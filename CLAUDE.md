@@ -2,23 +2,54 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: spec-only, sem código
+## Estado atual: esqueleto Rails 8, sem domínio
 
-Este repositório contém **apenas documentos de especificação** (`.context/`) e um
-README de uma linha. Não existe código, stack escolhida, gerenciador de pacotes,
-suíte de testes ou build. **Não há comandos de build/lint/test para documentar
-ainda** — eles só existirão depois da task 1.1.
+O app Rails existe e boota (task 1.1 em andamento), mas **não há nenhum model,
+migration ou rota de domínio** — `app/models/` tem só `ApplicationRecord` e
+`db/` não tem `migrate/`. O único teste é `test/lib/stack_test.rb`, que prova que
+a conexão é PostgreSQL de verdade e que o banco de teste é distinto do de
+desenvolvimento (AD-002 depende disso: `pg_trgm`, `unaccent` e GIN sustentam os
+Req. 3 e 4 inteiros).
 
-Consequência prática: a resposta certa para "implemente X" quase sempre é
-verificar antes se as pendências bloqueantes já foram resolvidas (ver abaixo).
+Pendente ainda em 1.1: o README tem uma linha só e **não documenta a subida em um
+comando** (Req. 11.6) — a task não fecha sem isso. Não há CI (task 1.2).
 
-## O que é o Bindr
+## Comandos
 
-Galeria de cartas do One Piece Card Game (OPTCG) + registro de coleção pessoal.
-Uso pessoal, não comercial. Fase 1 (MVP) = catálogo navegável com busca/filtros,
-coleção por variante, wishlist, progresso por set, import/export CSV e pipeline de
-ingestão. Deck builder é Fase 2; preços são Fase 3 — ver `.context/product.md` §4
-para os non-goals explícitos.
+Tudo roda em Docker; o Postgres não existe fora dele.
+
+```bash
+cp .env.example .env
+docker compose up          # sobe db + app, roda db:prepare, serve em :3000
+docker compose exec app bin/rails test
+docker compose exec app bin/rails test test/lib/stack_test.rb
+docker compose exec app bin/rails test test/lib/stack_test.rb -n "/PostgreSQL/"
+docker compose exec app bin/rubocop      # rubocop-rails-omakase
+docker compose exec app bin/brakeman
+docker compose exec app bin/rails db:prepare
+```
+
+Gates definidos em `.specs/features/catalogo/tasks.md`: **quick** =
+`bin/rails test test/models test/lib`; **full** = `bin/rails test && bin/rubocop`;
+**build** = `docker compose build`.
+
+Verificação da fixture de ingestão, offline, sem Docker e sem Ruby — deve
+continuar passando (12 verificações):
+
+```bash
+python3 spec/verify_fixture.py
+```
+
+Validadores do fluxo spec-driven:
+
+```bash
+SKILL=~/.claude/skills/tlc-spec-driven
+python3 $SKILL/scripts/validate_spec.py  .specs/features/catalogo/spec.md
+python3 $SKILL/scripts/validate_tasks.py .specs/features/catalogo/tasks.md
+```
+
+`Dockerfile.dev` é a imagem de desenvolvimento (código como volume); `Dockerfile`
+é o de produção gerado pelo Rails — separados de propósito, não unificar.
 
 ## Método de trabalho: spec-driven
 
@@ -26,13 +57,25 @@ O fluxo é `requirements` → `design` → `tasks`, documentado em `.context/REA
 Regras que valem para qualquer sessão de trabalho aqui:
 
 - **Uma task por vez**, em ordem, de `.context/tasks.md`. Não abrir a próxima com a
-  anterior incompleta. Marcar o checkbox ao terminar.
+  anterior incompleta.
 - **Toda task termina com código que roda e teste que passa.** "Estrutura criada"
   não conta como task concluída.
 - **Se um requisito se mostrar errado durante a execução, pare e corrija
   `requirements.md`** antes de continuar. Não improvisar no código — corrigir só o
   código desalinha o spec e destrói o valor do método.
 - Mudança de escopo volta ao documento de origem e se propaga para baixo.
+
+### Dois diretórios de spec, de propósito
+
+`.context/` é a **fonte de verdade** de requisitos, design e plano de tasks.
+`.specs/` guarda o recorte por feature (`features/catalogo/`), o log de decisões
+(`STATE.md`, AD-001 a AD-005) e os artefatos do Verifier. Em divergência,
+`.context/` vence (AD-005). Os IDs `CAT-NN` e `T1`–`T14` de `.specs/` apontam para
+os requisitos numerados de `.context/requirements.md`.
+
+**Ao concluir uma task, marcar o checkbox nos dois planos** (`.context/tasks.md` e
+`.specs/features/catalogo/tasks.md`) e commitar junto com o código. `STATE.md`
+tem a seção *Handoff* com o ponto exato de retomada — ler antes de começar.
 
 ### Convenções nos documentos
 
@@ -45,24 +88,30 @@ Regras que valem para qualquer sessão de trabalho aqui:
 Os documentos estão em português brasileiro. Escrever novos documentos e commits
 na mesma língua.
 
-## Pendências que bloqueiam código
+## Decisões já tomadas (P1–P7 resolvidas)
 
-`.context/design.md` §9 lista P1–P7. **P1 e P2 bloqueiam qualquer linha de código
-de domínio** e correspondem às tasks 0.1 e 0.2:
+As sete pendências que bloqueavam código foram decididas na Fase 0 e estão em
+`.specs/STATE.md` como AD-001..AD-004. **Nenhuma bloqueia mais nada** — não
+reabrir sem motivo novo:
 
-| # | Pendência | Default sugerido |
-|---|---|---|
-| P1 | Fonte de dados do catálogo | sem default — precisa investigação |
-| P2 | Campos, raridades, sets e attributes reais do jogo | sem default |
-| P3 | Definição de "set completo" | variantes base; parallels em métrica separada |
-| P4 | Stack | Rails 8 + Hotwire + PostgreSQL |
-| P5 | `variant_code` estável quando a fonte não fornece | hash determinístico de `card_number + rarity + art_kind` |
-| P6 | Cache de imagens na Fase 1 | não; aceitar hotlink e medir |
-| P7 | `DON!!` entra no catálogo | não na Fase 1 |
+| # | Decisão | Onde |
+|---|---------|------|
+| P1 | Fonte = `hugoprudente/optcgjson` (`output/*.json`), revisão imutável | AD-001 |
+| P2 | Campos/raridades/sets reais extraídos da fixture; glossário de `product.md` §6 corrigido | task 0.2 |
+| P3 | "Set completo" = `baseSetSize` (variantes base); parallels em métrica separada | AD-003 |
+| P4 | Rails 8 + Hotwire + PostgreSQL | AD-002 |
+| P5 | Não se aplica: a fonte dá `id` estável por variante (`OP01-001_p1`) | AD-001 |
+| P6 | Sem cache de imagens na Fase 1; hotlink de `imageUrl` | AD-004 |
+| P7 | `DON!!` fora do catálogo na Fase 1 | task 0.2 |
 
-Antes de escrever schema ou ingestão, confirmar que 0.1/0.2 foram feitas. O
-glossário de domínio em `product.md` §6 é o entendimento do autor sobre o jogo,
-**não fonte confirmada** — a task 0.2 existe para corrigi-lo contra a lista oficial.
+A escolha da fonte em AD-001 é o que **elimina** a fragilidade que o design
+original atribuía a `variant_code`: ele vem pronto da fonte, não é derivado por
+hash. Trocar de fonte reintroduz esse problema.
+
+A fixture `spec/fixtures/optcgjson-subset.json` (1.4 MB) é versionada de
+propósito — é a entrada dos testes de ingestão sem rede (Req. 11.5). Já
+`storage/ingestion/` (payloads brutos do Fetch) é ignorada: reconstruível a
+partir da revisão fixada.
 
 ## Arquitetura (de `.context/design.md`)
 
@@ -130,10 +179,26 @@ filtro foi renomeado.
   junção). `traits` vem de texto livre da fonte → **normalizar caixa e espaçamento
   na ingestão**, senão `"Straw Hat Crew"` e `"Straw hat crew"` viram traits
   distintos e o filtro fica furado.
-- `rarity` como **texto, não enum** — a lista completa de raridades não está
-  confirmada, e enum incompleto faz a ingestão explodir com um valor novo.
+- `rarity` como **texto, não enum** — a fixture confirma nove valores
+  (`C UC R SR SEC L P "SP CARD" TR`), mas a fonte é um scraper comunitário: enum
+  faz a ingestão explodir no dia em que aparecer um valor novo.
 - `variant_code` precisa ser **estável entre execuções**, senão a idempotência
-  quebra e o usuário perde o vínculo com a coleção. É a parte mais frágil do design.
+  quebra e o usuário perde o vínculo com a coleção. Hoje ele vem pronto da fonte
+  (`id` por variante, AD-001) — foi o que tirou este ponto da lista de riscos.
+
+### Revisão por subagente
+
+**Não existe `ruby-reviewer` nem `rails-reviewer`** entre os agentes instalados
+(Python, Go, Rust, Java, PHP, TypeScript, React, Django, FastAPI — Ruby não). O
+plano completo está em `.specs/features/catalogo/tasks.md` §"Plano de delegação";
+o resumo: Fase 1 inline (T1 fixa convenções que as outras 13 herdam), Fase 2 e
+Fase 3 como um lote cada, e revisão pelos agentes agnósticos de linguagem —
+`ecc:database-reviewer` no schema/índices, `ecc:silent-failure-hunter` no loop de
+erro por registro do upsert, `ecc:pr-test-analyzer` nos testes de ingestão,
+`ecc:a11y-architect` nas views.
+
+Se rodar sensor de mutação, isolar em worktree ou cópia — **nunca `git stash`**:
+há trabalho não commitado com frequência neste repo.
 
 ### Autorização
 
