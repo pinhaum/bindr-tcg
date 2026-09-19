@@ -1,0 +1,11 @@
+# Configuração da fonte do catálogo (AD-001).
+#
+# `revision` DEVE ser um commit ou tag imutável. Referência móvel (`main`,
+# `master`, `HEAD`, `latest`) é rejeitada na carga desta configuração, não na
+# hora do download: a CI semanal da fonte commita em `main`, e puxar `main`
+# faria uma mudança de formato upstream entrar na ingestão sem aviso
+# (Req. 1.9 e 1.11). Subir o pin é um ato explícito, datado e revisável.
+source: optcgjson
+repository: hugoprudente/optcgjson
+path: output/AllSets.json
+revision: 5669eab51096629faf90dbf0dc903128cff80a98

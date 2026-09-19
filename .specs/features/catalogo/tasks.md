@@ -224,7 +224,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T5: Estágio Fetch
+### T5: Estágio Fetch — CONCLUÍDA
 
 **What**: Buscar o payload da revisão fixada e persistir bruto em disco antes de processar.
 **Where**: `app/services/ingestion/`
@@ -233,9 +233,9 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Revisão fixada (commit/tag), nunca `main`
-- [ ] Payload bruto salvo em disco antes de qualquer processamento
-- [ ] Aborta sem escrever no banco se a fonte estiver indisponível
+- [x] Revisão fixada (commit/tag), nunca `main` — validado na carga de `config/ingestion.yml`
+- [x] Payload bruto salvo em disco antes de qualquer processamento
+- [x] Aborta sem escrever no banco se a fonte estiver indisponível
 
 **Tests**: unit
 **Gate**: quick

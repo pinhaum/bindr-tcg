@@ -69,7 +69,7 @@ Regras de execução:
     por faixa de custo não fazem varredura completa de tabela.
   - _Requisitos: 11.3_
 
-- [ ] **2.3 Estágio Fetch**
+- [x] **2.3 Estágio Fetch**
   - Buscar o payload da fonte externa e persistir o bruto em disco antes de
     qualquer processamento.
   - Abortar sem escrever no banco se a fonte estiver indisponível.
