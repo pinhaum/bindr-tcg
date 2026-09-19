@@ -57,11 +57,17 @@
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T1** de `.specs/features/colecao/tasks.md` (instalar
-  bcrypt e dar `has_secure_password` ao `User` existente). Spec e plano já
-  escritos e validados; nenhuma task começou. A decisão central já está tomada
-  e registrada na spec: **não rodar `bin/rails generate authentication`** —
-  ele sobrescreve `app/models/user.rb` e apaga a linha que protege a coleção.
+- **Next step**: **Executar T2** de `.specs/features/colecao/tasks.md` (tabela e
+  model `Session`, portados à mão dos templates de `railties-8.0.5.1`). T1 está
+  fechada: bcrypt instalada no volume, `has_secure_password` no `User` e oito
+  testes em `test/models/user_password_test.rb`. A decisão central segue de pé:
+  **não rodar `bin/rails generate authentication`** — ele sobrescreve
+  `app/models/user.rb` e apaga a linha que protege a coleção.
+- **Achado da T1**: `authenticate_by` resolve o usuário com `find_by(email:)`,
+  que é **sensível à caixa**. O índice `index_users_on_lower_email` impede que
+  duas grafias coexistam, mas não faz a busca casar — normalizar a caixa na
+  entrada é da **T4**. O comportamento atual está fixado por teste para que a
+  T4 o mude de propósito, e não por acidente.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
