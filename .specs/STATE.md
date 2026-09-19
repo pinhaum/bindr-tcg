@@ -62,6 +62,8 @@
 ### Contexto que não está nos documentos
 
 - **Docker em WSL:** `~/.docker/config.json` tem `"credsStore": "desktop.exe"`, que não existe no PATH. Qualquer `docker compose` que precise puxar imagem falha com `docker-credential-desktop.exe: executable file not found`. Contorno documentado no README: `DOCKER_CONFIG` apontando para um config `{}` vazio. **Não editar o config global do usuário.**
+- **`tmp/pids/server.pid` órfão impede o app de subir.** Se o container morre sem limpar o pid, `docker compose up app` reinicia e sai com `A server is already running (pid: 1)`. O serviço fica fora do ar sem erro óbvio. Correção: `rm -f tmp/pids/server.pid` e subir de novo. Aconteceu ao rodar smoke test na verificação do B2.
+- **A rota do catálogo é `/catalog`, não `/cards`.** `/cards/:id` é a página de detalhe da carta. `root` aponta para `catalog#index`.
 - **`RAILS_ENV` posicional NÃO é lido pelo `bin/rails`.** `bin/rails db:drop db:create RAILS_ENV=test` atinge o banco de **desenvolvimento** e apaga o catálogo da T9 — aconteceu na verificação do B1. Use `env RAILS_ENV=test bin/rails ...` (variável antes do comando) ou `bin/rails db:test:prepare`. Recuperação, sem rede: `REUSE_PAYLOAD=1 bin/rails ingestion:import`, a partir do payload fixado em `storage/ingestion/`.
 - **O volume nomeado `bundle` sombreia as gems da imagem.** Mudar o `Gemfile` e reconstruir a imagem **não basta**: é preciso `docker compose run --rm --no-deps app bundle install` para a gem entrar no volume, senão o container sobe com `Bundler::GemNotFound`.
 - **App renomeado à mão:** o projeto foi gerado fora do repo e nasceu como `railsgen`; o módulo é `Bindr` em `config/application.rb`. Se algo referenciar `railsgen`, é resíduo.
