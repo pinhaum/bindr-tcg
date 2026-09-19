@@ -450,6 +450,13 @@ CREATE UNIQUE INDEX index_cards_on_card_number ON public.cards USING btree (card
 
 
 --
+-- Name: index_cards_on_card_number_trgm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_cards_on_card_number_trgm ON public.cards USING gin (card_number public.gin_trgm_ops);
+
+
+--
 -- Name: index_cards_on_card_type; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -594,6 +601,7 @@ ALTER TABLE ONLY public.card_variants
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260919120300'),
 ('20260919120200'),
 ('20260919120100'),
 ('20260919120000');

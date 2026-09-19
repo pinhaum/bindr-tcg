@@ -124,7 +124,7 @@ Regras de execução:
   - Testes: cada filtro isolado, duas combinações, e o caso multicolor.
   - _Requisitos: 4.1, 4.2, 4.3, 4.4, 4.5, 4.8, 2.4_
 
-- [ ] **3.2 Busca textual**
+- [x] **3.2 Busca textual**
   - Nome com tolerância a erro de digitação e insensível a caixa e acento.
   - Texto de efeito por full-text.
   - `card_number` com match exato prependido como primeiro resultado.

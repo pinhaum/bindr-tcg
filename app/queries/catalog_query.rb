@@ -14,8 +14,10 @@
 #    que for descartado também não aparece nos filtros ativos — o chip só
 #    representa filtro que está de fato valendo.
 #
-# A busca por consulta (`q`) é acrescentada pela T11 em `CatalogSearch`; aqui só
-# entram filtros, ordenação e paginação.
+# A busca textual (`q`) entra por três caminhos independentes unidos por `OU`
+# — nome por trigram, efeito por full-text, `card_number` por substring — e o
+# match **exato** de `card_number` é uma consulta separada cujo resultado é
+# prependido (Req. 3.4). Ver `#search_scope` e `#call`.
 class CatalogQuery
   DEFAULT_PER_PAGE = 24
   MAX_PER_PAGE = 100
@@ -40,6 +42,27 @@ class CatalogQuery
 
   RANGE_FILTERS = %i[cost power counter].freeze
 
+  # `word_similarity` (`<%`), não `similarity` (`%`), e limiar 0.5 em vez do
+  # default 0.6 — medido contra o catálogo real (2815 cartas) na T11:
+  #
+  #   similarity('Zorro', 'Roronoa Zoro')      = 0.286  → abaixo do default 0.3
+  #   word_similarity('Zorro', 'Roronoa Zoro') = 0.571  → abaixo do default 0.6
+  #
+  # Com o par default (`%` a 0.3) o Req. 3.3 **falha**: um typo de um caractere
+  # em "Zoro" não acha a carta, porque a similaridade da string inteira é
+  # diluída pelo sobrenome que o termo não tem. `word_similarity` compara o
+  # termo contra a melhor extensão do nome e resolve isso; 0.5 é o limiar que
+  # aceita os typos reais testados (Zorro, Namy, Luffi, Belmere) sem inundar o
+  # resultado. O operador `<%` continua usando o índice GIN trigram
+  # (`Bitmap Index Scan on index_cards_on_unaccent_name_trgm`, verificado por
+  # EXPLAIN) — `immutable_unaccent(name)` é obrigatório aqui: com `unaccent`
+  # direto o índice não é usado (design.md §4.1.1).
+  WORD_SIMILARITY_THRESHOLD = "0.5".freeze
+
+  # Dicionário de dois argumentos: só essa forma de `to_tsvector` é IMMUTABLE,
+  # e é a que o índice `index_cards_on_effect_text_tsvector` usa.
+  TEXT_SEARCH_CONFIG = "english".freeze
+
   SORTABLE = %w[card_number name cost power].freeze
   DIRECTIONS = %w[asc desc].freeze
 
@@ -54,13 +77,20 @@ class CatalogQuery
   end
 
   def call
-    scope = filtered_scope
-    total = scope.count
+    apply_search_threshold
+
+    scope = searchable_scope
+    exact = exact_card_number_match(scope)
+    # O exato sai do conjunto paginado para não aparecer duas vezes: ele é
+    # prependido à página 1 e continua contado uma única vez no total.
+    scope = scope.where.not(id: exact.id) if exact
+
+    total = scope.count + (exact ? 1 : 0)
     page = sanitized_page
     per_page = sanitized_per_page
 
     Result.new(
-      records: paginate(ordered(scope), page, per_page).to_a,
+      records: page_records(scope, exact, page, per_page),
       total_count: total,
       page: page,
       per_page: per_page,
@@ -68,8 +98,8 @@ class CatalogQuery
     )
   end
 
-  # Exposto para a T11 encadear a busca textual sobre os mesmos filtros, e para
-  # a contagem de página do controller.
+  # Filtros sem busca textual. Exposto para o controller montar contagens
+  # auxiliares sobre o mesmo recorte.
   def filtered_scope
     scope = base_scope
     scope = apply_array_filters(scope)
@@ -78,11 +108,112 @@ class CatalogQuery
     apply_range_filters(scope)
   end
 
+  # Filtros + busca textual. É sobre este escopo que o match exato de
+  # `card_number` é procurado, e é por isso que prepender não passa por cima de
+  # um filtro ativo (Req. 3.6).
+  def searchable_scope = apply_search(filtered_scope)
+
   def active_filters = @active_filters
+
+  # Exposto para o teste de plano de execução (Req. 11.3): a asserção é sobre
+  # o SQL das ramificações da busca, que é onde os índices são escolhidos.
+  def search_match_sql
+    apply_search_threshold
+    Card.sanitize_sql_array([ SEARCH_MATCH_SQL,
+                              search_term,
+                              TEXT_SEARCH_CONFIG, TEXT_SEARCH_CONFIG, search_term,
+                              "%#{sanitize_like(search_term.upcase)}%" ])
+  end
+
+  # Exposto para o teste de plano (Req. 11.3), pelo mesmo motivo de
+  # `search_match_sql`.
+  def exact_match_sql
+    exact_match_scope(searchable_scope).select(:id).to_sql
+  end
 
   private
 
   def base_scope = Card.all
+
+  # O exato vai à frente da página 1; nas demais páginas ele já foi consumido,
+  # então o offset desconta a vaga que ele ocupou.
+  def page_records(scope, exact, page, per_page)
+    return paginate(ordered(scope), page, per_page).to_a unless exact
+    return [ exact ] + ordered(scope).limit(per_page - 1).to_a if page == 1
+
+    [ exact ] + ordered(scope).limit(per_page).offset((page - 1) * per_page - 1).to_a.last(per_page)
+  end
+
+  # `SET LOCAL` via `set_config(..., true)`: vale só até o fim da transação
+  # corrente e não vaza para outra consulta nem para outra conexão do pool.
+  def apply_search_threshold
+    return if search_term.blank?
+
+    Card.connection.select_value(
+      Card.sanitize_sql_array(
+        [ "SELECT set_config('pg_trgm.word_similarity_threshold', ?, true)",
+          WORD_SIMILARITY_THRESHOLD ]
+      )
+    )
+  end
+
+  def search_term
+    @search_term ||= @params[:q].to_s.strip
+  end
+
+  # Os três caminhos são formas alternativas de o mesmo termo casar a mesma
+  # carta, e o conjunto entra por `E` com os filtros, porque `filtered_scope`
+  # já os aplicou.
+  #
+  # Eles se unem por **`UNION`, não por `OR`** — e isso não é estilo. Medido
+  # contra o catálogo real na T11 (design.md §4.1.2): um único
+  # `WHERE a OR b OR c` produz Seq Scan mesmo com os três índices presentes,
+  # porque uma ramificação inindexável derruba o plano indexado do predicado
+  # inteiro. Em `UNION`, cada ramificação é planejada isolada e usa o seu
+  # índice.
+  def apply_search(scope)
+    return scope if search_term.blank?
+
+    @active_filters[:q] = search_term
+    scope.where(id: search_match_ids)
+  end
+
+  def search_match_ids
+    Card.connection.select_values(
+      Card.sanitize_sql_array([ SEARCH_MATCH_SQL,
+                                search_term,
+                                TEXT_SEARCH_CONFIG, TEXT_SEARCH_CONFIG, search_term,
+                                "%#{sanitize_like(search_term.upcase)}%" ])
+    )
+  end
+
+  SEARCH_MATCH_SQL = <<~SQL.freeze
+    SELECT id FROM cards WHERE immutable_unaccent(?) <% immutable_unaccent(name)
+    UNION
+    SELECT id FROM cards WHERE to_tsvector(?, coalesce(effect_text, '')) @@ plainto_tsquery(?, ?)
+    UNION
+    SELECT id FROM cards WHERE card_number LIKE ?
+  SQL
+
+  # Consulta separada, deliberadamente (design.md §4.1): resolver ranking exato
+  # dentro do full-text é mais frágil e menos previsível que duas consultas.
+  # Ela parte do escopo já filtrado, então um filtro ativo que exclua a carta
+  # exata continua valendo.
+  #
+  # Comparação contra a coluna crua, com o termo em maiúsculas pelo Ruby:
+  # `upper(card_number) = upper(?)` descartaria o índice único e viraria
+  # varredura completa. Os 2815 `card_number` do catálogo são maiúsculos.
+  def exact_card_number_match(scope)
+    return nil if search_term.blank?
+
+    exact_match_scope(scope).first
+  end
+
+  def exact_match_scope(scope) = scope.where(card_number: search_term.upcase)
+
+  def sanitize_like(term)
+    ActiveRecord::Base.sanitize_sql_like(term)
+  end
 
   # Aceita tanto `ActionController::Parameters` quanto Hash de símbolo ou
   # string, sem exigir que o chamador saiba qual é qual.

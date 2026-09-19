@@ -362,7 +362,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T11: Busca textual
+### T11: Busca textual — CONCLUÍDA
 
 **What**: Nome com tolerância a typo, efeito por full-text, `card_number` exato prependido.
 **Where**: `app/queries/`
@@ -371,9 +371,30 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Nome insensível a caixa e acento, tolerante a erro de digitação
-- [ ] Match exato de `card_number` vem como primeiro resultado, por consulta separada
-- [ ] Combinável com todos os filtros
+- [x] Nome insensível a caixa e acento, tolerante a erro de digitação
+- [x] Match exato de `card_number` vem como primeiro resultado, por consulta separada
+- [x] Combinável com todos os filtros
+
+> Dois achados medidos contra o catálogo real, ambos propagados para
+> `design.md` (§4.1.2 e §4.1.3) antes de virarem código:
+>
+> 1. **O par default do `pg_trgm` não atende o Req. 3.3.**
+>    `similarity('Zorro','Roronoa Zoro')` = 0.286, abaixo do limiar 0.3 — a
+>    similaridade da string inteira é diluída pelo sobrenome que o termo não
+>    tem. Trocado por `word_similarity` (`<%`) com limiar 0.5 via
+>    `set_config(..., true)`, local à transação.
+> 2. **As três ramificações unidas por `OR` produzem Seq Scan**, mesmo com os
+>    três índices presentes: uma ramificação inindexável derruba o plano do
+>    predicado inteiro. Passaram a se unir por `UNION`, e `card_number` ganhou
+>    índice GIN trigram (migração `20260919120300`, aditiva — não altera nada
+>    do schema verificado na Fase 2).
+>
+> Sensor de discriminação: 7 mutações. Três sobreviveram à primeira versão dos
+> testes e cada uma virou asserção nova — o decoy do prepend ordenava *depois*
+> do exato, então o exato vinha em primeiro por sorte da ordenação; `unaccent`
+> direto no lugar de `immutable_unaccent` e `upper(card_number)` no exato
+> devolvem o resultado certo e só perdem o índice, defeito que nenhum teste
+> funcional pega. As três agora morrem por teste de plano de execução.
 
 **Tests**: integration
 **Gate**: quick

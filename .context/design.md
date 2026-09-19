@@ -273,7 +273,55 @@ Fazer tudo em PostgreSQL, sem serviço de busca dedicado.
   com índice GIN.
 - **Match exato de `card_number` (Req. 3.4):** consulta separada, resultado
   prependido antes dos demais. Não tente resolver ranking exato dentro do
-  full-text — é mais simples e mais previsível fazer duas consultas.
+  full-text — é mais simples e mais previsível fazer duas consultas. A
+  comparação é contra a coluna crua (`card_number = ?`), com o termo passado em
+  maiúsculas pelo Ruby: `upper(card_number) = upper(?)` descarta o índice único
+  e vira varredura completa. Todos os 2815 `card_number` do catálogo já são
+  maiúsculos.
+- **Substring de `card_number` (Req. 3.1):** o termo também casa por
+  substring, o que exige índice GIN trigram em `card_number` — ver 4.1.2.
+
+### 4.1.2 As ramificações da busca se unem por `UNION`, não por `OR`
+
+Medido na T11 contra o catálogo real. Os três caminhos do Req. 3.1 (nome,
+efeito, `card_number`) unidos em um único `WHERE ... OR ... OR ...` produzem
+**Seq Scan**, mesmo com os três índices presentes: basta uma ramificação
+inindexável para o planejador desistir do plano indexado do predicado inteiro.
+
+```
+nome                                → Bitmap Index Scan (trigram)
+nome OR efeito                      → BitmapOr dos dois GIN
+nome OR efeito OR card_number ILIKE → Seq Scan on cards
+```
+
+Duas correções, as duas necessárias:
+
+1. `card_number ILIKE '%termo%'` só é indexável com **GIN trigram em
+   `card_number`**. O índice único btree não serve: foi criado com a collation
+   padrão, então nem `LIKE` ancorado o usa. Buscar código parcial é caso real —
+   "OP01" casa 121 cartas, 13 delas em `LimitedProductCard`, que o filtro de
+   set sozinho não acharia.
+2. As ramificações entram por `UNION` de subconsultas, uma por índice. Cada
+   uma é planejada isoladamente e o resultado vira `Append` + `HashAggregate`
+   sobre três `Bitmap Index Scan`.
+
+### 4.1.3 Tolerância a typo exige `word_similarity`, não `similarity`
+
+Medido na T11 contra as 2815 cartas reais. O par default do `pg_trgm`
+(`%` com `similarity_threshold = 0.3`) **não atende o Req. 3.3**:
+
+```
+similarity('Zorro', 'Roronoa Zoro')      = 0.286   < 0.3   → não casa
+word_similarity('Zorro', 'Roronoa Zoro') = 0.571   < 0.6   → não casa no default
+```
+
+A similaridade da string inteira é diluída pelo sobrenome que o termo não tem.
+`word_similarity` (operador `<%`) compara o termo contra a melhor extensão do
+nome e não sofre essa diluição. O limiar vai a **0.5** via
+`set_config('pg_trgm.word_similarity_threshold', '0.5', true)` — local à
+transação, não vaza para outra conexão do pool. Verificado com typos reais:
+`Zorro`→Zoro, `Namy`→Nami, `Luffi`→Luffy, `Belmere`→Bell-mère. O operador `<%`
+continua usando o índice GIN trigram.
 
 ### 4.1.1 `unaccent` não é indexável sem wrapper
 
