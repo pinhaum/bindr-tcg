@@ -45,10 +45,16 @@
 ## Handoff
 
 - **Feature**: catalogo (`.specs/features/catalogo/`)
-- **Phase / Task**: **Fase 2 concluída (T3–T9 / lote B1)**. Próxima: **T10** = task **3.1** — query object do catálogo. Início do lote **B2** (Fase 3, T10–T14).
-- **Completed**: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), **2.1 (T3), 2.2 (T4), 2.3 (T5), 2.4 (T6), 2.5 (T7), 2.6 (T8), 2.7 (T9)**
+- **Phase / Task**: **Fase 3 concluída (T10–T14 / lote B2)**. Todas as 14 tasks
+  do plano estão fechadas.
+- **Completed**: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
+  **3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14)**
 - **In-progress** (file:line): nenhum
-- **Next step**: B2 (T10–T14). O Verifier do lote B1 ainda **não rodou** — é o passo imediato antes de abrir a Fase 3.
+- **Next step**: **Verifier do lote B2** (`22612fe..3af5982`), autor ≠
+  verificador. O Verifier do lote B1 também continua pendente. Depois disso, a
+  Fase 4 (autenticação e coleção), que é onde o parâmetro `owned` do
+  `design.md` §4.2 entra — ele foi deixado **fora** do query object de
+  propósito, por depender de sessão.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
@@ -74,6 +80,43 @@
 - **Nomes que divergem de `design.md` §3.2**, ambos por colisão com o Ruby/Rails e marcados com `SPEC_DEVIATION` no código: a coluna `attributes` virou **`attributes_list`** (`attributes` é método do Active Record) e o model `Set` virou **`CardSet`** (a tabela continua `sets`; `Set` é classe da stdlib).
 - **Teste de plano de execução precisa de seletividade realista.** O teste da T4 semeia 20k cartas com cor e custo raros: com filtro pouco seletivo o planejador escolhe Seq Scan *com razão*, e o teste não distinguiria índice ausente de índice ignorado por custo. A T13 (latência) herda esse cuidado.
 - **`Dockerfile.dev` instala `postgresql-client-17` do PGDG**, porque o `pg_dump` 15 do bookworm recusa dumpar um servidor 17 e quebraria `db:schema:dump`.
+
+### Decisões técnicas da Fase 3 que valem para as próximas
+
+- **O limiar do trigram exige transação explícita.** `set_config(..., true)` é
+  `SET LOCAL`: vale até o fim da transação corrente. Fora de uma, cada
+  statement é a sua própria e o limiar já reverteu quando a consulta roda — a
+  busca por typo devolve **zero** em produção enquanto a suíte passa, porque o
+  Rails envolve todo teste numa transação. `CatalogQuery#call` abre transação
+  quando há termo de busca. O teste que pega isso é o único da suíte com
+  `use_transactional_tests = false`; não remover.
+- **`word_similarity` (`<%`), não `similarity` (`%`), limiar 0.5.** O par
+  default do `pg_trgm` não atende o Req. 3.3: a similaridade da string inteira
+  é diluída por partes do nome que o termo não tem. Medido em `design.md`
+  §4.1.3.
+- **Ramificações de busca se unem por `UNION`, não por `OR`.** Uma ramificação
+  inindexável num `OR` derruba o plano indexado do predicado inteiro. Em
+  `design.md` §4.1.2.
+- **Match exato compara a coluna crua** (`card_number = ?`) com o termo já em
+  maiúsculas pelo Ruby. `upper(card_number) = upper(?)` descarta o índice
+  único — defeito só de latência, que nenhum teste funcional pega. Há teste de
+  plano de execução para ele.
+- **O placeholder de imagem não usa JavaScript.** O projeto não tem pipeline
+  de JS: `app/javascript` e `config/importmap.rb` não existem, e
+  `stimulus-rails` está no Gemfile sem nunca ter sido instalado. O placeholder
+  é resolvido por camada de CSS (sempre renderizado, embaixo da imagem). Se a
+  Fase 4 precisar de Hotwire para o incremento sem recarregar (Req. 7.2), o
+  importmap precisa ser instalado então — não está feito.
+- **Não há navegador no container**, logo não há system test. T12 e T14 estão
+  marcadas `Tests: e2e` no plano e foram entregues como teste de integração
+  sobre HTML renderizado, com `SPEC_DEVIATION` registrado em cada uma. Os
+  360px e o lazy loading foram verificados à mão em Chromium do Playwright, no
+  host. Fechar essa lacuna é mudança de `Dockerfile.dev`.
+- **Migração nova na Fase 3:** `20260919120300_add_card_number_trigram_index`.
+  É **aditiva** — só cria índice GIN trigram em `cards.card_number`, não toca
+  tabela, coluna nem constraint do schema verificado na Fase 2.
+- **Benchmark de latência é rake, não teste:**
+  `bin/rails catalog:benchmark` (`lib/tasks/benchmark.rake`).
 
 ### Pendência aberta para o orquestrador
 
