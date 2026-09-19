@@ -1,0 +1,73 @@
+# Roda linter, análise de segurança e suíte de testes em cada push e pull
+# request. O serviço Postgres existe porque a suíte não é isolável do banco:
+# `test/lib/stack_test.rb` prova que a stack de AD-002 está ativa, e a Fase 2
+# inteira depende de extensões que só o PostgreSQL tem.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: .ruby-version
+          bundler-cache: true
+
+      - name: Rubocop
+        run: bin/rubocop
+
+      # --ensure-ignore-notes exige justificativa em cada entrada de
+      # config/brakeman.ignore; --ensure-no-obsolete-ignore-entries derruba o
+      # build quando um ignore deixa de corresponder a um aviso real. Juntas,
+      # impedem que o arquivo de ignore vire um depósito silencioso.
+      - name: Brakeman
+        run: bin/brakeman --no-pager --ensure-ignore-notes --ensure-no-obsolete-ignore-entries
+
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: bindr
+          POSTGRES_PASSWORD: bindr
+          POSTGRES_DB: bindr_development
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bindr"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: bindr
+      POSTGRES_PASSWORD: bindr
+      POSTGRES_DB: bindr_development
+      # Variável própria, não derivada de POSTGRES_DB: o terceiro teste de
+      # stack_test.rb existe para matar a regressão de os dois bancos
+      # coincidirem. Defini-la aqui mantém o CI fiel ao ambiente local.
+      POSTGRES_TEST_DB: bindr_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: .ruby-version
+          bundler-cache: true
+
+      - name: Preparar o banco de teste
+        run: bin/rails db:prepare
+
+      - name: Testes
+        run: bin/rails test

@@ -14,7 +14,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Design**: `.context/design.md`
 **Spec**: `.specs/features/catalogo/spec.md`
-**Status**: In Progress — Fase 0 concluída (0.1, 0.2, 0.3); T1 concluída
+**Status**: In Progress — Fase 0 concluída (0.1, 0.2, 0.3); Fase 1 concluída (T1, T2)
 
 ---
 
@@ -166,7 +166,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T2: Configurar CI
+### T2: Configurar CI — CONCLUÍDA
 
 **What**: Pipeline que roda linter e suíte de testes em cada push.
 **Where**: `.github/workflows/`
@@ -175,7 +175,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Pipeline roda em push e falha quando o teste falha
+- [x] Pipeline roda em push e falha quando o teste falha
 
 **Tests**: none
 **Gate**: full

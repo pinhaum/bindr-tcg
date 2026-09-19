@@ -1,0 +1,9 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "21ab0fe00fdd5899ffc405cff75aadb91b805ee996a614f7e27b08a287e9062d",
+      "note": "EOLRails avisa que o suporte ao Rails 8.0.5.1 acaba em 2026-11-07. Não é falha de código: é um prazo. Ignorado para o CI não reprovar por decurso de tempo antes de haver o que corrigir. Revisar na atualização do Rails; quando a versão subir, este ignore fica obsoleto e --ensure-no-obsolete-ignore-entries derruba o build."
+    }
+  ],
+  "brakeman_version": "8.0.6"
+}

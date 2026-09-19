@@ -38,6 +38,16 @@ A verificação da fixture de ingestão roda offline, sem Docker e sem Ruby:
 python3 spec/verify_fixture.py
 ```
 
+As mesmas verificações rodam no CI (`.github/workflows/ci.yml`) a cada push e
+pull request: um job de lint (`rubocop` + `brakeman`) e um job de testes contra
+um serviço PostgreSQL 17. O job de testes usa `POSTGRES_TEST_DB` explícito, como
+o ambiente local — o banco de teste precisa ser distinto do de desenvolvimento.
+
+`config/brakeman.ignore` registra os avisos dispensados, cada um com
+justificativa obrigatória. O CI roda o brakeman com
+`--ensure-ignore-notes --ensure-no-obsolete-ignore-entries`, então uma entrada
+sem nota ou que deixou de corresponder a um aviso real derruba o build.
+
 ## Configuração
 
 `config/database.yml` lê host, usuário, senha e nome do banco do ambiente, com

@@ -47,7 +47,7 @@ Regras de execução:
     no README.
   - _Requisitos: 11.6_
 
-- [ ] **1.2 Configurar CI**
+- [x] **1.2 Configurar CI**
   - Pipeline que roda linter e a suíte de testes em cada push.
   - _Requisitos: 11.4_
 
