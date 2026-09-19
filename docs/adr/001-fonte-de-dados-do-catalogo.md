@@ -27,7 +27,7 @@ Todas verificadas por requisição real em 2026-09-19, não por documentação.
   instável entre reimportações — inadequado como chave natural.
 - **Campos ausentes:** `Counter` e `Trigger` não existem no contrato. `attributes`
   é um mapa de strings cujas chaves variam por jogo.
-- **Divergências** entre `API_TCG_DOCUMENTACAO.md` e o OpenAPI real: `_id` é
+- **Divergências** entre `docs/pesquisa/apitcg.md` e o OpenAPI real: `_id` é
   inteiro (não string); `images` é array (não objeto); `Subtypes` é string
   `"A;B"` (não array `Traits`); `Attribute` é singular (não `Attributes`);
   o texto de efeito é `Description`, com HTML embutido.
@@ -78,9 +78,8 @@ Todas verificadas por requisição real em 2026-09-19, não por documentação.
 
 ## Fixtures
 
-- `spec/fixtures/optcgjson-OP01.json` — set completo (154 variantes).
-- `spec/fixtures/optcgjson-subset.json` — OP01, OP13, PRB01, ST01, ST16 (679
-  variantes), escolhidos por conterem os dois casos-limite abaixo.
+- `spec/fixtures/optcgjson-subset.json` — OP01 (set completo), OP13, PRB01, ST01 e
+  ST16 (679 variantes), escolhidos por conterem os dois casos-limite abaixo.
 - `spec/fixtures/apitcg-openapi.json` — contrato da opção descartada, como prova.
 
 ## Casos-limite achados na amostra (entram como teste)

@@ -1,3 +1,25 @@
+> ## ⚠️ Material de pesquisa — fonte DESCARTADA
+>
+> A apitcg.com **não foi escolhida** como fonte do catálogo (task 0.1,
+> 2026-09-19). Ver `docs/adr/001-fonte-de-dados-do-catalogo.md`.
+>
+> **Este documento foi escrito a partir da página da API, não de chamadas reais, e
+> contém divergências confirmadas** contra o contrato em
+> `spec/fixtures/apitcg-openapi.json`. Não implemente a partir dele:
+>
+> | Documentado aqui | Contrato real |
+> |---|---|
+> | `_id` string | `_id` **inteiro** (auto-incremental, instável entre reimportações) |
+> | `images` objeto `{small,large}` | `images` **array** de `{small,medium,large}` |
+> | `attributes.Traits` array | `attributes.Subtypes` **string** `"A;B"` |
+> | `attributes.Attributes` (plural) | `attributes.Attribute` **singular** |
+> | `attributes.EffectText` | `attributes.Description`, com HTML embutido |
+> | `Counter`, `TriggerText` | **não existem** no contrato |
+>
+> **O que continua útil aqui:** a seção sobre `markets.tcgplayer.prices` e
+> `/api/history-prices/{id}`. A optcgjson não traz preço, então a Fase 3 volta a
+> esta pesquisa.
+
 # Documentação da API TCG para o Projeto Bindr-TCG
 
 ## Visão Geral

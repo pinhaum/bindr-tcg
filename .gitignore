@@ -1,0 +1,22 @@
+# Rails (a partir da task 1.1)
+/.bundle/
+/log/*
+/tmp/*
+!/tmp/.keep
+/storage/*
+!/storage/.keep
+/public/assets
+
+# Payloads brutos do estágio Fetch (Req. 1.8) — reconstruíveis a partir da
+# revisão fixada, não versionados. As fixtures em spec/fixtures/ são
+# versionadas de propósito: são a entrada dos testes sem rede (Req. 11.5).
+/storage/ingestion/
+
+# Segredos
+.env
+.env.*
+!.env.example
+
+# Editor / SO
+.DS_Store
+*.swp
