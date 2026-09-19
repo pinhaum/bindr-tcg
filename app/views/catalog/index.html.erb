@@ -1,0 +1,50 @@
+<% content_for :title, "Catálogo" %>
+
+<main class="catalog">
+  <h1 class="catalog__title">Catálogo</h1>
+
+  <form class="catalog__search" method="get" action="<%= catalog_path %>" role="search">
+    <label class="catalog__search-label" for="catalog-q">Buscar carta</label>
+    <input id="catalog-q" type="search" name="q" value="<%= @result.active_filters[:q] %>"
+           placeholder="Nome, código ou texto de efeito">
+    <button type="submit">Buscar</button>
+  </form>
+
+  <% chips = catalog_chips(@result.active_filters) %>
+  <% if chips.any? %>
+    <ul class="catalog__chips" aria-label="Filtros ativos">
+      <% chips.each do |chip| %>
+        <li class="filter-chip">
+          <span class="filter-chip__label"><%= chip.label %>: <%= chip.value %></span>
+          <%= link_to chip.url, class: "filter-chip__remove",
+                      "aria-label": "Remover filtro #{chip.label}: #{chip.value}" do %>
+            <span aria-hidden="true">&times;</span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <p class="catalog__count">
+    <%= pluralize(@result.total_count, "carta", plural: "cartas") %>
+  </p>
+
+  <% if @result.records.empty? %>
+    <section class="catalog__empty">
+      <p>
+        <% if @result.active_filters[:q].present? %>
+          Nenhuma carta encontrada para <strong><%= @result.active_filters[:q] %></strong>.
+        <% else %>
+          Nenhuma carta corresponde aos filtros aplicados.
+        <% end %>
+      </p>
+      <%= link_to "Limpar filtros", catalog_path, class: "catalog__empty-reset" %>
+    </section>
+  <% else %>
+    <ul class="catalog__grid">
+      <%= render partial: "catalog/card_tile", collection: @result.records, as: :card %>
+    </ul>
+
+    <%= render "catalog/pagination", result: @result %>
+  <% end %>
+</main>

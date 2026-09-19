@@ -401,7 +401,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T12: Grade do catálogo
+### T12: Grade do catálogo — CONCLUÍDA
 
 **What**: Grade navegável com paginação, lazy loading e estado na URL.
 **Where**: `app/views/`, `app/controllers/`
@@ -410,14 +410,53 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Imagem, nome e `card_number` por carta; paginação; lazy loading
-- [ ] Placeholder com nome e código quando a imagem falha
-- [ ] Estado vazio com termo buscado e ação de limpar filtros
-- [ ] Filtros ativos como chips removíveis individualmente
-- [ ] Estado completo na URL; recarregar reproduz o resultado
-- [ ] Usável em 360px sem scroll horizontal
+- [x] Imagem, nome e `card_number` por carta; paginação; lazy loading
+- [x] Placeholder com nome e código quando a imagem falha
+- [x] Estado vazio com termo buscado e ação de limpar filtros
+- [x] Filtros ativos como chips removíveis individualmente
+- [x] Estado completo na URL; recarregar reproduz o resultado
+- [x] Usável em 360px sem scroll horizontal
 
-**Tests**: e2e
+> **SPEC_DEVIATION — `Tests: e2e` virou teste de integração.** A imagem de
+> desenvolvimento não tem navegador nem chromedriver (nenhum binário `chrom*`
+> no container), e instalá-los é mudança de `Dockerfile.dev`, fora do escopo
+> desta task. Todos os critérios do "Done when" são observáveis no HTML
+> renderizado — o placeholder é markup, o estado na URL é query string, os
+> chips são links, o lazy loading é atributo.
+>
+> O Req. 2.5 e o Req. 11.2 foram **verificados adicionalmente em navegador
+> real** (Chromium do Playwright, no host, contra o catálogo completo em
+> :3000), porque "sem scroll horizontal" não é asserível em HTML:
+> `scrollWidth == clientWidth == 360` nas três URLs testadas, zero elementos
+> ultrapassando 360px, grade em duas colunas fluidas, e as 24 imagens da
+> primeira página todas com `loading="lazy"`. Essa verificação é manual e não
+> está na suíte — é a lacuna que um chromedriver no container fecharia.
+>
+> **Placeholder sem JavaScript.** O projeto não tem pipeline de JS
+> (`app/javascript` e `config/importmap.rb` não existem; `stimulus-rails` está
+> no Gemfile mas nunca foi instalado). Em vez de bootstrapar importmap, o
+> placeholder é resolvido por camadas de CSS: renderizado sempre, embaixo,
+> com a imagem por cima. Imagem ausente ou hotlink quebrado deixam o
+> placeholder visível sem script nenhum — mais robusto que `onerror`, que
+> depende de o script carregar.
+>
+> **Defeito encontrado pelo smoke test, não pela suíte.** Com a página no ar
+> contra o catálogo real, `q=Zorro` devolvia **zero** resultado enquanto os 49
+> testes passavam. Causa: o limiar do trigram é aplicado com
+> `set_config(..., true)` — `SET LOCAL`, válido só até o fim da transação
+> corrente. Fora de uma transação cada statement é a sua própria e o limiar já
+> voltou a 0.6 quando a consulta roda; o Rails envolve **todo** teste numa
+> transação, então a suíte inteira era estruturalmente cega a essa falha. A
+> busca passou a rodar em transação explícita e ganhou teste de regressão com
+> `use_transactional_tests = false`, que é o único jeito de reproduzir a
+> condição real.
+>
+> Brakeman acusou SQL injection (confiança fraca) na interpolação do nome de
+> coluna do filtro de array. O valor vem de constante congelada e não era
+> explorável, mas foi eliminado com `quote_column_name` em vez de entrar em
+> `brakeman.ignore`: 0 warnings sem ignore novo.
+
+**Tests**: integration (ver desvio acima) + verificação manual em navegador
 **Gate**: full
 
 ---

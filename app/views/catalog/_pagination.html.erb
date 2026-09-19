@@ -1,0 +1,21 @@
+<%#
+  Paginação clássica (Req. 2.2). Cada link carrega o estado inteiro dos
+  filtros, senão trocar de página descarta o que o usuário filtrou (Req. 4.7).
+%>
+<% if result.total_pages > 1 %>
+  <nav class="pagination" aria-label="Paginação do catálogo">
+    <% if result.page > 1 %>
+      <%= link_to "Anterior", catalog_page_url(result.active_filters, result.page - 1),
+                  class: "pagination__prev", rel: "prev" %>
+    <% end %>
+
+    <span class="pagination__status">
+      Página <%= result.page %> de <%= result.total_pages %>
+    </span>
+
+    <% if result.page < result.total_pages %>
+      <%= link_to "Próxima", catalog_page_url(result.active_filters, result.page + 1),
+                  class: "pagination__next", rel: "next" %>
+    <% end %>
+  </nav>
+<% end %>

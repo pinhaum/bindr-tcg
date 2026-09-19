@@ -131,7 +131,7 @@ Regras de execução:
   - Combinável com todos os filtros.
   - _Requisitos: 3.1, 3.2, 3.3, 3.4, 3.6_
 
-- [ ] **3.3 Grade do catálogo**
+- [x] **3.3 Grade do catálogo**
   - Grade com imagem, nome e `card_number`. Paginação. Lazy loading nas imagens.
   - Placeholder com nome e código quando a imagem falhar.
   - Estado vazio explícito com o termo buscado e ação de limpar filtros.

@@ -257,6 +257,39 @@ class CatalogSearchTest < ActiveSupport::TestCase
     assert_includes resultado, "OP01-003"
   end
 
+  # **Este teste existe por causa de um defeito real que a suíte inteira
+  # estruturalmente não pegava.** O limiar do trigram é aplicado com
+  # `set_config(..., true)` — `SET LOCAL`, válido só até o fim da transação
+  # corrente. Fora de uma transação, cada statement é a sua própria: o limiar
+  # volta a 0.6 antes de a consulta rodar e a busca por typo devolve zero.
+  #
+  # Todo teste do Rails roda dentro de uma transação, então todos passavam
+  # enquanto a página em desenvolvimento devolvia 0 resultado para "Zorro".
+  # `self.use_transactional_tests = false` é o que reproduz a condição real;
+  # sem isso não há asserção possível sobre essa falha.
+  class SemTransacaoTest < ActiveSupport::TestCase
+    self.use_transactional_tests = false
+
+    setup do
+      @set = CardSet.create!(code: "TXN", name: "Sem transação", kind: "booster")
+      @card = Card.create!(set_id: @set.id, card_number: "TXN-001",
+                           name: "Roronoa Zoro", card_type: "leader", colors: [ "Red" ])
+    end
+
+    teardown do
+      CardVariant.where(card_id: @card.id).delete_all
+      Card.where(id: @card.id).delete_all
+      CardSet.where(id: @set.id).delete_all
+    end
+
+    test "a busca por typo funciona fora de uma transação" do
+      resultado = CatalogQuery.new(q: "Zorro").call
+
+      assert_includes resultado.records.map(&:card_number), "TXN-001",
+                      "o limiar do trigram não sobreviveu até a consulta"
+    end
+  end
+
   test "o termo buscado aparece nos filtros ativos para o estado vazio" do
     assert_equal "Zorro", search("Zorro").active_filters[:q]
   end

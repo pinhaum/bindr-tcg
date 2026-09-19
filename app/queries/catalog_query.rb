@@ -76,26 +76,18 @@ class CatalogQuery
     @active_filters = {}
   end
 
+  # A busca inteira roda dentro de uma transação **explícita**. Não é
+  # cerimônia: `set_config(..., true)` é `SET LOCAL`, válido só até o fim da
+  # transação corrente. Fora de uma, cada statement é a sua própria transação
+  # e o limiar já voltou a 0.6 quando a consulta seguinte executa — a busca
+  # por typo devolve zero resultado em produção enquanto passa nos testes,
+  # porque o Rails envolve cada teste numa transação. Foi exatamente o que
+  # aconteceu aqui, e o `assert` que pega isso é o de `q=Zorro` fora do
+  # wrapper transacional dos testes.
   def call
-    apply_search_threshold
+    return build_result if search_term.blank?
 
-    scope = searchable_scope
-    exact = exact_card_number_match(scope)
-    # O exato sai do conjunto paginado para não aparecer duas vezes: ele é
-    # prependido à página 1 e continua contado uma única vez no total.
-    scope = scope.where.not(id: exact.id) if exact
-
-    total = scope.count + (exact ? 1 : 0)
-    page = sanitized_page
-    per_page = sanitized_per_page
-
-    Result.new(
-      records: page_records(scope, exact, page, per_page),
-      total_count: total,
-      page: page,
-      per_page: per_page,
-      active_filters: @active_filters.freeze
-    )
+    Card.transaction { build_result }
   end
 
   # Filtros sem busca textual. Exposto para o controller montar contagens
@@ -132,6 +124,28 @@ class CatalogQuery
   end
 
   private
+
+  def build_result
+    apply_search_threshold
+
+    scope = searchable_scope
+    exact = exact_card_number_match(scope)
+    # O exato sai do conjunto paginado para não aparecer duas vezes: ele é
+    # prependido à página 1 e continua contado uma única vez no total.
+    scope = scope.where.not(id: exact.id) if exact
+
+    total = scope.count + (exact ? 1 : 0)
+    page = sanitized_page
+    per_page = sanitized_per_page
+
+    Result.new(
+      records: page_records(scope, exact, page, per_page),
+      total_count: total,
+      page: page,
+      per_page: per_page,
+      active_filters: @active_filters.freeze
+    )
+  end
 
   def base_scope = Card.all
 
@@ -228,7 +242,12 @@ class CatalogQuery
       next current if values.blank?
 
       @active_filters[param] = values
-      current.where("#{column} && ARRAY[?]::text[]", values)
+      # `quote_column_name` em vez de interpolar direto: o nome vem de uma
+      # constante congelada, não do request, mas interpolação em SQL é padrão
+      # que não se deixa no código — na próxima edição a origem do valor pode
+      # já não ser uma constante.
+      quoted = Card.connection.quote_column_name(column)
+      current.where(Arel.sql("cards.#{quoted} && ARRAY[?]::text[]"), values)
     end
   end
 

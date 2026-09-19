@@ -1,14 +1,13 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # A carta é identificada pelo `card_number` na URL, não pelo id: é o
+  # identificador que o usuário conhece e o que torna a URL compartilhável.
+  # O ponto em códigos como `P-029` exigiria `format: false`; os códigos reais
+  # do catálogo não têm ponto, mas a constraint fixa isso.
+  get "cards/:id" => "catalog#show", as: :card, constraints: { id: /[^\/]+/ }
+  get "catalog" => "catalog#index", as: :catalog
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  root "catalog#index"
 end
