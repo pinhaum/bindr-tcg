@@ -26,7 +26,7 @@
   - Confrontar com o glossário em `product.md` §6 e **corrigir o glossário** conforme necessário
   - *Resolve P2.*
 
-- [ ] **0.3 Decidir e registrar as pendências restantes**
+- [x] **0.3 Decidir e registrar as pendências restantes**
   - Atualizar `design.md` §9 marcando cada uma como decidida:
     - P3: definição de "set completo" (variantes base vs. parallels/secret rares)
     - P4: escolha de stack (default proposto: Rails 8 + Hotwire + Postgres; validar se atende requisitos)
@@ -38,7 +38,7 @@
 ## Fase 1 – Implementação
 
 ### 1 – Fundação do projeto
-- [ ] **1.1 Inicializar o projeto na stack escolhida**
+- [ ] **1.1 Inicializar o projeto na stack escolhida** (Rails 8 + Hotwire + PostgreSQL)
   - Criar repositório novo, configurar PostgreSQL, garantir suíte de testes rodando com teste trivial verde
   - Preparar `docker-compose` (ou equivalente) com único comando de subida documentado no README
   - *Atende requisito 11.6*
@@ -161,8 +161,8 @@
   - Por set: variantes distintas possuídas, total de variantes, percentual
   - Contar variantes distintas, não cópias
   - Link para catálogo já filtrado por aquele set
-  - Aplicar definição de "set completo" decidida em P3
-  - *Atende requisitos 9.1, 9.2, 9.3, 9.4*
+  - Denominador = `baseSetSize` (variantes base); parallels em métrica separada (P3)
+  - *Atende requisitos 9.1, 9.2, 9.3, 9.4, 9.5, 9.6*
 
 - [ ] **5.2 Export CSV**
   - Exportar coleção em CSV contendo, no mínimo: `card_number`, identificador da variante, nome da carta e quantidade

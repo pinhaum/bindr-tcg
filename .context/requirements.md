@@ -196,12 +196,15 @@ decidir o que caçar.
 3. O sistema DEVE permitir navegar de um set para o catálogo já filtrado por
    aquele set.
 4. O cálculo de progresso DEVE contar variantes distintas, não cópias.
+5. O percentual de conclusão de um set DEVE usar como denominador as **variantes
+   base** do set (`baseSetSize` da fonte), não o total de impressões.
+6. O sistema DEVE exibir a contagem de parallels possuídos como **métrica
+   separada**, nunca somada ao percentual de conclusão.
 
-> DECISÃO PENDENTE: "100% de um set" deve considerar todas as variantes,
-> incluindo parallels e secret rares, ou apenas a impressão base de cada
-> `card_number`? As duas leituras são legítimas e mudam o número exibido. Sugestão
-> de default: contar variantes base como "set completo" e mostrar parallels como
-> métrica separada. Precisa da sua decisão.
+> Decidido na task 0.3 (P3) — ver `docs/adr/002-stack-set-completo-e-imagens.md`.
+> Contar todas as impressões travaria sets dominados por parallels perto de zero
+> permanentemente (em `LimitedProductCard`, 171 de 192 registros são parallels),
+> o que não responde à pergunta que este requisito existe para responder.
 
 ---
 

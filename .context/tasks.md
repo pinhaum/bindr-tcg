@@ -31,7 +31,7 @@ Regras de execução:
   - Confrontar com o glossário em `product.md` §6 e **corrigir o glossário**.
   - _Resolve: P2._
 
-- [ ] **0.3 Decidir e registrar as pendências restantes**
+- [x] **0.3 Decidir e registrar as pendências restantes**
   - Restam **P3** (definição de "set completo"), **P4** (stack) e **P6** (cache de
     imagens). P5 e P7 foram resolvidas na 0.1/0.2 — ver `design.md` §9.
   - Atualizar `design.md` §9 marcando cada uma como decidida.
@@ -40,7 +40,7 @@ Regras de execução:
 
 ## 1 — Fundação do projeto
 
-- [ ] **1.1 Inicializar o projeto na stack escolhida**
+- [ ] **1.1 Inicializar o projeto na stack escolhida** (Rails 8 + Hotwire + PostgreSQL)
   - Projeto novo, PostgreSQL configurado, suíte de testes rodando com um teste
     trivial verde.
   - `docker-compose` ou equivalente, com um único comando de subida documentado
@@ -192,8 +192,8 @@ Regras de execução:
   - Por set: variantes distintas possuídas, total de variantes, percentual.
   - Contar variantes distintas, não cópias.
   - Link para o catálogo já filtrado por aquele set.
-  - Aplicar a definição de "set completo" decidida em P3.
-  - _Requisitos: 9.1, 9.2, 9.3, 9.4_
+  - Denominador = `baseSetSize` (variantes base); parallels como métrica separada (P3).
+  - _Requisitos: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
 - [ ] **5.2 Export CSV**
   - `card_number`, identificador da variante, nome e quantidade.

@@ -95,10 +95,11 @@ Quando **não** seguir esta recomendação:
 > Requisito 6. Confirme na documentação atual do Rails antes de assumir; se não
 > atender, use uma biblioteca de autenticação consolidada.
 
-> DECISÃO PENDENTE (P4): aprovar Rails + Hotwire ou escolher outra opção. O
-> restante deste documento é deliberadamente escrito de forma agnóstica de
-> framework — modelo de dados, estratégia de busca e ingestão valem para as três
-> opções.
+> **P4 DECIDIDA (task 0.3):** Rails 8 + Hotwire + PostgreSQL — ver
+> `docs/adr/002-stack-set-completo-e-imagens.md`. Postgres é o fator decisivo:
+> `pg_trgm`, `unaccent` e GIN sobre arrays sustentam os Req. 3 e 4 inteiros.
+> O restante deste documento segue agnóstico de framework, o que mantém a troca
+> barata caso a medição da task 3.4 contrarie a premissa.
 
 ---
 
@@ -365,8 +366,10 @@ Riscos reconhecidos:
 para a URL original — não redistribuição como asset próprio. Isso é
 deliberadamente uma task da Fase 2, não do MVP: pode ser que nunca incomode.
 
-> DECISÃO PENDENTE: aceitar o risco de hotlink na Fase 1, ou já construir cache?
-> Recomendo aceitar e medir.
+> **P6 DECIDIDA (task 0.3):** aceitar o hotlink e medir — ver
+> `docs/adr/002-stack-set-completo-e-imagens.md`. O placeholder do Req. 2.2
+> (nome + código quando a imagem falha) deixa de ser detalhe de robustez e passa
+> a ser a mitigação desta decisão.
 
 ---
 
@@ -389,19 +392,19 @@ intacta.** É o teste que protege o único dado insubstituível do sistema.
 
 ## 9. Decisões pendentes
 
-P1, P2, P5 e P7 foram **resolvidas** na task 0.1/0.2 (2026-09-19) — ver
-`docs/adr/001-fonte-de-dados-do-catalogo.md`. P3, P4 e P6 seguem abertas e são a
-task 0.3.
+**Nenhuma. P1–P7 estão todas decididas** (tasks 0.1, 0.2 e 0.3, em 2026-09-19).
+Ver `docs/adr/001-fonte-de-dados-do-catalogo.md` e
+`docs/adr/002-stack-set-completo-e-imagens.md`.
 
-| #   | Decisão                                            | Status | Resolução / default                                       |
-| --- | -------------------------------------------------- | ------ | --------------------------------------------------------- |
-| P1  | Fonte de dados do catálogo                         | ✅ **resolvida** | `hugoprudente/optcgjson` (`output/*.json`), sem auth, scraping do site oficial da Bandai com CI semanal. ADR 001. |
-| P2  | Campos, raridades, sets e attributes reais do jogo | ✅ **resolvida** | Extraídos da amostra real; glossário em `product.md` §6 corrigido. Raridades: C, UC, R, SR, SEC, L, P, SP CARD, TR. |
-| P3  | Definição de "set completo"                        | ⬜ aberta | Variantes base; parallels em métrica separada. `baseSetSize` e `totalSetSize` vêm da fonte e sustentam as duas métricas. |
-| P4  | Stack                                              | ⬜ aberta | Rails 8 + Hotwire + Postgres |
-| P5  | `variant_code` estável                             | ✅ **resolvida** | **Sem hash derivado.** A fonte fornece `id` estável (`OP01-001_p1`). Usar direto. |
-| P6  | Cache de imagens na Fase 1                         | ⬜ aberta | Não; aceitar hotlink (`imageUrl` aponta para `onepiece-cardgame.com`) e medir. |
-| P7  | `DON!!` entra no catálogo?                         | ✅ **resolvida** | Não. A fonte não traz cartas DON!!, então não há decisão a tomar na Fase 1. |
+| #   | Decisão                                            | Status | Resolução                                                  |
+| --- | -------------------------------------------------- | ------ | ---------------------------------------------------------- |
+| P1  | Fonte de dados do catálogo                         | ✅ | `hugoprudente/optcgjson` (`output/*.json`), sem auth, scraping do site oficial da Bandai com CI semanal. ADR 001. |
+| P2  | Campos, raridades, sets e attributes reais do jogo | ✅ | Extraídos da amostra real; glossário em `product.md` §6 corrigido. Raridades: C, UC, R, SR, SEC, L, P, SP CARD, TR. |
+| P3  | Definição de "set completo"                        | ✅ | **Variantes base** (`baseSetSize`) como denominador; parallels em métrica separada. Ambos os números vêm da fonte. ADR 002. |
+| P4  | Stack                                              | ✅ | **Rails 8 + Hotwire + PostgreSQL.** ADR 002. |
+| P5  | `variant_code` estável                             | ✅ | **Sem hash derivado.** A fonte fornece `id` estável (`OP01-001_p1`). Usar direto. |
+| P6  | Cache de imagens na Fase 1                         | ✅ | **Não.** Hotlink de `imageUrl` e medir; o placeholder do Req. 2.2 é a mitigação. ADR 002. |
+| P7  | `DON!!` entra no catálogo?                         | ✅ | Não. A fonte não traz cartas DON!!, então não há decisão a tomar na Fase 1. |
 
 ### Consequências para a ingestão (achadas na amostra)
 
