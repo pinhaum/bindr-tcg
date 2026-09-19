@@ -461,7 +461,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T13: Medir a latência do filtro
+### T13: Medir a latência do filtro — CONCLUÍDA
 
 **What**: Validar a premissa de stack (AD-002) com o catálogo completo carregado.
 **Where**: ambiente local
@@ -470,11 +470,45 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] p95 medido para busca + três filtros combinados
-- [ ] Resultado registrado
-- [ ] Se > 500ms: otimizar índice e consulta **antes** de considerar troca de stack
+- [x] p95 medido para busca + três filtros combinados
+- [x] Resultado registrado
+- [x] Se > 500ms: otimizar índice e consulta **antes** de considerar troca de stack
 
-**Tests**: none
+> **Resultado: p95 = 25,3 ms no query object e 51,6 ms ponta a ponta por
+> HTTP.** O alvo do Req. 11.1 é 500 ms. Passa com ~20x de folga; nada a
+> otimizar e nenhuma razão para reabrir AD-002.
+>
+> Medido com o catálogo completo (2815 cartas, 4914 variantes, 62 sets),
+> 50 amostras por cenário, 3 execuções de aquecimento descartadas (a primeira
+> paga plano, cache frio e carregamento de classe). Reproduzível:
+> `docker compose exec -T app bin/rails catalog:benchmark`.
+>
+> | Cenário (query object) | p50 | p95 |
+> | --- | --- | --- |
+> | **busca + 3 filtros — o cenário do Req. 11.1** | 7,2 ms | **25,3 ms** |
+> | busca sozinha | 6,3 ms | 8,4 ms |
+> | 3 filtros sem busca | 2,1 ms | 3,0 ms |
+> | busca com typo + filtros | 6,2 ms | 7,8 ms |
+> | `card_number` exato + filtros | 5,7 ms | 7,9 ms |
+> | trait + set + raridade | 3,4 ms | 6,1 ms |
+>
+> O query object sozinho não é o número que o usuário sente, então a medição
+> foi repetida por HTTP, com renderização de view, no servidor de
+> desenvolvimento (que recarrega código a cada request — é o caso pessimista):
+>
+> | Cenário (HTTP ponta a ponta) | p50 | p95 |
+> | --- | --- | --- |
+> | busca + 3 filtros | 23,8 ms | **51,6 ms** |
+> | catálogo sem filtro, 24 tiles | 32,8 ms | 43,0 ms |
+> | página profunda (`page=100`) | 39,7 ms | 57,9 ms |
+> | `per_page=100` | 99,5 ms | 119,6 ms |
+> | busca ampla + `per_page=100` (pior caso) | 105,0 ms | 161,9 ms |
+>
+> Mesmo o pior caso realista fica 3x abaixo do alvo. O custo cresce com o
+> número de tiles renderizados, não com o tamanho do catálogo — o que é
+> esperado, já que `per_page` é limitado a 100 pelo query object.
+
+**Tests**: none (medição, não asserção — ver Test Coverage Matrix)
 **Gate**: full
 
 ---

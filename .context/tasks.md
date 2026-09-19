@@ -140,7 +140,7 @@ Regras de execução:
   - Usável em viewport de 360px sem scroll horizontal.
   - _Requisitos: 2.1, 2.2, 2.3, 2.5, 3.5, 4.6, 4.7, 11.2_
 
-- [ ] **3.4 Medir a latência do filtro** ← *validação da premissa de stack*
+- [x] **3.4 Medir a latência do filtro** ← *validação da premissa de stack*
   - Medir o p95 de uma consulta com busca e três filtros combinados, com o
     catálogo completo carregado.
   - Se exceder 500ms: otimizar índices e consulta antes de considerar mudança
