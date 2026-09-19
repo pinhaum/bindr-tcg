@@ -84,6 +84,65 @@ T12 → T14
 
 ---
 
+## Plano de delegação
+
+Mapeado em 2026-09-19. **Advisory** — nenhum gate depende disto.
+
+### Lotes (batches)
+
+O critério do skill é ~7 tasks por worker, **nunca partindo uma fase**. Com
+fases de 2 / 7 / 5 tasks (T1–T14), o empacotamento é:
+
+| Lote | Fases | Tasks | Como executar | Tier |
+| ---- | ----- | ----- | ------------- | ---- |
+| — | Fase 1 | T1, T2 | **Inline, sem subagente** | — |
+| B1 | Fase 2 | T3–T9 (7) | Worker único | Alto raciocínio |
+| B2 | Fase 3 | T10–T14 (5) | Worker único | Alto raciocínio |
+
+**Fase 1 não se delega.** T1 fixa as convenções que as outras 13 herdam — layout,
+nomes, `docker-compose`, como o teste roda. Delegar isso é herdar uma convenção
+que ninguém escolheu. São 2 tasks; cabem inline.
+
+**Nenhum dos dois lotes é "mecânico".** A Fase 2 tem a invariante mais cara do
+projeto (ingestão não corrompe coleção) e a Fase 3 tem a semântica de filtro
+`OU`/`E` com multicolor. O rubric manda dimensionar para cima na dúvida.
+
+### Verifier — obrigatório, não se pergunta
+
+Roda **ao fim de cada lote**, com autor ≠ verificador. Tier médio-alto: ele
+projeta mutações e re-deriva cobertura; um Verifier fraco anula a garantia.
+
+O sensor de discriminação é onde ele ganha o custo. Mutações que os testes
+**precisam** matar:
+
+- Trocar o upsert de variante por `create` cego → T8 deve falhar.
+- Fazer a ingestão deletar carta ausente da fonte → T8 deve falhar.
+- Tratar `counter` nulo como `0` → teste de modelagem deve falhar.
+- Inverter `OU`/`E` entre categorias de filtro → T10 deve falhar.
+- Excluir multicoloridas do filtro de cor → T10 deve falhar.
+
+> **Isolamento:** o sensor usa worktree temporário ou cópia de arquivos, **nunca
+> `git stash`**. Há trabalho não commitado com frequência neste repo.
+
+### Agentes nomeados
+
+**Não existe `ruby-reviewer` nem `rails-reviewer`** entre os 68 agentes
+instalados (verificado). Há Python, Go, Rust, Java, PHP, TypeScript, React,
+Django, FastAPI — Ruby não. Então o worker é um agente genérico com o payload do
+skill, e a revisão usa os que são agnósticos de linguagem:
+
+| Quando | Agente | Por quê |
+| ------ | ------ | ------- |
+| Após T3/T4 (schema e índices) | `ecc:database-reviewer` | Constraints, índices, planos de execução — agnóstico de ORM |
+| Após T7/T8 (upsert) | `ecc:silent-failure-hunter` | O loop de erro por registro é exatamente onde erro engolido some |
+| Após T8 | `ecc:pr-test-analyzer` | Julga se os testes cobrem comportamento ou só espelham a implementação |
+| Após T12/T14 (views) | `ecc:a11y-architect` | Req. 2.5 (360px) e placeholder de imagem |
+| Antes de expor rotas de sessão (Fase 4) | `ecc:security-reviewer` | Req. 6.5 — consulta parte sempre do usuário da sessão |
+
+Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem ganho.
+
+---
+
 ## Task Breakdown
 
 ### T1: Inicializar o projeto Rails 8 com PostgreSQL

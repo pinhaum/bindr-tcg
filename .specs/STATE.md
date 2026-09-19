@@ -60,3 +60,4 @@
 - Ao concluir qualquer task, marcar o checkbox **nos dois** planos (`.context/tasks.md` e `.specs/features/catalogo/tasks.md`) e commitar junto com o código.
 - `python3 spec/verify_fixture.py` roda offline e deve continuar passando (12 verificações).
 - Não adicionar linhas de atribuição em mensagens de commit.
+- Plano de delegação a subagentes está em `.specs/features/catalogo/tasks.md` (seção "Plano de delegação"): Fase 1 inline, Fase 2 e Fase 3 como um lote cada, Verifier obrigatório ao fim de cada lote. Não existe agente Ruby/Rails instalado — revisão usa os agnósticos de linguagem listados lá.
