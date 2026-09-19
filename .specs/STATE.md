@@ -45,10 +45,18 @@
 ## Handoff
 
 - **Feature**: catalogo (`.specs/features/catalogo/`)
-- **Phase / Task**: Fase 0 concluída (tasks 0.1, 0.2, 0.3). Próxima: task 1.1 em `.context/tasks.md`.
-- **Completed**: 0.1, 0.2, 0.3
+- **Phase / Task**: Fase 0 concluída. Próxima: **T1** (`.specs/features/catalogo/tasks.md`) = task **1.1** (`.context/tasks.md`).
+- **Completed**: 0.1, 0.2, 0.3 — P1–P7 todas decididas, nenhuma pendência bloqueando código
 - **In-progress** (file:line): nenhum
-- **Next step**: Task 1.1 — inicializar o projeto Rails 8 com PostgreSQL, `docker-compose` e um teste trivial verde.
+- **Next step**: T1 — inicializar Rails 8 + PostgreSQL, `docker-compose` com subida em um comando documentada no README, e um teste trivial verde. Ao fazer, confirmar na documentação do Rails 8 se o gerador de autenticação atende o Req. 6 (resolve um `⚠️ VERIFICAR` de `design.md` §2).
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
+- **Último commit**: `126a771` (chore: remove duplicated plan and redundant fixture)
+
+### Contexto que não está nos documentos
+
+- `.gitignore` já existe e prevê `log/`, `tmp/`, `storage/` — o gerador do Rails vai querer sobrescrevê-lo; **mesclar, não substituir** (a entrada `storage/ingestion/` é do estágio Fetch, Req. 1.8).
+- Ao concluir qualquer task, marcar o checkbox **nos dois** planos (`.context/tasks.md` e `.specs/features/catalogo/tasks.md`) e commitar junto com o código.
+- `python3 spec/verify_fixture.py` roda offline e deve continuar passando (12 verificações).
+- Não adicionar linhas de atribuição em mensagens de commit.
