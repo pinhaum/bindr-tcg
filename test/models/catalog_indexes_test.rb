@@ -33,7 +33,7 @@ class CatalogIndexesTest < ActiveSupport::TestCase
     SQL
 
     @connection.execute(<<~SQL)
-      INSERT INTO cards (set_id, card_number, name, card_type, colors, traits, cost, power, counter, created_at, updated_at)
+      INSERT INTO cards (set_id, card_number, name, card_type, colors, traits, cost, power, counter, effect_text, created_at, updated_at)
       SELECT
         #{set_id},
         'IDX-' || lpad(i::text, 6, '0'),
@@ -43,7 +43,12 @@ class CatalogIndexesTest < ActiveSupport::TestCase
         CASE WHEN i % 500 = 0 THEN ARRAY['Supernovas'] ELSE ARRAY['Straw Hat Crew'] END,
         CASE WHEN i % 400 = 0 THEN 10 ELSE 3 END,
         1000 * (1 + (i % 3)),
-        CASE WHEN i % 3 = 0 THEN NULL ELSE 1000 END,
+        -- `counter` alto é raro, como no catálogo real: é a faixa seletiva que
+        -- o usuário filtra. A faixa baixa casa a maioria das linhas e por isso
+        -- é legitimamente Seq Scan — medido no catálogo real.
+        CASE WHEN i % 3 = 0 THEN NULL WHEN i % 700 = 0 THEN 2000 ELSE 1000 END,
+        CASE WHEN i % 600 = 0 THEN 'Draw one card and rest this Character.'
+             ELSE 'Gain plus one thousand power during this turn.' END,
         now(), now()
       FROM generate_series(1, #{SEED_SIZE}) AS i
     SQL
@@ -93,6 +98,38 @@ class CatalogIndexesTest < ActiveSupport::TestCase
   end
 
   # Done when: `pg_trgm` e `unaccent` habilitadas.
+  # Req. 4.2 — `counter` é a terceira coluna de faixa, e a de semântica mais
+  # delicada (NULL ≠ 0). O filtro seletivo precisa do índice; a faixa larga,
+  # não — no catálogo real `counter BETWEEN 1000 AND 2000` casa 1721 de 2815
+  # cartas e o Seq Scan é a escolha certa do planejador. Asserir índice ali
+  # provaria o contrário do que o Req. 11.3 pede.
+  test "filtro seletivo por counter usa índice, sem varredura completa" do
+    assert_no_sequential_scan(
+      "SELECT * FROM cards WHERE counter >= 2000",
+      filtro: "faixa alta de counter"
+    )
+  end
+
+  # `counter` NULL é "não tem counter", não counter 0: filtrar por faixa não
+  # pode arrastar as cartas sem counter junto.
+  test "filtro por faixa de counter não inclui cartas sem counter" do
+    sem_counter = @connection.select_value(
+      "SELECT count(*) FROM cards WHERE counter >= 0 AND counter IS NULL"
+    )
+
+    assert_equal 0, sem_counter
+  end
+
+  # Req. 3.1 — busca no texto de efeito. O índice existe desde a T4; sem
+  # verificação de plano ninguém saberia se ele é usado de fato.
+  test "busca full-text no texto de efeito usa índice" do
+    assert_no_sequential_scan(
+      "SELECT * FROM cards WHERE to_tsvector('english', coalesce(effect_text, '')) " \
+      "@@ plainto_tsquery('english', 'rest character')",
+      filtro: "full-text de effect_text"
+    )
+  end
+
   test "as extensões pg_trgm e unaccent estão habilitadas" do
     instaladas = @connection.select_values("SELECT extname FROM pg_extension")
 
