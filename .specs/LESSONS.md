@@ -26,6 +26,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: .specs/features/catalogo/spec.md (Edge Cases) — proibição de sentinela citada só para counter (spec/edge-cases)
 - last seen: 2026-09-19T21:53:12Z
 
+### L-003 - Quando uma guarda combina duas condições (aplicável ao tipo E tem valor), a fixture precisa satisfazer uma e violar a outra; dar nil ao campo inaplicável colapsa as duas e deixa metade da guarda sem teste.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `test/fixtures` · harmful: 0
+- features: catalogo
+- evidence: app/models/card.rb:118 (M13) (test/fixtures)
+- last seen: 2026-09-19T22:54:58Z
+
+### L-004 - Limiar de similaridade precisa de teste nos dois sentidos: só assert_includes trava o limite superior, e afrouxar o limiar inunda o resultado sem derrubar nada — acrescentar refute_includes de um resultado irrelevante.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `search/threshold` · harmful: 0
+- features: catalogo
+- evidence: app/queries/catalog_query.rb:60 (M10) (search/threshold)
+- last seen: 2026-09-19T22:54:58Z
+
+### L-005 - Quando um resultado é prependido fora da paginação, testar página >= 2 explicitamente: testar só a página 1 deixa o ramo de offset sem cobertura e esconde violação do tamanho de página.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `pagination` · harmful: 0
+- features: catalogo
+- evidence: .specs/features/catalogo/validation.md D1 (app/queries/catalog_query.rb:158) (pagination)
+- last seen: 2026-09-19T22:54:58Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

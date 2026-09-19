@@ -412,3 +412,493 @@ Minor, não bloqueante.
 
 **Próximo passo**: abrir a T10 (Fase 3). Corrigir M10 é uma task de teste de uma
 linha; cabe no início da T10 ou como fix isolada, a critério do orquestrador.
+
+---
+---
+
+# Catálogo — Validação do lote B2 (T10–T14, Fase 3)
+
+**Date**: 2026-09-19
+**Spec**: `.specs/features/catalogo/spec.md`
+**Diff range**: `22612fe..5dd1f85` (escopo designado). Durante a verificação
+entrou `7e28f1c` (a11y), commit concorrente fora do escopo — ver *Nota sobre o
+escopo*.
+**Verifier**: subagente independente (autor ≠ verificador)
+**Veredito**: ✅ **PASS**, com **1 defeito real** e **2 lacunas de cobertura**
+registrados (nenhum bloqueante para fechar a Fase 3; o defeito é Major)
+
+---
+
+## Nota sobre o escopo
+
+1. **`22612fe` é a correção do `design.md`**, não uma task, e `A..B` o exclui —
+   correto. Confirmei que os cinco commits de task estão dentro do intervalo:
+   `81ef3e4` (T10), `e33b045` (T11), `b232ef8` (T12), `126638a` (T13),
+   `3af5982` (T14), mais `e501a46` e `5dd1f85` (docs). **Nenhum commit de task
+   ficou de fora.**
+2. **`7e28f1c` (`fix(a11y): stop screen readers announcing each card three
+   times`) foi commitado durante esta verificação**, por outro agente. Ele
+   altera `_card_tile.html.erb`, `show.html.erb`, `application.html.erb` e os
+   dois testes de integração (`alt=""`, `aria-hidden="true"`, `lang="pt-BR"`).
+   **Não faz parte deste escopo e não foi verificado como task.** Ele não toca
+   nenhum dos três arquivos que o sensor mutou. Efeito colateral registrado: a
+   asserção de `alt` da T12 (`alt="Roronoa Zoro (OP01-001)"`) foi **substituída**
+   por `alt=""` — mudança deliberada de decisão de acessibilidade, não
+   regressão, mas significa que o critério "imagem com texto alternativo" da
+   T12 já não vale como estava.
+3. Durante a execução concorrente a suíte esteve transitoriamente vermelha (2
+   falhas, `catalog_grid_test.rb:120` e `:130`). Ao fim do commit `7e28f1c` ela
+   voltou a **180 runs, 0 falhas**.
+
+---
+
+## Task Completion
+
+| Task | Status | Notas |
+| ---- | ------ | ----- |
+| T10 | ✅ Done | Query object completo; semântica OU/E provada por resultado |
+| T11 | ✅ Done | `word_similarity` 0.5 e `UNION` confirmados contra o catálogo real |
+| T12 | ⚠️ Done com desvio | `SPEC_DEVIATION` honesto: e2e → integração (sem navegador no container) |
+| T13 | ✅ Done | p95 reproduzido; mede o cenário que o Req. 11.1 pede |
+| T14 | ⚠️ Done com desvio | Mesmo `SPEC_DEVIATION` da T12 |
+
+---
+
+## Critérios "Done when" — verificação ancorada no spec
+
+### T10 — Query object (Req. 4)
+
+| Critério | Outcome definido no spec | Evidência `file:line` | Resultado |
+| -------- | ------------------------ | --------------------- | --------- |
+| OU dentro da categoria | Req. 4.4 — dois valores da mesma categoria unem por OU | `test/queries/catalog_query_test.rb:123` — `assert_equal ["OP01-002","OP01-003"], numbers(...colors: ["Green","Blue"])` | ✅ PASS |
+| E entre categorias | Req. 4.3 — categorias distintas unem por E | `test/queries/catalog_query_test.rb:141` e `:149` — a ausência de `OP01-004` (Red event) é o que separa E de OU | ✅ PASS |
+| Cor inclui multicoloridas | Req. 4.5 — Red/Blue entra no filtro de Red **e** no de Blue | `test/queries/catalog_query_test.rb:131` — `assert_includes vermelhas, "OP01-003"` + `assert_includes azuis, "OP01-003"` | ✅ PASS |
+| Parâmetro inválido ignorado, nunca erro | Req. 4.7 / §4.2 — resultado válido, nunca 500 | `test/queries/catalog_query_test.rb:165`, `:171`, `:177`, `:184`; HTTP em `test/integration/catalog_grid_test.rb:282`, `:289` (`assert_response :success`) | ✅ PASS |
+| `total_count` + filtros ativos normalizados | Req. 4.8 e 4.6 | `test/queries/catalog_query_test.rb:201` — `assert_equal 3, resultado.total_count` com `per_page: 1`; `:208` e `:217` para chips | ✅ PASS |
+| Filtro isolado, 2 combinações, multicolor | — | `:62`–`:96` (seis filtros isolados), `:141`/`:149`/`:157` (combinações), `:131` (multicolor) | ✅ PASS |
+| Faixas (Req. 4.2) | `counter` NULL ≠ 0 | `test/queries/catalog_query_test.rb:114` — `counter_min: 0` **não** arrasta `OP01-003` (counter NULL) | ✅ PASS |
+
+### T11 — Busca textual (Req. 3)
+
+| Critério | Outcome definido no spec | Evidência `file:line` | Resultado |
+| -------- | ------------------------ | --------------------- | --------- |
+| Insensível a caixa | Req. 3.2 | `test/queries/catalog_search_test.rb:66` | ✅ PASS |
+| Insensível a acento, nos dois sentidos | Req. 3.2 | `test/queries/catalog_search_test.rb:71` — `Bell-mere` acha `Bell-mère` e vice-versa | ✅ PASS |
+| Tolerante a typo | Req. 3.3 — typo de 1–2 caracteres acha a carta pretendida | `test/queries/catalog_search_test.rb:79` (`Zorro`→Zoro, `Namy`→Nami) e `:84` (`Belmere`→Bell-mère) | ✅ PASS |
+| Busca no texto de efeito | Req. 3.1 | `test/queries/catalog_search_test.rb:90` e `:97` (stemming: `drawing`→`draw`) | ✅ PASS |
+| Exato de `card_number` em primeiro, por consulta separada | Req. 3.4 | `test/queries/catalog_search_test.rb:124` — o decoy `OP01-000` **ordena antes** do exato; `assert_equal "OP01-001", resultado.first` só passa com prepend real | ✅ PASS |
+| Combinável com todos os filtros | Req. 3.6 | `test/queries/catalog_search_test.rb:152`, `:158`, `:165`, `:172` | ✅ PASS |
+| Sem full table scan | Req. 11.3 | `test/queries/catalog_search_test.rb:216` — EXPLAIN com 20k linhas semeadas assere os três índices e `refute_match(/Seq Scan on cards/)` | ✅ PASS |
+
+### T12 — Grade (Req. 2, 3.5, 4.6, 4.7, 11.2)
+
+| Critério | Outcome definido no spec | Evidência `file:line` | Resultado |
+| -------- | ------------------------ | --------------------- | --------- |
+| Imagem, nome e `card_number` | Req. 2.1 | `test/integration/catalog_grid_test.rb:44` | ✅ PASS |
+| Paginação | Req. 2.2 | `test/integration/catalog_grid_test.rb:203` — páginas disjuntas (`assert_empty primeira & segunda`) | ✅ PASS |
+| Lazy loading | Req. 11.2 | `test/integration/catalog_grid_test.rb:56` — toda `img.card-tile__image` com `loading="lazy"` | ✅ PASS |
+| Placeholder com nome e código | Req. 2.3 | `test/integration/catalog_grid_test.rb:70`, `:84` (renderizado mesmo com imagem), `:95` (camada CSS) | ✅ PASS (ver *Placeholder* abaixo) |
+| Estado vazio com termo e limpar | Req. 3.5 | `test/integration/catalog_grid_test.rb:187` — `.catalog__empty` com `/xyzqwkjhgf/` e link para `catalog_path` | ✅ PASS |
+| Chips removíveis individualmente | Req. 4.6 | `test/integration/catalog_grid_test.rb:166` e `:192` — assere que remover Red preserva Green **e** vice-versa | ✅ PASS |
+| Estado completo na URL | Req. 4.7 | `test/integration/catalog_grid_test.rb:144` (recarga reproduz) e `:215` (paginação preserva filtro) | ✅ PASS |
+| 360px sem scroll horizontal | Req. 2.5 | `test/integration/catalog_grid_test.rb` (CSS: nenhuma declaração px > 360; `--tile-min` cabe 2x; `auto-fill`) + Chromium real (verificado pelo orquestrador) | ⚠️ Coberto por proxy — ver *Desvio* |
+| Ordenação | Req. 2.4 | `test/integration/catalog_grid_test.rb:226`; unit em `catalog_query_test.rb:226` (asc **e** desc) | ✅ PASS |
+
+### T13 — Latência (Req. 11.1)
+
+| Critério | Outcome definido no spec | Evidência | Resultado |
+| -------- | ------------------------ | --------- | --------- |
+| p95 de busca + 3 filtros, catálogo completo | Req. 11.1 — p95 < 500 ms | `lib/tasks/benchmark.rake:148` — cenário `q: "Zorro", colors, card_types, cost_min/max` sobre 2815 cartas; **reproduzido por mim: p95 = 20,6 ms** (autor: 25,3 ms) | ✅ PASS |
+| Resultado registrado | — | `.specs/features/catalogo/tasks.md` §T13, duas tabelas (query object e HTTP) | ✅ PASS |
+
+**Verificação do ceticismo**: o cenário do Req. 11.1 é genuíno — busca textual
+(`q`) **mais três categorias distintas** de filtro (cor, tipo, faixa de custo),
+contra o catálogo completo (`Card.count` = 2815, impresso pela própria task).
+Não é um caminho mais fácil. O aquecimento de 3 execuções descartadas é
+metodologicamente correto (`benchmark.rake:173`). Ressalva menor: `p95 =
+amostras[(reps*0.95).ceil - 1]` com 50 amostras pega o índice 47, que é o 48º
+valor — aproximação aceitável, e o resultado está 20x abaixo do alvo, então
+nenhuma escolha de interpolação muda o veredito.
+
+### T14 — Detalhe (Req. 5)
+
+| Critério | Outcome definido no spec | Evidência `file:line` | Resultado |
+| -------- | ------------------------ | --------------------- | --------- |
+| Todas as variantes, cada uma com raridade, set e imagem | Req. 5.2 | `test/integration/card_detail_test.rb:26` — 3 variantes, raridades L/SEC/C, sets Romance Dawn e Straw Hat Crew, três `img[src]` distintos | ✅ PASS |
+| Quebras de linha de `effect_text` e `trigger_text` | Req. 5.4 | `test/integration/card_detail_test.rb:178` e `:195` — `assert_match(/<br/, html)` com texto multilinha explícito | ✅ PASS |
+| Campos inaplicáveis omitidos, não vazios | Req. 5.5 | `test/integration/card_detail_test.rb:93` (Leader), `:107` (Event), `:122` (Stage), `:136` (Character sem counter) | ⚠️ **Lacuna** — ver M13 |
+| Campos conhecidos + imagem maior | Req. 5.1 | `test/integration/card_detail_test.rb:232` | ✅ PASS |
+
+---
+
+## Verificação dos pontos de ceticismo
+
+### `word_similarity` com limiar 0.5 — ✅ confirmado, bem calibrado
+
+Medido por mim contra o catálogo real (2815 cartas), não contra fixture:
+
+| Termo | Linhas casadas | Nomes distintos | Avaliação |
+| ----- | -------------- | --------------- | --------- |
+| `Zorro` | 42 | 5 | Roronoa Zoro (+ Parallel) e Zoro-Juurou — todos legítimos |
+| `Namy` | 39 | 5 | Nami, O-Nami, Namule — plausível |
+| `Luffi` | 94 | 10 | todos contêm "Luffy" |
+| `Belmere` | 3 | 2 | Bell-mère |
+| `Sanji` | 48 | 9 | — |
+
+Nenhum falso positivo semanticamente absurdo, e nenhum resultado legítimo
+cortado. **0.5 é o valor certo.** O limiar inferior é que não está travado —
+ver M10.
+
+### `UNION` no lugar de `OR` — ⚠️ a afirmação do design **não se sustenta mais**
+
+`EXPLAIN` contra o catálogo real, com o schema atual:
+
+```
+UNION → Append + 3 Bitmap Index Scan (nome trgm, effect tsvector, card_number trgm)
+OR    → Bitmap Heap Scan + BitmapOr dos MESMOS 3 índices     ← também indexado
+```
+
+As três ramificações usam índice no `UNION`, como o autor afirma — **isso
+confere**. Mas a justificativa de §4.1.2 ("uma ramificação inindexável derruba o
+plano do predicado inteiro") descreve o estado **anterior** à migração
+`20260919120300`. Reproduzi a condição original derrubando o índice novo dentro
+de uma transação com `ROLLBACK`:
+
+```
+OR sem index_cards_on_card_number_trgm → Seq Scan on cards (cost=0.00..1599.76)
+OR com o índice                        → BitmapOr, sem Seq Scan
+```
+
+**A causa do Seq Scan era o índice ausente, não o `OR`.** Uma vez criado o
+índice, `OR` planeja tão bem quanto `UNION`. O `UNION` não é errado (deduplica e
+o plano é equivalente), mas §4.1.2 atribui a ele um efeito que pertence à
+migração. Isso torna M8 um mutante **equivalente**, não uma lacuna — e é o que
+explica o design.md descrever duas correções "as duas necessárias" quando só
+uma delas é que resolve o plano.
+
+### Migração `20260919120300` — ✅ aditiva, confirmado
+
+`git diff 22612fe..5dd1f85 -- db/structure.sql` traz exatamente duas adições:
+um `CREATE INDEX index_cards_on_card_number_trgm ... USING gin (card_number
+public.gin_trgm_ops)` e a linha `('20260919120300')` em `schema_migrations`.
+**Nenhuma tabela, coluna ou constraint do schema verificado na Fase 2 foi
+tocada.** O índice único btree `index_cards_on_card_number` continua presente e
+é o que atende o match exato.
+
+### T13 p95 — ✅ reproduzido, mede o que o Req. 11.1 pede
+
+Ver tabela da T13 acima. p95 = 20,6 ms na minha execução.
+
+### T12/T14 como integração em vez de e2e — ✅ desvio honesto, lacuna real e nomeada
+
+O `SPEC_DEVIATION` está registrado em `tasks.md` §T12 e §T14, e em `STATE.md`.
+Confirmei a causa: não há binário de navegador no container. O que **fica
+descoberto sem navegador**, e está corretamente nomeado pelo autor:
+
+- Comportamento de renderização em viewport real (coberto por proxy de CSS +
+  verificação manual em Chromium, já feita pelo orquestrador).
+- O placeholder aparecendo quando o **hotlink quebra de verdade** (e não só
+  quando `image_url` é NULL).
+
+O desvio **não** esconde critério não atendido — todos os "Done when" da T12 e
+da T14 têm asserção correspondente no HTML renderizado ou no CSS. O custo real é
+que a regressão de layout só seria pega por inspeção manual.
+
+### Placeholder por CSS, sem JS — ✅ mecanismo correto, cobertura parcial
+
+O mecanismo é sólido e melhor que `onerror`: `.card-tile__art { position:
+relative }` com imagem e placeholder ambos `position: absolute; inset: 0`
+(`app/assets/stylesheets/catalog.css:102-119`). O placeholder é renderizado
+**sempre**, por baixo; imagem ausente ou quebrada simplesmente não pinta nada
+por cima. Não depende de script.
+
+Os testes cobrem: placeholder presente com `image_url` NULL
+(`catalog_grid_test.rb:70`), presente **mesmo havendo** `image_url` (`:84`), e a
+camada CSS (`:95`). O que **nenhum teste cobre** é a falha real do hotlink em
+navegador — mas, ao contrário de um `onerror`, aqui não há código a executar: se
+o markup e o CSS estão certos, o comportamento decorre. Risco baixo.
+
+**Observação**: o comentário de cabeçalho de `test/integration/catalog_grid_test.rb:11-12`
+ainda fala em "execução do `onerror` da imagem", vocabulário da solução
+descartada. Cosmético, mas induz a erro quem ler o teste.
+
+### `owned` fora do query object — ⚠️ registrado, mas só em um lugar
+
+A ausência está registrada em `.specs/STATE.md:55` ("é onde o parâmetro `owned`
+do `design.md` §4.2 entra — ele foi deixado **fora** do query object de
+propósito, por depender de sessão"). **Não** há menção em `tasks.md` §T10 nem
+comentário em `catalog_query.rb`, que é onde quem for implementar vai olhar.
+
+Quanto a aceitar o filtro depois sem reescrita: **sim**. `owned` hoje cai no
+saneador genérico e é ignorado (`normalize_keys` + ausência de entrada nos
+hashes de filtro), então nenhuma URL com `owned` quebra. Adicioná-lo é
+acrescentar um predicado ao lado de `apply_variant_filters`, no mesmo formato
+dos existentes. A estrutura `reduce`-por-categoria comporta isso sem
+reorganização. Ressalva: `owned` opera sobre **variantes do usuário**, e o
+escopo base é `Card.all` — vai precisar de um `EXISTS` como `VARIANT_FILTERS` já
+faz, não de uma coluna. Está dentro do padrão existente.
+
+---
+
+## Sensor de Discriminação
+
+**Isolamento**: mutação in-place com restauração a partir de cópia pristina
+extraída de `git show 5dd1f85:<arquivo>`, verificada por `cmp` após cada rodada.
+**Nunca `git stash`**. Um worktree temporário foi criado e descartado ao
+descobrir-se que `/tmp` não está no mount do container; a alternativa por cópia
+de arquivo foi usada em seu lugar. Os três alvos (`catalog_query.rb`,
+`catalog_helper.rb`, `card.rb`) **não são tocados** pelo commit concorrente
+`7e28f1c`, então não houve colisão. Todos verificados idênticos ao HEAD ao fim.
+
+| # | Mutante | `file:line` | Resultado |
+| - | ------- | ----------- | --------- |
+| M1 | `E` entre categorias → `OU` (`current.where(...)` → `current.or(Card.where(...))`) | `app/queries/catalog_query.rb:260` | ✅ Morto (3 falhas) |
+| M2 | Cor exclui multicoloridas (`&&` → `=` em array) | `app/queries/catalog_query.rb:250` | ✅ Morto (5 falhas) |
+| M3 | `per_page` sem teto (`value.clamp(1, MAX_PER_PAGE)` → `value`) | `app/queries/catalog_query.rb:323` | ✅ Morto |
+| M4 | `total_count` conta a página (`scope.count` → `[scope.count, per_page].min`) | `app/queries/catalog_query.rb:137` | ✅ Morto |
+| M5 | Parâmetro inválido vira 500 (remove `rescue ArgumentError, TypeError`) | `app/queries/catalog_query.rb:343` | ✅ Morto (3 erros) |
+| M6 | `dir` ignorado (sempre `asc`) | `app/queries/catalog_query.rb:299` | ✅ Morto |
+| M7 | `immutable_unaccent` → `unaccent` (mesmo resultado, perde índice) | `app/queries/catalog_query.rb:205` | ✅ Morto (teste de plano) |
+| M8 | `UNION` → `OR` nas três ramificações | `app/queries/catalog_query.rb:204-210` | ⚪ **Equivalente** — ver acima: com o índice novo, `OR` também usa os 3 índices |
+| M9 | Limiar `word_similarity` 0.5 → 0.9 (corta typo legítimo) | `app/queries/catalog_query.rb:60` | ✅ Morto (5 falhas) |
+| M10 | Limiar `word_similarity` 0.5 → 0.1 (inunda de falso positivo) | `app/queries/catalog_query.rb:60` | ❌ **SOBREVIVEU** |
+| M11 | Off-by-one no offset do prepend (`- 1` removido) | `app/queries/catalog_query.rb:158` | ⚪ Equivalente — mas **expôs o defeito D1** (ver abaixo) |
+| M12 | Chip remove tudo em vez de só a si mesmo (`remaining.except(:page)` → `remaining.slice(:sort, :dir)`) | `app/helpers/catalog_helper.rb:72` | ✅ Morto (3 falhas) |
+| M13 | Aplicabilidade por tipo ignorada (remove `return false unless field_applicable?`) | `app/models/card.rb:118` | ❌ **SOBREVIVEU** |
+| M14 | `counter` NULL vira 0 (`!value.nil?` → `true`) | `app/models/card.rb:121` | ✅ Morto |
+| M16 | Prepend removido (`exact = exact_card_number_match(scope)` → `exact = nil`) | `app/queries/catalog_query.rb:132` | ✅ Morto (5 falhas) |
+| M17 | Match exato case-sensitive (remove `.upcase`) | `app/queries/catalog_query.rb:226` | ✅ Morto |
+
+**Sensor depth**: 16 mutantes novos (além dos 2 obrigatórios do plano, ambos
+mortos). 12 mortos, 2 equivalentes, **2 sobreviventes reais**.
+
+**Nota**: o mutante "remover a transação explícita de `CatalogQuery#call`" não
+foi repetido — o orquestrador já o confirmou morto (`SemTransacaoTest`).
+`simple_format` não foi mutado porque `show.html.erb` estava sob edição
+concorrente; o critério tem asserção direta em `card_detail_test.rb:178`.
+
+---
+
+## Achados
+
+### D1 — DEFEITO REAL: o match exato é prependido em **todas** as páginas (Major)
+
+**Não é mutante — é comportamento do HEAD.** `app/queries/catalog_query.rb:154-159`:
+
+```ruby
+def page_records(scope, exact, page, per_page)
+  return paginate(ordered(scope), page, per_page).to_a unless exact
+  return [ exact ] + ordered(scope).limit(per_page - 1).to_a if page == 1
+
+  [ exact ] + ordered(scope).limit(per_page).offset((page - 1) * per_page - 1).to_a.last(per_page)
+end
+```
+
+O ramo de `page > 1` **também** prepende `exact`. Reproduzido no banco de teste
+com um termo que é exato e casa outras 9 cartas por substring, `per_page = 3`:
+
+```
+p1: tamanho=3  ["ZZT-005", "ZZT-0051", "ZZT-0052"]
+p2: tamanho=4  ["ZZT-005", "ZZT-0053", "ZZT-0054", "ZZT-0055"]   ← 4 > per_page
+p3: tamanho=4  ["ZZT-005", "ZZT-0056", "ZZT-0057", "ZZT-0058"]   ← 4 > per_page
+p4: tamanho=2  ["ZZT-005", "ZZT-0059"]
+```
+
+Consequências: (a) a página devolve **mais itens que `per_page`**; (b) a carta
+exata **se repete em todas as páginas**, contradizendo o comentário do próprio
+código em `:133-134` ("o exato sai do conjunto paginado para não aparecer duas
+vezes"); (c) `total_count` = 10 com `per_page` = 3 promete 4 páginas de ≤3, e a
+soma dos tamanhos é 13. Nenhuma carta é perdida nem duplicada *dentro* da mesma
+página, o que é por que a suíte não percebe.
+
+**Por que nenhum teste pega**: o único teste de paginação com prepend é
+`catalog_search_test.rb:144`, que usa `per_page: 1` e **só olha a página 1**.
+`catalog_grid_test.rb:203` testa paginação, mas **sem termo de busca**, então
+`exact` é `nil` e o ramo defeituoso nunca executa. Falta um teste que combine
+match exato + `per_page` pequeno + página ≥ 2.
+
+Severidade **Major**: viola o contrato de `per_page` de `design.md` §4.2 e é
+visível ao usuário (a mesma carta reaparece ao paginar uma busca por código).
+Não é Blocker porque nenhum dado se perde e o caso exige busca por
+`card_number` exato com muitos outros resultados.
+
+### D2 — LACUNA: limiar inferior de `word_similarity` sem teste (Minor)
+
+M10 sobreviveu: baixar o limiar de `0.5` para `0.1`
+(`app/queries/catalog_query.rb:60`) não derruba nenhum dos 180 testes. Medido
+contra o catálogo real, o estrago é concreto:
+
+| Termo | linhas @ 0.5 | @ 0.3 | @ 0.1 |
+| ----- | ------------ | ----- | ----- |
+| `Zorro` | 42 | 46 | 113 |
+| `Nami` | 39 | 48 | 205 |
+
+Buscar "Nami" devolveria **205 cartas em vez de 39** — 5x de ruído — e a suíte
+continuaria verde. Todos os testes de busca usam `assert_includes`, que só
+verifica presença; nenhum verifica **ausência de resultado irrelevante** nem
+põe teto no tamanho do resultado. O limiar superior está travado (M9 morreu por
+5 asserções); o inferior não tem nada.
+
+Correção sugerida (uma asserção): num termo como `Zorro`, exigir que uma carta
+sem parentesco (ex.: `Nami`) **não** apareça, ou que o resultado não ultrapasse
+um teto plausível.
+
+### D3 — LACUNA: `field_applicable?` não é exercitado de forma independente (Minor)
+
+M13 sobreviveu: remover `return false unless field_applicable?(field)` de
+`app/models/card.rb:118` não derruba nenhum teste de detalhe.
+
+A causa é que **toda** fixture da T14 dá `nil` aos campos inaplicáveis — o
+Leader de `card_detail_test.rb:93` tem `cost: nil, counter: nil`, o Event de
+`:107` tem `power: nil, life: nil, counter: nil`. Com o valor ausente, "não se
+aplica" e "não tem valor" produzem o mesmo resultado, e só o segundo está sendo
+testado. Provei a diferença criando um Leader com `cost: 4, counter: 1000`:
+
+```
+HEAD     display_field?(:cost) = false   (correto, Req. 5.5)
+MUTANTE  display_field?(:cost) = true    (viola Req. 5.5)
+```
+
+Isto é exatamente a distinção que a própria nota da T14 diz ser deliberada — "o
+dia em que a fonte entregar counter num Event passar despercebido" — e é o caso
+que não tem teste. A T14 afirma que o mutante "ignorar aplicabilidade por tipo"
+foi morto; **não foi**, com os dados que a suíte usa.
+
+Correção sugerida: um teste com carta de tipo `leader` carregando `cost` e
+`counter` preenchidos, asserindo `.field--cost` ausente.
+
+---
+
+## Code Quality
+
+| Princípio | Status |
+| --------- | ------ |
+| Código mínimo | ✅ |
+| Mudanças cirúrgicas | ✅ |
+| Sem scope creep | ✅ |
+| Segue padrões existentes | ✅ |
+| Outcome ancorado no spec | ✅ (2 lacunas nomeadas) |
+| Cobertura por camada | ⚠️ domínio quase 1:1; falta o caso de D1 e D3 |
+| Todo teste mapeia a requisito | ✅ — cada bloco cita `Req. N.N` |
+| Diretrizes documentadas seguidas | ✅ `CLAUDE.md` + `.context/design.md` §4 |
+
+Observações de qualidade, nenhuma bloqueante:
+
+- `catalog_query.rb` tem 346 linhas, das quais boa parte é comentário
+  explicando *por que* — apropriado, dado que várias decisões (limiar, `UNION`,
+  transação) são contraintuitivas e foram pagas caro.
+- `search_match_sql` e `exact_match_sql` são públicos só para o teste de plano.
+  Está documentado no código (`:110`, `:120`). Aceitável.
+- `catalog_helper.rb:67` — `rest.empty? ? remaining.delete(key) : remaining[key] = rest`
+  funciona, mas a atribuição dentro de ternário é frágil de ler. Cosmético.
+- Comentário obsoleto em `test/integration/catalog_grid_test.rb:11-12` (fala de
+  `onerror`, solução que não foi adotada).
+- `design.md` §4.1.2 atribui ao `OR` um efeito que pertence ao índice ausente
+  (ver ceticismo). Vale corrigir o parágrafo, pela mesma regra que o próprio
+  projeto aplica: requisito/design errado se corrige no documento.
+
+---
+
+## Edge Cases
+
+- [x] Mesma variante em dois sets — coberto na Fase 2 (fora deste lote)
+- [x] Raridade/attribute desconhecido persistido como texto — Fase 2
+- [x] `counter` NULL ≠ 0 — `catalog_query_test.rb:114` (filtro) e `card_detail_test.rb:136` (tela)
+- [x] `traits` com variação de caixa — Fase 2
+- [x] Termo de busca com SQL injection — `catalog_search_test.rb:205`
+- [x] `sort` com SQL injection — `catalog_query_test.rb:177`
+- [x] Página além da última devolve vazio sem erro — verificado (`page=9999` → 0 registros, sem exceção)
+- [ ] **Match exato + paginação além da página 1** — D1, não coberto
+
+---
+
+## Gate Check
+
+- **Comando**: `docker compose exec -T app bin/rails test` (full) + `bin/rubocop`
+- **No escopo designado (`5dd1f85`)**: **176 runs, 500 assertions, 0 falhas, 0 erros, 0 skips**; RuboCop **54 arquivos, 0 offenses**
+- **No HEAD atual (`7e28f1c`, com o commit concorrente de a11y)**: **180 runs, 506 assertions, 0 falhas**
+- **Benchmark**: `bin/rails catalog:benchmark` — todos os 6 cenários `OK`, pior p95 = 20,6 ms contra alvo de 500 ms
+- **Delta de testes no lote B2**: +92 (84 ao fim da Fase 2 → 176)
+- **Skips**: nenhum
+
+---
+
+## Requirement Traceability Update
+
+| Requirement | Status anterior | Novo status |
+| ----------- | --------------- | ----------- |
+| CAT-02 (Navegação) | Implementing | ✅ Verified |
+| CAT-03 (Busca) | Implementing | ✅ Verified, com D2 |
+| CAT-04 (Filtros) | Implementing | ✅ Verified, com D1 |
+| CAT-05 (Detalhe) | Implementing | ✅ Verified, com D3 |
+
+---
+
+## Fix Plans
+
+### Fix 1 (D1) — prepend só na página 1
+
+- **Root cause**: `app/queries/catalog_query.rb:158` prepende `exact` em toda
+  página; só a página 1 deveria recebê-lo.
+- **Fix**: no ramo `page > 1`, devolver apenas
+  `ordered(scope).limit(per_page).offset((page - 1) * per_page - 1)`, sem
+  `[ exact ] +` e sem `.last(per_page)`.
+- **Teste**: termo exato com ≥ 2 páginas de resultado e `per_page` pequeno;
+  asserir `records.size <= per_page` em toda página e que o exato aparece uma
+  única vez no conjunto de todas as páginas.
+- **Prioridade**: Major
+
+### Fix 2 (D2) — travar o limiar inferior da busca
+
+- **Root cause**: nenhum teste assere ausência de resultado irrelevante.
+- **Fix**: asserção em `test/queries/catalog_search_test.rb` — buscar `Zorro` e
+  `refute_includes` uma carta sem parentesco.
+- **Prioridade**: Minor
+
+### Fix 3 (D3) — exercitar `field_applicable?` isolado de "tem valor"
+
+- **Root cause**: todas as fixtures dão `nil` ao campo inaplicável.
+- **Fix**: teste com `card_type: "leader"` e `cost: 4, counter: 1000`
+  preenchidos, asserindo `.field--cost` e `.field--counter` ausentes.
+- **Prioridade**: Minor
+
+### Fix 4 (cosmético) — documentação
+
+- `design.md` §4.1.2: separar "o `OR` caía em Seq Scan **porque faltava o
+  índice em `card_number`**" de "portanto usamos `UNION`".
+- `test/integration/catalog_grid_test.rb:11-12`: remover a menção a `onerror`.
+- Registrar a ausência de `owned` em `tasks.md` §T10 ou como comentário em
+  `catalog_query.rb`, não só em `STATE.md`.
+
+---
+
+## Summary
+
+**Overall**: ✅ **PASS** — a Fase 3 entrega o que o spec pede.
+
+**Spec-anchored check**: todos os critérios "Done when" de T10–T14 têm teste com
+evidência `file:line`; 2 deles (Req. 5.5 e o limiar da busca) passam por motivo
+mais fraco do que aparentam, o que está registrado como D2 e D3.
+
+**Sensor**: 16 mutantes novos — 12 mortos, 2 equivalentes, 2 sobreviventes.
+Os dois mutantes obrigatórios do plano (`OU`/`E` invertido, multicolor excluída)
+morreram com folga.
+
+**Gate**: 180 testes, 0 falhas; RuboCop limpo; benchmark 20x abaixo do alvo.
+
+**O que está sólido**: a semântica de filtro é testada por *resultado*, não por
+SQL, e os testes escolhem os casos que separam a regra certa da errada — o decoy
+que ordena antes do exato (`catalog_search_test.rb:124`) e a ausência do Red
+event no teste de E (`catalog_query_test.rb:141`) são exemplos de teste que
+discrimina de verdade. Os três defeitos que só afetam latência
+(`immutable_unaccent`, índice do match exato, plano das ramificações) têm teste
+de plano de execução, o que é raro e correto. O `SPEC_DEVIATION` de T12/T14 é
+honesto e nomeia com precisão o que fica descoberto.
+
+**O que encontrei**: um defeito real de paginação que a suíte não podia ver
+(D1), duas lacunas onde o teste passa por motivo mais fraco que o critério (D2,
+D3), e uma afirmação de design que a evidência não sustenta mais (`UNION` vs
+`OR`).
+
+**Próximo passo**: os três fixes são pequenos e independentes. D1 é o único que
+muda comportamento; D2 e D3 são asserções novas. Nenhum bloqueia a Fase 4.

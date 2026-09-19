@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 3,
+  "next_id": 6,
   "lessons": [
     {
       "id": "L-001",
@@ -40,6 +40,60 @@
       ],
       "created": "2026-09-19T21:53:12Z",
       "last_seen": "2026-09-19T21:53:12Z"
+    },
+    {
+      "id": "L-003",
+      "key": "surviving_mutant::quando uma guarda combina duas condicoes aplicavel ao tipo e tem valor a fixture precisa satisfazer uma e violar a outra dar nil ao campo inaplicavel colapsa as duas e deixa metade da guarda sem teste",
+      "text": "Quando uma guarda combina duas condições (aplicável ao tipo E tem valor), a fixture precisa satisfazer uma e violar a outra; dar nil ao campo inaplicável colapsa as duas e deixa metade da guarda sem teste.",
+      "signal": "surviving_mutant",
+      "scope": "test/fixtures",
+      "status": "candidate",
+      "features": [
+        "catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "app/models/card.rb:118 (M13) (test/fixtures)"
+      ],
+      "created": "2026-09-19T22:54:58Z",
+      "last_seen": "2026-09-19T22:54:58Z"
+    },
+    {
+      "id": "L-004",
+      "key": "surviving_mutant::limiar de similaridade precisa de teste nos dois sentidos so assert includes trava o limite superior e afrouxar o limiar inunda o resultado sem derrubar nada acrescentar refute includes de um resultado irrelevante",
+      "text": "Limiar de similaridade precisa de teste nos dois sentidos: só assert_includes trava o limite superior, e afrouxar o limiar inunda o resultado sem derrubar nada — acrescentar refute_includes de um resultado irrelevante.",
+      "signal": "surviving_mutant",
+      "scope": "search/threshold",
+      "status": "candidate",
+      "features": [
+        "catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "app/queries/catalog_query.rb:60 (M10) (search/threshold)"
+      ],
+      "created": "2026-09-19T22:54:58Z",
+      "last_seen": "2026-09-19T22:54:58Z"
+    },
+    {
+      "id": "L-005",
+      "key": "ac_gap::quando um resultado e prependido fora da paginacao testar pagina 2 explicitamente testar so a pagina 1 deixa o ramo de offset sem cobertura e esconde violacao do tamanho de pagina",
+      "text": "Quando um resultado é prependido fora da paginação, testar página >= 2 explicitamente: testar só a página 1 deixa o ramo de offset sem cobertura e esconde violação do tamanho de página.",
+      "signal": "ac_gap",
+      "scope": "pagination",
+      "status": "candidate",
+      "features": [
+        "catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        ".specs/features/catalogo/validation.md D1 (app/queries/catalog_query.rb:158) (pagination)"
+      ],
+      "created": "2026-09-19T22:54:58Z",
+      "last_seen": "2026-09-19T22:54:58Z"
     }
   ]
 }

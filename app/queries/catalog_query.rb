@@ -149,13 +149,15 @@ class CatalogQuery
 
   def base_scope = Card.all
 
-  # O exato vai à frente da página 1; nas demais páginas ele já foi consumido,
-  # então o offset desconta a vaga que ele ocupou.
+  # O exato vai à frente da página 1 e **só dela**: da página 2 em diante ele
+  # já foi consumido, e reprependê-lo repetiria a mesma carta em toda página
+  # além de estourar o `per_page`. O offset das páginas seguintes desconta a
+  # única vaga que ele ocupou na primeira.
   def page_records(scope, exact, page, per_page)
     return paginate(ordered(scope), page, per_page).to_a unless exact
     return [ exact ] + ordered(scope).limit(per_page - 1).to_a if page == 1
 
-    [ exact ] + ordered(scope).limit(per_page).offset((page - 1) * per_page - 1).to_a.last(per_page)
+    ordered(scope).limit(per_page).offset((page - 1) * per_page - 1).to_a
   end
 
   # `SET LOCAL` via `set_config(..., true)`: vale só até o fim da transação

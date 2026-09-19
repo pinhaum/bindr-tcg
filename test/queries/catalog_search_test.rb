@@ -147,6 +147,76 @@ class CatalogSearchTest < ActiveSupport::TestCase
     assert_equal [ "OP01-001" ], numbers(resultado)
   end
 
+  # O prepend do exato vale **só para a página 1**. Este teste existe porque a
+  # primeira versão reprependia o exato em toda página: a mesma carta repetia
+  # em todas e cada página passava do `per_page`. Nenhum teste pegava, porque
+  # os de prepend olhavam só a página 1 e os de paginação não tinham termo de
+  # busca — com `exact` nulo, o ramo nunca executava.
+  test "o exato não se repete nas páginas seguintes" do
+    demais = (1..5).map do |i|
+      create_card(card_number: "OP01-1#{i}", name: "Tribute to OP01-001 ##{i}",
+                  card_type: "event", colors: [ "Red" ], cost: 1)
+    end
+    demais.each do |c|
+      CardVariant.create!(card: c, set_id: @op01.id, variant_code: c.card_number,
+                          rarity: "C", art_kind: "base")
+    end
+
+    p1 = numbers(search("OP01-001", per_page: 3, page: 1))
+    p2 = numbers(search("OP01-001", per_page: 3, page: 2))
+
+    assert_equal "OP01-001", p1.first, "o exato tem de abrir a página 1"
+    refute_includes p2, "OP01-001", "o exato repetiu na página 2"
+    assert_empty p1 & p2, "as páginas 1 e 2 trazem cartas repetidas"
+  end
+
+  test "nenhuma página de uma busca com exato excede o per_page" do
+    demais = (1..5).map do |i|
+      create_card(card_number: "OP01-1#{i}", name: "Tribute to OP01-001 ##{i}",
+                  card_type: "event", colors: [ "Red" ], cost: 1)
+    end
+    demais.each do |c|
+      CardVariant.create!(card: c, set_id: @op01.id, variant_code: c.card_number,
+                          rarity: "C", art_kind: "base")
+    end
+
+    (1..3).each do |pagina|
+      resultado = search("OP01-001", per_page: 3, page: pagina)
+
+      assert_operator resultado.records.size, :<=, 3,
+                      "a página #{pagina} devolveu mais itens que o per_page"
+    end
+  end
+
+  # A soma das páginas tem de reproduzir o total, sem sobra nem falta.
+  test "paginar uma busca com exato cobre o total exatamente uma vez" do
+    vistos = (1..4).flat_map { |pg| numbers(search("OP01-001", per_page: 2, page: pg)) }
+
+    assert_equal vistos.uniq, vistos, "alguma carta apareceu em mais de uma página"
+    assert_equal search("OP01-001", per_page: 2, page: 1).total_count, vistos.size
+  end
+
+  # O limiar de `word_similarity` precisa de trava nos DOIS sentidos. Alto
+  # demais corta o typo que o Req. 3.3 exige achar; baixo demais transforma a
+  # busca em ruído — medido no catálogo real, 0.1 leva "Nami" de 39 para 205
+  # cartas. Os testes de typo usam `assert_includes` e só provam o primeiro
+  # caso: sem esta asserção, baixar o limiar não quebra nada.
+  # "Zoan Morgan" pontua 0.4 em `word_similarity` contra "Zoro" — acima de 0.1,
+  # abaixo de 0.5. É o que torna a asserção capaz de falhar: nomes como "Nami"
+  # pontuam 0 e passariam com qualquer limiar, provando nada.
+  test "o limiar corta nome que apenas se parece de longe com o termo" do
+    parecida = create_card(card_number: "OP01-900", name: "Zoan Morgan",
+                           card_type: "character", colors: [ "Red" ], cost: 2)
+    CardVariant.create!(card: parecida, set_id: @op01.id, variant_code: "OP01-900",
+                        rarity: "C", art_kind: "base")
+
+    resultado = numbers(search("Zoro"))
+
+    assert_includes resultado, "OP01-001", "o typo legítimo tem de casar"
+    refute_includes resultado, "OP01-900",
+                    "limiar baixo demais: 'Zoan Morgan' (0.4) virou resultado de 'Zoro'"
+  end
+
   # --- Req. 3.6: combinável com todos os filtros ---
 
   test "busca combina com filtro de cor" do
