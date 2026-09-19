@@ -44,6 +44,10 @@
 
 ## Handoff
 
+> **Começando uma sessão nova na Fase 4?** Leia
+> **`.specs/HANDOFF-fase-4.md`** primeiro: ele condensa estado, dívida,
+> decisões, armadilhas de ambiente e método em um documento só.
+
 - **Feature**: catalogo (`.specs/features/catalogo/`)
 - **Phase / Task**: **Feature `catalogo` ENCERRADA.** 14 de 14 tasks fechadas,
   os dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os
@@ -66,7 +70,7 @@
 
 Nada aqui bloqueia a Fase 4; são pontos que a próxima sessão herda com os olhos abertos.
 
-- **O CI nunca rodou de verdade.** Não há remoto configurado, então `.github/workflows/ci.yml` está correto por construção e por simulação local, mas nunca foi exercitado. Verde de verdade só com o primeiro push.
+- **CI verde no primeiro run real** (`35475280590`, 2026-09-19), remoto em `github.com/pinhaum/bindr-tcg`. O run expôs que o pin da major não pegava o `pg_dump` (era 16.15 com `psql` 17.11, porque o runner traz um client 16 e o `update-alternatives` só reassume o `psql`); corrigido pondo `/usr/lib/postgresql/17/bin` na frente do PATH, com step que falha o job se a major regredir. Confirmado 17.11 nos dois binários no run `35475533719`.
 - **T12/T14 não têm cobertura de navegador.** Viraram teste de integração porque não há chromedriver no container (`SPEC_DEVIATION` registrado em cada uma). O 360px do Req. 2.5 foi verificado à mão em Chromium; uma regressão de layout passaria no CI. Decidir se vale chromedriver no `Dockerfile.dev`.
 - **Importmap não instalado.** Não há pipeline de JS: `stimulus-rails` está no Gemfile mas nunca foi executado, e o placeholder de imagem foi resolvido por CSS. **O Req. 7.2 (incremento sem recarregar) vai exigir o importmap** — é a primeira coisa a resolver na task 4.3.
 - **Três melhorias de a11y não bloqueantes**, da revisão do `ecc:a11y-architect`: `lang="en"` no conteúdo em inglês (nome, `effect_text`, `trigger_text`), `min-height/min-width: 24px` explícitos nos alvos de toque (SC 2.5.8) e reforço do indicador de foco (SC 2.4.11).
