@@ -342,7 +342,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T10: Query object do catálogo
+### T10: Query object do catálogo — CONCLUÍDA
 
 **What**: Contrato de `design.md` §4.2 — filtros, faixas, ordenação e paginação num único objeto.
 **Where**: `app/queries/`
@@ -351,11 +351,11 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] OU dentro da categoria, E entre categorias
-- [ ] Filtro de cor inclui multicoloridas
-- [ ] Parâmetro inválido é ignorado, nunca causa erro
-- [ ] Retorna `total_count` e filtros ativos normalizados
-- [ ] Testes: cada filtro isolado, duas combinações, caso multicolor
+- [x] OU dentro da categoria, E entre categorias
+- [x] Filtro de cor inclui multicoloridas
+- [x] Parâmetro inválido é ignorado, nunca causa erro
+- [x] Retorna `total_count` e filtros ativos normalizados
+- [x] Testes: cada filtro isolado, duas combinações, caso multicolor
 
 **Tests**: integration
 **Gate**: quick

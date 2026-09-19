@@ -114,7 +114,7 @@ Regras de execução:
 
 ## 3 — Catálogo: busca, filtros e exibição
 
-- [ ] **3.1 Query object do catálogo**
+- [x] **3.1 Query object do catálogo**
   - Implementar o contrato de `design.md` §4.2: todos os filtros, faixas,
     ordenação e paginação.
   - `OU` dentro da categoria, `E` entre categorias.
