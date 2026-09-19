@@ -45,10 +45,10 @@
 ## Handoff
 
 - **Feature**: catalogo (`.specs/features/catalogo/`)
-- **Phase / Task**: **Fase 1 concluída (T1, T2)**. Próxima: **T3** (`.specs/features/catalogo/tasks.md`) = task **2.1** (`.context/tasks.md`) — migrações de `sets`, `cards` e `card_variants`. Início do lote **B1** (Fase 2, T3–T9).
-- **Completed**: 0.1, 0.2, 0.3, **1.1 (T1)**, **1.2 (T2)**
+- **Phase / Task**: **Fase 2 concluída (T3–T9 / lote B1)**. Próxima: **T10** = task **3.1** — query object do catálogo. Início do lote **B2** (Fase 3, T10–T14).
+- **Completed**: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), **2.1 (T3), 2.2 (T4), 2.3 (T5), 2.4 (T6), 2.5 (T7), 2.6 (T8), 2.7 (T9)**
 - **In-progress** (file:line): nenhum
-- **Next step**: B1 (T3–T9) — schema, índices e os três estágios da ingestão. A task mais cara é a T8: provar que a ingestão rodada duas vezes não altera a coleção do usuário.
+- **Next step**: B2 (T10–T14). O Verifier do lote B1 ainda **não rodou** — é o passo imediato antes de abrir a Fase 3.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
@@ -56,13 +56,24 @@
 ### Contexto que não está nos documentos
 
 - **Docker em WSL:** `~/.docker/config.json` tem `"credsStore": "desktop.exe"`, que não existe no PATH. Qualquer `docker compose` que precise puxar imagem falha com `docker-credential-desktop.exe: executable file not found`. Contorno documentado no README: `DOCKER_CONFIG` apontando para um config `{}` vazio. **Não editar o config global do usuário.**
-- **App renomeado à mão:** o projeto foi gerado fora do repo (para não sobrescrever `.gitignore`/`README.md`) e por isso nasceu como `railsgen`; o módulo é `Bindr` em `config/application.rb`. Se algo referenciar `railsgen`, é resíduo.
-- **`--skip-solid` foi deliberado**, justificado em `.context/design.md` §2. Reintroduzir só quando houver job assíncrono real.
-- **O gerador de autenticação NÃO foi executado.** Foi só verificado que atende o Req. 6. Ele cria `User` e `Session`, que são da Fase 4 — rodar lá.
-- `config/database.yml` lê tudo do ambiente; `POSTGRES_TEST_DB` é variável própria, não derivada de `POSTGRES_DB`. O terceiro teste de `test/lib/stack_test.rb` existe para matar exatamente a regressão de os dois bancos coincidirem (mutação verificada na T1).
-- Ao concluir qualquer task, marcar o checkbox **nos dois** planos (`.context/tasks.md` e `.specs/features/catalogo/tasks.md`) e commitar junto com o código.
-- `python3 spec/verify_fixture.py` roda offline e deve continuar passando (12 verificações).
+- **O volume nomeado `bundle` sombreia as gems da imagem.** Mudar o `Gemfile` e reconstruir a imagem **não basta**: é preciso `docker compose run --rm --no-deps app bundle install` para a gem entrar no volume, senão o container sobe com `Bundler::GemNotFound`.
+- **App renomeado à mão:** o projeto foi gerado fora do repo e nasceu como `railsgen`; o módulo é `Bindr` em `config/application.rb`. Se algo referenciar `railsgen`, é resíduo.
+- **`--skip-solid` foi deliberado**, justificado em `.context/design.md` §2.
+- **O gerador de autenticação NÃO foi executado.** A T8 criou `users` e `collection_items` mínimos (migração `20260919120200`) porque a invariante do Req. 1.7 não é demonstrável sem coleção. O fluxo de sessão/login continua sendo Fase 4 e deve usar o gerador, que criará `Session` e provavelmente vai querer ajustar `users`.
+- `config/database.yml` lê tudo do ambiente; `POSTGRES_TEST_DB` é variável própria.
+- Ao concluir qualquer task, marcar o checkbox **nos dois** planos e commitar junto com o código.
+- `python3 spec/verify_fixture.py` roda offline e continua passando (12 verificações).
 - Não adicionar linhas de atribuição em mensagens de commit.
-- **CI (T2):** `.github/workflows/ci.yml` tem dois jobs — lint (`rubocop` + `brakeman`) e testes com serviço Postgres 17. O job de testes **não** roda em Docker: roda direto no runner, com `bin/rails db:prepare`. Verificado que `db:prepare` funciona sem `db/schema.rb` e sem `db/migrate/`; **quando a T3 criar as migrações, esse caminho muda** e vale reconferir o CI.
-- **`config/brakeman.ignore`:** dispensa só o `EOLRails` (fim de suporte ao Rails 8.0.5.1 em **2026-11-07**). O CI usa `--ensure-no-obsolete-ignore-entries`, então **ao atualizar o Rails esse ignore fica obsoleto e derruba o build** — é intencional; remover a entrada junto com a atualização.
-- Plano de delegação a subagentes está em `.specs/features/catalogo/tasks.md`: Fase 1 inline, Fase 2 e Fase 3 como um lote cada, Verifier obrigatório ao fim de cada lote. Não existe agente Ruby/Rails instalado.
+
+### Decisões técnicas da Fase 2 que valem para a Fase 3
+
+- **`schema_format = :sql`** (`db/structure.sql`, `db/schema.rb` removido). O índice trigram do nome depende da função `immutable_unaccent`, e o formato Ruby não representa funções — um banco criado a partir de `schema.rb` falhava ao recriar o índice. Migração nova exige `db:migrate` para regenerar `structure.sql`.
+- **`unaccent` é STABLE**, nas duas assinaturas (medido no PostgreSQL 17.11). Não entra em índice de expressão nem em coluna gerada. Usar sempre o wrapper `immutable_unaccent(text)`, que a migração `20260919120100` cria. A busca por nome da **T11** depende disso.
+- **`json` pinada em `~> 2.7`.** A 3.x removeu o argumento `quirks_mode` que o ActiveSupport 8.0.5.1 ainda passa; com ela **toda** escrita em coluna `jsonb` levanta `ArgumentError`. Soltar o pin só quando o Rails parar de passar esse argumento.
+- **Nomes que divergem de `design.md` §3.2**, ambos por colisão com o Ruby/Rails e marcados com `SPEC_DEVIATION` no código: a coluna `attributes` virou **`attributes_list`** (`attributes` é método do Active Record) e o model `Set` virou **`CardSet`** (a tabela continua `sets`; `Set` é classe da stdlib).
+- **Teste de plano de execução precisa de seletividade realista.** O teste da T4 semeia 20k cartas com cor e custo raros: com filtro pouco seletivo o planejador escolhe Seq Scan *com razão*, e o teste não distinguiria índice ausente de índice ignorado por custo. A T13 (latência) herda esse cuidado.
+- **`Dockerfile.dev` instala `postgresql-client-17` do PGDG**, porque o `pg_dump` 15 do bookworm recusa dumpar um servidor 17 e quebraria `db:schema:dump`.
+
+### Pendência aberta para o orquestrador
+
+- **CI (`.github/workflows/ci.yml`) não foi alterado, por instrução.** Mas a T4 mudou o caminho do `db:prepare`: com `schema_format = :sql`, `bin/rails db:prepare` carrega `db/structure.sql` via `psql`, que precisa estar no runner **e** ser compatível com o Postgres 17 do serviço. O `ubuntu-latest` traz cliente PostgreSQL, mas a versão não está fixada. **Conferir antes de confiar no verde do CI.**
