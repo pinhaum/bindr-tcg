@@ -147,7 +147,7 @@ Regras de execução:
     arquitetural. Registrar o resultado da medição.
   - _Requisitos: 11.1_
 
-- [ ] **3.5 Página de detalhe da carta**
+- [x] **3.5 Página de detalhe da carta**
   - Todos os campos conhecidos, imagem em resolução maior.
   - Lista de todas as variantes, cada uma com raridade, set e imagem própria.
   - `effect_text` e `trigger_text` preservando quebras de linha.

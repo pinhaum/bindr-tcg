@@ -513,7 +513,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T14: Página de detalhe da carta
+### T14: Página de detalhe da carta — CONCLUÍDA
 
 **What**: Todos os campos, todas as variantes, campos inaplicáveis omitidos.
 **Where**: `app/views/`
@@ -522,9 +522,36 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Todas as variantes listadas, cada uma com raridade, set e imagem própria
-- [ ] `effect_text` e `trigger_text` preservam quebras de linha
-- [ ] Campos não aplicáveis ao tipo omitidos, não exibidos vazios
+- [x] Todas as variantes listadas, cada uma com raridade, set e imagem própria
+- [x] `effect_text` e `trigger_text` preservam quebras de linha
+- [x] Campos não aplicáveis ao tipo omitidos, não exibidos vazios
 
-**Tests**: e2e
+> **SPEC_DEVIATION — `Tests: e2e` virou teste de integração**, pelo mesmo
+> motivo da T12 (sem navegador no container). Os 360px foram verificados em
+> Chromium real: `scrollWidth == clientWidth == 360` e zero elementos fora da
+> viewport, em cartas de 3 e de 6 variantes.
+>
+> **A aplicabilidade de campo é regra do jogo, não presença de dado.**
+> `Card::APPLICABLE_FIELDS` declara que tipo tem que campo, e
+> `display_field?` combina isso com "tem valor". As duas coisas são
+> separadas de propósito: um Character sem counter e um Event (que nunca tem
+> counter) somem da tela pelo mesmo efeito, mas por motivos distintos —
+> confundi-los faria o dia em que a fonte entregar counter num Event passar
+> despercebido. Confirmado contra o catálogo real: `OP01-001` (Leader) exibe
+> power e life e **não** exibe cost nem counter; `OP05-119` (Character sem
+> counter) omite counter; `EB01-006` exibe os oito campos aplicáveis.
+>
+> `simple_format` para `effect_text` e `trigger_text`: escapa o texto, que
+> vem de fonte externa, e converte quebra de linha em `<br>` (Req. 5.4).
+> Nenhuma carta do catálogo atual tem `\n` no efeito — a fonte achata — mas o
+> requisito vale e o teste usa texto multilinha explícito.
+>
+> Sensor de discriminação: 5 mutações, 4 mortas (ignorar aplicabilidade por
+> tipo, counter NULL como 0, perder `simple_format`, usar o set da carta em
+> vez do set da variante). A quinta — `present?` no lugar de `!nil?` — é
+> **mutante equivalente**, não lacuna: `0.present?` é `true` em Rails, então
+> cost 0 aparece nos dois casos. O comentário do código que afirmava o
+> contrário estava errado e foi corrigido.
+
+**Tests**: integration (ver desvio acima) + verificação manual em navegador
 **Gate**: full

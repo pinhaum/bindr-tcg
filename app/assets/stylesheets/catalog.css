@@ -147,3 +147,68 @@ body {
 }
 
 .catalog__empty { padding: var(--gap) 0; }
+
+/* Detalhe da carta (Req. 5). Mesmas regras de 360px da grade. */
+
+.card-detail { max-width: 100%; padding: var(--gap); }
+
+.card-detail__name { font-size: 1.5rem; margin: 0; overflow-wrap: anywhere; }
+.card-detail__number { margin: 0 0 var(--gap); opacity: 0.7; }
+
+.card-detail__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem var(--gap);
+  margin: 0 0 var(--gap);
+}
+
+.field dt { font-size: 0.75rem; opacity: 0.7; }
+.field dd { margin: 0; overflow-wrap: anywhere; }
+
+.card-detail__effect p,
+.card-detail__trigger p { margin: 0 0 0.5rem; overflow-wrap: anywhere; }
+
+.variant-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  gap: var(--gap);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.variant { max-width: 100%; }
+
+.variant__art {
+  position: relative;
+  aspect-ratio: 5 / 7;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  background: rgb(0 0 0 / 6%);
+}
+
+.variant__image,
+.variant__placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+}
+
+.variant__image { object-fit: cover; }
+
+.variant__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+.variant__meta { margin: 0.25rem 0 0; font-size: 0.8125rem; }
+.variant__meta dt { font-size: 0.7rem; opacity: 0.7; }
+.variant__meta dd { margin: 0; overflow-wrap: anywhere; }

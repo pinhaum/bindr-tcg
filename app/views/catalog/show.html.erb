@@ -1,0 +1,145 @@
+<% content_for :title, "#{@card.name} (#{@card.card_number})" %>
+
+<main class="card-detail">
+  <p><%= link_to "← Voltar ao catálogo", catalog_path %></p>
+
+  <header>
+    <h1 class="card-detail__name"><%= @card.name %></h1>
+    <p class="card-detail__number"><%= @card.card_number %></p>
+  </header>
+
+  <%#
+    Req. 5.5 — a lista de campos é filtrada por `display_field?`, que combina
+    "se aplica a este tipo de carta" com "tem valor". Um campo inaplicável não
+    é renderizado vazio: ele não é renderizado.
+  %>
+  <dl class="card-detail__fields">
+    <div class="field field--card-type">
+      <dt>Tipo</dt>
+      <dd><%= @card.card_type.humanize %></dd>
+    </div>
+
+    <% if @card.display_field?(:colors) %>
+      <div class="field field--colors">
+        <dt>Cor</dt>
+        <dd><%= @card.colors.join(", ") %></dd>
+      </div>
+    <% end %>
+
+    <% if @card.display_field?(:cost) %>
+      <div class="field field--cost">
+        <dt>Custo</dt>
+        <dd><%= @card.cost %></dd>
+      </div>
+    <% end %>
+
+    <% if @card.display_field?(:power) %>
+      <div class="field field--power">
+        <dt>Power</dt>
+        <dd><%= @card.power %></dd>
+      </div>
+    <% end %>
+
+    <% if @card.display_field?(:life) %>
+      <div class="field field--life">
+        <dt>Life</dt>
+        <dd><%= @card.life %></dd>
+      </div>
+    <% end %>
+
+    <% if @card.display_field?(:counter) %>
+      <div class="field field--counter">
+        <dt>Counter</dt>
+        <dd><%= @card.counter %></dd>
+      </div>
+    <% end %>
+
+    <% if @card.display_field?(:attributes_list) %>
+      <div class="field field--attributes">
+        <dt>Attribute</dt>
+        <dd><%= @card.attributes_list.join(", ") %></dd>
+      </div>
+    <% end %>
+
+    <% if @card.display_field?(:traits) %>
+      <div class="field field--traits">
+        <dt>Traits</dt>
+        <dd><%= @card.traits.join(", ") %></dd>
+      </div>
+    <% end %>
+
+    <% if @card.display_field?(:block_icon) %>
+      <div class="field field--block">
+        <dt>Block</dt>
+        <dd><%= @card.block_icon %></dd>
+      </div>
+    <% end %>
+  </dl>
+
+  <%#
+    Req. 5.4 — `simple_format` escapa o texto (ele vem de fonte externa) e
+    converte quebra de linha em `<br>`. Interpolar direto perderia a quebra;
+    `html_safe` renderizaria HTML de terceiro.
+  %>
+  <% if @card.effect_text.present? %>
+    <section class="card-detail__effect">
+      <h2>Efeito</h2>
+      <%= simple_format(@card.effect_text) %>
+    </section>
+  <% end %>
+
+  <% if @card.trigger_text.present? %>
+    <section class="card-detail__trigger">
+      <h2>Trigger</h2>
+      <%= simple_format(@card.trigger_text) %>
+    </section>
+  <% end %>
+
+  <%#
+    Req. 5.2 — a coleção referencia variantes, não cartas (design.md §3.1):
+    arte base e arte alternativa são objetos de coleção distintos. Por isso
+    cada variante aparece inteira, com raridade, set e imagem próprias.
+  %>
+  <section class="card-detail__variants">
+    <h2>Impressões (<%= @variants.size %>)</h2>
+
+    <ul class="variant-list">
+      <% @variants.each do |variant| %>
+        <li class="variant">
+          <div class="variant__art">
+            <div class="variant__placeholder">
+              <span><%= @card.name %></span>
+              <span><%= variant.variant_code %></span>
+            </div>
+
+            <% if variant.image_url.present? %>
+              <%= image_tag variant.image_url_large.presence || variant.image_url,
+                            alt: "#{@card.name} — #{variant.variant_code}",
+                            loading: "lazy",
+                            class: "variant__image" %>
+            <% end %>
+          </div>
+
+          <dl class="variant__meta">
+            <div>
+              <dt>Código</dt>
+              <dd class="variant__code"><%= variant.variant_code %></dd>
+            </div>
+            <% if variant.rarity.present? %>
+              <div>
+                <dt>Raridade</dt>
+                <dd class="variant__rarity"><%= variant.rarity %></dd>
+              </div>
+            <% end %>
+            <div>
+              <dt>Set</dt>
+              <dd class="variant__set">
+                <%= variant.card_set.name %> (<%= variant.card_set.code %>)
+              </dd>
+            </div>
+          </dl>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+</main>
