@@ -63,11 +63,14 @@
   testes em `test/models/user_password_test.rb`. A decisão central segue de pé:
   **não rodar `bin/rails generate authentication`** — ele sobrescreve
   `app/models/user.rb` e apaga a linha que protege a coleção.
-- **Achado da T1**: `authenticate_by` resolve o usuário com `find_by(email:)`,
-  que é **sensível à caixa**. O índice `index_users_on_lower_email` impede que
-  duas grafias coexistam, mas não faz a busca casar — normalizar a caixa na
-  entrada é da **T4**. O comportamento atual está fixado por teste para que a
-  T4 o mude de propósito, e não por acidente.
+- **Achado da T1, já resolvido na própria T1**: `authenticate_by` resolve o
+  usuário com `find_by(email:)`, que é **sensível à caixa**. O índice
+  `index_users_on_lower_email` impede que duas grafias coexistam, mas não faz a
+  busca casar — quem se cadastrasse como `sanji@` não entraria digitando
+  `SANJI@`. Resolvido com `normalizes :email` no `User`, que normaliza tanto a
+  escrita quanto o argumento nomeado das consultas
+  (`activerecord-8.0.5.1/lib/active_record/normalization.rb:33`). A **T4** não
+  precisa mais tratar caixa de e-mail.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main

@@ -86,16 +86,33 @@ class UserPasswordTest < ActiveSupport::TestCase
     end
   end
 
-  # `authenticate_by` resolve o usuário com `find_by(email:)`, que é
-  # sensível à caixa (activerecord-8.0.5.1/.../secure_password.rb:52). O
-  # índice único impede que as duas grafias coexistam, mas não faz a busca
-  # casar. Normalizar a caixa na entrada é do fluxo de autenticação (T4);
-  # este teste fixa o comportamento atual para que a T4 o mude de propósito,
-  # e não por acidente.
-  test "authenticate_by é sensível à caixa do e-mail — normalização é da T4" do
-    create_user(email: "sanji@example.com", password: "senha-correta")
+  # Req. 6.1 — o e-mail é comparado sem distinção de caixa também na **busca**,
+  # e não só na unicidade. `authenticate_by` resolve o usuário com
+  # `find_by(email:)` (activerecord-8.0.5.1/.../secure_password.rb:52), que é
+  # sensível à caixa; `normalizes` corrige o argumento da consulta. Sem ele,
+  # quem se cadastrou como `sanji@` não entraria digitando `SANJI@`.
+  test "authenticate_by ignora a caixa e o espaço em volta do e-mail" do
+    user = create_user(email: "sanji@example.com", password: "senha-correta")
 
-    assert_nil User.authenticate_by(email: "SANJI@example.com", password: "senha-correta")
+    assert_equal user, User.authenticate_by(email: "SANJI@example.com", password: "senha-correta")
+    assert_equal user, User.authenticate_by(email: "  Sanji@Example.com  ", password: "senha-correta")
+  end
+
+  # A outra metade do contrato de `normalizes`: a gravação. Sem ela, duas
+  # grafias do mesmo e-mail chegariam ao banco e só o índice as barraria —
+  # como erro de constraint em vez de cadastro aceito.
+  test "e-mail é gravado normalizado" do
+    user = User.create!(email: "  BROOK@Example.COM \n", password: "senha-correta")
+
+    assert_equal "brook@example.com", user.reload.email
+  end
+
+  test "cadastrar e-mail existente em outra caixa é recusado pela validação do banco" do
+    create_user(email: "chopper@example.com")
+
+    assert_raises(ActiveRecord::RecordNotUnique) do
+      User.create!(email: "CHOPPER@example.com", password: "outra-senha")
+    end
   end
 
   # Done when: `has_many :collection_items, dependent: :restrict_with_exception`

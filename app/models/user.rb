@@ -21,5 +21,14 @@ class User < ApplicationRecord
   # é informado.
   has_secure_password
 
+  # Req. 6.1 — o e-mail é identidade e é comparado sem distinção de caixa. O
+  # índice único `index_users_on_lower_email` impede que duas grafias coexistam,
+  # mas não faz a **busca** casar: `authenticate_by` resolve o usuário com
+  # `find_by(email:)` (activerecord-8.0.5.1/.../secure_password.rb:52), que é
+  # sensível à caixa. Sem esta normalização, quem se cadastrou como `sanji@` não
+  # entraria digitando `SANJI@`. `normalizes` fecha os dois lados: normaliza na
+  # escrita e também o argumento nomeado das consultas.
+  normalizes :email, with: ->(email) { email.strip.downcase }
+
   validates :email, presence: true
 end
