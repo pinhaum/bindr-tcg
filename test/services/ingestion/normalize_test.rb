@@ -78,6 +78,30 @@ module Ingestion
       assert_nil lider.cost, "Leader não tem cost na fonte"
     end
 
+    # A fonte é um scraper comunitário: valor novo em campo numérico é
+    # premissa, não hipótese remota — `blockIcon` já traz `"X"` em 27 registros
+    # do payload real. Se a conversão caísse para 0, a carta entraria no
+    # catálogo com um número inventado, indistinguível de um valor legítimo,
+    # e as faixas do Req. 4.2 passariam a mentir. `nil` é a única resposta
+    # honesta para "a fonte não deu um número aqui" (design.md §3.3).
+    test "string não-numérica em campo numérico vira nil, nunca 0" do
+      payload = JSON.parse(FIXTURE.read)
+      alvo = payload["data"].first["cards"].first
+      alvo["counter"] = "X"
+      alvo["power"] = "?"
+      alvo["cost"] = "-"
+      alvo["life"] = "N/A"
+      alvo["blockIcon"] = "X"
+
+      carta = Normalize.call(payload).cards.find { |c| c.card_number == alvo["number"] }
+
+      assert_nil carta.counter, "counter não-numérico virou sentinela"
+      assert_nil carta.power, "power não-numérico virou sentinela"
+      assert_nil carta.cost, "cost não-numérico virou sentinela"
+      assert_nil carta.life, "life não-numérico virou sentinela"
+      assert_nil carta.block_icon, "block_icon não-numérico virou sentinela"
+    end
+
     test "nenhuma carta escapa com número em formato de texto" do
       numericos = @resultado.cards.flat_map { |c| [ c.cost, c.life, c.power, c.counter, c.block_icon ] }
 

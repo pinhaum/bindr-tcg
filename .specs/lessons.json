@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 3,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "surviving_mutant::conversor string numero testar o caminho da string nao numerica nao so nil e vazio a guarda de nil responde antes e mascara o mutante que devolve 0 no lugar de nil",
+      "text": "Conversor string→número: testar o caminho da string NÃO-numérica, não só nil e vazio; a guarda de nil responde antes e mascara o mutante que devolve 0 no lugar de nil.",
+      "signal": "surviving_mutant",
+      "scope": "ingestion/normalize",
+      "status": "candidate",
+      "features": [
+        "catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "app/services/ingestion/normalize.rb:189 (mutante M10) (ingestion/normalize)"
+      ],
+      "created": "2026-09-19T21:52:58Z",
+      "last_seen": "2026-09-19T21:52:58Z"
+    },
+    {
+      "id": "L-002",
+      "key": "spec_precision_gap::quando o spec proibe um sentinela 0 para ausencia declarar a proibicao para todos os campos numericos nao so o exemplo citado senao os demais campos ficam sem criterio de aceite",
+      "text": "Quando o spec proíbe um sentinela (0 para ausência), declarar a proibição para todos os campos numéricos, não só o exemplo citado — senão os demais campos ficam sem critério de aceite.",
+      "signal": "spec_precision_gap",
+      "scope": "spec/edge-cases",
+      "status": "candidate",
+      "features": [
+        "catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        ".specs/features/catalogo/spec.md (Edge Cases) — proibição de sentinela citada só para counter (spec/edge-cases)"
+      ],
+      "created": "2026-09-19T21:53:12Z",
+      "last_seen": "2026-09-19T21:53:12Z"
+    }
+  ]
+}
