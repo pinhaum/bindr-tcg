@@ -389,17 +389,33 @@ intacta.** É o teste que protege o único dado insubstituível do sistema.
 
 ## 9. Decisões pendentes
 
-Nenhuma linha de código do domínio deve ser escrita antes de P1 e P2.
+P1, P2, P5 e P7 foram **resolvidas** na task 0.1/0.2 (2026-09-19) — ver
+`docs/adr/001-fonte-de-dados-do-catalogo.md`. P3, P4 e P6 seguem abertas e são a
+task 0.3.
 
-| #   | Decisão                                            | Bloqueia                 | Default sugerido                                         |
-| --- | -------------------------------------------------- | ------------------------ | -------------------------------------------------------- |
-| P1  | Fonte de dados do catálogo                         | Todo o modelo de dados   | — sem default, precisa de investigação                   |
-| P2  | Campos, raridades, sets e attributes reais do jogo | Schema                   | — sem default                                            |
-| P3  | Definição de "set completo"                        | Req. 9                   | Variantes base; parallels em métrica separada            |
-| P4  | Stack                                              | Tudo                     | Rails 8 + Hotwire + Postgres                             |
-| P5  | `variant_code` estável quando a fonte não fornece  | Idempotência da ingestão | Hash determinístico de `card_number + rarity + art_kind` |
-| P6  | Cache de imagens na Fase 1                         | Req. 11.2                | Não; aceitar hotlink e medir                             |
-| P7  | `DON!!` entra no catálogo?                         | Modelo                   | Não na Fase 1                                            |
+| #   | Decisão                                            | Status | Resolução / default                                       |
+| --- | -------------------------------------------------- | ------ | --------------------------------------------------------- |
+| P1  | Fonte de dados do catálogo                         | ✅ **resolvida** | `hugoprudente/optcgjson` (`output/*.json`), sem auth, scraping do site oficial da Bandai com CI semanal. ADR 001. |
+| P2  | Campos, raridades, sets e attributes reais do jogo | ✅ **resolvida** | Extraídos da amostra real; glossário em `product.md` §6 corrigido. Raridades: C, UC, R, SR, SEC, L, P, SP CARD, TR. |
+| P3  | Definição de "set completo"                        | ⬜ aberta | Variantes base; parallels em métrica separada. `baseSetSize` e `totalSetSize` vêm da fonte e sustentam as duas métricas. |
+| P4  | Stack                                              | ⬜ aberta | Rails 8 + Hotwire + Postgres |
+| P5  | `variant_code` estável                             | ✅ **resolvida** | **Sem hash derivado.** A fonte fornece `id` estável (`OP01-001_p1`). Usar direto. |
+| P6  | Cache de imagens na Fase 1                         | ⬜ aberta | Não; aceitar hotlink (`imageUrl` aponta para `onepiece-cardgame.com`) e medir. |
+| P7  | `DON!!` entra no catálogo?                         | ✅ **resolvida** | Não. A fonte não traz cartas DON!!, então não há decisão a tomar na Fase 1. |
+
+### Consequências para a ingestão (achadas na amostra)
+
+Dois casos-limite reais que viram teste na task 2.4/2.5:
+
+1. **Variante em dois sets.** `P-029_r1` aparece em PRB01 e ST16, mesma imagem e
+   raridade. `variant_code` é único **globalmente**, mas variante↔set não é 1:1 —
+   a ingestão não pode assumir dono exclusivo ao carregar `AllSets.json`.
+2. **`attribute: "?"`** em OP13-079 (Imu) é valor real publicado pela Bandai.
+   Confirma `rarity` e attributes como texto, nunca enum.
+
+Como a fonte já entrega `color`, `attribute` e `feature` em arrays, o Normalize
+**não precisa de split por `;`** — a normalização de caixa/espaçamento de
+`feature` continua valendo.
 
 ---
 

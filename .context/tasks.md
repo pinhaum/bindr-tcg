@@ -14,7 +14,7 @@ Regras de execução:
 
 ## Fase 0 — Desbloqueio (não escreva domínio antes disso)
 
-- [ ] **0.1 Investigar e escolher a fonte de dados do catálogo**
+- [x] **0.1 Investigar e escolher a fonte de dados do catálogo**
   - Identificar as opções realmente existentes hoje: lista oficial da Bandai,
     APIs comunitárias, datasets mantidos pela comunidade.
   - Para cada uma, registrar: cobertura de sets, presença de variantes/arts
@@ -24,7 +24,7 @@ Regras de execução:
   - Registrar a escolha e o motivo em um ADR.
   - _Resolve: P1. Bloqueia: todo o resto._
 
-- [ ] **0.2 Mapear o schema real a partir da amostra**
+- [x] **0.2 Mapear o schema real a partir da amostra**
   - Listar os campos reais retornados pela fonte, com tipos e exemplos.
   - Extrair a lista **real e completa** de: raridades, códigos de set, attributes,
     tipos de carta.
@@ -32,8 +32,8 @@ Regras de execução:
   - _Resolve: P2._
 
 - [ ] **0.3 Decidir e registrar as pendências restantes**
-  - P3 (definição de "set completo"), P4 (stack), P5 (`variant_code` estável),
-    P6 (cache de imagens), P7 (DON!!).
+  - Restam **P3** (definição de "set completo"), **P4** (stack) e **P6** (cache de
+    imagens). P5 e P7 foram resolvidas na 0.1/0.2 — ver `design.md` §9.
   - Atualizar `design.md` §9 marcando cada uma como decidida.
 
 ---
