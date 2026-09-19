@@ -45,10 +45,10 @@
 ## Handoff
 
 - **Feature**: catalogo (`.specs/features/catalogo/`)
-- **Phase / Task**: Fase 1 em andamento. **T1 concluída**. Próxima: **T2** (`.specs/features/catalogo/tasks.md`) = task **1.2** (`.context/tasks.md`) — configurar CI.
-- **Completed**: 0.1, 0.2, 0.3, **1.1 (T1)**
+- **Phase / Task**: **Fase 1 concluída (T1, T2)**. Próxima: **T3** (`.specs/features/catalogo/tasks.md`) = task **2.1** (`.context/tasks.md`) — migrações de `sets`, `cards` e `card_variants`. Início do lote **B1** (Fase 2, T3–T9).
+- **Completed**: 0.1, 0.2, 0.3, **1.1 (T1)**, **1.2 (T2)**
 - **In-progress** (file:line): nenhum
-- **Next step**: T2 — pipeline em `.github/workflows/` que roda `bin/rubocop` e `bin/rails test` em cada push, com um serviço Postgres. Precisa falhar quando o teste falha (verificar de fato, não presumir).
+- **Next step**: B1 (T3–T9) — schema, índices e os três estágios da ingestão. A task mais cara é a T8: provar que a ingestão rodada duas vezes não altera a coleção do usuário.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
@@ -63,4 +63,6 @@
 - Ao concluir qualquer task, marcar o checkbox **nos dois** planos (`.context/tasks.md` e `.specs/features/catalogo/tasks.md`) e commitar junto com o código.
 - `python3 spec/verify_fixture.py` roda offline e deve continuar passando (12 verificações).
 - Não adicionar linhas de atribuição em mensagens de commit.
+- **CI (T2):** `.github/workflows/ci.yml` tem dois jobs — lint (`rubocop` + `brakeman`) e testes com serviço Postgres 17. O job de testes **não** roda em Docker: roda direto no runner, com `bin/rails db:prepare`. Verificado que `db:prepare` funciona sem `db/schema.rb` e sem `db/migrate/`; **quando a T3 criar as migrações, esse caminho muda** e vale reconferir o CI.
+- **`config/brakeman.ignore`:** dispensa só o `EOLRails` (fim de suporte ao Rails 8.0.5.1 em **2026-11-07**). O CI usa `--ensure-no-obsolete-ignore-entries`, então **ao atualizar o Rails esse ignore fica obsoleto e derruba o build** — é intencional; remover a entrada junto com a atualização.
 - Plano de delegação a subagentes está em `.specs/features/catalogo/tasks.md`: Fase 1 inline, Fase 2 e Fase 3 como um lote cada, Verifier obrigatório ao fim de cada lote. Não existe agente Ruby/Rails instalado.
