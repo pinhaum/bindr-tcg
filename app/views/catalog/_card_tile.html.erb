@@ -16,14 +16,14 @@
 <li class="card-tile">
   <%= link_to card_path(card.card_number), class: "card-tile__link" do %>
     <div class="card-tile__art">
-      <div class="card-tile__placeholder">
+      <div class="card-tile__placeholder" aria-hidden="true">
         <span class="card-tile__placeholder-name"><%= card.name %></span>
         <span class="card-tile__placeholder-number"><%= card.card_number %></span>
       </div>
 
       <% if variant&.image_url.present? %>
         <%= image_tag variant.image_url,
-                      alt: "#{card.name} (#{card.card_number})",
+                      alt: "",
                       loading: "lazy",
                       class: "card-tile__image" %>
       <% end %>

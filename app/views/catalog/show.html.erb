@@ -107,14 +107,14 @@
       <% @variants.each do |variant| %>
         <li class="variant">
           <div class="variant__art">
-            <div class="variant__placeholder">
+            <div class="variant__placeholder" aria-hidden="true">
               <span><%= @card.name %></span>
               <span><%= variant.variant_code %></span>
             </div>
 
             <% if variant.image_url.present? %>
               <%= image_tag variant.image_url_large.presence || variant.image_url,
-                            alt: "#{@card.name} — #{variant.variant_code}",
+                            alt: "",
                             loading: "lazy",
                             class: "variant__image" %>
             <% end %>

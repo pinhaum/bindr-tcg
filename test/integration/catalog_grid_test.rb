@@ -100,10 +100,35 @@ class CatalogGridTest < ActionDispatch::IntegrationTest
                  "imagem e placeholder precisam ocupar a mesma área")
   end
 
-  test "a imagem tem texto alternativo com nome e código" do
+  # A arte da carta é decorativa: nome e código já são texto visível dentro do
+  # mesmo link. Um `alt` descritivo aqui não acrescentaria informação — a
+  # ilustração não é descrita — e só repetiria o que o leitor de tela já vai
+  # anunciar. `alt=""` é o que tira a imagem da árvore de acessibilidade.
+  test "a arte da carta é decorativa, sem texto alternativo redundante" do
     get catalog_path
 
-    assert_select "img.card-tile__image[alt=?]", "Roronoa Zoro (OP01-001)"
+    assert_select "img.card-tile__image[alt=?]", ""
+  end
+
+  # O placeholder é fallback **visual** do hotlink (AD-004). Ele repete nome e
+  # código que já aparecem abaixo da arte, então precisa sair da árvore de
+  # acessibilidade — senão o leitor de tela anuncia cada carta três vezes
+  # (placeholder + alt + spans visíveis), medido em 24 tiles da grade.
+  test "o placeholder não é anunciado por leitor de tela" do
+    get catalog_path
+
+    assert_select ".card-tile__placeholder[aria-hidden=?]", "true", 3
+  end
+
+  # Trava a regra: o nome acessível do link é o texto visível, uma vez só.
+  test "o nome da carta aparece uma única vez no nome acessível do link" do
+    get catalog_path
+
+    primeiro = css_select(".card-tile__link").first.dup
+    primeiro.css("[aria-hidden=true]").each(&:remove)
+
+    assert_equal 1, primeiro.text.scan("OP01-001").size,
+                 "o card_number foi anunciado mais de uma vez no mesmo link"
   end
 
   # --- Req. 4.8: contagem total ---

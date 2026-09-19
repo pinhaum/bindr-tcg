@@ -73,6 +73,29 @@ class CardDetailTest < ActionDispatch::IntegrationTest
     assert_select ".variant__placeholder", text: /OP01-002/
   end
 
+  # O placeholder da variante repete nome e código que o `<dl>` logo abaixo já
+  # traz. Sem `aria-hidden` o leitor de tela anuncia cada impressão em
+  # duplicata — mesma correção da grade.
+  test "o placeholder da variante não é anunciado por leitor de tela" do
+    zoro = create_card(card_number: "OP01-001", name: "Roronoa Zoro",
+                       card_type: "leader", colors: [ "Red" ], power: 5000, life: 5)
+    add_variant(zoro, "OP01-001", rarity: "L", image: "https://example.test/base.png")
+
+    get card_path("OP01-001")
+
+    assert_select ".variant__placeholder[aria-hidden=?]", "true"
+  end
+
+  test "a arte da variante é decorativa, sem texto alternativo redundante" do
+    zoro = create_card(card_number: "OP01-001", name: "Roronoa Zoro",
+                       card_type: "leader", colors: [ "Red" ], power: 5000, life: 5)
+    add_variant(zoro, "OP01-001", rarity: "L", image: "https://example.test/base.png")
+
+    get card_path("OP01-001")
+
+    assert_select "img.variant__image[alt=?]", ""
+  end
+
   # --- Req. 5.5: campos inaplicáveis são omitidos ---
 
   test "Leader exibe life e power e não exibe cost nem counter" do
