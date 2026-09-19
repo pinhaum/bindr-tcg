@@ -6,6 +6,13 @@ gem "rails", "~> 8.0.2"
 gem "propshaft"
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
+# Preso na série 2.x de propósito: o ActiveSupport 8.0.5.1 chama
+# `JSON.generate(..., quirks_mode: true)` (active_support/json/encoding.rb:110)
+# e a json 3.x removeu esse argumento. Com a 3.x, qualquer escrita em coluna
+# jsonb levanta ArgumentError — o que atinge `import_runs.error_log` e,
+# portanto, o Req. 1.5 inteiro. Soltar o pin só quando o Rails parar de passar
+# esse argumento.
+gem "json", "~> 2.7"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]

@@ -262,7 +262,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T7: Estágio Upsert + `import_runs`
+### T7: Estágio Upsert + `import_runs` — CONCLUÍDA
 
 **What**: Upsert por chave natural, cada registro em transação própria, com resumo persistido.
 **Where**: `app/services/ingestion/upsert.rb`
@@ -271,10 +271,10 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Upsert por `card_number` e por `(card_id, variant_code)`, nunca create cego
-- [ ] Erro em um registro vai para `import_runs.error_log` e o loop continua
-- [ ] Resumo com início, fim, status, criados, atualizados, falhados e **revisão utilizada**
-- [ ] Mesma variante em dois sets não gera duplicata (caso `P-029_r1`)
+- [x] Upsert por `card_number` e por `(card_id, variant_code)`, nunca create cego
+- [x] Erro em um registro vai para `import_runs.error_log` e o loop continua
+- [x] Resumo com início, fim, status, criados, atualizados, falhados e **revisão utilizada**
+- [x] Mesma variante em dois sets não gera duplicata (caso `P-029_r1`)
 
 **Tests**: integration
 **Gate**: quick

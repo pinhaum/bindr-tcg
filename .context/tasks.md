@@ -88,7 +88,7 @@ Regras de execução:
   - Testes rodando sobre a fixture da task 0.1, **sem rede**.
   - _Requisitos: 1.1, 11.5_
 
-- [ ] **2.5 Estágio Upsert + `import_runs`**
+- [x] **2.5 Estágio Upsert + `import_runs`**
   - Upsert por chave natural. Cada registro em transação própria.
   - Erro em um registro é logado em `import_runs.error_log` e o processamento
     continua.
