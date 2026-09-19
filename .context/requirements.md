@@ -39,6 +39,13 @@ automaticamente de uma fonte externa, para não digitar milhares de cartas à m�
    que uma carta desapareça da fonte externa.
 8. SE a fonte externa estiver indisponível ENTÃO o sistema DEVE falhar de forma
    explícita, sem deixar o catálogo em estado parcialmente sobrescrito.
+9. A configuração da fonte DEVE fixar uma **revisão imutável** do dataset (commit
+   ou tag), nunca uma referência móvel como `main`. QUANDO a importação for
+   executada ENTÃO o sistema DEVE buscar exatamente a revisão configurada.
+10. O resumo de execução do critério 6 DEVE registrar a revisão utilizada, de modo
+    que seja possível identificar de qual versão da fonte veio cada importação.
+11. A atualização da revisão fixada DEVE ser um ato explícito de quem mantém o
+    sistema, nunca efeito colateral de executar a importação.
 
 ---
 

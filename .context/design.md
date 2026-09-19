@@ -188,6 +188,7 @@ wishlist_items
 import_runs
   id
   source              text
+  source_revision     text               -- Requisito 1.10; commit ou tag imutável
   status              enum               -- running | succeeded | failed
   started_at          datetime
   finished_at         datetime NULL
@@ -312,9 +313,11 @@ Fetch → Normalize → Upsert
 
 Cada estágio isolado, porque cada um falha de forma diferente:
 
-1. **Fetch** — única parte que toca a rede. Salva o payload bruto em disco antes
-   de processar. Isso permite reprocessar sem refazer a chamada e é o que torna
-   possível o Req. 11.5 (teste sem rede: o payload salvo vira fixture).
+1. **Fetch** — única parte que toca a rede. Busca uma **revisão imutável** da
+   fonte (commit ou tag, nunca `main` — Req. 1.9) e salva o payload bruto em
+   disco antes de processar. Isso permite reprocessar sem refazer a chamada e é
+   o que torna possível o Req. 11.5 (teste sem rede: o payload salvo vira
+   fixture).
 2. **Normalize** — mapeia o formato externo para o modelo interno. Todo
    conhecimento sobre o formato da fonte vive **aqui e só aqui**. Trocar de fonte
    de dados deve significar escrever um normalizador novo, nada mais.
@@ -329,12 +332,23 @@ Cada estágio isolado, porque cada um falha de forma diferente:
 | 1.5 erro isolado        | Cada registro em transação própria; falha registrada em `import_runs.error_log` e o loop continua |
 | 1.7 não destrói coleção | A ingestão **não tem operação de delete.** Carta ausente da fonte é marcada, nunca removida       |
 | 1.8 falha explícita     | Se o Fetch falhar, o processo aborta antes de qualquer escrita no banco                           |
+| 1.9 revisão fixada      | Fetch resolve a revisão configurada (commit/tag); referência móvel é rejeitada na configuração    |
+| 1.10 revisão auditável  | A revisão usada é gravada em `import_runs.source_revision` junto ao resumo da execução            |
 
 Sobre 1.7: se uma carta sai da fonte externa, o correto é adicionar um campo de
 "visto na última execução" e sinalizar na UI, não deletar. Deletar uma variante
 apagaria em cascata o registro de coleção do usuário — perda de dado
 irrecuperável a partir de um erro da fonte externa. **Nenhuma foreign key da
 coleção deve usar delete em cascata.**
+
+Sobre 1.9 e 1.10: a fonte é um scraper de terceiro com CI semanal que commita em
+`main` (ADR 001). Puxar `main` significa que uma mudança de formato upstream
+entra na ingestão sem aviso, no meio de uma execução. Fixar commit ou tag torna
+a atualização da fonte uma decisão datada e revisável: quando o pin sobe, o
+diff do payload bruto é inspecionável antes de qualquer escrita. Registrar a
+revisão em `import_runs` é o que permite responder "de qual versão veio este
+dado" depois do fato — sem isso, uma carta errada no catálogo não tem origem
+rastreável.
 
 ---
 

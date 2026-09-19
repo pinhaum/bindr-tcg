@@ -73,7 +73,12 @@ Regras de execução:
   - Buscar o payload da fonte externa e persistir o bruto em disco antes de
     qualquer processamento.
   - Abortar sem escrever no banco se a fonte estiver indisponível.
-  - _Requisitos: 1.8_
+  - Ler a revisão da fonte (commit ou tag) da configuração e buscar exatamente
+    essa revisão. Rejeitar na carga da configuração uma referência móvel como
+    `main` ou `HEAD`.
+  - Teste: configuração com referência móvel falha de forma explícita;
+    configuração com commit fixo busca a URL daquela revisão.
+  - _Requisitos: 1.8, 1.9, 1.11_
 
 - [ ] **2.4 Estágio Normalize**
   - Mapear o formato externo para o modelo interno. Todo conhecimento do formato
@@ -88,8 +93,8 @@ Regras de execução:
   - Erro em um registro é logado em `import_runs.error_log` e o processamento
     continua.
   - Resumo persistido ao final: início, fim, status, criados, atualizados,
-    falhados.
-  - _Requisitos: 1.2, 1.3, 1.5, 1.6_
+    falhados e a revisão da fonte usada (`source_revision`).
+  - _Requisitos: 1.2, 1.3, 1.5, 1.6, 1.10_
 
 - [ ] **2.6 Testes de garantia da ingestão** ← *task mais importante do projeto*
   - Rodar a ingestão duas vezes sobre a mesma fixture e verificar que a contagem

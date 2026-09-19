@@ -67,9 +67,12 @@ Todas verificadas por requisição real em 2026-09-19, não por documentação.
   `attribute` e `feature` já vêm como arrays, então **não há split por `;`** como
   seria necessário na apitcg.
 - **Risco assumido:** a fonte é um scraper mantido por uma pessoa, sem licença
-  declarada. Mitigação: o estágio Fetch salva o payload bruto em disco antes de
-  processar (Req. 1.8), então o catálogo é reconstruível sem rede; trocar de
-  fonte significa reescrever só o Normalize.
+  declarada. Mitigação em três camadas: o estágio Fetch salva o payload bruto em
+  disco antes de processar (Req. 1.8), então o catálogo é reconstruível sem rede;
+  a ingestão busca uma **revisão fixada** (commit ou tag), nunca `main`, de modo
+  que a CI semanal do repositório não altera o comportamento da importação sem um
+  ato explícito (Req. 1.9 e 1.11); e trocar de fonte significa reescrever só o
+  Normalize.
 - **Fase 3 (preços) não tem fonte aqui.** optcgjson não traz preço. Quando a Fase
   3 chegar, apitcg ou dotgg voltam à mesa só para esse fim.
 
