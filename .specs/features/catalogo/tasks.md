@@ -182,7 +182,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T3: Migrações de `sets`, `cards` e `card_variants`
+### T3: Migrações de `sets`, `cards` e `card_variants` — CONCLUÍDA
 
 **What**: Schema conforme `design.md` §3.2, ajustado ao vocabulário real da task 0.2.
 **Where**: `db/migrate/`
@@ -191,18 +191,18 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] `card_number` único; `(card_id, variant_code)` único
-- [ ] Foreign keys sem delete em cascata em direção à coleção
-- [ ] `rarity` como texto, não enum
-- [ ] `counter` permite NULL, distinto de 0
-- [ ] `colors`, `traits`, `attributes` como arrays Postgres
+- [x] `card_number` único; `(card_id, variant_code)` único
+- [x] Foreign keys sem delete em cascata em direção à coleção
+- [x] `rarity` como texto, não enum
+- [x] `counter` permite NULL, distinto de 0
+- [x] `colors`, `traits`, `attributes` como arrays Postgres (coluna `attributes_list`; ver SPEC_DEVIATION na migração)
 
 **Tests**: integration
 **Gate**: quick
 
 ---
 
-### T4: Índices do catálogo
+### T4: Índices do catálogo — CONCLUÍDA
 
 **What**: Índices de `design.md` §3.4 e extensões do Postgres.
 **Where**: `db/migrate/`
@@ -211,10 +211,13 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] GIN nas colunas de array; trigram no nome
-- [ ] `pg_trgm` e `unaccent` habilitadas
-- [ ] Teste prova, via plano de execução, que filtro por cor e por faixa de custo não fazem full table scan
-- [ ] Sintaxe de `gin_trgm_ops` e `to_tsvector` conferida na documentação da versão em uso (resolve um `⚠️ VERIFICAR` de `design.md`)
+- [x] GIN nas colunas de array; trigram no nome
+- [x] `pg_trgm` e `unaccent` habilitadas
+- [x] Teste prova, via plano de execução, que filtro por cor e por faixa de custo não fazem full table scan
+- [x] Sintaxe de `gin_trgm_ops` e `to_tsvector` conferida na documentação da versão em uso (resolve um `⚠️ VERIFICAR` de `design.md`)
+  - `gin_trgm_ops` e `to_tsvector('english', …)` conferem com a doc do PostgreSQL 17.
+  - **Achado novo:** `unaccent` é STABLE nas duas assinaturas (medido no servidor 17.11), logo **não** é indexável direto — nem em índice de expressão nem em coluna gerada. O índice usa o wrapper IMMUTABLE `immutable_unaccent`.
+  - Consequência: `schema_format = :sql` (`db/structure.sql`), porque `schema.rb` não representa a função e um banco criado a partir dele falha ao recriar o índice.
 
 **Tests**: integration
 **Gate**: quick

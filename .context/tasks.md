@@ -55,13 +55,13 @@ Regras de execução:
 
 ## 2 — Catálogo: modelo e ingestão
 
-- [ ] **2.1 Migrações de `sets`, `cards` e `card_variants`**
+- [x] **2.1 Migrações de `sets`, `cards` e `card_variants`**
   - Schema conforme `design.md` §3.2, **ajustado ao resultado da task 0.2**.
   - Constraints no banco: `card_number` único, `(card_id, variant_code)` único.
   - Foreign keys **sem delete em cascata** em direção à coleção.
   - _Requisitos: 1.2, 1.3, 5.3_
 
-- [ ] **2.2 Índices do catálogo**
+- [x] **2.2 Índices do catálogo**
   - Todos os índices de `design.md` §3.4, incluindo GIN nas colunas de array e
     trigram no nome.
   - Habilitar as extensões necessárias do Postgres.

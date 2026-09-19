@@ -16,6 +16,15 @@ module Bindr
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # O schema do catálogo usa recursos que o formato Ruby não sabe
+    # representar: a função `immutable_unaccent` (exigida pelo índice trigram
+    # do Req. 3.2 — `unaccent` é STABLE e não pode entrar em índice) e os
+    # índices de expressão com `gin_trgm_ops` e `to_tsvector`. Com
+    # `schema_format = :ruby`, carregar `db/schema.rb` em um banco novo falha
+    # ao recriar esses índices. `structure.sql` é gerado por `pg_dump` e
+    # preserva tudo.
+    config.active_record.schema_format = :sql
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

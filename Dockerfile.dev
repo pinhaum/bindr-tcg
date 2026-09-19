@@ -3,13 +3,27 @@
 # volume e roda em modo development.
 FROM ruby:3.3.0-slim
 
+# O cliente do PostgreSQL vem do repositório oficial (PGDG) fixado na major
+# 17, a mesma do serviço `db`. O `postgresql-client` do Debian bookworm é da
+# 15 e `pg_dump` recusa dumpar um servidor mais novo — o que quebraria
+# `db:schema:dump`, já que o projeto usa `schema_format = :sql`.
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       build-essential \
       git \
       libpq-dev \
       libyaml-dev \
-      postgresql-client && \
+      ca-certificates \
+      curl \
+      gnupg && \
+    install -d /usr/share/postgresql-common/pgdg && \
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+      -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc && \
+    echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
+      > /etc/apt/sources.list.d/pgdg.list && \
+    apt-get update -qq && \
+    apt-get install --no-install-recommends -y postgresql-client-17 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /rails
