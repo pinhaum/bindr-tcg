@@ -25,6 +25,8 @@ SKILL=~/.claude/skills/tlc-spec-driven
 python3 $SKILL/scripts/validate_spec.py  .specs/features/catalogo/spec.md
 python3 $SKILL/scripts/validate_tasks.py .specs/features/catalogo/tasks.md
 python3 $SKILL/scripts/validate_state.py catalogo   # só depois que houver validation.md
+python3 $SKILL/scripts/validate_spec.py  .specs/features/colecao/spec.md
+python3 $SKILL/scripts/validate_tasks.py .specs/features/colecao/tasks.md
 ```
 
 `validate_state.py` falha até a feature terminar e o Verifier escrever
@@ -33,5 +35,8 @@ python3 $SKILL/scripts/validate_state.py catalogo   # só depois que houver vali
 ## Features
 
 - `features/catalogo/` — ingestão, busca, filtros, grade e detalhe (Req. 1–5).
-- Coleção, wishlist, progresso e CSV (Req. 6–10) entram como feature própria
-  quando a fase 4 de `.context/tasks.md` começar.
+  Encerrada, verificada em `validation.md`.
+- `features/colecao/` — conta, coleção por variante e wishlist (Req. 6–8, e 5.3).
+  Spec e plano escritos; execução ainda não começou.
+- Progresso por set e CSV (Req. 9–10) entram como feature própria quando a
+  fase 5 de `.context/tasks.md` começar.

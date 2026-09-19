@@ -44,11 +44,11 @@
 
 ## Handoff
 
-> **Começando uma sessão nova na Fase 4?** Leia
-> **`.specs/HANDOFF-fase-4.md`** primeiro: ele condensa estado, dívida,
-> decisões, armadilhas de ambiente e método em um documento só.
+> **Começando uma sessão nova?** Leia **`.specs/HANDOFF-colecao.md`** primeiro:
+> estado, decisões, armadilhas de ambiente e método para a feature `colecao`.
+> O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
-- **Feature**: catalogo (`.specs/features/catalogo/`)
+- **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
 - **Phase / Task**: **Feature `catalogo` ENCERRADA.** 14 de 14 tasks fechadas,
   os dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os
   achados dos Verifiers e da revisão de a11y foram corrigidos e commitados.
@@ -57,11 +57,11 @@
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Fase 4 é feature nova** (`.context/tasks.md` §4 — autenticação
-  e coleção). Não cabe em `catalogo`: precisa de `.specs/features/colecao/` com
-  spec própria antes de decompor em tasks. É onde o parâmetro `owned` do
-  `design.md` §4.2 entra — deixado **fora** do query object de propósito, por
-  depender de sessão, e o objeto aceita o filtro sem reescrita.
+- **Next step**: **Executar T1** de `.specs/features/colecao/tasks.md` (instalar
+  bcrypt e dar `has_secure_password` ao `User` existente). Spec e plano já
+  escritos e validados; nenhuma task começou. A decisão central já está tomada
+  e registrada na spec: **não rodar `bin/rails generate authentication`** —
+  ele sobrescreve `app/models/user.rb` e apaga a linha que protege a coleção.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
