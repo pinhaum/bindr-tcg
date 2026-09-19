@@ -45,19 +45,32 @@
 ## Handoff
 
 - **Feature**: catalogo (`.specs/features/catalogo/`)
-- **Phase / Task**: **Fase 3 concluída (T10–T14 / lote B2)**. Todas as 14 tasks
-  do plano estão fechadas.
+- **Phase / Task**: **Feature `catalogo` ENCERRADA.** 14 de 14 tasks fechadas,
+  os dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os
+  achados dos Verifiers e da revisão de a11y foram corrigidos e commitados.
 - **Completed**: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
-  **3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14)**
+  3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
+  em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
+  419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Verifier do lote B2** (`22612fe..3af5982`), autor ≠
-  verificador. O Verifier do lote B1 também continua pendente. Depois disso, a
-  Fase 4 (autenticação e coleção), que é onde o parâmetro `owned` do
-  `design.md` §4.2 entra — ele foi deixado **fora** do query object de
-  propósito, por depender de sessão.
+- **Next step**: **Fase 4 é feature nova** (`.context/tasks.md` §4 — autenticação
+  e coleção). Não cabe em `catalogo`: precisa de `.specs/features/colecao/` com
+  spec própria antes de decompor em tasks. É onde o parâmetro `owned` do
+  `design.md` §4.2 entra — deixado **fora** do query object de propósito, por
+  depender de sessão, e o objeto aceita o filtro sem reescrita.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
+
+### Dívida conhecida ao fim da feature `catalogo`
+
+Nada aqui bloqueia a Fase 4; são pontos que a próxima sessão herda com os olhos abertos.
+
+- **O CI nunca rodou de verdade.** Não há remoto configurado, então `.github/workflows/ci.yml` está correto por construção e por simulação local, mas nunca foi exercitado. Verde de verdade só com o primeiro push.
+- **T12/T14 não têm cobertura de navegador.** Viraram teste de integração porque não há chromedriver no container (`SPEC_DEVIATION` registrado em cada uma). O 360px do Req. 2.5 foi verificado à mão em Chromium; uma regressão de layout passaria no CI. Decidir se vale chromedriver no `Dockerfile.dev`.
+- **Importmap não instalado.** Não há pipeline de JS: `stimulus-rails` está no Gemfile mas nunca foi executado, e o placeholder de imagem foi resolvido por CSS. **O Req. 7.2 (incremento sem recarregar) vai exigir o importmap** — é a primeira coisa a resolver na task 4.3.
+- **Três melhorias de a11y não bloqueantes**, da revisão do `ecc:a11y-architect`: `lang="en"` no conteúdo em inglês (nome, `effect_text`, `trigger_text`), `min-height/min-width: 24px` explícitos nos alvos de toque (SC 2.5.8) e reforço do indicador de foco (SC 2.4.11).
+- **Flakiness observada uma vez:** `guarantees_test.rb` falhou uma vez em ~20 execuções por contenção entre os 4 workers paralelos (`last_seen_at` do presente menor que o do ausente). Se voltar, congelar o relógio — `Upsert` já aceita `clock:` — e **não** afrouxar a asserção.
 
 ### Contexto que não está nos documentos
 
