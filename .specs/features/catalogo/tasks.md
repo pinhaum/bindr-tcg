@@ -281,7 +281,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T8: Testes de garantia da ingestão
+### T8: Testes de garantia da ingestão — CONCLUÍDA
 
 **What**: Os testes que provam que a ingestão não corrompe dados do usuário. É a task mais importante do projeto.
 **Where**: `test/services/ingestion/`
@@ -290,9 +290,19 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Ingestão rodada duas vezes sobre a mesma fixture não altera contagem
-- [ ] `collection_item` criado antes da segunda execução continua com a mesma quantidade
-- [ ] Carta ausente da fonte não é deletada, apenas marcada
+- [x] Ingestão rodada duas vezes sobre a mesma fixture não altera contagem
+- [x] `collection_item` criado antes da segunda execução continua com a mesma quantidade
+- [x] Carta ausente da fonte não é deletada, apenas marcada
+
+> `users` e `collection_items` entraram aqui, em migração mínima, porque a
+> invariante do Req. 1.7 não é demonstrável sem uma coleção para preservar. O
+> gerador de autenticação do Rails **não** foi executado — continua sendo Fase 4.
+>
+> Sensor de discriminação rodado nesta task: `create` cego de carta, `create`
+> cego de variante e exclusão da carta ausente da fonte — os três derrubam a
+> suíte. O mutante de `create` cego **sobreviveu à primeira versão** do teste,
+> que só olhava contagem; uma ingestão que falha em todo registro também deixa a
+> contagem intacta. As asserções passaram a exigir `status` e `failed_count`.
 
 **Tests**: integration
 **Gate**: full

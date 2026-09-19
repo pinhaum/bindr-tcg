@@ -96,7 +96,7 @@ Regras de execução:
     falhados e a revisão da fonte usada (`source_revision`).
   - _Requisitos: 1.2, 1.3, 1.5, 1.6, 1.10_
 
-- [ ] **2.6 Testes de garantia da ingestão** ← *task mais importante do projeto*
+- [x] **2.6 Testes de garantia da ingestão** ← *task mais importante do projeto*
   - Rodar a ingestão duas vezes sobre a mesma fixture e verificar que a contagem
     de registros não muda.
   - Criar um `collection_item`, rodar a ingestão novamente, verificar que a

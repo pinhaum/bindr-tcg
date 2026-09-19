@@ -150,6 +150,40 @@ ALTER SEQUENCE public.cards_id_seq OWNED BY public.cards.id;
 
 
 --
+-- Name: collection_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.collection_items (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    card_variant_id bigint NOT NULL,
+    quantity integer DEFAULT 0 NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT collection_items_quantity_check CHECK ((quantity >= 0))
+);
+
+
+--
+-- Name: collection_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.collection_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: collection_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.collection_items_id_seq OWNED BY public.collection_items.id;
+
+
+--
 -- Name: import_runs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -236,6 +270,38 @@ ALTER SEQUENCE public.sets_id_seq OWNED BY public.sets.id;
 
 
 --
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    id bigint NOT NULL,
+    email text NOT NULL,
+    password_digest text NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
 -- Name: card_variants id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -250,6 +316,13 @@ ALTER TABLE ONLY public.cards ALTER COLUMN id SET DEFAULT nextval('public.cards_
 
 
 --
+-- Name: collection_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_items ALTER COLUMN id SET DEFAULT nextval('public.collection_items_id_seq'::regclass);
+
+
+--
 -- Name: import_runs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -261,6 +334,13 @@ ALTER TABLE ONLY public.import_runs ALTER COLUMN id SET DEFAULT nextval('public.
 --
 
 ALTER TABLE ONLY public.sets ALTER COLUMN id SET DEFAULT nextval('public.sets_id_seq'::regclass);
+
+
+--
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
@@ -288,6 +368,14 @@ ALTER TABLE ONLY public.cards
 
 
 --
+-- Name: collection_items collection_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_items
+    ADD CONSTRAINT collection_items_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: import_runs import_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -309,6 +397,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 ALTER TABLE ONLY public.sets
     ADD CONSTRAINT sets_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
 --
@@ -417,10 +513,38 @@ CREATE INDEX index_cards_on_unaccent_name_trgm ON public.cards USING gin (public
 
 
 --
+-- Name: index_collection_items_on_card_variant_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_collection_items_on_card_variant_id ON public.collection_items USING btree (card_variant_id);
+
+
+--
+-- Name: index_collection_items_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_collection_items_on_user_id ON public.collection_items USING btree (user_id);
+
+
+--
+-- Name: index_collection_items_on_user_id_and_card_variant_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_collection_items_on_user_id_and_card_variant_id ON public.collection_items USING btree (user_id, card_variant_id);
+
+
+--
 -- Name: index_sets_on_code; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_sets_on_code ON public.sets USING btree (code);
+
+
+--
+-- Name: index_users_on_lower_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_lower_email ON public.users USING btree (lower(email));
 
 
 --
@@ -432,11 +556,27 @@ ALTER TABLE ONLY public.cards
 
 
 --
+-- Name: collection_items fk_rails_245c26f2dd; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_items
+    ADD CONSTRAINT fk_rails_245c26f2dd FOREIGN KEY (card_variant_id) REFERENCES public.card_variants(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: card_variants fk_rails_2d977c7759; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.card_variants
     ADD CONSTRAINT fk_rails_2d977c7759 FOREIGN KEY (card_id) REFERENCES public.cards(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: collection_items fk_rails_8f44cb7ace; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_items
+    ADD CONSTRAINT fk_rails_8f44cb7ace FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -454,6 +594,7 @@ ALTER TABLE ONLY public.card_variants
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260919120200'),
 ('20260919120100'),
 ('20260919120000');
 
