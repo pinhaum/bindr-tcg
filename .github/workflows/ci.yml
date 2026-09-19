@@ -61,6 +61,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # O projeto usa `schema_format = :sql`, então `db:prepare` carrega
+      # `db/structure.sql` via `psql` e regenera o dump com `pg_dump`. O
+      # `pg_dump` recusa servidor de major mais nova que a sua — medido: o
+      # cliente 15 aborta contra o servidor 17 com "server version mismatch".
+      # A imagem do runner não garante cliente algum, então fixamos a 17 pelo
+      # PGDG, o mesmo motivo e a mesma major do `Dockerfile.dev`.
+      - name: Instalar o cliente PostgreSQL 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+          https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y postgresql-client-17
+          psql --version
+          pg_dump --version
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version-file: .ruby-version
