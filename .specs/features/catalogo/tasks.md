@@ -242,7 +242,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T6: Estágio Normalize
+### T6: Estágio Normalize — CONCLUÍDA
 
 **What**: Mapear o formato da optcgjson para o modelo interno. Todo conhecimento do formato externo isolado aqui.
 **Where**: `app/services/ingestion/normalize.rb`
@@ -251,11 +251,11 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] `variant_code` = campo `id` da fonte, sem hash derivado
-- [ ] `traits` normalizados em caixa e espaçamento
-- [ ] `counter` nulo preservado como NULL
-- [ ] Trata `attribute: "?"` sem falhar
-- [ ] Testes rodam sobre `spec/fixtures/optcgjson-subset.json`, sem rede
+- [x] `variant_code` = campo `id` da fonte, sem hash derivado
+- [x] `traits` normalizados em caixa e espaçamento
+- [x] `counter` nulo preservado como NULL
+- [x] Trata `attribute: "?"` sem falhar
+- [x] Testes rodam sobre `spec/fixtures/optcgjson-subset.json`, sem rede
 
 **Tests**: unit
 **Gate**: quick

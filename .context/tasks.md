@@ -80,7 +80,7 @@ Regras de execução:
     configuração com commit fixo busca a URL daquela revisão.
   - _Requisitos: 1.8, 1.9, 1.11_
 
-- [ ] **2.4 Estágio Normalize**
+- [x] **2.4 Estágio Normalize**
   - Mapear o formato externo para o modelo interno. Todo conhecimento do formato
     externo isolado nesta unidade.
   - Normalizar `traits` (caixa e espaçamento) para evitar duplicatas semânticas.
