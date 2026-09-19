@@ -281,29 +281,30 @@ Fazer tudo em PostgreSQL, sem serviço de busca dedicado.
 - **Substring de `card_number` (Req. 3.1):** o termo também casa por
   substring, o que exige índice GIN trigram em `card_number` — ver 4.1.2.
 
-### 4.1.2 As ramificações da busca se unem por `UNION`, não por `OR`
+### 4.1.2 A busca só é indexável com GIN trigram em `card_number`
 
-Medido na T11 contra o catálogo real. Os três caminhos do Req. 3.1 (nome,
-efeito, `card_number`) unidos em um único `WHERE ... OR ... OR ...` produzem
-**Seq Scan**, mesmo com os três índices presentes: basta uma ramificação
-inindexável para o planejador desistir do plano indexado do predicado inteiro.
+Medido na T11 contra o catálogo real, e **corrigido na verificação do B2**: a
+primeira redação deste parágrafo atribuía ao `UNION` um efeito que pertence ao
+índice.
 
-```
-nome                                → Bitmap Index Scan (trigram)
-nome OR efeito                      → BitmapOr dos dois GIN
-nome OR efeito OR card_number ILIKE → Seq Scan on cards
-```
+Os três caminhos do Req. 3.1 (nome, efeito, `card_number`) num único
+`WHERE ... OR ... OR ...` produziam **Seq Scan**. A causa é uma só:
 
-Duas correções, as duas necessárias:
+- `card_number ILIKE '%termo%'` só é indexável com **GIN trigram em
+  `card_number`** (migração `20260919120300`). O índice único btree não serve:
+  criado com a collation padrão, nem `LIKE` ancorado o usa. Buscar código
+  parcial é caso real — "OP01" casa 121 cartas, 13 delas em
+  `LimitedProductCard`, que o filtro de set sozinho não acharia.
 
-1. `card_number ILIKE '%termo%'` só é indexável com **GIN trigram em
-   `card_number`**. O índice único btree não serve: foi criado com a collation
-   padrão, então nem `LIKE` ancorado o usa. Buscar código parcial é caso real —
-   "OP01" casa 121 cartas, 13 delas em `LimitedProductCard`, que o filtro de
-   set sozinho não acharia.
-2. As ramificações entram por `UNION` de subconsultas, uma por índice. Cada
-   uma é planejada isoladamente e o resultado vira `Append` + `HashAggregate`
-   sobre três `Bitmap Index Scan`.
+Com esse índice presente, o `OR` planeja como `BitmapOr` sobre os três
+`Bitmap Index Scan`, sem Seq Scan — verificado por `EXPLAIN`. Ou seja: **o
+`UNION` não é o que resolve a indexabilidade.**
+
+A consulta continua usando `UNION` de subconsultas, uma por índice, porque
+cada ramificação é planejada isoladamente e o resultado independe de o
+planejador escolher o `BitmapOr`. É uma escolha de previsibilidade, não o
+remédio para o Seq Scan. Trocar por `OR` hoje também funcionaria; o que **não**
+pode sumir é o índice.
 
 ### 4.1.3 Tolerância a typo exige `word_similarity`, não `similarity`
 
