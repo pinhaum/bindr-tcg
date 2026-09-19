@@ -104,7 +104,7 @@ Regras de execução:
   - Verificar que uma carta ausente da fonte **não** é deletada.
   - _Requisitos: 1.4, 1.7_
 
-- [ ] **2.7 Carregar o catálogo completo em desenvolvimento**
+- [x] **2.7 Carregar o catálogo completo em desenvolvimento**
   - Executar a ingestão real. Registrar o número final de cartas e variantes.
   - Inspecionar manualmente 10 cartas contra a fonte oficial, incluindo pelo
     menos um Leader dual-color e uma carta com arte alternativa.

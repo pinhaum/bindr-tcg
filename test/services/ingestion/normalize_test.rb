@@ -113,6 +113,27 @@ module Ingestion
       assert_equal [ "Straw Hat Crew" ], traits
     end
 
+    # A grafia da fonte é preservada: normalizar caixa destruiria traits reais
+    # como "Former CP9" e "Kingdom of GERMA" (medido no catálogo completo na
+    # T9) para resolver uma única colisão que existe de fato.
+    test "a grafia do trait vinda da fonte é preservada" do
+      payload = {
+        "data" => [ {
+          "code" => "TST", "name" => "Teste", "type" => "booster",
+          "cards" => [ {
+            "id" => "TST-001", "number" => "TST-001", "name" => "X", "rarity" => "C",
+            "cardClass" => "CHARACTER", "color" => [ "Red" ],
+            "feature" => [ "Former CP9", "Kingdom of GERMA", "Land of Wano" ],
+            "attribute" => [], "isParallel" => false
+          } ]
+        } ]
+      }
+
+      traits = Normalize.call(payload).cards.first.traits
+
+      assert_equal [ "Former CP9", "Kingdom of GERMA", "Land of Wano" ], traits
+    end
+
     test "trait já em caixa alta é preservado" do
       film = @resultado.cards.find { |c| c.traits.include?("FILM") }
 
@@ -177,6 +198,19 @@ module Ingestion
       assert_equal 121, op01.base_set_size
       assert_equal 154, op01.total_set_size
       assert_equal "booster", op01.kind
+    end
+
+    # O AllSets.json real entrega `data` como objeto indexado pelo código do
+    # set; a fixture é uma lista. Descoberto ao rodar a carga real na T9: a
+    # forma de objeto derrubava o Normalize com TypeError.
+    test "aceita data como objeto indexado por código de set" do
+      set = { "code" => "TST", "name" => "Teste", "type" => "booster", "cards" => [] }
+
+      como_objeto = Normalize.call({ "data" => { "TST" => set } })
+      como_lista = Normalize.call({ "data" => [ set ] })
+
+      assert_equal 1, como_objeto.sets.size
+      assert_equal como_lista.sets.map(&:code), como_objeto.sets.map(&:code)
     end
 
     test "tipo de set desconhecido vira 'other' em vez de derrubar a ingestão" do

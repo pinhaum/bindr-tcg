@@ -309,7 +309,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ---
 
-### T9: Carregar o catálogo completo em desenvolvimento
+### T9: Carregar o catálogo completo em desenvolvimento — CONCLUÍDA
 
 **What**: Executar a ingestão real e conferir contra a fonte oficial.
 **Where**: ambiente local
@@ -318,8 +318,24 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] Número final de cartas e variantes registrado (esperado ~2815 / ~4915)
-- [ ] 10 cartas inspecionadas manualmente, incluindo um Leader dual-color e uma com arte alternativa
+- [x] Número final de cartas e variantes registrado: **2815 cartas, 4914 variantes, 62 sets**, 7791 registros criados, 0 falhas
+- [x] 10 cartas inspecionadas manualmente, incluindo um Leader dual-color (`EB01-001`, Red/Green) e uma com arte alternativa (`EB01-006`, 6 variantes em 3 sets)
+
+> **4914, não 4915.** A fonte tem 4915 linhas de carta e 4914 `id` distintos:
+> `P-029_r1` aparece em PRB01 e ST16. O número do ADR 001 contava linhas; 4914 é
+> a contagem correta de variantes, e é exatamente o caso-limite que a T7 trata.
+>
+> Dois achados da carga real, ambos corrigidos no Normalize:
+> 1. `AllSets.json` entrega `data` como **objeto indexado pelo código do set**,
+>    não como lista — a fixture é um recorte já achatado. Derrubava o Normalize
+>    com `TypeError`. Tem teste de regressão.
+> 2. A normalização de traits por Title Case corrompia 10 traits reais
+>    (`Former CP9` → `Former Cp9`, `Kingdom of GERMA`, `Land of Wano`) para
+>    resolver **uma** colisão real (`SMILE`/`Smile`). Trocada por colapso de
+>    espaçamento + deduplicação insensível a caixa, preservando a grafia da fonte.
+>
+> Idempotência confirmada contra o catálogo real: segunda execução deu
+> 0 criados / 7791 atualizados / 0 falhados, sem mudança de contagem.
 
 **Tests**: none
 **Gate**: full

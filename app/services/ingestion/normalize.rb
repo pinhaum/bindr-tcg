@@ -49,7 +49,7 @@ module Ingestion
       cards = {}
       variants = {}
 
-      Array(@payload["data"]).each do |raw_set|
+      raw_sets(@payload["data"]).each do |raw_set|
         sets << normalize_set(raw_set)
         set_code = raw_set["code"]
 
@@ -71,6 +71,17 @@ module Ingestion
     end
 
     private
+
+    # `AllSets.json` entrega `data` como objeto indexado pelo código do set
+    # (`{"OP01": {...}}`); os arquivos por set e a fixture derivada entregam uma
+    # lista. As duas formas trazem o mesmo objeto de set, então aqui elas
+    # convergem — e a diferença não vaza para nenhum outro estágio.
+    def raw_sets(data)
+      case data
+      when Hash then data.values
+      else Array(data)
+      end
+    end
 
     def normalize_set(raw)
       NormalizedSet.new(
@@ -138,15 +149,17 @@ module Ingestion
     end
 
     # Req. 4.1 e design.md §3.3 — sem isto, "Straw Hat Crew" e
-    # "Straw hat crew" viram traits distintos e o filtro por trait fica
-    # furado. A caixa canônica é Title Case por palavra, preservando o que já
-    # estiver em caixa alta (`FILM`).
+    # "Straw hat crew" viram traits distintos e o filtro por trait fica furado.
+    #
+    # A normalização é de **espaçamento**, mais deduplicação insensível a
+    # caixa; a grafia da fonte é preservada. Title Case foi testado contra o
+    # catálogo completo e reprovado: corromperia 10 traits reais
+    # ("Former CP9" -> "Former Cp9", "Kingdom of GERMA" -> "Kingdom Of Germa",
+    # "Land of Wano" -> "Land Of Wano") para resolver uma única colisão de
+    # caixa que existe de fato na fonte (SMILE/Smile). A comparação para o
+    # filtro tem de ser insensível a caixa — não a exibição.
     def normalize_traits(values)
-      clean_list(values).map { |trait| canonical_trait(trait) }.uniq
-    end
-
-    def canonical_trait(trait)
-      trait.split(/\s+/).map { |word| word == word.upcase ? word : word.capitalize }.join(" ")
+      clean_list(values).uniq { |trait| trait.downcase }
     end
 
     def clean_list(values)
