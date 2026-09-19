@@ -52,3 +52,13 @@ docs/product.md
   foi confirmada** e precisa de validação em fonte primária antes de virar
   código.
 - `DECISÃO PENDENTE` — ponto em que o design deliberadamente não escolheu.
+
+## Relação com `.specs/`
+
+A partir de 2026-09-19 o projeto também mantém `.specs/`, no formato do fluxo
+spec-driven do skill: log de decisões (`STATE.md`, AD-NNN), recorte por feature e
+artefatos de verificação. **Este diretório (`.context/`) continua sendo a fonte de
+verdade** de requisitos, design e plano de tasks — em caso de divergência, ele
+vence. Ver `.specs/README.md` e AD-005.
+
+Ao concluir uma task, marcar o checkbox **nos dois** planos.
