@@ -264,20 +264,50 @@ Fazer tudo em PostgreSQL, sem serviço de busca dedicado.
 
 - **Nome (Req. 3.2, 3.3):** extensão `pg_trgm` com índice GIN usando o operador
   de similaridade trigram. Isso dá tolerância a erro de digitação. Para
-  insensibilidade a acento, a extensão `unaccent` aplicada em uma coluna gerada ou
-  em índice de expressão.
+  insensibilidade a acento, a extensão `unaccent` — **mas não diretamente**:
+  `unaccent` é `STABLE`, não `IMMUTABLE`, e por isso o Postgres recusa usá-la
+  tanto em coluna gerada quanto em índice de expressão. É preciso envolvê-la em
+  uma função `IMMUTABLE` própria com o dicionário fixado explicitamente. Ver
+  4.1.1.
 - **Texto de efeito (Req. 3.1):** busca full-text via `tsvector` em coluna gerada,
   com índice GIN.
 - **Match exato de `card_number` (Req. 3.4):** consulta separada, resultado
   prependido antes dos demais. Não tente resolver ranking exato dentro do
   full-text — é mais simples e mais previsível fazer duas consultas.
 
-> ⚠️ VERIFICAR — `pg_trgm`, `unaccent` e `tsvector`/GIN são recursos reais e
-> estáveis do PostgreSQL e eu tenho confiança razoável neles. Mas **não escreva a
-> sintaxe exata de memória** (nome dos operadores, `gin_trgm_ops`, assinatura de
-> `to_tsvector`, colunas geradas) — confira na documentação da sua versão do
-> Postgres. Nomes de função e sintaxe são exatamente o tipo de coisa que eu posso
-> lembrar errado.
+### 4.1.1 `unaccent` não é indexável sem wrapper
+
+Verificado na T4 contra o PostgreSQL 17.11 — este parágrafo substitui um
+`⚠️ VERIFICAR` que a verificação **refutou**, e a suposição original estava
+errada:
+
+```sql
+SELECT proname, provolatile FROM pg_proc WHERE proname = 'unaccent';
+-- unaccent | s   (STABLE, nas duas assinaturas)
+```
+
+Índice de expressão e coluna gerada exigem `IMMUTABLE`; as duas formas foram
+testadas e as duas falham. `unaccent` é `STABLE` porque o dicionário de
+tradução pode ser redefinido em runtime. Fixando o dicionário, a função passa
+a ser determinística e o wrapper pode declarar `IMMUTABLE` honestamente:
+
+```sql
+CREATE FUNCTION immutable_unaccent(text) RETURNS text
+LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT AS
+$$ SELECT public.unaccent('public.unaccent'::regdictionary, $1) $$;
+
+CREATE INDEX index_cards_on_unaccent_name_trgm
+  ON cards USING gin (immutable_unaccent(name) gin_trgm_ops);
+```
+
+A consulta precisa chamar `immutable_unaccent(name)`, e não `unaccent(name)`,
+senão o índice não é usado. Isso vale para a T11 (busca textual).
+
+> ⚠️ VERIFICAR — `gin_trgm_ops` e a forma de dois argumentos de `to_tsvector`
+> foram conferidos na documentação do PostgreSQL 17 na T4 (só a forma de dois
+> argumentos de `to_tsvector` é `IMMUTABLE`, portanto indexável). O restante da
+> sintaxe continua valendo a regra: **não escreva de memória** — confira na
+> documentação da versão em uso.
 
 **Por que não Elasticsearch/Meilisearch/OpenSearch:** o dataset é pequeno e as
 consultas são estruturadas, não linguagem natural. Um serviço de busca
