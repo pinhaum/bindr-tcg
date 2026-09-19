@@ -16,6 +16,11 @@ class User < ApplicationRecord
   # usuário é insubstituível; o catálogo é regenerável.
   has_many :collection_items, dependent: :restrict_with_exception
 
+  # `destroy`, ao contrário de `collection_items`: a sessão é derivada e
+  # descartável, então encerrar a conta encerra as sessões. A assimetria entre
+  # as duas linhas é deliberada.
+  has_many :sessions, dependent: :destroy
+
   # Req. 6.2 — a senha é guardada como digest bcrypt, nunca em claro. Também
   # valida presença na criação e confirmação quando `password_confirmation`
   # é informado.

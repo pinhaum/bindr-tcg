@@ -57,10 +57,10 @@
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T2** de `.specs/features/colecao/tasks.md` (tabela e
-  model `Session`, portados à mão dos templates de `railties-8.0.5.1`). T1 está
-  fechada: bcrypt instalada no volume, `has_secure_password` no `User` e oito
-  testes em `test/models/user_password_test.rb`. A decisão central segue de pé:
+- **Next step**: **Executar T3** de `.specs/features/colecao/tasks.md` (concern
+  `Authentication` e `Current`, portados à mão, com `allow_unauthenticated_access`
+  liberando o catálogo). T1 e T2 fechadas: bcrypt e `has_secure_password` no
+  `User`, tabela e model `Session` com FK `cascade`. A decisão central segue de pé:
   **não rodar `bin/rails generate authentication`** — ele sobrescreve
   `app/models/user.rb` e apaga a linha que protege a coleção.
 - **Achado da T1, já resolvido na própria T1**: `authenticate_by` resolve o

@@ -94,7 +94,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T2: Criar a tabela e o model `Session`
+### T2: Criar a tabela e o model `Session` ✅
 
 **What**: Migração `create_table :sessions` (`user_id`, `ip_address`, `user_agent`) com FK para `users`, e o model `Session`.
 **Where**: `db/migrate/` (migração nova)
@@ -109,10 +109,10 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Migração criada e `db/structure.sql` regenerado por `db:migrate`
-- [ ] `Session belongs_to :user`; `User has_many :sessions, dependent: :destroy`
-- [ ] Teste prova que apagar um usuário apaga suas sessões e **não** apaga seus `collection_items` (a FK é `restrict`)
-- [ ] `db/structure.sql` não perdeu o índice trigram nem `immutable_unaccent`
+- [x] Migração criada e `db/structure.sql` regenerado por `db:migrate`
+- [x] `Session belongs_to :user`; `User has_many :sessions, dependent: :destroy`
+- [x] Teste prova que apagar um usuário apaga suas sessões e **não** apaga seus `collection_items` (a FK é `restrict`)
+- [x] `db/structure.sql` não perdeu o índice trigram nem `immutable_unaccent`
 
 **Tests**: unit
 **Gate**: full
