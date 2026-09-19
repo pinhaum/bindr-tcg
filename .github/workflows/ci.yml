@@ -16,7 +16,6 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: .ruby-version
           bundler-cache: true
 
       - name: Rubocop
@@ -77,12 +76,26 @@ jobs:
             | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y postgresql-client-17
+          # O runner já traz um postgresql-client-16, e o pacote novo só
+          # reassume o `psql` via update-alternatives — `/usr/bin/pg_dump`
+          # continua sendo o 16. Como é o `pg_dump` que recusa servidor de
+          # major mais nova, é ele que precisa vir do 17: o diretório da
+          # major entra na frente do PATH para os steps seguintes.
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Conferir a major do cliente PostgreSQL
+        run: |
           psql --version
           pg_dump --version
+          # Falha o job se `pg_dump` não for 17: sem isso, a divergência volta
+          # silenciosamente e só aparece quando `db:prepare` regenerar o dump.
+          pg_dump --version | grep -q ' 17\.' || {
+            echo "pg_dump não é da major 17: $(pg_dump --version)" >&2
+            exit 1
+          }
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: .ruby-version
           bundler-cache: true
 
       - name: Preparar o banco de teste
