@@ -89,11 +89,26 @@ Quando **não** seguir esta recomendação:
   requisitos atuais.** Se for importante pra você, precisa virar requisito antes
   de virar código.
 
-> ⚠️ VERIFICAR — falo de Rails 8 por ele trazer Solid Queue e Solid Cache como
-> defaults e um gerador de autenticação embutido, o que reduziria dependências.
-> Não tenho certeza dos detalhes exatos dessa versão nem se o gerador atende o
-> Requisito 6. Confirme na documentação atual do Rails antes de assumir; se não
-> atender, use uma biblioteca de autenticação consolidada.
+> ✅ VERIFICADO (task 1.1) — `rails generate authentication` existe em
+> railties 8.0 e **atende o Requisito 6**, sem biblioteca externa:
+>
+> | Critério | Como é atendido |
+> | -------- | --------------- |
+> | 6.1 criar conta, autenticar, encerrar sessão | `SessionsController` + `PasswordsController` gerados; `User` com `has_many :sessions` |
+> | 6.2 senha só como hash | `has_secure_password` → bcrypt |
+> | 6.3 catálogo aberto a anônimo | `allow_unauthenticated_access` no concern `Authentication` |
+> | 6.4 mutação exige sessão | `before_action :require_authentication` é o default; opt-out é explícito |
+> | 6.5 ninguém lê coleção alheia | `Current.session` resolve o usuário a partir do cookie assinado, nunca de um ID do request — é a base que o Req. 6.5 pede |
+>
+> O gerador ainda **não foi executado**: ele cria `User` e `Session`, que são da
+> Fase 4. Rodar na task correspondente, não aqui.
+>
+> **Solid Queue / Solid Cache foram descartados** (`rails new --skip-solid`).
+> A Fase 1 não tem job assíncrono nem cache de aplicação: a ingestão roda sob
+> demanda (Req. 1.1) e os alvos de latência do Req. 11.1 são de consulta ao
+> Postgres. Três tabelas e um segundo serviço de infraestrutura sem consumidor
+> seriam custo sem contrapartida. Quando a Fase 2 ou 3 precisar de job em
+> background, reintroduzir com `bin/rails solid_queue:install`.
 
 > **P4 DECIDIDA (task 0.3):** Rails 8 + Hotwire + PostgreSQL — ver
 > `docs/adr/002-stack-set-completo-e-imagens.md`. Postgres é o fator decisivo:

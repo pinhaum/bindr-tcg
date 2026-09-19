@@ -45,19 +45,22 @@
 ## Handoff
 
 - **Feature**: catalogo (`.specs/features/catalogo/`)
-- **Phase / Task**: Fase 0 concluída. Próxima: **T1** (`.specs/features/catalogo/tasks.md`) = task **1.1** (`.context/tasks.md`).
-- **Completed**: 0.1, 0.2, 0.3 — P1–P7 todas decididas, nenhuma pendência bloqueando código
+- **Phase / Task**: Fase 1 em andamento. **T1 concluída**. Próxima: **T2** (`.specs/features/catalogo/tasks.md`) = task **1.2** (`.context/tasks.md`) — configurar CI.
+- **Completed**: 0.1, 0.2, 0.3, **1.1 (T1)**
 - **In-progress** (file:line): nenhum
-- **Next step**: T1 — inicializar Rails 8 + PostgreSQL, `docker-compose` com subida em um comando documentada no README, e um teste trivial verde. Ao fazer, confirmar na documentação do Rails 8 se o gerador de autenticação atende o Req. 6 (resolve um `⚠️ VERIFICAR` de `design.md` §2).
+- **Next step**: T2 — pipeline em `.github/workflows/` que roda `bin/rubocop` e `bin/rails test` em cada push, com um serviço Postgres. Precisa falhar quando o teste falha (verificar de fato, não presumir).
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
-- **Último commit**: `126a771` (chore: remove duplicated plan and redundant fixture)
 
 ### Contexto que não está nos documentos
 
-- `.gitignore` já existe e prevê `log/`, `tmp/`, `storage/` — o gerador do Rails vai querer sobrescrevê-lo; **mesclar, não substituir** (a entrada `storage/ingestion/` é do estágio Fetch, Req. 1.8).
+- **Docker em WSL:** `~/.docker/config.json` tem `"credsStore": "desktop.exe"`, que não existe no PATH. Qualquer `docker compose` que precise puxar imagem falha com `docker-credential-desktop.exe: executable file not found`. Contorno documentado no README: `DOCKER_CONFIG` apontando para um config `{}` vazio. **Não editar o config global do usuário.**
+- **App renomeado à mão:** o projeto foi gerado fora do repo (para não sobrescrever `.gitignore`/`README.md`) e por isso nasceu como `railsgen`; o módulo é `Bindr` em `config/application.rb`. Se algo referenciar `railsgen`, é resíduo.
+- **`--skip-solid` foi deliberado**, justificado em `.context/design.md` §2. Reintroduzir só quando houver job assíncrono real.
+- **O gerador de autenticação NÃO foi executado.** Foi só verificado que atende o Req. 6. Ele cria `User` e `Session`, que são da Fase 4 — rodar lá.
+- `config/database.yml` lê tudo do ambiente; `POSTGRES_TEST_DB` é variável própria, não derivada de `POSTGRES_DB`. O terceiro teste de `test/lib/stack_test.rb` existe para matar exatamente a regressão de os dois bancos coincidirem (mutação verificada na T1).
 - Ao concluir qualquer task, marcar o checkbox **nos dois** planos (`.context/tasks.md` e `.specs/features/catalogo/tasks.md`) e commitar junto com o código.
 - `python3 spec/verify_fixture.py` roda offline e deve continuar passando (12 verificações).
 - Não adicionar linhas de atribuição em mensagens de commit.
-- Plano de delegação a subagentes está em `.specs/features/catalogo/tasks.md` (seção "Plano de delegação"): Fase 1 inline, Fase 2 e Fase 3 como um lote cada, Verifier obrigatório ao fim de cada lote. Não existe agente Ruby/Rails instalado — revisão usa os agnósticos de linguagem listados lá.
+- Plano de delegação a subagentes está em `.specs/features/catalogo/tasks.md`: Fase 1 inline, Fase 2 e Fase 3 como um lote cada, Verifier obrigatório ao fim de cada lote. Não existe agente Ruby/Rails instalado.

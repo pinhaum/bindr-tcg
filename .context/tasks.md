@@ -40,7 +40,7 @@ Regras de execução:
 
 ## 1 — Fundação do projeto
 
-- [ ] **1.1 Inicializar o projeto na stack escolhida** (Rails 8 + Hotwire + PostgreSQL)
+- [x] **1.1 Inicializar o projeto na stack escolhida** (Rails 8 + Hotwire + PostgreSQL)
   - Projeto novo, PostgreSQL configurado, suíte de testes rodando com um teste
     trivial verde.
   - `docker-compose` ou equivalente, com um único comando de subida documentado

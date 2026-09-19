@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bindr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bindr}
+      POSTGRES_DB: ${POSTGRES_DB:-bindr_development}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bindr}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    # `db:prepare` é idempotente: cria o banco na primeira subida e só aplica
+    # migrações pendentes nas seguintes. É o que torna `docker compose up` o
+    # comando único do Req. 11.6.
+    command: bash -c "bin/rails db:prepare && bin/rails server -b 0.0.0.0"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-bindr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bindr}
+      POSTGRES_DB: ${POSTGRES_DB:-bindr_development}
+      POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-bindr_test}
+    volumes:
+      - .:/rails
+      - bundle:/usr/local/bundle
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  bundle:

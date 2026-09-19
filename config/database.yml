@@ -1,0 +1,22 @@
+# Conexão via variáveis de ambiente para que o mesmo arquivo sirva dentro do
+# container (host `db`) e fora dele (host `localhost`). Ver `.env.example`.
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: <%= ENV.fetch("POSTGRES_HOST") { "localhost" } %>
+  port: <%= ENV.fetch("POSTGRES_PORT") { 5432 } %>
+  username: <%= ENV.fetch("POSTGRES_USER") { "bindr" } %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD") { "bindr" } %>
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("POSTGRES_DB") { "bindr_development" } %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch("POSTGRES_TEST_DB") { "bindr_test" } %>
+
+production:
+  <<: *default
+  database: bindr_production

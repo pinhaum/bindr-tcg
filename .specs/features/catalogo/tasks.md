@@ -14,7 +14,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Design**: `.context/design.md`
 **Spec**: `.specs/features/catalogo/spec.md`
-**Status**: In Progress — Fase 0 concluída (0.1, 0.2, 0.3)
+**Status**: In Progress — Fase 0 concluída (0.1, 0.2, 0.3); T1 concluída
 
 ---
 
@@ -38,11 +38,13 @@ cujo resultado é "estrutura criada" — proibido por `.context/tasks.md`.
 
 ## Gate Check Commands
 
-Definidos na T1 (ainda não existe projeto). Previsto para Rails 8:
+Definidos na T1 e em uso:
 
 - **quick**: `bin/rails test test/models test/lib`
 - **full**: `bin/rails test && bin/rubocop`
 - **build**: `docker compose build`
+
+Dentro do container, prefixar com `docker compose exec app`.
 
 ---
 
@@ -145,7 +147,7 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 ## Task Breakdown
 
-### T1: Inicializar o projeto Rails 8 com PostgreSQL
+### T1: Inicializar o projeto Rails 8 com PostgreSQL — CONCLUÍDA
 
 **What**: Projeto Rails 8 novo, PostgreSQL configurado, suíte de testes rodando com um teste trivial verde, subida local em um comando documentado.
 **Where**: raiz do repositório, `docker-compose.yml`, `README.md`
@@ -154,10 +156,10 @@ Não usar `ecc:code-reviewer` genérico junto com os acima: sobreposição sem g
 
 **Done when**:
 
-- [ ] `docker compose up` sobe app + Postgres
-- [ ] Um teste trivial passa
-- [ ] README documenta o comando único de subida
-- [ ] Confirmado na documentação do Rails 8 se o gerador de autenticação atende o Req. 6 (resolve um `⚠️ VERIFICAR` de `design.md`)
+- [x] `docker compose up` sobe app + Postgres
+- [x] Um teste trivial passa
+- [x] README documenta o comando único de subida
+- [x] Confirmado na documentação do Rails 8 se o gerador de autenticação atende o Req. 6 (resolve um `⚠️ VERIFICAR` de `design.md`)
 
 **Tests**: unit
 **Gate**: full
