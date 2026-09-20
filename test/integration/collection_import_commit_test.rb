@@ -595,6 +595,37 @@ class CollectionImportCommitTest < ActionDispatch::IntegrationTest
     assert_equal depois_da_primeira, retrato_da_colecao
   end
 
+  # Troca o teto de linhas graváveis pela duração do bloco. `remove_const` antes
+  # de `const_set` evita o aviso de redefinição, e o `ensure` devolve o valor
+  # real mesmo se a asserção falhar.
+  def com_teto_de(limite)
+    original = CollectionCsv::Parser::MAX_LINHAS
+    CollectionCsv::Parser.send(:remove_const, :MAX_LINHAS)
+    CollectionCsv::Parser.const_set(:MAX_LINHAS, limite)
+    yield
+  ensure
+    CollectionCsv::Parser.send(:remove_const, :MAX_LINHAS)
+    CollectionCsv::Parser.const_set(:MAX_LINHAS, original)
+  end
+
+  # Faz o `upsert` de **uma** variante levantar o erro dado, deixando as demais
+  # seguirem o caminho real. Instrumentar o serviço é o único jeito de produzir
+  # uma falha que não seja `ActiveRecordError` — a violação de FK que os testes
+  # vizinhos usam não alcança essa classe de erro.
+  def com_upsert_falhando_em(card_variant_id, erro)
+    original = CollectionCsv::Commit.instance_method(:upsert)
+
+    CollectionCsv::Commit.define_method(:upsert) do |linha|
+      raise erro if linha.card_variant_id == card_variant_id
+
+      original.bind_call(self, linha)
+    end
+
+    yield
+  ensure
+    CollectionCsv::Commit.define_method(:upsert, original)
+  end
+
   # --- Req. 10.3 / POR-06: uma linha que falha não desfaz as anteriores ---
 
   # O mesmo espírito do erro isolado da ingestão (design.md §5.2): cada
@@ -634,6 +665,95 @@ class CollectionImportCommitTest < ActionDispatch::IntegrationTest
 
     assert_equal "confirmado", preview.reload.status,
                  "o lote fecha mesmo com linha falhando: o oposto perderia o lote inteiro"
+  end
+
+  # Achado CRITICAL da revisão de banco (autor ≠ revisor), reproduzido antes de
+  # corrigir: os dois testes acima produzem falha por violação de FK, que é uma
+  # `ActiveRecord::ActiveRecordError` — e o `rescue` original capturava
+  # exatamente essa classe. Ficavam de fora **todos** os erros que não descendem
+  # dela: `PG::Error` cru do driver (`PG::ConnectionBad.ancestors` não inclui
+  # `ActiveRecordError`), `Timeout::Error`, e qualquer `RuntimeError` de um bug
+  # de aplicação.
+  #
+  # Medido com o `rescue` estreito: com a primeira linha já gravada no savepoint
+  # dela, um erro na segunda propagava pelo `each`, a transação externa fazia
+  # ROLLBACK e a coleção ficava com **zero** linhas. Num lote de 10.000, uma
+  # queda de conexão na linha 4.000 apagaria as 3.999 já gravadas.
+  test "uma falha que não é do Active Record também não desfaz as anteriores" do
+    sign_in
+    preview = previsualizar
+    falhada = @nova.id
+
+    com_upsert_falhando_em(falhada, RuntimeError.new("bug de aplicação")) do
+      confirmar(preview.token)
+    end
+
+    assert_equal 7, quantidade(@nami, @existente),
+                 "a linha anterior à que falhou continua gravada"
+    assert_equal 0, quantidade(@nami, @zerada),
+                 "a linha posterior à que falhou continua sendo processada"
+    assert_nil CollectionItem.for_user(@nami).find_by(card_variant_id: falhada),
+               "a linha que falhou não gravou nada"
+    assert_equal "confirmado", preview.reload.status,
+                 "o lote fecha: o oposto devolveria a pré-visualização ao estado pendente " \
+                 "com parte da coleção já gravada"
+  end
+
+  # `PG::Error` é o caso que motivou o achado: é o que chega numa queda de
+  # conexão com o banco no meio do lote, e é o mais caro de perder.
+  test "um erro cru do driver do banco não desfaz as anteriores" do
+    sign_in
+    preview = previsualizar
+    falhada = @nova.id
+
+    com_upsert_falhando_em(falhada, PG::Error.new("conexão perdida")) do
+      confirmar(preview.token)
+    end
+
+    assert_equal 7, quantidade(@nami, @existente)
+    assert_equal "confirmado", preview.reload.status
+  end
+
+  # O `rescue` alargado não pode engolir o que precisa derrubar o processo:
+  # `SignalException`, `SystemExit` e `NoMemoryError` não são `StandardError`, e
+  # virar "mais uma linha que falhou" esconderia um desligamento em curso.
+  test "sinal de desligamento não é tratado como linha que falhou" do
+    sign_in
+    preview = previsualizar
+
+    assert_raises(SystemExit) do
+      com_upsert_falhando_em(@nova.id, SystemExit.new) do
+        confirmar(preview.token)
+      end
+    end
+  end
+
+  # Achado HIGH da mesma revisão: o teto de AD-008 vive em `Parser::MAX_LINHAS`,
+  # que atua no upload, e entre ele e esta escrita está um `jsonb` **sem `CHECK`
+  # de tamanho**. Um staging maior chegando aqui por qualquer outro caminho —
+  # manutenção, migração de dado, o limite do parser mudando sozinho — viraria
+  # 30.000+ statements numa requisição HTTP sem nada reclamar.
+  test "um lote acima do teto é recusado antes de gravar qualquer linha" do
+    sign_in
+    preview = previsualizar
+    excedente = preview.linhas.first.merge("indice" => 99)
+    preview.update!(linhas: preview.linhas + [ excedente ])
+
+    antes = CollectionItem.for_user(@nami).sum(:quantity)
+
+    # Baixar o teto é mais honesto do que montar 10.001 linhas: o que se prova
+    # é a guarda, não a aritmética do número. O valor real continua fixado pelo
+    # teste do `Parser`, que é o dono de AD-008.
+    com_teto_de(1) do
+      assert_raises(CollectionCsv::Commit::LoteGrandeDemais) do
+        CollectionCsv::Commit.new(@nami, preview.token).call
+      end
+    end
+
+    assert_equal antes, CollectionItem.for_user(@nami).sum(:quantity),
+                 "o teto precisa barrar antes da escrita, não no meio dela"
+    assert_equal "pendente", preview.reload.status,
+                 "um lote recusado não consome a pré-visualização"
   end
 
   # --- POR-06: a escrita é `ON CONFLICT`, não ler-em-Ruby-e-escrever-depois ---

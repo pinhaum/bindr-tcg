@@ -924,6 +924,51 @@ teste, então a exceção não vira porta dos fundos.
   pelo mecanismo do statement; e o custo do lote máximo de AD-008 (10.000
   linhas), que medi só por extrapolação linear a partir de 50.
 
+**Revisão de banco da escrita em lote (`ecc:database-reviewer`, autor ≠ revisor):**
+**1 CRITICAL**, 1 HIGH, 2 MEDIUM, 1 LOW. Mediu com **duas conexões reais**, que é
+o que o executor declarou não conseguir avaliar.
+
+- **CRITICAL — CORRIGIDO.** *`rescue` estreito anulava a garantia do Req. 10.3.*
+  O bloco capturava `ActiveRecord::ActiveRecordError`, e **`PG::Error` não herda
+  dela** (`PG::ConnectionBad.ancestors` = `[PG::ConnectionBad, PG::Error,
+  StandardError, Exception]`) — nem `RuntimeError`, nem `Timeout::Error`.
+  Reproduzido antes de corrigir: com a primeira linha já gravada no savepoint
+  dela, um erro na segunda propagava pelo `each`, a transação externa fazia
+  ROLLBACK e a coleção ficava com **zero** linhas, status de volta a `pendente`.
+  Numa queda de conexão na linha 4.000 de um lote de 10.000, o usuário perderia
+  as 3.999 já gravadas — exatamente o que o Req. 10.3 / POR-06 proíbe. A lacuna
+  existia porque os testes só produziam falha por violação de FK, que **é**
+  `ActiveRecordError`. `rescue StandardError`, com três testes novos (bug de
+  aplicação, `PG::Error`, e um que prova que `SystemExit` **não** é engolido).
+  Mutação que reverte o `rescue` derruba dois deles.
+
+- **HIGH — CORRIGIDO.** *Nenhum teto de lote no `Commit`.* O limite de AD-008
+  vive em `Parser::MAX_LINHAS`, que atua no upload, e entre ele e a escrita está
+  um `jsonb` **sem `CHECK` de tamanho**. Teto defensivo redundante em
+  `Commit#gravar`, levantando `LoteGrandeDemais` antes de gravar qualquer linha.
+
+- **MEDIUM — REGISTRADO, sem ação nesta task.** *Sem `statement_timeout`.* 10.000
+  linhas medidas em **6,94s / 30.004 statements** (1 reivindicação + 3 por
+  linha; o par SAVEPOINT/RELEASE domina a contagem, não o INSERT). É configuração
+  de ambiente, não deste arquivo, e mexer em `database.yml` extrapola a task.
+  **Dívida aberta:** confirmar que 6,94s cabem no timeout de proxy de produção.
+
+- **MEDIUM — REGISTRADO, vira insumo da T15.** *Falha parcial não é distinguível
+  depois.* Com falhas de `ActiveRecordError`, o lote fecha com `falhas` preenchido,
+  mas isso só existe no flash da resposta — quem fechou a aba não descobre mais
+  quais linhas falharam. **A T15 monta o resumo do Req. 10.4 e é onde essa
+  decisão cabe**: persistir o resultado ou assumir que o flash basta.
+
+- **LOW — sem ação.** Índice parcial em `expires_at` só compensaria com volume.
+
+**Medido e aprovado pela revisão:** duas reivindicações simultâneas do mesmo
+preview devolvem exatamente um `true`; dois commits concorrentes na mesma
+variante resolvem por lock de linha sem somar nem duplicar; o `ON CONFLICT` casa
+sem ambiguidade com `index_collection_items_on_user_id_and_card_variant_id`; um
+import de 3.000 linhas **não** bloqueia o "+1" da grade (0,03–0,04s, medido);
+morte de processo no meio do lote desfaz tudo e devolve o staging a `pendente`,
+que é recuperável.
+
 ### T15: Resumo final da importação ✅ fecha a §5.3
 
 **What**: O resumo que o usuário lê depois de confirmar: quantas linhas entraram, quantas foram atualizadas, quantas recusadas, e por quê.

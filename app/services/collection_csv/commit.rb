@@ -125,6 +125,11 @@ module CollectionCsv
     # `expires_at > now()` fica aqui, e não num `if` em Ruby antes, pelo mesmo
     # motivo do `status`: um prazo lido e escrito em dois passos tem a mesma
     # janela que o status lido e escrito em dois passos.
+    # Levantada, nunca devolvida como `Result`: um lote acima do teto não é um
+    # desfecho que a tela deva explicar ao usuário — é sinal de que algo passou
+    # por cima do `Parser`, e o lugar de aparecer é o log, não a interface.
+    class LoteGrandeDemais < StandardError; end
+
     RECLAIM_SQL = <<~SQL.freeze
       UPDATE collection_imports
       SET status = 'confirmado', updated_at = now()
@@ -178,6 +183,23 @@ module CollectionCsv
         inalteradas = 0
         falhas = []
 
+        # Teto redundante com o do `Parser`, e deliberadamente redundante —
+        # achado HIGH da revisão de banco. O limite de AD-008 vive em
+        # `Parser::MAX_LINHAS`, que atua no **upload**; entre ele e esta escrita
+        # está um `jsonb` **sem `CHECK` de tamanho**, então nada no banco impede
+        # que um staging maior chegue aqui: um caminho de manutenção, uma
+        # migração de dado, ou o próprio limite do parser mudando sem que
+        # ninguém olhe para este arquivo.
+        #
+        # O custo é real e medido pela revisão: 10.000 linhas são 30.004
+        # statements e ~7s de transação aberta. Deixar o teto de capacidade
+        # morar só numa constante de outro arquivo é confiar demais na distância.
+        if linhas_gravaveis(preview).size > Parser::MAX_LINHAS
+          raise LoteGrandeDemais,
+                "a pré-visualização #{preview.id} tem #{linhas_gravaveis(preview).size} " \
+                "linhas graváveis e o teto é #{Parser::MAX_LINHAS}"
+        end
+
         # A transação externa envolve a reivindicação **e** a escrita: é ela que
         # garante que uma confirmação abandonada no meio não deixe a
         # pré-visualização marcada como consumida com a coleção pela metade.
@@ -194,7 +216,23 @@ module CollectionCsv
               upsert(linha)
               linha.classificacao == :inalterada ? inalteradas += 1 : gravadas += 1
             end
-          rescue ActiveRecord::ActiveRecordError => e
+          # `StandardError`, e não `ActiveRecord::ActiveRecordError`: a revisão de
+          # banco (autor ≠ revisor) mostrou, com duas conexões reais, que o
+          # `rescue` estreito **anulava a garantia que este bloco existe para
+          # dar**. `PG::Error` não herda de `ActiveRecordError`
+          # (`PG::ConnectionBad.ancestors` = `[PG::ConnectionBad, PG::Error,
+          # StandardError, Exception]`), e um `RuntimeError` de aplicação
+          # tampouco — reproduzido: com a primeira linha já gravada no savepoint
+          # dela, um erro na segunda propagava pelo `each`, a transação externa
+          # fazia ROLLBACK e a coleção ficava com **zero** linhas, status de
+          # volta a `pendente`. Numa queda de conexão na linha 4.000 de um lote
+          # de 10.000, o usuário perderia as 3.999 já gravadas — exatamente o
+          # que o Req. 10.3 / POR-06 proíbe.
+          #
+          # `StandardError` e não `Exception`: `SignalException`, `SystemExit` e
+          # `NoMemoryError` precisam continuar derrubando o processo em vez de
+          # virar "mais uma linha que falhou".
+          rescue StandardError => e
             # A mensagem do banco não vai para a tela: ela carrega nome de
             # tabela, de constraint e às vezes o statement. O que o usuário lê
             # é a identificação da linha, que é o que permite corrigir o
