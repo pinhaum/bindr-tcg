@@ -611,6 +611,31 @@ acaso em cerca de 40% das vezes.
 
 ---
 
+**Revisão de banco (`ecc:database-reviewer`, autor ≠ revisor):** 0 CRITICAL,
+0 HIGH, 1 MEDIUM, 1 LOW. Confirmou ao vivo, em `pg_constraint`, que a única FK é
+para `users` com `ON DELETE RESTRICT` e que não há cascata possível para
+`collection_items`; que o conjunto de índices não tem redundância e cobre por
+`Index Scan` as consultas de T12–T14; e mediu o `jsonb` de 10.000 linhas em
+~3 MB, validando a escolha contra tabela filha.
+
+> **MEDIUM — vira REQUISITO VINCULANTE DA T14, não sugestão.** O `CHECK` de
+> `status` não impede a regressão `confirmado → pendente`. Reproduzi:
+> `imp.update!(status: "confirmado")` seguido de `imp.update!(status: "pendente")`
+> passa sem erro, e `confirmavel?` volta a `true`. **Consequência:** se a T14
+> fizer `confirmavel?` (SELECT) e depois `update!(status: "confirmado")` (UPDATE)
+> como dois passos em Ruby, duas requisições simultâneas leem `pendente`, ambas
+> passam, e **a coleção é gravada duas vezes** — o Edge Case "duas confirmações
+> da mesma pré-visualização não duplicam o efeito" some. O schema não impede.
+>
+> **A T14 DEVE** fazer a transição num único `UPDATE ... WHERE id = $1 AND
+> status = 'pendente' AND expires_at > now() RETURNING id`, e a escrita na
+> coleção **deve estar na mesma transação**, condicionada ao `RETURNING` ter
+> vindo preenchido. `SELECT` seguido de `UPDATE` é defeito, mesmo com teste verde.
+
+> **LOW — registrado sem ação.** Não há `CHECK` de `jsonb_array_length(linhas)
+> <= 10000` no banco; o limite vive só no parser. Sem caminho de produto que
+> escreva sem passar por ele, é risco de regressão futura, não defeito presente.
+
 ### T12: Upload produz pré-visualização e **nada mais**
 
 **What**: A action que recebe o arquivo, chama parser e resolver, grava a pré-visualização no staging e responde — sem escrever uma única linha na coleção.
