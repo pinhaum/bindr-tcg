@@ -547,6 +547,125 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     assert_equal 100.0, d.completion_percent
   end
 
+  # --- PRG-06: parallels como métrica separada --------------------------
+
+  test "cada set traz a contagem de parallels possuídos e o total de parallels do set" do
+    # `@set_d`: 2 parallels impressos, nenhum possuído ainda.
+    d = progress["OPp2d"]
+    assert_equal 0, d.parallel_owned_variants
+    assert_equal 2, d.parallel_variants
+
+    # `@set_e`: 1 parallel impresso e possuído.
+    e = progress["OPp2e"]
+    assert_equal 1, e.parallel_owned_variants
+    assert_equal 1, e.parallel_variants
+  end
+
+  # O critério que separa uma implementação correta de uma que soma parallels no
+  # numerador. `@set_e` é o cenário montado para discriminar: a **única** posse é
+  # `@v_e_par`, um `parallel`. O percentual tem de ser zero e a contagem de
+  # parallels **um** — os dois números diferentes, senão nenhuma asserção
+  # distinguiria "não somou" de "somou".
+  test "posse apenas de parallels mantém o percentual em zero e a contagem refletindo a posse" do
+    e = progress["OPp2e"]
+
+    assert_equal "parallel", @v_e_par.art_kind
+    assert_equal 1, CollectionItem.for_user(@user).owned
+                                  .joins(:card_variant)
+                                  .where(card_variants: { set_id: @set_e.id }).count,
+                 "a única posse do usuário em OPp2e é o parallel"
+
+    assert_equal 0.0, e.completion_percent,
+                 "parallel nunca entra no numerador do percentual (AD-003, Req. 9.6)"
+    assert_equal 0, e.base_owned_variants
+
+    assert_equal 1, e.parallel_owned_variants,
+                 "e a métrica separada reflete a posse"
+    assert_not_equal e.completion_percent, e.parallel_owned_variants,
+                     "com os dois números iguais nenhuma asserção discriminaria"
+  end
+
+  test "parallels não entram no denominador do percentual" do
+    e = progress["OPp2e"]
+
+    # O set tem 2 impressões (1 base, 1 parallel) e `base_set_size = 2`. O
+    # denominador vem da fonte e não soma o parallel impresso.
+    assert_equal 2, e.total_variants
+    assert_equal 1, e.parallel_variants
+    assert_equal 2, e.base_size,
+                 "o denominador é base_set_size, e o parallel não o infla"
+  end
+
+  # O par do teste acima: no **mesmo** cenário, acrescentar uma variante base
+  # move só o percentual. Se os parallels vazassem para o numerador, a contagem
+  # de parallels e o percentual andariam juntos e este teste não discriminaria.
+  test "acrescentar uma variante base altera só o percentual, deixando os parallels intactos" do
+    antes = progress["OPp2e"]
+    assert_equal 0.0, antes.completion_percent
+    assert_equal 1, antes.parallel_owned_variants
+
+    own(@user, @v_e_base, 1)
+
+    depois = progress["OPp2e"]
+
+    assert_equal 50.0, depois.completion_percent,
+                 "uma base de duas: o percentual muda"
+    assert_equal 1, depois.base_owned_variants
+
+    assert_equal antes.parallel_owned_variants, depois.parallel_owned_variants,
+                 "a contagem de parallels fica intacta: a base não é parallel"
+    assert_equal antes.parallel_variants, depois.parallel_variants
+  end
+
+  test "possuir um parallel a mais altera só a contagem de parallels, não o percentual" do
+    antes = progress["OPp2d"]
+
+    own(@user, @v_d_par1, 1)
+
+    depois = progress["OPp2d"]
+
+    assert_equal antes.completion_percent, depois.completion_percent,
+                 "o percentual não se mexe (AD-003)"
+    assert_equal antes.base_owned_variants, depois.base_owned_variants
+    assert_equal antes.parallel_owned_variants + 1, depois.parallel_owned_variants,
+                 "só a métrica separada acompanha"
+  end
+
+  test "set sem nenhuma variante parallel apresenta a métrica como zero, sem ocultá-la" do
+    # `@set_c` tem uma única impressão, `base`. A métrica existe e vale zero.
+    c = progress["OPp1c"]
+
+    assert_equal 0, CardVariant.where(set_id: @set_c.id, art_kind: "parallel").count,
+                 "o cenário é um set sem parallel nenhum"
+
+    assert_not_nil c, "o set não pode sumir por não ter parallel"
+    assert_equal 0, c.parallel_variants
+    assert_equal 0, c.parallel_owned_variants
+  end
+
+  test "a contagem de parallels conta variantes distintas, nunca cópias" do
+    # `@v_e_par` tem 2 cópias e conta **1**, pela mesma regra do Req. 9.4.
+    assert_equal 2, CollectionItem.find_by!(user: @user, card_variant: @v_e_par).quantity
+
+    assert_equal 1, progress["OPp2e"].parallel_owned_variants
+  end
+
+  test "parallel com quantidade zero não conta como possuído" do
+    own(@user, @v_d_par1, 0)
+
+    assert_equal 0, progress["OPp2d"].parallel_owned_variants,
+                 "`owned` filtra por quantidade, também na métrica separada"
+  end
+
+  test "parallel de outro usuário não entra na contagem do alvo" do
+    own(@outro, @v_d_par1, 3)
+
+    assert_equal 0, progress(@user)["OPp2d"].parallel_owned_variants
+    assert_equal 1, progress(@outro)["OPp2d"].parallel_owned_variants
+    assert_equal 2, progress(@outro)["OPp2d"].parallel_variants,
+                   "o total de parallels é do catálogo e não depende de quem olha"
+  end
+
   # --- Forma da agregação -----------------------------------------------
 
   # PRG-11 é medido na T8, mas a forma nasce aqui: um `count` por set seria

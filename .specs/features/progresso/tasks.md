@@ -241,7 +241,7 @@ T6 → T7 → T8
 
 ---
 
-### T3: Parallels como métrica separada
+### T3: Parallels como métrica separada ✅
 
 **What**: Contagem de variantes `art_kind = 'parallel'` possuídas por set, exibida como métrica própria e fora do numerador e do denominador do percentual.
 **Where**: `app/queries/set_progress_query.rb`
@@ -256,14 +256,70 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Cada set traz a contagem de parallels possuídos e o total de parallels do set
-- [ ] Teste prova que posse **apenas** de parallels mantém o percentual de conclusão em zero e a contagem de parallels refletindo a posse
-- [ ] Teste prova que acrescentar uma variante base ao mesmo cenário altera **só** o percentual, deixando a contagem de parallels intacta
-- [ ] Teste prova que set sem nenhuma variante `parallel` apresenta a métrica como zero, sem ocultá-la e sem erro
-- [ ] Nenhuma consulta nova por set: a métrica sai da mesma agregação
+- [x] Cada set traz a contagem de parallels possuídos e o total de parallels do set
+- [x] Teste prova que posse **apenas** de parallels mantém o percentual de conclusão em zero e a contagem de parallels refletindo a posse
+- [x] Teste prova que acrescentar uma variante base ao mesmo cenário altera **só** o percentual, deixando a contagem de parallels intacta
+- [x] Teste prova que set sem nenhuma variante `parallel` apresenta a métrica como zero, sem ocultá-la e sem erro
+- [x] Nenhuma consulta nova por set: a métrica sai da mesma agregação
 
 **Tests**: unit
 **Gate**: quick
+
+**Decisões da execução:**
+
+- **Duas colunas, e a assimetria entre elas é o ponto.**
+  `parallel_owned_variants` conta sobre `owned_items` (o `LEFT JOIN` da
+  coleção) e `parallel_variants` conta sobre `card_variants` (o catálogo). A
+  primeira depende de quem olha, a segunda não — é a mesma assimetria que
+  `owned_variants` e `total_variants` já tinham na T1, e há teste que a trava:
+  o total de parallels de `@set_d` é 2 tanto para o dono da posse quanto para o
+  outro usuário. Contar o total sobre `owned_items` foi uma das mutações
+  testadas e derruba 2 testes.
+- **Contagem absoluta, sem percentual próprio, e a razão está no arquivo.** O
+  Req. 9.6 pede "a contagem de parallels possuídos". Um percentual exigiria um
+  `parallelSetSize` que a fonte não fornece; seria derivado de `art_kind`, a
+  classificação que a própria spec mediu como divergente em 21 dos 62 sets.
+  Não acrescentei `parallel_percent` nem predicado análogo a
+  `completion_percent_known?`: não há requisito, e o número não existiria sem
+  inventar denominador.
+- **O filtro é `art_kind = 'parallel'` e mais nada — `other` fica de fora.**
+  `other` já entra no numerador e no universo do denominador do percentual
+  principal (decisão da T2); trazê-lo para cá o tiraria de lá e reintroduziria
+  a incoerência aritmética que a T2 resolveu. Os dois conjuntos são disjuntos
+  por construção, e é isso que o Req. 9.6 quer dizer com "nunca somada ao
+  percentual". A mutação que faz a métrica contar `base,other,parallel` derruba
+  6 testes.
+- **Nenhuma consulta nova, como T1 e T2 previram.** As duas métricas entraram
+  como colunas `COUNT(...) FILTER (...)` no mesmo `SELECT`, sobre o mesmo
+  `GROUP BY sets.id`. O teste de número de consultas da T1 continua verde, e a
+  medição contra o banco de desenvolvimento confirma: **1 consulta** para os 63
+  sets, com `parallel_variants` somando exatamente 1643 — o número medido de
+  `art_kind = 'parallel'` no catálogo real. 12 sets reais não têm parallel
+  nenhum e continuam listados com a métrica em zero.
+- **O cenário discriminante é `@set_e`, e ele já existia desde a T2.** A posse
+  única ali é `@v_e_par` (`parallel`): percentual **0.0** contra contagem de
+  parallels **1** — dois números diferentes, sem os quais nenhuma asserção
+  distinguiria "não somou" de "somou". O par do teste acrescenta `@v_e_base` ao
+  **mesmo** cenário e exige que só o percentual se mova (0.0 → 50.0) com a
+  contagem de parallels intacta. `@v_e_par` tem 2 cópias de propósito: é o que
+  prova que a métrica conta variantes distintas e não cópias.
+- **Sensor de discriminação: sete mutações sobre cópia do arquivo (`cp`/`diff`,
+  nunca `git stash`), seis capturadas.** Parallels somados ao numerador do
+  percentual (5 falhas), somados ao denominador (7 falhas), métrica contando
+  `base` em vez de `parallel` (8 falhas), métrica contando `base,other,parallel`
+  (6 falhas), total de parallels contado sobre a posse em vez do catálogo
+  (2 falhas) e parallels possuídos somando cópias em vez de contar variantes
+  (5 falhas).
+- **Uma mutação sobreviveu, e ela não é da T3.** Remover o `DISTINCT` de
+  `COUNT(DISTINCT owned_items.card_variant_id)` não derruba teste nenhum —
+  **nem na coluna nova nem na `base_owned_variants` da T2**, conferido nas duas.
+  Não é teste fraco: a subconsulta de posse seleciona só `card_variant_id` de
+  `collection_items`, onde `UNIQUE (user_id, card_variant_id)` garante uma
+  linha por variante, então `COUNT` e `COUNT(DISTINCT)` coincidem por
+  **construção do schema**. O `DISTINCT` fica como defesa contra uma mudança
+  futura na forma do join, não como a garantia de distinção — essa é da
+  constraint. Registrado aqui em vez de escrever um teste que não teria como
+  falhar.
 
 ---
 

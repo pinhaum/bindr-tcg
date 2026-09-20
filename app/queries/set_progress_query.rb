@@ -83,6 +83,29 @@
 # defeito do subsistema de ingestão, e misturá-lo aqui violaria a separação que
 # é o eixo do `design.md`.
 #
+# ## Parallels: contagem absoluta, fora dos dois lados da divisão
+#
+# (PRG-06, Req. 9.6, AD-003.) `parallel_owned_variants` e `parallel_variants`
+# são **duas colunas a mais no mesmo `SELECT`**, sobre o mesmo `GROUP BY` — não
+# há consulta nova por set, como a T1 previu. O total (`parallel_variants`) sai
+# do catálogo e não depende de quem olha; o possuído sai do mesmo `LEFT JOIN`
+# da coleção que alimenta as demais métricas, logo herda `owned` (quantidade
+# zero não conta) e o escopo do usuário sem repetir nenhuma regra.
+#
+# **Contagem absoluta, e não um segundo percentual.** O Req. 9.6 pede "a
+# contagem de parallels possuídos". Um percentual de parallels exigiria um
+# `parallelSetSize` que a fonte **não fornece**: seria derivado de `art_kind`,
+# que é justamente a classificação cuja confiabilidade a spec mediu como
+# divergente em 21 dos 62 sets. Exibir um percentual sobre um denominador que
+# sabemos suspeito é o erro que esta feature inteira existe para não cometer.
+#
+# **`other` não é `parallel`.** O filtro aqui é `art_kind = 'parallel'` e mais
+# nada. `other` já entra no numerador **e** no universo do denominador do
+# percentual principal (ver acima); movê-lo para cá o tiraria do percentual e
+# reintroduziria a incoerência aritmética que a decisão de numerador resolveu.
+# São dois conjuntos disjuntos por construção: nenhuma variante conta nas duas
+# métricas, e é isso que o Req. 9.6 quer dizer com "nunca somada ao percentual".
+#
 # ## Indisponível é `nil`, e `nil` nunca é `0`
 #
 # Set sem `base_set_size` (medido: exatamente um, `PRB9cd8`) e set com
@@ -108,6 +131,7 @@ class SetProgressQuery
   # dar exatamente o mesmo resultado de quem nunca registrou nada.
   Row = Struct.new(:set_id, :set_code, :set_name, :owned_variants, :total_variants,
                    :base_owned_variants, :base_size,
+                   :parallel_owned_variants, :parallel_variants,
                    keyword_init: true) do
     # `nil` quando não há denominador conhecido — ausente ou zero, o mesmo
     # caminho. O chamador distingue indisponível de zero por cento sem
@@ -141,7 +165,9 @@ class SetProgressQuery
         base_owned_variants: record.base_owned_variants.to_i,
         # `to_i` aqui apagaria a distinção entre "sem denominador" e "zero",
         # que é justamente o que PRG-10 exige preservar até o `Row`.
-        base_size: record.base_size
+        base_size: record.base_size,
+        parallel_owned_variants: record.parallel_owned_variants.to_i,
+        parallel_variants: record.parallel_variants.to_i
       )
     end
   end
@@ -168,7 +194,11 @@ class SetProgressQuery
     COUNT(DISTINCT owned_items.card_variant_id) AS owned_variants,
     COUNT(DISTINCT owned_items.card_variant_id)
       FILTER (WHERE card_variants.art_kind IN ('base', 'other')) AS base_owned_variants,
-    sets.base_set_size AS base_size
+    sets.base_set_size AS base_size,
+    COUNT(DISTINCT owned_items.card_variant_id)
+      FILTER (WHERE card_variants.art_kind = 'parallel') AS parallel_owned_variants,
+    COUNT(DISTINCT card_variants.id)
+      FILTER (WHERE card_variants.art_kind = 'parallel') AS parallel_variants
   SQL
 
   def variants_join
