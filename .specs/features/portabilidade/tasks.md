@@ -147,11 +147,11 @@ T14 → T15 → T16 → T17
 
 **Done when**:
 
-- [ ] A causa está identificada e escrita no cabeçalho do teste — não "provavelmente relógio", mas o mecanismo, com a evidência que o sustenta
-- [ ] O flake é **reproduzido antes** de ser corrigido, e a reprodução está registrada (comando e saída)
-- [ ] A correção ataca a **causa**, não o sintoma: a asserção não é enfraquecida, pulada, removida nem trocada por uma mais permissiva
-- [ ] O teste continua provando que a marca de última aparição **distingue** o presente do ausente — revertida a correção, a garantia original volta a ser exercida, e isso é verificado
-- [ ] `bin/rubocop` limpo
+- [x] A causa está identificada e escrita no cabeçalho do teste — não "provavelmente relógio", mas o mecanismo, com a evidência que o sustenta
+- [x] O flake é **reproduzido antes** de ser corrigido, e a reprodução está registrada (comando e saída)
+- [x] A correção ataca a **causa**, não o sintoma: a asserção não é enfraquecida, pulada, removida nem trocada por uma mais permissiva
+- [x] O teste continua provando que a marca de última aparição **distingue** o presente do ausente — revertida a correção, a garantia original volta a ser exercida, e isso é verificado
+- [x] `bin/rubocop` limpo
 
 **Tests**: unit
 **Gate**: quick

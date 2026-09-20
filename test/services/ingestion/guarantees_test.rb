@@ -11,8 +11,29 @@ module Ingestion
     FIXTURE = Rails.root.join("spec", "fixtures", "optcgjson-subset.json")
     REVISION = "5669eab51096629faf90dbf0dc903128cff80a98".freeze
 
-    def ingest(payload = FIXTURE.read, revision: REVISION)
-      Upsert.new(Normalize.call(payload), source: "optcgjson", revision: revision).call
+    def ingest(payload = FIXTURE.read, revision: REVISION, clock: Time)
+      Upsert.new(Normalize.call(payload), source: "optcgjson", revision: revision,
+                 clock: clock).call
+    end
+
+    # Relógio monotônico para os testes que asseveram **ordem** entre marcas de
+    # duas execuções. Ver o comentário do teste "a marca de última aparição
+    # distingue o presente do ausente": `Time.current` é relógio de parede e
+    # pode andar para trás neste ambiente, o que inverte a ordem sem que nada
+    # na ingestão esteja errado. Cada leitura aqui é estritamente maior que a
+    # anterior, então a asserção passa a medir a regra da ingestão em vez da
+    # estabilidade do relógio do host.
+    class RelogioCrescente
+      def initialize(inicio = Time.current.change(usec: 0), passo: 1.second)
+        @proximo = inicio
+        @passo = passo
+      end
+
+      def current
+        instante = @proximo
+        @proximo += @passo
+        instante
+      end
     end
 
     def contagens
@@ -196,12 +217,41 @@ module Ingestion
     # A marca é o que permite sinalizar o ausente na interface sem removê-lo:
     # quem entrou na última execução tem `last_seen_at` novo, o ausente
     # mantém o antigo.
+    #
+    # ## Por que este teste injeta um relógio (T1 da `portabilidade`)
+    #
+    # A asserção de ordem falhava de forma intermitente na suíte completa — 1
+    # falha em 5 execuções —, e **não por empate**: o presente aparecia mais
+    # velho que o ausente, uma inversão de segundos. O diagnóstico registrado
+    # na spec (truncamento por `to_i`) estava errado: as três colunas são
+    # `timestamp(6)`, e truncamento não inverte.
+    #
+    # A causa é o **relógio de parede do host andar para trás**. A execução
+    # que reproduziu o defeito gravou, na mesma ingestão:
+    #
+    #     run 1083: started_at=19:06:56.243492  finished_at=19:06:50.933776
+    #     run 1084: started_at=19:06:50.971246  finished_at=19:07:06.247061
+    #
+    # A primeira execução terminou ~5,3s **antes** de ter começado, e a
+    # segunda começou antes da primeira. Medido diretamente no container: em
+    # 2000 leituras, `Time.now` saltou 4 vezes, ±11,25s, enquanto
+    # `CLOCK_MONOTONIC` avançou os 0,005s esperados — ressincronização de
+    # relógio do WSL2. `Upsert` carimba `last_seen_at` com `@clock.current`,
+    # isto é, relógio de parede; logo duas ingestões podem receber marcas
+    # fora de ordem sem que nada na ingestão esteja errado.
+    #
+    # Injetar `RelogioCrescente` ataca essa causa: a ingestão passa a ser
+    # medida por uma fonte de tempo monotônica, e a asserção volta a provar a
+    # regra — o presente é remarcado, o ausente não — em vez de provar que o
+    # relógio do host se comportou. A asserção continua sendo `:>` estrito.
     test "a marca de última aparição distingue o presente do ausente" do
-      ingest
+      relogio = RelogioCrescente.new
+
+      ingest(clock: relogio)
       ausente = Card.find_by!(card_number: "OP01-001")
       marca_antiga = ausente.last_seen_at
 
-      segunda = ingest(fixture_sem_carta("OP01-001"))
+      segunda = ingest(fixture_sem_carta("OP01-001"), clock: relogio)
 
       assert_equal marca_antiga.to_i, ausente.reload.last_seen_at.to_i,
                    "a carta ausente não podia ter sido remarcada"
