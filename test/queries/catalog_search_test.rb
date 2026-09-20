@@ -51,6 +51,53 @@ class CatalogSearchTest < ActiveSupport::TestCase
 
   def search(term, **params) = CatalogQuery.new(q: term, **params).call
 
+  # ## A causa do flake: a *pending list* do GIN
+  #
+  # Os três índices que as asserções de plano exigem são **GIN**, e GIN tem
+  # `fastupdate` ligado por default: a inserção não vai para a árvore, vai para
+  # uma **lista pendente** não ordenada, drenada depois por autovacuum ou ao
+  # estourar `gin_pending_list_limit` (4MB aqui). O custo de varrer essa lista
+  # **entra na conta do planejador** — então o custo estimado do mesmo índice,
+  # sobre os mesmos dados e com estatística válida, muda conforme quanto da
+  # lista já foi drenado. Quando ele sobe o bastante, a varredura completa fica
+  # mais barata aos olhos do planejador e a asserção acusa a busca por um custo
+  # que é do **estado do índice**, não da consulta.
+  #
+  # Medido neste banco, oito seeds idênticos de 20.000 linhas, `ANALYZE` válido
+  # em todos — custo do `Bitmap Index Scan` da ramificação de `card_number`:
+  #
+  #     sem drenar:  348.81 663.31 977.81 34.31 348.81 663.31 977.81 1292.31
+  #     drenando:     34.31  34.31  34.31 34.31  34.31  34.31  34.31   34.31
+  #
+  # Cinco valores distintos contra **um**. E foi exatamente essa ramificação que
+  # falhou na reprodução com contenção deliberada: `Seq Scan on cards cards_2`
+  # a custo 1372.05, com as outras duas ramificações indexadas e `pg_stats`
+  # populado — ou seja, **estatística válida não bastava**.
+  #
+  # `gin_clean_pending_list` drena a lista explicitamente e **elimina a variação
+  # na origem** — não reduz a probabilidade, remove a causa. Mesmo movimento da
+  # T8 da `progresso`: trocar um observável que depende de quando um processo
+  # assíncrono passou por um que não depende. A drenagem vem **antes** do
+  # `ANALYZE` de propósito, para que as estatísticas descrevam o índice no
+  # estado em que ele será consultado.
+  #
+  # ## A guarda de `pg_stats`, e por que não sobre `reltuples`
+  #
+  # Sem estatística válida o planejador estima `rows=1`, escolhe
+  # `Index Scan using cards_pkey` com `Filter:` nas três ramificações e produz
+  # um plano que **não** varre a tabela — ou seja, **passa** no
+  # `refute_match(/Seq Scan on cards/)` enquanto falha nos três `assert_match`.
+  # A guarda impede que o teste afirme algo sobre o plano nesse estado.
+  #
+  # Ela é sobre `pg_stats` porque `pg_class.reltuples` **não é transacional** e
+  # sobrevive ao rollback: medido, ele fica em **20000 numa tabela commitada
+  # vazia**, satisfazendo uma guarda sem o `ANALYZE` ter rodado — verde por
+  # resíduo, o defeito que a T8 já corrigiu uma vez. `pg_stats` é síncrono e
+  # transacional, então só tem linha se o `ANALYZE` rodou **nesta** transação
+  # e sobre a tabela semeada. Medido: com `ANALYZE`, 18 linhas; sem, 0.
+  #
+  # A guarda **não substitui nem enfraquece** nenhuma asserção de plano: ela
+  # protege a pré-condição da medição.
   def seed_for_planner(connection)
     connection.execute(<<~SQL)
       INSERT INTO cards (set_id, card_number, name, card_type, colors, created_at, updated_at)
@@ -58,8 +105,29 @@ class CatalogSearchTest < ActiveSupport::TestCase
              'Personagem Generico ' || i, 'character', ARRAY['Purple'], now(), now()
       FROM generate_series(1, 20000) AS i
     SQL
+    GIN_INDEXES_DA_BUSCA.each do |indice|
+      connection.select_value("SELECT gin_clean_pending_list('#{indice}')")
+    end
     connection.execute("ANALYZE cards")
+
+    colunas = connection.select_value(
+      "SELECT count(*) FROM pg_stats WHERE tablename = 'cards'"
+    )
+    assert_operator colunas, :>, 0,
+                    "`cards` não tem estatística de coluna em `pg_stats` nesta transação: o " \
+                    "`ANALYZE` do seed não valeu. Sem ele o planejador estima `rows=1`, escolhe " \
+                    "`cards_pkey` com `Filter:` e o plano medido não é o do cenário semeado — " \
+                    "as asserções de índice abaixo acusariam a busca por um defeito que é da medição."
   end
+
+  # Os três índices GIN que as asserções de plano exigem. Nomeados numa
+  # constante porque a lista precisa acompanhar as asserções: um índice novo na
+  # busca que fique de fora daqui volta a trazer a oscilação de custo junto.
+  GIN_INDEXES_DA_BUSCA = %w[
+    index_cards_on_unaccent_name_trgm
+    index_cards_on_effect_text_tsvector
+    index_cards_on_card_number_trgm
+  ].freeze
 
   # --- Req. 3.2: caixa e acento ---
 

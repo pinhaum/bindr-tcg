@@ -180,11 +180,11 @@ T14 → T15 → T16 → T17
 
 **Done when**:
 
-- [ ] A causa está identificada e escrita no cabeçalho do teste, com a evidência que a sustenta
-- [ ] O flake é **reproduzido antes** de ser corrigido, e a reprodução está registrada
-- [ ] A correção ataca a **causa**, não o sintoma: a asserção não é enfraquecida, pulada nem removida
-- [ ] O teste continua provando que a busca **usa o índice trigram** e **não** faz varredura completa — revertida a correção, a garantia volta a ser exercida
-- [ ] `bin/rubocop` limpo
+- [x] A causa está identificada e escrita no cabeçalho do teste, com a evidência que a sustenta
+- [x] O flake é **reproduzido antes** de ser corrigido, e a reprodução está registrada
+- [x] A correção ataca a **causa**, não o sintoma: a asserção não é enfraquecida, pulada nem removida
+- [x] O teste continua provando que a busca **usa o índice trigram** e **não** faz varredura completa — revertida a correção, a garantia volta a ser exercida
+- [x] `bin/rubocop` limpo
 
 **Tests**: unit
 **Gate**: quick
