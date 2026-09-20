@@ -255,30 +255,64 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   # teste acima previne para o volume — premissa que vira asserção —, aplicado à
   # metade que faltava.
   #
-  # **A asserção é sobre `last_analyze`, e não sobre `pg_class.reltuples`.**
-  # Escrevi a segunda forma primeiro e o sensor a reprovou: `reltuples` **não é
-  # transacional** e sobrevive ao rollback do teste, então uma execução anterior
-  # deste mesmo arquivo deixa a estimativa povoada e a asserção passa sem o
-  # `ANALYZE` — verde por resíduo, e dependente da ordem em que a suíte roda.
-  # `last_analyze` é um instante, e comparar com o início do teste prova que o
-  # `ANALYZE` rodou **nesta** execução, o que nenhum resíduo satisfaz.
+  # **A asserção é sobre `pg_stats`, e não sobre `pg_class.reltuples` nem sobre
+  # `pg_stat_user_tables.last_analyze`.** As três formas foram escritas e medidas
+  # nesta ordem, e as duas primeiras foram reprovadas por razões diferentes:
+  #
+  # 1. **`reltuples` é verde por resíduo.** Não é transacional e sobrevive ao
+  #    rollback do teste, então uma execução anterior deste mesmo arquivo deixa a
+  #    estimativa povoada e a asserção passa **sem o `ANALYZE`**. Medido: sem
+  #    `ANALYZE`, `reltuples` continua em 300 de uma rodada anterior enquanto o
+  #    `ANALYZE` de fato não rodou. Foi o defeito que a T8 corrigiu, e **não se
+  #    volta para cá**.
+  # 2. **`last_analyze` é intermitente.** Corrige o resíduo (é um instante, e
+  #    comparar com o início do teste prova a execução desta rodada), mas trocou
+  #    aquele modo de falha por um de concorrência: a verificação independente
+  #    mediu 2 falhas em 12 execuções completas (~17%). `pg_stat_user_tables` é
+  #    servido de um snapshot que o Postgres congela **por objeto, na primeira
+  #    leitura de cada transação** (`stats_fetch_consistency = cache`, o default
+  #    desde a 15; aqui roda 17.11), e o teste inteiro vive dentro da transação do
+  #    `use_transactional_tests`. `pg_stat_clear_snapshot()` derruba esse cache e
+  #    reduz muito a intermitência, mas **não a elimina**: medido, o teste ainda
+  #    falhou 1 vez em 2 execuções completas com o descarte aplicado. O caminho
+  #    inteiro passa pelo coletor de estatísticas, que é assíncrono por projeto, e
+  #    asserção sobre observável assíncrono é instável por construção.
+  #
+  # ## `pg_stats` é síncrono, transacional, e prova exatamente a mesma coisa
+  #
+  # `ANALYZE` grava as estatísticas de coluna em `pg_statistic` (exposto por
+  # `pg_stats`) **dentro da transação**, sem passar pelo coletor. Isso dá as duas
+  # propriedades que as outras duas formas não tinham ao mesmo tempo:
+  #
+  # - **Síncrono**: o valor está visível na consulta seguinte, sem coletor no
+  #   meio. Não há janela de corrida a tolerar — é o que remove a intermitência
+  #   pela raiz, em vez de reduzir sua probabilidade.
+  # - **Transacional**: o rollback do teste o desfaz. Medido: 9 linhas em
+  #   `pg_stats` depois do `ANALYZE`, **0 após o rollback**, enquanto `reltuples`
+  #   sobrevive em 300. Ou seja, resíduo de execução anterior **não** satisfaz
+  #   esta asserção, que era a única virtude que `last_analyze` tinha sobre
+  #   `reltuples`.
+  #
+  # A garantia vigiada é a mesma e foi conferida nos dois sentidos: com o
+  # `ANALYZE`, `pg_stats` tem linhas; **sem** ele, tem zero e o teste falha — que
+  # é exatamente a regressão que esta asserção existe para pegar (sem `ANALYZE` o
+  # planejador estima `rows=1` para `sets`, escolhe `Nested Loop` e as asserções
+  # de plano seguem verdes medindo outra coisa).
   test "o seed atualiza as estatísticas do planejador nesta execução" do
-    inicio = @connection.select_value("SELECT clock_timestamp()")
-
     semear_volume_realista
 
-    analises = @connection.select_rows(<<~SQL).to_h
-      SELECT relname, last_analyze FROM pg_stat_user_tables
-      WHERE relname IN ('sets', 'card_variants', 'collection_items')
+    colunas_analisadas = @connection.select_rows(<<~SQL).to_h
+      SELECT tablename, count(*) FROM pg_stats
+      WHERE tablename IN ('sets', 'card_variants', 'collection_items')
+      GROUP BY tablename
     SQL
 
     %w[sets card_variants collection_items].each do |tabela|
-      assert analises[tabela],
-             "`#{tabela}` nunca passou por `ANALYZE`: o planejador decide com estatísticas default " \
-             "e o plano medido não é o do cenário semeado"
-      assert_operator analises[tabela], :>, inicio,
-                      "o `ANALYZE` de `#{tabela}` é anterior a este teste (#{analises[tabela]} < " \
-                      "#{inicio}): as estatísticas são resíduo de outra execução, não do seed daqui"
+      assert_operator colunas_analisadas.fetch(tabela, 0), :>, 0,
+                      "`#{tabela}` não tem estatística de coluna em `pg_stats` nesta transação: ou o " \
+                      "`ANALYZE` do seed não rodou, ou ele rodou sobre tabela vazia. Nos dois casos o " \
+                      "planejador decide com estatísticas default e o plano medido não é o do cenário " \
+                      "semeado. (O volume em si é travado pelo teste do seed, acima.)"
     end
   end
 
@@ -338,22 +372,150 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   # foram introduzidas, e que a marcação continua sendo a lista que reflui — que
   # é a decisão de forma tomada na T5 justamente por causa deste requisito.
 
-  # Larguras fixas em pixel acima de 360px no bloco `progress-*`. O limite é o
-  # viewport inteiro do Req. 2.5: qualquer caixa da página declarada mais larga
-  # que ele já estoura sozinha, sem precisar de vizinho.
-  LARGURA_EM_PIXEL = /\b(?:width|min-width|flex-basis)\s*:\s*(\d+(?:\.\d+)?)px/i
+  # Larguras fixas acima de 360px no bloco `progress-*`. O limite é o viewport
+  # inteiro do Req. 2.5: qualquer caixa da página declarada mais larga que ele já
+  # estoura sozinha, sem precisar de vizinho.
+  #
+  # ## Por que a asserção lê mais de uma unidade
+  #
+  # A primeira versão casava **só** `px`, e a verificação independente a reprovou
+  # por mutação: `min-width: 40rem` no item do set (= 640px, quase o dobro do
+  # viewport) sobreviveu à suíte **inteira**, e `50em` também. O mesmo defeito em
+  # `px` morria. Ou seja: a propriedade estava coberta, a **unidade** não — e
+  # justamente a unidade que esta folha usa por convenção em quase tudo
+  # (`0.875rem`, `0.375rem`, `24rem`), que é a que alguém escreveria aqui sem
+  # pensar. Ler uma unidade só não cai sob o `SPEC_DEVIATION` acima: aquele
+  # desvio justifica não medir `scrollWidth` por falta de navegador, não
+  # justifica ignorar unidades que são declaráveis e verificáveis no mesmo texto.
+  #
+  # ## Premissa da conversão, declarada porque a conversão depende dela
+  #
+  # `rem` e `em` são convertidos a pixel assumindo **raiz de 16px**, o default do
+  # navegador. Esta folha não redefine `font-size` em `:root` nem em `html`, então
+  # a premissa vale hoje. **Se alguém passar a declarar a raiz, esta conversão
+  # muda** e `REM_EM_PIXELS` tem de acompanhar — por isso o número está numa
+  # constante nomeada e não embutido na conta. Para `em` a premissa é mais frouxa
+  # ainda (o `em` é relativo ao `font-size` do próprio elemento, que pode ser
+  # menor que a raiz), o que torna a conversão uma **subestimativa**: uma regra
+  # com `font-size` maior estoura antes do que esta conta acusa. Errar para o
+  # lado de deixar passar é o certo aqui — o teste não pode acusar defeito que
+  # não existe.
+  #
+  # ## O que deliberadamente **não** é convertido, e por quê
+  #
+  # - `%` e `vw` são **relativos ao viewport ou ao pai**: `width: 100%` dentro de
+  #   360px dá 360px e não estoura nada. Convertê-los exigiria inventar um pai, e
+  #   o resultado seria falso positivo em cima do idioma correto — a folha usa
+  #   `max-width: 100%` justamente para caber. Ficam de fora por serem a solução,
+  #   não o defeito.
+  # - `ch` e `ex` dependem da métrica da fonte em uso (largura do "0", altura do
+  #   "x"), que não se conhece sem renderizar. Um fator arbitrário aqui seria
+  #   conversão inventada, e conversão inventada é pior que a ausência dela:
+  #   passaria a reprovar regra correta com número que ninguém sabe defender. A
+  #   folha usa `width: 4ch` num campo de quantidade (`:524`), e 4ch jamais chega
+  #   perto de 360px em fonte alguma.
+  #
+  # O que sobra são as unidades **absolutas** do CSS, todas com fator fixo por
+  # especificação e portanto convertíveis sem suposição sobre o contexto.
+  REM_EM_PIXELS = 16.0
+
+  # Fatores da especificação CSS (`px` por unidade). `in`, `cm`, `mm`, `pt`, `pc`
+  # e `Q` são absolutos por definição; `rem`/`em` dependem da premissa acima.
+  UNIDADES_EM_PIXELS = {
+    "px" => 1.0,
+    "rem" => REM_EM_PIXELS,
+    "em" => REM_EM_PIXELS,
+    "in" => 96.0,
+    "cm" => 96.0 / 2.54,
+    "mm" => 96.0 / 25.4,
+    "q" => 96.0 / 101.6,
+    "pt" => 96.0 / 72.0,
+    "pc" => 16.0
+  }.freeze
+
+  # `(?<![-\w])` e não `\b` antes do nome da propriedade: `\b` casa na fronteira
+  # do hífen e faria `max-width` ser lido como `width`. Na versão só-`px` isso
+  # era inofensivo por acaso — nenhum `max-width` em pixel acima de 360px existe
+  # na folha —, mas com `rem` coberto o `max-width: 24rem` de `.auth` (= 384px)
+  # passaria a ser acusado. E acusá-lo seria o pior tipo de falso positivo:
+  # `max-width` é um **teto**, o idioma que faz a caixa caber, o oposto do
+  # defeito que esta asserção procura. `min-width` continua na lista porque ali o
+  # número é um **piso** e é ele que estoura.
+  LARGURA_DECLARADA = /
+    (?<![-\w])(?:width|min-width|flex-basis)\s*:\s*
+    (\d+(?:\.\d+)?)                       # valor
+    (px|rem|em|in|cm|mm|q|pt|pc)\b        # unidade conversível
+  /xi
   VIEWPORT_MINIMO = 360
+
+  # Converte a declaração a pixel pela tabela acima. Unidade fora da tabela não
+  # chega aqui: a regex não a casa, e isso é a decisão documentada acima.
+  def self.em_pixels(valor, unidade)
+    valor.to_f * UNIDADES_EM_PIXELS.fetch(unidade.downcase)
+  end
 
   test "o bloco de progresso não declara largura fixa maior que o viewport de 360px" do
     infratoras = regras_do_bloco_de_progresso.flat_map do |seletor, corpo|
-      corpo.scan(LARGURA_EM_PIXEL).filter_map do |(valor)|
-        "#{seletor.squish} { ...#{valor}px... }" if valor.to_f > VIEWPORT_MINIMO
+      corpo.scan(LARGURA_DECLARADA).filter_map do |(valor, unidade)|
+        pixels = self.class.em_pixels(valor, unidade)
+        next unless pixels > VIEWPORT_MINIMO
+
+        "#{seletor.squish} { ...#{valor}#{unidade}... } = #{pixels.round}px"
       end
     end
 
     assert_empty infratoras,
                  "regra do bloco `progress-*` declara largura fixa acima de #{VIEWPORT_MINIMO}px, " \
-                 "o que estoura o viewport do Req. 2.5:\n#{infratoras.join("\n")}"
+                 "o que estoura o viewport do Req. 2.5 (conversão com raiz de " \
+                 "#{REM_EM_PIXELS.round}px):\n#{infratoras.join("\n")}"
+  end
+
+  # A asserção acima é uma varredura por regex, e regex de asserção é código que
+  # ninguém testa até o dia em que ela deixa de casar o que devia — foi
+  # exatamente assim que a versão só-`px` passou pela verificação anterior. Este
+  # teste mede **o detector**, não a folha: cada caso nomeia o que a asserção tem
+  # de fazer com aquela entrada, e é o que impede que a correção das unidades
+  # apodreça em silêncio ou vire falso positivo.
+  test "o detector de largura fixa distingue as unidades que cobre das que não cobre" do
+    excedem = {
+      "min-width: 40rem" => 640,    # a mutação que sobreviveu à verificação
+      "min-width: 50em" => 800,     # idem, segunda unidade
+      "min-width: 640px" => 640,    # o controle que já morria
+      "width: 30pc" => 480,
+      "min-width: 12cm" => 454,
+      "flex-basis: 400pt" => 533,
+      "min-width: 22.6rem" => 362   # logo acima da fronteira
+    }
+
+    excedem.each do |declaracao, esperado|
+      casado = declaracao.scan(LARGURA_DECLARADA).first
+
+      assert casado, "`#{declaracao}` deveria ser lida pelo detector de largura fixa e não foi"
+      assert_in_delta esperado, self.class.em_pixels(*casado), 1.0,
+                      "`#{declaracao}` converteu para valor diferente de ~#{esperado}px"
+      assert_operator self.class.em_pixels(*casado), :>, VIEWPORT_MINIMO,
+                      "`#{declaracao}` excede #{VIEWPORT_MINIMO}px e o detector não acusou"
+    end
+
+    # O outro lado, que é o que impede a asserção de reprovar código correto.
+    # `max-width` é teto e faz caber; `%` e `ch` não são convertíveis de forma
+    # honesta; `22.5rem` é exatamente o viewport e não o excede.
+    naoacusa = [
+      "max-width: 24rem",   # o idioma que faz a página caber — jamais um defeito
+      "max-width: 100%",
+      "width: 100%",
+      "width: 4ch",
+      "min-width: 22.5rem"  # = 360px exatos, a fronteira
+    ]
+
+    naoacusa.each do |declaracao|
+      casado = declaracao.scan(LARGURA_DECLARADA).first
+      excede = casado && self.class.em_pixels(*casado) > VIEWPORT_MINIMO
+
+      refute excede,
+             "`#{declaracao}` foi acusada de estourar #{VIEWPORT_MINIMO}px. Falso positivo: a asserção " \
+             "passaria a reprovar folha correta, e asserção que reprova o código certo acaba apagada"
+    end
   end
 
   # `white-space: nowrap` num bloco que contém frase inteira impede a quebra que
@@ -389,6 +551,10 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   # As duas asserções acima olham a folha; esta olha a **marcação**, onde um
   # `style=` embutido escaparia inteiramente delas. É o mesmo defeito por outra
   # porta: largura fixa acima do viewport, escrita no atributo em vez da regra.
+  # Usa a **mesma** `LARGURA_DECLARADA` da folha, e de propósito: um atributo
+  # `style="min-width: 40rem"` é tão estourável quanto a regra equivalente, e
+  # deixar as duas asserções com alcances diferentes seria reabrir por esta porta
+  # exatamente a lacuna que a conversão de unidades fechou pela outra.
   test "a marcação renderizada não traz estilo embutido com largura fixa" do
     semear_sets(SETS_PEQUENO, prefixo: "V")
     entrar
@@ -397,7 +563,7 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
 
     embutidos = css_select("main.progress [style]").map { _1["style"].to_s }
     infratoras = embutidos.select do |estilo|
-      estilo.scan(LARGURA_EM_PIXEL).any? { |(valor)| valor.to_f > VIEWPORT_MINIMO } ||
+      estilo.scan(LARGURA_DECLARADA).any? { |(valor, unidade)| self.class.em_pixels(valor, unidade) > VIEWPORT_MINIMO } ||
         estilo.match?(/white-space\s*:\s*nowrap/i)
     end
 

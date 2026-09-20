@@ -946,6 +946,162 @@ task nova do plano, nenhum checkbox foi marcado por ela):
   não foram introduzidas. Mesmo precedente de `progress_ui_test.rb`,
   `catalog_grid_test.rb` e `collection_ownership_ui_test.rb`.
 
+**Correções das lacunas do Verifier**
+
+A verificação independente deu **PASS** e registrou duas lacunas MEDIUM, ambas
+**defeitos de teste** e nenhuma de produção. As duas foram fechadas aqui, em
+`test/queries/set_progress_plan_test.rb`. **Nenhum código de produção foi
+tocado**, nenhum checkbox foi marcado — não é task do plano — e
+`validation.md` **não** foi alterado: ele é o relatório do Verifier e registra o
+estado no momento da verificação.
+
+- **L1 — a asserção de 360px lia só `px`, e a folha escreve `rem`.** A regex
+  antiga casava exclusivamente a unidade `px`. O Verifier mutou `.progress-set`
+  para `min-width: 40rem` (= 640px, quase o dobro do viewport) e a mutação
+  **sobreviveu à suíte inteira**; `50em` também. A propriedade estava coberta, a
+  **unidade** não — e a unidade que escapava é justamente a que esta folha usa
+  por convenção (`0.875rem`, `24rem`), ou seja, a que alguém escreveria aqui sem
+  pensar. A asserção passou a converter a pixel antes de comparar.
+  **Unidades cobertas**: `px`, `rem`, `em`, `in`, `cm`, `mm`, `Q`, `pt`, `pc` —
+  as absolutas do CSS têm fator fixo por especificação, e `rem`/`em` assumem
+  **raiz de 16px**. A premissa está **declarada no teste** e o número vive numa
+  constante nomeada (`REM_EM_PIXELS`): se alguém passar a declarar `font-size`
+  em `:root` — o que esta folha hoje **não** faz —, a conversão muda junto.
+  **Unidades deliberadamente fora**, porque conversão inventada é pior que a
+  ausência dela: `%` e `vw` são relativos ao pai ou ao viewport (`width: 100%`
+  em 360px dá 360px e é a **solução**, não o defeito — convertê-los geraria
+  falso positivo em cima do idioma correto); `ch` e `ex` dependem da métrica da
+  fonte, que não se conhece sem renderizar, e a folha usa `width: 4ch` num campo
+  de quantidade que jamais se aproxima de 360px. A asserção do `style=` embutido
+  passou a usar **a mesma** constante, senão a lacuna reabriria por aquela porta.
+  **Um defeito meu, encontrado ao conferir a folha inteira**: a regex abria com
+  `\b(?:width|...)`, e `\b` casa na fronteira do hífen — ou seja, lia `max-width`
+  como `width`. Na versão só-`px` isso era inofensivo por acaso (não há
+  `max-width` em pixel acima de 360px na folha), mas com `rem` coberto o
+  `max-width: 24rem` de `.auth` (= 384px) passaria a ser **acusado**. Seria o
+  pior tipo de falso positivo: `max-width` é o teto que faz a caixa **caber**, o
+  oposto do defeito procurado, e asserção que reprova o código certo é apagada na
+  primeira vez que atrapalha. Corrigido para `(?<![-\w])`. `min-width` segue na
+  lista porque ali o número é um **piso** e é ele que estoura.
+  **O detector virou alvo de teste próprio** ("o detector de largura fixa
+  distingue as unidades que cobre das que não cobre"): regex de asserção é código
+  que ninguém testa até deixar de casar o que devia — foi exatamente assim que a
+  versão só-`px` atravessou a verificação. O teste fixa os dois lados: sete
+  declarações que **têm** de ser acusadas com a conversão conferida, e cinco que
+  **não** podem ser (`max-width: 24rem`, `max-width: 100%`, `width: 100%`,
+  `width: 4ch` e `min-width: 22.5rem`, a fronteira exata).
+  Registro de discordância pontual com o Verifier: ele sugeriu como alternativa
+  "proibir largura fixa de **qualquer** unidade". Não foi o caminho escolhido —
+  proibir `%` reprovaria `max-width: 100%`, que é exatamente o que faz a página
+  caber, e uma asserção que reprova o código certo é apagada na primeira vez que
+  atrapalha. A conversão declarada preserva o poder de detecção sem esse custo.
+  **Sensor**: as três mutações do Verifier agora **morrem** (`40rem`, `50em`,
+  `640px`), mais quatro minhas (`30pc`=480px, `12cm`=454px, `400pt`=533px, e
+  `min-width: 40rem` no `style=` embutido da view). Três controles negativos
+  confirmam que não há falso positivo: `22.5rem` (= **360px exatos**, não
+  excede), `width: 100%` e `max-width: 40rem` **passam**, enquanto `22.6rem`
+  (= 362px) falha — a fronteira está no lugar certo e o teto não é confundido
+  com o piso. Folha e view restauradas e conferidas **byte a byte idênticas**
+  por `diff`; `cp`, nunca `git stash`.
+
+- **L3 — o flake de `last_analyze`, e a causa não era a que se supunha.** O
+  Verifier reproduziu 2 falhas em 12 execuções completas (~17%) e atribuiu o
+  defeito à assincronia do coletor de estatísticas entre os workers paralelos.
+  **Investigado com `superpowers:systematic-debugging`, esse mecanismo não se
+  sustenta**: a suíte paralela do Rails dá **um banco por worker** — conferido,
+  existem `bindr_test-0` a `bindr_test-3` —, então o `ANALYZE` de um worker não
+  é sequer visível ao outro e não há contenção entre eles a explicar nada.
+  A causa real é **o cache de estatísticas por transação**: desde a 15, o
+  Postgres serve `pg_stat_user_tables` de um snapshot congelado **por objeto, na
+  primeira leitura de cada transação** (`stats_fetch_consistency = cache`, o
+  default; aqui roda 17.11). O teste inteiro vive dentro da transação do
+  `use_transactional_tests`, então qualquer leitura de estatísticas anterior ao
+  seed congela aquele valor e o `ANALYZE` que roda **depois** fica invisível
+  para a consulta — embora tenha rodado. O congelamento atravessa `SAVEPOINT`,
+  porque o snapshot é da transação **externa**.
+  Reproduzido de forma **determinística**, o que a hipótese de concorrência não
+  permitia: com uma leitura precoce na mesma transação a asserção dá `false`
+  mesmo com o `ANALYZE` executado (`16:06:46` congelado contra início
+  `16:28:52`, a mesma forma de falha que o Verifier capturou); sem ela, dá
+  `true`.
+  **A primeira correção — `pg_stat_clear_snapshot()` antes da leitura — reduziu
+  a intermitência mas não a eliminou, e foi descartada.** Medida na suíte
+  completa, ela ainda deixou o teste falhar 1 vez em 2 execuções. O motivo é
+  estrutural e vale registrar: `pg_stat_user_tables` é servido **pelo coletor de
+  estatísticas, que é assíncrono por projeto**. Descartar o snapshot remove uma
+  das janelas de corrida, não a natureza assíncrona do observável — e asserção
+  sobre observável assíncrono é instável por construção. Três hipóteses
+  sucessivas para o resíduo (publicação adiada no commit, atraso do
+  `pgstat_report_stat`, contenção entre os quatro workers) foram testadas e
+  **falsificadas** uma a uma, o que é o sinal de que o problema não era a janela
+  e sim o canal.
+  **A saída foi trocar o observável por um síncrono: `pg_stats`.** O `ANALYZE`
+  grava as estatísticas de coluna em `pg_statistic` **dentro da transação**, sem
+  passar pelo coletor. Isso dá as duas propriedades que nenhuma das formas
+  anteriores tinha ao mesmo tempo: é **síncrono** (visível na consulta seguinte,
+  sem janela a tolerar — a intermitência some pela raiz, não por redução de
+  probabilidade) e é **transacional** (o rollback o desfaz, então resíduo de
+  execução anterior não o satisfaz, que era a única virtude do `last_analyze`
+  sobre o `reltuples`). Medido: 9 linhas em `pg_stats` após o `ANALYZE`, **0
+  após o rollback**, enquanto `reltuples` sobrevive em 300. E medido também no
+  banco de um worker **entre** duas execuções da suíte, que é o retrato mais
+  direto do defeito original: `pg_stats` = **0**, enquanto `pg_class.reltuples`
+  guardava `sets=200` e `card_variants=12000` de uma rodada anterior. É
+  literalmente o resíduo com que a primeira versão da asserção ficava verde.
+  **A garantia não foi enfraquecida, e isso foi verificado nos dois sentidos**:
+  com o `ANALYZE`, `pg_stats` tem linhas; **sem** ele, tem zero e o teste falha
+  com mensagem explícita — que é exatamente a regressão que a asserção vigia
+  (sem `ANALYZE` o planejador estima `rows=1` para `sets`, escolhe `Nested Loop`
+  e as asserções de plano seguem verdes medindo outra coisa). Não se voltou a
+  `reltuples`: aquilo era verde por resíduo e a troca da T8 corrigiu um defeito
+  real.
+  **Prova de estabilidade**: **15 execuções completas da suíte** com o código
+  final, e o teste do L3 passou nas **15**. Contra a baseline medida **antes** da
+  correção: 8 execuções, com o flake se manifestando. As 12 execuções que a
+  verificação independente pediu são o mínimo porque 8 verdes seguidas ainda
+  teriam ~23% de chance sob a taxa de 17% medida — com 15, a hipótese de sorte
+  cai para ~6%. Mas a prova que mais vale aqui **não é a estatística**, e sim o
+  determinismo: o observável deixou de ser assíncrono. Duas falhas apareceram na
+  série, ambas em **outros** testes e de outras features (ver os dois itens
+  abaixo); nenhuma no teste corrigido.
+  **Nota sobre o método**: a hipótese do Verifier foi testada e falsificada antes
+  de qualquer correção, e a primeira correção minha também foi medida e
+  descartada quando a medição a reprovou. As duas coisas só apareceram porque o
+  flake foi **reproduzido antes de corrigido** — em 8 execuções de baseline e
+  depois em séries completas a cada tentativa. Corrigir sem reproduzir teria
+  parado na primeira hipótese plausível, que era a errada.
+
+- **Achado fora do escopo, registrado e não corrigido: há um segundo flake, em
+  `catalog_search_test.rb`.** Durante a baseline do L3 a suíte falhou em 2 de 8
+  execuções — mas **noutro teste**: `catalog_search_test.rb:296` ("a busca por
+  nome usa o índice trigram"), da feature `catalogo`, com o planejador
+  escolhendo `Seq Scan` sob contenção. Reapareceu depois, 1 vez nas 15 execuções
+  da série de validação desta correção, o que confirma que é real e
+  **independente** do L3 — nas mesmas 15 execuções o teste do L3 não falhou
+  nenhuma vez. É a mesma **família** de problema (asserção de plano sensível a
+  estatísticas sob paralelismo) e provavelmente tem solução parecida: o teste
+  semeia e chama `ANALYZE cards` (`catalog_search_test.rb:61`), e a asserção é
+  sobre o plano escolhido, que depende das estatísticas terem chegado. Não foi
+  tocado aqui porque está **fora do escopo destas duas lacunas e fora da feature
+  `progresso`** — mexer nele seria alargar a correção por conta própria. Fica
+  anotado para quem reabrir a `catalogo`, com o diagnóstico já adiantado.
+
+- **E um terceiro flake, na ingestão, também fora do escopo.** Na mesma série de
+  validação apareceu uma falha em
+  `test/services/ingestion/guarantees_test.rb:199` ("a marca de última aparição
+  distingue o presente do ausente"). O diagnóstico é diferente dos outros dois e
+  mais simples: a asserção final é
+  `assert_operator presente.last_seen_at, :>, ausente.last_seen_at`, e as duas
+  marcas são comparadas depois de as anteriores terem sido truncadas com `to_i`.
+  Quando as duas ingestões caem **no mesmo segundo** — o que só acontece com a
+  máquina rápida ou sob escalonamento favorável —, os instantes empatam e o `>`
+  estrito falha. Não foi tocado: é da feature de ingestão, não desta. Registrado
+  aqui porque os três flakes juntos formam um padrão que vale para quem for
+  cuidar disso — **asserção estrita sobre relógio ou sobre estatística é a fonte
+  recorrente de intermitência nesta suíte**, e as três moram em features
+  diferentes. Nas 15 execuções desta série, o teste do L3 não falhou **nenhuma**
+  vez; as duas falhas observadas foram estas outras, de outras features.
+
 ---
 
 ## Requirement Traceability
