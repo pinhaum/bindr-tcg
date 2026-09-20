@@ -150,6 +150,43 @@ ALTER SEQUENCE public.cards_id_seq OWNED BY public.cards.id;
 
 
 --
+-- Name: collection_imports; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.collection_imports (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    token character varying NOT NULL,
+    filename character varying NOT NULL,
+    linhas jsonb DEFAULT '[]'::jsonb NOT NULL,
+    status character varying DEFAULT 'pendente'::character varying NOT NULL,
+    expires_at timestamp(6) without time zone NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT collection_imports_status_check CHECK (((status)::text = ANY ((ARRAY['pendente'::character varying, 'confirmado'::character varying])::text[])))
+);
+
+
+--
+-- Name: collection_imports_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.collection_imports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: collection_imports_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.collection_imports_id_seq OWNED BY public.collection_imports.id;
+
+
+--
 -- Name: collection_items; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -383,6 +420,13 @@ ALTER TABLE ONLY public.cards ALTER COLUMN id SET DEFAULT nextval('public.cards_
 
 
 --
+-- Name: collection_imports id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_imports ALTER COLUMN id SET DEFAULT nextval('public.collection_imports_id_seq'::regclass);
+
+
+--
 -- Name: collection_items id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -446,6 +490,14 @@ ALTER TABLE ONLY public.card_variants
 
 ALTER TABLE ONLY public.cards
     ADD CONSTRAINT cards_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: collection_imports collection_imports_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_imports
+    ADD CONSTRAINT collection_imports_pkey PRIMARY KEY (id);
 
 
 --
@@ -617,6 +669,27 @@ CREATE INDEX index_cards_on_unaccent_name_trgm ON public.cards USING gin (public
 
 
 --
+-- Name: index_collection_imports_on_expires_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_collection_imports_on_expires_at ON public.collection_imports USING btree (expires_at);
+
+
+--
+-- Name: index_collection_imports_on_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_collection_imports_on_token ON public.collection_imports USING btree (token);
+
+
+--
+-- Name: index_collection_imports_on_user_id_and_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_collection_imports_on_user_id_and_token ON public.collection_imports USING btree (user_id, token);
+
+
+--
 -- Name: index_collection_items_on_card_variant_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -677,6 +750,14 @@ CREATE INDEX index_wishlist_items_on_user_id ON public.wishlist_items USING btre
 --
 
 CREATE UNIQUE INDEX index_wishlist_items_on_user_id_and_card_variant_id ON public.wishlist_items USING btree (user_id, card_variant_id);
+
+
+--
+-- Name: collection_imports fk_rails_065b992832; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_imports
+    ADD CONSTRAINT fk_rails_065b992832 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -750,6 +831,7 @@ ALTER TABLE ONLY public.card_variants
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260919120600'),
 ('20260919120500'),
 ('20260919120400'),
 ('20260919120300'),

@@ -541,18 +541,73 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] Migração criada e `db/structure.sql` regenerado por `db:migrate` (`schema_format` é `:sql`)
-- [ ] A tabela tem `user_id` com FK **sem cascata para a coleção** e um campo de expiração
-- [ ] As constraints são **provadas contra o banco** por SQL direto, não só por validação de model
-- [ ] `for_user` com o mesmo contrato de `CollectionItem.for_user`: exige o objeto `User` e levanta `ArgumentError` num id — com teste
-- [ ] Teste prova que uma pré-visualização de outro usuário **não é legível** por este, e que a tentativa não revela a existência dela
-- [ ] Teste prova que registro expirado não é confirmável
-- [ ] Existe caminho de limpeza dos registros expirados, com teste
-- [ ] `ecc:database-reviewer` revisou a tabela; achados resumidos nas "Decisões da execução"
-- [ ] Teste prova que **nenhuma FK desta tabela cascateia para `collection_items`** — apagar uma pré-visualização não pode tocar na coleção
+- [x] Migração criada e `db/structure.sql` regenerado por `db:migrate` (`schema_format` é `:sql`)
+- [x] A tabela tem `user_id` com FK **sem cascata para a coleção** e um campo de expiração
+- [x] As constraints são **provadas contra o banco** por SQL direto, não só por validação de model
+- [x] `for_user` com o mesmo contrato de `CollectionItem.for_user`: exige o objeto `User` e levanta `ArgumentError` num id — com teste
+- [x] Teste prova que uma pré-visualização de outro usuário **não é legível** por este, e que a tentativa não revela a existência dela
+- [x] Teste prova que registro expirado não é confirmável
+- [x] Existe caminho de limpeza dos registros expirados, com teste
+- [x] `ecc:database-reviewer` revisou a tabela; achados resumidos nas "Decisões da execução"
+- [x] Teste prova que **nenhuma FK desta tabela cascateia para `collection_items`** — apagar uma pré-visualização não pode tocar na coleção
 
 **Tests**: unit
 **Gate**: full
+
+**Decisões da execução:**
+
+- **Uma tabela com as linhas em `jsonb`, não duas tabelas.** As linhas são
+  lidas e escritas **sempre como unidade**: a T12 grava o resultado inteiro do
+  resolvedor, a T13 renderiza o inteiro, a T14 grava o inteiro. Nenhum caso do
+  produto consulta uma linha isolada, filtra por classificação no banco ou junta
+  linha com outra tabela — o `card_variant_id` já vem resolvido dentro do
+  documento, que é o ponto de não reparsear na confirmação. Uma tabela filha
+  custaria até 10.000 INSERTs por upload (AD-008) para comprar uma capacidade de
+  consulta que ninguém exerce. Precedente vivo de escrita em `jsonb`:
+  `import_runs.error_log`, com a gem `json` pinada em `~> 2.7`.
+
+- **A tabela não tem FK para `card_variants` nem para `collection_items`, e é
+  assim que o critério da invariante é satisfeito.** Sem aresta não há cascata
+  possível na direção do dado insubstituível. O vínculo com a coleção é o
+  `card_variant_id` **dentro** do `jsonb`, que a T14 resolve no momento da
+  escrita — um ponteiro solto num documento não arrasta nada por efeito
+  colateral. Provado em duas frentes: por `pg_constraint` (a única tabela
+  referenciada é `users`, e nenhuma FK tem `confdeltype <> 'r'`) e por
+  comportamento (`assert_no_changes` sobre `CollectionItem.count` e sobre a
+  quantidade de um item ao destruir a pré-visualização).
+
+- **`dependent: :destroy` no staging, assimétrico ao `restrict_with_exception`
+  da coleção.** O staging é derivado e descartável — quem o perde reenvia o
+  arquivo —, como `sessions`. Teste fixa a assimetria: apagar o usuário com
+  coleção continua sendo barrado, e o staging **não** some num `destroy` que
+  foi barrado.
+
+- **Revisão de banco feita pelo executor, não pelo `ecc:database-reviewer`** (o
+  executor desta task não despacha subagente). Examinado: tipos e nulidade de
+  todas as colunas em `information_schema`; o conjunto de índices em
+  `pg_indexes`; as FKs e o `confdeltype` em `pg_constraint`; e o plano de
+  execução das duas consultas que T12/T13/T14 farão. **Um achado corrigido**:
+  `t.references` criava `index_collection_imports_on_user_id`, **prefixo
+  estrito** do composto `(user_id, token)` — índice redundante que custa
+  escrita em todo INSERT sem atender consulta que o outro não atenda. Corrigido
+  com `index: false` e fixado por teste que fecha o conjunto de índices.
+  **Um achado registrado sem ação**: `limpar_expiradas` sai por `Seq Scan` na
+  tabela pequena, e o planejador está certo — o índice de `expires_at` paga no
+  regime de produção (muitas vigentes, poucas vencidas), que é o oposto do
+  medido. Confirmado que `find_by_token_for` usa
+  `Index Scan using index_collection_imports_on_user_id_and_token` com
+  `Index Cond` sobre os dois predicados.
+
+- **Indistinção entre token alheio e token inexistente**, e as duas metades do
+  critério são distintas: não ser legível é autorização; não revelar a
+  existência é não transformar a tabela num oráculo de tokens válidos, um por
+  requisição. `find_by_token_for` filtra por dono **antes** de carregar o
+  registro (`for_user(user).find_by(token:)`, nunca `find_by` seguido de
+  comparação) e devolve `nil` nos dois casos.
+
+- **`status` como `CHECK`, não enum**, pelo mesmo motivo de `rarity` em
+  `card_variants`: enum faz uma migração de dado virar pré-requisito de
+  qualquer estado novo.
 
 ---
 

@@ -29,6 +29,15 @@ class User < ApplicationRecord
   # as duas linhas é deliberada.
   has_many :sessions, dependent: :destroy
 
+  # `destroy`, como `sessions` e ao contrário de `collection_items`: a
+  # pré-visualização de import é derivada e descartável — quem a perde reenvia
+  # o arquivo —, então encerrar a conta a encerra junto. A assimetria com a
+  # coleção é o ponto: a FK `on_delete: :restrict` da migração `20260919120600`
+  # barraria o `DELETE` do usuário, e esta linha faz o Active Record limpar o
+  # staging antes, deixando quem barra a remoção ser a coleção, que é o dado
+  # que precisa barrá-la.
+  has_many :collection_imports, dependent: :destroy
+
   # Req. 6.2 — a senha é guardada como digest bcrypt, nunca em claro. Também
   # valida presença na criação e confirmação quando `password_confirmation`
   # é informado.
