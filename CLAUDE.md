@@ -2,17 +2,46 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: esqueleto Rails 8, sem domínio
+## Estado atual: catálogo pronto, coleção em construção
 
-O app Rails existe e boota (task 1.1 em andamento), mas **não há nenhum model,
-migration ou rota de domínio** — `app/models/` tem só `ApplicationRecord` e
-`db/` não tem `migrate/`. O único teste é `test/lib/stack_test.rb`, que prova que
-a conexão é PostgreSQL de verdade e que o banco de teste é distinto do de
-desenvolvimento (AD-002 depende disso: `pg_trgm`, `unaccent` e GIN sustentam os
-Req. 3 e 4 inteiros).
+A feature **`catalogo` está encerrada e verificada** (14 tasks, dois lotes, ambos
+PASS em `.specs/features/catalogo/validation.md`): ingestão, busca com tolerância
+a typo, filtros, grade e página de detalhe funcionam e são **públicos**.
 
-Pendente ainda em 1.1: o README tem uma linha só e **não documenta a subida em um
-comando** (Req. 11.6) — a task não fecha sem isso. Não há CI (task 1.2).
+A feature **`colecao` (Fase 4) está em execução**: a Fase 1 do plano (T1–T4,
+identidade e sessão) fechou, e `.context/tasks.md` §4.1 junto. **T5–T13 estão
+abertas** — posse por variante, filtro de posse, total e wishlist.
+
+O que existe hoje:
+
+- **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
+  `User`, `Session`, `Current`. `CollectionItem` tem a tabela e as constraints,
+  mas as regras de domínio são a T5.
+- **Controllers**: `CatalogController` (público), `SessionsController`,
+  `RegistrationsController`, e o concern `Authentication`.
+- **Cinco migrações**, de `20260919120000` a `20260919120400`. `schema_format`
+  é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
+- **16 arquivos de teste, 227 testes**, rubocop limpo, CI verde.
+
+**O default do app é exigir sessão.** `ApplicationController` inclui
+`Authentication`, então toda action nasce protegida e o acesso público é exceção
+declarada com `allow_unauthenticated_access` — hoje só o `CatalogController`.
+Uma action nova que não declare nada já está protegida.
+
+Dívidas abertas que valem saber antes de mexer em autenticação:
+
+- **Login sem limite de tentativas.** O `rate_limit` do template do Rails foi
+  deliberadamente omitido na T4: sem cache store compartilhado ele não limita
+  nada (teste é `:null_store`; produção cai em `:file_store` por container).
+  Justificativa completa em `app/controllers/sessions_controller.rb`. Reabrir
+  junto com Redis ou `solid_cache`.
+- **O cookie de sessão não declara `secure` explicitamente** — em produção vem
+  de `config.force_ssl`. A garantia é indireta; comentada no concern.
+- **Não há navegador no container**, logo não há system test. Teste de UI vira
+  teste de integração sobre HTML renderizado, com `SPEC_DEVIATION` registrado.
+- **O importmap não está instalado.** `app/javascript` e `config/importmap.rb`
+  não existem; `stimulus-rails` está no Gemfile sem nunca ter rodado. A T8
+  depende de instalá-lo.
 
 ## Comandos
 
@@ -22,16 +51,19 @@ Tudo roda em Docker; o Postgres não existe fora dele.
 cp .env.example .env
 docker compose up          # sobe db + app, roda db:prepare, serve em :3000
 docker compose exec app bin/rails test
-docker compose exec app bin/rails test test/lib/stack_test.rb
-docker compose exec app bin/rails test test/lib/stack_test.rb -n "/PostgreSQL/"
+docker compose exec app bin/rails test test/integration/sessions_test.rb
+docker compose exec app bin/rails test test/models/user_password_test.rb -n "/senha/"
 docker compose exec app bin/rubocop      # rubocop-rails-omakase
 docker compose exec app bin/brakeman
 docker compose exec app bin/rails db:prepare
 ```
 
-Gates definidos em `.specs/features/catalogo/tasks.md`: **quick** =
-`bin/rails test test/models test/lib`; **full** = `bin/rails test && bin/rubocop`;
-**build** = `docker compose build`.
+Gem nova exige `docker compose run --rm --no-deps app bundle install`: o volume
+nomeado `bundle` sombreia as gems da imagem, então rebuild **não** basta.
+
+Gates da feature em execução (`.specs/features/colecao/tasks.md`): **quick** =
+`bin/rails test test/models test/queries`; **full** =
+`bin/rails test && bin/rubocop`; **build** = `docker compose build`.
 
 Verificação da fixture de ingestão, offline, sem Docker e sem Ruby — deve
 continuar passando (12 verificações):
@@ -44,8 +76,8 @@ Validadores do fluxo spec-driven:
 
 ```bash
 SKILL=~/.claude/skills/tlc-spec-driven
-python3 $SKILL/scripts/validate_spec.py  .specs/features/catalogo/spec.md
-python3 $SKILL/scripts/validate_tasks.py .specs/features/catalogo/tasks.md
+python3 $SKILL/scripts/validate_spec.py  .specs/features/colecao/spec.md
+python3 $SKILL/scripts/validate_tasks.py .specs/features/colecao/tasks.md
 ```
 
 `Dockerfile.dev` é a imagem de desenvolvimento (código como volume); `Dockerfile`
@@ -68,14 +100,20 @@ Regras que valem para qualquer sessão de trabalho aqui:
 ### Dois diretórios de spec, de propósito
 
 `.context/` é a **fonte de verdade** de requisitos, design e plano de tasks.
-`.specs/` guarda o recorte por feature (`features/catalogo/`), o log de decisões
-(`STATE.md`, AD-001 a AD-005) e os artefatos do Verifier. Em divergência,
-`.context/` vence (AD-005). Os IDs `CAT-NN` e `T1`–`T14` de `.specs/` apontam para
-os requisitos numerados de `.context/requirements.md`.
+`.specs/` guarda o recorte por feature — `features/catalogo/` (encerrada) e
+`features/colecao/` (em execução) —, o log de decisões (`STATE.md`, AD-001 a
+AD-005) e os artefatos do Verifier. Em divergência, `.context/` vence (AD-005).
+Os IDs de `.specs/` apontam para os requisitos numerados de
+`.context/requirements.md`: `CAT-NN` e `T1`–`T14` no `catalogo`, `COL-NN` e
+`T1`–`T13` na `colecao`. **Os dois planos numeram `T1` em diante e as numerações
+não têm relação entre si** — sempre dizer de qual feature se fala.
 
 **Ao concluir uma task, marcar o checkbox nos dois planos** (`.context/tasks.md` e
-`.specs/features/catalogo/tasks.md`) e commitar junto com o código. `STATE.md`
-tem a seção *Handoff* com o ponto exato de retomada — ler antes de começar.
+o `tasks.md` da feature em execução) e commitar junto com o código. Atenção ao
+escopo de cada seção do `.context/tasks.md`: uma seção costuma cobrir várias
+tasks do plano da feature e só fecha quando todas elas fecham — a §4.1 cobriu
+T1–T4 e só foi marcada na T4. `STATE.md` tem a seção *Handoff* com o ponto exato
+de retomada — ler antes de começar.
 
 ### Convenções nos documentos
 
@@ -189,13 +227,17 @@ filtro foi renomeado.
 ### Revisão por subagente
 
 **Não existe `ruby-reviewer` nem `rails-reviewer`** entre os agentes instalados
-(Python, Go, Rust, Java, PHP, TypeScript, React, Django, FastAPI — Ruby não). O
-plano completo está em `.specs/features/catalogo/tasks.md` §"Plano de delegação";
-o resumo: Fase 1 inline (T1 fixa convenções que as outras 13 herdam), Fase 2 e
-Fase 3 como um lote cada, e revisão pelos agentes agnósticos de linguagem —
-`ecc:database-reviewer` no schema/índices, `ecc:silent-failure-hunter` no loop de
-erro por registro do upsert, `ecc:pr-test-analyzer` nos testes de ingestão,
-`ecc:a11y-architect` nas views.
+(Python, Go, Rust, Java, PHP, TypeScript, React, Django, FastAPI — Ruby não), daí
+a revisão sair sempre pelos agentes agnósticos de linguagem. Cada feature tem seu
+plano na seção "Plano de delegação" do próprio `tasks.md`. Na `colecao`:
+`ecc:security-reviewer` no concern e no controller de sessão (feito na Fase 1),
+`ecc:database-reviewer` nas constraints e no plano de execução,
+`ecc:a11y-architect` nos controles de posse, `ecc:pr-test-analyzer` nos testes de
+isolamento e wishlist.
+
+Coletas mecânicas — ler arquivo, listar símbolo, extrair formato — vão para
+subagentes Haiku com prompt fechado e **leitura apenas**. Decisão de design e
+resolução de colisão ficam com o orquestrador.
 
 Se rodar sensor de mutação, isolar em worktree ou cópia — **nunca `git stash`**:
 há trabalho não commitado com frequência neste repo.
