@@ -404,19 +404,57 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] Teste prova que a variante é resolvida pelo **par** `card_number` + `variant_code`, **nunca pelo nome**: uma linha cujo `card_name` diverge do catálogo resolve na mesma variante e não é rejeitada
-- [ ] Teste prova que um `variant_code` válido **sob outra carta** não resolve na variante errada — o par é a chave, não o `variant_code` sozinho
-- [ ] Teste prova que linha com variante inexistente é **rejeitada com motivo** e que as demais continuam sendo processadas (Req. 10.3)
-- [ ] Teste prova que linha com quantidade inválida (negativa, não inteira, texto) é rejeitada com motivo, sem interromper o lote
-- [ ] Teste prova que a classificação distingue **cria**, **atualiza** e **rejeita**, e que "atualiza" traz o valor **antes** e **depois** (AD-006: substituir)
-- [ ] Teste prova que a mesma variante em **duas linhas** do arquivo é tratada de forma explícita, e que a última **não vence em silêncio** (Edge Case da spec)
-- [ ] Teste prova que quantidade zero é classificada segundo o Req. 7.3 e a AD-006, de forma explícita na classificação
-- [ ] Teste prova que variante marcada como ausente da fonte **continua importável** (Req. 1.7, Edge Case da spec)
-- [ ] Teste prova que a resolução **não emite uma consulta por linha** (POR-13), medido
-- [ ] **Nenhum caminho deste serviço escreve no banco** — provado com `assert_no_changes`
+- [x] Teste prova que a variante é resolvida pelo **par** `card_number` + `variant_code`, **nunca pelo nome**: uma linha cujo `card_name` diverge do catálogo resolve na mesma variante e não é rejeitada
+- [x] Teste prova que um `variant_code` válido **sob outra carta** não resolve na variante errada — o par é a chave, não o `variant_code` sozinho
+- [x] Teste prova que linha com variante inexistente é **rejeitada com motivo** e que as demais continuam sendo processadas (Req. 10.3)
+- [x] Teste prova que linha com quantidade inválida (negativa, não inteira, texto) é rejeitada com motivo, sem interromper o lote
+- [x] Teste prova que a classificação distingue **cria**, **atualiza** e **rejeita**, e que "atualiza" traz o valor **antes** e **depois** (AD-006: substituir)
+- [x] Teste prova que a mesma variante em **duas linhas** do arquivo é tratada de forma explícita, e que a última **não vence em silêncio** (Edge Case da spec)
+- [x] Teste prova que quantidade zero é classificada segundo o Req. 7.3 e a AD-006, de forma explícita na classificação
+- [x] Teste prova que variante marcada como ausente da fonte **continua importável** (Req. 1.7, Edge Case da spec)
+- [x] Teste prova que a resolução **não emite uma consulta por linha** (POR-13), medido
+- [x] **Nenhum caminho deste serviço escreve no banco** — provado com `assert_no_changes`
 
 **Tests**: unit
 **Gate**: quick
+
+---
+
+**Decisões da execução:**
+
+- **Cinco classificações, não três.** Além de `:cria`, `:atualiza` e
+  `:rejeita`, o resolvedor produz `:zera` e `:inalterada`. As duas existem
+  porque o Edge Case da spec e o Req. 7.3 pedem que certos efeitos sejam
+  **explícitos** na pré-visualização, e "atualiza" os esconderia: `:zera` é o
+  caso destrutivo (havia posse ≥ 1, o arquivo traz zero, a posse desaparece),
+  e `:inalterada` é o que torna a ida-e-volta do POR-11 legível — reimportar o
+  próprio export diz "nada muda" em vez de anunciar N atualizações que não
+  alteram nada. Zero sobre variante **não** possuída continua sendo `:cria`:
+  não há posse a apagar, e misturar os dois casos esconderia do usuário qual é
+  qual.
+
+- **Linha duplicada: a última vale, as anteriores são rejeitadas com motivo
+  próprio (`:linha_duplicada`).** Rejeitar a última seria arbitrário; aplicar
+  as duas é impossível sob `UNIQUE (user_id, card_variant_id)`; e deixar a
+  última vencer sem dizer nada é exatamente o que o Edge Case proíbe. Como
+  rejeição, a linha perdedora chega à pré-visualização da T13 pelo mesmo
+  caminho de qualquer outra, com o seu motivo visível — que é o que o Edge
+  Case pede ("explícito", não "resolvido internamente").
+
+- **A ausência da fonte não é filtro, e não há coluna booleana para ela.** A
+  marca é `card_variants.last_seen_at` deixado para trás enquanto a ingestão
+  remarca o presente (`Ingestion::Upsert`); a ingestão não deleta (Req. 1.7).
+  O resolvedor **não consulta** `last_seen_at`, e há teste que segura isso nos
+  dois casos — marca velha e marca `NULL`. Filtrar por marca recente apagaria
+  do import justamente as cartas antigas que o usuário mais precisa registrar.
+
+- **Duas consultas para o lote inteiro**, medidas: uma em `card_variants`
+  juntada a `cards` (o `card_number` vive em `cards`) e uma em
+  `collection_items` a partir de `CollectionItem.for_user(user)`. O teste de
+  POR-13 compara dois lotes de tamanhos diferentes e afirma a igualdade, em
+  vez de fixar número absoluto. A discriminação foi verificada: substituindo a
+  consulta de lote por uma por linha, o teste falha com "o custo cresceu de 3
+  para 11 consultas" — um resolvedor N+1 **não** passa.
 
 ---
 
