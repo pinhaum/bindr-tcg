@@ -474,15 +474,54 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] `ecc:security-reviewer` revisou o caminho do arquivo — leitura, parsing, limite, codificação — e o relatório está resumido nas "Decisões da execução"
-- [ ] Todo achado CRITICAL ou HIGH está corrigido **ou** tem justificativa escrita de por que não se aplica; aceitar o achado não obriga a aceitar a correção proposta (precedente da T11 da `colecao`)
-- [ ] Teste cobre cada correção feita
-- [ ] Teste prova que conteúdo de uma linha do CSV não é interpretado como fórmula nem como marcação ao ser exibido na pré-visualização
-- [ ] Teste prova que o limite de linhas não é contornável por linha absurdamente longa ou por codificação
-- [ ] Nenhuma mensagem de erro vaza caminho de arquivo, SQL ou stack trace
+- [x] `ecc:security-reviewer` revisou o caminho do arquivo — leitura, parsing, limite, codificação — e o relatório está resumido nas "Decisões da execução"
+- [x] Todo achado CRITICAL ou HIGH está corrigido **ou** tem justificativa escrita de por que não se aplica; aceitar o achado não obriga a aceitar a correção proposta (precedente da T11 da `colecao`)
+- [x] Teste cobre cada correção feita
+- [x] Teste prova que conteúdo de uma linha do CSV não é interpretado como fórmula nem como marcação ao ser exibido na pré-visualização
+- [x] Teste prova que o limite de linhas não é contornável por linha absurdamente longa ou por codificação
+- [x] Nenhuma mensagem de erro vaza caminho de arquivo, SQL ou stack trace
 
 **Tests**: unit
 **Gate**: full
+
+**Decisões da execução:**
+
+- **Achado HIGH corrigido — o limite de AD-008 não limitava o custo.** A revisão
+  mostrou, e eu reproduzi antes de corrigir, que um CSV de **uma** linha de dado
+  com uma célula de 50 MB era **aceito em 0,16s**: `MAX_LINHAS` conta linhas e
+  `CSV.parse` materializa bytes. O comentário do próprio parser afirmava que o
+  limite de linhas "põe teto no custo" — premissa falsa. Correção: `MAX_BYTES`
+  de 8 MB verificado **antes** do parse, dentro do `Parser` e não no controller,
+  porque o serviço é chamável fora do contexto HTTP. 8 MB é folga de mais de
+  10× sobre o pior caso legítimo (10.000 linhas do export real ≈ 600 KB), e há
+  teste que falha se o teto passar a barrar o arquivo que AD-008 aceita.
+  Quatro testes novos; mutação movendo a guarda para depois do parse morre.
+
+- **Achado HIGH aceito, correção adiada com justificativa — CSV injection.** Uma
+  célula começando com `=`, `+`, `-`, `@`, TAB ou CR é fórmula para Excel. O
+  achado **não é defeito presente**: rastreei `card_name` vindo do arquivo e ele
+  existe em exatamente dois pontos (`resolver.rb:32` e `:110`), nenhum deles
+  levando a escrita ou reexportação — o `Export` lê `cards.name` do **catálogo**
+  (`export.rb:59`), nunca do arquivo do usuário, porque a spec fixou `card_name`
+  como informativo e nunca chave. **Pendências que isto cria:** a T13 exibe esse
+  campo em HTML (escape padrão do Rails resolve, desde que ninguém use `raw` ou
+  `html_safe`), e qualquer reexportação futura de dado vindo do usuário precisa
+  prefixar a célula com apóstrofo.
+
+- **Achado LOW registrado, sem ação — zip bomb.** Não há descompressão em
+  nenhuma camada do serviço. Vira ponto de atenção da T12: nenhum middleware
+  pode descomprimir o corpo sem teto de saída.
+
+- **0 CRITICAL.** A revisão confirmou por grep e por teste que não há escrita em
+  `collection_items` em nenhum dos quatro serviços, e que a autorização parte
+  sempre de `Current.user`.
+
+- **Apontamentos para a T12** (controller de upload), do revisor: teto de bytes
+  no corpo da requisição como segunda camada; não desabilitar CSRF;
+  `original_filename` nunca compondo caminho em disco; e a staging da T11 precisa
+  de `user_id` e expiração, para que ninguém confirme o staging alheio por id
+  adivinhado.
+
 
 ---
 

@@ -321,6 +321,59 @@ module CollectionCsv
       assert_equal 10_000, Parser::MAX_LINHAS
     end
 
+    # Achado HIGH da revisão de segurança da T10, reproduzido antes de corrigir:
+    # o limite de AD-008 conta **linhas**, e o custo de `CSV.parse` escala com
+    # **bytes**. Um arquivo de uma única linha de dado com uma célula de 50 MB
+    # passava pelo `MAX_LINHAS` sem ser tocado — medido, aceito em 0,16s —, e
+    # bastariam alguns envios simultâneos para esgotar a memória do worker.
+    #
+    # O teto de bytes mora no `Parser` e não no controller de propósito: o
+    # serviço é chamável fora do contexto HTTP, e uma guarda que só existisse na
+    # borda deixaria o serviço vulnerável a qualquer outro chamador.
+    test "arquivo grande demais em bytes é recusado mesmo tendo poucas linhas" do
+      celula = "A" * (Parser::MAX_BYTES + 1)
+      uma_linha_gigante = csv_com([ linha_valida(nome: celula) ])
+
+      resultado = Parser.new(uma_linha_gigante).call
+
+      refute resultado.aceito?, "aceitou #{uma_linha_gigante.bytesize} bytes em uma linha"
+      assert_empty resultado.linhas
+    end
+
+    test "a recusa por tamanho em bytes diz o limite em megabytes" do
+      resultado = Parser.new(csv_com([ linha_valida(nome: "A" * (Parser::MAX_BYTES + 1)) ])).call
+
+      assert_includes resultado.erro, "8 MB"
+    end
+
+    test "o teto de bytes não recusa o arquivo legítimo no limite de linhas" do
+      no_limite = csv_com_n_linhas(Parser::MAX_LINHAS)
+
+      assert_operator no_limite.bytesize, :<, Parser::MAX_BYTES,
+        "dez mil linhas reais ocupam #{no_limite.bytesize} bytes e não cabem no teto de " \
+        "#{Parser::MAX_BYTES}: o teto de bytes está barrando arquivo que AD-008 aceita"
+      assert Parser.new(no_limite).call.aceito?
+    end
+
+    # O teto precisa valer **antes** do parse: depois dele a memória já foi
+    # alocada, que é exatamente o que ele existe para evitar.
+    #
+    # A prova é indireta e por isso mais forte que cronometrar: o arquivo abaixo
+    # é grande **e** sintaticamente quebrado (aspas não fechadas). Se o teto
+    # fosse avaliado depois do parse, a recusa viria como "não foi possível ler
+    # o arquivo como CSV". Vir a mensagem de **tamanho** só é possível se o
+    # `bytesize` tiver sido consultado antes de `CSV.parse` ser chamado.
+    test "o teto de bytes é avaliado antes do parse" do
+      quebrado_e_gigante = "#{Format.header_row.join(Format::DELIMITER)}\n" \
+        "OP01-001,p1,\"#{"A" * (Parser::MAX_BYTES + 1)},1\n"
+
+      resultado = Parser.new(quebrado_e_gigante).call
+
+      refute resultado.aceito?
+      assert_includes resultado.erro, "8 MB",
+        "recusou pelo parse em vez de pelo tamanho: o teto está sendo avaliado tarde demais"
+    end
+
     # Done when: a mensagem diz o limite. Um "arquivo muito grande" sem número
     # não diz ao usuário o que fazer com o arquivo dele.
     test "a recusa por tamanho diz o limite em número de linhas" do

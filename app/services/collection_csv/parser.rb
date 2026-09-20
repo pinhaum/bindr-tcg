@@ -27,6 +27,20 @@ module CollectionCsv
     # e a que determina o custo real: uma linha = uma resolução de variante.
     MAX_LINHAS = 10_000
 
+    # Teto de **bytes**, complementar ao de linhas, porque os dois medem coisas
+    # diferentes e só o de linhas deixa passar o arquivo absurdo: `CSV.parse`
+    # materializa a tabela inteira em memória, e um arquivo de **uma** linha de
+    # dado com uma célula de 50 MB passava pelo `MAX_LINHAS` sem tocá-lo —
+    # medido, aceito em 0,16s. O custo real escala com bytes × colunas, não com
+    # o número de linhas, então o limite de AD-008 sozinho não põe o teto que o
+    # próprio AD-008 diz pôr.
+    #
+    # 8 MB é folga de mais de 10× sobre o pior caso legítimo: 10.000 linhas do
+    # export real ocupam cerca de 600 KB. Verificado **antes** do parse, porque
+    # depois dele a memória já foi alocada — que é exatamente o que se quer
+    # evitar.
+    MAX_BYTES = 8 * 1024 * 1024
+
     # Objeto de resultado em vez de exceção ou de par `[linhas, erro]`: a recusa
     # é um desfecho **esperado** deste serviço (arquivo do usuário é entrada
     # hostil por natureza), não um caso excepcional, e quem chama — o controller
@@ -51,6 +65,9 @@ module CollectionCsv
       return recusa(MENSAGEM_CODIFICACAO) unless conteudo.valid_encoding?
       return recusa(MENSAGEM_VAZIO) if conteudo.strip.empty?
 
+      # Antes do parse, e não depois: o ponto do teto é não alocar a tabela.
+      return recusa(MENSAGEM_TAMANHO) if conteudo.bytesize > MAX_BYTES
+
       tabela = parse
       return recusa(MENSAGEM_CSV_INVALIDO) if tabela.nil?
 
@@ -69,6 +86,9 @@ module CollectionCsv
 
     MENSAGEM_CODIFICACAO = "O arquivo não está em UTF-8. " \
       "Salve a planilha como CSV UTF-8 e envie novamente.".freeze
+
+    MENSAGEM_TAMANHO = "O arquivo é grande demais: o limite é de 8 MB. " \
+      "Envie o CSV exportado da sua coleção, sem colunas ou textos extras.".freeze
 
     def parse
       # O BOM que planilhas do Excel escrevem no início do arquivo gruda na
