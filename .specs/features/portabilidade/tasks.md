@@ -1,0 +1,675 @@
+# Plano de execução — Import e export CSV (Fase 5)
+
+Espelha `.context/tasks.md` §5.2 e §5.3. A fonte de verdade da ordem é
+`.context/tasks.md`; este documento acrescenta dependências, gate e teste
+explícitos por task (AD-005). **Ao concluir uma task, marcar o checkbox nos dois
+planos e commitar junto com o código.** A **§5.2 fecha quando o export fechar**
+(T7); a **§5.3 fecha quando o import fechar** (T15).
+
+A feature é governada por **AD-006**, **AD-007** e **AD-008**, decididas antes
+deste plano e **não reabertas nesta fase**: import **substitui** a quantidade;
+o arquivo vive em **tabela de staging** entre pré-visualização e confirmação;
+o limite é de **10.000 linhas** de dado.
+
+**A invariante desta feature está acima de qualquer task**: nenhuma escrita na
+coleção sem confirmação explícita do usuário (Req. 10.5). A coleção é o único
+dado insubstituível do sistema — o catálogo é regenerável (AD-001). **Uma task
+que grave antes da confirmação está errada mesmo que os testes passem.**
+
+## Execution Protocol
+
+- Uma task por vez, em ordem. Não abrir a próxima com a anterior incompleta.
+- Toda task termina com código que roda e teste que passa. "Estrutura criada" não
+  é task concluída.
+- Testes derivam dos critérios de aceitação da spec, nunca espelham a
+  implementação. Nunca enfraquecer, pular ou apagar teste para passar no gate.
+- Se um requisito se mostrar errado durante a execução, parar e avisar o dono do
+  produto. Corrigir `.context/requirements.md` é decisão dele (AD-005).
+- Um commit atômico por task, em português brasileiro, Conventional Commits, sem
+  linha de atribuição.
+- Divergência deliberada entre spec e código é marcada com `SPEC_DEVIATION` no
+  próprio arquivo, como em `test/integration/collection_authorization_test.rb`.
+- Toda consulta parte de `Current.user`, nunca de id vindo do request.
+  `CollectionItem.for_user` exige o objeto `User` e levanta `ArgumentError` num id.
+- Esta feature **tem migração** (staging, AD-007) e **tem gem nova** (`csv`).
+  `schema_format` é `:sql`: migração exige `db:migrate` para regenerar
+  `db/structure.sql`. Gem nova exige
+  `docker compose run --rm --no-deps app bundle install` — o volume nomeado
+  `bundle` sombreia as gems da imagem e rebuild **não** basta.
+
+## Test Coverage Matrix
+
+| Camada | Tipo de teste | Onde |
+|---|---|---|
+| Formato do CSV, serialização e escape | unit | `test/services/collection_csv/` |
+| Parser, validação de formato e limite de linhas | unit | `test/services/collection_csv/` |
+| Resolução de variante e classificação de linha | unit | `test/services/collection_csv/` |
+| Staging: constraints, expiração, autorização | unit | `test/models/collection_import_test.rb` |
+| Escrita em lote e isolamento entre usuários | unit | `test/models/` + `test/queries/` |
+| Plano de execução e número de consultas | unit | `test/queries/collection_csv_plan_test.rb` |
+| Fluxo HTTP, download, upload, confirmação | integration | `test/integration/` |
+| Pré-visualização renderizada e a11y | integration | `test/integration/` — `assert_select` |
+
+O projeto **não usa fixtures YAML**: cada teste cria seus registros no `setup`.
+A suíte roda em paralelo (`parallelize(workers: :number_of_processors)`), com um
+banco por worker (`bindr_test-0..3`).
+
+## Gate Check Commands
+
+| Gate | Comando |
+|---|---|
+| quick | `docker compose exec app bin/rails test test/models test/queries` |
+| full | `docker compose exec app bin/rails test && docker compose exec app bin/rubocop` |
+| build | `docker compose build` |
+
+`RAILS_ENV` posicional não é lido pelo `bin/rails` — usar `env RAILS_ENV=test
+bin/rails ...`. `bin/rails db:drop RAILS_ENV=test` apaga o banco de
+**desenvolvimento** e leva as 2818 cartas junto.
+
+## Execution Plan
+
+### Phase 1: Suíte determinística
+
+Antes de qualquer linha de feature. Esta feature tem gate **full** em toda task,
+e um gate que falha por acaso treina quem executa a ignorar vermelho — numa
+feature cuja metade escreve em massa sobre dado insubstituível.
+
+Os dois flakes são tasks **separadas** porque têm causas diferentes: um é sobre
+marca de tempo, o outro sobre escolha do planejador. A terceira task é a prova
+de que os dois sumiram — doze execuções, que é o que distingue correção de sorte.
+
+```
+T1 → T2 → T3
+```
+
+### Phase 2: Export
+
+A metade sem risco de perda, e a que **define o formato** de que o import
+depende. Nada do import começa antes de o contrato de colunas existir em código.
+
+```
+T3 → T4 → T5 → T6 → T7
+```
+
+### Phase 3: Import sem nenhuma escrita
+
+Parser, validação e resolução de variante — tudo que responde "o que este
+arquivo faria" **sem tocar na coleção**. A fronteira desta fase é deliberada:
+ao fim dela existe um import que sabe classificar cada linha e ainda não tem
+como gravar nada.
+
+```
+T7 → T8 → T9 → T10
+```
+
+### Phase 4: Pré-visualização, confirmação e escrita
+
+A barreira do Req. 10.5 e a única escrita da feature. Abre com o staging, porque
+é ele que permite à confirmação gravar o que foi mostrado (AD-007).
+
+```
+T10 → T11 → T12 → T13 → T14
+```
+
+### Phase 5: Resumo e provas não-funcionais
+
+Auditabilidade para o usuário e as provas que tornam as fases anteriores
+corretas: ida e volta fechada, isolamento entre usuários e custo por linha.
+
+```
+T14 → T15 → T16 → T17
+```
+
+## Task Breakdown
+
+### T1: Flake de `guarantees_test` — a marca de última aparição
+
+**What**: Diagnosticar e corrigir a falha intermitente da asserção que distingue o presente do ausente pela marca de última aparição, sem enfraquecê-la.
+**Where**: `test/services/ingestion/guarantees_test.rb`
+**Depends on**: None
+**Reuses**: O parâmetro `clock:` que `Ingestion::Upsert#initialize` já expõe (`app/services/ingestion/upsert.rb:16`) — é o ponto de injeção que existe justamente para tornar a marca determinística
+**Requirement**: POR-00
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:systematic-debugging`
+
+**Fatos já medidos pelo orquestrador — ponto de partida, não conclusão**:
+
+- **O flake foi reproduzido**: 1 falha em 5 execuções da suíte completa. A mensagem foi `Expected 2026-09-20 18:00:11.772126 to be > 2026-09-20 18:00:19.239740` — o **presente 8 segundos mais velho que o ausente**, isto é, **inversão**, não empate.
+- **O diagnóstico escrito na spec está errado e não deve ser seguido às cegas.** A spec supõe truncamento por `to_i`. As três colunas envolvidas (`cards.last_seen_at`, `card_variants.last_seen_at`, `import_runs.started_at`) são `timestamp(6)` — **precisão de microssegundo**, medida em `information_schema`. Truncamento não produz inversão de 8 segundos.
+- Em série o caminho é sempre correto: `presente > ausente` com delta de ~3s, medido cinco vezes por script isolado.
+- Isolado, o arquivo passou **6 de 6** execuções.
+- Os workers têm **bancos separados** (`bindr_test-0..3`), o que descarta interferência direta entre workers sobre o mesmo registro.
+- Os bancos de teste estavam **limpos** (`Card.count = 0`) — não há resíduo entre execuções.
+- O payload da segunda ingestão **contém** `OP01-002` (medido: 375 cartas sem `OP01-001`, com `OP01-002` presente), logo ele deveria ser sempre remarcado.
+
+**Done when**:
+
+- [ ] A causa está identificada e escrita no cabeçalho do teste — não "provavelmente relógio", mas o mecanismo, com a evidência que o sustenta
+- [ ] O flake é **reproduzido antes** de ser corrigido, e a reprodução está registrada (comando e saída)
+- [ ] A correção ataca a **causa**, não o sintoma: a asserção não é enfraquecida, pulada, removida nem trocada por uma mais permissiva
+- [ ] O teste continua provando que a marca de última aparição **distingue** o presente do ausente — revertida a correção, a garantia original volta a ser exercida, e isso é verificado
+- [ ] `bin/rubocop` limpo
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T2: Flake de `catalog_search_test` — asserção de plano de execução
+
+**What**: Diagnosticar e corrigir a falha intermitente da asserção de plano que exige o índice trigram, sem enfraquecê-la.
+**Where**: `test/queries/catalog_search_test.rb`
+**Depends on**: T1
+**Reuses**: O `ANALYZE cards` que `seed_for_planner` já executa (`test/queries/catalog_search_test.rb:61`); o precedente da T8 da `progresso`, que trocou um observável assíncrono por um síncrono e transacional
+**Requirement**: POR-00
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:systematic-debugging`
+
+**Fatos já medidos pelo orquestrador — ponto de partida, não conclusão**:
+
+- **A hipótese "falta `ANALYZE`" está descartada**: `seed_for_planner` já roda `ANALYZE cards` na linha 61, antes de todo `EXPLAIN`.
+- Isolado, o arquivo passou **3 de 3** execuções; o flake não foi reproduzido em isolamento.
+- Este arquivo contém `SemTransacaoTest` com `use_transactional_tests = false` — **o único ponto da suíte que escreve fora de transação**. Ele semeia e remove registros num `teardown`, e `seed_for_planner` insere 20.000 cartas. A interação entre esse estado e as estatísticas do planejador é a hipótese que ainda não foi testada.
+- O banco de teste carrega `pg_class.reltuples` de execuções anteriores, que **não é transacional**.
+
+**Done when**:
+
+- [ ] A causa está identificada e escrita no cabeçalho do teste, com a evidência que a sustenta
+- [ ] O flake é **reproduzido antes** de ser corrigido, e a reprodução está registrada
+- [ ] A correção ataca a **causa**, não o sintoma: a asserção não é enfraquecida, pulada nem removida
+- [ ] O teste continua provando que a busca **usa o índice trigram** e **não** faz varredura completa — revertida a correção, a garantia volta a ser exercida
+- [ ] `bin/rubocop` limpo
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T3: Prova de que os dois flakes sumiram — doze execuções da suíte
+
+**What**: Rodar a suíte completa doze vezes seguidas e registrar o resultado de cada uma, para distinguir correção de sorte.
+**Where**: `.specs/features/portabilidade/tasks.md`
+**Depends on**: T2
+**Reuses**: As correções das T1 e T2
+**Requirement**: POR-00
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Por que doze**: a taxa observada é de ~17% (1 em 6 pela medição da `progresso`,
+1 em 5 na medição desta sessão). Menos de doze execuções não distingue correção
+de sorte — com 17% de taxa, uma sequência de cinco passes limpos acontece por
+acaso em cerca de 40% das vezes.
+
+**Done when**:
+
+- [ ] A suíte completa rodou **doze vezes seguidas**
+- [ ] **Zero falha** nos dois arquivos nas doze execuções
+- [ ] O resultado de cada uma das doze execuções está registrado nas "Decisões da execução" desta task — contagem de testes, falhas e erros
+- [ ] `bin/rubocop` limpo
+- [ ] Se alguma execução falhar, a task **não fecha**: volta para T1 ou T2 conforme o arquivo
+
+**Tests**: unit (a suíte inteira, doze vezes)
+**Gate**: full
+
+---
+
+### T4: Gem `csv` declarada e formato do CSV fixado em um só lugar
+
+**What**: Declarar `csv` no Gemfile e criar o objeto que é dono do contrato de colunas — nomes, ordem e cabeçalho —, de modo que export e import leiam a mesma definição.
+**Where**: `app/services/collection_csv/format.rb`
+**Depends on**: T3
+**Reuses**: Nada — é a primeira peça da feature
+**Requirement**: POR-01, POR-04
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] `csv` está no `Gemfile` com comentário explicando por que uma *default gem* é declarada (some do carregamento implícito no Ruby 3.4)
+- [ ] `docker compose run --rm --no-deps app bundle install` rodou e `Gemfile.lock` está commitado
+- [ ] As quatro colunas (`card_number`, `variant_code`, `card_name`, `quantity`) e a sua ordem estão definidas **em um único lugar**, consumido pelo export e pelo import
+- [ ] Teste prova que a lista de colunas do export é **idêntica** à que o import espera — uma mudança em uma delas quebra o teste, não o usuário
+- [ ] Teste prova que o cabeçalho é reconhecido **por nome, não por posição**, com as colunas em ordem trocada (Edge Case da spec)
+- [ ] Teste prova que um cabeçalho com BOM (`﻿`, que o Excel insere) é reconhecido (Edge Case da spec)
+- [ ] O build sobe com a gem nova: `docker compose build`
+
+**Tests**: unit
+**Gate**: build
+
+---
+
+### T5: Serialização da coleção em CSV
+
+**What**: Serviço que recebe o usuário e devolve o CSV da coleção dele, em UTF-8, com cabeçalho, só com as variantes possuídas.
+**Where**: `app/services/collection_csv/export.rb`
+**Depends on**: T4
+**Reuses**: `CollectionItem.for_user` e o scope `owned` (`app/models/collection_item.rb`); o contrato de colunas da T4
+**Requirement**: POR-01, POR-02, POR-13
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] Recebe o **objeto** `User` e nunca um id; nenhum caminho leva de parâmetro de request a usuário
+- [ ] Teste prova que o CSV tem linha de cabeçalho e uma linha por variante possuída, com as quatro colunas preenchidas
+- [ ] Teste prova que variante com `quantity = 0` **não** aparece no arquivo, e que o resultado é o mesmo de não haver registro (Req. 7.3)
+- [ ] Teste prova que um usuário sem nenhuma variante possuída produz arquivo com **cabeçalho e nenhuma linha de dado** — não arquivo vazio, não erro
+- [ ] Teste prova que nome com acento (`Bell-mère`) sai íntegro e que o arquivo é UTF-8
+- [ ] Teste prova que nome contendo vírgula ou aspas é escapado de forma que o próprio parser do import o leia de volta idêntico
+- [ ] Teste prova que a serialização usa um número de consultas que **não cresce** com o número de linhas (POR-13), medido por `assert_queries_count` ou contagem equivalente
+- [ ] Teste prova que dois usuários com posses distintas produzem arquivos distintos, cada um só com o seu
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T6: Rota e action de export, com sessão exigida
+
+**What**: Endpoint que entrega o CSV como download para o usuário da sessão, herdando o default protegido do `ApplicationController`.
+**Where**: `app/controllers/collection_exports_controller.rb` — mais a rota correspondente, declarada junto
+**Depends on**: T5
+**Reuses**: O default de `ApplicationController` (`app/controllers/concerns/authentication.rb`); `Current.user`; o serviço da T5
+**Requirement**: POR-03
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] O controller **não** declara `allow_unauthenticated_access` — a proteção vem do default, e há teste que prova que o anônimo é redirecionado para a autenticação **sem receber arquivo**
+- [ ] Teste prova que o corpo da resposta anônima não contém nenhuma linha de coleção
+- [ ] Teste prova que a resposta autenticada tem `Content-Type` de CSV e `Content-Disposition: attachment` com nome de arquivo
+- [ ] Teste prova que o conteúdo entregue é o da coleção de `Current.user`, e que passar `?user_id=` de outro usuário **não muda** o arquivo (Req. 6.5)
+- [ ] Teste prova que a rota não aceita nenhum identificador de usuário no caminho — não há URL onde um id de usuário caiba
+- [ ] O acento sobrevive à resposta HTTP, não só à serialização
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T7: Link de export na interface, em português ✅ fecha a §5.2
+
+**What**: Ponto de entrada visível para baixar a coleção, ligado à página que o usuário já usa, com rótulo em português.
+**Where**: view existente da coleção/progresso + parcial própria
+**Depends on**: T6
+**Reuses**: O padrão de link e os alvos de toque de 24px já estabelecidos desde a T8 da `colecao`
+**Requirement**: POR-01, POR-03
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] O controle aparece para o usuário autenticado e **não** aparece para o anônimo, com teste para os dois casos
+- [ ] O rótulo está em português e diz o que o arquivo é, não "Export"
+- [ ] O alvo de toque tem `min-height`/`min-width` de 24px (SC 2.5.8), como o código novo desde a T4 da `colecao`
+- [ ] Teste de integração sobre o HTML renderizado prova a presença do link e o seu destino, com `SPEC_DEVIATION` no cabeçalho do arquivo (não há navegador no container)
+- [ ] Nenhum scroll horizontal em 360px (Req. 2.5)
+- [ ] **Checkbox da §5.2 de `.context/tasks.md` marcado** nesta task, junto com o desta linha
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T8: Parser do CSV — formato, limite e recusa do arquivo inteiro
+
+**What**: Leitura do arquivo enviado, validando formato e tamanho **antes** de processar qualquer linha, recusando o arquivo inteiro com mensagem em português quando não servir.
+**Where**: `app/services/collection_csv/parser.rb`
+**Depends on**: T7
+**Reuses**: O contrato de colunas da T4
+**Requirement**: POR-04
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] Teste prova que um arquivo com cabeçalho correto e linhas válidas é aceito
+- [ ] Teste prova que arquivo **sem as colunas esperadas** é recusado **inteiro**, com mensagem em português, sem processar linha nenhuma
+- [ ] Teste prova que arquivo delimitado por `;` é recusado com mensagem que **diz o delimitador esperado**, em vez de importar uma coluna só (Edge Case da spec)
+- [ ] Teste prova que arquivo que não é CSV é recusado com mensagem em português e **sem stack trace**
+- [ ] Teste prova que arquivo com mais de **10.000 linhas de dado** é recusado com mensagem que **diz o limite** (AD-008), e que 10.000 exatas são aceitas — a fronteira é testada dos dois lados
+- [ ] Teste prova que o limite é verificado **antes** de qualquer resolução de variante
+- [ ] Teste prova que o cabeçalho é resolvido por nome e sobrevive a BOM e a ordem trocada (herdado da T4, exercitado aqui de ponta a ponta)
+- [ ] **Nenhum caminho deste serviço escreve no banco** — provado por teste com `assert_no_changes` sobre `CollectionItem.count` e a quantidade de um item existente
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T9: Resolução de variante pelo par, e classificação de cada linha
+
+**What**: Para cada linha aceita pelo parser, resolver a variante pelo par `card_number` + `variant_code` e classificar o efeito: cria, atualiza ou é rejeitada, com motivo.
+**Where**: `app/services/collection_csv/resolver.rb`
+**Depends on**: T8
+**Reuses**: `CollectionItem.for_user`; `CardVariant` e o `UNIQUE (card_id, variant_code)` do schema
+**Requirement**: POR-05, POR-06, POR-13
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] Teste prova que a variante é resolvida pelo **par** `card_number` + `variant_code`, **nunca pelo nome**: uma linha cujo `card_name` diverge do catálogo resolve na mesma variante e não é rejeitada
+- [ ] Teste prova que um `variant_code` válido **sob outra carta** não resolve na variante errada — o par é a chave, não o `variant_code` sozinho
+- [ ] Teste prova que linha com variante inexistente é **rejeitada com motivo** e que as demais continuam sendo processadas (Req. 10.3)
+- [ ] Teste prova que linha com quantidade inválida (negativa, não inteira, texto) é rejeitada com motivo, sem interromper o lote
+- [ ] Teste prova que a classificação distingue **cria**, **atualiza** e **rejeita**, e que "atualiza" traz o valor **antes** e **depois** (AD-006: substituir)
+- [ ] Teste prova que a mesma variante em **duas linhas** do arquivo é tratada de forma explícita, e que a última **não vence em silêncio** (Edge Case da spec)
+- [ ] Teste prova que quantidade zero é classificada segundo o Req. 7.3 e a AD-006, de forma explícita na classificação
+- [ ] Teste prova que variante marcada como ausente da fonte **continua importável** (Req. 1.7, Edge Case da spec)
+- [ ] Teste prova que a resolução **não emite uma consulta por linha** (POR-13), medido
+- [ ] **Nenhum caminho deste serviço escreve no banco** — provado com `assert_no_changes`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T10: Revisão de segurança do upload e do parser
+
+**What**: Submeter o único ponto da aplicação que recebe arquivo do usuário à revisão de segurança, e corrigir o que ela apontar.
+**Where**: `app/services/collection_csv/`, e o controller de upload quando existir
+**Depends on**: T9
+**Reuses**: Os serviços das T8 e T9
+**Requirement**: POR-04
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+- Subagente: `ecc:security-reviewer`
+
+**Done when**:
+
+- [ ] `ecc:security-reviewer` revisou o caminho do arquivo — leitura, parsing, limite, codificação — e o relatório está resumido nas "Decisões da execução"
+- [ ] Todo achado CRITICAL ou HIGH está corrigido **ou** tem justificativa escrita de por que não se aplica; aceitar o achado não obriga a aceitar a correção proposta (precedente da T11 da `colecao`)
+- [ ] Teste cobre cada correção feita
+- [ ] Teste prova que conteúdo de uma linha do CSV não é interpretado como fórmula nem como marcação ao ser exibido na pré-visualização
+- [ ] Teste prova que o limite de linhas não é contornável por linha absurdamente longa ou por codificação
+- [ ] Nenhuma mensagem de erro vaza caminho de arquivo, SQL ou stack trace
+
+**Tests**: unit
+**Gate**: full
+
+---
+
+### T11: Tabela de staging — schema, constraints e autorização
+
+**What**: A tabela que guarda a pré-visualização entre o upload e a confirmação, com dono, expiração e as constraints provadas contra o banco.
+**Where**: migração nova, `app/models/collection_import.rb`
+**Depends on**: T10
+**Reuses**: O padrão de FK `on_delete: :restrict` e de prova por SQL direto de `test/models/collection_item_test.rb` e `test/models/wishlist_item_test.rb`
+**Requirement**: POR-07, POR-12
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+- Subagente: `ecc:database-reviewer` na tabela e nas constraints
+
+**Done when**:
+
+- [ ] Migração criada e `db/structure.sql` regenerado por `db:migrate` (`schema_format` é `:sql`)
+- [ ] A tabela tem `user_id` com FK **sem cascata para a coleção** e um campo de expiração
+- [ ] As constraints são **provadas contra o banco** por SQL direto, não só por validação de model
+- [ ] `for_user` com o mesmo contrato de `CollectionItem.for_user`: exige o objeto `User` e levanta `ArgumentError` num id — com teste
+- [ ] Teste prova que uma pré-visualização de outro usuário **não é legível** por este, e que a tentativa não revela a existência dela
+- [ ] Teste prova que registro expirado não é confirmável
+- [ ] Existe caminho de limpeza dos registros expirados, com teste
+- [ ] `ecc:database-reviewer` revisou a tabela; achados resumidos nas "Decisões da execução"
+- [ ] Teste prova que **nenhuma FK desta tabela cascateia para `collection_items`** — apagar uma pré-visualização não pode tocar na coleção
+
+**Tests**: unit
+**Gate**: full
+
+---
+
+### T12: Upload produz pré-visualização e **nada mais**
+
+**What**: A action que recebe o arquivo, chama parser e resolver, grava a pré-visualização no staging e responde — sem escrever uma única linha na coleção.
+**Where**: `app/controllers/collection_imports_controller.rb` — mais a rota correspondente, declarada junto
+**Depends on**: T11
+**Reuses**: O parser da T8, o resolver da T9 e o model da T11; o default protegido do `ApplicationController`
+**Requirement**: POR-07, POR-12
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] O controller **não** declara `allow_unauthenticated_access`; teste prova que o anônimo é redirecionado e que nada é gravado
+- [ ] **Teste prova que enviar o arquivo não altera a coleção**: `assert_no_changes` sobre a quantidade de um item existente e sobre `CollectionItem.count`, com um arquivo que classificaria criações e atualizações
+- [ ] Teste prova que o registro de staging criado pertence a `Current.user`, e que `?user_id=` de outro usuário não muda o dono
+- [ ] Teste prova que um arquivo recusado pelo parser (formato, delimitador, limite) **não cria registro de staging** e responde com a mensagem em português
+- [ ] Teste prova que a resposta identifica a pré-visualização de forma que só o dono consiga confirmá-la
+- [ ] A rota não aceita identificador de usuário
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T13: Tela de pré-visualização — o que vai mudar, antes de mudar
+
+**What**: A tela que mostra, linha a linha, o que a confirmação fará: o que cria, o que altera (com antes e depois) e o que será rejeitado, com o motivo.
+**Where**: `app/views/collection_imports/`
+**Depends on**: T12
+**Reuses**: Os padrões de a11y estabelecidos nas features anteriores — alvos de 24px, foco visível, sem `aria-label` em campo com `<label>` visível (lição da T13 da `colecao`)
+**Requirement**: POR-07, POR-10
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+- Subagente: `ecc:a11y-architect` na tela
+
+**Done when**:
+
+- [ ] Teste de integração sobre o HTML renderizado prova que as três classes de linha — cria, altera, rejeita — são **distinguíveis** na tela, com `SPEC_DEVIATION` no cabeçalho do arquivo
+- [ ] Teste prova que a linha que altera mostra o valor **antes** e **depois** (AD-006: é o que torna "substituir" visível antes de destruir)
+- [ ] Teste prova que cada linha rejeitada mostra o **motivo** e **identifica a linha** (Req. 10.4)
+- [ ] Teste prova que a distinção entre as três classes **não é só por cor** (SC 1.4.1)
+- [ ] Todo texto de interface em português
+- [ ] Sem scroll horizontal em 360px (Req. 2.5)
+- [ ] `ecc:a11y-architect` revisou a tela; achados HIGH corrigidos ou justificados por escrito
+- [ ] Teste prova que a tela de pré-visualização **não** grava nada: renderizá-la não altera a coleção
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T14: Confirmação — a única escrita da feature
+
+**What**: A action que grava o que a pré-visualização mostrou, em lote, sem desfazer linhas anteriores por causa de uma posterior, e que é segura contra confirmação repetida.
+**Where**: `app/services/collection_csv/commit.rb` — acionado pela action de confirmação do controller de import, que ganha só a chamada
+**Depends on**: T13
+**Reuses**: O staging da T11; o padrão de `ON CONFLICT` do incremento de posse (`app/controllers/collection_items_controller.rb`), que resolve corrida no banco em vez de ler-e-escrever em Ruby
+**Requirement**: POR-08, POR-06, POR-12
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+- Subagente: `ecc:database-reviewer` na escrita em lote
+
+**Done when**:
+
+- [ ] Teste prova que a confirmação grava **exatamente** o que a pré-visualização apresentou — o resultado é comparado contra a pré-visualização, não contra o arquivo
+- [ ] Teste prova que **abandonar o fluxo sem confirmar deixa a coleção exatamente como estava** (Req. 10.5)
+- [ ] Teste prova que a confirmação **exige** a pré-visualização: não há caminho que grave direto do arquivo
+- [ ] Teste prova que a confirmação de uma pré-visualização **de outro usuário** não grava nada e não revela a existência dela
+- [ ] Teste prova que **duas confirmações da mesma pré-visualização não duplicam o efeito** (Edge Case da spec)
+- [ ] Teste prova que uma linha que falha na gravação **não desfaz** as anteriores (Req. 10.3 / POR-06), no mesmo espírito do erro isolado da ingestão (design.md §5.2)
+- [ ] Teste prova que a escrita usa `ON CONFLICT` ou equivalente, e **não** ler-em-Ruby-e-escrever-depois (o *lost update* que a T6 da `colecao` resolveu)
+- [ ] Teste prova que a quantidade resultante é a do arquivo (AD-006: substituir), não a soma
+- [ ] Teste prova que a sessão expirada entre pré-visualização e confirmação **não grava nada** e leva à autenticação (Edge Case da spec)
+- [ ] `ecc:database-reviewer` revisou a escrita em lote; achados resumidos nas "Decisões da execução"
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T15: Resumo final da importação ✅ fecha a §5.3
+
+**What**: O resumo que o usuário lê depois de confirmar: quantas linhas entraram, quantas foram atualizadas, quantas recusadas, e por quê.
+**Where**: `app/views/collection_imports/`
+**Depends on**: T14
+**Reuses**: A classificação da T9 e o resultado da gravação da T14
+**Requirement**: POR-09, POR-10
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] Teste prova que o resumo apresenta as três contagens — importadas, atualizadas, rejeitadas (Req. 10.4)
+- [ ] Teste prova que os três números **batem com o estado real da coleção** depois da gravação, não com a intenção: o teste conta no banco e compara
+- [ ] Teste prova que cada linha rejeitada aparece com **motivo** e **identificação da linha**
+- [ ] Teste prova que, sem nenhuma rejeição, o resumo **não sugere erro** (Req. 10.4 / critério 4 da história P2)
+- [ ] Todo o resumo em português, com plural correto (o inflector do Rails é inglês — lição da T8 da `colecao`)
+- [ ] Sem scroll horizontal em 360px
+- [ ] **Checkbox da §5.3 de `.context/tasks.md` marcado** nesta task, junto com o desta linha
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T16: Ida e volta fechada e isolamento entre usuários
+
+**What**: As duas provas que tornam as fases anteriores corretas: reimportar o próprio export não altera nada, e dois usuários com o mesmo arquivo mantêm coleções independentes.
+**Where**: `test/integration/collection_csv_roundtrip_test.rb`
+**Depends on**: T15
+**Reuses**: Export das T5/T6 e import das T12–T14, exercitados de ponta a ponta
+**Requirement**: POR-11, POR-12
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+- Subagente: `ecc:pr-test-analyzer` nos testes desta task
+
+**Done when**:
+
+- [ ] Teste prova a **ida e volta**: exportar, reimportar o arquivo **sem edição**, confirmar, e a coleção fica **idêntica** ao estado exportado (POR-11) — item a item, não só na contagem
+- [ ] A ida e volta é exercitada com acento, vírgula no nome e mais de um set, para que o escape e a resolução sejam exercidos de verdade
+- [ ] Teste prova que **dois usuários que importam o mesmo arquivo** mantêm coleções independentes (critério 3 da história P2)
+- [ ] Teste prova que exportar por dois usuários com posses distintas devolve a cada um **só o seu**
+- [ ] Teste prova que importar o arquivo de um estando autenticado como o outro **não altera a coleção do primeiro**
+- [ ] `ecc:pr-test-analyzer` revisou os testes desta task e os de isolamento; achados resumidos nas "Decisões da execução"
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T17: Custo do export e da pré-visualização, medido
+
+**What**: A prova de que nem o export nem a pré-visualização emitem consulta por linha, medida com volume realista e não com três registros.
+**Where**: `test/queries/collection_csv_plan_test.rb`
+**Depends on**: T16
+**Reuses**: O padrão de medição das T10 da `colecao` e T8 da `progresso` — volume realista, `ANALYZE` antes de confiar em `EXPLAIN`
+**Requirement**: POR-13
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+- Subagente: `ecc:database-reviewer` no plano de execução
+
+**Done when**:
+
+- [ ] Teste prova que o número de consultas do export **não cresce** com a quantidade de linhas: medido em dois volumes diferentes, com o mesmo número de consultas
+- [ ] Teste prova o mesmo para a pré-visualização (POR-13 / critério 5 da história P2)
+- [ ] A medição usa volume realista — centenas a milhares de linhas —, não três registros, pelo mesmo cuidado de seletividade da T4 do `catalogo`
+- [ ] `ANALYZE` roda antes de qualquer `EXPLAIN` (o banco de teste carrega `pg_class.reltuples` de execuções anteriores, que não é transacional)
+- [ ] Se a medição reprovar o alvo, a saída registrada é **otimizar consulta ou índice**, com medição — não trocar de stack nem partir para assíncrono sem dado
+- [ ] Qualquer índice criado é **medido antes**, com `EXPLAIN (ANALYZE, BUFFERS)`, como na T10 da `colecao` — que mediu e **não** criou
+- [ ] `ecc:database-reviewer` revisou o plano; achados resumidos nas "Decisões da execução"
+
+**Tests**: unit
+**Gate**: full
+
+## Plano de delegação
+
+Não existe `ruby-reviewer` nem `rails-reviewer` entre os agentes instalados. O
+padrão herdado das features `catalogo`, `colecao` e `progresso`: subagente por
+task, revisão pelos agentes agnósticos de linguagem.
+
+| Fase | Execução | Revisão |
+|---|---|---|
+| 1 (T1–T3) | subagente por task, com `superpowers:systematic-debugging` — são diagnósticos, não implementação | nenhuma; a prova é a suíte doze vezes (T3) |
+| 2 (T4–T7) | subagente por task, em ordem — T4 fixa o contrato de colunas que T5 e o import inteiro consomem | `ecc:a11y-architect` no link de export (T7) |
+| 3 (T8–T10) | subagente por task, em ordem | `ecc:security-reviewer` no upload e no parser (**T10, task própria**) — é entrada externa não confiável e o único ponto da aplicação que recebe arquivo do usuário |
+| 4 (T11–T14) | subagente por task, em ordem | `ecc:database-reviewer` na tabela de staging (T11) e na escrita em lote (T14); `ecc:a11y-architect` na pré-visualização (T13) |
+| 5 (T15–T17) | subagente por task, em ordem | `ecc:pr-test-analyzer` nos testes de ida e volta e isolamento (T16); `ecc:database-reviewer` no plano de execução (T17) |
+
+Verifier ao fim da última task, autor ≠ verificador, relatório em
+`.specs/features/portabilidade/validation.md`, com evidência `file:line` por
+critério, sensor de discriminação desenhado por ele mesmo e faixa de diff. **Ao
+Verifier desta feature pede-se explicitamente que tente destruir dado de coleção
+por algum caminho** — é a garantia central e o que distingue esta feature das
+anteriores.
+
+Coletas mecânicas (ler arquivo, listar símbolo, extrair formato) vão para
+subagentes Haiku com prompt fechado e leitura apenas. Decisão de design e
+resolução de colisão ficam com o orquestrador.
+
+Sensor de mutação, se rodar, vai em worktree ou cópia — **nunca `git stash`**:
+há trabalho não commitado com frequência neste repo.
+
+## Requirement Traceability
+
+| Requirement ID | Tasks |
+|---|---|
+| POR-00 | T1, T2, T3 |
+| POR-01 | T4, T5, T7 |
+| POR-02 | T5 |
+| POR-03 | T6, T7 |
+| POR-04 | T4, T8, T10 |
+| POR-05 | T9 |
+| POR-06 | T9, T14 |
+| POR-07 | T11, T12, T13 |
+| POR-08 | T14 |
+| POR-09 | T15 |
+| POR-10 | T13, T15 |
+| POR-11 | T16 |
+| POR-12 | T11, T12, T14, T16 |
+| POR-13 | T5, T9, T17 |
+
+**Coverage:** 14 requisitos, 14 mapeados, 0 órfãos. Nenhuma task sem requisito.
+17 tasks, todas com requisito.
