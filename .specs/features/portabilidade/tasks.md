@@ -375,14 +375,14 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] Teste prova que um arquivo com cabeçalho correto e linhas válidas é aceito
-- [ ] Teste prova que arquivo **sem as colunas esperadas** é recusado **inteiro**, com mensagem em português, sem processar linha nenhuma
-- [ ] Teste prova que arquivo delimitado por `;` é recusado com mensagem que **diz o delimitador esperado**, em vez de importar uma coluna só (Edge Case da spec)
-- [ ] Teste prova que arquivo que não é CSV é recusado com mensagem em português e **sem stack trace**
-- [ ] Teste prova que arquivo com mais de **10.000 linhas de dado** é recusado com mensagem que **diz o limite** (AD-008), e que 10.000 exatas são aceitas — a fronteira é testada dos dois lados
-- [ ] Teste prova que o limite é verificado **antes** de qualquer resolução de variante
-- [ ] Teste prova que o cabeçalho é resolvido por nome e sobrevive a BOM e a ordem trocada (herdado da T4, exercitado aqui de ponta a ponta)
-- [ ] **Nenhum caminho deste serviço escreve no banco** — provado por teste com `assert_no_changes` sobre `CollectionItem.count` e a quantidade de um item existente
+- [x] Teste prova que um arquivo com cabeçalho correto e linhas válidas é aceito
+- [x] Teste prova que arquivo **sem as colunas esperadas** é recusado **inteiro**, com mensagem em português, sem processar linha nenhuma
+- [x] Teste prova que arquivo delimitado por `;` é recusado com mensagem que **diz o delimitador esperado**, em vez de importar uma coluna só (Edge Case da spec)
+- [x] Teste prova que arquivo que não é CSV é recusado com mensagem em português e **sem stack trace**
+- [x] Teste prova que arquivo com mais de **10.000 linhas de dado** é recusado com mensagem que **diz o limite** (AD-008), e que 10.000 exatas são aceitas — a fronteira é testada dos dois lados
+- [x] Teste prova que o limite é verificado **antes** de qualquer resolução de variante
+- [x] Teste prova que o cabeçalho é resolvido por nome e sobrevive a BOM e a ordem trocada (herdado da T4, exercitado aqui de ponta a ponta)
+- [x] **Nenhum caminho deste serviço escreve no banco** — provado por teste com `assert_no_changes` sobre `CollectionItem.count` e a quantidade de um item existente
 
 **Tests**: unit
 **Gate**: quick
