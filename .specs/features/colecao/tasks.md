@@ -1071,7 +1071,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T12: Tabela e model `wishlist_items`
+### T12: Tabela e model `wishlist_items` ✅
 
 **What**: Migração de `wishlist_items` com as mesmas garantias de banco da coleção, e o model correspondente.
 **Where**: `db/migrate/` (migração nova)
@@ -1086,10 +1086,74 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] `UNIQUE (user_id, card_variant_id)`, `CHECK (target_quantity >= 1)` e FK `on_delete: :restrict`, conforme `design.md` §3.2
-- [ ] Nenhuma FK em cascata — a ingestão não pode apagar dado do usuário
-- [ ] Testes por SQL direto provam que as três garantias são do banco
-- [ ] O teste de garantias da ingestão é estendido: rodar duas vezes com wishlist povoada e nenhum alvo muda
+- [x] `UNIQUE (user_id, card_variant_id)`, `CHECK (target_quantity >= 1)` e FK `on_delete: :restrict`, conforme `design.md` §3.2
+- [x] Nenhuma FK em cascata — a ingestão não pode apagar dado do usuário
+- [x] Testes por SQL direto provam que as três garantias são do banco
+- [x] O teste de garantias da ingestão é estendido: rodar duas vezes com wishlist povoada e nenhum alvo muda
+
+**Decisões da execução:**
+
+- **`CHECK (target_quantity >= 1)` contra o `>= 0` da coleção — a assimetria é
+  a decisão da task, e parece inconsistência sem esta nota.** Posse zero é
+  estado legítimo e necessário: "tenho a linha, não tenho a carta" é o que
+  distingue quem **nunca teve** de quem **não tem mais**, e é exatamente o que
+  os scopes `owned`/`unowned` e o filtro do Req. 7.6 leem. Desejar zero cópias,
+  porém, não é desejo nenhum — a forma canônica de "não quero mais" é
+  **remover** o item (Req. 8.4), não zerar o alvo. Permitir zero criaria uma
+  segunda representação da mesma coisa (linha com alvo 0 vs. ausência de linha)
+  e, pior, um alvo 0 ficaria **permanentemente "atendido"** quando a T13
+  derivar o Req. 8.3 comparando posse com alvo — lixo silencioso na lista. A
+  justificativa mora na migração, onde quem for comparar as duas tabelas vai
+  procurar.
+- **O piso tem teste pelos dois lados, senão o `CHECK` não estaria provado.**
+  Três testes atacam o piso por baixo (INSERT com 0, INSERT com −1, `UPDATE ...
+  SET target_quantity = target_quantity - 1`) e **um o ataca por cima**: alvo 1
+  precisa ser aceito. Sem este último, um `CHECK (target_quantity >= 2)` — ou
+  qualquer piso alto demais — deixaria os outros três verdes.
+- **Três testes de FK, não dois, porque `confdeltype <> 'r'` sozinho passa numa
+  tabela sem FK nenhuma.** A asserção de não-cascata usa `<> 'r'` e não `= 'c'`
+  de propósito: `SET NULL` e `SET DEFAULT` também destruiriam o vínculo, e como
+  as colunas são `null: false` o efeito seria erro ou lixo. Mas ela é vacuamente
+  verdadeira se a tabela não tiver foreign key alguma — o pior caso possível.
+  Daí o teste que exige **exatamente duas** FKs, mais os dois que exercitam a
+  recusa real (`DELETE` de variante desejada e `DELETE` de usuário com
+  wishlist).
+- **O teste de garantias da ingestão foi estendido, não reescrito.** Seis testes
+  novos entraram em `guarantees_test.rb` ao lado dos da coleção, que ficaram
+  intactos: wishlist povoada sobrevive à reingestão, variante desejada ausente
+  da fonte não some nem perde o vínculo, **posse e desejo da mesma variante**
+  sobrevivem juntos, nenhuma FK da wishlist cascateia, e o banco recusa remover
+  variante desejada. O teste de posse+desejo usa a **mesma** variante nas duas
+  tabelas de propósito: em variantes diferentes ele seria verde por acaso.
+- **Os alvos semeados são diferentes entre si e diferentes de 1.** Mesmo
+  raciocínio da T11 com `sum` vs `count`: com o mesmo valor em todas as linhas,
+  uma ingestão que sobrescrevesse todos os alvos por um número igual passaria
+  despercebida. Os dois itens do teste usam 3 e 5.
+- **`WishlistItem.for_user` é cópia deliberada do contrato de
+  `CollectionItem.for_user`, incluindo o `ArgumentError` no id.** Aceita `User`
+  ou `nil`, e **levanta** se receber um id. É o que impede
+  `WishlistItem.for_user(params[:user_id])` de compilar e satisfaz o Req. 6.5
+  por construção — a T13 consome isso no controller e não precisa reinventar a
+  autorização.
+- **`has_many :wishlist_items, dependent: :restrict_with_exception` no `User`,
+  como `collection_items` e ao contrário de `sessions`.** A FK `restrict` da
+  migração já barraria o `DELETE`; a linha faz o erro aparecer como
+  `DeleteRestrictionError` do Active Record em vez de `InvalidForeignKey` cru do
+  Postgres. A assimetria com `sessions` (`destroy`) continua deliberada: sessão
+  é derivada e descartável, wishlist não.
+- **Nenhum índice novo, e a decisão é do revisor somada ao schema que o Rails
+  já gera.** O `ecc:database-reviewer` foi explicitamente perguntado sobre as
+  consultas da T13 (listar a wishlist do usuário; derivar "atendido" por join
+  com a coleção) e respondeu que **não falta índice**: o `WHERE user_id = $1`
+  entra pelo prefixo do único composto `(user_id, card_variant_id)`, e o lado da
+  coleção é sondado pelo `index_collection_items_on_user_id_and_card_variant_id`
+  que já existe desde `20260919120200` e cobre o par na ordem exata. Dezenas a
+  poucas centenas de itens por usuário não justificam mais nada. **A T13 mede se
+  quiser reabrir** — o padrão da T10 (medir antes de criar) continua valendo.
+- **`target_quantity` sem default, ao contrário de `quantity` que tem `0`.**
+  Posse recém-criada tem valor neutro; alvo de wishlist não tem — zero é
+  proibido pelo `CHECK` e qualquer outro número seria arbitrário. O usuário
+  informa o alvo ao marcar, e a T13 não deve inventar default.
 
 **Tests**: unit
 **Gate**: full

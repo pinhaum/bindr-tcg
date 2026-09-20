@@ -335,6 +335,40 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: wishlist_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.wishlist_items (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    card_variant_id bigint NOT NULL,
+    target_quantity integer NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT wishlist_items_target_quantity_check CHECK ((target_quantity >= 1))
+);
+
+
+--
+-- Name: wishlist_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.wishlist_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: wishlist_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.wishlist_items_id_seq OWNED BY public.wishlist_items.id;
+
+
+--
 -- Name: card_variants id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -381,6 +415,13 @@ ALTER TABLE ONLY public.sets ALTER COLUMN id SET DEFAULT nextval('public.sets_id
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: wishlist_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wishlist_items ALTER COLUMN id SET DEFAULT nextval('public.wishlist_items_id_seq'::regclass);
 
 
 --
@@ -453,6 +494,14 @@ ALTER TABLE ONLY public.sets
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: wishlist_items wishlist_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wishlist_items
+    ADD CONSTRAINT wishlist_items_pkey PRIMARY KEY (id);
 
 
 --
@@ -610,6 +659,27 @@ CREATE UNIQUE INDEX index_users_on_lower_email ON public.users USING btree (lowe
 
 
 --
+-- Name: index_wishlist_items_on_card_variant_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_wishlist_items_on_card_variant_id ON public.wishlist_items USING btree (card_variant_id);
+
+
+--
+-- Name: index_wishlist_items_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_wishlist_items_on_user_id ON public.wishlist_items USING btree (user_id);
+
+
+--
+-- Name: index_wishlist_items_on_user_id_and_card_variant_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_wishlist_items_on_user_id_and_card_variant_id ON public.wishlist_items USING btree (user_id, card_variant_id);
+
+
+--
 -- Name: cards fk_rails_08603a186b; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -631,6 +701,22 @@ ALTER TABLE ONLY public.collection_items
 
 ALTER TABLE ONLY public.card_variants
     ADD CONSTRAINT fk_rails_2d977c7759 FOREIGN KEY (card_id) REFERENCES public.cards(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: wishlist_items fk_rails_5c10acf6bc; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wishlist_items
+    ADD CONSTRAINT fk_rails_5c10acf6bc FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: wishlist_items fk_rails_710125c5e1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wishlist_items
+    ADD CONSTRAINT fk_rails_710125c5e1 FOREIGN KEY (card_variant_id) REFERENCES public.card_variants(id) ON DELETE RESTRICT;
 
 
 --
@@ -664,6 +750,7 @@ ALTER TABLE ONLY public.card_variants
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260919120500'),
 ('20260919120400'),
 ('20260919120300'),
 ('20260919120200'),

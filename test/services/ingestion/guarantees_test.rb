@@ -77,6 +77,86 @@ module Ingestion
                    "a coleção só está provada intacta se a reingestão tiver de fato rodado"
     end
 
+    # Done when (T12): rodar a ingestão duas vezes com wishlist povoada e
+    # nenhum alvo muda. Req. 1.7 / COL-14 — a extensão do teste mais valioso do
+    # projeto à segunda tabela de dado insubstituível. A coleção já estava
+    # coberta acima; o desejo do usuário tem exatamente o mesmo direito.
+    test "a wishlist do usuário sobrevive intacta a uma nova ingestão" do
+      ingest
+      dono = usuario
+      desejadas = %w[OP01-001_p1 OP01-002].map { |code| CardVariant.find_by!(variant_code: code) }
+      # Alvos **diferentes entre si e diferentes de 1**: com o mesmo valor em
+      # todas as linhas, uma ingestão que sobrescrevesse todos os alvos por um
+      # número igual passaria despercebida.
+      itens = desejadas.zip([ 3, 5 ]).map do |variante, alvo|
+        WishlistItem.create!(user: dono, card_variant: variante, target_quantity: alvo)
+      end
+
+      segunda = ingest
+
+      assert_equal [ 3, 5 ], itens.map { |item| item.reload.target_quantity },
+                   "a ingestão alterou a quantidade-alvo da wishlist"
+      assert_equal desejadas.map(&:id), itens.map(&:card_variant_id),
+                   "a wishlist perdeu o vínculo com a variante"
+      assert_equal 2, WishlistItem.count
+      assert_equal "succeeded", segunda.status,
+                   "a wishlist só está provada intacta se a reingestão tiver de fato rodado"
+    end
+
+    # Req. 1.7 sob a condição que mais assusta, agora para a wishlist: a
+    # variante desejada some da fonte. spec.md, Edge Cases — "o item continua
+    # listado, a ingestão não deleta".
+    test "variante desejada e ausente da fonte não é removida nem perde o vínculo" do
+      ingest
+      dono = usuario
+      variante = CardVariant.find_by!(variant_code: "OP01-001_p1")
+      item = WishlistItem.create!(user: dono, card_variant: variante, target_quantity: 4)
+
+      ingest(fixture_sem_variante("OP01-001_p1"))
+
+      assert CardVariant.exists?(variante.id), "a variante ausente da fonte sumiu do catálogo"
+      assert_equal 4, item.reload.target_quantity
+      assert_equal variante.id, item.card_variant_id
+    end
+
+    # Coleção e wishlist convivem sobre a mesma variante sem interferir uma na
+    # outra: são estados independentes (spec.md, "Modelagem da wishlist"). O
+    # teste seria verde por acaso se as duas tabelas fossem povoadas em
+    # variantes diferentes, então as duas apontam para a **mesma**.
+    test "posse e desejo da mesma variante sobrevivem juntos à reingestão" do
+      ingest
+      dono = usuario
+      variante = CardVariant.find_by!(variant_code: "OP01-001_p1")
+      posse = CollectionItem.create!(user: dono, card_variant: variante, quantity: 1)
+      desejo = WishlistItem.create!(user: dono, card_variant: variante, target_quantity: 3)
+
+      ingest
+
+      assert_equal 1, posse.reload.quantity
+      assert_equal 3, desejo.reload.target_quantity
+    end
+
+    test "nenhuma foreign key da wishlist usa exclusão em cascata" do
+      cascateando = ActiveRecord::Base.connection.select_values(<<~SQL)
+        SELECT conname FROM pg_constraint
+        WHERE contype = 'f' AND confdeltype <> 'r'
+          AND conrelid::regclass::text = 'wishlist_items'
+      SQL
+
+      assert_empty cascateando
+    end
+
+    test "o banco recusa remover uma variante que alguém deseja" do
+      ingest
+      dono = usuario
+      variante = CardVariant.first
+      WishlistItem.create!(user: dono, card_variant: variante, target_quantity: 2)
+
+      assert_raises(ActiveRecord::InvalidForeignKey) do
+        remover_variante(variante.id)
+      end
+    end
+
     test "a coleção sobrevive a três execuções consecutivas" do
       ingest
       dono = usuario

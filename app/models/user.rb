@@ -16,6 +16,14 @@ class User < ApplicationRecord
   # usuário é insubstituível; o catálogo é regenerável.
   has_many :collection_items, dependent: :restrict_with_exception
 
+  # Mesmo `restrict_with_exception` de `collection_items`, e pelo mesmo motivo:
+  # a wishlist é dado do usuário, insubstituível, e não pode ser apagada por
+  # efeito colateral de uma remoção de conta. A FK `on_delete: :restrict` da
+  # migração `20260919120500` já barraria o `DELETE`; esta linha faz o erro
+  # aparecer como `DeleteRestrictionError` do Active Record em vez de
+  # `InvalidForeignKey` cru do Postgres.
+  has_many :wishlist_items, dependent: :restrict_with_exception
+
   # `destroy`, ao contrário de `collection_items`: a sessão é derivada e
   # descartável, então encerrar a conta encerra as sessões. A assimetria entre
   # as duas linhas é deliberada.

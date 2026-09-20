@@ -49,15 +49,15 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T11 fechada**
-  (total de cópias da coleção, exibido na grade e atualizado por Turbo Stream;
-  **sem migração**). Fase 2 (posse) encerrada com T5–T8.
-  Restam T12–T13: wishlist.
+- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T12 fechada**
+  (tabela, model e garantias de banco de `wishlist_items`; **a primeira
+  migração da feature**, `20260919120500`). Fase 2 (posse) encerrada com T5–T8.
+  Resta **T13**: controller, views e "atendido" derivado.
   Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois lotes verificados (B1 e
   B2, ambos PASS, autor ≠ verificador). Os achados dos Verifiers e da revisão
   de a11y foram corrigidos e commitados.
 - **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
-  T6, T7, T8, T9, T10, **T11**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
+  T6, T7, T8, T9, T10, T11, **T12**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
   `.context/tasks.md` §4.1, §4.2, §4.3 e **§4.4** fechados. A §4.2 cobria T5+T6+T7 e
   fechou na T7. A **§4.3 cobria T6+T8 e fechou na T8**, conferida bullet a
   bullet: "incremento e decremento em ação única, sem formulário" e "sem
@@ -72,20 +72,66 @@
   dentro do `CatalogQuery`, que é o query object da 3.1, com o usuário injetado
   pelo chamador) somada à **T10** (plano de execução medido, sem full table
   scan na tabela de coleção). "Total de cartas possuídas contando cópias" é a
-  **T11** (`sum(:quantity)`, não `count`). **A §4.5 continua aberta**: wishlist
-  (T12–T13).
+  **T11** (`sum(:quantity)`, não `count`). **A §4.5 continua aberta na T12 e fecha na
+  T13**: ela cobre T12+T13 e exige "Marcar variante como desejada. Listar.
+  Remover." e "Sinalizar item atendido" — os quatro verbos são do
+  **controller**, que é a T13. A T12 entregou só tabela, model e provas de
+  banco, então nenhum bullet da §4.5 é verdadeiro ainda.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T12** de `.specs/features/colecao/tasks.md`
-  (migração e model de `wishlist_items`, com as mesmas garantias de banco da
-  coleção — `UNIQUE (user_id, card_variant_id)`, `CHECK (target_quantity >= 1)`
-  e FK `restrict`). É a primeira task da feature que **cria migração**, então
-  `schema_format = :sql` exige `db:migrate` para regenerar `db/structure.sql`.
-  A decisão central segue de pé: **não rodar
+- **Next step**: **Executar T13** de `.specs/features/colecao/tasks.md`, a
+  última da feature (controller e views da wishlist: marcar, listar, remover, e
+  "atendido" derivado na consulta). Ela **fecha a §4.5** de `.context/tasks.md`
+  e a feature `colecao` inteira. A decisão central segue de pé: **não rodar
   `bin/rails generate authentication`**.
+- **O que a T12 entregou, e o que a T13 herda dela.** A tabela
+  `wishlist_items` existe (migração `20260919120500`, a **primeira da
+  feature**), com `UNIQUE (user_id, card_variant_id)`,
+  `CHECK (target_quantity >= 1)` e as duas FKs `ON DELETE RESTRICT`, todas
+  provadas contra o banco por SQL direto em `test/models/wishlist_item_test.rb`
+  (19 testes). O model `WishlistItem` tem `for_user` e as validações de
+  formulário; **não tem controller, rota nem view** — isso é a T13 inteira.
+  - **`target_quantity >= 1`, e a T13 não deve "consertar" a assimetria com o
+    `quantity >= 0` da coleção.** Posse zero é estado legítimo; desejo zero
+    não é. A forma de não querer mais é **remover** o item (Req. 8.4), nunca
+    zerar o alvo — um alvo 0 ficaria permanentemente "atendido" quando o
+    Req. 8.3 for derivado. A justificativa longa está na migração e nas
+    "Decisões da execução" da T12.
+  - **"Atendido" é derivado, nunca persistido** (spec.md, *Assumptions*). Não
+    existe coluna de flag e não deve passar a existir: uma flag fica obsoleta
+    no instante em que a posse muda. A comparação é
+    `collection_items.quantity >= wishlist_items.target_quantity` para o mesmo
+    par `(user_id, card_variant_id)`, por `LEFT JOIN` — **`LEFT`**, porque
+    desejar uma variante que nunca se teve é o caso normal e um `INNER`
+    sumiria com exatamente os itens que mais importam.
+  - **Nenhum índice novo é necessário, e há revisão registrada dizendo isso.**
+    O `ecc:database-reviewer` foi perguntado sobre as duas consultas da T13:
+    o `WHERE user_id = $1` entra pelo **prefixo** do único composto
+    `(user_id, card_variant_id)`, e o lado da coleção é sondado pelo
+    `index_collection_items_on_user_id_and_card_variant_id`, que existe desde
+    `20260919120200` e cobre o par na ordem exata. Volume esperado: dezenas a
+    poucas centenas de itens por usuário. Se a T13 quiser reabrir, vale o
+    padrão da T10: **medir com `EXPLAIN (ANALYZE, BUFFERS)` antes de criar**,
+    nunca criar por reflexo.
+  - **`WishlistItem.for_user` tem o mesmo contrato de
+    `CollectionItem.for_user`, incluindo o `ArgumentError` no id.** A T13
+    **não** deve reinventar autorização: `for_user(Current.user)` é o ponto de
+    entrada, e passar `params[:user_id]` levanta em vez de vazar. O Req. 6.5
+    fica satisfeito por construção. Para o 404 do critério 4 da história de
+    isolamento, o padrão já usado na T7 é
+    `for_user(Current.user).find(params[:id])`, que dá `RecordNotFound` sem
+    revelar existência.
+  - **A armadilha do `allow_unauthenticated_access` não atinge a T13, mas vale
+    lembrar.** O controller da wishlist **não** deve declarar acesso público:
+    toda action dele exige sessão, que é o default do `ApplicationController`.
+    Anonimamente, o esperado é redirecionar — não 200 com lista vazia.
+  - **Se a T13 acrescentar região de wishlist atualizável por Turbo Stream**, o
+    padrão é o dos quatro alvos que a T11 deixou documentado, e a lição de
+    a11y da T11 também: **uma** região viva por operação, nunca duas, senão
+    cada clique produz duas falas.
 - **O que a T11 entregou, e o que a T12/T13 herdam dela.** O total de cópias é
   `CollectionItem.total_copies_for(user)` — `for_user(user).owned.sum(:quantity)`
   —, no **model** e não no controller, porque tem dois chamadores: a grade do
