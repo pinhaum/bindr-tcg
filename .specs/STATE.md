@@ -52,28 +52,34 @@
 - **Phase / Task**: **Feature `catalogo` ENCERRADA.** 14 de 14 tasks fechadas,
   os dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os
   achados dos Verifiers e da revisão de a11y foram corrigidos e commitados.
-- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, **T3**.
+- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, **T4**.
+  `colecao` Fase 1 (T1–T4) encerrada; `.context/tasks.md` §4.1 fechado.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T4** de `.specs/features/colecao/tasks.md`
-  (`SessionsController` e cadastro). T1, T2 e T3 fechadas. A decisão central
-  segue de pé: **não rodar `bin/rails generate authentication`** — ele
-  sobrescreve `app/models/user.rb` e apaga a linha que protege a coleção.
-- **A T4 herda duas coisas da T3, e nenhuma delas é opcional:**
-  - **A rota já existe.** `resource :session, only: %i[new create destroy]` foi
-    declarada na T3 porque `request_authentication` redireciona para
-    `new_session_path` e um helper ausente seria `NameError` em vez de redirect.
-    A T4 escreve o controller e as views; **não precisa tocar em
-    `config/routes.rb`**. Hoje a rota aponta para um controller inexistente —
-    acessá-la por navegador dá erro, e isso é esperado até a T4.
-  - **`after_authentication_url` já está no concern e é o que fecha o retorno à
-    origem.** O `create` da T4 deve redirecionar para ele, não para `root_url`:
-    o teste `anônimo volta à origem depois de autenticar`
-    (`test/integration/authentication_test.rb`) já prova que
-    `session[:return_to_after_authenticating]` é gravado; quem consome é a T4.
+- **Next step**: **Executar T5** de `.specs/features/colecao/tasks.md` (model
+  `CollectionItem` sobre o usuário da sessão). **Fase 1 (T1–T4) encerrada** — a
+  identidade e a sessão estão de pé, e `.context/tasks.md` §4.1 fechou junto com
+  a T4. A decisão central segue de pé: **não rodar
+  `bin/rails generate authentication`**.
+- **`rate_limit` é dívida aberta, não esquecimento.** A T4 decidiu **não**
+  incluir a linha do template: sem cache store compartilhado ela não limita
+  nada (teste é `:null_store`; produção cai em `:file_store` por container) e
+  daria aparência de proteção contra força bruta. O login está **sem limite de
+  tentativas** hoje. Reabrir junto com Redis ou `solid_cache` — é mudança de
+  infraestrutura, com teste que exercite o limite de verdade. Justificativa
+  completa no comentário de `app/controllers/sessions_controller.rb`. A
+  revisão de segurança apontou que omitir o limite **e** o piso de senha
+  deixaria o espaço de força bruta no menor denominador; o piso
+  (`minimum: 8`) entrou na T4 por isso, e é a metade que não depende de
+  infraestrutura.
+- **A T5 herda o padrão de sonda de teste.** `CollectionItemsController` é a T6,
+  então tanto `authentication_test.rb` quanto `sessions_test.rb` definem um
+  controller-sonda anônimo com rota desenhada no `setup`. Quando a T6 chegar,
+  **não remover as sondas**: elas cobrem o concern em si — o default herdado por
+  uma action que não declara nada — e continuam sendo o único teste disso.
 - **A sonda de teste da T3 não é código de produção.** Quando a T3 rodou não
   havia nenhuma action protegida no app, então
   `test/integration/authentication_test.rb` define um controller anônimo com

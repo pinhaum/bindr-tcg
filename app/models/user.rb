@@ -36,4 +36,20 @@ class User < ApplicationRecord
   normalizes :email, with: ->(email) { email.strip.downcase }
 
   validates :email, presence: true
+
+  # A garantia real é o índice `index_users_on_lower_email`, que nenhuma
+  # corrida atravessa; esta validação existe para que o formulário de cadastro
+  # possa **dizer** que o e-mail já está em uso em vez de estourar
+  # `RecordNotUnique` como erro 500. `case_sensitive: false` é redundante com o
+  # `normalizes` acima e está aqui de propósito: se a normalização for removida
+  # um dia, a validação não passa a aceitar duas grafias em silêncio.
+  validates :email, uniqueness: { case_sensitive: false }
+
+  # A T4 decidiu não incluir o `rate_limit` do template, por falta de cache
+  # store compartilhado (justificativa em `sessions_controller.rb`). Sem limite
+  # de tentativas **e** sem piso de senha, nada estreitaria o espaço de força
+  # bruta — o piso é a metade que não depende de infraestrutura, então é aqui
+  # que ela fica. `allow_nil` evita duplicar a mensagem de presença, que o
+  # `has_secure_password` já emite.
+  validates :password, length: { minimum: 8 }, allow_nil: true
 end

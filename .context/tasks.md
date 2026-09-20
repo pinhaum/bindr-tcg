@@ -158,7 +158,7 @@ Regras de execução:
 
 ## 4 — Usuário e coleção
 
-- [ ] **4.1 Autenticação**
+- [x] **4.1 Autenticação**
   - Cadastro, login, logout. Senha apenas como hash.
   - Catálogo e busca acessíveis sem sessão; mutações exigem sessão.
   - _Requisitos: 6.1, 6.2, 6.3, 6.4_

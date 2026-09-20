@@ -22,6 +22,30 @@
   </head>
 
   <body>
+    <header class="site-header">
+      <%= link_to "Bindr", root_path, class: "site-header__brand" %>
+
+      <nav class="site-header__nav" aria-label="Conta">
+        <%# `authenticated?` é helper do concern `Authentication`. O catálogo é
+            público, então este cabeçalho é renderizado para anônimo também. %>
+        <% if authenticated? %>
+          <%= button_to "Sair", session_path, method: :delete, class: "site-header__action" %>
+        <% else %>
+          <%= link_to "Entrar", new_session_path, class: "site-header__action" %>
+          <%= link_to "Criar conta", new_registration_path, class: "site-header__action" %>
+        <% end %>
+      </nav>
+    </header>
+
+    <%# `role="alert"` para que a mensagem seja anunciada assim que aparece —
+        sem isso, quem usa leitor de tela não percebe o resultado da ação. %>
+    <% if flash[:notice].present? %>
+      <p class="flash flash--notice" role="alert"><%= flash[:notice] %></p>
+    <% end %>
+    <% if flash[:alert].present? %>
+      <p class="flash flash--alert" role="alert"><%= flash[:alert] %></p>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>

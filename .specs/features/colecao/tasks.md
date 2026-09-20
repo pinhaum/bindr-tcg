@@ -165,7 +165,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T4: `SessionsController` e cadastro
+### T4: `SessionsController` e cadastro ✅
 
 **What**: Telas e actions de criar conta, autenticar e encerrar sessão, com mensagens de erro em português.
 **Where**: `app/controllers/sessions_controller.rb`
@@ -180,11 +180,42 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Rotas `resource :session` e cadastro de usuário; layout com link de entrar/sair
-- [ ] `User.authenticate_by(email:, password:)` — sem `email_address`
-- [ ] Credencial errada reapresenta o formulário com mensagem em português que não revela se o e-mail existe
-- [ ] `rate_limit` do template só entra se acompanhado de cache store real; em teste o store é `:null_store` e em produção está comentado — decidir explicitamente e registrar a decisão em comentário
-- [ ] Teste de integração cobre criar conta, sair, autenticar e acessar página protegida
+- [x] Rotas `resource :session` e cadastro de usuário; layout com link de entrar/sair
+- [x] `User.authenticate_by(email:, password:)` — sem `email_address`
+- [x] Credencial errada reapresenta o formulário com mensagem em português que não revela se o e-mail existe
+- [x] `rate_limit` do template só entra se acompanhado de cache store real; em teste o store é `:null_store` e em produção está comentado — decidir explicitamente e registrar a decisão em comentário
+- [x] Teste de integração cobre criar conta, sair, autenticar e acessar página protegida
+
+**Decisões da execução:**
+
+- **`rate_limit` ficou de fora, e a ausência é a decisão.** O template traz
+  `rate_limit to: 10, within: 3.minutes`, que depende de cache store
+  compartilhado. Este projeto não tem: em teste o store é `:null_store`
+  (`config/environments/test.rb:23`) e não conta nada — um teste do limite
+  passaria sem exercitar coisa alguma; em produção `config.cache_store` está
+  comentado (`config/environments/production.rb:50`) e o default é
+  `:file_store` em `tmp/cache/`, por container e perdido no recreate. Com mais
+  de um container, cada um contaria seu próprio limite. Incluir a linha daria
+  aparência de proteção contra força bruta sem a proteção, e sem teste que
+  denunciasse a diferença. Entra junto com um cache store real, que é mudança
+  de infraestrutura. Justificativa no comentário do controller.
+- **`RegistrationsController` não vem do gerador.** O gerador do Rails entrega
+  entrar, sair e reset de senha; o cadastro é requisito daqui (Req. 6.1) e foi
+  escrito do zero, com rota `resource :registration, only: %i[new create]`.
+- **Achado da revisão de segurança, corrigido na task:** sem `rate_limit` **e**
+  sem piso de senha, nada estreitava o espaço de força bruta — omitir os dois
+  transformaria a decisão sobre o `rate_limit` em lacuna. `validates :password,
+  length: { minimum: 8 }, allow_nil: true` no `User` é a metade que não depende
+  de infraestrutura. O teste de senha vazia que já existia não provava piso
+  nenhum (passaria com um caractere); há agora um teste de senha curta.
+- **Defeito encontrado e corrigido na própria task:** cadastro com e-mail
+  duplicado estourava `ActiveRecord::RecordNotUnique` — 500 em vez de formulário
+  com erro. Só existia o índice do banco, sem validação no model.
+  `validates :email, uniqueness: { case_sensitive: false }` foi acrescentado ao
+  `User`. O índice continua sendo a garantia real (a validação tem corrida), e o
+  teste da T1 que prova isso foi ajustado para contornar a validação com
+  `save(validate: false)` em vez de ser afrouxado — mais um teste cobre a
+  validação na camada de cima.
 
 **Tests**: integration
 **Gate**: full

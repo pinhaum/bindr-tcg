@@ -107,12 +107,34 @@ class UserPasswordTest < ActiveSupport::TestCase
     assert_equal "brook@example.com", user.reload.email
   end
 
-  test "cadastrar e-mail existente em outra caixa é recusado pela validação do banco" do
+  # A garantia é do **banco** e continua sendo depois que a T4 acrescentou
+  # `validates :email, uniqueness:` ao model. As duas coexistem de propósito e
+  # provam coisas diferentes: a validação existe para o formulário de cadastro
+  # poder dizer "e-mail já em uso" em vez de estourar 500, e tem corrida — duas
+  # requisições simultâneas passam por ela juntas. Quem barra de verdade é o
+  # índice `index_users_on_lower_email`, e é isso que este teste fixa. Por isso
+  # ele **contorna** a validação com `save(validate: false)`: se um dia alguém
+  # remover o índice confiando na validação, este teste cai.
+  test "cadastrar e-mail existente em outra caixa é recusado pelo índice do banco" do
     create_user(email: "chopper@example.com")
 
+    duplicado = User.new(email: "CHOPPER@example.com", password: "outra-senha")
+
     assert_raises(ActiveRecord::RecordNotUnique) do
-      User.create!(email: "CHOPPER@example.com", password: "outra-senha")
+      duplicado.save(validate: false)
     end
+  end
+
+  # A contraparte da anterior, na camada de cima: a validação do model recusa
+  # antes de chegar ao banco, que é o que permite ao formulário de cadastro
+  # reapresentar o erro em vez de devolver 500 (T4).
+  test "validação do model recusa e-mail duplicado antes do banco" do
+    create_user(email: "kuma@example.com")
+
+    duplicado = User.new(email: "KUMA@example.com", password: "outra-senha")
+
+    assert_not duplicado.valid?
+    assert_includes duplicado.errors[:email], "has already been taken"
   end
 
   # Done when: `has_many :collection_items, dependent: :restrict_with_exception`

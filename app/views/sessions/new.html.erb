@@ -1,0 +1,25 @@
+<% content_for :title, "Entrar" %>
+
+<main class="auth">
+  <h1 class="auth__title">Entrar</h1>
+
+  <%= form_with url: session_path, class: "auth__form" do |form| %>
+    <div class="auth__field">
+      <%= form.label :email, "E-mail" %>
+      <%= form.email_field :email, value: params[:email], required: true,
+                           autocomplete: "email", autofocus: true %>
+    </div>
+
+    <div class="auth__field">
+      <%= form.label :password, "Senha" %>
+      <%= form.password_field :password, required: true,
+                              autocomplete: "current-password" %>
+    </div>
+
+    <%= form.submit "Entrar", class: "auth__submit" %>
+  <% end %>
+
+  <p class="auth__alt">
+    Não tem conta? <%= link_to "Criar conta", new_registration_path %>
+  </p>
+</main>
