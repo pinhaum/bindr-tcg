@@ -49,36 +49,57 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) em andamento** — T5 e
-  T6 fechadas, T7 a seguir. Feature `catalogo` ENCERRADA: 14 de 14 tasks, os
+- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) em andamento** — T5, T6
+  e T7 fechadas, T8 a seguir. Feature `catalogo` ENCERRADA: 14 de 14 tasks, os
   dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os achados
   dos Verifiers e da revisão de a11y foram corrigidos e commitados.
 - **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
-  **T6**. `colecao` Fase 1 (T1–T4) encerrada; `.context/tasks.md` §4.1 fechado.
-  **Duas seções do `.context/tasks.md` continuam ABERTAS de propósito**: a §4.2
-  cobre T5, T6 e T7 — a parte "um usuário não acessa a coleção de outro" é a
-  T7, e só ela fecha a seção; a §4.3 cobre T6 e T8 — "sem recarregar a página
-  inteira" e "disponível na grade e no detalhe" são a T8, e só ela a fecha.
+  T6, **T7**. `colecao` Fase 1 (T1–T4) encerrada; `.context/tasks.md` §4.1 e
+  **§4.2** fechados — a §4.2 cobria T5+T6+T7 e fechou na T7, que entregou o
+  bullet "teste de que um usuário não acessa a coleção de outro"; os outros três
+  bullets (migração com `UNIQUE`/`CHECK`, testes de que a constraint é do banco,
+  consulta partindo do usuário da sessão) já estavam cobertos por T5 e T6.
+  **Uma seção do `.context/tasks.md` continua ABERTA de propósito**: a §4.3
+  cobre T6 e T8 — "sem recarregar a página inteira" e "disponível na grade e no
+  detalhe" são a T8, e só ela a fecha.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T7** de `.specs/features/colecao/tasks.md`
-  (isolamento entre usuários, `test/integration/collection_authorization_test.rb`).
-  A decisão central segue de pé: **não rodar `bin/rails generate authentication`**.
-- **A T6 não deixou nenhuma rota por id de `collection_item` — decisão a tomar
-  na T7.** As duas rotas são
+- **Next step**: **Executar T8** de `.specs/features/colecao/tasks.md` (posse na
+  grade e no detalhe sem recarregar: instalar o importmap, controles por
+  variante, Turbo Stream, alvos de toque de 24px). A decisão central segue de
+  pé: **não rodar `bin/rails generate authentication`**.
+- **A rota por id de `collection_item` foi decidida na T7: não existe, e não
+  vai existir na Fase 2.** As duas rotas continuam sendo
   `POST /collection_items/:card_variant_id/increment` e `.../decrement`: a
   chave é a **variante**, porque o botão "+1" sai da grade do catálogo, onde o
-  registro de coleção normalmente ainda não existe. O critério da T7 "id de
-  item de outro usuário devolve 404" não tem hoje URL onde esse id caiba —
-  **é decisão do orquestrador** acrescentar rota por id de item (mostrar ou
-  remover) ou reformular o critério. O terreno está pronto para a primeira
-  opção: `CollectionItem.for_user(Current.user)` é o único caminho de leitura,
-  e uma busca por id dentro dele cai em `RecordNotFound` → 404 por construção.
-  O critério "nenhuma action lê `params[:user_id]`" já é verificável hoje e já
-  tem um teste na T6 (`user_id` no request é ignorado).
+  registro de coleção normalmente ainda não existe. O critério da T7 "id de item
+  de outro usuário devolve 404" pressupunha um desenho REST por id que a T6 não
+  adotou; **decisão do orquestrador na T7: não acrescentar a rota**, porque o
+  requisito de origem (Req. 6.5, *"Um usuário NUNCA DEVE conseguir ler ou
+  alterar a coleção de outro usuário"*) não menciona 404 nem id, e é satisfeito
+  **por construção** — não há id de item em URL nenhuma. Registrado como
+  `SPEC_DEVIATION` no cabeçalho de
+  `test/integration/collection_authorization_test.rb` e provado por teste: uma
+  rota de `collection_items` com qualquer segmento que não seja
+  `card_variant_id` quebra a suíte.
+  - **A T13 herdou esse critério e precisa entregá-lo de verdade.** A wishlist
+    tem remoção por item, logo id na URL: o "404 sem revelar existência" para
+    item de outro usuário é teste real lá, e o "Done when" da T13 já o pede.
+    O terreno está pronto — `for_user(Current.user)` é o único caminho de
+    leitura, e uma busca por id dentro dele cai em `RecordNotFound` → 404 por
+    construção, sem checagem de dono espalhada. **Não usar `find_by` + `if
+    nil`**: isso devolveria 200 ou 403 e revelaria a existência.
+- **A T7 não encontrou nenhum defeito de autorização, e o sensor explica por
+  quê.** Três mutações confirmaram que o isolamento está onde parece estar:
+  `Current.user.id` → `params[:user_id] || Current.user.id` mata 4 testes
+  (inclusive um decremento cruzado real, 5 → 4); remover `WHERE user_id = $1`
+  do decremento mata 2; acrescentar rota por id mata 1. **A T8 não pode
+  desfazer nenhuma das duas cláusulas** ao trocar a resposta por Turbo Stream:
+  o que muda é a renderização, não a origem do usuário nem o escopo do
+  `WHERE`.
 - **A T6 resolveu a corrida no banco, e a T8 não pode desfazer isso.** O
   incremento é `INSERT ... ON CONFLICT (user_id, card_variant_id) DO UPDATE SET
   quantity = collection_items.quantity + 1`; o decremento é

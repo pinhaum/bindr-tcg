@@ -400,7 +400,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T7: Isolamento entre usuários
+### T7: Isolamento entre usuários ✅
 
 **What**: Provar que toda leitura e escrita de coleção parte do usuário da sessão e que um id de outro usuário devolve 404.
 **Where**: `test/integration/collection_authorization_test.rb`
@@ -414,10 +414,111 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Dois usuários com a mesma variante veem apenas a própria quantidade
-- [ ] Requisição com id de item de outro usuário devolve 404, não 403 — não revela existência
-- [ ] Parâmetro `user_id` no request é ignorado; o usuário da sessão prevalece
-- [ ] Nenhuma action do controller lê `params[:user_id]`
+- [x] Dois usuários com a mesma variante veem apenas a própria quantidade
+- [x] Requisição com id de item de outro usuário devolve 404, não 403 — não revela existência — **`SPEC_DEVIATION`: não existe rota por id de item; o critério é satisfeito por construção e migra para a T13** (ver decisão abaixo)
+- [x] Parâmetro `user_id` no request é ignorado; o usuário da sessão prevalece
+- [x] Nenhuma action do controller lê `params[:user_id]`
+
+**Decisões da execução:**
+
+- **Não acrescentar rota por id de item — decisão do orquestrador, não da
+  execução.** O segundo critério pressupõe uma URL que aceite id de
+  `collection_item`, e a T6 não criou nenhuma: as rotas são
+  `POST /collection_items/:card_variant_id/increment|decrement`, chaveadas pela
+  variante porque o botão nasce na grade do catálogo, onde o registro ainda não
+  existe. A T6 deixou a escolha aberta ("acrescentar rota por id ou reformular o
+  critério") e o orquestrador decidiu pela segunda, por três razões: (1) o
+  requisito de origem, `.context/requirements.md` Req. 6.5, diz literalmente
+  *"Um usuário NUNCA DEVE conseguir ler ou alterar a coleção de outro usuário"*
+  e **não** menciona 404 nem id — o "404 por id" é uma operacionalização que a
+  `spec.md` escolheu assumindo um desenho REST por id de item, que a T6 não
+  adotou por razão de produto; (2) criar rota por id só para ter o que testar
+  produziria superfície de ataque que o produto não usa, e código morto; (3) o
+  critério se cumpre integralmente na **T13 (wishlist)**, que tem remoção por
+  item e portanto id na URL de verdade — lá o teste de 404 é real, não encenado.
+  O `SPEC_DEVIATION` está no cabeçalho de
+  `test/integration/collection_authorization_test.rb`.
+- **A ausência é provada por teste, não afirmada em comentário.**
+  `"nenhuma rota de collection_items aceita id de item"` percorre
+  `Rails.application.routes.routes`, filtra o controller e asserta que os
+  segmentos obrigatórios de **toda** rota dele são exatamente
+  `["card_variant_id"]`. Acrescentar `get "collection_items/:id"` quebra a suíte
+  com a mensagem que aponta para o `SPEC_DEVIATION` — quem quiser a rota
+  enfrenta a decisão em vez de contorná-la em silêncio. Verificado no sensor: a
+  rota por id foi acrescentada de fato e o teste morreu.
+- **O critério "`user_id` é ignorado" ganhou a metade que faltava: o
+  decremento.** A T6 já provava o incremento. O decremento é o caso perigoso —
+  um `user_id` aceito ali **subtrai** da coleção alheia, e o teste
+  correspondente é o que mais dói no sensor (a quantidade do outro usuário cai
+  de 5 para 4). Cobertos os três vetores: corpo do POST, query string e o caso
+  em que o request informa o usuário *correto* (que passaria mesmo com a leitura
+  do parâmetro — existe para fixar a semântica, e o teste ao lado é o que mata a
+  mutação).
+- **O critério "nenhuma action lê `params[:user_id]`" é estrutural, e por isso
+  tem um teste estrutural.** Os testes de comportamento só pegam a leitura que
+  exercitam; um `params[:user_id]` numa action nova passaria por eles. O teste
+  lê o fonte do controller, descarta as linhas de comentário (o arquivo
+  *menciona* `params[:user_id]` na justificativa, e sem o filtro o teste seria
+  falso-positivo) e asserta a ausência do acesso — inclusive de
+  `params.permit/require/fetch/expect`, que é a forma indireta de deixá-lo
+  entrar.
+- **Nenhuma migração e nenhuma mudança de produção, como previsto.** A task é de
+  prova: o isolamento já era do desenho da T5 (`for_user` exige o objeto `User`)
+  e da T6 (`WHERE user_id = $1` em ambos os statements). **Nenhum defeito de
+  autorização foi encontrado** — as três mutações do sensor confirmaram que o
+  que existe é o que segura, não um acaso.
+- **Sensor de discriminação, três mutações, por cópia e `cp`/`diff` — nunca
+  `git stash`.** (1) `Current.user.id` → `params[:user_id] || Current.user.id`
+  nas duas actions: **4 testes morrem**, incluindo o decremento cruzado real
+  (5 → 4). (2) `WHERE user_id = $1` removido do decremento: **2 testes morrem**,
+  entre eles o de dois usuários com quantidades independentes (9 → 8).
+  (3) `get "collection_items/:id"` acrescentado às rotas: **1 teste morre**, o
+  de ausência de rota por id. Depois da revisão, mais três mutações sobre o
+  teste estrutural reescrito em AST: `params.dig(:user_id)`,
+  `params.to_unsafe_h[:user_id]` e `params.permit(:user_id)[:user_id]` — **as
+  três matam 4 testes cada**, e as três passariam pela versão de regex.
+  Restauração conferida com `diff` em todas.
+- **Revisão do `ecc:pr-test-analyzer`: zero achado CRITICAL; um HIGH e três
+  MEDIUM, três aceitos e dois recusados.**
+  - **HIGH aceito, e era procedente.** A primeira versão do teste do critério 4
+    era **regex sobre o texto do fonte**, e o revisor listou escapes reais:
+    `params.dig(:user_id)`, `params.to_unsafe_h[:user_id]` e indireção por
+    variável passariam sem ser detectados — justamente as formas que alguém
+    escreveria *sem saber* que existe um teste a respeito. Um teste de
+    isolamento que não pega a forma idiomática do desvio não vale nada.
+    Reescrito para análise de **AST** (`Ripper.sexp`): a asserção é que o
+    conjunto de chaves lidas de `params` no controller é exatamente
+    `[:card_variant_id]`. **Verificado por sensor**, as quatro formas agora
+    morrem: `[:user_id]`, `.dig`, `.to_unsafe_h[...]` e `.permit(...)`.
+  - **MEDIUM aceito: a asserção era superampla.** A versão de regex proibia
+    qualquer `params.permit/require/fetch/expect` no controller, o que quebraria
+    a T8 por motivo não relacionado a autorização se ela precisasse de outro
+    parâmetro legítimo. A versão de AST não proíbe método nenhum — ela pergunta
+    *quais chaves* saem de `params`, então um `permit(:card_variant_id)` legítimo
+    passa e um `permit(:user_id)` não.
+  - **MEDIUM aceito: rota sob namespace escapava do teste de rotas.** O filtro
+    era `defaults[:controller] == "collection_items"`, que não pegaria
+    `api/collection_items` — a rota nova escaparia em silêncio e o teste
+    continuaria verde. Agora o casamento é por sufixo do caminho do controller.
+  - **MEDIUM aceito: faltava a resposta do decremento.** O teste de decremento
+    cruzado conferia só o estado do banco; um defeito que escrevesse na linha
+    certa mas **relatasse** a quantidade da linha do outro usuário seria
+    vazamento sem alteração, e nenhuma asserção o pegaria. O teste do incremento
+    já tinha esse par; o do decremento passou a ter.
+  - **LOW recusado: a duplicação com `collection_items_test.rb` é deliberada.**
+    O teste de `user_id` no incremento existe nos dois arquivos. O revisor
+    aponta, corretamente, que remover um não reduziria a cobertura. Fica: o
+    arquivo de autorização precisa ser legível como o conjunto completo do
+    Req. 6.5 — quem abrir procurando "o que prova o isolamento" não deve ter de
+    montar a resposta a partir de dois arquivos. Custo: um teste redundante.
+  - **LOW recusado, com a observação incorporada ao código:** o teste "a sessão
+    prevalece mesmo com `user_id` correto" não mata a mutação sozinho, e o
+    revisor confirmou que o comentário do próprio teste já dizia isso. Ele fica
+    porque fixa a semântica (a posse creditada é a da sessão), e o comentário já
+    aponta qual teste ao lado é o que mata.
+  - **Nota do revisor sobre `card_variant_id` não-numérico**: fora do escopo do
+    Req. 6.5, e a query usa bind params tipados. Não vira teste aqui; registrado
+    para quem mexer na T8.
 
 **Tests**: integration
 **Gate**: full

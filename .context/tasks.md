@@ -163,7 +163,7 @@ Regras de execução:
   - Catálogo e busca acessíveis sem sessão; mutações exigem sessão.
   - _Requisitos: 6.1, 6.2, 6.3, 6.4_
 
-- [ ] **4.2 Modelo de `collection_items`**
+- [x] **4.2 Modelo de `collection_items`**
   - Migração com `UNIQUE (user_id, card_variant_id)` e `CHECK (quantity >= 0)` no
     banco.
   - Testes que provam que a constraint é do banco, não só da aplicação.
