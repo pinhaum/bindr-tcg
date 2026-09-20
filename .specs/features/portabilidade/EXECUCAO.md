@@ -96,17 +96,43 @@ não é transacional e fica verde por resíduo). As 6 asserções de plano segue
 - A página da coleção que o usuário já usa é `app/views/progress/index.html.erb`
   (não existe `app/views/collection/`). É o destino natural do link da T7.
 
+## Contrato do resolvedor (T9) — a T13 e a T15 dependem disto
+
+`CollectionCsv::Resolver` produz **cinco** classificações, não as três que o
+Req. 10.4 nomeia:
+
+| Classificação | Significado |
+|---|---|
+| `:cria` | não havia registro; passa a haver (inclui zero sobre variante não possuída) |
+| `:atualiza` | havia registro com outra quantidade; AD-006 manda substituir |
+| `:zera` | **destrutivo**: havia posse ≥ 1 e o arquivo traz 0 — a posse desaparece |
+| `:inalterada` | a quantidade do arquivo é a que já está lá (torna o POR-11 legível) |
+| `:rejeita` | com `:motivo` simbólico e `:mensagem` em português |
+
+**Isto não viola o Req. 10.4.** O requisito pede resumo com "importadas,
+atualizadas e rejeitadas"; `:zera` e `:inalterada` são refinamentos que existem
+porque o Req. 10.5 exige que o efeito destrutivo seja **visível antes de
+gravar**. A **T15 precisa decidir o mapeamento** das cinco para as três
+categorias exigidas — e `:zera` não pode desaparecer dentro de "atualizadas"
+sem que a tela diga o que aconteceu.
+
+Cada `Linha` carrega: `indice`, `card_number`, `variant_code`, `card_name`,
+`quantidade_bruta`, `card_variant_id`, `quantidade_antes`, `quantidade_depois`.
+
+**Linha duplicada:** a última vale; as anteriores viram `:rejeita` com motivo
+`:linha_duplicada`, aparecendo na pré-visualização como qualquer outra rejeição.
+
+**Custo:** 2 consultas por lote, independente de N (uma em `card_variants JOIN
+cards`, uma em `collection_items` via `for_user`).
+
 ## Próximo passo exato
 
-1. **T4 EM EXECUÇÃO** (subagente): gem `csv` no Gemfile + `app/services/collection_csv/format.rb`
-   + testes de unidade (colunas idênticas export/import, cabeçalho por nome com
-   ordem trocada, cabeçalho com BOM). Gate **build**.
-2. Depois da T4, a Fase 2 é **estritamente serial** — cada task consome o
-   artefato da anterior, não há o que paralelizar:
-   T5 (`export.rb`, gate quick) → T6 (`collection_exports_controller.rb` + rota,
-   gate full) → **T7 fecha a §5.2** (link na view, gate full, marca o checkbox
-   da §5.2 em `.context/tasks.md`).
-3. Ao fim da T17: Verifier FRESCO (autor ≠ verificador) produzindo
+1. **T10** — revisão de segurança do upload e do parser (`ecc:security-reviewer`).
+2. Fase 4 (T11–T14): migração da staging (AD-007), upload+preview, tela de
+   pré-visualização, escrita atômica após confirmação. **A T14 é a única task da
+   feature que escreve na coleção.**
+3. **T15 fecha a §5.3** de `.context/tasks.md` (linha 207).
+4. Ao fim da T17: Verifier FRESCO (autor ≠ verificador) produzindo
    `.specs/features/portabilidade/validation.md`, com pedido EXPLÍCITO de tentar
    **destruir dado de coleção** por algum caminho. Depois:
    `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py portabilidade`
