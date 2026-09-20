@@ -43,5 +43,15 @@ Rails.application.routes.draw do
   # usuário nunca aparece na URL, vem de `Current.user` (Req. 6.5).
   resources :wishlist_items, only: %i[index create destroy], path: "wishlist"
 
+  # Progresso por set (Req. 9). Rota singular e sem id: a página é sempre a do
+  # usuário da sessão, e não há coleção de "progressos" a listar nem recorte a
+  # endereçar. **Nenhum identificador de usuário cabe nesta URL** — quem
+  # calcula é `Current.user`, e é isso que torna `?user_id=` inócuo por desenho
+  # e não por checagem (Req. 6.5).
+  #
+  # `get` puro em vez de `resource`: só existe leitura, e `resource :progress`
+  # geraria `new`/`edit`/`create` que nunca serão escritos.
+  get "progress" => "progress#index", as: :progress
+
   root "catalog#index"
 end

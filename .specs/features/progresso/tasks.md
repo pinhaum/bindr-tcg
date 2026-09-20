@@ -323,7 +323,7 @@ T6 → T7 → T8
 
 ---
 
-### T4: `ProgressController` e rota, com sessão exigida
+### T4: `ProgressController` e rota, com sessão exigida ✅
 
 **What**: Controller e rota da página de progresso, herdando o default protegido de `ApplicationController`, sem `allow_unauthenticated_access`.
 **Where**: `app/controllers/progress_controller.rb`
@@ -338,15 +338,89 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] O controller **não** declara `allow_unauthenticated_access`
-- [ ] A action monta a consulta a partir de `Current.user`; nenhum identificador de usuário é lido do request
-- [ ] Teste prova que anônimo é redirecionado para a autenticação, sem 200 e sem dado de coleção no corpo
-- [ ] Teste prova que, após autenticar, o usuário retorna à página de progresso
-- [ ] Teste prova que `?user_id=` de outro usuário é ignorado e o número exibido é o do usuário da sessão
-- [ ] Teste estrutural prova que `require_authentication` está entre os callbacks do controller — um 302 sozinho não distingue "filtro presente" de "rota inexistente"
+- [x] O controller **não** declara `allow_unauthenticated_access`
+- [x] A action monta a consulta a partir de `Current.user`; nenhum identificador de usuário é lido do request
+- [x] Teste prova que anônimo é redirecionado para a autenticação, sem 200 e sem dado de coleção no corpo
+- [x] Teste prova que, após autenticar, o usuário retorna à página de progresso
+- [x] Teste prova que `?user_id=` de outro usuário é ignorado e o número exibido é o do usuário da sessão
+- [x] Teste estrutural prova que `require_authentication` está entre os callbacks do controller — um 302 sozinho não distingue "filtro presente" de "rota inexistente"
 
 **Tests**: integration
 **Gate**: full
+
+**Decisões da execução:**
+
+- **A proteção é por omissão, e é isso que se prova.** O controller não declara
+  nada: `ApplicationController` inclui `Authentication`, cujo `before_action
+  :require_authentication` torna a action protegida ao nascer. Não acrescentei
+  `authenticated?` na action — ele é o remendo que o `CatalogController` precisa
+  por ser **público**, e chamá-lo aqui por reflexo sugeriria falsamente que a
+  sessão ainda não está resolvida quando a action começa. O
+  `WishlistItemsController` é o precedente exato, e o comentário do controller
+  registra a razão para quem ler depois.
+
+- **A asserção estrutural é um par simétrico, não uma asserção.**
+  `require_authentication` **presente** em `ProgressController` e **ausente** em
+  `CatalogController`. Só o primeiro lado passaria também se o filtro estivesse
+  instalado em tudo, inclusive onde não deveria — e é justamente o catálogo
+  público que essa hipótese quebraria. É a mesma forma que
+  `authentication_test.rb` usa, invertida: lá o par prova que o catálogo **pula**
+  um filtro que existe; aqui, que o progresso **herda** um filtro que o catálogo
+  pula.
+
+- **As duas provas estruturais são por AST (`Ripper.sexp`), nunca por regex
+  sobre o texto.** Escrevi as duas primeiro como `refute_match` sobre a fonte e
+  **as duas falharam no verde** — casando com a própria palavra dentro dos
+  comentários que explicam por que a construção não deve existir. O defeito não
+  era cosmético: um regex de `/params/` tem falso positivo em comentário e falso
+  negativo em `params.dig(:user_id)`, `params.to_unsafe_h[:user_id]` e
+  `chave = :user_id; params[chave]` — as formas idiomáticas que alguém
+  escreveria sem saber que existe um teste a respeito. `Ripper.sexp` descarta
+  comentário e enxerga o identificador em qualquer forma de acesso. O precedente
+  e o helper vêm de `collection_authorization_test.rb`.
+
+- **Aqui a asserção sobre `params` é mais forte que a do
+  `CollectionItemsController`.** Lá o teste irmão admite `:card_variant_id`,
+  porque a variante é catálogo público e precisa vir da URL. Nesta página não há
+  **nenhum** parâmetro legítimo: é sempre "o progresso de quem está na sessão",
+  sem filtro, paginação ou recorte. Por isso a asserção é a ausência total do
+  identificador `params`, e não uma lista de chaves permitidas.
+
+- **Rota `get "progress"`, sem id e sem `resource`.** Nenhum identificador de
+  usuário cabe na URL — é o que torna `?user_id=` inócuo por desenho e não por
+  checagem (Req. 6.5). `resource :progress` geraria `new`/`edit`/`create` que
+  nunca serão escritos; só existe leitura. O helper é `progress_path`, e o
+  `as: :progress` é o que o concern precisa para devolver o usuário à origem
+  depois de autenticar.
+
+- **View mínima de propósito, e a T5 continua inteira.** A action precisa
+  renderizar para os testes rodarem, então `app/views/progress/index.html.erb`
+  traz só o `<h1>`. Lista de sets, percentuais, parallels e marcação a11y são da
+  T5; o link para o catálogo filtrado é da T6. Os testes desta task leem
+  `@rows` por `view_assigns` em vez de assertar marcação, justamente para não
+  travarem a forma da página que a T5 ainda vai escolher.
+
+- **`SPEC_DEVIATION` registrado no cabeçalho do arquivo de teste**: não há
+  navegador no container, então a verificação de comportamento de página é
+  teste de integração sobre HTML renderizado. É o precedente de
+  `collection_ownership_ui_test.rb` e o que a spec já prevê em "Verificação de
+  comportamento visual". Nenhum critério da T4 depende de layout.
+
+- **Sensor de discriminação: seis mutações sobre cópia dos arquivos
+  (`cp`/`diff`, nunca `git stash`), todas capturadas.** Declarar
+  `allow_unauthenticated_access` (6 falhas), declarar `skip_before_action
+  :require_authentication` — a forma expandida em que o primeiro se traduz
+  (6 falhas), ler o usuário de `params[:user_id]` (2 falhas), lê-lo por
+  `params.dig(:user_id)` (2 falhas), montar a consulta com `nil` em vez de
+  `Current.user` (2 falhas) e remover a rota (5 erros). Os arquivos foram
+  restaurados e conferidos idênticos por `diff`; a suíte foi reconferida verde.
+
+- **Anônimo sai sem número no corpo, e o teste olha o corpo.** Um controller que
+  renderizasse a página e só depois redirecionasse ainda seria 302, então o
+  `assert_redirected_to` sozinho não bastaria: a asserção exige que o código do
+  set não apareça na resposta. O cenário dá a `@nami` uma variante e a `@zoro`
+  duas, de propósito — com posses do mesmo tamanho, obedecer ao `?user_id=` e
+  ignorá-lo dariam o mesmo número e nada discriminaria.
 
 ---
 
