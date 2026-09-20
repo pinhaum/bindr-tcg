@@ -211,16 +211,43 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] A suíte completa rodou **doze vezes seguidas**
-- [ ] **Zero falha** nos dois arquivos nas doze execuções
-- [ ] O resultado de cada uma das doze execuções está registrado nas "Decisões da execução" desta task — contagem de testes, falhas e erros
-- [ ] `bin/rubocop` limpo
-- [ ] Se alguma execução falhar, a task **não fecha**: volta para T1 ou T2 conforme o arquivo
+- [x] A suíte completa rodou **doze vezes seguidas**
+- [x] **Zero falha** nos dois arquivos nas doze execuções
+- [x] O resultado de cada uma das doze execuções está registrado nas "Decisões da execução" desta task — contagem de testes, falhas e erros
+- [x] `bin/rubocop` limpo
+- [x] Se alguma execução falhar, a task **não fecha**: volta para T1 ou T2 conforme o arquivo
 
 **Tests**: unit (a suíte inteira, doze vezes)
 **Gate**: full
 
 ---
+
+**Decisões da execução:**
+
+- **As doze execuções rodaram em série, com os containers livres, e isso não é
+  detalhe de conforto.** A T2 mediu que duas suítes sobrepostas produzem
+  `PG::TRDeadlockDetected` originado no `teardown` de `SemTransacaoTest`
+  (`catalog_search_test.rb:418-420`, três `delete_all` fora de transação) — um
+  defeito **pré-existente**, reproduzido com o arquivo original restaurado e
+  registrado como **AD-010**. Rodar as doze em paralelo confundiria deadlock de
+  contenção com flake, e a prova não distinguiria uma coisa da outra.
+
+- **Resultado: 12 de 12 verdes, com a linha de resumo idêntica nas doze** —
+  `502 runs, 1853 assertions, 0 failures, 0 errors, 0 skips`. Nenhum exit
+  não-zero; nenhuma falha em `guarantees_test.rb` ou `catalog_search_test.rb`
+  em nenhuma das doze.
+
+- **Por que doze e não cinco.** Com a taxa observada de ~17% (1 em 6 na medição
+  da `progresso`, 1 em 5 na desta sessão), cinco passes limpos acontecem por
+  acaso em ~40% das vezes — não provariam nada. Doze passes limpos têm
+  probabilidade ~11% sob a hipótese de que o defeito continua vivo, o que torna
+  a correção a explicação muito mais provável que sorte.
+
+- **As duas causas eram ambientais e nenhuma era a que a spec supunha.** A spec
+  atribuía o primeiro flake a truncamento por `to_i` e o segundo a falta de
+  `ANALYZE`; as duas hipóteses foram **falsificadas com medição** (T1 e T2), e
+  as causas reais — relógio de parede andando para trás, e pending list do GIN
+  inflando o custo do índice — estão registradas em **AD-009**.
 
 ### T4: Gem `csv` declarada e formato do CSV fixado em um só lugar
 

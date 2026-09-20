@@ -66,6 +66,22 @@
 - **Date**: 2026-09-20
 - **Status**: active
 
+### AD-009
+- **Decision**: Teste que assevera **ordem entre marcas de tempo** injeta relógio monotônico (o parâmetro `clock:` que `Ingestion::Upsert` já expõe); teste que assevera **plano de execução sobre índice GIN** drena a *pending list* com `gin_clean_pending_list` antes do `ANALYZE` e guarda a pré-condição por `pg_stats`, nunca por `pg_class.reltuples`.
+- **Reason**: Os dois flakes herdados da Fase 1 da `portabilidade` (T1 e T2) tiveram causa **ambiental**, não de produto, e os dois diagnósticos escritos na spec estavam **errados**. (1) O relógio de parede deste host **anda para trás**: medido no container, `Time.now` deu 4 saltos de ±11,25s em 2000 leituras enquanto `CLOCK_MONOTONIC` avançou 0,005s, e a execução que falhou gravou um `ImportRun` com `finished_at` **5,3s anterior ao próprio `started_at`**. Truncamento por `to_i` — a hipótese da spec — não produz inversão. (2) Os três índices da busca são **GIN com `fastupdate`**: a inserção vai para uma lista pendente cujo custo de varredura entra na conta do planejador, e o custo do mesmo índice sobre os mesmos dados variou de 34.31 a 1292.31 em oito seeds idênticos **com estatística válida em todos** — o que falsifica a hipótese "falta `ANALYZE`". `reltuples` não serve de guarda porque não é transacional: fica em 20000 numa tabela commitada vazia, ficando verde por resíduo.
+- **Trade-off**: As correções são de **teste**, não de host nem de produção. O relógio do WSL2 **continua saltando**: se a ordenação por `last_seen_at` algum dia virar requisito de produto ("cartas vistas por último"), a mesma inversão aparecerá nos dados reais e aí é problema de produto, não de suíte. A drenagem da pending list custa uma chamada por índice no seed; em troca, elimina a variação na origem em vez de reduzir probabilidade.
+- **Scope**: Toda asserção futura sobre ordem de marca de tempo ou sobre plano de execução com índice GIN. Commits `8062fa3` (T1) e `4efc35c` (T2).
+- **Date**: 2026-09-20
+- **Status**: active
+
+### AD-010
+- **Decision**: Os deadlocks de `PG::TRDeadlockDetected` observados em `test/queries` sob execuções concorrentes de `bin/rails test` são **pré-existentes e fora do escopo da `portabilidade`**; ficam registrados, não corrigidos nesta feature.
+- **Reason**: A origem é o `teardown` de `SemTransacaoTest` (`test/queries/catalog_search_test.rb:418-420`), que faz três `delete_all` **commitados fora de transação** — é o único ponto da suíte que escreve fora de transação. Medido na Fase 1: os mesmos deadlocks se reproduzem com o arquivo **original restaurado**, e aparecem em capturas feitas antes de a correção da T2 existir. Confirmado também que `gin_clean_pending_list` **não amplia** a superfície de lock: toma `RowExclusiveLock` em `cards`, o mesmo que o `INSERT` do seed já detém.
+- **Trade-off**: Enquanto não for corrigido, **as doze execuções da T3 e qualquer medição de suíte precisam rodar em série**, com os containers livres — duas suítes sobrepostas produzem deadlock que se confunde com flake e invalida a medição. Corrigir exigiria repensar o `teardown` do único teste não-transacional da suíte, o que é mudança de outra feature.
+- **Scope**: `test/queries/catalog_search_test.rb`. Anotado também `test/queries/catalog_owned_plan_test.rb:265`, que roda `ANALYZE` sem guarda equivalente mas usa índices **B-tree**, sem pending list, logo não exposto à variação da AD-009.
+- **Date**: 2026-09-20
+- **Status**: active
+
 ## Handoff
 
 > **Começando uma sessão nova?** Leia **`.specs/HANDOFF-colecao.md`** primeiro:
