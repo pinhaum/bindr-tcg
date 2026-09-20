@@ -63,13 +63,23 @@
   informação sem dizer qual, e um traço é invisível para leitor de tela.
 %>
 <main class="progress">
-  <h1 class="progress__title">Progresso por set</h1>
+  <h1 class="progress__title" id="progress_title">Progresso por set</h1>
 
   <p class="progress__count">
     <%= @rows.size == 1 ? "1 set" : "#{@rows.size} sets" %>
   </p>
 
-  <ul class="progress__list">
+  <%#
+    Achado MEDIUM da revisão de a11y: `aria-labelledby` apontando para o `<h1>`.
+    Quem navega por lista (tecla "l" no NVDA) pula direto para a `<ul>` sem
+    passar pelo título — sem nome próprio ela é anunciada só como "lista, 63
+    itens", e "de quê" é justamente o que falta. O rótulo **reaproveita** o
+    `<h1>` em vez de repetir o texto num `aria-label`: duas fontes para a mesma
+    frase é como elas divergem depois. O `id` referenciado precisa existir, e há
+    teste que exige a existência do alvo — um `aria-labelledby` apontando para
+    id inexistente deixa o elemento sem nome nenhum, pior que não ter o atributo.
+  %>
+  <ul class="progress__list" aria-labelledby="progress_title">
     <% @rows.each do |row| %>
       <li class="progress-set" id="progress_set_<%= row.set_code %>">
         <h2 class="progress-set__name">

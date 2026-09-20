@@ -435,4 +435,104 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     assert_equal nomes.size, nomes.uniq.size,
                  "links com o mesmo nome acessível são indistinguíveis em lista de links"
   end
+
+  # --- Correções da revisão de a11y (SC 2.4.11, SC 2.5.8, SC 1.3.1) ---
+  #
+  # SPEC_DEVIATION: os dois testes de CSS abaixo (foco visível e alvo de toque)
+  # asseveram sobre o **texto da folha de estilo**, não sobre o que o navegador
+  # pinta ou mede.
+  #
+  # Reason: **não há navegador no container** (mesma limitação do cabeçalho
+  # deste arquivo). Medir um anel de foco exige renderização, e medir altura
+  # calculada exige layout; nenhum dos dois existe aqui. A folha é servida como
+  # arquivo estático, então o que o teste pode travar é a regra em si. É o
+  # precedente já adotado em `collection_ownership_ui_test` ("os botões de posse
+  # declaram alvo de toque de 24px") e em `catalog_grid_test`, e é a mesma razão
+  # pela qual a convenção do projeto é **declarar** `min-height` em vez de
+  # confiar no cálculo: o que não se mede, se declara.
+  #
+  # Limite honesto: um `outline: none` acrescentado depois, num seletor de maior
+  # especificidade e em outro ponto da folha, passaria por estas asserções. O
+  # que elas garantem é que a declaração existe e que o link não ficou de fora
+  # do agrupamento — que é exatamente o defeito que a revisão encontrou.
+
+  # SC 2.4.11 / SC 2.4.7 — o link do catálogo é o único controle interativo da
+  # página de progresso. Fora do realce reforçado ele herdava só o outline
+  # default do navegador, que é fino e some sobre o fundo do item do set.
+  test "o link do catálogo declara o indicador de foco reforçado do projeto" do
+    css = Rails.root.join("app/assets/stylesheets/catalog.css").read
+
+    # A regra é procurada pelo **seletor agrupado**: o link precisa estar num
+    # bloco `:focus-visible` que declare o contorno de 2px com `outline-offset`,
+    # e não apenas existir em algum lugar da folha.
+    blocos = css.scan(/([^{}]*:focus-visible[^{}]*)\{([^}]*)\}/m)
+    bloco = blocos.find { |seletor, _| seletor.include?(".progress-set__catalog-link:focus-visible") }
+
+    assert bloco, "`.progress-set__catalog-link` não aparece em nenhuma regra `:focus-visible` (SC 2.4.11)"
+    assert_match(/outline:\s*2px\s+solid/, bloco.last,
+                 "o foco do link precisa do mesmo contorno reforçado dos demais controles")
+    assert_match(/outline-offset:\s*2px/, bloco.last,
+                 "sem `outline-offset` o contorno se confunde com a borda do item do set")
+  end
+
+  # O realce é **o mesmo** dos outros controles, não um parecido: o valor é
+  # lido das regras existentes e comparado, então divergir a espessura num só
+  # lugar derruba a asserção.
+  test "o foco do link do catálogo é o mesmo realce dos demais controles" do
+    css = Rails.root.join("app/assets/stylesheets/catalog.css").read
+    blocos = css.scan(/([^{}]*:focus-visible[^{}]*)\{([^}]*)\}/m)
+
+    do_link = blocos.find { |seletor, _| seletor.include?(".progress-set__catalog-link:focus-visible") }
+    do_posse = blocos.find { |seletor, _| seletor.include?(".ownership__button:focus-visible") }
+
+    assert do_link, "`.progress-set__catalog-link` ficou sem regra de foco"
+    assert do_posse, "a regra de foco dos controles de posse sumiu da folha"
+    assert_equal do_posse.last.squish, do_link.last.squish,
+                 "o realce de foco do link precisa ser idêntico ao dos controles de posse"
+  end
+
+  # SC 2.5.8 — alvo de toque. A convenção do projeto é **declarar** e não
+  # depender de cálculo: o `padding` vertical de 0.375rem sobre uma fonte de
+  # 0.875rem entrega ~33px hoje, mas isso muda com a fonte do usuário.
+  test "o link do catálogo declara alvo de toque de 24px" do
+    css = Rails.root.join("app/assets/stylesheets/catalog.css").read
+    regra = css[/\.progress-set__catalog-link\s*\{[^}]*\}/m]
+
+    assert regra, "a regra .progress-set__catalog-link sumiu da folha do catálogo"
+    assert_match(/min-height:\s*24px/, regra, "alvo de toque sem altura mínima (SC 2.5.8)")
+  end
+
+  # SC 1.3.1 / SC 2.4.6 — a lista precisa de nome próprio. Quem navega por
+  # lista (tecla "l" no NVDA) chega na `<ul>` sem passar pelo `<h1>`, e "lista,
+  # 63 itens" não diz de quê.
+  test "a lista de sets tem nome acessível próprio" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    listas = css_select("ul.progress__list")
+    assert_equal 1, listas.size
+
+    rotulo = listas.first["aria-labelledby"].to_s
+    assert rotulo.present?,
+           "a lista de sets precisa de nome próprio para quem navega por lista (SC 1.3.1)"
+  end
+
+  # O alvo do `aria-labelledby` **existe** e tem texto. Um `aria-labelledby`
+  # apontando para id inexistente deixa a lista sem nome nenhum — pior que não
+  # ter o atributo, porque parece resolvido. Esta é a asserção que separa o
+  # rótulo de fato do rótulo de fachada.
+  test "o rótulo da lista aponta para um elemento que existe e nomeia a página" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    rotulo = css_select("ul.progress__list").first["aria-labelledby"].to_s
+    alvos = css_select("##{rotulo}")
+
+    assert_equal 1, alvos.size,
+                 "`aria-labelledby` aponta para `##{rotulo}`, que não existe na página"
+    assert_match(/Progresso por set/, alvos.first.text.squish,
+                 "o elemento que rotula a lista precisa dizer do que a lista é")
+  end
 end

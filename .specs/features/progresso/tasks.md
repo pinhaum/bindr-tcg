@@ -617,6 +617,82 @@ T6 → T7 → T8
   se um segundo valor entrar na URL; o escalar é coincidência de implementação do
   saneador, não contrato.
 
+**Correções da revisão de a11y** (pós-T6, sobre a view entregue nas T5/T6 — não é
+task nova do plano, nenhum checkbox foi marcado por ela):
+
+- **CRITICAL — foco visível (SC 2.4.11 / SC 2.4.7).** O
+  `.progress-set__catalog-link` era o único controle interativo do projeto fora
+  do realce reforçado: herdava o outline default do navegador, fino e sumindo
+  sobre o fundo do item do set — exatamente o que o comentário da folha registra
+  como motivo do reforço. Ele entrou **no seletor agrupado existente** dos
+  controles de wishlist, e não numa regra nova: duas regras com a mesma
+  declaração é como elas divergem no dia em que alguém ajusta a espessura numa
+  só, e o ponto do reforço é ser o mesmo contorno em todo lugar. O agrupamento
+  torna a divergência impossível em vez de detectável — e há teste que compara o
+  corpo da regra do link com o dos controles de posse e exige que sejam iguais.
+
+- **HIGH — alvo de toque (SC 2.5.8).** `min-height: 24px` declarado. A altura
+  calculada já passava (0.875rem × `line-height: 1.5` = 21px, mais 0.375rem de
+  padding em cima e embaixo ≈ **33px**), mas a convenção do projeto, registrada
+  em `catalog.css` no bloco do `.wishlist-mark__input`, é declarar e não depender
+  de cálculo: fonte do usuário e `line-height` herdado mudam o resultado.
+
+- **`min-width` deliberadamente não declarado.** O alvo é um link de **texto em
+  fluxo**, cuja largura é a da frase "Ver no catálogo" e nunca chega perto de
+  24px. Declarar `min-width` num `inline-block` de texto não protege nada e
+  passaria a mentir se o texto virasse ícone — aí o certo seria declarar os dois,
+  como em `.ownership__button`, que é alvo quadrado de verdade. A justificativa
+  está no comentário da regra, não só aqui.
+
+- **O comentário dos 44px estava errado e foi corrigido.** A folha afirmava que
+  "a área de toque de 44px sai do `padding` vertical": com `padding: 0.375rem 0`
+  sobre fonte de 0.875rem, o `padding` contribui 12px e o total chega a ~33px —
+  o CSS não entregava 44px em configuração nenhuma, e nenhum ajuste só de padding
+  chegaria lá. Comentário que afirma um número que o código não entrega é pior
+  que comentário nenhum, porque a próxima pessoa confia nele e não mede.
+
+- **MEDIUM — `<ul>` sem nome acessível (SC 1.3.1).** `aria-labelledby` na
+  `<ul class="progress__list">` apontando para um `id` novo no `<h1>`. Quem
+  navega por lista (tecla "l" no NVDA) chega na `<ul>` sem passar pelo título e
+  ouvia só "lista, 63 itens". O rótulo **reaproveita** o `<h1>` em vez de repetir
+  a frase num `aria-label`: duas fontes para o mesmo texto é como elas divergem
+  depois.
+
+- **Há teste separado exigindo que o alvo do `aria-labelledby` exista.** Um
+  `aria-labelledby` apontando para id inexistente deixa o elemento **sem nome
+  nenhum** — pior que não ter o atributo, porque parece resolvido na leitura do
+  código. É a diferença entre rótulo de fato e rótulo de fachada, e sem essa
+  asserção apagar o `id` do `<h1>` não derrubava nada.
+
+- **`SPEC_DEVIATION` nos dois testes de CSS.** Foco visível e altura de alvo de
+  toque são propriedades do que o navegador pinta e mede, e **não há navegador no
+  container** — mesma limitação do cabeçalho do arquivo. A asserção é sobre o
+  texto da folha, precedente já adotado em `collection_ownership_ui_test` ("os
+  botões de posse declaram alvo de toque de 24px") e em `catalog_grid_test`. O
+  limite está escrito no próprio teste: um `outline: none` acrescentado depois,
+  em seletor de maior especificidade e outro ponto da folha, passaria pelas
+  asserções. O que elas travam é que a declaração existe e que o link não ficou
+  **de fora do agrupamento** — que é o defeito que a revisão encontrou.
+
+- **Sensor de discriminação: quatro mutações sobre cópia dos arquivos
+  (`cp`/`diff`, nunca `git stash`), quatro capturadas.** Link retirado do seletor
+  agrupado de `:focus-visible` (2 falhas: a da existência da regra e a da
+  igualdade com o realce dos controles de posse), `min-height` removido (1),
+  `aria-labelledby` removido da `<ul>` (1 falha + 1 erro), e `id` removido do
+  `<h1>` deixando o `aria-labelledby` pendurado (1 — a asserção da existência do
+  alvo, a única que pega este caso). Arquivos restaurados e conferidos idênticos
+  por `diff`; suíte reconferida verde.
+
+- **Discordância registrada quanto ao escopo do achado CRITICAL.** O revisor
+  descreve o link como fora do realce "e também do segundo grupo": não há
+  discordância sobre o defeito, mas o remédio proposto ("acrescentar ao seletor
+  agrupado existente") tem dois seletores agrupados candidatos na folha. A
+  escolha foi o **segundo** (o dos controles de wishlist, vizinho do bloco
+  `progress-*`), e não o primeiro, por proximidade física na folha: a regra fica
+  a poucas linhas do bloco que ela estiliza, e quem editar `progress-*` a vê. A
+  declaração é idêntica nos dois, e o teste de igualdade compara com o **primeiro**
+  grupo justamente para travar que os dois não divirjam.
+
 ---
 
 ### T7: Isolamento entre usuários ✅
