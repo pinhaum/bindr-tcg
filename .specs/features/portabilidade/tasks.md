@@ -264,13 +264,13 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] `csv` está no `Gemfile` com comentário explicando por que uma *default gem* é declarada (some do carregamento implícito no Ruby 3.4)
-- [ ] `docker compose run --rm --no-deps app bundle install` rodou e `Gemfile.lock` está commitado
-- [ ] As quatro colunas (`card_number`, `variant_code`, `card_name`, `quantity`) e a sua ordem estão definidas **em um único lugar**, consumido pelo export e pelo import
-- [ ] Teste prova que a lista de colunas do export é **idêntica** à que o import espera — uma mudança em uma delas quebra o teste, não o usuário
-- [ ] Teste prova que o cabeçalho é reconhecido **por nome, não por posição**, com as colunas em ordem trocada (Edge Case da spec)
-- [ ] Teste prova que um cabeçalho com BOM (`﻿`, que o Excel insere) é reconhecido (Edge Case da spec)
-- [ ] O build sobe com a gem nova: `docker compose build`
+- [x] `csv` está no `Gemfile` com comentário explicando por que uma *default gem* é declarada (some do carregamento implícito no Ruby 3.4)
+- [x] `docker compose run --rm --no-deps app bundle install` rodou e `Gemfile.lock` está commitado
+- [x] As quatro colunas (`card_number`, `variant_code`, `card_name`, `quantity`) e a sua ordem estão definidas **em um único lugar**, consumido pelo export e pelo import
+- [x] Teste prova que a lista de colunas do export é **idêntica** à que o import espera — uma mudança em uma delas quebra o teste, não o usuário
+- [x] Teste prova que o cabeçalho é reconhecido **por nome, não por posição**, com as colunas em ordem trocada (Edge Case da spec)
+- [x] Teste prova que um cabeçalho com BOM (`﻿`, que o Excel insere) é reconhecido (Edge Case da spec)
+- [x] O build sobe com a gem nova: `docker compose build`
 
 **Tests**: unit
 **Gate**: build

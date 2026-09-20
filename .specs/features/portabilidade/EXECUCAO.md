@@ -88,15 +88,24 @@ não é transacional e fica verde por resíduo). As 6 asserções de plano segue
   `allow_unauthenticated_access`.
 - Ruby 3.3.0, Rails 8.0.5.1. `app/services/` só tem `ingestion/` hoje.
 - Não existem views `collection_exports/` nem `collection_imports/`.
+- `assert_queries_count` **existe** no ActiveRecord 8.0.5.1
+  (`active_record/testing/query_assertions.rb:18`, assinatura
+  `assert_queries_count(count = nil, include_schema: false, &block)`). É a
+  ferramenta que a T5 e a T13 pedem para provar POR-13 — não precisa improvisar
+  contador.
+- A página da coleção que o usuário já usa é `app/views/progress/index.html.erb`
+  (não existe `app/views/collection/`). É o destino natural do link da T7.
 
 ## Próximo passo exato
 
-1. Fechar a T3: conferir as 12 execuções, marcar checkboxes nos dois planos,
-   registrar o resultado das doze nas "Decisões da execução" da T3, commitar.
-2. Abrir a **T4** (gem `csv` + `app/services/collection_csv/format.rb`).
-   Gate da T4 é **build** (`docker compose build`). Gem nova exige
-   `docker compose run --rm --no-deps app bundle install` — rebuild NÃO basta,
-   o volume nomeado `bundle` sombreia as gems da imagem.
+1. **T4 EM EXECUÇÃO** (subagente): gem `csv` no Gemfile + `app/services/collection_csv/format.rb`
+   + testes de unidade (colunas idênticas export/import, cabeçalho por nome com
+   ordem trocada, cabeçalho com BOM). Gate **build**.
+2. Depois da T4, a Fase 2 é **estritamente serial** — cada task consome o
+   artefato da anterior, não há o que paralelizar:
+   T5 (`export.rb`, gate quick) → T6 (`collection_exports_controller.rb` + rota,
+   gate full) → **T7 fecha a §5.2** (link na view, gate full, marca o checkbox
+   da §5.2 em `.context/tasks.md`).
 3. Ao fim da T17: Verifier FRESCO (autor ≠ verificador) produzindo
    `.specs/features/portabilidade/validation.md`, com pedido EXPLÍCITO de tentar
    **destruir dado de coleção** por algum caminho. Depois:

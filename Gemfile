@@ -13,6 +13,13 @@ gem "pg", "~> 1.1"
 # portanto, o Req. 1.5 inteiro. Soltar o pin só quando o Rails parar de passar
 # esse argumento.
 gem "json", "~> 2.7"
+# Declarada mesmo sendo uma *default gem* hoje: a partir do Ruby 3.4 a `csv`
+# saiu das default gems e virou bundled gem, então `require "csv"` deixa de
+# funcionar por carregamento implícito e passa a exigir declaração no Gemfile.
+# Sem ela, export e import de coleção quebrariam na primeira atualização de
+# Ruby — em produção, não em teste. Declarar agora torna a dependência
+# explícita e a versão travada no lock.
+gem "csv", "~> 3.3"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
