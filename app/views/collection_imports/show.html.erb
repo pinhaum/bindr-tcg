@@ -1,24 +1,244 @@
 <%#
-  Pré-visualização do import — **placeholder da T12**.
+  T13 — a pré-visualização do import: o que vai mudar, antes de mudar
+  (POR-07, POR-10 / Req. 10.4, 10.5).
 
-  A tela de verdade é a **T13**: é ela que mostra as três classes de linha de
-  forma distinguível sem depender de cor, o antes e o depois de cada alteração,
-  o motivo de cada rejeição, e que passa pela revisão de a11y. Esta view existe
-  porque o redirect do upload precisa chegar a algum lugar e porque o teste de
-  autorização do token precisa de uma resposta de sucesso para exercitar.
+  ## Por que esta tela existe
 
-  O que já está certo aqui e não deve regredir na T13: nada é gravado ao
-  renderizar, e o registro vem de `CollectionImport.find_by_token_for`, que
-  filtra por dono antes de carregar.
+  O Req. 10.5 não pede "uma etapa a mais": pede que o usuário **veja o que vai
+  mudar antes de qualquer gravação**. A coleção é o único dado insubstituível
+  do sistema — o catálogo é regenerável (AD-001) —, e esta tela é a barreira
+  entre um arquivo errado e a perda desse dado. Uma tela que passe nos testes e
+  esconda um efeito destrutivo falha no propósito do requisito mesmo verde.
+
+  **Nada é gravado ao renderizar**, e isso não pode regredir: a action só lê o
+  staging por `CollectionImport.find_by_token_for`, que filtra por dono antes de
+  carregar (T11), e nada aqui chama escrita. Quem grava é a T14, depois da
+  confirmação explícita. Há `assert_no_changes` sobre o retrato inteiro da
+  tabela de coleção em `collection_import_preview_ui_test` para manter assim.
+
+  ## CINCO grupos, não três — e por quê
+
+  O plano da T13 fala em três classes (cria, altera, rejeita) porque foi escrito
+  antes de o `CollectionCsv::Resolver` (T9) existir. O resolvedor produz
+  **cinco** classificações, e a diferença importa exatamente no ponto que este
+  requisito protege:
+
+  - `:cria`       — não havia registro; passa a haver.
+  - `:atualiza`   — havia outra quantidade; AD-006 manda **substituir**.
+  - `:zera`       — **destrutivo**: havia posse e o arquivo a leva a zero.
+  - `:inalterada` — a quantidade do arquivo é a que já está lá.
+  - `:rejeita`    — não será aplicada, com motivo.
+
+  `:zera` é mecanicamente uma substituição, e dobrá-lo dentro de "altera"
+  cumpriria a letra do plano — mas tiraria do usuário justamente a informação
+  que a confirmação do Req. 10.5 existe para dar: que uma posse vai
+  desaparecer. Por isso ele é um **grupo próprio, primeiro na página**, antes
+  até do que cria: quem rola a tela de cima para baixo encontra o dano possível
+  antes de qualquer outra coisa, e quem não rola encontra mesmo assim.
+
+  `:inalterada` também é grupo próprio, e por trás dele está o POR-11: a ida e
+  volta do próprio export tem que ler "nada muda", não "N atualizações" que não
+  alteram nada. É o grupo que fica **por último**, porque é o que não pede
+  decisão nenhuma.
+
+  A ordem dos grupos é, portanto, por **consequência decrescente**: o que
+  destrói, o que cria, o que troca, o que é recusado, o que não muda.
+
+  ## Como a distinção não depende de cor (SC 1.4.1)
+
+  Três portadores independentes, e o primeiro sozinho basta:
+
+  1. **Texto.** Cada linha carrega um `.import-preview__badge` que **nomeia**
+     a classificação em português ("Remove da coleção", "Cria", "Altera",
+     "Recusada", "Sem alteração"). Sem folha de estilo nenhuma a tela continua
+     legível, e é isso que o teste lê.
+  2. **Estrutura.** Cada grupo é uma `<section>` com o próprio cabeçalho e a
+     própria contagem — a classificação está na hierarquia do documento, que é
+     por onde o leitor de tela navega.
+  3. **Forma.** A folha distingue os grupos por `border-left` e `font-weight`,
+     nunca só por `color`/`background-color`. Há teste que lê as regras da
+     folha e recusa uma distinção puramente cromática.
+
+  ## O antes e o depois (AD-006)
+
+  Em `:atualiza` e em `:zera` os dois valores viajam em elementos **separados e
+  nomeados** — `.import-preview__antes` e `.import-preview__depois` —, não num
+  texto corrido. Num texto corrido, "2 → 7" e "7 → 2" são indistinguíveis para
+  um teste e ambíguos para quem lê com leitor de tela; separados, a ordem é
+  estrutural e a seta vira enfeite, não informação.
+
+  Em `:cria` **não há "antes"**: ausência de registro não é registro de zero
+  cópias — é a mesma distinção que o projeto faz em `counter`, onde `NULL ≠ 0`.
+  Imprimir `0` ali afirmaria algo falso sobre a coleção do usuário.
+
+  ## O `card_name` vem do arquivo, não do catálogo
+
+  Achado da revisão de segurança da T10: este é o único texto da tela que é
+  **entrada hostil** — o usuário escreveu no CSV e o resolvedor o carrega sem
+  consultar o catálogo (de propósito: o nome é informativo e diverge
+  legitimamente). O escape default do ERB resolve, e é por isso que **nenhum
+  `raw`, `html_safe` ou `<%==` aparece neste arquivo** e não pode aparecer.
+  Há teste com `<script>` numa célula de nome para travar isso.
+
+  Mitigação de fórmula de CSV **não** se aplica aqui: isto é HTML, e o `=` na
+  primeira coluna de uma planilha não tem significado nenhum numa `<td>`.
+
+  ## O botão de confirmar aponta para uma rota que ainda não existe
+
+  A tela sem o botão não é a tela: o Req. 10.5 é "ver **e** confirmar", e uma
+  pré-visualização sem saída é uma tela que não faz sentido para o usuário. O
+  formulário já declara o destino que a **T14** vai criar
+  (`/collection/import/:token/confirm`), escrito como caminho literal porque o
+  helper de rota ainda não existe e `confirm_collection_import_path` seria
+  `NameError` na renderização. A T14 troca o literal pelo helper quando
+  declarar a rota. **Nenhum teste da T13 depende de a action existir** — o que
+  se prova aqui é a tela, não a gravação.
+
+  ## Sem `aria-label` em nada que já tenha texto visível
+
+  Lição da T13 da `colecao`: um `aria-label` sobre um elemento cujo texto
+  visível já é o nome acessível só cria uma segunda frase para manter em
+  sincronia e arrisca o SC 2.5.3 de quem usa comando de voz. Os rótulos aqui
+  são todos texto de verdade. O único uso de `aria-` é o `aria-labelledby` que
+  liga cada `<section>` ao próprio cabeçalho — que é relação estrutural, não
+  rótulo duplicado.
 %>
 <% content_for :title, "Pré-visualização da importação" %>
 
-<main class="auth">
-  <h1 class="auth__title">Pré-visualização da importação</h1>
+<%
+  linhas = @collection_import.linhas_resolvidas
+  grupos = linhas.group_by(&:classificacao)
 
-  <p>
+  # Ordem por consequência decrescente: o destrutivo primeiro, o inerte por
+  # último. Cada entrada traz o rótulo do grupo, o rótulo da linha e a frase de
+  # apoio que explica o que aquele grupo fará.
+  secoes = [
+    [ :zera, "Remove da coleção", "Remove da coleção",
+      "Estas cartas você possui hoje e o arquivo traz zero: a posse desaparece na confirmação." ],
+    [ :cria, "Passa a constar", "Cria",
+      "Estas variantes ainda não estão na sua coleção e passarão a constar." ],
+    [ :atualiza, "Altera a quantidade", "Altera",
+      "A quantidade do arquivo substitui a que está na sua coleção hoje." ],
+    [ :rejeita, "Não será importada", "Recusada",
+      "Estas linhas do arquivo não serão aplicadas. O motivo de cada uma está abaixo." ],
+    [ :inalterada, "Já está assim", "Sem alteração",
+      "A quantidade do arquivo é a que você já tem: nada muda nestas linhas." ]
+  ]
+%>
+
+<main class="import-preview">
+  <h1 class="import-preview__title">Confira o que vai mudar</h1>
+
+  <p class="import-preview__file">
     Arquivo: <%= @collection_import.filename %> —
-    <%= pluralize(@collection_import.linhas_resolvidas.size, "linha", plural: "linhas") %>
-    analisada(s). Nada foi gravado na sua coleção ainda.
+    <%= pluralize(linhas.size, "linha analisada", plural: "linhas analisadas") %>.
   </p>
+
+  <p class="import-preview__untouched">
+    <strong>Nada foi gravado na sua coleção ainda.</strong>
+    Sua coleção só muda quando você confirmar, no fim desta página.
+  </p>
+
+  <% secoes.each do |classificacao, titulo, rotulo, apoio| %>
+    <% do_grupo = grupos[classificacao].to_a %>
+    <% next if do_grupo.empty? %>
+
+    <%#
+      Sem `aria-labelledby` apontando para o próprio `<h2>` ao lado: um
+      `<section>` nomeado vira landmark `region`, e quatro regiões nomeadas com
+      exatamente o texto do cabeçalho adjacente só duplicam o que a hierarquia
+      de cabeçalhos já oferece para navegar. É a mesma lição da T13 da
+      `colecao` — não repetir em `aria-` o que o texto visível já diz.
+    %>
+    <section class="import-preview__group" data-classificacao="<%= classificacao %>">
+      <h2 class="import-preview__group-title">
+        <%= titulo %> (<%= do_grupo.size %>)
+      </h2>
+
+      <p class="import-preview__group-help"><%= apoio %></p>
+
+      <ul class="import-preview__rows">
+        <% do_grupo.each do |linha| %>
+          <li class="import-preview__row" data-classificacao="<%= classificacao %>">
+            <p class="import-preview__badge"><%= rotulo %></p>
+
+            <p class="import-preview__card">
+              <span class="import-preview__number"><%= linha.card_number || "—" %></span>
+              <span class="import-preview__variant"><%= linha.variant_code || "—" %></span>
+              <span class="import-preview__name"><%= linha.card_name %></span>
+            </p>
+
+            <%#
+              O número da linha **do arquivo**, e não o índice do resolvedor:
+              o `indice` é zero-based sobre as linhas de dado, e o usuário abre
+              o arquivo num editor onde o cabeçalho é a linha 1. Sem o `+ 2` a
+              tela mandaria ele olhar duas linhas acima do erro — que é pior do
+              que não dizer nada, porque ele corrigiria a linha errada.
+            %>
+            <p class="import-preview__origin">Linha <%= linha.indice.to_i + 2 %> do arquivo</p>
+
+            <% if linha.rejeitada? %>
+              <p class="import-preview__motivo"><%= linha.mensagem %></p>
+            <% else %>
+              <p class="import-preview__change">
+                <% if linha.quantidade_antes.nil? %>
+                  Você não tem esta variante registrada; passará a ter
+                  <span class="import-preview__depois"><%= linha.quantidade_depois %></span>.
+                <% else %>
+                  De <span class="import-preview__antes"><%= linha.quantidade_antes %></span>
+                  para <span class="import-preview__depois"><%= linha.quantidade_depois %></span>.
+                <% end %>
+              </p>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <%#
+    O destino é a rota da T14, escrita como caminho literal porque o helper
+    ainda não existe (ver o cabeçalho). `form_with` emite o token de CSRF, que
+    a confirmação vai verificar: é a mesma exigência que a revisão de segurança
+    da T10 fez sobre o upload, e por mais razão ainda aqui — este é o botão que
+    grava.
+  %>
+  <div class="import-preview__decision">
+    <%#
+      Achado HIGH da revisão de a11y desta task (SC 3.3.4 — prevenção de erro
+      em ação que altera dado do usuário): quem chega ao botão por teclado ou
+      por leitor de tela pode não ter passado pelos grupos acima. Sem esta
+      frase, o único controle que grava anuncia "Confirmar e gravar na minha
+      coleção" e **nada** sobre a posse que desaparece — a informação que o
+      Req. 10.5 existe para dar chegaria só a quem lê a tela inteira de cima
+      para baixo.
+
+      A contagem fica **antes** do botão e no fluxo do documento, não num
+      `aria-describedby`: descrição associada é anunciada depois do nome em
+      boa parte dos leitores, e às vezes suprimida em modo de formulário. Aqui
+      o texto é conteúdo de verdade, lido por todo mundo na mesma ordem.
+    %>
+    <% quantas_zeram = grupos[:zera].to_a.size %>
+    <% if quantas_zeram.positive? %>
+      <p class="import-preview__warning">
+        <strong>Atenção:</strong>
+        <%= pluralize(quantas_zeram, "carta que você possui hoje sai da sua coleção",
+                      plural: "cartas que você possui hoje saem da sua coleção") %>
+        se você confirmar.
+      </p>
+    <% end %>
+
+    <%= form_with url: "#{collection_import_path(@collection_import.token)}/confirm",
+                  method: :post, class: "import-preview__form" do |form| %>
+      <%= form.submit "Confirmar e gravar na minha coleção",
+                      class: "import-preview__confirm" %>
+    <% end %>
+
+    <p class="import-preview__abandon">
+      Se algo estiver errado,
+      <%= link_to "envie outro arquivo", new_collection_import_path,
+                  class: "import-preview__again" %>.
+      Sair desta página sem confirmar deixa sua coleção exatamente como está.
+    </p>
+  </div>
 </main>

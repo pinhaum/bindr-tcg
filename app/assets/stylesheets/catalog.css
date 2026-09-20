@@ -690,3 +690,218 @@ body {
   padding: 0.375rem 0;
   overflow-wrap: anywhere;
 }
+
+/*
+ * Pré-visualização do import (T13 / POR-07, POR-10, Req. 2.5, 10.4, 10.5).
+ *
+ * ## Req. 2.5 — 360px sem scroll horizontal
+ *
+ * A tela é uma pilha de blocos em fluxo, e **deliberadamente não é tabela**.
+ * Uma linha de import tem seis informações (classificação, número, variante,
+ * nome, origem, antes/depois); em colunas fixas elas só caberiam em 360px com
+ * `overflow-x`, que é exatamente o scroll que o requisito proíbe. Como
+ * parágrafos empilhados, cada uma reflui sozinha.
+ *
+ * Nenhuma regra abaixo declara largura fixa, `white-space: nowrap` ou
+ * `overflow-x` — as três formas pelas quais um bloco de texto empurra a página
+ * para o lado. Há teste que lê esta folha e falha se alguma aparecer, porque
+ * não há navegador no container para medir o overflow de verdade.
+ *
+ * ## SC 1.4.1 — a distinção não é só por cor
+ *
+ * Cada linha carrega o nome da classificação em **texto visível**
+ * (`.import-preview__badge`), e é esse o portador principal: a tela continua
+ * legível com a folha inteira desligada. O reforço visual abaixo usa
+ * `border-left` e `font-weight` — **forma**, não cor. `color` e
+ * `background-color` não aparecem em nenhum seletor de classificação, de
+ * propósito: sozinhos, eles deixariam a tela ilegível em monocromia e no modo
+ * de cores forçadas.
+ *
+ * `currentcolor` em toda borda pela mesma razão do resto do projeto: a
+ * marcação sobrevive a `forced-colors` sem desaparecer.
+ */
+
+.import-preview { padding: var(--gap); }
+
+.import-preview__title { font-size: 1.5rem; margin: 0 0 0.5rem; }
+
+.import-preview__file {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  /* Nome de arquivo é uma palavra só e pode ser longo: quebra em vez de
+     empurrar a caixa. */
+  overflow-wrap: anywhere;
+}
+
+/*
+ * A frase que diz que a coleção ainda está intacta. Borda e não fundo colorido:
+ * é o mesmo raciocínio das classificações — a informação precisa sobreviver
+ * sem cor.
+ */
+.import-preview__untouched {
+  margin: 0 0 var(--gap);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid currentcolor;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.import-preview__group { margin: 0 0 var(--gap); }
+
+.import-preview__group-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+  overflow-wrap: anywhere;
+}
+
+.import-preview__group-help { margin: 0 0 0.5rem; font-size: 0.875rem; }
+
+.import-preview__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.import-preview__row {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  min-width: 0; /* sem isto o conteúdo longo não encolhe abaixo do intrínseco */
+  border: 1px solid currentcolor;
+  border-left-width: 4px;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.import-preview__badge {
+  margin: 0;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * O reforço por **forma**, um por classificação. A borda esquerda muda de
+ * espessura e o peso do rótulo muda junto: dois canais não-cromáticos, ambos
+ * perceptíveis em monocromia. O texto do `badge` continua sendo o que carrega
+ * o significado.
+ *
+ * `:zera` é o caso destrutivo e recebe o tratamento mais forte — borda mais
+ * grossa e rótulo em negrito. Não é ênfase decorativa: é o único grupo em que
+ * a confirmação **apaga** dado do usuário, e o Req. 10.5 existe para que ele
+ * veja isso antes de clicar.
+ */
+.import-preview__row[data-classificacao="zera"] {
+  border-left-width: 8px;
+  border-style: double;
+}
+
+.import-preview__row[data-classificacao="zera"] .import-preview__badge {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.import-preview__row[data-classificacao="rejeita"] {
+  border-left-style: dashed;
+}
+
+.import-preview__row[data-classificacao="rejeita"] .import-preview__badge {
+  font-weight: 700;
+}
+
+.import-preview__row[data-classificacao="cria"] .import-preview__badge {
+  font-weight: 700;
+}
+
+.import-preview__row[data-classificacao="atualiza"] .import-preview__badge {
+  font-weight: 600;
+}
+
+/*
+ * `:inalterada` é o grupo que não pede decisão nenhuma. Borda fina e rótulo
+ * leve: ele desce na hierarquia visual sem sair da tela — a opacidade reduzida
+ * é enfeite, e o rótulo textual continua sendo o que informa.
+ */
+.import-preview__row[data-classificacao="inalterada"] {
+  border-left-width: 1px;
+  border-style: dotted;
+}
+
+.import-preview__row[data-classificacao="inalterada"] .import-preview__badge {
+  font-weight: 400;
+}
+
+.import-preview__card { margin: 0; overflow-wrap: anywhere; }
+
+.import-preview__number { font-weight: 700; }
+
+.import-preview__variant { font-variant-numeric: tabular-nums; }
+
+.import-preview__name { overflow-wrap: anywhere; }
+
+.import-preview__origin { margin: 0; font-size: 0.8125rem; opacity: 0.8; }
+
+.import-preview__change { margin: 0; overflow-wrap: anywhere; }
+
+.import-preview__motivo { margin: 0; overflow-wrap: anywhere; }
+
+/* Os dois números do AD-006. `tabular-nums` para que a leitura do antes e do
+   depois não dance com a largura do dígito. */
+.import-preview__antes,
+.import-preview__depois {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.import-preview__decision { margin: var(--gap) 0 0; }
+
+/*
+ * O aviso de escopo destrutivo ao lado do botão que grava (achado HIGH da
+ * revisão de a11y da T13, SC 3.3.4). Borda e negrito, nunca só cor: quem chega
+ * aqui precisa da informação em monocromia e em `forced-colors` também.
+ */
+.import-preview__warning {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid currentcolor;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * O botão que atravessa a barreira do Req. 10.5. Alvos de 24px pelo SC 2.5.8,
+ * `min-height` **e** `min-width` como no resto do código novo do projeto — a
+ * dívida de a11y registrada em `STATE.md` diz explicitamente que código novo
+ * não deve herdá-la.
+ */
+.import-preview__form { margin: 0 0 0.5rem; }
+
+.import-preview__confirm {
+  min-height: 24px;
+  min-width: 24px;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.import-preview__abandon { margin: 0; font-size: 0.875rem; }
+
+.import-preview__again {
+  display: inline-block;
+  min-height: 24px;
+  min-width: 24px;
+  padding: 0.375rem 0;
+  overflow-wrap: anywhere;
+}
+
+/* SC 2.4.11 — foco reforçado, como nos demais controles do projeto. */
+.import-preview__confirm:focus-visible,
+.import-preview__again:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}

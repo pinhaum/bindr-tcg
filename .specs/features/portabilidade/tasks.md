@@ -679,17 +679,88 @@ para `users` com `ON DELETE RESTRICT` e que não há cascata possível para
 
 **Done when**:
 
-- [ ] Teste de integração sobre o HTML renderizado prova que as três classes de linha — cria, altera, rejeita — são **distinguíveis** na tela, com `SPEC_DEVIATION` no cabeçalho do arquivo
-- [ ] Teste prova que a linha que altera mostra o valor **antes** e **depois** (AD-006: é o que torna "substituir" visível antes de destruir)
-- [ ] Teste prova que cada linha rejeitada mostra o **motivo** e **identifica a linha** (Req. 10.4)
-- [ ] Teste prova que a distinção entre as três classes **não é só por cor** (SC 1.4.1)
-- [ ] Todo texto de interface em português
-- [ ] Sem scroll horizontal em 360px (Req. 2.5)
-- [ ] `ecc:a11y-architect` revisou a tela; achados HIGH corrigidos ou justificados por escrito
-- [ ] Teste prova que a tela de pré-visualização **não** grava nada: renderizá-la não altera a coleção
+- [x] Teste de integração sobre o HTML renderizado prova que as três classes de linha — cria, altera, rejeita — são **distinguíveis** na tela, com `SPEC_DEVIATION` no cabeçalho do arquivo
+- [x] Teste prova que a linha que altera mostra o valor **antes** e **depois** (AD-006: é o que torna "substituir" visível antes de destruir)
+- [x] Teste prova que cada linha rejeitada mostra o **motivo** e **identifica a linha** (Req. 10.4)
+- [x] Teste prova que a distinção entre as três classes **não é só por cor** (SC 1.4.1)
+- [x] Todo texto de interface em português
+- [x] Sem scroll horizontal em 360px (Req. 2.5)
+- [x] `ecc:a11y-architect` revisou a tela; achados HIGH corrigidos ou justificados por escrito
+- [x] Teste prova que a tela de pré-visualização **não** grava nada: renderizá-la não altera a coleção
 
 **Tests**: integration
 **Gate**: full
+
+**Decisões da execução:**
+
+- **Cinco grupos, não três, e `:zera` primeiro.** O plano foi escrito antes da
+  T9 e fala em três classes; o `Resolver` produz cinco. A tela agrupa por
+  **consequência decrescente** — remove, cria, altera, recusa, sem alteração —
+  e `:zera` é `<section>` própria **no topo**, antes do que cria. Dobrá-lo
+  dentro de "altera" cumpriria a letra do plano e falharia no propósito do
+  Req. 10.5: as duas são substituição pela mecânica, mas uma apaga posse. Há
+  teste que falha se os rótulos de `:zera` e `:atualiza` lerem igual, e a
+  mutação que funde os dois grupos morre.
+
+- **A distinção tem três portadores, e o principal é texto.** Cada linha traz
+  um `.import-preview__badge` que **nomeia** a classificação ("Remove da
+  coleção", "Cria", "Altera", "Recusada", "Sem alteração"); os grupos são
+  `<section>` com cabeçalho próprio; a folha reforça por `border-style`,
+  `border-left-width` e `font-weight` — **forma, nunca cor**. Nenhum seletor de
+  classificação usa `color` ou `background-color`. O teste que audita a folha
+  foi corrigido depois de uma mutação passar por ele: auditar as regras
+  concatenadas deixava `color: crimson` na linha pegar carona no `font-weight`
+  de uma regra irmã. Auditadas isoladamente, a mutação morre.
+
+- **Achado HIGH da revisão de a11y (feita pelo executor, não por subagente) —
+  o botão que grava não dizia o que destrói.** Quem chega ao único controle de
+  escrita por teclado ou leitor de tela podia não ter lido os grupos acima:
+  ele anunciava "Confirmar e gravar na minha coleção" e nada sobre a posse que
+  some (SC 3.3.4). Correção: um `.import-preview__warning` com a **contagem**
+  de cartas que saem da coleção, no bloco da decisão, em texto de conteúdo e
+  não em `aria-describedby` — descrição associada é anunciada depois do nome e
+  às vezes suprimida em modo de formulário. Dois testes: um exige o aviso com
+  a contagem, o outro exige que ele **não** apareça sem linha destrutiva, para
+  que um aviso fixo não treine o usuário a ignorá-lo.
+
+- **Achado MEDIUM corrigido — `aria-labelledby` redundante.** Cada `<section>`
+  apontava para o próprio `<h2>` adjacente, o que a transforma em landmark
+  `region` com exatamente o texto do cabeçalho ao lado: quatro regiões nomeadas
+  duplicando o que a hierarquia de cabeçalhos já oferece. Removido, pela mesma
+  lição da T13 da `colecao` — não repetir em `aria-` o que o texto visível diz.
+
+- **Falso positivo descartado — o token de CSRF.** O HTML renderizado não
+  trazia `authenticity_token`. Não é defeito: `allow_forgery_protection` é
+  `false` em `config/environments/test.rb`; `form_with` emite o token em
+  desenvolvimento e produção. Nenhuma mudança.
+
+- **Ausência de registro não é zero.** A linha `:cria` não imprime "antes":
+  mostrar `0` afirmaria que o usuário tem um registro de zero cópias, que é
+  diferente de não ter registro — a mesma distinção que o projeto faz em
+  `counter`. O `0` de `:zera`, ao contrário, é valor e é impresso.
+
+- **O número da linha é o do arquivo, não o índice do resolvedor.** `indice` é
+  zero-based sobre as linhas de dado; o usuário abre o CSV num editor onde o
+  cabeçalho é a linha 1. A tela mostra `indice + 2`. Sem isso, ela mandaria o
+  usuário corrigir duas linhas acima do erro — pior que não dizer nada.
+
+- **O botão aponta para a rota da T14, como caminho literal.** O helper
+  `confirm_collection_import_path` ainda não existe e seria `NameError` na
+  renderização. Nenhum teste da T13 depende de a action existir — o que se
+  prova é a tela. A T14 troca o literal pelo helper ao declarar a rota.
+
+- **Sensor de discriminação: sete mutações, em cópia, nunca `git stash`.**
+  Fundir `:zera` em `:atualiza` (1 falha), trocar antes por depois (2), motivo
+  genérico para toda rejeição (1), apagar o rótulo textual (4), `raw` no
+  `card_name` (1), distinguir só por cor (1, depois de corrigir a auditoria) e
+  **gravar no `show`** (3 falhas). Nenhuma sobreviveu.
+
+- **Critérios não provados literalmente**, registrados no `SPEC_DEVIATION` do
+  arquivo de teste: "sem scroll horizontal em 360px" e "não é só por cor"
+  exigem renderização, e não há navegador no container. Provado no lugar: que
+  nenhuma regra nova declara largura fixa, `white-space: nowrap` ou
+  `overflow-x`, e que o portador da distinção é textual. **Não se afirma** ter
+  medido overflow nem contraste.
 
 ---
 
