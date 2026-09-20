@@ -1,0 +1,15 @@
+<%#
+  Só a mensagem, sem contêiner e sem `role`: o nó que carrega a região de
+  anúncio vive em `layouts/_flash` e **permanece** entre as atualizações do
+  Turbo.
+
+  Extraído em partial porque é o mesmo markup nos dois caminhos — o layout na
+  resposta HTML e o `turbo_stream.update` na resposta Stream. Duas cópias
+  divergiriam na primeira correção.
+
+  Sem mensagem não renderiza nada, e o contêiner vazio some pelo
+  `.flash-area:empty` da folha.
+%>
+<% if message.present? %>
+  <p class="flash flash--<%= kind %>"><%= message %></p>
+<% end %>

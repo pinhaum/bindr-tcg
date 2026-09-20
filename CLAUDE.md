@@ -8,20 +8,24 @@ A feature **`catalogo` está encerrada e verificada** (14 tasks, dois lotes, amb
 PASS em `.specs/features/catalogo/validation.md`): ingestão, busca com tolerância
 a typo, filtros, grade e página de detalhe funcionam e são **públicos**.
 
-A feature **`colecao` (Fase 4) está em execução**: a Fase 1 do plano (T1–T4,
-identidade e sessão) fechou, e `.context/tasks.md` §4.1 junto. **T5–T13 estão
-abertas** — posse por variante, filtro de posse, total e wishlist.
+A feature **`colecao` (Fase 4) está em execução**: a Fase 1 (T1–T4, identidade e
+sessão) e a Fase 2 (T5–T8, posse por variante) fecharam, e com elas
+`.context/tasks.md` §4.1, §4.2 e §4.3. **T9–T13 estão abertas** — filtro de
+posse, total e wishlist.
 
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
-  `User`, `Session`, `Current`. `CollectionItem` tem a tabela e as constraints,
-  mas as regras de domínio são a T5.
-- **Controllers**: `CatalogController` (público), `SessionsController`,
-  `RegistrationsController`, e o concern `Authentication`.
+  `User`, `Session`, `Current`.
+- **Controllers**: `CatalogController` (público), `CollectionItemsController`,
+  `SessionsController`, `RegistrationsController`, e o concern `Authentication`.
 - **Cinco migrações**, de `20260919120000` a `20260919120400`. `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **16 arquivos de teste, 227 testes**, rubocop limpo, CI verde.
+- **17 arquivos de teste, 288 testes**, rubocop limpo.
+- **Importmap instalado na T8**, com Turbo pinado para `turbo.js` e **Stimulus
+  deliberadamente não pinado** (não há controller Stimulus no projeto). O
+  placeholder de imagem do catálogo continua resolvido em CSS — não trocar por
+  JS só porque agora existe pipeline.
 
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção
@@ -39,9 +43,13 @@ Dívidas abertas que valem saber antes de mexer em autenticação:
   de `config.force_ssl`. A garantia é indireta; comentada no concern.
 - **Não há navegador no container**, logo não há system test. Teste de UI vira
   teste de integração sobre HTML renderizado, com `SPEC_DEVIATION` registrado.
-- **O importmap não está instalado.** `app/javascript` e `config/importmap.rb`
-  não existem; `stimulus-rails` está no Gemfile sem nunca ter rodado. A T8
-  depende de instalá-lo.
+- **`allow_unauthenticated_access` não resolve a sessão.** Ele remove o
+  `before_action :require_authentication`, que era quem chamava
+  `resume_session`: num controller público, `Current.user` é `nil` na action
+  até alguém chamar `authenticated?`. Ler dado do usuário ali sem isso é
+  defeito **silencioso** — responde 200 e devolve vazio. A T8 tropeçou nisso;
+  `CatalogController#owned_quantities` chama `authenticated?` antes de ler
+  `Current.user` por esse motivo.
 
 ## Comandos
 

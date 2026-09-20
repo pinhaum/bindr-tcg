@@ -1,0 +1,112 @@
+<%#
+  Controle de posse de **uma variante** (Req. 5.3 / COL-18, Req. 7.2 / COL-07).
+
+  É o mesmo partial na grade e no detalhe, de propósito: os dois lugares
+  registram a mesma coisa pela mesma rota, e duplicar o markup faria a próxima
+  correção de a11y precisar ser lembrada duas vezes.
+
+  **O `id` é o contrato com o Turbo Stream.** `dom_id` produz
+  `ownership_card_variant_<id>`, e o controller usa `turbo_stream.update` —
+  **`update`, não `replace`** — para trocar o conteúdo deste contêiner sem
+  recarregar a página (Req. 7.5 / COL-10).
+
+  A distinção entre os dois decide se a mudança é anunciada: `replace` troca o
+  **próprio** elemento, e uma região `aria-live` recém-inserida no DOM não
+  anuncia — o leitor de tela a trata como conteúdo novo, não como região que
+  mudou. `update` mantém o elemento (e portanto a região viva) e troca só os
+  filhos, que é exatamente a mudança que o `aria-live` existe para anunciar.
+  Por isso o `aria-live` está no nó de fora, que **permanece**.
+
+  **Sem JavaScript isto continua funcionando**, e é requisito dos Edge Cases,
+  não cortesia: `button_to` gera um `<form method="post">` de verdade, com
+  token CSRF. Sem Turbo o navegador submete o formulário e o controller
+  responde `redirect_back`; com Turbo, o mesmo POST devolve um Stream e a
+  página não recarrega. Nenhum atributo aqui é necessário para o caminho sem
+  JS funcionar.
+
+  Anônimo não vê controle nenhum — vê o convite para entrar. O catálogo é
+  público (Req. 6.3) e não pode quebrar sem sessão.
+%>
+<div id="<%= dom_id(variant, :ownership) %>" class="ownership"
+     aria-live="polite" aria-atomic="true">
+  <% if authenticated? %>
+    <p class="ownership__quantity">
+      <span class="ownership__count"><%= quantity %></span>
+      <%#
+        Plural explícito, não `pluralize`: o inflector do Rails é inglês e não
+        sabe acentuação portuguesa — `"cópia".pluralize(2)` devolve "cópia",
+        e a frase anunciada sairia "2 cópia". Um `Inflector` em português
+        resolveria isso para o app inteiro, mas é mudança de configuração
+        global, não desta task.
+      %>
+      <span class="ownership__unit"><%= quantity == 1 ? "cópia" : "cópias" %></span>
+      <%#
+        Nome da carta **e** código da variante dentro da região viva. Sem eles
+        o anúncio é "3 cópias", que numa grade de 24 tiles não identifica nada;
+        só com o código, quem não decora códigos de set fica na mesma. O
+        `aria-label` do botão que originou a ação já dá os dois — a região que
+        anuncia o resultado não pode dar menos (achado MEDIUM da revisão de
+        a11y). `aria-atomic` faz a região inteira ser lida a cada mudança,
+        então a frase sai completa.
+
+        Some da tela por CSS, sem sair da árvore de acessibilidade: o código é
+        redundante no detalhe, onde a variante já se identifica ao lado, e não
+        cabe na grade.
+      %>
+      <span class="ownership__variant"><%= card.name %> <%= variant.variant_code %></span>
+    </p>
+
+    <div class="ownership__actions">
+      <%#
+        O rótulo acessível cita nome da carta e código da variante. Numa grade
+        com 24 tiles, ou num detalhe com seis impressões, "Adicionar" sozinho
+        se repete idêntico e quem navega por lista de botões não distingue um
+        do outro (SC 2.4.6 / 4.1.2). O texto visível continua curto porque o
+        alvo precisa caber em 360px; o rótulo acessível carrega o contexto que
+        o visual dá pela posição.
+      %>
+      <%= button_to increment_collection_item_path(card_variant_id: variant.id),
+                    class: "ownership__button ownership__button--increment",
+                    form_class: "ownership__form",
+                    aria: { label: "Adicionar uma cópia de #{card.name} #{variant.variant_code}" } do %>
+        <span aria-hidden="true">+1</span>
+      <% end %>
+
+      <%#
+        Em zero, o decremento é marcado com **`aria-disabled`, não `disabled`**.
+        A diferença decide se quem navega por teclado perde o lugar.
+
+        Achado HIGH da revisão de a11y (`ecc:a11y-architect`), e o cenário é
+        concreto: com uma cópia, o usuário foca o "−1" e aperta Enter. O Turbo
+        troca os filhos deste contêiner e o botão volta renderizado com
+        quantidade zero. Um `disabled` de verdade sai da árvore de foco — o
+        elemento que tinha o foco deixa de ser focável, o navegador joga o foco
+        para o `<body>` e o usuário recomeça a tabulação do topo da página
+        (SC 2.4.3). `aria-disabled` comunica o mesmo estado e mantém o botão
+        focável, de modo que o foco continua onde estava.
+
+        Esconder o botão seria pior ainda: mudaria o layout e a ordem de
+        tabulação a cada clique.
+
+        Nada disto é a garantia do piso de zero — ela é do banco
+        (`CHECK (quantity >= 0)`) e do `WHERE quantity > 0` do controller.
+        Justamente por isso `aria-disabled` é seguro: o botão continua
+        clicável, e clicar devolve a mensagem "você não tem cópias desta
+        variante para remover" em vez de uma operação destrutiva. O estado
+        visual vem de `[aria-disabled="true"]` na folha.
+      %>
+      <%= button_to decrement_collection_item_path(card_variant_id: variant.id),
+                    class: "ownership__button ownership__button--decrement",
+                    form_class: "ownership__form",
+                    aria: { label: "Remover uma cópia de #{card.name} #{variant.variant_code}",
+                            disabled: quantity.zero? } do %>
+        <span aria-hidden="true">&minus;1</span>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="ownership__signed-out">
+      <%= link_to "Entrar para registrar posse", new_session_path,
+                  class: "ownership__sign-in" %>
+    </p>
+  <% end %>
+</div>

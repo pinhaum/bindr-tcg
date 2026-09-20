@@ -9,10 +9,31 @@
   a imagem fica por cima. Sem `image_url` não há imagem e o placeholder é o
   que aparece; com o hotlink quebrado o navegador não pinta nada no lugar do
   `<img>` e o placeholder continua visível por trás. Um `onerror` em JS faria
-  o mesmo e dependeria de o script carregar — este projeto ainda não tem
-  pipeline de JS, e o requisito não precisa de um.
+  o mesmo e dependeria de o script carregar — o placeholder foi resolvido em
+  CSS antes de o importmap existir e continua assim de propósito.
+
+  ---
+
+  **Posse na grade: controle direto só quando a carta tem uma variante só.**
+
+  O Req. 5.3 exige registro de posse na grade *e* no detalhe, **sempre por
+  variante**, e o Req. 5.3 de `.context/requirements.md` é explícito em que o
+  registro nunca é agregado na carta. A grade, porém, renderiza cartas. Medido
+  no catálogo real (2815 cartas): **1129 (40,1%) têm mais de uma variante** e
+  1686 (59,9%) têm exatamente uma.
+
+  Isso descarta as duas saídas fáceis. Um controle único por tile agregaria a
+  posse na carta em 40% dos casos — violação direta do requisito. Empilhar um
+  controle por variante dentro do tile destruiria a grade em 360px sem scroll
+  horizontal (Req. 2.5), que é requisito vigente e já verificado.
+
+  O desenho: com **uma** variante o controle é inequívoco e aparece no tile —
+  há exatamente uma variante a incrementar. Com **mais de uma**, o tile mostra
+  quantas impressões existem e leva ao detalhe, onde a escolha da variante é
+  explícita. Um controle que agregasse seria mais cômodo e estaria errado.
 %>
-<% variant = card.card_variants.min_by(&:variant_code) %>
+<% variants = card.card_variants.sort_by(&:variant_code) %>
+<% variant = variants.first %>
 <li class="card-tile">
   <%= link_to card_path(card.card_number), class: "card-tile__link" do %>
     <div class="card-tile__art">
@@ -31,5 +52,23 @@
 
     <span class="card-tile__name"><%= card.name %></span>
     <span class="card-tile__number"><%= card.card_number %></span>
+  <% end %>
+
+  <% if variants.one? %>
+    <%= render "collection_items/ownership",
+               variant: variant, card: card, quantity: owned_quantity(variant) %>
+  <% elsif variants.many? %>
+    <%#
+      O link diz quantas impressões existem: é a informação que justifica não
+      haver botão aqui, e sem ela o tile pareceria simplesmente incompleto.
+      O `aria-label` nomeia a carta porque numa grade de 24 tiles o texto
+      "3 impressões" se repete idêntico.
+    %>
+    <p class="card-tile__variants">
+      <%= link_to card_path(card.card_number), class: "card-tile__variants-link",
+                  aria: { label: "Escolher entre as #{variants.size} impressões de #{card.name} para registrar posse" } do %>
+        <%= pluralize(variants.size, "impressão", plural: "impressões") %>
+      <% end %>
+    </p>
   <% end %>
 </li>

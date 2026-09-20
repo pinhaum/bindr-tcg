@@ -298,3 +298,116 @@ body {
 .auth__errors ul { margin: 0.25rem 0 0; padding-left: 1.25rem; }
 
 .auth__alt { font-size: 0.875rem; }
+
+/*
+ * Controles de posse por variante (T8 / Req. 5.3, 7.2, 7.5).
+ *
+ * Eles nascem com os alvos de toque de 24px do SC 2.5.8 — a dívida de a11y
+ * registrada em `STATE.md` diz explicitamente que código novo não deve
+ * herdá-la. `min-height` e `min-width` juntos, porque um botão de "+1" é
+ * estreito e só a altura não resolve.
+ *
+ * Na grade eles ficam **fora** do `<a>` do tile: um botão dentro de um link é
+ * markup inválido e o clique fica ambíguo entre navegar e incrementar.
+ */
+
+.ownership {
+  position: relative; /* contexto para o texto só-para-leitor-de-tela abaixo */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.ownership__quantity {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 0;
+  min-width: 0; /* o texto encolhe em 360px em vez de empurrar os botões */
+}
+
+.ownership__count { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ownership__unit { opacity: 0.7; }
+
+/*
+ * O código da variante está na região viva para o anúncio do leitor de tela
+ * dizer de qual impressão é a quantidade. Visualmente ele é redundante na
+ * página de detalhe (a variante já se identifica ao lado) e não cabe na grade,
+ * então some da tela sem sair do DOM — `clip-path` em vez de `display: none`,
+ * que o tiraria da árvore de acessibilidade junto.
+ */
+.ownership__variant {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ownership__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ownership__form { margin: 0; }
+
+.ownership__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  min-width: 24px;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+/*
+ * `[aria-disabled="true"]`, e **não** `[disabled]`. O botão continua focável e
+ * no DOM de propósito: um `disabled` de verdade sai da árvore de foco, e como
+ * o Turbo re-renderiza este botão logo depois do clique que o zerou, o foco do
+ * usuário cairia no `<body>` (SC 2.4.3 — achado HIGH da revisão de a11y). Ele
+ * é visivelmente inerte e o clique é recusado pelo servidor, que responde a
+ * mensagem em português.
+ */
+.ownership__button[aria-disabled="true"] { opacity: 0.45; cursor: default; }
+
+/*
+ * SC 2.4.11 — indicador de foco reforçado. O default do navegador é fino e
+ * some sobre a arte da carta; o `outline-offset` separa o contorno do próprio
+ * botão para ele não se confundir com a borda.
+ */
+.ownership__button:focus-visible,
+.ownership__sign-in:focus-visible,
+.card-tile__variants-link:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+.ownership__signed-out { margin: 0; }
+
+.ownership__sign-in {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  min-width: 24px;
+}
+
+.card-tile__variants { margin: 0.25rem 0 0; font-size: 0.8125rem; }
+
+.card-tile__variants-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  min-width: 24px;
+}
+
+/* Área de flash atualizada por Turbo Stream: vazia não deve ocupar espaço. */
+.flash-area:empty { display: none; }

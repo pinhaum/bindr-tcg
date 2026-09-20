@@ -19,6 +19,7 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
 
   <body>
@@ -37,14 +38,16 @@
       </nav>
     </header>
 
-    <%# `role="alert"` para que a mensagem seja anunciada assim que aparece —
-        sem isso, quem usa leitor de tela não percebe o resultado da ação. %>
-    <% if flash[:notice].present? %>
-      <p class="flash flash--notice" role="alert"><%= flash[:notice] %></p>
-    <% end %>
-    <% if flash[:alert].present? %>
-      <p class="flash flash--alert" role="alert"><%= flash[:alert] %></p>
-    <% end %>
+    <%#
+      Extraído em partial porque o Turbo Stream atualiza estas mensagens: uma
+      operação de posse que não recarrega a página precisa **também** poder
+      dizer por que foi recusada ("você não tem cópias desta variante para
+      remover"). Sem isso, a recusa ficaria silenciosa no caminho com
+      JavaScript e visível no caminho sem — o mesmo requisito atendido de dois
+      jeitos diferentes. As duas regiões de anúncio e a razão de serem duas
+      estão em `layouts/_flash`.
+    %>
+    <%= render "layouts/flash", flash: flash %>
 
     <%= yield %>
   </body>

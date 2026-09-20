@@ -171,7 +171,7 @@ Regras de execução:
     a coleção de outro.
   - _Requisitos: 6.5, 7.1, 7.4, 7.8_
 
-- [ ] **4.3 Registrar posse**
+- [x] **4.3 Registrar posse**
   - Incremento e decremento em ação única, sem formulário, sem recarregar a
     página inteira.
   - Quantidade zero equivale a não possuída.

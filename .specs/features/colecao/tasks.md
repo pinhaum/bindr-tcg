@@ -525,7 +525,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T8: Posse na grade e no detalhe, sem recarregar
+### T8: Posse na grade e no detalhe, sem recarregar ✅
 
 **What**: Instalar o importmap e adicionar os controles de posse por variante na grade e no detalhe, atualizando sem recarga total via Turbo.
 **Where**: `app/views/catalog/_card_tile.html.erb`
@@ -540,12 +540,130 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] `bin/rails importmap:install` executado (hoje não existem `app/javascript` nem `config/importmap.rb`)
-- [ ] Controles presentes na grade e no detalhe, sempre por variante
-- [ ] Atualização por Turbo Stream, sem recarregar a página inteira
-- [ ] Sem JavaScript, incremento e decremento continuam funcionando por submissão normal
-- [ ] Alvos de toque com no mínimo 24px, conforme a dívida de a11y registrada em `STATE.md`
-- [ ] Teste de integração sobre o HTML renderizado; sem navegador no container, registrar `SPEC_DEVIATION` como nas tasks T12 e T14 da feature `catalogo`
+- [x] `bin/rails importmap:install` executado (hoje não existem `app/javascript` nem `config/importmap.rb`)
+- [x] Controles presentes na grade e no detalhe, sempre por variante
+- [x] Atualização por Turbo Stream, sem recarregar a página inteira
+- [x] Sem JavaScript, incremento e decremento continuam funcionando por submissão normal
+- [x] Alvos de toque com no mínimo 24px, conforme a dívida de a11y registrada em `STATE.md`
+- [x] Teste de integração sobre o HTML renderizado; sem navegador no container, registrar `SPEC_DEVIATION` como nas tasks T12 e T14 da feature `catalogo`
+
+**Decisões da execução:**
+
+- **Na grade o controle direto só existe quando a carta tem uma variante só, e
+  a decisão saiu de uma medição.** O "Done when" pede controle na grade
+  "sempre por variante", mas a grade renderiza **cartas**. Medido no catálogo
+  real (2815 cartas): **1129 (40,1%) têm mais de uma variante** e 1686 (59,9%)
+  têm exatamente uma. Isso elimina as duas saídas ingênuas. Um controle único
+  por tile **agregaria a posse na carta em 40% dos casos**, violação direta do
+  Req. 5.3 de `.context/requirements.md` (*"o registro DEVE ser feito por
+  variante, nunca agregado na carta"*). Empilhar N controles por tile destrói a
+  grade em 360px sem scroll horizontal (Req. 2.5), requisito vigente e já
+  verificado no `catalogo`. O desenho entregue: com **uma** variante o controle
+  é inequívoco e aparece no tile; com **mais de uma**, o tile mostra "N
+  impressões" e leva ao detalhe, onde a escolha da variante é explícita. Um
+  controle que agregasse seria mais cômodo e estaria errado. No **detalhe**
+  não há ambiguidade nenhuma: o controle vai em cada variante, dentro do loop
+  `@variants` que já existia.
+- **Um partial só, usado nos dois lugares.** `collection_items/_ownership`
+  serve grade e detalhe. Duplicar o markup faria cada correção de a11y precisar
+  ser lembrada duas vezes — e foram cinco correções nesta task.
+- **`turbo_stream.update`, não `replace`, e a diferença é de acessibilidade.**
+  `update` troca os **filhos** e preserva o elemento; `replace` troca o próprio
+  nó. Como a região `aria-live` mora no elemento alvo, `replace` a recriaria a
+  cada operação — e uma região viva recém-inserida no DOM **não anuncia**. Com
+  `replace`, a quantidade mudaria em silêncio para quem usa leitor de tela. O
+  sensor confirmou: trocado para `replace`, dois testes morrem.
+- **O `format.html` da T6 continua sendo o caminho de produção, não resíduo.**
+  `respond_to` põe `format.html` **primeiro**: quem não pede Stream recebe o
+  `redirect_back`. É o que os Edge Cases da spec exigem (*"IF o JavaScript não
+  estiver disponível, THEN incremento e decremento continuam funcionando por
+  submissão normal"*), e `button_to` gera formulário POST de verdade com token
+  CSRF — nada no controle depende de JS para funcionar. O sensor confirmou:
+  removido o `format.html`, cinco testes morrem, três deles da própria T6.
+- **Os dois statements atômicos da T6 não foram tocados.** O `ON CONFLICT` do
+  incremento e o `UPDATE ... WHERE quantity > 0` do decremento estão idênticos.
+  O que a task mudou foi **a renderização da resposta**, não a escrita nem a
+  origem do usuário — o aviso registrado na T7 em `STATE.md` era exatamente
+  sobre isso.
+- **Defeito encontrado e corrigido na própria task, e ele era silencioso.**
+  `CatalogController` declara `allow_unauthenticated_access`, que remove o
+  `before_action :require_authentication` — e era **ele** que resolvia a sessão
+  a partir do cookie assinado. Sem isso, `Current.session` ainda era `nil` na
+  action e **todo usuário autenticado via quantidade zero**, porque a sessão só
+  seria resolvida mais tarde, quando a view chamasse `authenticated?` para
+  decidir se mostra os botões. A página respondia 200, os controles apareciam e
+  a posse sumia. Corrigido com uma chamada a `authenticated?` antes de ler
+  `Current.user` (`resume_session` é idempotente, então a view não repete a
+  consulta). O defeito foi encontrado **pelo teste**, não por leitura.
+- **N+1 resolvido no controller, não no tile.** O tile precisa saber quantas
+  variantes a carta tem e quanto o usuário possui; perguntar por tile seriam
+  duas consultas por carta, 48 numa página de 24. `CatalogController#index`
+  resolve as variantes com `ActiveRecord::Associations::Preloader` (e não
+  `includes`: o `CatalogQuery` monta a página em Ruby e entrega um **Array**,
+  não uma relação) e as quantidades com um `pluck` de conjunto. Há teste que
+  conta consultas com limite folgado de propósito — o que ele protege é a
+  **ausência de crescimento linear**, não um número exato, que quebraria em
+  toda mudança inócua. O sensor confirmou: removido o `Preloader`, o teste
+  acusa 27 consultas contra o limite de 20.
+- **Stimulus não foi pinado.** A gem está no Gemfile desde o esqueleto, mas
+  esta task não tem um único controller Stimulus: o Turbo Stream é declarativo
+  e chega pronto do servidor. Pinar o que não se usa carregaria JS em toda
+  página para nada. Turbo é pinado para `turbo.js`, servido pelo Propshaft a
+  partir da própria gem — sem download e sem `vendor/javascript` a versionar.
+- **Plural explícito em vez de `pluralize`.** O inflector do Rails é inglês e
+  não sabe acentuação portuguesa: `"cópia".pluralize(2)` devolve `"cópia"`, e a
+  frase **anunciada pelo leitor de tela** sairia "2 cópia". Um `Inflector` em
+  português resolveria para o app inteiro, mas é mudança de configuração
+  global; fica como dívida.
+- **Revisão do `ecc:a11y-architect`: zero CRITICAL, um HIGH e dois MEDIUM
+  aceitos, um LOW recusado.**
+  - **HIGH aceito, e o cenário era concreto:** o botão de decremento usava
+    `disabled` de verdade. Com uma cópia, o usuário foca o "−1" e aperta Enter;
+    o Turbo re-renderiza o botão já em zero, um `disabled` sai da árvore de
+    foco, o navegador joga o foco para o `<body>` e quem navega por teclado
+    recomeça a tabulação do topo da página (SC 2.4.3). Trocado por
+    `aria-disabled`, que comunica o mesmo estado e mantém o botão focável. É
+    seguro justamente porque o piso de zero **não** depende do botão: o
+    `WHERE quantity > 0` recusa o clique e responde a mensagem em português.
+    A folha passou a estilizar `[aria-disabled="true"]`. Sensor: revertido para
+    `disabled`, o teste morre.
+  - **MEDIUM aceito:** a região `aria-live` anunciava só o `variant_code`, sem
+    o nome da carta — menos informativo que o `aria-label` do botão que
+    originou a ação. Numa grade, "3 cópias" sozinho não identifica nada. O nome
+    entrou na região.
+  - **MEDIUM aceito:** havia uma região de flash única com `role="alert"`, que
+    implica `aria-live="assertive"` e **interrompe** a fala corrente. Isso é o
+    que se quer para uma recusa e é demais para o retorno de rotina de um "+1":
+    quem registra uma caixa de boosters aperta o botão dezenas de vezes, e cada
+    incremento cortaria a leitura em andamento. Separado em `role="status"`
+    (polite) para o `notice` e `role="alert"` (assertive) para o `alert`, cada
+    um com `id` próprio e atualizado pelo Stream. O `role` mora no contêiner que
+    **permanece**, pela mesma razão do `update` vs `replace`.
+  - **LOW recusado, por não ser acionável:** contraste do `outline` de foco,
+    que usa `currentcolor`. O próprio revisor marcou como "não confirmado" e
+    disse depender de paleta que não existe — o projeto **não declara nenhuma
+    cor**, então `currentcolor` é a cor de texto do navegador sobre o fundo do
+    navegador. Não há o que corrigir sem antes haver uma paleta; registrado
+    como dívida para quando houver.
+- **`SPEC_DEVIATION` registrado no cabeçalho de
+  `test/integration/collection_ownership_ui_test.rb`**, no padrão das T12/T14
+  do `catalogo`: não há navegador no container, então "atualiza sem recarregar"
+  é provado sobre o `text/vnd.turbo-stream.html` renderizado — que a resposta é
+  um `<turbo-stream action="update">` mirando só o contêiner daquela variante,
+  que o alvo é o mesmo `id` que a página renderiza, e que a mesma rota sem
+  `Accept` de Stream responde `redirect_back`. O que **não** fica coberto é a
+  aplicação do Stream ao DOM por um navegador real.
+- **Sensor de discriminação, seis mutações, por cópia e `cp`/`diff` — nunca
+  `git stash`.** (1) tile renderizando controle para carta de várias variantes
+  (`variants.one?` → `variants.any?`): **3 testes morrem**. (2) `format.html`
+  removido do `respond_to`: **5 testes morrem**, três deles da T6. (3)
+  `turbo_stream.update` → `replace`: **2 morrem**. (4) `Preloader` removido:
+  **1 morre**, acusando 27 consultas. (5) chamada a `authenticated?` removida
+  do `CatalogController`: **1 morre** — é a mutação que reproduz o defeito
+  silencioso encontrado na task. (6) `aria-disabled` → `disabled`: **1 morre**.
+  Restauração conferida com `diff` em todas as seis.
+- **Nenhuma migração, como previsto.** A task é de view, controller e
+  configuração de asset; nada toca schema.
 
 **Tests**: integration
 **Gate**: full

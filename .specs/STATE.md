@@ -49,28 +49,84 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) em andamento** — T5, T6
-  e T7 fechadas, T8 a seguir. Feature `catalogo` ENCERRADA: 14 de 14 tasks, os
-  dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os achados
-  dos Verifiers e da revisão de a11y foram corrigidos e commitados.
+- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) ENCERRADA** — T5, T6, T7
+  e **T8** fechadas. Fase 3 (T9–T13: filtro, total e wishlist) a seguir.
+  Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois lotes verificados (B1 e
+  B2, ambos PASS, autor ≠ verificador). Os achados dos Verifiers e da revisão
+  de a11y foram corrigidos e commitados.
 - **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
-  T6, **T7**. `colecao` Fase 1 (T1–T4) encerrada; `.context/tasks.md` §4.1 e
-  **§4.2** fechados — a §4.2 cobria T5+T6+T7 e fechou na T7, que entregou o
-  bullet "teste de que um usuário não acessa a coleção de outro"; os outros três
-  bullets (migração com `UNIQUE`/`CHECK`, testes de que a constraint é do banco,
-  consulta partindo do usuário da sessão) já estavam cobertos por T5 e T6.
-  **Uma seção do `.context/tasks.md` continua ABERTA de propósito**: a §4.3
-  cobre T6 e T8 — "sem recarregar a página inteira" e "disponível na grade e no
-  detalhe" são a T8, e só ela a fecha.
+  T6, T7, **T8**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
+  `.context/tasks.md` §4.1, §4.2 e **§4.3** fechados. A §4.2 cobria T5+T6+T7 e
+  fechou na T7. A **§4.3 cobria T6+T8 e fechou na T8**, conferida bullet a
+  bullet: "incremento e decremento em ação única, sem formulário" e "sem
+  recarregar a página inteira" — a primeira metade é T6 (um `POST` por
+  operação, sem `new`/`edit`) e a segunda é T8 (Turbo Stream que troca só o
+  contêiner da variante); "quantidade zero equivale a não possuída" — T5, com
+  os scopes `owned`/`unowned` e teste em `collection_item_test.rb`; "disponível
+  tanto na grade quanto no detalhe, sempre por variante" — T8.
+  **As §4.4 e §4.5 continuam abertas**: filtro de posse e total (T9–T11) e
+  wishlist (T12–T13).
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T8** de `.specs/features/colecao/tasks.md` (posse na
-  grade e no detalhe sem recarregar: instalar o importmap, controles por
-  variante, Turbo Stream, alvos de toque de 24px). A decisão central segue de
-  pé: **não rodar `bin/rails generate authentication`**.
+- **Next step**: **Executar T9** de `.specs/features/colecao/tasks.md`
+  (parâmetro `owned` no `CatalogQuery`, com valores `all|owned|missing`, o
+  usuário injetado pelo chamador e nunca lido da URL). A decisão central segue
+  de pé: **não rodar `bin/rails generate authentication`**.
+- **O que a T9 e a T11 precisam saber sobre a contagem de posse que a T8
+  introduziu.** O `CatalogController` agora carrega, antes de renderizar, um
+  hash `@owned_quantities` no formato `card_variant_id => quantity`, montado
+  por `owned_quantities(variants)` — um `pluck` de conjunto sobre
+  `CollectionItem.for_user(Current.user)`, uma consulta só, nas duas actions. O
+  helper `owned_quantity(variant)` (`app/helpers/collection_helper.rb`) é o
+  único ponto de leitura na view e devolve **zero** por default, inclusive para
+  o anônimo (`for_user(nil)` é `none`).
+  - **A T11 (total de cópias) não deve somar esse hash.** Ele cobre só as
+    variantes da página corrente; o total do Req. 7.7 é sobre a coleção
+    inteira e pede o seu próprio `sum(:quantity)` sobre
+    `CollectionItem.for_user(Current.user).owned`.
+  - **A T9 não precisa do hash e não deve passar por ele.** O filtro `owned`
+    é consulta, não exibição: ele entra no `CatalogQuery` com o usuário
+    **injetado pelo chamador**, e a semântica "zero é linha existente" já está
+    nos scopes `owned`/`unowned` do model. O hash é camada de view.
+  - **`allow_unauthenticated_access` NÃO resolve a sessão.** Ele remove o
+    `before_action :require_authentication`, que era quem chamava
+    `resume_session` — em um controller público, `Current.user` é `nil` na
+    action até alguém chamar `authenticated?`. A T8 tropeçou nisso: o defeito
+    é **silencioso** (200, controles na tela, posse zerada para quem está
+    autenticado). `CatalogController#owned_quantities` chama `authenticated?`
+    antes de ler `Current.user` por esse motivo. **Qualquer leitura de dado do
+    usuário dentro de um controller público precisa fazer o mesmo.**
+- **A T8 não desfez nada da T6 nem da T7, e o aviso continua valendo para a
+  Fase 3.** O `ON CONFLICT` do incremento e o `UPDATE ... WHERE quantity > 0`
+  do decremento estão **idênticos**; o usuário continua saindo de
+  `Current.user` e o `WHERE user_id = $1` continua nos dois statements. O que a
+  T8 mudou foi a **renderização da resposta**: `respond_to` com `format.html`
+  (o `redirect_back` da T6, que é o caminho sem JavaScript) **primeiro** e
+  `format.turbo_stream` depois.
+- **O caminho sem JavaScript é requisito, não cortesia, e tem teste.** Os Edge
+  Cases da spec exigem que incremento e decremento continuem funcionando por
+  submissão normal. `button_to` gera `<form method="post">` de verdade com
+  token CSRF; nada no controle depende de JS. Removido o `format.html`, cinco
+  testes morrem — três deles da própria T6. **Não trocar `respond_to` por
+  resposta única de Stream.**
+- **`turbo_stream.update`, nunca `replace`, nos controles de posse e no flash.**
+  `update` troca os filhos e preserva o elemento; `replace` troca o nó. Como a
+  região `aria-live`/`role` mora no elemento alvo, `replace` a recriaria a cada
+  operação — e uma região viva recém-inserida no DOM **não anuncia**. A
+  mudança de quantidade passaria em silêncio para quem usa leitor de tela. Dois
+  testes morrem se trocar.
+- **Importmap instalado na T8, com Turbo e sem Stimulus.** `config/importmap.rb`
+  pina `application` e `@hotwired/turbo-rails` → `turbo.js`, servido pelo
+  Propshaft a partir da própria gem (sem download, sem `vendor/javascript` a
+  versionar). `app/javascript/application.js` importa o Turbo e nada mais.
+  **Stimulus não foi pinado de propósito**: não há nenhum controller Stimulus
+  no projeto, e pinar o que não se usa carregaria JS em toda página para nada.
+  O `javascript_importmap_tags` está no layout. O placeholder de imagem do
+  catálogo **continua em CSS** e não deve ser trocado por JS agora que o
+  importmap existe.
 - **A rota por id de `collection_item` foi decidida na T7: não existe, e não
   vai existir na Fase 2.** As duas rotas continuam sendo
   `POST /collection_items/:card_variant_id/increment` e `.../decrement`: a
@@ -177,8 +233,9 @@ Nada aqui bloqueia a Fase 4; são pontos que a próxima sessão herda com os olh
 
 - **CI verde no primeiro run real** (`35475280590`, 2026-09-19), remoto em `github.com/pinhaum/bindr-tcg`. O run expôs que o pin da major não pegava o `pg_dump` (era 16.15 com `psql` 17.11, porque o runner traz um client 16 e o `update-alternatives` só reassume o `psql`); corrigido pondo `/usr/lib/postgresql/17/bin` na frente do PATH, com step que falha o job se a major regredir. Confirmado 17.11 nos dois binários no run `35475533719`.
 - **T12/T14 não têm cobertura de navegador.** Viraram teste de integração porque não há chromedriver no container (`SPEC_DEVIATION` registrado em cada uma). O 360px do Req. 2.5 foi verificado à mão em Chromium; uma regressão de layout passaria no CI. Decidir se vale chromedriver no `Dockerfile.dev`.
-- **Importmap não instalado.** Não há pipeline de JS: `stimulus-rails` está no Gemfile mas nunca foi executado, e o placeholder de imagem foi resolvido por CSS. **O Req. 7.2 (incremento sem recarregar) vai exigir o importmap** — é a primeira coisa a resolver na task 4.3.
-- **Três melhorias de a11y não bloqueantes**, da revisão do `ecc:a11y-architect`: `lang="en"` no conteúdo em inglês (nome, `effect_text`, `trigger_text`), `min-height/min-width: 24px` explícitos nos alvos de toque (SC 2.5.8) e reforço do indicador de foco (SC 2.4.11).
+- ~~**Importmap não instalado.**~~ **RESOLVIDO na T8 da `colecao`**, que era onde esta dívida vencia. `bin/rails importmap:install` rodou, `config/importmap.rb` pina Turbo (e **não** Stimulus, que continua sem uso) e o layout carrega `javascript_importmap_tags`. O placeholder de imagem **continua em CSS**, de propósito: ele não precisa de JS e não deve passar a precisar só porque agora existe pipeline.
+- **Três melhorias de a11y não bloqueantes**, da revisão do `ecc:a11y-architect`: `lang="en"` no conteúdo em inglês (nome, `effect_text`, `trigger_text`), `min-height/min-width: 24px` explícitos nos alvos de toque (SC 2.5.8) e reforço do indicador de foco (SC 2.4.11). **Os 24px e o indicador de foco valem para o código novo desde a T4, e a T8 nasceu com os dois** (`.ownership__button`, `.ownership__sign-in`, `.card-tile__variants-link`); continuam pendentes nos componentes **antigos** — chips de filtro e paginação. O `lang="en"` continua inteiramente aberto, e a T8 o propagou para um lugar novo: os `aria-label` dos botões de posse citam `card.name`, que é conteúdo em inglês dentro de frase em português.
+- **Dívida nova da T8, duas, nenhuma bloqueante.** (1) **Plural em português é feito à mão**: o inflector do Rails é inglês e `"cópia".pluralize(2)` devolve `"cópia"` — o partial de posse resolve com um ternário, e a saída correta depende de ninguém trocá-lo por `pluralize`. Um `Inflector` em português resolveria para o app inteiro e é mudança de configuração global. (2) **Contraste do indicador de foco não verificado**: o `outline` usa `currentcolor` e o projeto **não declara nenhuma paleta** — as cores são as do navegador. O `ecc:a11y-architect` levantou como LOW não confirmado (SC 1.4.11) e não havia o que corrigir sem antes haver paleta. Reabrir junto com a primeira decisão de cor do projeto.
 - **Flakiness observada uma vez:** `guarantees_test.rb` falhou uma vez em ~20 execuções por contenção entre os 4 workers paralelos (`last_seen_at` do presente menor que o do ausente). Se voltar, congelar o relógio — `Upsert` já aceita `clock:` — e **não** afrouxar a asserção.
 
 ### Contexto que não está nos documentos

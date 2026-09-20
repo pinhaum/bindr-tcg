@@ -138,6 +138,17 @@
               </dd>
             </div>
           </dl>
+
+          <%#
+            Req. 5.3 / COL-18 — o controle de posse fica **em cada variante**,
+            dentro do loop que já existe. Aqui não há ambiguidade nenhuma: a
+            variante aparece inteira, com código, raridade, set e imagem, e o
+            botão pertence visivelmente a ela. É o oposto da grade, onde o tile
+            fala de uma carta e o controle direto só é inequívoco quando a
+            carta tem uma variante só.
+          %>
+          <%= render "collection_items/ownership",
+                     variant: variant, card: @card, quantity: owned_quantity(variant) %>
         </li>
       <% end %>
     </ul>

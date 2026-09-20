@@ -1,0 +1,33 @@
+<%#
+  Duas regiões, e a separação não é cosmética.
+
+  `role="alert"` implica `aria-live="assertive"`: ele **interrompe** a fala
+  corrente do leitor de tela. Isso é o que se quer para uma recusa ("você não
+  tem cópias desta variante para remover"), e é demais para o retorno de rotina
+  de um "+1". Quem estiver registrando uma caixa de boosters aperta o botão
+  dezenas de vezes seguidas — com uma só região assertiva, cada incremento
+  cortaria a leitura em andamento. Achado MEDIUM da revisão de a11y.
+
+  `role="status"` (polite) para o `notice`, `role="alert"` (assertive) para o
+  `alert`.
+
+  Cada `role` mora no contêiner que **permanece** entre as atualizações, e o
+  Turbo Stream troca só o conteúdo de dentro (`turbo_stream.update` no `id`
+  interno): uma região de anúncio recém-inserida no DOM não anuncia — a mesma
+  razão pela qual o controle de posse usa `update` e não `replace`.
+
+  Os contêineres são renderizados sempre, mesmo vazios. Vazios não ocupam
+  espaço (`.flash-area:empty` na folha) e não anunciam nada; é a chegada de
+  conteúdo que dispara o anúncio.
+%>
+<div class="flash-area" role="status">
+  <div id="flash_notice">
+    <%= render "layouts/flash_message", message: flash[:notice], kind: "notice" %>
+  </div>
+</div>
+
+<div class="flash-area" role="alert">
+  <div id="flash_alert">
+    <%= render "layouts/flash_message", message: flash[:alert], kind: "alert" %>
+  </div>
+</div>

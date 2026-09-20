@@ -48,7 +48,7 @@ class CollectionItemsController < ApplicationController
       RETURNING quantity
     SQL
 
-    redirect_back_with notice: "Você tem #{quantity} cópia(s) desta variante."
+    respond_with_quantity quantity, notice: "Você tem #{quantity} cópia(s) desta variante."
   end
 
   # Req. 7.4 / COL-09 — o piso de zero mora no `WHERE`, não num `if` em Ruby.
@@ -76,9 +76,15 @@ class CollectionItemsController < ApplicationController
     SQL
 
     if quantity.nil?
-      redirect_back_with alert: "Você não tem cópias desta variante para remover."
+      # Nenhuma linha afetada: a quantidade corrente é o que já estava lá — zero
+      # se a linha existe, zero também se ela não existe. O Stream reafirma o
+      # estado em vez de não responder nada, senão o botão desabilitado
+      # renderizado com a página velha continuaria contando uma história que o
+      # servidor não confirmou.
+      respond_with_quantity current_quantity,
+        alert: "Você não tem cópias desta variante para remover."
     else
-      redirect_back_with notice: "Você tem #{quantity} cópia(s) desta variante."
+      respond_with_quantity quantity, notice: "Você tem #{quantity} cópia(s) desta variante."
     end
   end
 
@@ -100,9 +106,65 @@ class CollectionItemsController < ApplicationController
       CollectionItem.connection.exec_query(sql, "CollectionItem Quantity", binds).rows.dig(0, 0)
     end
 
-    # A T8 troca isto por Turbo Stream; até lá, o redirect normal é o que faz o
-    # incremento funcionar sem JavaScript (Edge Cases da spec), e continuará
-    # sendo o caminho de fallback depois dela.
+    # Req. 7.5 / COL-10 — a mesma operação responde de duas formas, e as duas
+    # são caminho de produção.
+    #
+    # Com o Turbo carregado, o `POST` do `button_to` chega com
+    # `text/vnd.turbo-stream.html` no `Accept` e a resposta troca **só** o
+    # contêiner daquela variante: a página não recarrega, a rolagem da grade
+    # não volta ao topo e nada além da quantidade muda.
+    #
+    # **Sem JavaScript, `format.html` responde o mesmo `redirect_back` da T6.**
+    # Ele não é resíduo nem provisório: os Edge Cases da spec exigem que
+    # incremento e decremento continuem funcionando por submissão normal, com
+    # recarga. O Req. 7.5 é melhoria progressiva, não pré-requisito de
+    # funcionamento — por isso o `format.html` vem **primeiro** e é o default de
+    # quem não pediu Stream.
+    #
+    # `turbo_stream.update` e não `replace`: `update` troca os filhos e mantém o
+    # elemento, que é o que preserva a região `aria-live` do partial. `replace`
+    # trocaria o próprio nó, e uma região viva recém-inserida no DOM não
+    # anuncia — a mudança de quantidade passaria em silêncio para quem usa
+    # leitor de tela.
+    def respond_with_quantity(quantity, **flash_options)
+      respond_to do |format|
+        format.html { redirect_back_with(**flash_options) }
+        format.turbo_stream do
+          # `flash.now`, não `flash`: a mensagem é renderizada **nesta**
+          # resposta. `flash` a guardaria na sessão e ela reapareceria na
+          # próxima navegação, fora de contexto.
+          flash.now[:notice] = flash_options[:notice] if flash_options[:notice]
+          flash.now[:alert] = flash_options[:alert] if flash_options[:alert]
+
+          render turbo_stream: [
+            turbo_stream.update(
+              helpers.dom_id(@card_variant, :ownership),
+              partial: "collection_items/ownership",
+              locals: { variant: @card_variant, card: @card_variant.card, quantity: quantity.to_i }
+            ),
+            # Os dois são atualizados sempre, inclusive para limpar o que
+            # sobrou da operação anterior: sem isto, a recusa de um decremento
+            # ficaria na tela junto com o sucesso do incremento seguinte.
+            turbo_stream.update("flash_notice", partial: "layouts/flash_message",
+                                                locals: { message: flash[:notice], kind: "notice" }),
+            turbo_stream.update("flash_alert", partial: "layouts/flash_message",
+                                               locals: { message: flash[:alert], kind: "alert" })
+          ]
+        end
+      end
+    end
+
+    # A quantidade que está no banco agora, para o caso em que o `UPDATE` não
+    # afetou linha nenhuma. Parte de `Current.user` como todo o resto (Req. 6.5)
+    # e devolve zero quando não há registro — que é o mesmo que o usuário vê.
+    def current_quantity
+      CollectionItem.for_user(Current.user)
+                    .where(card_variant: @card_variant)
+                    .pick(:quantity)
+                    .to_i
+    end
+
+    # O redirect da T6, intocado: é o caminho sem JavaScript.
     #
     # `allow_other_host: false` é explícito de propósito, embora hoje seja
     # redundante: `config.load_defaults 8.0` liga `raise_on_open_redirects`, e
