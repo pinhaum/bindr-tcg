@@ -49,14 +49,15 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T9 fechada**
-  (parâmetro `owned` no `CatalogQuery`). Fase 2 (posse) encerrada com T5–T8.
-  Restam T10–T13: índice/plano, total e wishlist.
+- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T10 fechada**
+  (plano de execução do filtro de posse, medido; **sem migração e sem índice
+  novo**, por decisão medida). Fase 2 (posse) encerrada com T5–T8.
+  Restam T11–T13: total e wishlist.
   Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois lotes verificados (B1 e
   B2, ambos PASS, autor ≠ verificador). Os achados dos Verifiers e da revisão
   de a11y foram corrigidos e commitados.
 - **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
-  T6, T7, T8, **T9**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
+  T6, T7, T8, T9, **T10**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
   `.context/tasks.md` §4.1, §4.2 e **§4.3** fechados. A §4.2 cobria T5+T6+T7 e
   fechou na T7. A **§4.3 cobria T6+T8 e fechou na T8**, conferida bullet a
   bullet: "incremento e decremento em ação única, sem formulário" e "sem
@@ -66,18 +67,50 @@
   os scopes `owned`/`unowned` e teste em `collection_item_test.rb`; "disponível
   tanto na grade quanto no detalhe, sempre por variante" — T8.
   **As §4.4 e §4.5 continuam abertas**: filtro de posse e total (T9–T11) e
-  wishlist (T12–T13). A **§4.4 não fecha na T9** e isso foi conferido no texto
-  dela: ela cobre T9+T10+T11 e exige, além do filtro, "Total de cartas possuídas
-  contando cópias", que é a **T11**. Fecha lá.
+  wishlist (T12–T13). A **§4.4 também não fecha na T10**, pelo mesmo motivo
+  conferido de novo no texto dela: ela cobre T9+T10+T11 e exige, além do
+  filtro, "Total de cartas possuídas contando cópias", que é a **T11**. Fecha
+  lá, e só lá.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T10** de `.specs/features/colecao/tasks.md` (filtro
-  de posse sem full table scan: medir o plano de execução da consulta que a T9
-  escreveu e criar índice **se** a medição pedir). A decisão central segue de
-  pé: **não rodar `bin/rails generate authentication`**.
+- **Next step**: **Executar T11** de `.specs/features/colecao/tasks.md` (total
+  de cartas possuídas contando cópias — é ela que fecha a §4.4 de
+  `.context/tasks.md`). A decisão central segue de pé: **não rodar
+  `bin/rails generate authentication`**.
+- **O que a T10 mediu, e por que não há índice novo.** A T10 fechou **sem
+  migração**: o índice candidato que a T9 registrou — parcial,
+  `collection_items (user_id, card_variant_id) WHERE quantity >= 1` — foi
+  criado no banco de teste, medido com `EXPLAIN (ANALYZE, BUFFERS)` e
+  **reprovado**. O planejador não o escolheu em cenário nenhum: continuou
+  entrando por `index_collection_items_on_user_id` com `Filter: (quantity >=
+  1)`, ao mesmo custo de **19.29**. Com usuário pesado (15.000 itens, 12.857
+  possuídos) o custo total foi **2397.84 com** o índice contra **2404.20 sem**
+  — 0,27%, sem troca de plano e com execução ligeiramente pior. A hipótese da
+  T9 valia como descrição (a checagem de `quantity` é mesmo filtro de heap) e
+  não como problema: o recorte por usuário já reduz o conjunto a centenas de
+  linhas. **Não reabrir sem um padrão de acesso novo que a medição não cobriu.**
+- **`collection_items` tem um piso de acesso indexado que o teste de plano não
+  consegue derrubar, e isso está documentado de propósito.** Sensor da T10:
+  derrubados os dois índices não-únicos, as asserções de plano **continuam
+  verdes**, porque o planejador cai no índice do `UNIQUE (user_id,
+  card_variant_id)`. Aquele índice é inseparável da unicidade criada em
+  `20260919120200`. Por isso a existência dos índices é asserida em **teste
+  separado**, e o cabeçalho de `test/queries/catalog_owned_plan_test.rb`
+  explica isso — não é descuido, é propriedade do schema. O que as asserções de
+  plano pegam é **forma de consulta não indexável**: a mutação `(user_id + 0)`
+  produziu `Seq Scan on collection_items` a custo 6846 contra 19.29 e matou
+  dois testes.
+- **O planejador troca de índice conforme a seletividade do recorte de cartas,
+  e a T11 herda esse fato se for medir plano.** Cor pouco seletiva (`Red`,
+  19.960 de 20.000) → entra por `index_collection_items_on_user_id`, hash join,
+  custo 2398. Cor muito seletiva (`Yellow`, 40) → **inverte o join**, dirige por
+  `cards` e sonda `collection_items` por
+  `index_collection_items_on_card_variant_id`, custo **1339** — mais barato.
+  Asserção de plano que trava um nome de índice reprova o plano **melhor**;
+  a da T10 aceita os três índices da tabela.
 - **O que a T10 precisa saber sobre a forma da consulta que a T9 escreveu.** O
   filtro vive em `CatalogQuery#apply_ownership_filter` e a subconsulta em
   `#owned_variants_exists`. O SQL gerado, medido:

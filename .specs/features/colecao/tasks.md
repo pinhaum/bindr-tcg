@@ -803,7 +803,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T10: Filtro de posse sem full table scan
+### T10: Filtro de posse sem full table scan ✅
 
 **What**: Garantir que o filtro de posse não degrade o plano de execução, com índice se necessário.
 **Where**: `test/queries/catalog_owned_plan_test.rb`
@@ -818,9 +818,120 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] O plano do filtro combinado com busca não mostra Seq Scan na tabela de coleção
-- [ ] Dados semeados com seletividade realista — com filtro pouco seletivo o planejador escolhe Seq Scan com razão, e o teste não distinguiria índice ausente de índice ignorado por custo
-- [ ] Se faltar índice, a migração é aditiva e o dump do schema é regenerado
+- [x] O plano do filtro combinado com busca não mostra Seq Scan na tabela de coleção
+- [x] Dados semeados com seletividade realista — com filtro pouco seletivo o planejador escolhe Seq Scan com razão, e o teste não distinguiria índice ausente de índice ignorado por custo
+- [x] Se faltar índice, a migração é aditiva e o dump do schema é regenerado
+
+**Decisões da execução:**
+
+- **O índice candidato da T9 foi medido e REPROVADO; nenhuma migração nesta
+  task.** O parcial `collection_items (user_id, card_variant_id) WHERE quantity
+  >= 1` foi criado no banco de teste e medido com `EXPLAIN (ANALYZE, BUFFERS)`.
+  O planejador **não o escolheu em nenhum cenário**: continuou entrando por
+  `index_collection_items_on_user_id` com `Filter: (quantity >= 1)`, a custo
+  idêntico de **19.29** e com os mesmos buffers. Com usuário pesado (15.000
+  itens, 12.857 possuídos, 2.143 zerados) o resultado se manteve: custo total
+  **2397.84 com** o índice contra **2404.20 sem** — 0,27%, dentro do ruído, sem
+  troca de plano, e com tempo de execução ligeiramente **pior** com ele
+  (12,066 ms contra 11,861 ms). A hipótese da T9 era que o `UNIQUE (user_id,
+  card_variant_id)` não filtra `quantity` e empurraria a checagem para a heap;
+  ela se confirmou como **descrição** (a checagem é mesmo filtro de heap) e se
+  refutou como **problema**: o recorte por usuário já reduz o conjunto a
+  centenas de linhas, e descartar 57 delas na heap é mais barato que manter um
+  segundo índice. Índice que o planejador ignora é custo de escrita em toda
+  operação de posse sem ganho de leitura, então **não foi criado**.
+- **Números do plano sem índice novo** (20.000 cartas, 20.000 variantes, 50
+  usuários, 20.000 itens, `ANALYZE` nas quatro tabelas):
+  - `owned` + cor `Red`: `Index Scan using index_collection_items_on_user_id`,
+    `cost=0.29..19.29 rows=343`, `Rows Removed by Filter: 57`, execução
+    **2,377 ms**. Nenhum Seq Scan em `collection_items`.
+  - `missing` + cor `Red`: `Hash Anti Join`, mesmo acesso indexado a
+    `collection_items` (custo 19.29), execução **7,532 ms**. O `Seq Scan on
+    cards` que aparece aqui é **correto** — `missing` devolve 19.617 de 20.000
+    cartas, e varrer é mais barato que indexar 98% da tabela. O "Done when"
+    fala da tabela de **coleção**, não de `cards`.
+- **O planejador escolhe índices diferentes conforme a seletividade do recorte
+  de cartas, e travar um nome reprovaria o plano melhor.** Medido: com cor
+  pouco seletiva (`Red`, 19.960 cartas) ele entra por
+  `index_collection_items_on_user_id` e resolve em hash join (custo 2398); com
+  cor muito seletiva (`Yellow`, 40 cartas) ele **inverte o join**, dirige por
+  `cards` via `index_cards_on_colors` e sonda `collection_items` por
+  `index_collection_items_on_card_variant_id`, com `user_id` e `quantity` como
+  filtro de heap sobre uma linha — custo **1339**, mais barato. A primeira
+  versão da asserção exigia o índice por usuário e **reprovou esse plano
+  melhor**; foi corrigida para aceitar qualquer um dos três índices de
+  `collection_items`. A asserção do requisito é "sem full table scan", não
+  "por este índice".
+- **Seletividade semeada, e por que cada escolha.** 20.000 cartas e 20.000
+  variantes (o catálogo real tem 2815, com folga para que as tabelas não caibam
+  em poucas páginas); **50 usuários** com coleção, e não um só — com um único
+  usuário `user_id = $1` casaria 100% da tabela e o índice por usuário seria
+  inútil por **seletividade**, não por ausência, e o teste mediria outra coisa;
+  400 itens por usuário, o alvo detendo **2%** dos 20.000; 1 em 7 itens com
+  `quantity = 0`, para que `quantity >= 1` tenha linhas reais a descartar;
+  deslocamento por `u.id` na distribuição para que os 50 não possuam as mesmas
+  variantes, o que tornaria `card_variant_id` degenerado e falsearia o custo do
+  join. `ANALYZE` nas quatro tabelas ao fim do seed — sem ele o planejador
+  decide com estatísticas default. **A premissa virou asserção**: há um teste
+  que guarda o próprio seed (volume ≥ 10.000, alvo com < 10% dos itens, ao
+  menos um item zerado), porque um seed reduzido deixaria as asserções de plano
+  verdes sem provar nada e ninguém notaria.
+- **Sensor de discriminação, duas mutações, em subclasse descartável — nunca
+  `git stash`.**
+  1. **Derrubar os dois índices não-únicos** de `collection_items` dentro da
+     transação do teste: as quatro asserções de plano **continuaram verdes**, e
+     só o teste de existência de índice falhou. A causa está medida: o
+     planejador cai no índice do `UNIQUE (user_id, card_variant_id)`
+     (`cost=0.41..984.10`, ainda `Index Scan`). **Isso não é frouxidão do
+     teste, é propriedade do schema** — aquele índice é inseparável da
+     unicidade criada em `20260919120200`, então `collection_items` tem um piso
+     de acesso indexado por `user_id` que nenhuma migração remove sem remover
+     antes a própria unicidade. Por isso a existência dos índices é asserida em
+     **teste separado e explícito**: o plano sozinho não cobriria esse eixo.
+     Está documentado no cabeçalho do arquivo para não ser lido como descuido.
+  2. **Forma não indexável** (`WHERE (user_id + 0) = ?`, o análogo do
+     `upper(card_number)` que a T11 do `catalogo` já havia encontrado):
+     produziu `Seq Scan on collection_items` a custo **6846** contra 19.29 —
+     355x — e **dois testes de plano morreram** com a mensagem certa. É esta a
+     classe de defeito que a task existe para pegar: o resultado da consulta é
+     idêntico, só a latência muda, e nenhum teste funcional acusaria.
+- **A asserção é dupla de propósito.** `refute_match(/Seq Scan/)` sozinho
+  passaria se a consulta parasse de tocar `collection_items` — um filtro
+  quebrado que não consulta nada também não varre nada. O `assert_match` do
+  acesso indexado é o que fecha esse buraco.
+- **Nenhuma migração, logo `db/structure.sql` não foi regenerado nem tocado** —
+  o trigram e o `immutable_unaccent` seguem no dump por não ter havido
+  alteração nenhuma (conferido: `git diff --stat db/structure.sql` vazio).
+- **Revisão do `ecc:database-reviewer`: zero CRITICAL, zero HIGH.** A decisão
+  de não criar o índice, a asserção que aceita os três índices e o tratamento
+  do piso do `UNIQUE` foram confirmados corretos, este último com a observação
+  de que forçar discriminação de plano ali seria testar condição inatingível
+  enquanto a unicidade estiver de pé.
+  - **LOW aceito, incorporado ao cabeçalho:** nomear o cenário que reabriria o
+    índice parcial. O custo do `Filter: (quantity >= 1)` escala com **linhas
+    por usuário**, não com o tamanho da tabela — `collection_items` chegar a
+    milhões de linhas distribuídas entre muitos usuários não muda nada do que
+    foi medido. O que mudaria é o caso assimétrico: um usuário com dezenas de
+    milhares de itens **e** fração de `quantity = 0` muito acima dos ~14% do
+    seed. Nada no Req. 7 sugere esse padrão hoje.
+  - **MEDIUM aceito como escopo declarado, não como correção:** o seed
+    distribui posse uniformemente entre variantes, enquanto em produção cartas
+    populares concentram posse. Isso desloca a **fronteira** em que o
+    planejador inverte o join, não o fato de os dois caminhos serem indexados —
+    e o teste cobre os dois lados da inversão (`Red` e `Yellow`), que é o que a
+    asserção precisa. Registrado no cabeçalho como limite de fidelidade
+    deliberado; reproduzir o viés custaria seed muito mais complexo sem mudar
+    nenhuma asserção.
+  - **Confirmado sem ação:** o seed é determinístico (`ORDER BY (id * (u.id %
+    97 + 1)) % 20011`, sem `random()`), então não há flakiness por sorteio; o
+    `@user` por `.order(:id).first` não tem ambiguidade dentro da transação; e
+    os SQLs brutos só interpolam constantes internas e ids lidos do próprio
+    banco, nunca entrada externa.
+  - **Risco estrutural herdado, aceito:** plano de `EXPLAIN` pode variar com
+    versão do Postgres ou `work_mem`/`default_statistics_target`. É o mesmo
+    trade-off que `catalog_indexes_test.rb` já aceitava, e está mitigado pela
+    asserção não travar um plano específico — só "não é Seq Scan" e "é um dos
+    índices conhecidos".
 
 **Tests**: unit
 **Gate**: quick
