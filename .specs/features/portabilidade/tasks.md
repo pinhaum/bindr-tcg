@@ -292,14 +292,14 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] Recebe o **objeto** `User` e nunca um id; nenhum caminho leva de parâmetro de request a usuário
-- [ ] Teste prova que o CSV tem linha de cabeçalho e uma linha por variante possuída, com as quatro colunas preenchidas
-- [ ] Teste prova que variante com `quantity = 0` **não** aparece no arquivo, e que o resultado é o mesmo de não haver registro (Req. 7.3)
-- [ ] Teste prova que um usuário sem nenhuma variante possuída produz arquivo com **cabeçalho e nenhuma linha de dado** — não arquivo vazio, não erro
-- [ ] Teste prova que nome com acento (`Bell-mère`) sai íntegro e que o arquivo é UTF-8
-- [ ] Teste prova que nome contendo vírgula ou aspas é escapado de forma que o próprio parser do import o leia de volta idêntico
-- [ ] Teste prova que a serialização usa um número de consultas que **não cresce** com o número de linhas (POR-13), medido por `assert_queries_count` ou contagem equivalente
-- [ ] Teste prova que dois usuários com posses distintas produzem arquivos distintos, cada um só com o seu
+- [x] Recebe o **objeto** `User` e nunca um id; nenhum caminho leva de parâmetro de request a usuário
+- [x] Teste prova que o CSV tem linha de cabeçalho e uma linha por variante possuída, com as quatro colunas preenchidas
+- [x] Teste prova que variante com `quantity = 0` **não** aparece no arquivo, e que o resultado é o mesmo de não haver registro (Req. 7.3)
+- [x] Teste prova que um usuário sem nenhuma variante possuída produz arquivo com **cabeçalho e nenhuma linha de dado** — não arquivo vazio, não erro
+- [x] Teste prova que nome com acento (`Bell-mère`) sai íntegro e que o arquivo é UTF-8
+- [x] Teste prova que nome contendo vírgula ou aspas é escapado de forma que o próprio parser do import o leia de volta idêntico
+- [x] Teste prova que a serialização usa um número de consultas que **não cresce** com o número de linhas (POR-13), medido por `assert_queries_count` ou contagem equivalente
+- [x] Teste prova que dois usuários com posses distintas produzem arquivos distintos, cada um só com o seu
 
 **Tests**: unit
 **Gate**: quick
