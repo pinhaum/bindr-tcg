@@ -119,7 +119,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T3: Concern `Authentication` com `Current`
+### T3: Concern `Authentication` com `Current` ✅
 
 **What**: Portar à mão o concern `Authentication` e a classe `Current` dos templates do gerador, incluir o concern em `ApplicationController` e liberar o catálogo com `allow_unauthenticated_access`.
 **Where**: `app/controllers/concerns/authentication.rb`
@@ -134,11 +134,31 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] `require_authentication` é `before_action` default em `ApplicationController`
-- [ ] `CatalogController` declara `allow_unauthenticated_access` e `/catalog`, `/cards/:id` e a busca respondem 200 sem sessão
-- [ ] Sessão resolvida por cookie assinado, nunca por id vindo do request
-- [ ] Teste de integração prova que os testes de catálogo existentes continuam passando sem sessão
-- [ ] Teste prova que uma action protegida redireciona anônimo para a tela de autenticação e retorna à origem após autenticar
+- [x] `require_authentication` é `before_action` default em `ApplicationController`
+- [x] `CatalogController` declara `allow_unauthenticated_access` e `/catalog`, `/cards/:id` e a busca respondem 200 sem sessão
+- [x] Sessão resolvida por cookie assinado, nunca por id vindo do request
+- [x] Teste de integração prova que os testes de catálogo existentes continuam passando sem sessão
+- [x] Teste prova que uma action protegida redireciona anônimo para a tela de autenticação e retorna à origem após autenticar
+
+**Decisões da execução:**
+
+- **`new_session_path` sem controller.** `request_authentication` redireciona
+  para `new_session_path`, helper que só existiria na T4. Um helper ausente é
+  `NameError` em tempo de requisição, não redirect — o "Done when" não fecharia.
+  Resolvido declarando **só a rota** (`resource :session, only: %i[new create
+  destroy]`) nesta task; o `SessionsController` que a atende continua sendo a
+  T4, que não precisa mexer em `config/routes.rb`. Nenhum teste da T3 segue o
+  redirect, apenas asserta o destino.
+- **A action protegida do teste é uma sonda, não código de produção.** Quando a
+  T3 roda não existe nenhuma action protegida no app: `SessionsController` é T4
+  e `CollectionItemsController` é T6. Criar um controller de produção só para
+  ter o que testar anteciparia escopo e viraria código morto no commit
+  seguinte. `test/integration/authentication_test.rb` define um controller
+  anônimo, protegido por omissão, com rota desenhada no `setup` e revertida no
+  `teardown` — padrão do Rails para testar concern de controller. A sonda de
+  autenticação chama `start_new_session_for`, de modo que o cookie é assinado
+  pelo middleware real e o teste não reproduz o salt interno do Action
+  Dispatch.
 
 **Tests**: integration
 **Gate**: full

@@ -3,8 +3,14 @@
 # URL em consulta (design.md §4.2). Acrescentar um filtro novo não deve tocar
 # este arquivo.
 #
-# Catálogo é público; qualquer mutação exigirá sessão (Fase 4).
+# Catálogo é público (Req. 6.3), e é a única exceção ao default de
+# `ApplicationController`, que exige sessão em toda action. A liberação é
+# declarada aqui, na classe, e não por rota: um filtro novo ou uma action nova
+# deste controller herdam o acesso público sem precisar lembrar de nada. Toda
+# mutação continua exigindo sessão porque vive em outro controller.
 class CatalogController < ApplicationController
+  allow_unauthenticated_access
+
   def index
     @query = CatalogQuery.new(params)
     @result = @query.call

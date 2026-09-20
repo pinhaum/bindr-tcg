@@ -9,5 +9,12 @@ Rails.application.routes.draw do
   get "cards/:id" => "catalog#show", as: :card, constraints: { id: /[^\/]+/ }
   get "catalog" => "catalog#index", as: :catalog
 
+  # Só a rota, na T3: o concern `Authentication` redireciona o anônimo para
+  # `new_session_path`, e um helper inexistente seria `NameError` em tempo de
+  # requisição em vez de redirect. O `SessionsController` que a atende é a T4 —
+  # esta declaração é o contrato entre as duas tasks, e a T4 não precisa mexer
+  # em rota.
+  resource :session, only: %i[new create destroy]
+
   root "catalog#index"
 end

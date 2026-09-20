@@ -52,17 +52,35 @@
 - **Phase / Task**: **Feature `catalogo` ENCERRADA.** 14 de 14 tasks fechadas,
   os dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os
   achados dos Verifiers e da revisão de a11y foram corrigidos e commitados.
-- **Completed**: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
+- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, **T3**.
+  Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T3** de `.specs/features/colecao/tasks.md` (concern
-  `Authentication` e `Current`, portados à mão, com `allow_unauthenticated_access`
-  liberando o catálogo). T1 e T2 fechadas: bcrypt e `has_secure_password` no
-  `User`, tabela e model `Session` com FK `cascade`. A decisão central segue de pé:
-  **não rodar `bin/rails generate authentication`** — ele sobrescreve
-  `app/models/user.rb` e apaga a linha que protege a coleção.
+- **Next step**: **Executar T4** de `.specs/features/colecao/tasks.md`
+  (`SessionsController` e cadastro). T1, T2 e T3 fechadas. A decisão central
+  segue de pé: **não rodar `bin/rails generate authentication`** — ele
+  sobrescreve `app/models/user.rb` e apaga a linha que protege a coleção.
+- **A T4 herda duas coisas da T3, e nenhuma delas é opcional:**
+  - **A rota já existe.** `resource :session, only: %i[new create destroy]` foi
+    declarada na T3 porque `request_authentication` redireciona para
+    `new_session_path` e um helper ausente seria `NameError` em vez de redirect.
+    A T4 escreve o controller e as views; **não precisa tocar em
+    `config/routes.rb`**. Hoje a rota aponta para um controller inexistente —
+    acessá-la por navegador dá erro, e isso é esperado até a T4.
+  - **`after_authentication_url` já está no concern e é o que fecha o retorno à
+    origem.** O `create` da T4 deve redirecionar para ele, não para `root_url`:
+    o teste `anônimo volta à origem depois de autenticar`
+    (`test/integration/authentication_test.rb`) já prova que
+    `session[:return_to_after_authenticating]` é gravado; quem consome é a T4.
+- **A sonda de teste da T3 não é código de produção.** Quando a T3 rodou não
+  havia nenhuma action protegida no app, então
+  `test/integration/authentication_test.rb` define um controller anônimo com
+  rota desenhada no `setup`. Quando a T6 entregar o
+  `CollectionItemsController`, a sonda continua válida como teste do concern em
+  si — não removê-la achando que virou redundante: ela é o único teste que
+  cobre o default herdado por uma action que **não declara nada**.
 - **Achado da T1, já resolvido na própria T1**: `authenticate_by` resolve o
   usuário com `find_by(email:)`, que é **sensível à caixa**. O índice
   `index_users_on_lower_email` impede que duas grafias coexistam, mas não faz a
@@ -71,6 +89,15 @@
   escrita quanto o argumento nomeado das consultas
   (`activerecord-8.0.5.1/lib/active_record/normalization.rb:33`). A **T4** não
   precisa mais tratar caixa de e-mail.
+- **Dívida registrada na revisão de segurança da T3** (`ecc:security-reviewer`,
+  sem achado bloqueante): o cookie de sessão não declara `secure: true` no hash
+  de opções de `start_new_session_for`. Em produção o middleware o marca, porque
+  `config.force_ssl = true` — a garantia é **indireta**: um staging que não
+  herde `production.rb`, ou o dia em que `force_ssl` for desligado, tira o
+  `secure` sem que nenhum teste acuse. Fixar exige `secure: Rails.env.production?`
+  (desenvolvimento e teste rodam em HTTP), que é decisão de política de cookie e
+  não cabia na task que porta o concern. Ambos os pontos estão comentados em
+  `app/controllers/concerns/authentication.rb`.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
