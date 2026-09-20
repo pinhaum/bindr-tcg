@@ -43,6 +43,25 @@ class CollectionItem < ApplicationRecord
     end
   }
 
+  # Req. 7.7 / COL-12 — o total de **cópias** da coleção de um usuário.
+  #
+  # `sum(:quantity)` e não `count`: o requisito diz "contando cópias". Quem tem
+  # três cópias de uma variante e duas de outra tem total 5, não 2 — `count`
+  # responderia quantas variantes distintas, que é a métrica do Req. 9
+  # (progresso por set), com denominador próprio decidido em AD-003.
+  #
+  # O `owned` é aritmeticamente redundante (uma linha com zero soma zero) e
+  # está aqui assim mesmo: ele é a definição de "possuída" do Req. 7.3, e é o
+  # que segura o número no dia em que alguém trocar a agregação. Sem ele,
+  # `count` passaria a contar as linhas zeradas em silêncio.
+  #
+  # Aqui e não no controller porque são dois os chamadores: a grade do catálogo
+  # exibe o total e o Turbo Stream da posse o re-renderiza. Duas somas escritas
+  # à mão divergiriam na primeira mudança de critério.
+  def self.total_copies_for(user)
+    for_user(user).owned.sum(:quantity)
+  end
+
   # Req. 7.3 — a pergunta "o usuário tem esta variante?" é sobre a quantidade,
   # não sobre a existência do registro.
   def owned?

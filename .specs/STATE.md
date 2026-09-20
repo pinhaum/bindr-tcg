@@ -49,16 +49,16 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T10 fechada**
-  (plano de execução do filtro de posse, medido; **sem migração e sem índice
-  novo**, por decisão medida). Fase 2 (posse) encerrada com T5–T8.
-  Restam T11–T13: total e wishlist.
+- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T11 fechada**
+  (total de cópias da coleção, exibido na grade e atualizado por Turbo Stream;
+  **sem migração**). Fase 2 (posse) encerrada com T5–T8.
+  Restam T12–T13: wishlist.
   Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois lotes verificados (B1 e
   B2, ambos PASS, autor ≠ verificador). Os achados dos Verifiers e da revisão
   de a11y foram corrigidos e commitados.
 - **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
-  T6, T7, T8, T9, **T10**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
-  `.context/tasks.md` §4.1, §4.2 e **§4.3** fechados. A §4.2 cobria T5+T6+T7 e
+  T6, T7, T8, T9, T10, **T11**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
+  `.context/tasks.md` §4.1, §4.2, §4.3 e **§4.4** fechados. A §4.2 cobria T5+T6+T7 e
   fechou na T7. A **§4.3 cobria T6+T8 e fechou na T8**, conferida bullet a
   bullet: "incremento e decremento em ação única, sem formulário" e "sem
   recarregar a página inteira" — a primeira metade é T6 (um `POST` por
@@ -66,20 +66,71 @@
   contêiner da variante); "quantidade zero equivale a não possuída" — T5, com
   os scopes `owned`/`unowned` e teste em `collection_item_test.rb`; "disponível
   tanto na grade quanto no detalhe, sempre por variante" — T8.
-  **As §4.4 e §4.5 continuam abertas**: filtro de posse e total (T9–T11) e
-  wishlist (T12–T13). A **§4.4 também não fecha na T10**, pelo mesmo motivo
-  conferido de novo no texto dela: ela cobre T9+T10+T11 e exige, além do
-  filtro, "Total de cartas possuídas contando cópias", que é a **T11**. Fecha
-  lá, e só lá.
+  A **§4.4 fechou na T11**, conferida bullet a bullet: ela cobre T9+T10+T11 e
+  tem dois bullets. "Filtro *somente as que eu tenho* / *somente as que eu não
+  tenho*, integrado ao query object da task 3.1" é a **T9** (parâmetro `owned`
+  dentro do `CatalogQuery`, que é o query object da 3.1, com o usuário injetado
+  pelo chamador) somada à **T10** (plano de execução medido, sem full table
+  scan na tabela de coleção). "Total de cartas possuídas contando cópias" é a
+  **T11** (`sum(:quantity)`, não `count`). **A §4.5 continua aberta**: wishlist
+  (T12–T13).
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T11** de `.specs/features/colecao/tasks.md` (total
-  de cartas possuídas contando cópias — é ela que fecha a §4.4 de
-  `.context/tasks.md`). A decisão central segue de pé: **não rodar
+- **Next step**: **Executar T12** de `.specs/features/colecao/tasks.md`
+  (migração e model de `wishlist_items`, com as mesmas garantias de banco da
+  coleção — `UNIQUE (user_id, card_variant_id)`, `CHECK (target_quantity >= 1)`
+  e FK `restrict`). É a primeira task da feature que **cria migração**, então
+  `schema_format = :sql` exige `db:migrate` para regenerar `db/structure.sql`.
+  A decisão central segue de pé: **não rodar
   `bin/rails generate authentication`**.
+- **O que a T11 entregou, e o que a T12/T13 herdam dela.** O total de cópias é
+  `CollectionItem.total_copies_for(user)` — `for_user(user).owned.sum(:quantity)`
+  —, no **model** e não no controller, porque tem dois chamadores: a grade do
+  catálogo (`CatalogController#owned_total`, exibido pelo partial
+  `catalog/_owned_total`) e o `turbo_stream` da posse, que o re-renderiza a
+  cada "+1"/"−1". A wishlist vai querer um agregado parecido ("quantos itens
+  atendidos"), e o lugar dele é o mesmo: model, com um chamador de view e um de
+  Stream.
+  - **`sum(:quantity)`, nunca `count`.** Cópias, não variantes distintas — esta
+    última é a métrica do **Req. 9** (progresso por set), com denominador
+    decidido em AD-003. O teste só discrimina os dois porque as quantidades
+    semeadas são **diferentes de 1**; com uma cópia por variante os dois
+    agregados dão o mesmo número. Vale para qualquer contagem futura.
+  - **O scope `owned` é aritmeticamente redundante na soma e fica assim
+    mesmo.** Removê-lo não matou teste nenhum (uma linha com zero soma zero).
+    Ele é a definição de "possuída" do Req. 7.3 e é o que segura o número se
+    alguém trocar a agregação. Não "limpar".
+  - **O `authenticated?` dentro de `#owned_total` é redundante hoje e não deve
+    ser removido.** `#index` já chama no topo desde a T9 e `#owned_quantities`
+    chama de novo, então a mutação que o remove **sobrevive**. Removidas as
+    três, porém, o resultado é "Sua coleção: 0 cópias" para usuário autenticado
+    com a página em 200 — o defeito silencioso do
+    `allow_unauthenticated_access` pela quarta vez na feature — e 7 testes
+    morrem. A redundância existe para que uma reordenação futura de `#index`
+    não reintroduza o defeito.
+  - **O `turbo_stream` da posse agora tem QUATRO alvos**, não três: o contêiner
+    da variante, `flash_notice`, `flash_alert` e **`catalog_owned_total`**. O
+    quarto veio de um achado HIGH da revisão de a11y (SC 4.1.3): sem ele, um
+    "+1" deixaria o total do topo no valor do carregamento enquanto a contagem
+    da variante logo abaixo já mostraria o novo. Um `update` cujo alvo não está
+    no DOM — o detalhe da carta não exibe o total — é **descartado em silêncio**
+    pelo Turbo, então não há ramo condicional. Se a T13 acrescentar região de
+    wishlist atualizável, é este o padrão.
+  - **O total NÃO é região viva, e isso é decisão com teste.** Nada de
+    `aria-live` nem `role="status"` nele: quem dispara a operação já recebe o
+    anúncio específico da região viva da variante, e uma segunda região faria
+    cada "+1" produzir duas falas. Mesmo raciocínio que separou `role="status"`
+    de `role="alert"` no flash da T8. Acrescentar `aria-live` mata um teste.
+  - **A correção proposta pelo revisor de a11y foi recusada em favor de uma
+    melhor.** Ele sugeria qualificar o texto para "Sua coleção ao carregar esta
+    página", isto é, descrever o defeito na cópia em vez de corrigi-lo — o
+    usuário leria uma ressalva em toda visita para cobrir um caso que dura um
+    clique. O alvo de Stream resolve a causa. Registro aqui porque o padrão
+    vale para as próximas revisões: aceitar o **achado** não obriga a aceitar a
+    **correção** proposta.
 - **O que a T10 mediu, e por que não há índice novo.** A T10 fechou **sem
   migração**: o índice candidato que a T9 registrou — parcial,
   `collection_items (user_id, card_variant_id) WHERE quantity >= 1` — foi

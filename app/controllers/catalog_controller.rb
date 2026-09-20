@@ -34,6 +34,7 @@ class CatalogController < ApplicationController
     ).call
 
     @owned_quantities = owned_quantities(@result.records.flat_map(&:card_variants))
+    @owned_total = owned_total
   end
 
   def show
@@ -43,6 +44,29 @@ class CatalogController < ApplicationController
   end
 
   private
+    # Total de **cópias** da coleção inteira (Req. 7.7 / COL-12), em uma consulta
+    # agregada por request.
+    #
+    # **Não é a soma de `@owned_quantities`.** Aquele hash cobre só as variantes
+    # da página corrente e existe para exibição por tile: somá-lo daria o total
+    # *da página*, um número que mudaria a cada paginação e a cada filtro. O
+    # requisito pede o total da coleção, que não depende do recorte na tela.
+    #
+    # A soma em si mora em `CollectionItem.total_copies_for`, com a justificativa
+    # de `sum` contra `count`: o Turbo Stream da posse também a re-renderiza, e
+    # duas somas escritas à mão divergiriam na primeira mudança de critério.
+    #
+    # `authenticated?` antes de ler `Current.user`, pelo mesmo motivo de
+    # `#owned_quantities`: `allow_unauthenticated_access` não resolve a sessão, e
+    # sem a chamada o total sairia **zero para todo usuário autenticado**, com a
+    # página respondendo 200. Para o anônimo, `for_user(nil)` é `none` e a soma é
+    # zero — quem decide **não renderizar** nada é a view, não este número.
+    def owned_total
+      authenticated?
+
+      CollectionItem.total_copies_for(Current.user)
+    end
+
     # Um hash `card_variant_id => quantity` para as variantes desta página, em
     # **uma** consulta (Req. 5.3 / COL-18: o controle aparece por variante, na
     # grade e no detalhe — perguntar a posse variante a variante seria N+1).

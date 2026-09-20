@@ -178,7 +178,7 @@ Regras de execução:
   - Disponível tanto na grade quanto no detalhe, sempre por variante.
   - _Requisitos: 7.2, 7.3, 7.5, 5.3_
 
-- [ ] **4.4 Filtro de posse e totais**
+- [x] **4.4 Filtro de posse e totais**
   - Filtro "somente as que eu tenho" / "somente as que eu não tenho", integrado
     ao query object da task 3.1.
   - Total de cartas possuídas contando cópias.

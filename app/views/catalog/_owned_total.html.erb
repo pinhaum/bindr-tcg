@@ -1,0 +1,15 @@
+<%#
+  Total de cópias da coleção (Req. 7.7 / COL-12).
+
+  Partial porque o Turbo Stream o re-renderiza: um "+1" na grade atualiza o
+  contador da variante **e** este total, e duplicar o markup faria os dois
+  divergirem na primeira correção que alguém esquecesse de replicar. É o mesmo
+  motivo que fez `collection_items/_ownership` ser um partial na T8.
+
+  `update`, não `replace`, do lado do controller — aqui o elemento que
+  permanece é este `<p>`, pelo `id`.
+%>
+<p class="catalog__owned-total" id="catalog_owned_total">
+  Sua coleção: <span class="catalog__owned-total-count"><%= total %></span>
+  <%= total == 1 ? "cópia" : "cópias" %>
+</p>

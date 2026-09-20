@@ -938,7 +938,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T11: Total de cartas possuídas
+### T11: Total de cartas possuídas ✅
 
 **What**: Exibir o total de cópias possuídas pelo usuário da sessão.
 **Where**: `app/views/catalog/index.html.erb`
@@ -952,10 +952,119 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Total soma cópias, não variantes distintas
-- [ ] Variante com quantidade zero não entra no total
-- [ ] Nada é exibido para anônimo
-- [ ] Teste de integração confere o número com posse conhecida
+- [x] Total soma cópias, não variantes distintas
+- [x] Variante com quantidade zero não entra no total
+- [x] Nada é exibido para anônimo
+- [x] Teste de integração confere o número com posse conhecida
+
+**Decisões da execução:**
+
+- **A soma é própria e não passa por `@owned_quantities`, como a T8 instruiu.**
+  Aquele hash cobre só as variantes da página corrente e é camada de view:
+  somá-lo daria o total *da página*, um número que mudaria a cada clique de
+  paginação e a cada filtro aplicado. O Req. 7.7 pede o total da **coleção**,
+  que não depende do recorte na tela. Há dois testes que matam essa saída
+  errada: um pagina de um em um com três cartas possuídas (3, 2 e 8 cópias) e
+  exige 13 nas três páginas, e outro aplica um filtro que esvazia a grade e
+  ainda exige o total intacto.
+- **`sum(:quantity)` contra `count`, e o teste discrimina de verdade.** Todas
+  as quantidades semeadas são **diferentes de 1** de propósito: com uma cópia
+  por variante os dois agregados devolvem o mesmo número e nenhum teste
+  distinguiria "contando cópias" de "contando variantes distintas". Com 3 e 2
+  cópias, `count` responde 2 e `sum` responde 5. Variantes distintas é a
+  métrica do **Req. 9** (progresso por set), com denominador próprio em AD-003
+  — não é esta.
+- **O scope `owned` fica, e a justificativa é a que o próprio sensor expôs.**
+  Aritmeticamente ele é redundante: uma linha com `quantity = 0` soma zero, e
+  removê-lo **não matou teste nenhum** (mutação 3). Fica assim mesmo por ser a
+  definição de "possuída" do Req. 7.3 e por ser o que segura o número no dia em
+  que alguém trocar a agregação — sem ele, um `count` passaria a contar as
+  linhas zeradas em silêncio. O critério 5 tem teste próprio pelos dois lados:
+  uma coleção com 4 + 0 exibe 4, e uma coleção **inteiramente** zerada exibe 0
+  e não 2.
+- **Anônimo: a decisão de não renderizar é da view, não do número.**
+  `CollectionItem.for_user(nil)` é `none`, então a soma já é zero sem ramo
+  especial e sem consulta. Mas "0 cópias" para quem não tem conta seria uma
+  afirmação sobre uma coleção que não existe — o `<p>` inteiro só é renderizado
+  sob `authenticated?`. O catálogo continua público e respondendo 200.
+- **A armadilha do `allow_unauthenticated_access` pela quarta vez, e desta vez
+  ela sobreviveu ao sensor.** Remover o `authenticated?` de dentro de
+  `#owned_total` **não matou teste nenhum**, porque `#index` já chama
+  `authenticated?` no topo desde a T9 e `#owned_quantities` chama de novo. A
+  chamada é redundante **hoje** e fica: removidas as três (mutação 4c), o
+  resultado é "Sua coleção: 0 cópias" para usuário autenticado, com a página
+  respondendo 200 — o defeito silencioso exato — e **7 testes morrem**. A
+  redundância é o que impede que uma reordenação futura de `#index` reintroduza
+  o defeito sem ninguém notar.
+- **A soma mora no model, não no controller, e a razão apareceu na revisão de
+  a11y.** `CollectionItem.total_copies_for(user)` tem dois chamadores: a grade
+  do catálogo, que exibe o total, e o Turbo Stream da posse, que o
+  re-renderiza. Duas somas escritas à mão divergiriam na primeira mudança de
+  critério.
+- **Uma consulta agregada por request, nunca por tile.** É um `SUM` com
+  `WHERE user_id = $1 AND quantity >= 1` — o mesmo acesso indexado que a T10
+  mediu, sem índice novo e sem migração, como o plano previa.
+- **Revisão do `ecc:a11y-architect`: zero CRITICAL, um HIGH aceito com correção
+  diferente da proposta, um LOW aceito, e quatro dimensões sem achado.**
+  - **HIGH aceito, e a premissa factual estava certa:** os controles da T8
+    atualizam por Turbo Stream só o contêiner da variante e as duas regiões de
+    flash. Sem alvo para o total, um "+1" deixaria o número do topo no valor do
+    carregamento enquanto a contagem da variante logo abaixo já mostraria o
+    valor novo — duas afirmações contraditórias na mesma tela, e quem usa
+    leitor de tela não teria pista nenhuma da divergência (SC 4.1.3).
+    **A correção proposta pelo revisor foi recusada**: ele sugeria qualificar o
+    texto para "Sua coleção ao carregar esta página", isto é, descrever o
+    defeito na cópia em vez de corrigi-lo. Isso resolveria a acusação de
+    informação falsa piorando o produto — o usuário passaria a ler uma ressalva
+    em toda visita para cobrir um caso que dura um clique. **Corrigido de
+    verdade**: o `<p>` ganhou `id="catalog_owned_total"`, virou o partial
+    `catalog/_owned_total` e entrou como **quarto alvo** do `turbo_stream`
+    existente. Não é ampliação de escopo: o Stream já atualizava três alvos, e
+    o quarto é a região que esta task introduziu. Um `update` cujo alvo não
+    está no DOM — o detalhe da carta, que não exibe o total — é descartado em
+    silêncio pelo Turbo, então não há ramo condicional. Sensor: removido o
+    alvo, **3 testes morrem**.
+  - **Recusado, e a recusa virou teste:** acrescentar `aria-live` ou
+    `role="status"` ao total. Quem dispara a operação já recebe o anúncio
+    específico da região viva do controle da variante ("Nico Robin OP01-t11a,
+    3 cópias"); uma segunda região viva faria cada "+1" produzir **duas** falas,
+    e quem registra uma caixa de boosters aperta o botão dezenas de vezes — o
+    mesmo raciocínio que na T8 separou `role="status"` de `role="alert"` no
+    flash. O revisor chegou à mesma conclusão por outro caminho (item "e") e a
+    recusa é consistente com ela. Há teste que asserta a **ausência** de
+    `aria-live` e `role="status"` no total e a **presença** da região viva na
+    variante; acrescentar `aria-live` mata esse teste (mutação 6).
+  - **LOW aceito:** o revisor pediu conferência do espaçamento entre o `<span>`
+    do número e a unidade, porque interpolação ERB multilinha é fonte comum de
+    "37cópias". Conferido no HTML renderizado — o espaço sai correto —, e a
+    conferência virou propriedade do teste: `total_exibido` normaliza com
+    `squish`, de modo que as asserções são sobre a frase que o usuário lê e o
+    leitor de tela anuncia, não sobre a indentação do template.
+  - **Sem achado, confirmado:** distinguibilidade (a frase "Sua coleção:"
+    precede o número no mesmo nó de texto, então "2815 cartas / Sua coleção: 37
+    cópias" identifica cada número em leitura linear — há teste que exige a
+    palavra "coleção" e a unidade "cópias" no bloco); concordância de plural (o
+    ternário está correto para 0, 1 e n, e há teste de que uma cópia é "1
+    cópia"); `<p>` + `<span>` como marcação correta; alvo de toque, reflow e
+    idioma, nenhum aplicável a um bloco sem elemento interativo.
+  - Contraste continua fora de escopo pela mesma razão da T8: o projeto não
+    declara paleta nenhuma. Segue como dívida.
+- **Nenhuma migração, como o plano previa.** A task é de model, controller,
+  view e folha de estilo; nada toca schema, e `db/structure.sql` não foi
+  regenerado nem tocado.
+- **Sensor de discriminação, seis mutações, por cópia e `cp`/`diff` — nunca
+  `git stash`.** (1) `sum(:quantity)` → `count`: **7 testes morrem**, o número
+  cai de 5 para 2 e de 13 para 3. (2) total renderizado para anônimo
+  (`authenticated?` → `true`): **1 morre**. (3) scope `owned` removido:
+  **nenhum morre** — resultado esperado e documentado acima, a soma é
+  aritmeticamente igual. (4) `authenticated?` removido de `#owned_total`:
+  **nenhum morre**, porque `#index` e `#owned_quantities` já resolvem a sessão;
+  (4b) invertida também a ordem das duas atribuições: nenhum morre, pelo
+  `authenticated?` do topo da action; (4c) removidas as **três** chamadas:
+  **7 morrem** com "Sua coleção: 0 cópias" e 200. (5) alvo `catalog_owned_total`
+  removido do `turbo_stream`: **3 morrem**. (6) `aria-live="polite"`
+  acrescentado ao total: **1 morre**. Restauração conferida com `diff` em
+  todas.
 
 **Tests**: integration
 **Gate**: full

@@ -148,7 +148,23 @@ class CollectionItemsController < ApplicationController
             turbo_stream.update("flash_notice", partial: "layouts/flash_message",
                                                 locals: { message: flash[:notice], kind: "notice" }),
             turbo_stream.update("flash_alert", partial: "layouts/flash_message",
-                                               locals: { message: flash[:alert], kind: "alert" })
+                                               locals: { message: flash[:alert], kind: "alert" }),
+            # O total da coleção (Req. 7.7 / COL-12, T11). Sem este alvo, o
+            # número no topo da grade continuaria o do carregamento enquanto a
+            # contagem da variante logo abaixo já mostraria o valor novo — duas
+            # afirmações contraditórias na mesma tela, e quem usa leitor de tela
+            # não teria pista nenhuma da divergência (SC 4.1.3, achado HIGH da
+            # revisão de a11y desta task).
+            #
+            # `update` e não `replace`, como nos outros três: o elemento
+            # permanece e só os filhos são trocados.
+            #
+            # O alvo pode não existir na página de origem — o detalhe de uma
+            # carta não exibe o total. Um `turbo_stream.update` cujo alvo não
+            # está no DOM é **descartado em silêncio** pelo Turbo, sem erro e
+            # sem efeito colateral, então não há ramo condicional aqui.
+            turbo_stream.update("catalog_owned_total", partial: "catalog/owned_total",
+                                                       locals: { total: CollectionItem.total_copies_for(Current.user) })
           ]
         end
       end

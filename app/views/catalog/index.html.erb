@@ -29,6 +29,40 @@
     <%= pluralize(@result.total_count, "carta", plural: "cartas") %>
   </p>
 
+  <%#
+    Total de cópias da coleção (Req. 7.7 / COL-12), vindo de
+    `CatalogController#owned_total` — a soma da coleção **inteira**, não do que
+    está na tela.
+
+    Anônimo não vê nada: o catálogo é público (Req. 6.3) e "0 cópias" para quem
+    não tem conta seria uma afirmação sobre uma coleção que não existe.
+    `owned_total` já devolve zero nesse caso; quem decide não renderizar é aqui.
+
+    Texto autossuficiente em vez do número solto: este parágrafo fica ao lado do
+    `.catalog__count`, que também é um número seguido de "cartas". Em leitura
+    linear por leitor de tela, "2815 cartas / 37" não diz de quem é o 37 —
+    a frase inteira é o que distingue o tamanho do catálogo do tamanho da
+    coleção. Plural explícito pelo mesmo motivo da T8: o inflector do Rails é
+    inglês e `"cópia".pluralize(2)` devolve "cópia".
+
+    **O `id` é o contrato com o Turbo Stream**, como em
+    `collection_items/_ownership`. Um "+1" na grade não recarrega a página: sem
+    este alvo, o número aqui continuaria o do carregamento enquanto a contagem
+    da variante logo abaixo já mostraria o valor novo — duas afirmações
+    contraditórias na mesma tela, e quem usa leitor de tela não teria nenhuma
+    pista da divergência (achado HIGH da revisão de a11y, SC 4.1.3).
+
+    **Sem `aria-live` aqui, e isso é deliberado.** Quem dispara a operação já
+    recebe o anúncio da região viva do controle da variante, que é específico
+    ("Nico Robin OP01-t11a, 3 cópias"). Anunciar também o total faria cada "+1"
+    produzir duas falas — e quem registra uma caixa de boosters aperta o botão
+    dezenas de vezes. O total é atualizado em silêncio, para ser lido quando o
+    usuário voltar a ele.
+  %>
+  <% if authenticated? %>
+    <%= render "catalog/owned_total", total: @owned_total %>
+  <% end %>
+
   <% if @result.records.empty? %>
     <section class="catalog__empty">
       <p>
