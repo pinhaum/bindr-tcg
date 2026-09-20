@@ -42,6 +42,30 @@
 - **Date**: 2026-09-19
 - **Status**: active
 
+### AD-006
+- **Decision**: No import CSV, uma linha cuja variante o usuário já possui **substitui** a quantidade existente pelo valor do arquivo. Não soma, não toma o maior valor.
+- **Reason**: É a única das três leituras sob a qual o arquivo do export é idempotente na volta (POR-11 / Req. 10.2: "importar um CSV no mesmo formato do export"). Sob "somar", exportar e reimportar sem editar **dobraria** a coleção inteira a cada ciclo — o fluxo mais óbvio do produto seria o mais destrutivo. Sob "maior valor", o usuário que corrige uma quantidade para baixo (vendeu duas cópias) não consegue: o arquivo é ignorado em silêncio, e o número final não está em lugar nenhum.
+- **Trade-off**: Quem usa o CSV como planilha de **aquisição** ("abri uma caixa, registrei o que veio") não tem o que quer: precisa somar à mão antes de enviar. É o caso de uso que "somar" atenderia, e ele fica descoberto. Mitigado pela pré-visualização obrigatória (Req. 10.5), que mostra o valor **antes** e **depois** por linha: substituir 2 por 3 é visível antes de gravar, e o usuário que esperava 5 vê o erro na tela em vez de descobrir depois. Se o caso de aquisição se mostrar frequente, a saída é um modo explícito de merge escolhido no upload — **não** trocar o default.
+- **Scope**: Import CSV (Req. 10.2, 10.4). Define a semântica de "atualizada" no resumo do Req. 10.4.
+- **Date**: 2026-09-20
+- **Status**: active
+
+### AD-007
+- **Decision**: O arquivo enviado vive, entre a pré-visualização e a confirmação, numa **tabela de staging** no banco, dona do usuário que a criou, com expiração. Não em sessão, não por reenvio do arquivo.
+- **Reason**: Req. 10.5 exige que a confirmação grave **o que a pré-visualização mostrou**, e só o staging dá essa garantia. O cookie de sessão do Rails tem teto de 4KB — um CSV de mil linhas não cabe, é limite medido e não preferência. O reenvio na confirmação não guarda estado, mas permite que o arquivo **mude entre as duas etapas**: a pré-visualização passaria a descrever um arquivo que não é o que será gravado, esvaziando a barreira que o requisito existe para criar.
+- **Trade-off**: Custa uma migração (`schema_format = :sql` exige `db:migrate` para regenerar `db/structure.sql`), uma política de expiração e uma rotina de limpeza. Acrescenta uma tabela que guarda dado do usuário fora da coleção — logo entra no mesmo regime de autorização: toda leitura parte de `Current.user`, e uma pré-visualização alheia não é confirmável. Em troca, a confirmação passa a ser uma operação sobre **dado já validado e já mostrado**, sem parser no caminho da escrita.
+- **Scope**: Import CSV (Req. 10.5). Implica migração nesta feature.
+- **Date**: 2026-09-20
+- **Status**: active
+
+### AD-008
+- **Decision**: O import recusa arquivo com mais de **10.000 linhas de dado** (sem contar o cabeçalho), com mensagem em português que diz o limite.
+- **Reason**: O teto natural do domínio hoje é **4917 variantes** — uma coleção que possuísse todas as impressões existentes daria um CSV desse tamanho. 10.000 é folga de pouco mais de 2× sobre esse teto: aceita qualquer coleção real, inclusive depois de o catálogo crescer com novos sets, e ainda assim põe um limite superior ao trabalho que uma requisição aceita. Limite em **número de linhas**, e não em bytes, porque é a unidade que o usuário entende e a que determina o custo real (uma linha = uma resolução de variante).
+- **Trade-off**: É um número escolhido, não derivado — nenhuma medição diz que 10.000 é seguro e 10.001 não é. Ele protege contra o arquivo absurdo, não contra o arquivo grande-mas-legítimo: se a medição de custo (POR-13) mostrar que 10.000 linhas não cabem no tempo de resposta, a saída é import assíncrono ou um limite menor, **com medição**, e não afrouxar este número no escuro. O limite é verificado **antes** de processar qualquer linha, junto da validação de formato (Req. 10.3 / POR-04).
+- **Scope**: Import CSV (Req. 10.2). Recusa do arquivo inteiro, como no formato inválido.
+- **Date**: 2026-09-20
+- **Status**: active
+
 ## Handoff
 
 > **Começando uma sessão nova?** Leia **`.specs/HANDOFF-colecao.md`** primeiro:

@@ -57,72 +57,78 @@ plano inteiro:
 | **Chave que identifica a variante no CSV** | O **par** `card_number` + `variant_code`, as duas colunas juntas | O índice único do schema é `(card_id, variant_code)` — **por carta, não global** (`db/structure.sql:518`). Hoje os 4917 `variant_code` são todos distintos entre si, mas isso é propriedade **dos dados**, não garantia do banco: uma fonte que reemita `p1` para outra carta não viola constraint nenhuma. Resolver por `variant_code` sozinho funcionaria hoje e passaria a casar a variante errada em silêncio depois. O par é também exatamente o que o Req. 10.1 já manda exportar | Sim — medido e conferido no schema |
 | Colunas do CSV | `card_number`, `variant_code`, `card_name`, `quantity`, nesta ordem, com linha de cabeçalho | Req. 10.1 pede as quatro. Cabeçalho porque o arquivo é lido por humano em planilha, e porque o import pode validar o formato antes de processar linha nenhuma | Sim — Req. 10.1 |
 | Papel de `card_name` no import | **Informativo, nunca chave.** O import resolve por `card_number` + `variant_code` e ignora divergência de nome | O nome existe para o humano reconhecer a linha na planilha. Usá-lo como chave quebraria o import na primeira correção de grafia vinda da fonte externa — e o catálogo é regenerável, logo o nome muda sem o usuário fazer nada | Sim |
-| **Semântica do import sobre linha já existente** | **DECISÃO PENDENTE** — ver seção própria abaixo | É a única decisão desta spec que muda o que o usuário perde, e não me cabe tomá-la sozinho | **Não** |
+| **Semântica do import sobre linha já existente** | **Substituir**: a quantidade do CSV passa a ser a quantidade possuída | **AD-006.** É a única leitura sob a qual o arquivo do export é idempotente na volta (POR-11): somar dobraria a coleção a cada ciclo de exportar-e-reimportar. A pré-visualização mostra o antes e o depois por linha, então substituir 2 por 3 é visível antes de gravar | Sim — AD-006 |
 | Momento da escrita | Nenhuma escrita antes da confirmação. O upload produz uma pré-visualização; a gravação é uma segunda requisição, explícita | Req. 10.5 literal. É a barreira que separa "arquivo errado" de "coleção destruída" | Sim — Req. 10.5 |
-| Onde vive o arquivo entre a pré-visualização e a confirmação | **DECISÃO PENDENTE** — ver seção própria abaixo | Sessão, tabela temporária e reenvio têm custos diferentes e nenhum é obviamente certo | **Não** |
+| Onde vive o arquivo entre a pré-visualização e a confirmação | **Tabela de staging**, dona do usuário que a criou, com expiração | **AD-007.** É a única das três que garante que a confirmação grava o que a pré-visualização mostrou — o cookie de 4KB não comporta mil linhas, e o reenvio permite que o arquivo mude entre as duas etapas. Custa uma migração: `schema_format` é `:sql` | Sim — AD-007 |
 | Autorização das duas metades | **Exigem sessão.** Sem `allow_unauthenticated_access`, herdando o default de `ApplicationController` | Export sem sessão exporia coleção alheia ou devolveria arquivo vazio; import sem sessão não tem onde gravar. O default protegido do app já resolve por construção — e evita a armadilha do `allow_unauthenticated_access` que apareceu cinco vezes na `colecao` | Sim — `app/controllers/concerns/authentication.rb` |
 | Origem do usuário | `Current.user`, via `CollectionItem.for_user(user)`; nenhum identificador de usuário vem do request | Req. 6.5 por construção. `for_user` exige o objeto `User` e levanta `ArgumentError` para um id | Sim — `app/models/collection_item.rb` |
 | O que o export inclui | As linhas de `CollectionItem.for_user(user).owned` — quantidade ≥ 1 | Req. 7.3: zero é linha existente que significa "não tenho". Exportar zeros encheria o arquivo de linhas sem informação e, na volta, pediria uma decisão de merge que o usuário não pediu | Sim — scope `owned` vigente |
 | Biblioteca de CSV | `csv` da stdlib, **declarada explicitamente no Gemfile** | Medido: `csv 3.2.8` disponível sob Ruby 3.3.0, hoje como *default gem*. A partir do Ruby 3.4 ela deixa de ser carregada implicitamente; declarar agora custa uma linha e evita que a atualização de Ruby quebre a feature sem aviso. Gem nova exige `docker compose run --rm --no-deps app bundle install` — o volume `bundle` sombreia as gems da imagem | Sim — medido |
 | Codificação e delimitador | UTF-8, vírgula | O catálogo tem nomes com acento e caractere não-ASCII. Planilha em pt-BR frequentemente usa `;` — mas aceitar dois delimitadores no import exige detecção, que erra. Fixar um e documentá-lo é mais honesto que adivinhar | Sim |
-| Tamanho máximo de arquivo aceito | **DECISÃO PENDENTE** — ver seção própria abaixo | Sem limite, um arquivo grande derruba o processo; com limite arbitrário, rejeita import legítimo | **Não** |
+| Tamanho máximo de arquivo aceito | **10.000 linhas de dado**, sem contar o cabeçalho; recusa antes de processar linha nenhuma | **AD-008.** Folga de pouco mais de 2× sobre o teto do domínio (4917 variantes), medido. Em linhas e não em bytes porque é a unidade que o usuário entende e a que determina o custo. Verificado junto da validação de formato | Sim — AD-008 |
 | Verificação de comportamento visual | Teste de integração sobre HTML renderizado, com `SPEC_DEVIATION` no cabeçalho do arquivo | Não há navegador no container, logo não há system test. Precedente estabelecido em `collection_ownership_ui_test.rb` e nas três features anteriores | Sim — `CLAUDE.md` |
 
-**Open questions:** três, todas listadas na seção seguinte — **P8** (semântica
-do import sobre variante já possuída), **P9** (onde o arquivo vive entre a
-pré-visualização e a confirmação) e **P10** (limite de tamanho do arquivo).
-Nenhuma bloqueia o export; as três bloqueiam o import.
+**Open questions:** none. As três que bloqueavam o import foram decididas pelo
+dono do produto e registradas em `.specs/STATE.md` — **P8** em **AD-006**
+(substituir), **P9** em **AD-007** (tabela de staging) e **P10** em **AD-008**
+(10.000 linhas). Nenhuma se reabre nesta feature.
 
-## DECISÕES PENDENTES — precisam do dono do produto antes da fase de tasks
+## Decisões tomadas — P8, P9 e P10
 
-Três pontos onde o requisito não decide e o design não tem como escolher sozinho.
-**Nenhum deles bloqueia o export**; os três bloqueiam o import.
+Os três pontos onde o requisito não decidia foram decididos pelo dono do produto
+e registrados em `.specs/STATE.md`. **Nenhum se reabre nesta feature.**
 
-### P8 — semântica do import sobre variante que o usuário já possui
+| # | Pergunta | Decisão | ADR |
+|---|---|---|---|
+| P8 | Import sobre variante que o usuário já possui | **Substituir** — a quantidade do CSV passa a ser a quantidade possuída | AD-006 |
+| P9 | Onde o arquivo vive entre a pré-visualização e a confirmação | **Tabela de staging**, dona do usuário, com expiração | AD-007 |
+| P10 | Limite de tamanho do arquivo | **10.000 linhas de dado**, recusa antes de processar qualquer linha | AD-008 |
 
-O Req. 10.4 fala em linhas "importadas" e "atualizadas", o que confirma que
-atualizar existe — mas **não diz o que "atualizar" faz com o número**. Três
-leituras, com consequências diferentes:
+### P8 — substituir, e o que isso custa
 
-| Leitura | `quantity` do CSV = 3, usuário já tem 2 | Quando é a certa |
-|---|---|---|
-| **Substituir** | fica 3 | O CSV é a verdade; o usuário exportou, editou e devolveu |
-| **Somar** | fica 5 | O CSV é uma aquisição nova; o usuário está registrando a caixa que abriu |
-| **Maior valor** | fica 3 | Defensiva; nunca reduz, mas produz número que não está em lugar nenhum |
+Das três leituras (substituir, somar, maior valor), **substituir é a única sob a
+qual o export é idempotente na volta**, que é o que o Req. 10.2 e o POR-11 pedem:
+exportar e reimportar sem editar tem de deixar a coleção idêntica. Sob "somar", o
+fluxo mais óbvio do produto — baixar, conferir, devolver — dobraria a coleção
+inteira a cada ciclo. Sob "maior valor", quem vendeu duas cópias e corrige o
+número para baixo é ignorado em silêncio.
 
-**As três são defensáveis e apenas uma pode ser o default.** Substituir é o que
-fecha a ida e volta do Req. 10.2 (exportar e reimportar sem alteração precisa ser
-idempotente — somar duplicaria a coleção inteira a cada ciclo). Somar é o que
-atende o caso de uso de planilha de aquisição. A escolha muda o que o usuário
-perde quando erra.
+O que se perde: o caso de uso de **planilha de aquisição** ("abri uma caixa,
+registrei o que veio") fica descoberto — quem quiser isso precisa somar à mão
+antes de enviar. A mitigação é a pré-visualização, que mostra **antes e depois**
+por linha: trocar 2 por 3 é visível na tela antes de gravar. Se o caso de
+aquisição se mostrar frequente, a saída é um modo de merge escolhido no upload,
+**não** mudar este default.
 
-**Recomendação**: substituir, por ser a única leitura sob a qual o arquivo do
-export é idempotente na volta. Mas é decisão do dono do produto.
+### P9 — tabela de staging, e a migração que ela implica
 
-### P9 — onde o arquivo vive entre a pré-visualização e a confirmação
+O Req. 10.5 exige que a confirmação grave **o que a pré-visualização mostrou**, e
+só o staging dá essa garantia. O cookie de sessão tem teto de 4KB e não comporta
+mil linhas (limite medido, não preferência). O reenvio do arquivo na confirmação
+não guarda estado, mas deixa o arquivo **mudar entre as duas etapas** — a
+pré-visualização passaria a descrever algo que não é o que será gravado, o que
+esvazia a barreira que o requisito existe para criar.
 
-O Req. 10.5 exige duas etapas. Isso implica guardar algo entre elas:
+Consequências que o plano precisa absorver: **esta feature tem migração**
+(`schema_format` é `:sql`, logo `db:migrate` para regenerar `db/structure.sql`);
+a tabela guarda dado do usuário fora da coleção e entra no mesmo regime de
+autorização (leitura por `Current.user`, pré-visualização alheia não é
+confirmável); e precisa de política de expiração e limpeza.
 
-- **Sessão (cookie)**: o cookie do Rails tem limite de 4KB. Um CSV de mil linhas não cabe. Descartado por medição de limite, não por gosto.
-- **Reenviar o arquivo na confirmação**: sem estado no servidor, mas o usuário faz upload duas vezes e o arquivo pode mudar entre as duas — a pré-visualização passaria a descrever um arquivo que não é o que vai ser gravado.
-- **Tabela de staging**: estado no servidor, com política de expiração e limpeza a definir. É o que dá a garantia de que o confirmado é exatamente o pré-visualizado.
+### P10 — 10.000 linhas
 
-**Recomendação**: tabela de staging, por ser a única que garante que a confirmação
-grava o que a pré-visualização mostrou. Custa uma migração e uma decisão de
-expiração.
+O teto natural do domínio hoje é **4917 variantes**: uma coleção que possuísse
+todas as impressões existentes daria um CSV desse tamanho. 10.000 é folga de
+pouco mais de 2× — aceita qualquer coleção real, inclusive com o catálogo
+crescendo, e ainda põe teto no trabalho de uma requisição. O limite é em
+**linhas**, não em bytes, porque é a unidade que o usuário entende e a que
+determina o custo real (uma linha = uma resolução de variante).
 
-### P10 — limite de tamanho do arquivo aceito no import
-
-Sem limite, um arquivo grande consome memória e tempo sem teto. Com limite
-arbitrário, rejeita import legítimo de quem tem coleção grande.
-
-Referência medida: o catálogo inteiro tem **4917 variantes**. Uma coleção que
-possuísse *todas* as impressões existentes daria um CSV de 4917 linhas — o teto
-natural do domínio hoje. Um limite abaixo disso rejeitaria um caso real; muito
-acima, não protege.
-
-**Recomendação**: limite em número de linhas, com folga sobre o teto do domínio,
-e mensagem de erro que diga o limite. Mas o número é decisão do dono do produto.
+É um número **escolhido, não derivado**: nenhuma medição diz que 10.000 é seguro
+e 10.001 não é. Ele protege contra o arquivo absurdo, não contra o grande-mas-
+legítimo. Se a medição de custo (POR-13) mostrar que 10.000 linhas não cabem no
+tempo de resposta, a saída é import assíncrono ou um limite menor **com
+medição** — não afrouxar este número no escuro.
 
 ## User Stories
 
