@@ -70,6 +70,15 @@
   </p>
 
   <%#
+    T7 — entrada do export (POR-01). Acima da lista de propósito: são 63 sets
+    na página real, e um controle depois deles exigiria percorrer a lista
+    inteira por rolagem, por tabulação e em leitura de leitor de tela. As
+    razões de rótulo, posição e ausência de condicional estão no próprio
+    partial.
+  %>
+  <%= render "progress/export_link" %>
+
+  <%#
     Achado MEDIUM da revisão de a11y: `aria-labelledby` apontando para o `<h1>`.
     Quem navega por lista (tecla "l" no NVDA) pula direto para a `<ul>` sem
     passar pelo título — sem nome próprio ela é anunciada só como "lista, 63

@@ -552,7 +552,8 @@ body {
 .wishlist-item__link:focus-visible,
 .wishlist-mark__input:focus-visible,
 .wishlist-mark__submit:focus-visible,
-.progress-set__catalog-link:focus-visible {
+.progress-set__catalog-link:focus-visible,
+.collection-export__link:focus-visible {
   outline: 2px solid currentcolor;
   outline-offset: 2px;
 }
@@ -573,7 +574,37 @@ body {
 
 .progress__title { font-size: 1.5rem; margin: 0 0 0.5rem; }
 
-.progress__count { font-size: 0.875rem; margin: 0 0 var(--gap); }
+.progress__count { font-size: 0.875rem; margin: 0 0 0.5rem; }
+
+/*
+ * Entrada do export da coleção (T7 / POR-01).
+ *
+ * `min-height` **e** `min-width` de 24px pelo SC 2.5.8, ao contrário de
+ * `.progress-set__catalog-link`, que declara só a altura. A diferença não é
+ * inconsistência: lá a omissão de `min-width` é justificada por o alvo ser um
+ * link de texto em fluxo cuja largura nunca chega perto de 24px, e declará-la
+ * não protegeria nada. Aqui o rótulo é maior ainda — a largura também nunca é
+ * o gargalo —, mas o "Done when" da T7 exige as duas declarações, e declarar o
+ * piso de um alvo que já o supera não custa nada nem mente sobre o layout. É a
+ * mesma escolha de `.site-header__action`, que declara as duas.
+ *
+ * Nenhuma largura fixa, nenhum `white-space: nowrap` e nenhum `overflow-x`: as
+ * três formas pelas quais um controle de texto empurraria a página para fora
+ * de 360px (Req. 2.5). O rótulo "Baixar minha coleção (CSV)" é longo o
+ * bastante para exigir quebra em 360px, e `inline-block` sem largura declarada
+ * é o que permite que ele quebre em vez de estourar a caixa. `overflow-wrap`
+ * cobre o caso extremo de fonte muito grande, como nas demais caixas da
+ * página.
+ */
+.collection-export { margin: 0 0 var(--gap); font-size: 0.875rem; }
+
+.collection-export__link {
+  display: inline-block;
+  min-height: 24px;
+  min-width: 24px;
+  padding: 0.375rem 0;
+  overflow-wrap: anywhere;
+}
 
 .progress__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 

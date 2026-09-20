@@ -1,0 +1,72 @@
+<%#
+  T7 — ponto de entrada do export da coleção (POR-01, POR-03).
+
+  ## Por que aqui, e por que não no cabeçalho
+
+  O cabeçalho já carrega três entradas para quem tem sessão ("Progresso por
+  set", "Lista de desejos", "Sair") e é renderizado em **toda** página,
+  inclusive no catálogo público. Uma quarta entrada ali custaria espaço na
+  única faixa que precisa caber em 360px em todas as páginas, e pagaria esse
+  custo para oferecer uma ação que o usuário faz raramente — baixar um arquivo
+  não é navegação, é um ato pontual sobre um dado que ele acabou de olhar.
+
+  O progresso por set é a página onde ele **olha a coleção inteira agregada**:
+  é ali que "quero isto num arquivo" nasce. Colocar o controle ao lado da
+  contagem de sets liga a ação ao dado que a motiva, que é o mesmo raciocínio
+  pelo qual o link do catálogo mora dentro do item do set e não no topo.
+
+  ## Por que acima da lista e não abaixo
+
+  A lista tem 63 itens na página real. Um controle no fim exigiria percorrer
+  os 63 para encontrá-lo — por rolagem, por tabulação e em leitura de leitor
+  de tela. Acima da lista ele é alcançável em um passo, e o `<p>` da contagem
+  de sets é o último elemento antes da lista: o controle fica junto do resumo
+  do conjunto, que é sobre o que o arquivo fala.
+
+  ## O rótulo
+
+  **"Baixar minha coleção (CSV)"**. Cada pedaço carrega uma informação que a
+  spec exige e que o usuário precisa antes de clicar: o verbo diz o que vai
+  acontecer, "minha coleção" diz **o que** o arquivo é — o critério explícito
+  de "diz o que o arquivo é, não 'Export'" —, e "(CSV)" diz o formato, que é o
+  que decide se ele vai conseguir abrir o arquivo. "Export", "Download CSV" ou
+  "Exportar" seriam vocabulário de sistema: descrevem a operação do ponto de
+  vista do servidor, não o objeto que chega na pasta de downloads.
+
+  O possessivo não é enfeite: a página lista **todos** os sets do catálogo,
+  incluindo os de que o usuário não tem carta nenhuma. "Baixar a coleção" ali
+  seria ambíguo com "baixar o catálogo", e o arquivo é só do que ele possui
+  (POR-02). "Minha" desfaz a ambiguidade no próprio rótulo, sem depender de
+  texto de apoio que ninguém lê.
+
+  ## Sem `download`, sem `aria-label` e sem JavaScript
+
+  O atributo `download` do HTML é **ignorado em navegação cross-origin** e aqui
+  seria redundante de qualquer forma: quem nomeia o arquivo é o
+  `Content-Disposition: attachment` do `CollectionExportsController` (T6), que
+  funciona igual em todo navegador e não pode ser contrariado pelo cliente.
+  Duas fontes para o nome do arquivo é como elas divergem depois.
+
+  Sem `aria-label` porque o texto visível **já** é o nome acessível completo e
+  distinto — é o oposto do caso dos 63 "Ver no catálogo", onde o texto se
+  repetia. Acrescentar um `aria-label` aqui só criaria uma segunda frase para
+  manter em sincronia, e arriscaria quebrar o SC 2.5.3 de quem usa comando de
+  voz se as duas divergissem.
+
+  Um `<a>` puro, sem JS: o download é uma requisição GET a uma rota que devolve
+  um arquivo. O projeto tem importmap com Stimulus deliberadamente não pinado,
+  e nada aqui pede JavaScript.
+
+  ## Anônimo
+
+  Este partial só é renderizado dentro da página de progresso, que exige sessão
+  (`ApplicationController` inclui `Authentication`). O anônimo nem chega ao
+  template — recebe 302 antes. Não há condicional aqui **de propósito**: um
+  `if authenticated?` sugeriria que o partial é seguro fora deste contexto, e a
+  segurança real é do filtro, não da marcação. O teste prova a ausência onde o
+  anônimo de fato renderiza HTML: o catálogo público.
+%>
+<p class="collection-export">
+  <%= link_to "Baixar minha coleção (CSV)", collection_export_path,
+              class: "collection-export__link" %>
+</p>

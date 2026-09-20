@@ -348,12 +348,12 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] O controle aparece para o usuário autenticado e **não** aparece para o anônimo, com teste para os dois casos
-- [ ] O rótulo está em português e diz o que o arquivo é, não "Export"
-- [ ] O alvo de toque tem `min-height`/`min-width` de 24px (SC 2.5.8), como o código novo desde a T4 da `colecao`
-- [ ] Teste de integração sobre o HTML renderizado prova a presença do link e o seu destino, com `SPEC_DEVIATION` no cabeçalho do arquivo (não há navegador no container)
-- [ ] Nenhum scroll horizontal em 360px (Req. 2.5)
-- [ ] **Checkbox da §5.2 de `.context/tasks.md` marcado** nesta task, junto com o desta linha
+- [x] O controle aparece para o usuário autenticado e **não** aparece para o anônimo, com teste para os dois casos
+- [x] O rótulo está em português e diz o que o arquivo é, não "Export"
+- [x] O alvo de toque tem `min-height`/`min-width` de 24px (SC 2.5.8), como o código novo desde a T4 da `colecao`
+- [x] Teste de integração sobre o HTML renderizado prova a presença do link e o seu destino, com `SPEC_DEVIATION` no cabeçalho do arquivo (não há navegador no container)
+- [x] Nenhum scroll horizontal em 360px (Req. 2.5)
+- [x] **Checkbox da §5.2 de `.context/tasks.md` marcado** nesta task, junto com o desta linha
 
 **Tests**: integration
 **Gate**: full

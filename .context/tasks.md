@@ -200,7 +200,7 @@ Regras de execução:
   - Denominador = `baseSetSize` (variantes base); parallels como métrica separada (P3).
   - _Requisitos: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
-- [ ] **5.2 Export CSV**
+- [x] **5.2 Export CSV**
   - `card_number`, identificador da variante, nome e quantidade.
   - _Requisitos: 10.1_
 
