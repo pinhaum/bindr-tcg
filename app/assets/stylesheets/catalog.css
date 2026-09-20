@@ -419,3 +419,131 @@ body {
 
 /* Área de flash atualizada por Turbo Stream: vazia não deve ocupar espaço. */
 .flash-area:empty { display: none; }
+
+/*
+ * Wishlist (T13 / Req. 8).
+ *
+ * Mesmas regras de 360px do catálogo: nada com largura fixa, tudo encolhe, e
+ * os alvos de toque nascem com os 24px do SC 2.5.8 — a dívida de a11y do
+ * `catalogo` diz que código novo não deve herdá-la.
+ */
+
+.wishlist { padding: var(--gap); }
+
+.wishlist__title { margin: 0 0 0.5rem; }
+
+.wishlist__count { font-size: 0.875rem; margin: 0 0 var(--gap); }
+
+.wishlist__empty { font-size: 0.9375rem; }
+
+.wishlist__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+
+.wishlist-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid currentcolor;
+  border-radius: 0.25rem;
+}
+
+.wishlist-item__card { margin: 0; min-width: 0; font-weight: 600; }
+
+.wishlist-item__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.wishlist-item__progress {
+  margin: 0;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.wishlist-item__owned,
+.wishlist-item__target { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/*
+ * O estado "atendido" **não** é comunicado só por cor (SC 1.4.1): a palavra
+ * "Atendido" está no texto e o contorno é reforço, não o sinal. Trocar o
+ * rótulo por um ícone colorido quebraria o critério.
+ */
+.wishlist-item__status {
+  padding: 0.125rem 0.375rem;
+  border: 1px solid currentcolor;
+  border-radius: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.wishlist-item--fulfilled { border-width: 2px; }
+
+.wishlist-item__remove-form { margin: 0; }
+
+.wishlist-item__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  min-width: 24px;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Marcar como desejada, no detalhe da carta. */
+
+.wishlist-mark { margin-top: 0.5rem; }
+
+.wishlist-mark__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+.wishlist-mark__label { white-space: nowrap; }
+
+/*
+ * Largura em `ch` e não em `px`: o campo precisa caber dois dígitos e encolher
+ * junto com o resto em 360px.
+ *
+ * `min-height` **e** `min-width` de 24px pelo SC 2.5.8, como todo controle
+ * interativo do projeto. `4ch` quase sempre passa dos 24px com a fonte do
+ * corpo, mas "quase sempre" depende da fonte do usuário — a convenção daqui é
+ * declarar os dois e não depender de cálculo (achado LOW da revisão de a11y).
+ */
+.wishlist-mark__input {
+  width: 4ch;
+  min-height: 24px;
+  min-width: 24px;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.wishlist-mark__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  min-width: 24px;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* SC 2.4.11 — mesmo indicador de foco reforçado dos controles de posse. */
+.wishlist-item__remove:focus-visible,
+.wishlist-item__link:focus-visible,
+.wishlist-mark__input:focus-visible,
+.wishlist-mark__submit:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}

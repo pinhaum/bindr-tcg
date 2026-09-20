@@ -1,0 +1,99 @@
+<% content_for :title, "Lista de desejos" %>
+
+<%#
+  Req. 8.2 / COL-15 — a lista do usuário da sessão, e de mais ninguém. O
+  recorte é do controller (`WishlistItem.for_user(Current.user)`); esta view
+  não tem caminho nenhum para outro usuário.
+
+  Toda a página é renderizada a partir de **uma** consulta: `with_fulfillment`
+  traz a posse pelo `LEFT JOIN` e `includes(card_variant: :card)` traz variante
+  e carta. Ler `item.card_variant.card.name` dentro do loop sem isso seria N+1
+  pelo número de desejos.
+
+  Não há controle de sessão a esconder aqui como em `collection_items/_ownership`:
+  o controller exige sessão em toda action, então quem chega nesta view está
+  autenticado por construção.
+%>
+<main class="wishlist">
+  <h1 class="wishlist__title">Lista de desejos</h1>
+
+  <% if @items.empty? %>
+    <section class="wishlist__empty">
+      <p>Você ainda não marcou nenhuma carta como desejada.</p>
+      <p>
+        Abra o detalhe de uma carta no
+        <%= link_to "catálogo", catalog_path %> e escolha a impressão que quer
+        adquirir.
+      </p>
+    </section>
+  <% else %>
+    <p class="wishlist__count">
+      <%= pluralize(@items.size, "item", plural: "itens") %>
+    </p>
+
+    <ul class="wishlist__list">
+      <% @items.each do |item| %>
+        <% variant = item.card_variant %>
+        <% card = variant.card %>
+        <li class="wishlist-item <%= "wishlist-item--fulfilled" if item.fulfilled? %>">
+          <p class="wishlist-item__card">
+            <%= link_to "#{card.name} #{variant.variant_code}", card_path(card.card_number),
+                        class: "wishlist-item__link" %>
+          </p>
+
+          <%#
+            Req. 8.3 / COL-16 — o sinal de atendido é **derivado** da comparação
+            entre posse e alvo, feita na consulta. Nada aqui lê uma coluna de
+            flag, porque não existe nenhuma.
+
+            O estado não é comunicado só por cor: a palavra "Atendido" está no
+            texto (SC 1.4.1). O número de cópias e o alvo aparecem ao lado para
+            que o item diga *por que* está ou não atendido — "2 de 2" e "1 de 2"
+            explicam o rótulo sem exigir que o usuário vá conferir a coleção.
+          %>
+          <p class="wishlist-item__progress">
+            <span class="wishlist-item__owned"><%= item.owned_quantity %></span>
+            de
+            <span class="wishlist-item__target"><%= item.target_quantity %></span>
+            cópia(s)
+            <% if item.fulfilled? %>
+              <span class="wishlist-item__status wishlist-item__status--fulfilled">Atendido</span>
+            <% else %>
+              <span class="wishlist-item__status wishlist-item__status--pending">Faltam <%= item.target_quantity - item.owned_quantity %></span>
+            <% end %>
+          </p>
+
+          <%#
+            Req. 8.4 / COL-17 — remoção **por id do item**. O rótulo acessível
+            nomeia a carta e a impressão: numa lista de vinte desejos, vinte
+            botões "Remover" idênticos não se distinguem por lista de botões
+            (SC 2.4.6 / 4.1.2). O texto visível fica curto porque o alvo precisa
+            caber em 360px.
+
+            `button_to` gera `<form method="post">` com `_method=delete` e token
+            CSRF: funciona sem JavaScript, como o resto da feature.
+
+            **O rótulo carrega também o estado de atendimento** (achado MEDIUM
+            da revisão de a11y). Um atalho comum de leitor de tela é navegar por
+            botão, pulando texto solto: sem isto, quem percorre a lista assim
+            ouviria vinte "Remover X da lista de desejos" e nunca saberia quais
+            já estão atendidos — que é a informação pela qual se abre a lista. É
+            a mesma lição do controle de posse, cuja região viva precisou passar
+            a nomear carta e impressão em vez de só anunciar o número.
+
+            Isto **não** é região viva e não duplica anúncio nenhum: é o nome
+            acessível de um botão, lido quando o foco chega nele. A lição da T11
+            — uma região viva por operação — continua valendo, e a wishlist não
+            introduz nenhuma.
+          %>
+          <% estado = item.fulfilled? ? "atendido" : "faltam #{item.target_quantity - item.owned_quantity}" %>
+          <%= button_to "Remover", wishlist_item_path(item), method: :delete,
+                        class: "wishlist-item__remove",
+                        form_class: "wishlist-item__remove-form",
+                        aria: { label: "Remover #{card.name} #{variant.variant_code} " \
+                                       "da lista de desejos (#{estado})" } %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</main>

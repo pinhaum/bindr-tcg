@@ -41,6 +41,7 @@ class CatalogController < ApplicationController
     @card = Card.includes(card_variants: :card_set).find_by!(card_number: params[:id])
     @variants = @card.card_variants.sort_by { |variant| variant.variant_code }
     @owned_quantities = owned_quantities(@variants)
+    @wishlist_targets = wishlist_targets(@variants)
   end
 
   private
@@ -94,5 +95,36 @@ class CatalogController < ApplicationController
                     .where(card_variant_id: variants.map(&:id))
                     .pluck(:card_variant_id, :quantity)
                     .to_h
+    end
+
+    # Um hash `card_variant_id => target_quantity` para as impressões desta
+    # carta, em **uma** consulta (Req. 8.1 / COL-14): o formulário de desejo
+    # aparece por variante no detalhe, e perguntar item a item dentro do loop
+    # seria N+1 — o mesmo problema que `#owned_quantities` resolve para a posse.
+    #
+    # `authenticated?` **antes** de ler `Current.user`, pela quinta vez nesta
+    # feature e pelo mesmo motivo: `allow_unauthenticated_access` remove o
+    # `before_action :require_authentication`, que era quem chamava
+    # `resume_session`. Sem esta chamada, `Current.user` seria `nil` aqui e
+    # **todo usuário autenticado veria "Quero esta" numa impressão que já está
+    # na sua lista**, com a página respondendo 200 — defeito silencioso.
+    #
+    # `for_user(nil)` é `none` para o anônimo: hash vazio, sem consulta e sem
+    # ramo especial. Quem decide não renderizar o formulário é a view.
+    #
+    # **A chamada é redundante hoje e não deve ser removida**, exatamente como a
+    # de `#owned_total` (T11). `#show` chama `#owned_quantities` uma linha antes,
+    # e ela já resolveu a sessão — o sensor da T13 confirmou que remover **só**
+    # esta chamada sobrevive. Removidas as duas, porém, o formulário volta a
+    # dizer "Quero esta" para uma impressão que já está na lista do usuário, com
+    # a página em 200, e um teste morre. A redundância existe para que uma
+    # reordenação futura de `#show` não reintroduza o defeito silencioso.
+    def wishlist_targets(variants)
+      authenticated?
+
+      WishlistItem.for_user(Current.user)
+                  .where(card_variant_id: variants.map(&:id))
+                  .pluck(:card_variant_id, :target_quantity)
+                  .to_h
     end
 end

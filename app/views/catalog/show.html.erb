@@ -149,6 +149,22 @@
           %>
           <%= render "collection_items/ownership",
                      variant: variant, card: @card, quantity: owned_quantity(variant) %>
+
+          <%#
+            Req. 8.1 / COL-14 — marcar a impressão como desejada. Fica aqui e
+            não na grade: o tile não comporta um segundo controle em 360px sem
+            espremer o de posse (a justificativa longa está no próprio partial).
+
+            Só para quem tem sessão, pelo mesmo motivo do controle de posse: o
+            catálogo é público (Req. 6.3) e um formulário que sempre redireciona
+            para o login seria promessa quebrada.
+          %>
+          <% if authenticated? %>
+            <%= render "wishlist_items/mark",
+                       variant: variant, card: @card,
+                       target_quantity: wishlist_target(variant),
+                       marked: wishlist_target(variant).present? %>
+          <% end %>
         </li>
       <% end %>
     </ul>

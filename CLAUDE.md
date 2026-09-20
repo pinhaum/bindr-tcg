@@ -8,20 +8,23 @@ A feature **`catalogo` está encerrada e verificada** (14 tasks, dois lotes, amb
 PASS em `.specs/features/catalogo/validation.md`): ingestão, busca com tolerância
 a typo, filtros, grade e página de detalhe funcionam e são **públicos**.
 
-A feature **`colecao` (Fase 4) está em execução**: a Fase 1 (T1–T4, identidade e
-sessão) e a Fase 2 (T5–T8, posse por variante) fecharam, e com elas
-`.context/tasks.md` §4.1, §4.2 e §4.3. **T9–T13 estão abertas** — filtro de
-posse, total e wishlist.
+A feature **`colecao` (Fase 4) tem as 13 tasks executadas e ainda NÃO foi
+verificada**: Fase 1 (T1–T4, identidade e sessão), Fase 2 (T5–T8, posse por
+variante) e Fase 3 (T9–T13, filtro de posse, total e wishlist) fecharam, e com
+elas a **§4 inteira** de `.context/tasks.md` (§4.1 a §4.5). O próximo passo é o
+Verifier, com **autor ≠ verificador**, e relatório em
+`.specs/features/colecao/validation.md`.
 
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
-  `User`, `Session`, `Current`.
+  `WishlistItem`, `User`, `Session`, `Current`.
 - **Controllers**: `CatalogController` (público), `CollectionItemsController`,
-  `SessionsController`, `RegistrationsController`, e o concern `Authentication`.
-- **Cinco migrações**, de `20260919120000` a `20260919120400`. `schema_format`
+  `WishlistItemsController`, `SessionsController`, `RegistrationsController`, e
+  o concern `Authentication`.
+- **Seis migrações**, de `20260919120000` a `20260919120500`. `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **17 arquivos de teste, 288 testes**, rubocop limpo.
+- **26 arquivos de teste, 395 testes**, rubocop limpo.
 - **Importmap instalado na T8**, com Turbo pinado para `turbo.js` e **Stimulus
   deliberadamente não pinado** (não há controller Stimulus no projeto). O
   placeholder de imagem do catálogo continua resolvido em CSS — não trocar por
@@ -29,7 +32,9 @@ O que existe hoje:
 
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção
-declarada com `allow_unauthenticated_access` — hoje só o `CatalogController`.
+declarada com `allow_unauthenticated_access` — hoje o `CatalogController` e o
+`RegistrationsController`. `CollectionItemsController` e
+`WishlistItemsController` não declaram nada e por isso exigem sessão.
 Uma action nova que não declare nada já está protegida.
 
 Dívidas abertas que valem saber antes de mexer em autenticação:

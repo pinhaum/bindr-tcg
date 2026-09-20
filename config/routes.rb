@@ -31,5 +31,17 @@ Rails.application.routes.draw do
   post "collection_items/:card_variant_id/decrement" => "collection_items#decrement",
        as: :decrement_collection_item
 
+  # Wishlist (Req. 8). Ao contrário da posse, aqui **existe id de item na URL**:
+  # remover parte da própria lista, onde o item existe por definição. É o que
+  # torna real o 404 por id alheio do critério 4 da história de isolamento — a
+  # T7 registrou `SPEC_DEVIATION` por não ter, no desenho da posse, nenhuma URL
+  # onde um id coubesse.
+  #
+  # `path: "wishlist"` porque é o nome que o usuário lê na barra de endereço;
+  # os helpers continuam `wishlist_items_path`, alinhados ao model e ao
+  # controller. `create` continua recebendo `card_variant_id` no corpo: o
+  # usuário nunca aparece na URL, vem de `Current.user` (Req. 6.5).
+  resources :wishlist_items, only: %i[index create destroy], path: "wishlist"
+
   root "catalog#index"
 end

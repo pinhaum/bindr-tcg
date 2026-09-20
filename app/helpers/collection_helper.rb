@@ -22,4 +22,20 @@ module CollectionHelper
 
     (@owned_quantities || {}).fetch(variant.id, 0)
   end
+
+  # O alvo de wishlist já registrado para a variante, ou `nil` quando ela não
+  # está na lista de desejos. Mesmo contrato de `owned_quantity`: o controller
+  # carrega **um** hash antes de renderizar (`CatalogController#wishlist_targets`)
+  # e a view só o consulta — perguntar item a item dentro do loop das impressões
+  # seria N+1.
+  #
+  # `nil` e não zero, ao contrário da posse: aqui a distinção importa para a
+  # view. Zero seria um alvo inválido (`CHECK (target_quantity >= 1)`), e o que
+  # o formulário precisa saber é se há desejo registrado — para dizer "Quero
+  # esta" ou "Atualizar desejo".
+  def wishlist_target(variant)
+    return nil if variant.nil?
+
+    (@wishlist_targets || {})[variant.id]
+  end
 end

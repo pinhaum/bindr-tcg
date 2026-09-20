@@ -184,7 +184,7 @@ Regras de execução:
   - Total de cartas possuídas contando cópias.
   - _Requisitos: 7.6, 7.7_
 
-- [ ] **4.5 Wishlist**
+- [x] **4.5 Wishlist**
   - Marcar variante como desejada com quantidade-alvo. Listar. Remover.
   - Sinalizar item atendido quando a quantidade possuída atingir a alvo.
   - _Requisitos: 8.1, 8.2, 8.3, 8.4_

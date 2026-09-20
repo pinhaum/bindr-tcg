@@ -1160,7 +1160,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T13: Wishlist — marcar, listar, remover e sinalizar atendido
+### T13: Wishlist — marcar, listar, remover e sinalizar atendido ✅
 
 **What**: Controller e view da wishlist do usuário da sessão, com "atendido" derivado na consulta.
 **Where**: `app/controllers/wishlist_items_controller.rb`
@@ -1174,11 +1174,132 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Marcar variante com alvo inteiro maior que zero; listar apenas os itens do usuário da sessão; remover
-- [ ] "Atendido" é derivado comparando posse com alvo, nunca persistido como flag
-- [ ] Item cuja variante sumiu da fonte continua listado — a ingestão não deleta
-- [ ] Anônimo é redirecionado; id de item de outro usuário devolve 404
-- [ ] Teste de integração cobre alvo 2, posse 1 (não atendido), posse 2 (atendido) e remoção
+- [x] Marcar variante com alvo inteiro maior que zero; listar apenas os itens do usuário da sessão; remover
+- [x] "Atendido" é derivado comparando posse com alvo, nunca persistido como flag
+- [x] Item cuja variante sumiu da fonte continua listado — a ingestão não deleta
+- [x] Anônimo é redirecionado; id de item de outro usuário devolve 404
+- [x] Teste de integração cobre alvo 2, posse 1 (não atendido), posse 2 (atendido) e remoção
+
+**Decisões da execução:**
+
+- **A rota de remoção é por id de item, e é isso que torna real o critério que
+  a T7 não pôde cumprir.** `DELETE /wishlist/:id` existe porque remover parte
+  da própria lista, onde o item existe por definição — ao contrário do "+1" da
+  posse, que nasce na grade do catálogo, onde normalmente ainda não há registro
+  nenhum. O `SPEC_DEVIATION` no cabeçalho de
+  `test/integration/collection_authorization_test.rb` dizia que o critério 4 da
+  história de isolamento migrava para cá; ele está entregue, e o teste não é
+  encenado. `resources :wishlist_items, only: %i[index create destroy], path:
+  "wishlist"`: o usuário lê `/wishlist` na barra de endereço, os helpers
+  continuam alinhados ao model e ao controller.
+- **O 404 é garantido por `for_user(Current.user).find(params[:id])`, nunca
+  por `find_by` + checagem de dono.** `find` dentro do escopo do usuário
+  levanta `RecordNotFound` para id alheio, e o Rails traduz em **404** — a
+  mesma resposta de um id inexistente. Um `find_by` com `if item.user !=
+  Current.user` responderia 403, e 403 **é** a informação que o critério manda
+  não revelar: "existe e não é seu". Dois testes travam isso, e o segundo é o
+  que discrimina de verdade — ele compara o status do id alheio com o do id
+  inexistente e exige que sejam **iguais**. Um terceiro teste, vindo da revisão,
+  verifica o **corpo** da resposta: status correto com o e-mail do dono vazando
+  no HTML continuaria revelando existência.
+- **"Atendido" é `LEFT JOIN`, e o `LEFT` é a decisão central do scope.**
+  `WishlistItem.with_fulfillment` junta `collection_items` pelo **par completo**
+  (`user_id` **e** `card_variant_id`) e projeta
+  `COALESCE(collection_items.quantity, 0) AS owned_quantity`. Um `INNER` sumiria
+  da lista exatamente com quem deseja o que nunca teve — o caso normal da
+  wishlist, e o defeito seria silencioso (200 com lista curta demais). O sensor
+  confirmou: trocar `LEFT` por `INNER` mata **6** testes. Largar o `user_id` da
+  condição de join mata o teste de vazamento cruzado, onde a posse do outro
+  usuário atenderia o desejo deste.
+- **Nenhuma coluna de flag, e a afirmação tem teste contra o schema.** Um teste
+  compara `WishlistItem.column_names` com a lista exata das seis colunas, então
+  acrescentar `fulfilled` denuncia. Outro prova o comportamento pelo lado que
+  importa: um "+1" na coleção muda o atendimento **sem nenhuma escrita na
+  wishlist** (`assert_no_changes` no `updated_at` do item). Uma flag persistida
+  ficaria para trás ali.
+- **N+1 resolvido no scope, e o teste é de constância e não de orçamento.**
+  `with_fulfillment` traz posse pelo join e variante e carta por `includes` —
+  três consultas para a lista inteira, medidas. O teste compara o número de
+  consultas com **2 itens** e com **8**: um teto fixo ("no máximo N") dependeria
+  de quanto o layout e a sessão consultam, que não é assunto desta task, e
+  deixaria passar um N+1 real sempre que o teto fosse generoso. Comparar dois
+  tamanhos isola exatamente o que importa: consulta que cresce com o número de
+  itens.
+- **Plano medido, e nenhum índice criado — o revisor da T12 estava certo.**
+  `EXPLAIN (ANALYZE, BUFFERS)` com 300 desejos do usuário (1800 no total) contra
+  12.150 linhas de coleção: o lado da wishlist entra por
+  `index_wishlist_items_on_user_id`, o da coleção por
+  `index_collection_items_on_user_id_and_card_variant_id`, `Merge Right Join`,
+  **sem full table scan em nenhum dos dois**, execução de **0.241 ms**. Com
+  volume de teste pequeno o planejador escolhe Seq Scan do lado da coleção (150
+  linhas, 2 buffers) — que é a escolha **certa** para uma tabela minúscula, não
+  índice faltando. Vale o padrão da T10: medido antes, e não criado.
+- **A wishlist ganhou rota própria e entrada no cabeçalho**, não um recorte do
+  catálogo: ela mistura impressões de sets e cartas diferentes e não compartilha
+  filtro, busca nem paginação com a grade. É o único caminho até ela, e só
+  aparece para quem tem sessão — um link que só leva ao login é promessa
+  quebrada.
+- **Marcar como desejada fica SÓ no detalhe, e a decisão é do Req. 2.5.** O tile
+  da grade já carrega o controle de posse numa coluna de `minmax` abaixo de
+  180px; acrescentar ali um campo numérico mais um botão espremeria o caminho
+  principal do produto (registrar uma caixa de boosters pelo celular) para
+  acomodar um controle secundário. No detalhe cada impressão é um bloco inteiro
+  e os dois cabem. Custo aceito: marcar um desejo custa um clique a mais. Dois
+  testes travam a decisão — um exige o controle de posse na grade, outro exige a
+  **ausência** do de desejo, autenticado e anônimo.
+- **O `authenticated?` de `CatalogController#wishlist_targets` é redundante hoje
+  e não deve ser removido — e o sensor mostrou por quê.** Removida **só** ele, a
+  mutação **sobrevive**, porque `#owned_quantities` roda uma linha antes e já
+  resolveu a sessão. Removidas as duas, o formulário volta a dizer "Quero esta"
+  para uma impressão que já está na lista, com a página em 200, e um teste
+  morre. É a mesma redundância deliberada que a T11 documentou em
+  `#owned_total`: ela existe para que uma reordenação futura de `#show` não
+  reintroduza o defeito silencioso do `allow_unauthenticated_access`. Quinta
+  aparição da armadilha na feature.
+- **O controller da wishlist NÃO declara acesso público, e por isso não precisa
+  de `authenticated?` nenhum.** O default de `ApplicationController` exige
+  sessão, o `require_authentication` já resolveu a sessão quando a action
+  começa, e o anônimo é redirecionado antes de qualquer coisa rodar. A armadilha
+  do `allow_unauthenticated_access` só atinge controller **público** que lê dado
+  do usuário — acrescentar `authenticated?` aqui seria cerimônia.
+- **Achado HIGH de a11y, corrigido: `aria-label` no campo violava SC 2.5.3
+  (*Label in Name*).** `aria-label` tem precedência **total** sobre `<label
+  for>` na computação do nome acessível, então um `aria-label` de "Quantas
+  cópias de X você quer" no `<input>` **descartava** o rótulo visível "Quero" —
+  e quem usa comando de voz ("clique em Quero") deixava de conseguir mirar o
+  campo. É o oposto do padrão de `collection_items/_ownership`, onde o
+  `aria-label` está em botões cujo texto visível é `aria-hidden` e não há
+  rótulo concorrente. A correção move o contexto de carta e impressão para um
+  `role="group"` com `aria-label` no próprio `<form>`, o que resolve junto o
+  achado MEDIUM de formulários indistinguíveis ao navegar por formulário. Dois
+  testes travam: um exige o nome do grupo, outro exige a **ausência** de
+  `aria-label` no campo.
+  - **`role` e `aria` precisam ir dentro de `html:` no `form_with`.** No nível
+    de cima são engolidos em silêncio e o grupo fica sem nome acessível. Custou
+    uma rodada; o teste é o que denunciou.
+- **O botão "Remover" carrega o estado de atendimento no rótulo acessível**
+  (achado MEDIUM de a11y). Um atalho comum de leitor de tela é navegar por
+  botão, pulando texto solto: sem isso, quem percorre a lista assim ouviria
+  vinte "Remover X da lista de desejos" e nunca saberia quais já estão
+  atendidos — que é a informação pela qual se abre a lista. **Isto não é região
+  viva** e não duplica anúncio: é nome acessível de botão, lido quando o foco
+  chega nele. A lição da T11 (uma região viva por operação) continua valendo, e
+  a wishlist não introduz nenhuma.
+- **"Atendido" não é comunicado só por cor** (SC 1.4.1): a palavra está no
+  texto, e o item não atendido diz quantas faltam. O contorno mais grosso do
+  item atendido é reforço, não o sinal.
+- **Quatro testes de comportamento vieram da revisão de testes e não existiam.**
+  Alvo não numérico e alvo ausente (o type-casting do Active Record era
+  inferência, não fato, até haver teste); `card_variant_id` inexistente
+  devolvendo 404, que o comentário do controller prometia sem verificar; e a
+  asserção de redirect que faltava — o teste afirmava em comentário que o
+  usuário voltava ao detalhe e não verificava nada, e `ActionDispatch::
+  IntegrationTest` **não** popula `Referer` a partir da navegação anterior como
+  um navegador faria, então o header vai explícito.
+- **Alvo inválido vira mensagem em português, e a garantia continua sendo do
+  banco.** O `CHECK (target_quantity >= 1)` da T12 é o que nenhuma corrida
+  atravessa; a validação do model existe só para o formulário poder **dizer** o
+  que está errado em vez de estourar 500.
 
 **Tests**: integration
 **Gate**: full

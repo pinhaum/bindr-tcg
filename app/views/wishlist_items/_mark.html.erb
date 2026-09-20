@@ -1,0 +1,73 @@
+<%#
+  Req. 8.1 / COL-14 — marcar uma variante como desejada com quantidade-alvo.
+
+  **Só na página de detalhe, e não na grade do catálogo.** A decisão é de
+  layout e tem um requisito vigente por trás: o Req. 2.5 exige a grade usável
+  em 360px sem scroll horizontal, e o tile já carrega o controle de posse
+  (`+1`/`−1` e a contagem) numa coluna de `minmax` abaixo de 180px. Acrescentar
+  ali um campo numérico mais um botão espremeria tudo ou quebraria a linha, e o
+  controle de posse — que é o caminho principal do produto, registrar uma caixa
+  de boosters pelo celular — perderia espaço para um controle secundário. No
+  detalhe cada variante ocupa um bloco inteiro e os dois cabem lado a lado.
+
+  Consequência aceita: marcar um desejo custa um clique a mais (abrir o
+  detalhe) do que registrar posse. É o mesmo raciocínio que a T8 usou para não
+  empilhar um controle por variante dentro do tile.
+
+  Anônimo não chega a ver este partial: o detalhe o renderiza só para quem está
+  autenticado, e o `WishlistItemsController` exige sessão em toda action de
+  qualquer forma (Req. 6.4).
+%>
+<div class="wishlist-mark">
+  <%#
+    **O contexto de carta e impressão fica no `<form>`, não no `aria-label` do
+    campo.** Achado HIGH da revisão de a11y (SC 2.5.3, *Label in Name*), e a
+    armadilha é sutil: `aria-label` tem precedência **total** sobre `<label
+    for>` na computação do nome acessível. Um `aria-label` de "Quantas cópias de
+    X você quer" no `<input>` faria o rótulo visível "Quero" ser **descartado**
+    da árvore de acessibilidade, e quem usa comando de voz ("clique em Quero")
+    não conseguiria mirar o campo — o nome acessível precisa **conter** o texto
+    visível.
+
+    É o oposto do que `collection_items/_ownership` faz, e a diferença é que lá
+    o `aria-label` está em botões cujo texto visível é `aria-hidden` (`+1`/`−1`):
+    sem label visível concorrente, não há o que sobrescrever.
+
+    O `role="group"` com `aria-label` resolve o outro lado do mesmo problema: a
+    página de detalhe renderiza este formulário uma vez por impressão, e sem
+    identificação própria quem navega por formulário ouviria "formulário"
+    repetido, sem distinguir qual impressão é qual.
+  %>
+  <%#
+    `role` e `aria` vão dentro de `html:`: `form_with` só repassa ao `<form>` o
+    que está ali, e no nível de cima seriam engolidos em silêncio — o grupo
+    ficaria sem nome acessível e o teste é o que denuncia.
+  %>
+  <%= form_with url: wishlist_items_path, method: :post,
+                class: "wishlist-mark__form",
+                html: { role: "group",
+                        aria: { label: "Marcar #{card.name} #{variant.variant_code} como desejada" } } do |form| %>
+    <%= form.hidden_field :card_variant_id, value: variant.id %>
+
+    <%#
+      `<label>` de verdade e não `placeholder`: placeholder some ao digitar e
+      não é rótulo acessível. O `for`/`id` carrega o id da variante porque a
+      página lista várias impressões e ids repetidos quebrariam a associação de
+      todas menos a primeira.
+
+      `min="1"` espelha o `CHECK (target_quantity >= 1)` do banco — é dica para
+      o navegador, não garantia. A garantia é do schema, e a validação do model
+      é o que transforma um alvo inválido que chegue mesmo assim em mensagem em
+      português em vez de 500.
+    %>
+    <%= form.label :target_quantity, "Quero", class: "wishlist-mark__label",
+                   for: "wishlist_target_#{variant.id}" %>
+    <%= form.number_field :target_quantity, value: target_quantity, min: 1, step: 1,
+                          id: "wishlist_target_#{variant.id}",
+                          class: "wishlist-mark__input" %>
+
+    <%= form.submit marked ? "Atualizar desejo" : "Quero esta",
+                    class: "wishlist-mark__submit",
+                    data: { disable_with: false } %>
+  <% end %>
+</div>

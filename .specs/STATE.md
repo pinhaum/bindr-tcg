@@ -48,17 +48,24 @@
 > estado, decisões, armadilhas de ambiente e método para a feature `colecao`.
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
-- **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T12 fechada**
-  (tabela, model e garantias de banco de `wishlist_items`; **a primeira
-  migração da feature**, `20260919120500`). Fase 2 (posse) encerrada com T5–T8.
-  Resta **T13**: controller, views e "atendido" derivado.
-  Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois lotes verificados (B1 e
-  B2, ambos PASS, autor ≠ verificador). Os achados dos Verifiers e da revisão
-  de a11y foram corrigidos e commitados.
-- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
-  T6, T7, T8, T9, T10, T11, **T12**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
-  `.context/tasks.md` §4.1, §4.2, §4.3 e **§4.4** fechados. A §4.2 cobria T5+T6+T7 e
+- **Feature**: colecao (`.specs/features/colecao/`) — **as 13 tasks fechadas**
+- **Phase / Task**: Feature `colecao` **COM AS 13 TASKS EXECUTADAS**. A T13
+  fechou a Fase 3, e com ela a **§4.5 e a §4 inteira** de `.context/tasks.md`
+  (§4.1 a §4.5 todas marcadas; a seção não tem marcador de nível superior).
+  Fase 1 (T1–T4), Fase 2 (T5–T8) e Fase 3 (T9–T13) encerradas.
+  **A feature NÃO está verificada** — falta o Verifier, que é o próximo passo.
+  Feature `catalogo` ENCERRADA E VERIFICADA: 14 de 14 tasks, os dois lotes
+  verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os achados dos
+  Verifiers e da revisão de a11y foram corrigidos e commitados.
+- **Completed**: `catalogo` inteira (14 tasks). `colecao`: **T1 a T13, todas**.
+  `colecao` Fase 1 (T1–T4), Fase 2 (T5–T8) e **Fase 3 (T9–T13)** encerradas;
+  `.context/tasks.md` §4.1, §4.2, §4.3, §4.4 e **§4.5** fechados — **a §4
+  inteira**. A §4.5 cobria T12+T13 e fechou na T13, conferida bullet a bullet:
+  "Marcar variante como desejada com quantidade-alvo. Listar. Remover." são as
+  três actions do `WishlistItemsController` (T13) sobre a tabela e o model da
+  T12; "Sinalizar item atendido quando a quantidade possuída atingir a alvo" é
+  o `LEFT JOIN` derivado de `WishlistItem.with_fulfillment` (T13). Requisitos
+  8.1, 8.2, 8.3 e 8.4 todos cobertos. A §4.2 cobria T5+T6+T7 e
   fechou na T7. A **§4.3 cobria T6+T8 e fechou na T8**, conferida bullet a
   bullet: "incremento e decremento em ação única, sem formulário" e "sem
   recarregar a página inteira" — a primeira metade é T6 (um `POST` por
@@ -72,22 +79,82 @@
   dentro do `CatalogQuery`, que é o query object da 3.1, com o usuário injetado
   pelo chamador) somada à **T10** (plano de execução medido, sem full table
   scan na tabela de coleção). "Total de cartas possuídas contando cópias" é a
-  **T11** (`sum(:quantity)`, não `count`). **A §4.5 continua aberta na T12 e fecha na
-  T13**: ela cobre T12+T13 e exige "Marcar variante como desejada. Listar.
-  Remover." e "Sinalizar item atendido" — os quatro verbos são do
-  **controller**, que é a T13. A T12 entregou só tabela, model e provas de
-  banco, então nenhum bullet da §4.5 é verdadeiro ainda.
+  **T11** (`sum(:quantity)`, não `count`). A **§4.5 fechou na T13**: ela cobria T12+T13, e os quatro
+  verbos ("marcar", "listar", "remover", "sinalizar atendido") são do
+  **controller**, que é a T13 — a T12 tinha entregado só tabela, model e provas
+  de banco. Com ela, **a §4 inteira está fechada**.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T13** de `.specs/features/colecao/tasks.md`, a
-  última da feature (controller e views da wishlist: marcar, listar, remover, e
-  "atendido" derivado na consulta). Ela **fecha a §4.5** de `.context/tasks.md`
-  e a feature `colecao` inteira. A decisão central segue de pé: **não rodar
+- **Next step**: **VERIFICAÇÃO da feature `colecao`.** Não há mais task a
+  executar — as 13 fecharam. O que falta é o Verifier, com **autor ≠
+  verificador** (quem executou T1–T13 não verifica), em dois lotes conforme o
+  "Plano de delegação" do `tasks.md`: **Fase 2 (T5–T8)** e **Fase 3 (T9–T13)**;
+  a Fase 1 (T1–T4) também não foi verificada e precisa entrar. Relatório em
+  `.specs/features/colecao/validation.md`, no formato dos dois lotes do
+  `catalogo` (`.specs/features/catalogo/validation.md`, B1 linhas 1–414, B2 a
+  partir da 419). **Este arquivo não foi escrito pelo autor das tasks, de
+  propósito.** A decisão central segue de pé: **não rodar
   `bin/rails generate authentication`**.
-- **O que a T12 entregou, e o que a T13 herda dela.** A tabela
+- **O que a T13 entregou, e o que a verificação vai olhar.** Controller,
+  rotas, duas views e um scope: `WishlistItemsController` (`index`, `create`,
+  `destroy`), `resources :wishlist_items, only: %i[index create destroy], path:
+  "wishlist"`, `wishlist_items/index.html.erb` e `wishlist_items/_mark.html.erb`,
+  e `WishlistItem.with_fulfillment`. Nenhuma migração — a T12 já tinha
+  entregado a tabela. **395 testes, rubocop limpo.**
+  - **O critério 4 da história de isolamento (404 por id alheio) está
+    ENTREGUE, e o `SPEC_DEVIATION` da T7 pode ser lido como resolvido.** A
+    rota `DELETE /wishlist/:id` existe, e o 404 sai de
+    `for_user(Current.user).find(params[:id])` — `RecordNotFound` por
+    construção, sem checagem de dono espalhada. Três testes: um exige 404 e
+    item intacto, um exige que o status do id alheio seja **igual** ao do id
+    inexistente (é ele que distingue 404 de 403 de verdade), e um exige que o
+    **corpo** não vaze o e-mail do dono. O cabeçalho de
+    `test/integration/collection_authorization_test.rb` continua correto como
+    histórico: ele diz que o critério migra para a T13, e migrou.
+  - **"Atendido" nunca foi persistido, e há duas provas disso.** Um teste
+    compara `WishlistItem.column_names` com as seis colunas exatas (uma coluna
+    de flag nova denuncia); outro prova pelo comportamento, com
+    `assert_no_changes` no `updated_at` do item enquanto um "+1" na coleção
+    muda o atendimento.
+  - **O `LEFT` do join é a linha mais frágil do scope.** Trocado por `INNER`,
+    **6 testes morrem** (medido). Sem o `user_id` na condição de join, a posse
+    de outro usuário atende o desejo deste e 1 teste morre. Quem for mexer em
+    `with_fulfillment` precisa saber disso antes.
+  - **Plano de execução MEDIDO, nenhum índice criado.** Com 300 desejos do
+    usuário e 12.150 linhas de coleção: `Merge Right Join`, wishlist por
+    `index_wishlist_items_on_user_id`, coleção por
+    `index_collection_items_on_user_id_and_card_variant_id`, **sem full table
+    scan**, 0.241 ms. O `ecc:database-reviewer` da T12 estava certo. Com volume
+    de teste pequeno o planejador usa Seq Scan do lado da coleção (150 linhas,
+    2 buffers), que é a escolha certa e **não** índice faltando.
+  - **O `authenticated?` de `CatalogController#wishlist_targets` é redundante
+    e a mutação que o remove SOBREVIVE** — `#owned_quantities` roda antes e já
+    resolveu a sessão. Removidas **as duas**, o defeito silencioso volta e um
+    teste morre. Mesma redundância deliberada da T11 em `#owned_total`, pelo
+    mesmo motivo: proteger contra reordenação futura de `#show`. Registrado em
+    comentário no próprio método. **Não "limpar".**
+  - **Achado HIGH de a11y, corrigido, e a lição é nova nesta feature:
+    `aria-label` num campo que TEM `<label>` visível viola SC 2.5.3.** Ele tem
+    precedência total na computação do nome acessível e **descarta** o rótulo
+    visível, quebrando comando de voz. O padrão de
+    `collection_items/_ownership` não se aplica: lá o `aria-label` está em
+    botões cujo texto visível é `aria-hidden`. O contexto de carta e impressão
+    foi para um `role="group"` com `aria-label` no `<form>`. Detalhe de Rails
+    que custou uma rodada: **no `form_with`, `role` e `aria` precisam ir dentro
+    de `html:`** — no nível de cima são engolidos em silêncio.
+  - **Marcar como desejada fica SÓ no detalhe, por causa do Req. 2.5**, e há
+    teste travando a ausência do controle na grade (autenticado e anônimo). O
+    tile já carrega o de posse em coluna abaixo de 180px; um segundo controle
+    espremeria o caminho principal do produto. Se alguém quiser levá-lo à
+    grade, o teste enfrenta a decisão em vez de deixá-la passar.
+  - **A wishlist não introduz nenhuma região viva**, e isso é deliberado: a
+    lição da T11 (uma região por operação) continua valendo. O estado de
+    atendimento chega a quem navega por botão pelo **nome acessível** do botão
+    "Remover", não por `aria-live`.
+- **O que a T12 entregou, e o que a T13 herdou dela.** A tabela
   `wishlist_items` existe (migração `20260919120500`, a **primeira da
   feature**), com `UNIQUE (user_id, card_variant_id)`,
   `CHECK (target_quantity >= 1)` e as duas FKs `ON DELETE RESTRICT`, todas
