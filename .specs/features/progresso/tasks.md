@@ -619,7 +619,7 @@ T6 → T7 → T8
 
 ---
 
-### T7: Isolamento entre usuários
+### T7: Isolamento entre usuários ✅
 
 **What**: Prova de que o progresso de cada usuário sai da própria coleção e de que nenhum identificador vindo do request altera o resultado.
 **Where**: `test/integration/progress_authorization_test.rb`
@@ -634,14 +634,98 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste prova que dois usuários com posse **no mesmo set** veem números diferentes, cada um o seu
-- [ ] Os dois usuários têm posses de tamanhos distintos, para que uma troca de usuário mude o número visível — com posses iguais nenhuma asserção discriminaria
-- [ ] Teste prova que `?user_id=` do outro usuário não altera o número exibido
-- [ ] Teste prova que a coleção de um usuário não vaza para o total de parallels do outro
-- [ ] Teste prova que usuário sem posse alguma não vê número de quem tem
+- [x] Teste prova que dois usuários com posse **no mesmo set** veem números diferentes, cada um o seu
+- [x] Os dois usuários têm posses de tamanhos distintos, para que uma troca de usuário mude o número visível — com posses iguais nenhuma asserção discriminaria
+- [x] Teste prova que `?user_id=` do outro usuário não altera o número exibido
+- [x] Teste prova que a coleção de um usuário não vaza para o total de parallels do outro
+- [x] Teste prova que usuário sem posse alguma não vê número de quem tem
 
 **Tests**: integration
 **Gate**: full
+
+**Decisões da execução:**
+
+- **Todo número visível difere entre os dois usuários, e isso é o cenário, não
+  um detalhe.** `@set_x` tem `base_set_size` 6 e nove impressões (4 `base`, 2
+  `other`, 3 `parallel`); `@nami` sai com 2 possuídas, numerador 1, 17% e 1
+  parallel, `@zoro` com 5, 3, 50% e 2. Nenhum par coincide, então uma troca de
+  usuário em **qualquer** campo derruba asserção — com posses iguais o teste
+  passaria idêntico obedecendo ao `?user_id=` e ignorando-o. As posses são
+  **disjuntas**: nenhuma variante em comum, de modo que um vazamento infla o
+  número em vez de deixá-lo intacto.
+
+- **`total_variants` é a única coincidência, e é obrigatória.** Ele sai do
+  catálogo e não pode depender de quem olha. Um teste que só exigisse "números
+  diferentes" seria satisfeito por uma implementação que recortasse o **catálogo**
+  pelo usuário — o que esconderia do colecionador exatamente as cartas que ele
+  ainda não tem, o oposto do produto. Por isso há asserção explícita exigindo que
+  `total_variants` e `parallel_variants` **não** variem, ao lado da que exige que
+  `owned_variants` varie. É a mesma assimetria que T1 e T3 registraram.
+
+- **A leitura é da marcação, não de `view_assigns`.** A T4 já prova que `@rows`
+  é do usuário da sessão; o que faltava provar é que é esse número que chega aos
+  olhos de quem abriu a página. Um vazamento **na view** — uma consulta de posse
+  feita na marcação, um helper que reconsulta — não apareceria em
+  `view_assigns`, e foi exatamente a mutação M6 do sensor.
+
+- **Os parallels ganharam teste próprio, e a soma coincidir com o total é de
+  propósito.** `@zoro` tem 2 parallels e `@nami` 1; a soma (3) é o total do set.
+  Se a contagem ignorasse o usuário, `@nami` veria "3 de 3" — indistinguível de
+  "possuo todos" para quem lê a página. Os parallels saem de uma coluna `FILTER`
+  separada no mesmo `SELECT`, então um recorte perdido **só ali** deixaria o
+  percentual correto e a métrica errada; a mutação M4 é exatamente isso e mata 4
+  testes, dos quais este é o único específico.
+
+- **`@usopp` tem linha zerada sobre uma variante de `@zoro`, não ausência de
+  registro.** É o que torna "sem posse alguma" discriminante: uma implementação
+  que tratasse posse por **existência de registro** em vez de por `owned` lhe
+  daria 1, e uma que ignorasse o usuário lhe daria 7. Zero é linha existente que
+  significa "não tenho" (Req. 7.3).
+
+- **`@nami` tem 4 cópias de uma variante, de propósito.** Se o progresso contasse
+  cópias em vez de variantes, `@nami` (5 cópias) superaria `@zoro` (5 variantes,
+  5 cópias) — o cenário inverte o sinal da comparação, e não só desloca o número.
+
+- **As formas de enfiar identificador vão além do `?user_id=`.** O teste varre
+  `user_id`, `user`, `id`, e-mail no lugar do id, lista (`user_id[]`) e hash
+  aninhado, mais um teste separado de **cabeçalho** de requisição (`X-User-Id`).
+  O cabeçalho é a porta que nenhuma asserção sobre `params` cobre — o limite que
+  os testes irmãos registram explicitamente no comentário — e aqui ele é fechado
+  pelo efeito. Há também o caso do `?user_id=` apontando para o **próprio**
+  usuário: ele passaria intacto mesmo com a leitura do parâmetro, e existe para
+  impedir que alguém "conserte" o teste anterior fazendo o parâmetro valer.
+
+- **Três provas estruturais, porque comportamento só cobre o que ele exercita.**
+  (1) `SetProgressQuery.new(id)` levanta `ArgumentError` — a barreira de tipo é o
+  que torna PRG-08 satisfeito **por construção**, e sem asserção a suíte provaria
+  apenas que hoje ninguém escreveu o caminho errado. (2) Nenhuma rota de
+  progresso aceita segmento dinâmico, com casamento por **sufixo** do controller
+  para que `api/progress` não escape. (3) A **view** não toca `params` nem a
+  constante `User`, por AST (`Ripper.sexp`) sobre o Ruby que o ERB compila — a
+  T4 cobriu o controller, e a view é a metade que faltava, onde um
+  `params[:user_id]` passaria despercebido por não haver revisão de ERB tão
+  atenta. Regex não serviria: casaria com a palavra dentro dos próprios
+  comentários da view, que são extensos.
+
+- **Todos os 13 testes passaram contra o código existente, sem alterar uma linha
+  de produção.** É o resultado previsto: `SetProgressQuery` recebe o objeto
+  `User`, `CollectionItem.for_user` levanta `ArgumentError` para um id e a URL
+  `/progress` não tem onde um identificador caber. Nenhum defeito de autorização
+  foi encontrado.
+
+- **Sensor de discriminação: seis mutações sobre cópia dos arquivos (`cp`/`diff`,
+  nunca `git stash`), todas capturadas.** M1 — o query object recebendo
+  `User.find(params[:user_id])` (2 falhas). M2 — `for_user` trocado por
+  `CollectionItem.all` (11 falhas). M3 — o `LEFT JOIN` perdendo a correlação por
+  usuário (11 falhas). M4 — apenas a coluna de parallels sem recorte de usuário
+  (4 falhas). M5 — a barreira de tipo de `for_user` aceitando um id em vez de
+  levantar (1 falha, a estrutural desenhada para ela). M6 — a view reconsultando
+  a posse a partir de `params` (3 falhas). Os arquivos foram restaurados e
+  conferidos idênticos por `diff`; a suíte foi reconferida verde.
+
+- **`SPEC_DEVIATION` registrado no cabeçalho do arquivo**: não há navegador no
+  container, então a verificação de "o que cada usuário vê" é teste de integração
+  sobre HTML renderizado. Mesmo precedente da T4 e da T5.
 
 ---
 
