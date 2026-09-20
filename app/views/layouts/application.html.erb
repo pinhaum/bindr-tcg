@@ -42,6 +42,18 @@
             wishlist exige sessão em toda action (Req. 6.4), e um link que só
             leva ao login é promessa quebrada.
           %>
+          <%#
+            Progresso por set (T5 / Req. 9). Mesma razão de a wishlist estar
+            aqui: é uma página própria, não um recorte do catálogo — agrega a
+            coleção inteira por set e não tem busca, filtro nem paginação em
+            comum com a grade. O cabeçalho é o único lugar de onde ela é
+            alcançável.
+
+            Só para quem tem sessão, pela mesma regra: a página exige sessão em
+            toda action (Req. 6.4, PRG-09) e um link que só leva ao login é
+            promessa quebrada.
+          %>
+          <%= link_to "Progresso por set", progress_path, class: "site-header__action" %>
           <%= link_to "Lista de desejos", wishlist_items_path, class: "site-header__action" %>
           <%= button_to "Sair", session_path, method: :delete, class: "site-header__action" %>
         <% else %>

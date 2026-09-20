@@ -424,7 +424,7 @@ T6 → T7 → T8
 
 ---
 
-### T5: View de progresso
+### T5: View de progresso ✅
 
 **What**: Página que lista os sets com possuídas, total, percentual e parallels, e apresenta o percentual indisponível como indisponível.
 **Where**: `app/views/progress/index.html.erb`
@@ -439,15 +439,104 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Cada set exibe nome, possuídas, total e percentual
-- [ ] Parallels aparecem como métrica visivelmente separada do percentual
-- [ ] Set sem denominador exibe a posse e o percentual como indisponível, em texto que não é `0%` nem `100%`
-- [ ] Entrada para a página no cabeçalho, visível só para quem tem sessão — como "Lista de desejos"
-- [ ] Teste de integração sobre o HTML renderizado confere os números de um cenário conhecido, com `SPEC_DEVIATION` no cabeçalho do arquivo registrando a ausência de navegador
-- [ ] Usuário autenticado sem nenhuma posse vê todos os sets com zero, e não uma página vazia
+- [x] Cada set exibe nome, possuídas, total e percentual
+- [x] Parallels aparecem como métrica visivelmente separada do percentual
+- [x] Set sem denominador exibe a posse e o percentual como indisponível, em texto que não é `0%` nem `100%`
+- [x] Entrada para a página no cabeçalho, visível só para quem tem sessão — como "Lista de desejos"
+- [x] Teste de integração sobre o HTML renderizado confere os números de um cenário conhecido, com `SPEC_DEVIATION` no cabeçalho do arquivo registrando a ausência de navegador
+- [x] Usuário autenticado sem nenhuma posse vê todos os sets com zero, e não uma página vazia
 
 **Tests**: integration
 **Gate**: full
+
+**Decisões da execução:**
+
+- **Lista (`<ul>`), não tabela, e a razão é o Req. 2.5 antes de ser semântica.**
+  Cinco números por set em 360px só caberiam numa tabela com `overflow-x: auto`,
+  que é exatamente o scroll horizontal que o requisito proíbe — o remédio usual
+  seria a violação. A semântica confirma a escolha: cada set é um **registro
+  independente**, não uma célula cruzando duas dimensões; nada aqui se lê "na
+  coluna X, linha Y". A `<ul>` ainda faz o leitor de tela anunciar quantos sets
+  existem, informação que uma sequência de `<div>` não daria. É a mesma forma de
+  `wishlist_items/index`, pelo mesmo motivo. A T8 vai medir 360px e não herda
+  dívida: nenhuma largura fixa, nenhum `white-space: nowrap` em bloco largo,
+  `min-width: 0` e `overflow-wrap: anywhere` no nome do set.
+
+- **Cada número vem numa frase, porque em leitura linear não existe coluna.**
+  "3 7 60 1" é ruído para leitor de tela. A marcação emite "4 de 7 variantes",
+  "60% concluído", "1 de 2 parallels" — e há teste que **exige as frases**, não
+  só os números. Os `<span>` com classe existem para o CSS e para o teste mirar
+  o valor; retirá-los deixaria o texto igualmente legível, que é o critério de
+  que o significado não está na marcação. Mesma lição de
+  `catalog/_owned_total`. Plural explícito (`variante`/`variantes`,
+  `parallel`/`parallels`, `set`/`sets`), nunca `pluralize`: o inflector do Rails
+  é inglês.
+
+- **Sem `aria-live` e sem `role="status"`, deliberadamente.** A página não tem
+  interação: nenhum número muda sem recarregar. A T11 da `colecao` fixou que
+  região viva é para o que muda em resposta a uma ação do usuário; declará-la
+  aqui faria o leitor de tela reanunciar a página inteira sem que nada tivesse
+  acontecido.
+
+- **O texto de indisponível é "Percentual indisponível: este set não informa o
+  tamanho do set base."** Uma afirmação sobre **o dado**, não sobre a coleção do
+  usuário — é a diferença entre "a fonte não diz o tamanho deste set" e "você
+  não tem nada". "Sem dados" diria que falta informação sem dizer qual, e um
+  traço (`—`) é invisível para leitor de tela. A decisão é tomada por
+  `completion_percent_known?` e não por `nil?` na marcação; no ramo indisponível
+  **nada** é renderizado no lugar do percentual, nem elemento vazio — há teste
+  separado só para isso, porque `number_to_percentage(nil)` devolve string vazia
+  e o elemento existiria sem dizer nada.
+
+- **`owned_variants` (posse do set inteiro) e `base_owned_variants` (numerador do
+  percentual) são números diferentes e aparecem ambos.** O cenário de teste tem
+  4 e 3 para o mesmo set, justamente para que trocá-los na marcação derrube
+  asserção. A base do percentual é exibida entre parênteses — "(3 de 5 do set
+  base)" — porque um percentual sem a fração que o origina é inauditável pelo
+  usuário, e `base_set_size` (5) difere tanto de `total_variants` (7) quanto de
+  `owned_variants` (4) no cenário, de propósito.
+
+- **Entrada no cabeçalho ao lado de "Lista de desejos", dentro do mesmo
+  `if authenticated?`.** Mesma razão registrada lá: a página exige sessão em toda
+  action (PRG-09) e um link que só leva ao login é promessa quebrada. O teste é
+  um par simétrico — o link **presente** para quem tem sessão e **ausente** para
+  anônimo, com a wishlist conferida junto para provar que o cenário anônimo é
+  anônimo de fato.
+
+- **Sensor de discriminação: oito mutações sobre cópia dos arquivos (`cp`/`diff`,
+  nunca `git stash`), sete capturadas.** `completion_percent` renderizado sem o
+  predicado (2 falhas), set sem denominador omitido da lista (5), contagem de
+  parallels somada ao percentual (2), `owned_variants` trocado por
+  `total_variants` (5), indisponível exibido como `0%` (2), link do cabeçalho
+  visível para anônimo (1) e parallels aninhados no elemento do percentual em
+  forma que o parser preserva (1). Os arquivos foram restaurados e conferidos
+  idênticos por `diff`; a suíte foi reconferida verde.
+
+- **Uma mutação sobreviveu, e ela é impossível de matar por teste sobre o DOM.**
+  Escrever o `<p>` dos parallels **dentro** do `<p>` do percentual não é
+  observável: o parser HTML fecha o `<p>` aberto ao encontrar o seguinte, e os
+  dois viram irmãos de qualquer jeito. Nenhum teste sobre o DOM poderia
+  distinguir os dois arquivos. A asserção estrutural pega a forma que o parser
+  **preserva** (aninhar num `<span>`), que é a única em que o defeito existiria
+  de fato — e usar `<p>` para cada métrica é, portanto, o que torna o erro
+  impossível em vez de detectável. Registrado no comentário da view em vez de
+  escrever um teste que não teria como falhar, como a T3 fez com o `DISTINCT`.
+
+- **Duas asserções do teste foram corrigidas contra o contrato real, não contra
+  a implementação.** A primeira versão esperava `owned_variants = 3` para um set
+  com 3 base possuídas mais 1 parallel possuído, e `total_variants = 4` onde 4 é
+  `base_set_size`. As duas eram erro **do cenário**, não da view: `owned_variants`
+  é a posse do set inteiro (Req. 9.1) e `total_variants` é o total de impressões.
+  A view já distinguia os três números corretamente; foi o teste que os
+  conflatava. Corrigido preservando a intenção discriminante — e `@set_b` ganhou
+  uma segunda variante para que seu total (2) passasse a diferir do seu
+  denominador (4).
+
+- **Conferido contra o banco de desenvolvimento, não só contra o cenário de
+  teste**: a view renderiza os 63 sets reais, `PRB9cd8` (nome `"X"`, 3 variantes)
+  aparece com "0 de 3 variantes" e "Percentual indisponível", sem `0%` e sem
+  `100%` em nenhum ponto do seu item, e nenhuma contagem de parallels cai dentro
+  do elemento do percentual.
 
 ---
 

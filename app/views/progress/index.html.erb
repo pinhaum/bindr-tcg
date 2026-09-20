@@ -1,9 +1,116 @@
-<%# T4 — marcação mínima para que a action renderize. A página rica (nome do
-    set, possuídas, total, percentual, parallels e o tratamento de
-    indisponível) é a **T5**, e o link para o catálogo filtrado é a T6. Não
-    antecipar aqui. %>
 <% content_for :title, "Progresso por set" %>
 
+<%#
+  T5 — progresso por set (PRG-01, PRG-02, PRG-06, PRG-10).
+
+  ## Lista, não tabela
+
+  Uma tabela seria a escolha óbvia para cinco números por linha, e é a errada
+  aqui. O Req. 2.5 exige 360px sem scroll horizontal: cinco colunas de cabeçalho
+  em 360px ou encolhem até ilegíveis ou empurram a página para o lado, e o
+  remédio usual — `overflow-x: auto` no contêiner — é exatamente o scroll
+  horizontal que o requisito proíbe. Uma `<ul>` reflui por natureza.
+
+  A semântica também não pede tabela: cada set é um **registro independente**,
+  não uma célula cruzando duas dimensões. Nada aqui se lê "na coluna X, linha Y";
+  lê-se "o set OP01 está 60% completo". `<ul>` é a estrutura dessa lista, e o
+  leitor de tela anuncia "lista de 63 itens" — a informação de quantos sets
+  existem, que uma sequência de `<div>` não daria. É a mesma forma de
+  `wishlist_items/index`, pelo mesmo motivo.
+
+  ## Cada número diz o que é, sem depender de layout
+
+  Em leitura linear de leitor de tela não existe coluna: "3 7 60 1" é ruído. Por
+  isso cada métrica é uma frase completa — "3 de 7 variantes", "60% concluído",
+  "1 de 2 parallels". Os `<span>` com classe existem para o CSS e para o teste
+  poder mirar o número, **não** para carregar significado: retirá-los deixaria o
+  texto igualmente legível. É a mesma lição de `catalog/_owned_total`, onde o
+  número solto ao lado da contagem de cartas não dizia de quem era.
+
+  **Sem `aria-live` e sem `role="status"`.** Esta página não tem interação
+  nenhuma: nenhum número muda sem recarregar. A T11 da `colecao` fixou que
+  região viva é para o que muda em resposta a uma ação do usuário; declará-la
+  aqui faria o leitor de tela reanunciar a página inteira sem que nada tivesse
+  acontecido.
+
+  ## Parallels fora do percentual, na marcação e não só no texto
+
+  (Req. 9.6 / AD-003.) A contagem de parallels é um `<p>` **irmão** do percentual,
+  nunca aninhado nele. A separação estrutural é o que impede que um leitor de
+  tela leia os dois como uma afirmação só, e é o que o teste trava: a asserção
+  exige que `.progress-set__parallel-owned` não exista dentro de
+  `.progress-set__percent`.
+
+  Limite conhecido dessa asserção, medido no sensor de discriminação: escrever o
+  `<p>` dos parallels **dentro** do `<p>` do percentual é indistinguível no DOM,
+  porque o parser HTML fecha o `<p>` aberto ao encontrar o seguinte — os dois
+  viram irmãos de qualquer jeito, e nenhum teste sobre o DOM poderia pegar isso.
+  A asserção pega a forma que o parser **preserva** (aninhar num `<span>`), que é
+  a única em que o defeito existiria de fato. Usar `<p>` para cada métrica é,
+  portanto, o que torna o erro impossível em vez de detectável.
+
+  ## Indisponível não é um número
+
+  (PRG-10.) `completion_percent` é `nil` quando não há denominador, e `0.0`
+  quando há e a posse é zero — estados **diferentes** que o query object
+  preservou de propósito. A decisão é tomada por `completion_percent_known?`, e
+  não por `nil?` espalhado pela marcação: formatar `nil` como número daria `0%`,
+  que é exatamente o defeito que o Edge Case proíbe ("nunca `0%`, nunca `100%`,
+  nunca omitido").
+
+  O texto de indisponível é **"Percentual indisponível"** — uma afirmação sobre o
+  dado, não sobre a coleção do usuário. "Sem dados" ou "—" diriam que falta
+  informação sem dizer qual, e um traço é invisível para leitor de tela.
+%>
 <main class="progress">
   <h1 class="progress__title">Progresso por set</h1>
+
+  <p class="progress__count">
+    <%= @rows.size == 1 ? "1 set" : "#{@rows.size} sets" %>
+  </p>
+
+  <ul class="progress__list">
+    <% @rows.each do |row| %>
+      <li class="progress-set" id="progress_set_<%= row.set_code %>">
+        <h2 class="progress-set__name">
+          <%= row.set_name %>
+          <span class="progress-set__code"><%= row.set_code %></span>
+        </h2>
+
+        <%#
+          Possuídas e total (PRG-01). O total é o de **impressões** do set e sai
+          do catálogo — não depende de quem olha. Plural explícito, não
+          `pluralize`: o inflector do Rails é inglês e não sabe português.
+        %>
+        <p class="progress-set__owned-line">
+          <span class="progress-set__owned"><%= row.owned_variants %></span>
+          de
+          <span class="progress-set__total"><%= row.total_variants %></span>
+          <%= row.total_variants == 1 ? "variante" : "variantes" %>
+        </p>
+
+        <p class="progress-set__percent <%= "progress-set__percent--unknown" unless row.completion_percent_known? %>">
+          <% if row.completion_percent_known? %>
+            <span class="progress-set__percent-value"><%= number_to_percentage(row.completion_percent, precision: 0) %></span>
+            concluído
+            <span class="progress-set__percent-basis">
+              (<%= row.base_owned_variants %> de <%= row.base_size %> do set base)
+            </span>
+          <% else %>
+            Percentual indisponível: este set não informa o tamanho do set base.
+          <% end %>
+        </p>
+
+        <p class="progress-set__parallels">
+          <span class="progress-set__parallel-owned"><%= row.parallel_owned_variants %></span>
+          de
+          <span class="progress-set__parallel-total"><%= row.parallel_variants %></span>
+          <%= row.parallel_variants == 1 ? "parallel" : "parallels" %>
+          <%# Req. 9.6: a métrica é separada, e o texto diz isso em vez de
+              deixar a separação a cargo do layout. %>
+          <span class="progress-set__parallels-note">(não entra no percentual)</span>
+        </p>
+      </li>
+    <% end %>
+  </ul>
 </main>
