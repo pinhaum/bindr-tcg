@@ -53,5 +53,16 @@ Rails.application.routes.draw do
   # geraria `new`/`edit`/`create` que nunca serão escritos.
   get "progress" => "progress#index", as: :progress
 
+  # Export da coleção em CSV (Req. 10 / POR-03). Mesmo desenho do progresso e
+  # pela mesma razão: rota singular, sem id, porque o arquivo é sempre o do
+  # usuário da sessão. **Nenhum identificador de usuário cabe nesta URL** — quem
+  # serializa é `Current.user`, e é isso que torna `?user_id=` inócuo por
+  # desenho e não por checagem (Req. 6.5).
+  #
+  # `get` puro em vez de `resources`: o export é uma leitura só, e
+  # `resources :collection_exports` geraria `show` com `:id` — exatamente o
+  # segmento que não pode existir aqui.
+  get "collection/export" => "collection_exports#show", as: :collection_export
+
   root "catalog#index"
 end

@@ -321,12 +321,12 @@ acaso em cerca de 40% das vezes.
 
 **Done when**:
 
-- [ ] O controller **não** declara `allow_unauthenticated_access` — a proteção vem do default, e há teste que prova que o anônimo é redirecionado para a autenticação **sem receber arquivo**
-- [ ] Teste prova que o corpo da resposta anônima não contém nenhuma linha de coleção
-- [ ] Teste prova que a resposta autenticada tem `Content-Type` de CSV e `Content-Disposition: attachment` com nome de arquivo
-- [ ] Teste prova que o conteúdo entregue é o da coleção de `Current.user`, e que passar `?user_id=` de outro usuário **não muda** o arquivo (Req. 6.5)
-- [ ] Teste prova que a rota não aceita nenhum identificador de usuário no caminho — não há URL onde um id de usuário caiba
-- [ ] O acento sobrevive à resposta HTTP, não só à serialização
+- [x] O controller **não** declara `allow_unauthenticated_access` — a proteção vem do default, e há teste que prova que o anônimo é redirecionado para a autenticação **sem receber arquivo**
+- [x] Teste prova que o corpo da resposta anônima não contém nenhuma linha de coleção
+- [x] Teste prova que a resposta autenticada tem `Content-Type` de CSV e `Content-Disposition: attachment` com nome de arquivo
+- [x] Teste prova que o conteúdo entregue é o da coleção de `Current.user`, e que passar `?user_id=` de outro usuário **não muda** o arquivo (Req. 6.5)
+- [x] Teste prova que a rota não aceita nenhum identificador de usuário no caminho — não há URL onde um id de usuário caiba
+- [x] O acento sobrevive à resposta HTTP, não só à serialização
 
 **Tests**: integration
 **Gate**: full
