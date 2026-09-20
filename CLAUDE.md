@@ -8,12 +8,12 @@ A feature **`catalogo` está encerrada e verificada** (14 tasks, dois lotes, amb
 PASS em `.specs/features/catalogo/validation.md`): ingestão, busca com tolerância
 a typo, filtros, grade e página de detalhe funcionam e são **públicos**.
 
-A feature **`colecao` (Fase 4) tem as 13 tasks executadas e ainda NÃO foi
-verificada**: Fase 1 (T1–T4, identidade e sessão), Fase 2 (T5–T8, posse por
-variante) e Fase 3 (T9–T13, filtro de posse, total e wishlist) fecharam, e com
-elas a **§4 inteira** de `.context/tasks.md` (§4.1 a §4.5). O próximo passo é o
-Verifier, com **autor ≠ verificador**, e relatório em
-`.specs/features/colecao/validation.md`.
+A feature **`colecao` (Fase 4) está encerrada e verificada** (13 tasks, dois
+lotes, ambos PASS em `.specs/features/colecao/validation.md` — 62 critérios,
+62 PASS, 0 FAIL, autor ≠ verificador): identidade e sessão, posse por variante,
+filtro de posse, total de cópias e wishlist. Com ela fechou a **§4 inteira** de
+`.context/tasks.md` (§4.1 a §4.5). O próximo trabalho é a **Fase 5**: §5.1
+progresso por set e §5.2–5.3 import/export CSV.
 
 O que existe hoje:
 

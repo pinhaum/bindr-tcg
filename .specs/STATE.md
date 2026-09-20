@@ -49,11 +49,13 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — **as 13 tasks fechadas**
-- **Phase / Task**: Feature `colecao` **COM AS 13 TASKS EXECUTADAS**. A T13
+- **Phase / Task**: Feature `colecao` **ENCERRADA E VERIFICADA**. As 13 tasks
+  executadas e os **dois lotes verificados** (B1 = Fases 1 e 2, T1–T8; B2 =
+  Fase 3, T9–T13), **ambos PASS, autor ≠ verificador**, em
+  `.specs/features/colecao/validation.md`: **62 critérios verificados, 62 PASS,
+  0 FAIL** (40 no B1, 22 no B2), mais os 6 Success Criteria da `spec.md`. A T13
   fechou a Fase 3, e com ela a **§4.5 e a §4 inteira** de `.context/tasks.md`
   (§4.1 a §4.5 todas marcadas; a seção não tem marcador de nível superior).
-  Fase 1 (T1–T4), Fase 2 (T5–T8) e Fase 3 (T9–T13) encerradas.
-  **A feature NÃO está verificada** — falta o Verifier, que é o próximo passo.
   Feature `catalogo` ENCERRADA E VERIFICADA: 14 de 14 tasks, os dois lotes
   verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os achados dos
   Verifiers e da revisão de a11y foram corrigidos e commitados.
@@ -88,16 +90,27 @@
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **VERIFICAÇÃO da feature `colecao`.** Não há mais task a
-  executar — as 13 fecharam. O que falta é o Verifier, com **autor ≠
-  verificador** (quem executou T1–T13 não verifica), em dois lotes conforme o
-  "Plano de delegação" do `tasks.md`: **Fase 2 (T5–T8)** e **Fase 3 (T9–T13)**;
-  a Fase 1 (T1–T4) também não foi verificada e precisa entrar. Relatório em
-  `.specs/features/colecao/validation.md`, no formato dos dois lotes do
-  `catalogo` (`.specs/features/catalogo/validation.md`, B1 linhas 1–414, B2 a
-  partir da 419). **Este arquivo não foi escrito pelo autor das tasks, de
-  propósito.** A decisão central segue de pé: **não rodar
+- **Next step**: **Nada pendente na `colecao`.** As 13 tasks fecharam e os dois
+  lotes foram verificados (PASS, autor ≠ verificador). O próximo trabalho é a
+  **Fase 5** de `.context/tasks.md` — §5.1 progresso por set (Req. 9,
+  denominador `baseSetSize` por AD-003) e §5.2–5.3 import/export CSV (Req. 10).
+  A decisão central segue de pé: **não rodar
   `bin/rails generate authentication`**.
+- **Não "limpar" as quatro chamadas de `authenticated?` do `CatalogController`**
+  (`:22`, `:66`, `:92`, `:123`). Parecem redundantes e não são: os sensores da
+  T11 e da T13 mediram que removê-las **em conjunto** reintroduz o defeito
+  silencioso do `allow_unauthenticated_access` — ele remove o `before_action`
+  que resolvia a sessão, e o controller público passa a ler `Current.user` nil,
+  respondendo 200 com a coleção do usuário invisível. A armadilha apareceu
+  **cinco vezes** nesta feature. A redundância é proteção contra reordenação
+  futura das actions, e está comentada no código.
+- **Lacunas de cobertura registradas pelos Verifiers, nenhuma bloqueante**: a
+  aplicação do Turbo Stream ao DOM não é exercitada (há asserção sobre o
+  payload, não sobre o patch aplicado) e o layout em 360px não tem cobertura
+  automatizada — as duas fecham juntas com chromedriver no `Dockerfile.dev`. O
+  teste de plano da T10 não discrimina ausência dos índices não-únicos, pelo
+  piso do `UNIQUE`; está documentado no cabeçalho do teste e compensado por
+  asserção separada de existência dos índices.
 - **O que a T13 entregou, e o que a verificação vai olhar.** Controller,
   rotas, duas views e um scope: `WishlistItemsController` (`index`, `create`,
   `destroy`), `resources :wishlist_items, only: %i[index create destroy], path:
