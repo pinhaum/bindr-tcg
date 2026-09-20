@@ -153,7 +153,7 @@ T6 → T7 → T8
 
 ---
 
-### T2: Percentual com denominador `base_set_size`
+### T2: Percentual com denominador `base_set_size` ✅
 
 **What**: Percentual de conclusão por set, com denominador `sets.base_set_size` e numerador restrito ao mesmo universo (`art_kind IN ('base','other')`), mais o tratamento de denominador ausente, zero e numerador excedente.
 **Where**: `app/queries/set_progress_query.rb`
@@ -168,16 +168,76 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] O denominador é `sets.base_set_size`, nunca o total de impressões do set e nunca uma contagem local de `art_kind = 'base'`
-- [ ] O numerador do percentual conta as variantes possuídas com `art_kind IN ('base','other')`, excluindo `parallel`
-- [ ] Teste prova o percentual com denominador e numerador conhecidos, inclusive um set em que `base_set_size` diverge de `count(art_kind = 'base')` — o caso medido em 21 de 62 sets
-- [ ] Teste prova que set sem `base_set_size` é **exibido** com contagem de possuídas e percentual indisponível, e que o resultado não é `0` nem `100`
-- [ ] Teste prova que denominador zero não executa divisão e cai no mesmo caminho do denominador ausente
-- [ ] Teste prova que numerador maior que o denominador é apresentado limitado a cem por cento, sem erro
-- [ ] Comentário no arquivo registra a decisão de denominador/numerador da spec e a divergência medida, para que a escolha não pareça arbitrária a quem ler depois
+- [x] O denominador é `sets.base_set_size`, nunca o total de impressões do set e nunca uma contagem local de `art_kind = 'base'`
+- [x] O numerador do percentual conta as variantes possuídas com `art_kind IN ('base','other')`, excluindo `parallel`
+- [x] Teste prova o percentual com denominador e numerador conhecidos, inclusive um set em que `base_set_size` diverge de `count(art_kind = 'base')` — o caso medido em 21 de 62 sets
+- [x] Teste prova que set sem `base_set_size` é **exibido** com contagem de possuídas e percentual indisponível, e que o resultado não é `0` nem `100`
+- [x] Teste prova que denominador zero não executa divisão e cai no mesmo caminho do denominador ausente
+- [x] Teste prova que numerador maior que o denominador é apresentado limitado a cem por cento, sem erro
+- [x] Comentário no arquivo registra a decisão de denominador/numerador da spec e a divergência medida, para que a escolha não pareça arbitrária a quem ler depois
 
 **Tests**: unit
 **Gate**: quick
+
+**Decisões da execução:**
+
+- **Indisponível é `nil`; zero por cento é `0.0`. A distinção é do tipo, não de
+  convenção.** O Edge Case proíbe apresentar set sem denominador como `0%` ou
+  `100%`, e um sentinela numérico (`0`, `-1`, `100`) seria silenciosamente
+  formatável como percentual pela view da T5 — o defeito voltaria pela porta
+  que a spec fechou. `nil` torna a confusão impossível em Ruby: `nil != 0`,
+  `nil` não responde a comparação numérica e `nil.zero?` levanta
+  `NoMethodError`. Acrescentei `completion_percent_known?` para que a T5
+  pergunte pela disponibilidade em vez de espalhar `nil?` pela marcação. Há
+  teste que compara o set indisponível (`OPp2f`) com o set zerado (`OPp1c`)
+  lado a lado e exige que os dois valores **difiram**.
+- **`base_size` chega ao `Row` sem `to_i`, e isso é deliberado.** Todas as
+  outras colunas agregadas levam `.to_i` (nulo do `LEFT JOIN` é zero de fato);
+  `base_size` não pode, porque ali nulo e zero são estados **diferentes** que
+  PRG-10 exige preservar. Um `.to_i` nessa linha é a mutação que converte
+  "indisponível" em "não comecei" — foi testada no sensor e derruba um teste.
+  O comentário está na própria linha para que a assimetria não pareça descuido.
+- **Denominador ausente e denominador zero compartilham o caminho, e o guarda
+  é anterior à divisão.** `completion_percent_known?` é
+  `!base_size.nil? && base_size.positive?`, não um `rescue ZeroDivisionError`:
+  nenhuma divisão chega a ser executada, e não há como sair `Infinity` nem
+  `NaN`. O schema permite zero — `sets.base_set_size` é nullable e não tem
+  `CHECK` — mesmo que hoje nenhum set real esteja nesse estado.
+- **O limite de cem por cento é `min`, não `round`.** Numerador maior que o
+  denominador é alcançável hoje (ST16: `base_set_size = 7` contra 6 não-parallel),
+  e a divergência de classificação pode inverter o sinal em outro set após uma
+  reingestão. `[ pct, 100.0 ].min` apresenta o teto sem erro e sem esconder que
+  o percentual é conhecido — `completion_percent_known?` continua `true`.
+- **`sets.base_set_size` entra no `SELECT` sem agregação, por dependência
+  funcional.** O `GROUP BY` é `sets.id`, a chave primária, e o Postgres permite
+  selecionar qualquer coluna de `sets` sob esse agrupamento. Escrevi
+  `MAX(sets.base_set_size)` primeiro e troquei: o `MAX` sugeriria falsamente
+  que o denominador varia dentro do grupo.
+- **Nenhuma consulta nova, como a T1 previu.** As duas métricas entraram como
+  colunas no mesmo `SELECT` (uma `COUNT(...) FILTER (...)` e uma coluna
+  direta), sobre o mesmo `GROUP BY`. O teste de número de consultas da T1
+  continua verde com os cinco sets novos do cenário, e o `EXPLAIN` não ganhou
+  passada pelo banco.
+- **Duas asserções da T1 foram tornadas relativas, sem enfraquecê-las.** Os
+  sets novos do cenário acrescentam posse e deslocaram o total absoluto de
+  `CollectionItem.total_copies_for` (era 9, virou 17). Em vez de reescrever o
+  número — que voltaria a quebrar na T3 —, as asserções passaram a medir a
+  **diferença** entre somar cópias e contar variantes, que é exatamente o que
+  elas discriminam. A mutação `count` → `sum(:quantity)` continua sendo pega.
+- **Sensor de discriminação: nove mutações sobre cópia do arquivo (`cp`, nunca
+  `git stash`), todas capturadas.** Denominador pela contagem local de
+  `art_kind = 'base'` (12 falhas), denominador pelo total de impressões
+  (12 falhas), numerador restrito a `'base'` (3 falhas), numerador sem excluir
+  `parallel` (2 falhas), `base_size.to_i` (1 falha), indisponível como `0.0`
+  (5 falhas), indisponível como `100.0` (5 falhas), sem o limite de cem por
+  cento (1 falha) e guarda só para `nil`, deixando zero dividir (2 falhas). O
+  arquivo foi restaurado por `diff` e a suíte reconferida verde.
+- **Conferido contra o banco de desenvolvimento, não só contra o cenário de
+  teste**: 63 sets, exatamente um indisponível (`PRB9cd8`, `base_size` nulo,
+  percentual `nil`), 21 sets em que `base_set_size` diverge de
+  `count(art_kind = 'base')`, e os dois casos extremos da spec com o
+  denominador certo — `FamilyDeckSet` com 49 (a contagem local daria 0 e
+  divisão por zero) e `PRB01` com 113 (daria 1 e exibiria 100%).
 
 ---
 

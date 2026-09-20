@@ -24,6 +24,28 @@ require "test_helper"
 # Há ainda posse de **outro** usuário (`@outro`) sobre uma variante de um set
 # que o alvo também toca: uma agregação que ignorasse o escopo de usuário
 # continuaria verde em todos os testes que olham só o próprio usuário.
+#
+# T2 — percentual com denominador `base_set_size` (PRG-02, PRG-05, PRG-10).
+#
+# O percentual acrescenta três armadilhas próprias, e os sets `@set_d` a
+# `@set_g` existem só para que cada uma delas **discrimine**:
+#
+# 4. **O denominador é `sets.base_set_size`, nunca uma contagem local de
+#    `art_kind = 'base'`.** `@set_d` é o caso medido em 21 dos 62 sets do banco
+#    real: `base_set_size = 4` com **uma** variante `base` e três `other` — o
+#    retrato de `PRB01` (113 contra 1) em escala de teste. Uma implementação
+#    que contasse `art_kind = 'base'` localmente daria denominador 1 e exibiria
+#    100% para quem possui uma carta de quatro. Nos sets `@set_a` a `@set_c` as
+#    duas fontes coincidem, logo nenhum deles distingue os dois denominadores.
+# 5. **O numerador conta `art_kind IN ('base','other')`, e exclui `parallel`.**
+#    `@set_d` tem posse em variante `other` e `@set_e` em `parallel`: um
+#    numerador restrito a `'base'` erraria o primeiro; um numerador sem filtro
+#    nenhum erraria o segundo.
+# 6. **Denominador ausente e denominador zero são o mesmo caminho, e esse
+#    caminho não é zero por cento.** `@set_f` (`base_set_size` nulo, o
+#    `PRB9cd8` do banco real) e `@set_g` (`base_set_size = 0`) têm **posse
+#    registrada**: um percentual exibido como `0` seria indistinguível de "não
+#    comecei este set" exatamente onde o usuário já tem cartas.
 class SetProgressQueryTest < ActiveSupport::TestCase
   setup do
     @user = User.create!(email: "nami-prg1@example.com", password: "log-pose-77")
@@ -78,6 +100,49 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     # Existe, ninguém possui.
     @carta_c = create_card(@set_c, "OP03-p1a", "Shanks")
     @v_c = create_variant(@carta_c, @set_c, "OP03-p1a")
+
+    # --- @set_d: base_set_size diverge de count(art_kind = 'base') -------
+    # `base_set_size = 4` com uma só variante `base` e três `other`. É o caso
+    # medido em 21 dos 62 sets reais, e o único cenário em que o denominador
+    # da fonte e a contagem local dão números diferentes.
+    @set_d = CardSet.create!(code: "OPp2d", name: "Kingdoms of Intrigue", kind: "booster",
+                             base_set_size: 4, total_set_size: 6)
+    @v_d_base = create_variant(create_card(@set_d, "OP04-p2a", "Crocodile"), @set_d, "OP04-p2a")
+    @v_d_other1 = create_variant(create_card(@set_d, "OP04-p2b", "Nico Robin"), @set_d,
+                                 "OP04-p2b", art_kind: "other")
+    @v_d_other2 = create_variant(create_card(@set_d, "OP04-p2c", "Smoker"), @set_d,
+                                 "OP04-p2c", art_kind: "other")
+    @v_d_other3 = create_variant(create_card(@set_d, "OP04-p2d", "Tashigi"), @set_d,
+                                 "OP04-p2d", art_kind: "other")
+    # Dois parallels, que não podem entrar em numerador nem denominador.
+    @v_d_par1 = create_variant(create_card(@set_d, "OP04-p2e", "Sir Crocodile"), @set_d,
+                               "OP04-p2e", art_kind: "parallel")
+    @v_d_par2 = create_variant(create_card(@set_d, "OP04-p2f", "Mr. 1"), @set_d,
+                               "OP04-p2f", art_kind: "parallel")
+    own(@user, @v_d_base, 1)
+    own(@user, @v_d_other1, 3)
+
+    # --- @set_e: posse apenas de parallel --------------------------------
+    @set_e = CardSet.create!(code: "OPp2e", name: "Awakening of the New Era", kind: "booster",
+                             base_set_size: 2, total_set_size: 4)
+    @v_e_base = create_variant(create_card(@set_e, "OP05-p2a", "Sabo"), @set_e, "OP05-p2a")
+    @v_e_par = create_variant(create_card(@set_e, "OP05-p2b", "Koala"), @set_e,
+                              "OP05-p2b", art_kind: "parallel")
+    own(@user, @v_e_par, 2)
+
+    # --- @set_f: sem base_set_size (o `PRB9cd8` do banco real) -----------
+    # Tem posse registrada de propósito: é o que impede "indisponível" de se
+    # confundir com "não comecei".
+    @set_f = CardSet.create!(code: "OPp2f", name: "X", kind: "promo",
+                             base_set_size: nil, total_set_size: nil)
+    @v_f = create_variant(create_card(@set_f, "PR-p2f01", "Registro-lixo"), @set_f, "PR-p2f01")
+    own(@user, @v_f, 1)
+
+    # --- @set_g: base_set_size zero --------------------------------------
+    @set_g = CardSet.create!(code: "OPp2g", name: "Zero Denominator", kind: "promo",
+                             base_set_size: 0, total_set_size: 2)
+    @v_g = create_variant(create_card(@set_g, "PR-p2g01", "Denominador zero"), @set_g, "PR-p2g01")
+    own(@user, @v_g, 1)
   end
 
   def create_card(set, number, name)
@@ -149,8 +214,20 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     # Progresso: duas variantes distintas possuídas em OPp1a (a de 5 e a de 1).
     assert_equal 2, a.owned_variants
 
-    # Req. 7.7, mesma coleção, outra pergunta: 5 + 1 + 0 no set A, 2 + 1 no B.
-    assert_equal 9, CollectionItem.total_copies_for(@user)
+    # Req. 7.7, mesma coleção, outra pergunta. O total é somatório de cópias e
+    # cresce quando o cenário cresce, então a asserção mede a **diferença** que
+    # `@v_cinco` faz nas duas métricas, e não um número absoluto que qualquer
+    # posse acrescentada pela T2 deslocaria.
+    copias = CollectionItem.total_copies_for(@user)
+    variantes = CollectionItem.for_user(@user).owned.count
+    assert_operator copias, :>, variantes,
+                    "somar cópias e contar variantes não podem dar o mesmo número"
+
+    # E a diferença medida é exatamente o excedente de cada variante possuída
+    # com mais de uma cópia — `@v_cinco` (5), `@v_d_other1` (3) e `@v_e_par` (2).
+    excedente = CollectionItem.for_user(@user).owned.sum("quantity - 1")
+    assert_equal 8, excedente
+    assert_equal excedente, copias - variantes
 
     # E a asserção que fecha a distinção: a variante de cinco cópias, sozinha,
     # vale 1 no progresso e 5 no total.
@@ -161,13 +238,14 @@ class SetProgressQueryTest < ActiveSupport::TestCase
 
   test "aumentar a quantidade de uma variante possuída não altera o progresso" do
     antes = progress["OPp1a"].owned_variants
+    copias_antes = CollectionItem.total_copies_for(@user)
 
     CollectionItem.find_by!(user: @user, card_variant: @v_cinco).update!(quantity: 99)
 
     assert_equal antes, progress["OPp1a"].owned_variants,
                  "progresso conta variantes distintas; cópias são o Req. 7.7"
-    assert_equal 103, CollectionItem.total_copies_for(@user),
-                 "o total de cópias, esse sim, acompanha a quantidade"
+    assert_equal copias_antes + 94, CollectionItem.total_copies_for(@user),
+                 "o total de cópias, esse sim, acompanha a quantidade: 5 viraram 99"
   end
 
   # --- PRG-07: quantidade zero não é posse ------------------------------
@@ -276,6 +354,197 @@ class SetProgressQueryTest < ActiveSupport::TestCase
 
   test "string no lugar do usuário levanta ArgumentError" do
     assert_raises(ArgumentError) { SetProgressQuery.new("7").call }
+  end
+
+  # --- PRG-05: o denominador é `sets.base_set_size` ---------------------
+
+  test "o denominador do percentual é base_set_size, e não o total de impressões do set" do
+    d = progress["OPp2d"]
+
+    assert_equal 4, d.base_size, "o denominador vem de sets.base_set_size"
+    assert_equal 6, d.total_variants, "o set tem 6 impressões, que não são o denominador"
+    assert_not_equal d.total_variants, d.base_size,
+                     "se as duas coincidissem, nenhuma asserção distinguiria os denominadores"
+  end
+
+  # A armadilha medida em 21 dos 62 sets reais: `@set_d` tem `base_set_size = 4`
+  # e **uma só** variante `art_kind = 'base'`. Um denominador contado
+  # localmente daria 1, e o percentual sairia 200% para duas possuídas.
+  test "denominador ignora a contagem local de art_kind base, que diverge da fonte" do
+    base_locais = CardVariant.where(set_id: @set_d.id, art_kind: "base").count
+    assert_equal 1, base_locais, "o cenário reproduz a divergência medida no banco real"
+
+    d = progress["OPp2d"]
+
+    assert_equal 4, d.base_size
+    assert_not_equal base_locais, d.base_size,
+                     "contar art_kind = 'base' localmente daria 1 em vez de 4"
+  end
+
+  # --- PRG-02: percentual com numerador e denominador conhecidos --------
+
+  test "percentual com denominador e numerador conhecidos" do
+    # `@set_d`: possui `@v_d_base` (base) e `@v_d_other1` (other) de 4.
+    d = progress["OPp2d"]
+
+    assert_equal 2, d.base_owned_variants
+    assert_equal 4, d.base_size
+    assert_equal 50.0, d.completion_percent
+  end
+
+  test "percentual de set com posse parcial nos sets em que as duas fontes coincidem" do
+    # `@set_a`: `base_set_size = 3`, possui `@v_cinco` e `@v_uma`.
+    a = progress["OPp1a"]
+
+    assert_equal 2, a.base_owned_variants
+    assert_equal 3, a.base_size
+    assert_in_delta 66.67, a.completion_percent, 0.01
+  end
+
+  test "set sem nenhuma posse tem percentual zero, que é um número e não indisponibilidade" do
+    c = progress["OPp1c"]
+
+    assert_equal 0, c.base_owned_variants
+    assert_equal 0.0, c.completion_percent
+    assert c.completion_percent_known?,
+           "zero por cento é informação; indisponível é a ausência dela"
+  end
+
+  # --- PRG-02: o numerador conta `base` e `other`, e exclui `parallel` ---
+
+  test "o numerador do percentual conta variantes other além das base" do
+    d = progress["OPp2d"]
+
+    # `@v_d_base` é `base` e `@v_d_other1` é `other`: um numerador restrito a
+    # `'base'` daria 1 e exibiria 25% para quem tem metade do set.
+    assert_equal "base", @v_d_base.art_kind
+    assert_equal "other", @v_d_other1.art_kind
+    assert_equal 2, d.base_owned_variants,
+                 "numerador e denominador precisam contar o mesmo universo"
+  end
+
+  test "o numerador do percentual exclui variantes parallel" do
+    # `@set_e`: a única posse é `@v_e_par`, que é `parallel`.
+    e = progress["OPp2e"]
+
+    assert_equal "parallel", @v_e_par.art_kind
+    assert_equal 1, e.owned_variants, "a posse existe e aparece no numerador do Req. 9.1"
+    assert_equal 0, e.base_owned_variants, "mas não no numerador do percentual"
+    assert_equal 0.0, e.completion_percent
+  end
+
+  test "possuir um parallel a mais não altera o percentual de conclusão do set" do
+    antes = progress["OPp2d"].completion_percent
+
+    own(@user, @v_d_par2, 1)
+
+    assert_equal antes, progress["OPp2d"].completion_percent,
+                 "parallel é métrica separada e nunca entra no percentual (AD-003)"
+  end
+
+  test "variantes parallel do set não inflam o denominador" do
+    d = progress["OPp2d"]
+
+    # O set tem 2 parallels entre as 6 impressões; o denominador continua 4.
+    assert_equal 2, CardVariant.where(set_id: @set_d.id, art_kind: "parallel").count
+    assert_equal 4, d.base_size
+  end
+
+  # --- PRG-10: denominador ausente é indisponível, nunca 0 nem 100 ------
+
+  test "set sem base_set_size é exibido, com a posse real e percentual indisponível" do
+    f = progress["OPp2f"]
+
+    assert_not_nil f, "o set não pode sumir: o usuário tem posse nele"
+    assert_equal 1, f.owned_variants, "a posse real é exibida"
+    assert_equal 1, f.base_owned_variants
+
+    assert_nil f.base_size, "o set não tem denominador conhecido"
+    assert_nil f.completion_percent, "percentual indisponível"
+    assert_not f.completion_percent_known?
+  end
+
+  # O critério literal da spec: nem `0`, nem `100`. Um `nil` satisfaz os dois
+  # por construção, e a asserção existe para travar a representação contra uma
+  # implementação futura que "resolvesse" o nulo com um default.
+  test "percentual indisponível não é zero nem cem por cento" do
+    f = progress["OPp2f"]
+
+    assert_not_equal 0, f.completion_percent
+    assert_not_equal 0.0, f.completion_percent
+    assert_not_equal 100, f.completion_percent
+    assert_not_equal 100.0, f.completion_percent
+  end
+
+  # `nil` e `0` têm de ser distinguíveis sem ambiguidade pelo consumidor da
+  # API — a view da T5 não pode confundir "indisponível" com "não comecei".
+  test "indisponível e zero por cento são distinguíveis pelo chamador" do
+    indisponivel = progress["OPp2f"]
+    zerado = progress["OPp1c"]
+
+    assert_nil indisponivel.completion_percent
+    assert_equal 0.0, zerado.completion_percent
+    assert_not_equal indisponivel.completion_percent, zerado.completion_percent
+
+    assert_not indisponivel.completion_percent_known?
+    assert zerado.completion_percent_known?
+  end
+
+  test "denominador zero cai no mesmo caminho do denominador ausente" do
+    g = progress["OPp2g"]
+    f = progress["OPp2f"]
+
+    assert_equal 0, @set_g.base_set_size, "o cenário é denominador zero, não nulo"
+    assert_equal 1, g.owned_variants, "a posse continua exibida"
+
+    assert_nil g.completion_percent, "nenhuma divisão é executada"
+    assert_not g.completion_percent_known?
+    assert_equal f.completion_percent_known?, g.completion_percent_known?,
+                 "ausente e zero são o mesmo caminho"
+  end
+
+  test "denominador zero não levanta erro de divisão nem devolve infinito ou NaN" do
+    g = nil
+    assert_nothing_raised { g = progress["OPp2g"] }
+
+    assert_nil g.completion_percent
+    assert_not_equal Float::INFINITY, g.completion_percent
+  end
+
+  # --- Numerador excedente: limitado a cem por cento, sem erro ----------
+
+  # Alcançável hoje: ST16 tem `base_set_size = 7` e 6 variantes não-parallel, e
+  # a divergência de classificação pode inverter o sinal em outro set após uma
+  # reingestão. `@set_h` reproduz o caso.
+  test "numerador maior que o denominador é limitado a cem por cento, sem erro" do
+    set_h = CardSet.create!(code: "OPp2h", name: "Excedente", kind: "booster",
+                            base_set_size: 1, total_set_size: 3)
+    tres = 3.times.map do |i|
+      variante = create_variant(create_card(set_h, "OP06-p2#{i}", "Excedente #{i}"),
+                                set_h, "OP06-p2#{i}")
+      own(@user, variante, 1)
+      variante
+    end
+
+    h = progress["OPp2h"]
+
+    assert_equal 3, tres.size
+    assert_equal 3, h.base_owned_variants, "o numerador real é 3"
+    assert_equal 1, h.base_size, "contra um denominador de 1"
+    assert_equal 100.0, h.completion_percent,
+                 "apresentado limitado a cem por cento, nunca 300%"
+    assert h.completion_percent_known?
+  end
+
+  test "numerador igual ao denominador dá exatamente cem por cento" do
+    own(@user, @v_d_other2, 1)
+    own(@user, @v_d_other3, 1)
+
+    d = progress["OPp2d"]
+
+    assert_equal 4, d.base_owned_variants
+    assert_equal 4, d.base_size
+    assert_equal 100.0, d.completion_percent
   end
 
   # --- Forma da agregação -----------------------------------------------
