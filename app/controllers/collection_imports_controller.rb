@@ -50,6 +50,9 @@ class CollectionImportsController < ApplicationController
   MENSAGEM_CORPO_GRANDE = "O arquivo é grande demais: o limite é de 8 MB. " \
     "Envie o CSV exportado da sua coleção, sem colunas ou textos extras.".freeze
 
+  MENSAGEM_JA_CONFIRMADA = "Esta importação já foi confirmada ou expirou. " \
+    "Sua coleção não foi alterada; envie o arquivo de novo se quiser importar.".freeze
+
   # O formulário de upload. Sem consulta e sem escrita — só o ponto de entrada
   # do fluxo.
   def new
@@ -101,7 +104,49 @@ class CollectionImportsController < ApplicationController
     raise ActiveRecord::RecordNotFound if @collection_import.nil?
   end
 
+  # A confirmação (T14) — a **única escrita** da feature, e a action mais
+  # perigosa do sistema. Toda a lógica mora em `CollectionCsv::Commit`; aqui há
+  # a chamada e a tradução do desfecho em resposta, e nada mais.
+  #
+  # **Nenhum parâmetro além do token entra nesta action.** Não se lê `arquivo`,
+  # não se chama `Parser` nem `Resolver`: o que é gravado é o que a
+  # pré-visualização mostrou, lido do staging (Req. 10.5). Reparsear aqui
+  # transformaria o botão "confirmar" num segundo upload cego, e o usuário
+  # gravaria algo que nunca leu.
+  #
+  # `nil` do serviço cobre token inexistente e token alheio com a **mesma**
+  # resposta, herdando a indistinção de `find_by_token_for` (T11): responder
+  # coisas diferentes faria da rota um oráculo de tokens válidos, um por
+  # requisição.
+  def confirm
+    resultado = CollectionCsv::Commit.new(Current.user, params[:token]).call
+
+    raise ActiveRecord::RecordNotFound if resultado.nil?
+
+    # Não reivindicada: já confirmada antes, ou vencida. Os dois são desfechos
+    # **esperados** — o usuário clicou duas vezes, ou deixou a tela aberta —, e
+    # nenhum deles é erro: nada foi gravado, e dizer isso é mais útil do que um
+    # 500 ou um silêncio que sugere sucesso.
+    unless resultado.reivindicada?
+      redirect_to collection_import_path(params[:token]), alert: MENSAGEM_JA_CONFIRMADA
+      return
+    end
+
+    redirect_to collection_import_path(params[:token]), notice: mensagem_do(resultado)
+  end
+
   private
+
+    # O resumo de verdade é da T15, com as contagens na tela. Esta frase existe
+    # para que a confirmação não termine em silêncio enquanto isso — um fluxo
+    # que grava na coleção e não diz nada é pior que um resumo provisório.
+    def mensagem_do(resultado)
+      base = "Importação confirmada: #{resultado.gravadas} linha(s) gravada(s)."
+
+      return base if resultado.falhas.empty?
+
+      "#{base} #{resultado.falhas.size} linha(s) não puderam ser gravadas."
+    end
 
     # O arquivo do Rack chega em **ASCII-8BIT**: são bytes de rede, e o Rack não
     # tem por que adivinhar a codificação deles. O `Parser` (T8) espera uma

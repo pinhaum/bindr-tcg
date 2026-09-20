@@ -88,5 +88,16 @@ Rails.application.routes.draw do
   post "collection/import" => "collection_imports#create", as: :collection_imports
   get "collection/import/:token" => "collection_imports#show", as: :collection_import
 
+  # A confirmação (T14) — a **única escrita** da feature. `post` e não `get`
+  # porque ela altera estado, e a tela da T13 chega aqui por `form_with`: um
+  # `get` deixaria a gravação a um prefetch ou a um histórico de navegador de
+  # distância, sobre o único dado insubstituível do sistema.
+  #
+  # Chaveada pelo mesmo token do `show`, e por nada mais: a rota **não aceita
+  # arquivo nem identificador de usuário**. O que é gravado vem do staging que
+  # a tela mostrou (Req. 10.5), e o dono é sempre `Current.user`.
+  post "collection/import/:token/confirm" => "collection_imports#confirm",
+       as: :confirm_collection_import
+
   root "catalog#index"
 end

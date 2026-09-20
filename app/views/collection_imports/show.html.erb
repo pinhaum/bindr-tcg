@@ -83,16 +83,15 @@
   Mitigação de fórmula de CSV **não** se aplica aqui: isto é HTML, e o `=` na
   primeira coluna de uma planilha não tem significado nenhum numa `<td>`.
 
-  ## O botão de confirmar aponta para uma rota que ainda não existe
+  ## O botão de confirmar aponta para a rota de confirmação
 
   A tela sem o botão não é a tela: o Req. 10.5 é "ver **e** confirmar", e uma
-  pré-visualização sem saída é uma tela que não faz sentido para o usuário. O
-  formulário já declara o destino que a **T14** vai criar
-  (`/collection/import/:token/confirm`), escrito como caminho literal porque o
-  helper de rota ainda não existe e `confirm_collection_import_path` seria
-  `NameError` na renderização. A T14 troca o literal pelo helper quando
-  declarar a rota. **Nenhum teste da T13 depende de a action existir** — o que
-  se prova aqui é a tela, não a gravação.
+  pré-visualização sem saída é uma tela que não faz sentido para o usuário. A
+  **T13** escreveu o destino como caminho literal porque a rota ainda não
+  existia e `confirm_collection_import_path` seria `NameError` na renderização;
+  a **T14** declarou a rota e trocou o literal pelo helper. É o helper que
+  mantém a tela e a rota amarradas: mudar o caminho no `routes.rb` sem mudar
+  aqui vira erro de carga, e não um botão que aponta para o vazio.
 
   ## Sem `aria-label` em nada que já tenha texto visível
 
@@ -183,10 +182,13 @@
               <p class="import-preview__change">
                 <% if linha.quantidade_antes.nil? %>
                   Você não tem esta variante registrada; passará a ter
+                  <span class="import-preview__rotulo-valor">nova quantidade</span>
                   <span class="import-preview__depois"><%= linha.quantidade_depois %></span>.
                 <% else %>
-                  De <span class="import-preview__antes"><%= linha.quantidade_antes %></span>
-                  para <span class="import-preview__depois"><%= linha.quantidade_depois %></span>.
+                  De <span class="import-preview__rotulo-valor">quantidade atual</span>
+                  <span class="import-preview__antes"><%= linha.quantidade_antes %></span>
+                  para <span class="import-preview__rotulo-valor">nova quantidade</span>
+                  <span class="import-preview__depois"><%= linha.quantidade_depois %></span>.
                 <% end %>
               </p>
             <% end %>
@@ -197,8 +199,8 @@
   <% end %>
 
   <%#
-    O destino é a rota da T14, escrita como caminho literal porque o helper
-    ainda não existe (ver o cabeçalho). `form_with` emite o token de CSRF, que
+    O destino é a rota de confirmação da T14, pelo helper (ver o cabeçalho).
+    `form_with` emite o token de CSRF, que
     a confirmação vai verificar: é a mesma exigência que a revisão de segurança
     da T10 fez sobre o upload, e por mais razão ainda aqui — este é o botão que
     grava.
@@ -224,11 +226,11 @@
         <strong>Atenção:</strong>
         <%= pluralize(quantas_zeram, "carta que você possui hoje sai da sua coleção",
                       plural: "cartas que você possui hoje saem da sua coleção") %>
-        se você confirmar.
+        se você confirmar. Veja quais em &ldquo;Remove da coleção&rdquo;, no topo desta página.
       </p>
     <% end %>
 
-    <%= form_with url: "#{collection_import_path(@collection_import.token)}/confirm",
+    <%= form_with url: confirm_collection_import_path(@collection_import.token),
                   method: :post, class: "import-preview__form" do |form| %>
       <%= form.submit "Confirmar e gravar na minha coleção",
                       class: "import-preview__confirm" %>

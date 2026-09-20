@@ -485,11 +485,27 @@ class CollectionImportsTest < ActionDispatch::IntegrationTest
 
   # A porta complementar: uma URL com id de usuário não pode **resolver** para
   # o import por nenhum caminho.
+  #
+  # `/collection/import/<id>/confirm` **saiu desta lista na T14**, e a razão
+  # precisa ficar escrita para que a remoção não pareça um teste enfraquecido
+  # para passar no gate. Aquele caminho servia de exemplo de "URL com id" só
+  # enquanto a forma não existia; a T14 declarou
+  # `POST /collection/import/:token/confirm`, e o que ocupa o segmento não é um
+  # id de usuário — é o **token** da pré-visualização, 32 bytes urlsafe gerados
+  # pela T11, um segredo por upload que não identifica ninguém.
+  #
+  # A garantia que este teste protege continua inteira e é verificada acima,
+  # pelo teste que percorre as rotas do controller e exige
+  # `required_names - ["token"]` vazio: nenhuma rota do import aceita
+  # identificador de usuário. A prova de que o token alheio não grava e não
+  # revela a existência é da T14, em
+  # `test/integration/collection_import_commit_test.rb` — autorização, que
+  # roteamento não resolve.
   test "uma URL com id de usuário não resolve para o import" do
     caminhos = [
-      "/collection/import/#{@zoro.id}/confirm",
       "/users/#{@zoro.id}/collection/import",
-      "/collection/#{@zoro.id}/import"
+      "/collection/#{@zoro.id}/import",
+      "/collection/import/users/#{@zoro.id}"
     ]
 
     caminhos.each do |caminho|

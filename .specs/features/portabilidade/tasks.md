@@ -764,6 +764,44 @@ para `users` com `ON DELETE RESTRICT` e que não há cascata possível para
 
 ---
 
+**Revisão de a11y (`ecc:a11y-architect`, autor ≠ revisor):** 0 CRITICAL,
+2 HIGH, 1 MEDIUM, 1 LOW.
+
+- **HIGH 1 — CORRIGIDO.** *Antes/depois sem rótulo textual associável (SC 1.3.1).*
+  Os dois números eram elementos distintos, mas a relação "qual é o atual, qual
+  é o novo" vivia só na frase "De X para Y": quem navega elemento a elemento,
+  lê em braille ou usa zoom extremo com janela estreita via um número solto sem
+  saber qual era. Acrescentado rótulo de **conteúdo** ("quantidade atual" /
+  "nova quantidade"), oculto visualmente por posicionamento e `clip-path` — não
+  por `display: none`, que o removeria também da árvore de acessibilidade. Não é
+  `aria-label`, então não reabre a lição registrada sobre rótulo ARIA duplicando
+  texto visível: aqui não havia texto visível a duplicar.
+
+- **HIGH 2 — ACEITO COMO ACHADO, REJEITADO COMO HIGH.** *Ausência de mecanismo
+  de pular a lista (SC 2.4.1).* O próprio revisor escreveu que "a navegação por
+  heading nativa dos leitores de tela é o mecanismo de bypass blocks aqui, e ele
+  já existe (5 `h2` + 1 `h1`)" e que **"nenhuma mudança estrutural obrigatória"**.
+  Ele manteve HIGH apenas porque a dependência não estava documentada — o que é
+  uma nota, não um defeito. Fica registrada aqui: **a tela depende da navegação
+  por cabeçalho para pular grupos longos**, e a hierarquia (`h1` único + um `h2`
+  por classificação, sem salto de nível) existe para sustentar isso. Se o volume
+  real de linhas mostrar que um `h2` por grupo não basta, a saída é paginar ou
+  subagrupar — não acrescentar um skip-link que duplicaria o que a AT já faz.
+
+- **MEDIUM — CORRIGIDO.** *O aviso dizia quantas cartas saem, não quais.* Quem
+  confia só no aviso confirma uma contagem que bate com a expectativa mesmo
+  quando as cartas são outras. O aviso agora aponta onde ver a lista.
+
+- **LOW — REGISTRADO SEM AÇÃO.** `<input type="file">` renderiza um botão cujo
+  tamanho o navegador controla e que nem sempre respeita `min-height`. É
+  limitação de plataforma, não do CSS.
+
+**Nota sobre o teste de reflow:** a regra de ocultação do rótulo usa `width: 1px`
+e `white-space: nowrap`, que o teste de scroll horizontal proíbe. A exceção é
+**condicionada a `position: absolute`** — um elemento fora do fluxo e recortado
+não empurra a página. Mutação que troca o posicionamento por `static` derruba o
+teste, então a exceção não vira porta dos fundos.
+
 ### T14: Confirmação — a única escrita da feature
 
 **What**: A action que grava o que a pré-visualização mostrou, em lote, sem desfazer linhas anteriores por causa de uma posterior, e que é segura contra confirmação repetida.
@@ -780,21 +818,111 @@ para `users` com `ON DELETE RESTRICT` e que não há cascata possível para
 
 **Done when**:
 
-- [ ] Teste prova que a confirmação grava **exatamente** o que a pré-visualização apresentou — o resultado é comparado contra a pré-visualização, não contra o arquivo
-- [ ] Teste prova que **abandonar o fluxo sem confirmar deixa a coleção exatamente como estava** (Req. 10.5)
-- [ ] Teste prova que a confirmação **exige** a pré-visualização: não há caminho que grave direto do arquivo
-- [ ] Teste prova que a confirmação de uma pré-visualização **de outro usuário** não grava nada e não revela a existência dela
-- [ ] Teste prova que **duas confirmações da mesma pré-visualização não duplicam o efeito** (Edge Case da spec)
-- [ ] Teste prova que uma linha que falha na gravação **não desfaz** as anteriores (Req. 10.3 / POR-06), no mesmo espírito do erro isolado da ingestão (design.md §5.2)
-- [ ] Teste prova que a escrita usa `ON CONFLICT` ou equivalente, e **não** ler-em-Ruby-e-escrever-depois (o *lost update* que a T6 da `colecao` resolveu)
-- [ ] Teste prova que a quantidade resultante é a do arquivo (AD-006: substituir), não a soma
-- [ ] Teste prova que a sessão expirada entre pré-visualização e confirmação **não grava nada** e leva à autenticação (Edge Case da spec)
-- [ ] `ecc:database-reviewer` revisou a escrita em lote; achados resumidos nas "Decisões da execução"
+- [x] Teste prova que a confirmação grava **exatamente** o que a pré-visualização apresentou — o resultado é comparado contra a pré-visualização, não contra o arquivo
+- [x] Teste prova que **abandonar o fluxo sem confirmar deixa a coleção exatamente como estava** (Req. 10.5)
+- [x] Teste prova que a confirmação **exige** a pré-visualização: não há caminho que grave direto do arquivo
+- [x] Teste prova que a confirmação de uma pré-visualização **de outro usuário** não grava nada e não revela a existência dela
+- [x] Teste prova que **duas confirmações da mesma pré-visualização não duplicam o efeito** (Edge Case da spec)
+- [x] Teste prova que uma linha que falha na gravação **não desfaz** as anteriores (Req. 10.3 / POR-06), no mesmo espírito do erro isolado da ingestão (design.md §5.2)
+- [x] Teste prova que a escrita usa `ON CONFLICT` ou equivalente, e **não** ler-em-Ruby-e-escrever-depois (o *lost update* que a T6 da `colecao` resolveu)
+- [x] Teste prova que a quantidade resultante é a do arquivo (AD-006: substituir), não a soma
+- [x] Teste prova que a sessão expirada entre pré-visualização e confirmação **não grava nada** e leva à autenticação (Edge Case da spec)
+- [x] `ecc:database-reviewer` revisou a escrita em lote; achados resumidos nas "Decisões da execução"
 
 **Tests**: integration
 **Gate**: full
 
 ---
+
+**Decisões da execução:**
+
+- **Transação x erro isolado: savepoint por linha.** Os dois critérios não são
+  irreconciliáveis porque falam de granularidades diferentes — a transação é
+  sobre o **lote** (impedir a dupla confirmação), o erro isolado é sobre a
+  **linha** (Req. 10.3). `transaction(requires_new: true)` por linha emite um
+  `SAVEPOINT`: o erro desfaz aquela linha e nada mais, o loop continua, e a
+  transação externa — que contém a transição de status — permanece viva e
+  commita. É o que a ingestão obtém com "transação própria por registro"
+  (design.md §5.2), sob um envelope que precisa permanecer atômico. As duas
+  alternativas foram descartadas com razão escrita no serviço: gravar fora de
+  transação perde a atomicidade da reivindicação; transação única sem
+  savepoints perde o lote inteiro por uma linha ruim.
+
+- **A reivindicação é um `UPDATE` condicional, e isso é provado pelo
+  mecanismo, não pelo desfecho.** O requisito vinculante da revisão de banco da
+  T11 foi cumprido literalmente:
+  `UPDATE collection_imports SET status='confirmado' WHERE id=$1 AND status='pendente' AND expires_at > now() RETURNING id`.
+  **O primeiro teste escrito para isso era insuficiente e a mutação provou**:
+  substituir o statement por `confirmavel?` + `update!` (exatamente o defeito
+  que a revisão nomeou) passava verde, porque duas chamadas sequenciais
+  produzem o mesmo `true`/`false` nos dois desenhos. O teste foi refeito sobre
+  o SQL efetivamente emitido (`sql.active_record`): um statement só, `UPDATE` e
+  não `SELECT`, as duas guardas dentro do `WHERE`, `RETURNING` presente. Aí a
+  mutação morre. A corrida real não é reproduzível em
+  `ActionDispatch::IntegrationTest` (a suíte roda dentro de uma transação, e
+  duas threads na mesma conexão não são duas transações) — registrado como
+  `SPEC_DEVIATION` no cabeçalho do arquivo de teste.
+
+- **A mesma transação, provada por profundidade e não por `BEGIN`.** A suíte já
+  roda dentro de uma transação de teste, então a do serviço sai como
+  `SAVEPOINT`; um teste que exigisse `BEGIN` estaria medindo
+  `use_transactional_tests`, não o produto. O observável é
+  `open_transactions` no momento de cada statement: a transição corre com
+  transação aberta, nenhuma escrita a precede, e cada escrita corre **mais
+  fundo** que ela — a assinatura do savepoint por linha.
+
+- **`:inalterada` é gravada, deliberadamente.** Pular seria correto na maior
+  parte das vezes e errado no caso que importa: entre a pré-visualização e a
+  confirmação o usuário pode ter mexido na coleção por outro caminho (a grade
+  tem "+1"), e "inalterada" é afirmação sobre o estado de **quando a tela foi
+  montada**. Pular deixaria a coleção diferente do que a tela prometeu, que é o
+  que o Req. 10.5 proíbe. Gravar o mesmo valor é idempotente e custa uma linha
+  num `INSERT` que já está acontecendo. `:rejeita` **nunca** é gravada.
+
+- **A guarda de `:rejeita` precisou de um caso específico para ser provada.** A
+  rejeição por variante inexistente não tem `card_variant_id`, então a guarda de
+  FK a barraria sozinha; e a rejeição por **linha duplicada** (T9) chega com
+  variante resolvida mas `quantidade_depois` nula, de modo que gravá-la violaria
+  o `NOT NULL` e o savepoint engoliria o erro — a coleção ficaria idêntica e a
+  mutação passaria **por acidente**. O que discrimina é o `Result`: recusar por
+  decisão não produz falha, tropeçar na constraint produz. Com
+  `assert_empty resultado.falhas`, a mutação morre.
+
+- **Achado honesto — a guarda `card_variant_id.present?` é redundante.**
+  Removê-la não quebra nenhum teste, porque `CLASSIFICACOES_GRAVAVEIS` já exclui
+  toda linha sem variante resolvida. Mantida como defesa em profundidade sobre o
+  dado insubstituível, e **registrada como redundante** em vez de coberta por um
+  teste contrived sobre um estado que o resolvedor não produz.
+
+- **Sensor de discriminação: oito mutações, em cópia, nunca `git stash`.**
+  Somar em vez de substituir (8 falhas), `SELECT`+`UPDATE` (2, **depois** de
+  refazer o teste — sobrevivia à primeira versão), `requires_new: false` (1
+  falha + 2 erros), gravar `:rejeita` (1, **depois** de acrescentar a linha
+  duplicada e o `Result` — sobrevivia antes), pular `:inalterada` (1), remover a
+  guarda de expiração do `WHERE` (2), usar `quantidade_bruta` do arquivo em vez
+  de `quantidade_depois` do staging (1). A oitava — remover a guarda de FK —
+  **sobreviveu**, e está registrada acima como redundância consciente.
+
+- **Revisão de banco feita pelo executor, não pelo `ecc:database-reviewer`** (o
+  executor desta task não despacha subagente). Examinado contra o banco ao vivo:
+  o plano da reivindicação em volume realista (5.000 registros, com `ANALYZE`
+  antes) sai por `Index Scan using collection_imports_pkey` com
+  `Index Cond: (id = ...)` e as duas guardas no `Filter` — O(1), sem varredura;
+  o `ON CONFLICT (user_id, card_variant_id)` é coberto pelo
+  `UNIQUE index_collection_items_on_user_id_and_card_variant_id`, confirmado em
+  `pg_indexes`, logo o `ON CONFLICT` tem alvo real e não cai em erro de
+  inferência; as constraints de `collection_items` em `pg_constraint`
+  (`CHECK (quantity >= 0)`, FKs `ON DELETE RESTRICT`) continuam sendo a garantia
+  final, e o `CHECK` é o que transforma uma quantidade negativa vinda do staging
+  em falha de linha isolada em vez de dado corrompido; `quantity` é `NOT NULL`,
+  que é o backstop que mascarou a mutação descrita acima. Custo medido: 50
+  linhas produzem 152 statements (1 reivindicação + 50 upserts + 101 marcas de
+  savepoint) — **linear nas linhas, sem N+1 de leitura**, e o overhead de
+  savepoint é o preço explícito do Req. 10.3. **O que não consegui avaliar**:
+  comportamento sob concorrência real (duas conexões disputando a mesma
+  pré-visualização), que o ambiente de teste não reproduz e que eu provei só
+  pelo mecanismo do statement; e o custo do lote máximo de AD-008 (10.000
+  linhas), que medi só por extrapolação linear a partir de 50.
 
 ### T15: Resumo final da importação ✅ fecha a §5.3
 

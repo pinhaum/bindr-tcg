@@ -236,6 +236,45 @@ class CollectionImportPreviewUiTest < ActionDispatch::IntegrationTest
                  "o 'depois' é a quantidade que o arquivo grava"
   end
 
+  # Achado HIGH da revisão de a11y (SC 1.3.1): os dois números serem elementos
+  # distintos não basta. A relação "qual é o atual, qual é o novo" vivia só na
+  # frase "De X para Y", legível por quem percorre a frase inteira em ordem — e
+  # perdida por quem navega elemento a elemento, lê em braille ou usa zoom
+  # extremo com janela estreita. O rótulo é texto de conteúdo, não `aria-label`.
+  test "cada quantidade é nomeada, não apenas posicionada" do
+    renderizar
+    linha = linha_de(@atualiza.card.card_number)
+    rotulos = linha.css(".import-preview__rotulo-valor").map { |r| r.text.squish }
+
+    assert_includes rotulos, "quantidade atual"
+    assert_includes rotulos, "nova quantidade"
+  end
+
+  # O rótulo só serve se chegar à árvore de acessibilidade: `display: none` e
+  # `visibility: hidden` o removeriam dela junto com o visual, anulando o
+  # propósito. A regra precisa ocultar por posicionamento e recorte.
+  test "o rótulo das quantidades é ocultado sem sair da árvore de acessibilidade" do
+    folha = File.read(Rails.root.join("app/assets/stylesheets/catalog.css"))
+    regra = regras_de(folha, "import-preview__rotulo-valor").join("\n")
+
+    refute_empty regra, "a regra de ocultação do rótulo precisa existir na folha"
+    refute_match(/display:\s*none/, regra, "`display: none` tira o texto do leitor de tela")
+    refute_match(/visibility:\s*hidden/, regra, "`visibility: hidden` tira o texto do leitor de tela")
+    assert_match(/position:\s*absolute/, regra)
+    assert_match(/clip-path/, regra)
+  end
+
+  # Achado MEDIUM da mesma revisão: o aviso dizia **quantas** cartas saem, não
+  # **quais**. Quem confia só nele confirma uma contagem que bate com a
+  # expectativa mesmo quando as cartas são outras.
+  test "o aviso destrutivo aponta onde ver quais cartas saem" do
+    renderizar
+    aviso = css_select(".import-preview__warning").first.text.squish
+
+    assert_includes aviso, "Remove da coleção",
+                    "o aviso precisa dizer onde a lista está, não só quantas são"
+  end
+
   # O caso destrutivo carrega o par pela mesma razão, e o zero precisa aparecer
   # como valor e não sumir por ser falsy no template.
   test "a linha destrutiva mostra a posse que existe hoje e o zero que a substitui" do
@@ -360,7 +399,21 @@ class CollectionImportPreviewUiTest < ActionDispatch::IntegrationTest
 
     assert_not_empty regras
 
-    regras.each do |regra|
+    # A regra de ocultação visual do rótulo é a única exceção, e ela se exclui
+    # sozinha: `width: 1px` e `white-space: nowrap` são partes obrigatórias da
+    # técnica, e um elemento de 1px **fora do fluxo** (`position: absolute`,
+    # recortado por `clip-path`) não tem como empurrar a página para o lado. A
+    # exceção é condicionada a esse `position: absolute`, então uma regra que
+    # perdesse o posicionamento voltaria a ser cobrada pelas asserções abaixo.
+    fora_do_fluxo, no_fluxo = regras.partition do |regra|
+      regra.include?("rotulo-valor") && regra.match?(/position:\s*absolute/)
+    end
+
+    assert_equal 1, fora_do_fluxo.size,
+                 "só o rótulo para leitor de tela sai do fluxo; qualquer outra regra " \
+                 "fora do fluxo precisa ser justificada aqui"
+
+    no_fluxo.each do |regra|
       # `width` como propriedade inteira, começando uma declaração. O recorte
       # importa: `min-width`, `max-width` e `border-left-width` também terminam
       # em "width" e nenhuma delas fixa a largura da caixa — `border-*-width` é
