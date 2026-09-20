@@ -222,7 +222,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T5: Model `CollectionItem` sobre o usuário da sessão
+### T5: Model `CollectionItem` sobre o usuário da sessão ✅
 
 **What**: Completar `CollectionItem` com as regras de domínio e o escopo por usuário, sem aceitar `user_id` de request.
 **Where**: `app/models/collection_item.rb`
@@ -237,10 +237,62 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Teste prova, por SQL direto, que `UNIQUE (user_id, card_variant_id)` é do banco (`ActiveRecord::RecordNotUnique`)
-- [ ] Teste prova, por SQL direto, que `CHECK (quantity >= 0)` é do banco
-- [ ] Teste prova que a FK recusa apagar uma variante possuída (`ActiveRecord::InvalidForeignKey`)
-- [ ] Quantidade zero é representável e tratada como não possuída
+- [x] Teste prova, por SQL direto, que `UNIQUE (user_id, card_variant_id)` é do banco (`ActiveRecord::RecordNotUnique`)
+- [x] Teste prova, por SQL direto, que `CHECK (quantity >= 0)` é do banco
+- [x] Teste prova que a FK recusa apagar uma variante possuída (`ActiveRecord::InvalidForeignKey`)
+- [x] Quantidade zero é representável e tratada como não possuída
+
+**Decisões da execução:**
+
+- **Nenhuma migração, e isso é o resultado esperado.** As três garantias já
+  nasceram na migração `20260919120200` (Fase 2), que criou `collection_items`
+  para que a T8 do `catalogo` pudesse provar a invariante do Req. 1.7. A task
+  consome o schema e o prova; não o recria. Se tivesse sido preciso migrar, o
+  sinal seria de que a Fase 2 entregou menos do que `spec.md` §47 afirma.
+- **`for_user` exige o objeto `User` e levanta `ArgumentError` para um id.** O
+  Req. 6.5 é absoluto, e a forma barata de garantir "nunca um id vindo do
+  request" é tornar a escrita errada impossível de compilar por acidente:
+  `CollectionItem.for_user(params[:user_id])` explode em vez de devolver a
+  coleção de outra pessoa. `nil` é o único valor não-`User` aceito, porque é o
+  `Current.user` do anônimo do catálogo público — devolve relação vazia, não
+  erro (Req. 7.6, critério 3). A alternativa (`where(user_id: ...)` aceitando
+  qualquer coisa) deixaria a violação de autorização passar pela revisão sem
+  ruído.
+- **Zero é linha existente, não ausência de linha.** `owned` filtra
+  `quantity > 0` e `unowned` filtra `quantity = 0`, em vez de testar existência
+  do registro. Usar ausência como sentinela quebraria o filtro do Req. 7.6 para
+  quem teve a carta e zerou: "nunca teve" e "não tem mais" deixariam de ser
+  distinguíveis, e a T9 herdaria o defeito.
+- **O teste da FK não asserta nada depois do `raise`.** A violação aborta a
+  transação do teste; qualquer consulta seguinte falha com
+  `PG::InFailedSqlTransaction` e não diz nada sobre o schema. A primeira versão
+  do teste trazia um `assert CardVariant.exists?` depois do `assert_raises` e
+  errava por isso. O nome da constraint na mensagem é o que identifica quem
+  recusou.
+- **O `CHECK` é provado duas vezes, por `INSERT` e por `UPDATE` direto.** Só o
+  `INSERT` não distinguiria a constraint da validação do model: o caso que
+  importa é o `UPDATE ... SET quantity = quantity - 1`, que é exatamente a forma
+  que o decremento da T6 tenderia a tomar e que passa por fora de toda
+  validação do Active Record.
+- **O trabalho não commitado que existia no arquivo foi aproveitado quase
+  inteiro.** Era uma tentativa anterior desta mesma T5, sem teste: scopes
+  `owned`, `unowned`, `for_user` e o método `owned?`. A avaliação confirmou que
+  estavam alinhados a COL-06/COL-08/COL-09 e ao Req. 6.5. Única correção: o
+  comentário de `for_user` citava `CollectionItem.for(...)`, nome de método que
+  não existe. Nada foi descartado; o que faltava era o teste, que é o que esta
+  task acrescenta.
+- **Revisão do `ecc:database-reviewer`: zero achado CRITICAL ou HIGH.** As duas
+  correções LOW aceitas entraram: o teste de dois usuários passou a assertar a
+  **coexistência** das duas linhas (`assert insert_item(...)` sozinho passaria
+  mesmo se o segundo INSERT sobrescrevesse o primeiro), e `owned` trocou
+  `arel_table[:quantity].gt(0)` por `where(quantity: 1..)`, simétrico ao
+  `unowned` e sem Arel explícito. Dois MEDIUM foram **recusados por escopo**:
+  trocar `quantity` de `integer` para `bigint` editaria uma migração já
+  commitada da Fase 2 — que não altera a coluna do banco existente e forçaria
+  churn em `structure.sql` — e cópias de uma carta física não chegam perto de
+  2³¹; e a redundância do índice simples `user_id` com o prefixo do composto
+  `(user_id, card_variant_id)` é trabalho de índice, que é a **T10**, como o
+  próprio revisor apontou.
 
 **Tests**: unit
 **Gate**: quick

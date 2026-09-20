@@ -49,21 +49,39 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: **Feature `catalogo` ENCERRADA.** 14 de 14 tasks fechadas,
-  os dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os
-  achados dos Verifiers e da revisão de a11y foram corrigidos e commitados.
-- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, **T4**.
+- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) em andamento** — T5
+  fechada, T6 a seguir. Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois
+  lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os achados dos
+  Verifiers e da revisão de a11y foram corrigidos e commitados.
+- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, **T5**.
   `colecao` Fase 1 (T1–T4) encerrada; `.context/tasks.md` §4.1 fechado.
+  A T5 abriu a Fase 2. **`.context/tasks.md` §4.2 continua ABERTO de
+  propósito**: ele cobre T5, T6 e T7 — a parte "um usuário não acessa a coleção
+  de outro" é a T7, e só ela fecha a seção.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T5** de `.specs/features/colecao/tasks.md` (model
-  `CollectionItem` sobre o usuário da sessão). **Fase 1 (T1–T4) encerrada** — a
-  identidade e a sessão estão de pé, e `.context/tasks.md` §4.1 fechou junto com
-  a T4. A decisão central segue de pé: **não rodar
+- **Next step**: **Executar T6** de `.specs/features/colecao/tasks.md`
+  (`CollectionItemsController`, incremento e decremento em ação única). O model
+  `CollectionItem` já está pronto e testado: use `CollectionItem.for_user(
+  Current.user)` — o scope **exige o objeto `User` e levanta `ArgumentError`
+  para um id**, de modo que `for_user(params[:user_id])` não compila por
+  acidente. A decisão central segue de pé: **não rodar
   `bin/rails generate authentication`**.
+- **A T5 não precisou de migração, e a T6 também não deve precisar.** As três
+  garantias de `collection_items` (`UNIQUE (user_id, card_variant_id)`,
+  `CHECK (quantity >= 0)` e as duas FKs `restrict`) nasceram na migração
+  `20260919120200`, na Fase 2 do `catalogo`. A T5 as **provou** contra o banco
+  em `test/models/collection_item_test.rb`; não as criou. O piso de zero do
+  Req. 7.4 já é do schema — o decremento da T6 não é a única coisa que o
+  segura, e o teste do `UPDATE ... SET quantity = quantity - 1` direto está lá
+  justamente para provar isso.
+- **Zero é linha existente, não ausência de linha.** `CollectionItem.owned`
+  filtra `quantity > 0`; `unowned` filtra `quantity = 0`. A T9 (filtro `owned`
+  no `CatalogQuery`) herda essa semântica: "nunca teve" e "não tem mais"
+  precisam continuar distinguíveis, senão o Req. 7.6 fica furado.
 - **`rate_limit` é dívida aberta, não esquecimento.** A T4 decidiu **não**
   incluir a linha do template: sem cache store compartilhado ela não limita
   nada (teste é `:null_store`; produção cai em `:file_store` por container) e
