@@ -1,0 +1,24 @@
+<%#
+  Pré-visualização do import — **placeholder da T12**.
+
+  A tela de verdade é a **T13**: é ela que mostra as três classes de linha de
+  forma distinguível sem depender de cor, o antes e o depois de cada alteração,
+  o motivo de cada rejeição, e que passa pela revisão de a11y. Esta view existe
+  porque o redirect do upload precisa chegar a algum lugar e porque o teste de
+  autorização do token precisa de uma resposta de sucesso para exercitar.
+
+  O que já está certo aqui e não deve regredir na T13: nada é gravado ao
+  renderizar, e o registro vem de `CollectionImport.find_by_token_for`, que
+  filtra por dono antes de carregar.
+%>
+<% content_for :title, "Pré-visualização da importação" %>
+
+<main class="auth">
+  <h1 class="auth__title">Pré-visualização da importação</h1>
+
+  <p>
+    Arquivo: <%= @collection_import.filename %> —
+    <%= pluralize(@collection_import.linhas_resolvidas.size, "linha", plural: "linhas") %>
+    analisada(s). Nada foi gravado na sua coleção ainda.
+  </p>
+</main>

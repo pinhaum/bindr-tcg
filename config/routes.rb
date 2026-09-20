@@ -64,5 +64,29 @@ Rails.application.routes.draw do
   # segmento que não pode existir aqui.
   get "collection/export" => "collection_exports#show", as: :collection_export
 
+  # Import da coleção em CSV (Req. 10 / POR-07, POR-12). **Nenhum identificador
+  # de usuário cabe nestas URLs**, pela mesma razão do export e do progresso: o
+  # dono da pré-visualização é sempre `Current.user`, e é isso que torna
+  # `?user_id=` inócuo por desenho e não por checagem (Req. 6.5).
+  #
+  # O único segmento dinâmico é o **token** da pré-visualização — 32 bytes
+  # urlsafe gerados pela T11 —, e ele não identifica usuário nenhum: é um
+  # segredo por upload, resolvido sempre dentro do escopo do dono por
+  # `CollectionImport.find_by_token_for`. Um id sequencial aqui deixaria a
+  # pré-visualização alheia a uma tentativa de distância; o token deixa a URL
+  # endereçável (é para ela que o upload redireciona) sem deixá-la adivinhável.
+  #
+  # `get`/`post` explícitos em vez de `resources`: o recurso não tem `edit`,
+  # `update` nem `destroy`, e `resources` geraria `:id` — exatamente o segmento
+  # que não pode existir. A confirmação (T14) entra aqui como uma rota própria,
+  # também chaveada pelo token.
+  # Os três nomes são declarados à mão, e nenhum deles pode ser omitido: sem
+  # `as:` no `post`, o Rails deriva `collection_import` do caminho e ele colide
+  # com o nome do `show` — `ArgumentError` na carga das rotas, que aparece como
+  # `root_url` indefinido em todo teste que faz login, bem longe da causa.
+  get "collection/import" => "collection_imports#new", as: :new_collection_import
+  post "collection/import" => "collection_imports#create", as: :collection_imports
+  get "collection/import/:token" => "collection_imports#show", as: :collection_import
+
   root "catalog#index"
 end

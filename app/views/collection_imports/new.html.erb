@@ -1,0 +1,33 @@
+<%#
+  Formulário de upload do import (T12 / POR-07).
+
+  Mínimo de propósito: a tela de pré-visualização é da T13, e é ela que traz o
+  desenho, os alvos de 24px e a revisão de a11y. O que precisa estar certo
+  desde já é o contrato do formulário — `multipart/form-data` e um campo de
+  arquivo chamado `arquivo`, que é o que a action lê —, porque é ele que o
+  teste de integração exercita.
+
+  `form_with` sem `local:` já emite o token de CSRF, que a action verifica: a
+  revisão de segurança da T10 pediu que essa verificação continuasse ligada, e
+  é o formulário que a torna utilizável.
+%>
+<% content_for :title, "Importar coleção" %>
+
+<main class="auth">
+  <h1 class="auth__title">Importar coleção</h1>
+
+  <p>
+    Envie o arquivo CSV exportado da sua coleção. Você verá o que vai mudar
+    antes de qualquer alteração ser gravada.
+  </p>
+
+  <%= form_with url: collection_imports_path, method: :post,
+                class: "auth__form" do |form| %>
+    <div class="auth__field">
+      <%= form.label :arquivo, "Arquivo CSV" %>
+      <%= form.file_field :arquivo, accept: "text/csv,.csv", required: true %>
+    </div>
+
+    <%= form.submit "Pré-visualizar importação", class: "auth__submit" %>
+  <% end %>
+</main>

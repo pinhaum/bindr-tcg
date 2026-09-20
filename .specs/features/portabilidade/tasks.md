@@ -651,12 +651,12 @@ para `users` com `ON DELETE RESTRICT` e que não há cascata possível para
 
 **Done when**:
 
-- [ ] O controller **não** declara `allow_unauthenticated_access`; teste prova que o anônimo é redirecionado e que nada é gravado
-- [ ] **Teste prova que enviar o arquivo não altera a coleção**: `assert_no_changes` sobre a quantidade de um item existente e sobre `CollectionItem.count`, com um arquivo que classificaria criações e atualizações
-- [ ] Teste prova que o registro de staging criado pertence a `Current.user`, e que `?user_id=` de outro usuário não muda o dono
-- [ ] Teste prova que um arquivo recusado pelo parser (formato, delimitador, limite) **não cria registro de staging** e responde com a mensagem em português
-- [ ] Teste prova que a resposta identifica a pré-visualização de forma que só o dono consiga confirmá-la
-- [ ] A rota não aceita identificador de usuário
+- [x] O controller **não** declara `allow_unauthenticated_access`; teste prova que o anônimo é redirecionado e que nada é gravado
+- [x] **Teste prova que enviar o arquivo não altera a coleção**: `assert_no_changes` sobre a quantidade de um item existente e sobre `CollectionItem.count`, com um arquivo que classificaria criações e atualizações
+- [x] Teste prova que o registro de staging criado pertence a `Current.user`, e que `?user_id=` de outro usuário não muda o dono
+- [x] Teste prova que um arquivo recusado pelo parser (formato, delimitador, limite) **não cria registro de staging** e responde com a mensagem em português
+- [x] Teste prova que a resposta identifica a pré-visualização de forma que só o dono consiga confirmá-la
+- [x] A rota não aceita identificador de usuário
 
 **Tests**: integration
 **Gate**: full
