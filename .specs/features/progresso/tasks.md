@@ -805,7 +805,7 @@ task nova do plano, nenhum checkbox foi marcado por ela):
 
 ---
 
-### T8: Número fixo de consultas e viewport de 360px
+### T8: Número fixo de consultas e viewport de 360px ✅
 
 **What**: Medir que a página resolve em número de consultas que não cresce com a quantidade de sets, e que a marcação não impõe scroll horizontal em 360px.
 **Where**: `test/queries/set_progress_plan_test.rb`
@@ -820,15 +820,131 @@ task nova do plano, nenhum checkbox foi marcado por ela):
 
 **Done when**:
 
-- [ ] Teste conta as consultas emitidas pela requisição com **duas** quantidades de sets diferentes e prova que o número **não varia** com a quantidade
-- [ ] A contagem mede a agregação, não a página inteira: consultas de sessão e de layout são identificadas e descontadas, ou a asserção é sobre a diferença entre os dois cenários
-- [ ] O plano da agregação é medido com dado semeado em volume realista e registrado no cabeçalho do teste
-- [ ] Índice só entra se a medição reprovar; se entrar, a migração é aditiva e `db/structure.sql` é regenerado por `db:migrate`
-- [ ] Marcação sem largura fixa maior que 360px nem `white-space: nowrap` em bloco largo; asserção sobre a folha de estilo ou sobre a marcação renderizada, com `SPEC_DEVIATION` registrando que a ausência de navegador impede medir o scroll de fato
-- [ ] `.context/tasks.md` §5.1 marcado nesta task, que é a que a fecha
+- [x] Teste conta as consultas emitidas pela requisição com **duas** quantidades de sets diferentes e prova que o número **não varia** com a quantidade
+- [x] A contagem mede a agregação, não a página inteira: consultas de sessão e de layout são identificadas e descontadas, ou a asserção é sobre a diferença entre os dois cenários
+- [x] O plano da agregação é medido com dado semeado em volume realista e registrado no cabeçalho do teste
+- [x] Índice só entra se a medição reprovar; se entrar, a migração é aditiva e `db/structure.sql` é regenerado por `db:migrate`
+- [x] Marcação sem largura fixa maior que 360px nem `white-space: nowrap` em bloco largo; asserção sobre a folha de estilo ou sobre a marcação renderizada, com `SPEC_DEVIATION` registrando que a ausência de navegador impede medir o scroll de fato
+- [x] `.context/tasks.md` §5.1 marcado nesta task, que é a que a fecha
 
 **Tests**: unit
 **Gate**: full
+
+**Decisões da execução:**
+
+- **A asserção central é sobre a diferença entre dois cenários, e não sobre um
+  número absoluto.** Medido: a requisição emite **3** consultas — `Session Load`,
+  `User Load` (as duas do `resume_session`) e uma única `CardSet Load`, que é a
+  agregação. Travar `assert_equal 3` seria frágil pela razão errada: mudaria se
+  o concern ganhasse um `includes` ou se o layout passasse a exibir um contador,
+  e nenhuma dessas é a regressão que PRG-11 proíbe — uma asserção que falha por
+  elas é apagada na primeira vez que atrapalha. A asserção compara **1 set
+  contra 40**: o custo constante aparece nos dois lados e se cancela na
+  subtração, seja ele qual for. Há uma segunda asserção que **desconta
+  nominalmente** as duas consultas de sessão e exige que reste exatamente uma,
+  contendo `GROUP BY` — ela fecha o ponto cego da subtração, onde duas consultas
+  de catálogo constantes também se cancelariam.
+
+- **A medição é da requisição HTTP, e é isso que a distingue da T1.** A T1 já
+  trava a forma do query object isolado. Isso não cobre PRG-11: provado pelo
+  sensor, um `CardVariant.where(set_id: ...).count` **dentro do laço da view**
+  deixa os 44 testes da T1 verdes e a página N+1 — 44 consultas em 40 sets. Só
+  a contagem sobre `get progress_path` pega esse caso, e ela o pega com as duas
+  asserções de PRG-11.
+
+- **Nenhum índice criado: a medição reprovou o candidato do revisor.** O
+  `ecc:database-reviewer` deixou anotado o índice parcial
+  `collection_items (user_id, card_variant_id) WHERE quantity >= 1`. Criado
+  sobre o seed de volume (200 sets, 12.000 variantes, 51 usuários, 20.400
+  itens), o planejador **o ignorou por completo**: mesmo plano, mesmo
+  `Index Scan using index_collection_items_on_user_id` com
+  `Filter: (quantity >= 1)`, e **custo idêntico — 2096,43 com e sem**. O caso
+  assimétrico que a T10 da `colecao` nomeou como o único capaz de reabrir a
+  decisão também foi medido — o mesmo usuário com 12.000 itens e **40%** deles
+  zerados, muito além dos ~14% daquele seed — e o índice continuou ignorado,
+  com o plano **com** ele saindo marginalmente pior (4172,30 contra 4172,27).
+  Índice que o planejador não escolhe é custo de escrita sem ganho de leitura.
+  Nenhuma migração, `db/structure.sql` intacto, `db:migrate` não foi necessário.
+
+- **Os dois `Seq Scan` do catálogo não são assertados como ausentes, e isso é
+  deliberado.** `total_variants` e `parallel_variants` exigem todas as variantes
+  de todos os sets: não há predicado seletivo que um índice explore, e o
+  `FILTER` roda depois da leitura. Exigir a ausência deles reprovaria o plano
+  **certo** e empurraria para um índice que só serviria para satisfazer a
+  asserção — o erro exato que a T10 da `colecao` cometeu ao travar um índice
+  nominal e teve de corrigir. A asserção é "sem varredura de `collection_items`"
+  mais "acesso indexado existe", sem nomear qual índice.
+
+- **A asserção de estatísticas é sobre `last_analyze`, não sobre
+  `pg_class.reltuples` — e foi o sensor que impôs a troca.** A primeira versão
+  lia `reltuples` e o sensor a reprovou: **`reltuples` não é transacional** e
+  sobrevive ao rollback do teste, então uma execução anterior deste mesmo
+  arquivo deixa a estimativa povoada e a asserção passa **sem o `ANALYZE`** —
+  verde por resíduo, e dependente da ordem da suíte. Confirmado medindo:
+  `reltuples` do banco de teste vinha `[12000, 20400, 200]` de uma rodada
+  anterior, e zerou só depois de um `ANALYZE` manual sobre as tabelas vazias.
+  `last_analyze` é um instante comparado com `clock_timestamp()` do início do
+  teste: prova que o `ANALYZE` rodou **nesta** execução, o que nenhum resíduo
+  satisfaz. A mutação que remove o `ANALYZE` passou a morrer em duas rodadas
+  consecutivas.
+
+- **Sem o `ANALYZE` o plano medido é outro, e essa era a segunda metade do
+  buraco.** Medido: sem ele o Postgres estima `rows=1` para `sets` e escolhe
+  `Nested Loop Left Join` com `Bitmap Heap Scan on card_variants` por set — um
+  plano que nada tem a ver com o que as 12.000 variantes custam. As asserções de
+  plano continuavam **verdes** nesse estado, porque o plano desinformado também
+  acessa `collection_items` por índice. Era uma asserção que media outra coisa
+  sem falhar, exatamente a armadilha que a T10 nomeou para o volume — aqui
+  aplicada às estatísticas.
+
+- **PRG-12 é atacado pelas causas declaráveis, não pela largura calculada.** Não
+  há navegador, então `scrollWidth > clientWidth` não existe aqui. As asserções
+  varrem as regras cujo seletor menciona `progress-*` — por seletor e não por
+  faixa de linhas, para que a regra de `:focus-visible`, que vive longe do bloco
+  no grupo dos controles de wishlist, continue sendo inspecionada — e proíbem
+  três coisas: largura fixa em pixel acima de 360px (`width`, `min-width`,
+  `flex-basis`), `white-space: nowrap` em bloco **largo** (os que carregam
+  frase; em elemento curto ele é legítimo, por isso a lista explícita) e
+  `overflow-x: auto|scroll`, que é o remédio usual e aqui **é** a violação. Uma
+  quarta asserção olha a **marcação renderizada** atrás de `style=` embutido,
+  onde os três escapariam da folha inteiramente.
+
+- **A forma da página também é assertada, porque ela não aparece em CSS
+  nenhum.** Trocar a `<ul>` por `<table>` é a regressão que reintroduz o
+  problema que a T5 resolveu escolhendo lista, e nenhuma regra de estilo a
+  denuncia. Há asserção exigindo a `<ul class="progress__list"` e proibindo
+  `<table>` dentro de `main.progress`.
+
+- **Duas asserções guardam as premissas das outras, no precedente da T10.** A
+  primeira trava o **seed** (volume, seletividade do usuário alvo, existência de
+  item zerado); a segunda trava que o **bloco `progress-*` foi de fato
+  encontrado** na folha — sem ela, renomear o seletor faria as três asserções de
+  360px varrerem o vazio e passarem sem ler uma linha. As duas foram
+  confirmadas pelo sensor (M9 e M10).
+
+- **Sensor de discriminação: dez mutações sobre cópia dos arquivos (`cp`/`diff`,
+  nunca `git stash`), dez capturadas.** M1 — agregação trocada por um `count`
+  por set, a forma N+1 (2 falhas na T8, 3 na suíte; 208 consultas contra 4).
+  M2 — `ANALYZE` removido do seed (1 falha, em duas rodadas consecutivas, só
+  **depois** da troca por `last_analyze`; na versão `reltuples` sobrevivia).
+  M3 — `min-width: 420px` no item do set (1). M4 — `white-space: nowrap` na
+  linha de parallels (1). M5 — `overflow-x: auto` no contêiner (1). M6 — `<ul>`
+  trocada por `<table>` (2). M7 — `style="min-width: 900px"` embutido no item
+  (1). M8 — `CardVariant.where(set_id:).count` dentro do laço da view, com o
+  query object **intacto** (2 falhas na T8 e **zero** nos 44 testes da T1 — é a
+  prova de que esta task cobre o que a T1 não cobria). M9 — seed reduzido a 10
+  sets (1). M10 — bloco `progress-*` renomeado na folha (1). Os arquivos de
+  produção foram restaurados e conferidos **byte a byte idênticos** por `diff`;
+  a suíte foi reconferida verde.
+
+- **`SPEC_DEVIATION` registrado na seção de 360px do arquivo de teste**: não há
+  navegador no container, então a verificação de scroll horizontal é asserção
+  sobre o texto da folha e sobre a marcação renderizada. O limite está escrito
+  no próprio teste: uma tabela de muitas colunas, uma imagem sem `max-width` ou
+  uma palavra inquebrável mais larga que a caixa estouram 360px sem violar
+  nenhuma destas asserções. O que elas garantem é que as causas **declaráveis**
+  não foram introduzidas. Mesmo precedente de `progress_ui_test.rb`,
+  `catalog_grid_test.rb` e `collection_ownership_ui_test.rb`.
 
 ---
 

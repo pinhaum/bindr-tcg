@@ -193,7 +193,7 @@ Regras de execução:
 
 ## 5 — Progresso e portabilidade
 
-- [ ] **5.1 Progresso por set**
+- [x] **5.1 Progresso por set**
   - Por set: variantes distintas possuídas, total de variantes, percentual.
   - Contar variantes distintas, não cópias.
   - Link para o catálogo já filtrado por aquele set.
