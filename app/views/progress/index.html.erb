@@ -110,6 +110,47 @@
               deixar a separação a cargo do layout. %>
           <span class="progress-set__parallels-note">(não entra no percentual)</span>
         </p>
+
+        <%#
+          T6 — link para o catálogo filtrado (PRG-03 / Req. 9.3).
+
+          **O parâmetro é `sets` e o valor é o código, pelo contrato que já
+          existe.** `CatalogQuery::VARIANT_FILTERS` mapeia `sets` para a coluna
+          `code` e resolve por `joins(:card_set).where(sets: { code: values })`.
+          Passar `row.set_id` produziria uma URL sintaticamente válida que não
+          casa nenhum set e devolve catálogo vazio — 200 sem erro, o defeito
+          silencioso que a `colecao` já pagou cinco vezes. Lista (`[ code ]`) e
+          não escalar porque o filtro é `OU` dentro da categoria e o saneador
+          do query object trabalha sobre `Array(...)`.
+
+          **O nome acessível nomeia o set; o texto visível não precisa.** São 63
+          sets na página real: um texto visível repetido 63 vezes ("Ver no
+          catálogo") é o que a lista de links de um leitor de tela mostra, e
+          nela o usuário escolhe sem nenhum contexto ao redor — 63 entradas
+          idênticas são inescolhíveis (WCAG 2.4.4). O texto visível fica curto
+          porque **aí** o contexto existe: o `<h2>` do set está a três linhas
+          acima e na mesma caixa. O `aria-label` carrega o nome e o código,
+          exatamente como `catalog/_card_tile` faz com "3 impressões" numa
+          grade de 24 tiles — mesmo problema, mesma solução já adotada no
+          projeto.
+
+          `aria-label` **substitui** o texto visível no nome acessível, então
+          ele começa com o texto visível ("Ver no catálogo") para não quebrar o
+          SC 2.5.3 de quem usa comando de voz: quem diz "ver no catálogo"
+          continua acertando o link.
+
+          O link é o último elemento do item de propósito: ele é a ação sobre
+          os números acima, e vir antes deles faria o leitor de tela oferecer a
+          saída antes de dizer de onde. Nada aqui tem largura fixa nem
+          `nowrap` — a T8 mede 360px e não herda dívida.
+        %>
+        <p class="progress-set__catalog">
+          <%= link_to catalog_path(sets: [ row.set_code ]),
+                      class: "progress-set__catalog-link",
+                      aria: { label: "Ver no catálogo as cartas de #{row.set_name} (#{row.set_code})" } do %>
+            Ver no catálogo
+          <% end %>
+        </p>
       </li>
     <% end %>
   </ul>

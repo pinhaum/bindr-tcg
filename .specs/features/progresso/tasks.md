@@ -540,7 +540,7 @@ T6 → T7 → T8
 
 ---
 
-### T6: Link para o catálogo filtrado por set
+### T6: Link para o catálogo filtrado por set ✅
 
 **What**: Link de cada set para o catálogo já filtrado por aquele set, pelo parâmetro `sets` do contrato de `design.md` §4.2.
 **Where**: `app/views/progress/index.html.erb`
@@ -555,14 +555,67 @@ T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Cada set exibido oferece link para o catálogo filtrado por ele
-- [ ] O link usa `catalog_path(sets: [ code ])` — o **código** do set, pelo contrato existente; nenhum parâmetro novo é inventado
-- [ ] Teste de integração **segue** o link e confere que o catálogo responde 200 com o filtro ativo
-- [ ] Teste prova que o conjunto devolvido corresponde ao set: uma carta daquele set presente e uma de outro set ausente
-- [ ] O texto do link identifica o set para quem usa leitor de tela, sem depender de contexto visual
+- [x] Cada set exibido oferece link para o catálogo filtrado por ele
+- [x] O link usa `catalog_path(sets: [ code ])` — o **código** do set, pelo contrato existente; nenhum parâmetro novo é inventado
+- [x] Teste de integração **segue** o link e confere que o catálogo responde 200 com o filtro ativo
+- [x] Teste prova que o conjunto devolvido corresponde ao set: uma carta daquele set presente e uma de outro set ausente
+- [x] O texto do link identifica o set para quem usa leitor de tela, sem depender de contexto visual
 
 **Tests**: integration
 **Gate**: full
+
+**Decisões da execução:**
+
+- **O teste extrai o `href` do HTML e faz a requisição seguinte com ele.** É a
+  diferença entre provar o que a **view emite** e provar o que o catálogo
+  **filtra** — este último `test/queries/catalog_query_test.rb` já prova. Montar
+  `get catalog_path(sets: [ "OPp5a" ])` à mão passaria intacto com a view
+  emitindo o id do set, um parâmetro de nome errado ou nenhum parâmetro: o link
+  quebrado e a suíte verde. O helper `href_do_catalogo` é o único ponto por onde
+  a URL entra no teste, e ele lê de `css_select`, nunca reconstrói.
+
+- **Duas requisições encadeadas, e a segunda asserção é sobre o conjunto.** O
+  `200` sozinho não discrimina: o catálogo responde 200 para qualquer filtro,
+  inclusive para um que não casa nada. A prova é uma carta do set **presente** e
+  uma de outro set **ausente** — e há um teste simétrico seguindo o link do
+  `@set_b`, porque sem ele um link **sem filtro nenhum** passaria por acaso: o
+  catálogo completo também contém a carta do set A.
+
+- **Texto visível curto, `aria-label` com o nome do set.** São 63 sets na página
+  real. Um texto visível repetido 63 vezes é o que a lista de links de um leitor
+  de tela mostra, e nela não há contexto ao redor para desempatar (WCAG 2.4.4) —
+  63 entradas "Ver no catálogo" são inescolhíveis. O texto visível pode ser curto
+  porque **ali** o contexto existe: o `<h2>` do set está na mesma caixa, três
+  linhas acima. É o precedente de `catalog/_card_tile`, que resolve "3 impressões"
+  numa grade de 24 tiles do mesmo jeito. O `aria-label` **começa** com o texto
+  visível ("Ver no catálogo as cartas de …") para não quebrar o SC 2.5.3: quem
+  usa comando de voz e diz "ver no catálogo" continua acertando o link.
+
+- **Sensor de discriminação: oito mutações sobre cópia dos arquivos (`cp`/`diff`,
+  nunca `git stash`), oito capturadas.** Id do set em vez do código (4 falhas),
+  `sets` trocado por `set` (4), link sem filtro nenhum (4), `sets` escalar em vez
+  de lista (1), `aria-label` fixo sem nomear o set (2), link renderizado uma vez
+  fora do laço (7), link removido de todos os sets (7) e `hidden` no próprio `<a>`
+  (1). A view foi restaurada e conferida idêntica por `diff`; a suíte foi
+  reconferida verde.
+
+- **Uma mutação sobreviveu à primeira rodada e virou asserção nova, não
+  justificativa.** Esconder o link de 62 dos 63 sets com `hidden` não derrubava
+  nada: `css_select` encontra o elemento escondido, e "presente no DOM" não é
+  "oferecido ao usuário" — `hidden` remove o link da tela **e** da árvore de
+  acessibilidade. O teste
+  "os links dos sets são oferecidos de fato, não apenas presentes no DOM" fechou
+  o buraco em `[hidden]` no `<a>` e no contêiner, mais `aria-hidden="true"`. Com
+  ela as oito mutações morrem. O achado é de a11y de verdade, não artefato do
+  sensor: era uma forma de o link existir para o teste e não para quem usa a
+  página.
+
+- **`sets` como lista (`[ code ]`) e não escalar.** O saneador do query object
+  trabalha sobre `Array(...)`, então o escalar funciona hoje — a mutação M4
+  derruba apenas 1 teste, o da igualdade exata do `href`, e não a navegação. A
+  lista é a forma do contrato (`OU` dentro da categoria) e é a que continua certa
+  se um segundo valor entrar na URL; o escalar é coincidência de implementação do
+  saneador, não contrato.
 
 ---
 

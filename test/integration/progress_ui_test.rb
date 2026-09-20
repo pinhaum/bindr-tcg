@@ -303,4 +303,136 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
                   "o cenário precisa de um anônimo de fato, senão nada discrimina"
     assert_select "header.site-header a[href=?]", progress_path, false
   end
+
+  # --- PRG-03: link para o catálogo filtrado por set ---
+  #
+  # T6. O critério da spec é que o teste **siga** o link, não que monte a URL.
+  # Montar `get catalog_path(sets: ["OPp5a"])` à mão provaria que o catálogo
+  # filtra — o que `catalog_query_test` já prova —, e passaria intacto se a view
+  # emitisse `sets` com o **id** do set, um parâmetro de nome errado, ou nenhum
+  # parâmetro. O `href` é extraído do HTML renderizado e é ele que vai à
+  # requisição seguinte: o contrato sob teste é o que a view emite.
+
+  # O href real da página, sem reconstrução: é este valor que os testes seguem.
+  def href_do_catalogo(set)
+    links = css_select("#progress_set_#{set.code} a.progress-set__catalog-link")
+    assert_equal 1, links.size,
+                 "o set #{set.code} precisa oferecer exatamente um link para o catálogo"
+    links.first["href"]
+  end
+
+  test "cada set oferece link para o catálogo filtrado por ele" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    # Todos os sets, não só o primeiro: um link emitido fora do laço satisfaria
+    # uma asserção sobre um set só.
+    assert_select "a.progress-set__catalog-link", 3
+    [ @set_a, @set_b, @set_c ].each { |set| assert href_do_catalogo(set).present? }
+  end
+
+  # Presente no DOM não é o mesmo que oferecido ao usuário: `hidden` deixa o
+  # elemento passar por `css_select` e some da página para todo mundo, inclusive
+  # para leitor de tela. Achado do sensor de discriminação — sem esta asserção,
+  # esconder o link de 62 dos 63 sets não derrubava nenhum teste.
+  test "os links dos sets são oferecidos de fato, não apenas presentes no DOM" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    assert_select "a.progress-set__catalog-link[hidden]", false,
+                  "um link escondido não é oferecido a ninguém"
+    assert_select ".progress-set__catalog[hidden]", false,
+                  "esconder o contêiner esconde o link junto"
+    assert_select "a.progress-set__catalog-link[aria-hidden=?]", "true", false,
+                  "o link é a saída do set para o catálogo e não pode sumir da árvore de acessibilidade"
+  end
+
+  # O parâmetro é o do contrato de `design.md` §4.2, e o valor é o **código**
+  # do set. Trocar `sets` por outro nome, ou o código pelo id, muda este href.
+  test "o link usa o parâmetro sets com o código do set" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    assert_equal catalog_path(sets: [ @set_a.code ]), href_do_catalogo(@set_a)
+    assert_no_match(/#{@set_a.id}/, href_do_catalogo(@set_a),
+                    "o filtro do catálogo resolve por `sets.code`, nunca pelo id")
+  end
+
+  test "seguir o link leva ao catálogo com o filtro ativo" do
+    sign_in(@luffy)
+    get progress_path
+    href = href_do_catalogo(@set_a)
+
+    get href
+
+    assert_response :success
+    # O chip de filtro ativo é como o catálogo declara que o filtro valeu: um
+    # parâmetro descartado pelo saneador não vira chip (`CatalogQuery`).
+    assert_select ".catalog__chips .filter-chip__label", text: "Set: #{@set_a.code}"
+  end
+
+  # A prova de que o filtro recortou o conjunto certo, e não apenas de que a
+  # página respondeu 200: uma carta do set presente e uma de outro set ausente.
+  test "o conjunto devolvido pelo link corresponde ao set" do
+    sign_in(@luffy)
+    get progress_path
+    href = href_do_catalogo(@set_a)
+
+    get href
+
+    assert_select "a[href=?]", card_path("OP05-p5a1"),
+                  { count: 1 }, "uma carta do set filtrado precisa aparecer"
+    assert_select "a[href=?]", card_path("OP05-p5b1"),
+                  { count: 0 }, "nenhuma carta de outro set pode aparecer"
+  end
+
+  # Seguir o link de outro set devolve outro conjunto: sem esta asserção, um
+  # link sem filtro nenhum passaria no teste acima por acaso, já que o catálogo
+  # completo também contém a carta do set A.
+  test "o link de cada set leva ao seu próprio recorte" do
+    sign_in(@luffy)
+    get progress_path
+    href = href_do_catalogo(@set_b)
+
+    get href
+
+    assert_select "a[href=?]", card_path("OP05-p5b1"),
+                  { count: 1 }, "uma carta do set B precisa aparecer no recorte do set B"
+    assert_select "a[href=?]", card_path("OP05-p5a1"),
+                  { count: 0 }, "o recorte do set B não contém cartas do set A"
+  end
+
+  # O texto do link identifica **qual** set. Numa lista de 63 links todos
+  # escritos "Ver no catálogo", quem navega por lista de links não consegue
+  # escolher — o nome acessível precisa se sustentar fora do contexto visual.
+  test "o nome acessível do link identifica o set sem depender do contexto visual" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    assert_select "#progress_set_OPp5a a.progress-set__catalog-link" do |links|
+      nome = links.first["aria-label"].to_s
+      assert_match(/Romance Dawn/, nome,
+                   "o nome acessível precisa nomear o set")
+      assert_match(/catálogo/i, nome,
+                   "o nome acessível precisa dizer para onde o link leva")
+    end
+  end
+
+  # Os nomes acessíveis são distintos entre si: é a asserção que um texto fixo
+  # como "Ver no catálogo", repetido 63 vezes, não sobrevive.
+  test "os links dos sets têm nomes acessíveis distintos entre si" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    nomes = css_select("a.progress-set__catalog-link").map { |link| link["aria-label"].to_s.squish }
+
+    assert_equal 3, nomes.size
+    assert_equal nomes.size, nomes.uniq.size,
+                 "links com o mesmo nome acessível são indistinguíveis em lista de links"
+  end
 end
