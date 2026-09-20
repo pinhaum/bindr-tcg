@@ -12,7 +12,16 @@ class CatalogController < ApplicationController
   allow_unauthenticated_access
 
   def index
-    @query = CatalogQuery.new(params)
+    # O usuário do filtro de posse (Req. 7.6 / COL-11) vai por argumento
+    # próprio, separado de `params`: o query object não tem caminho de `params`
+    # para o usuário, então `?owned=owned&user_id=7` não lê a coleção de
+    # ninguém. `authenticated?` antes, pelo mesmo motivo de
+    # `#owned_quantities` — `allow_unauthenticated_access` não resolve a sessão,
+    # e sem esta chamada `Current.user` seria `nil` aqui e o filtro sairia
+    # silenciosamente ignorado para quem está autenticado.
+    authenticated?
+
+    @query = CatalogQuery.new(params, Current.user)
     @result = @query.call
 
     # `preload` e não `includes`: o `CatalogQuery` monta a página em Ruby (o

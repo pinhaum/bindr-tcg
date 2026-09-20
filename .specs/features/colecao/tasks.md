@@ -670,7 +670,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T9: Parâmetro `owned` no `CatalogQuery`
+### T9: Parâmetro `owned` no `CatalogQuery` ✅
 
 **What**: Aceitar `owned` com valores `all`, `owned` e `missing`, com o usuário injetado pelo chamador e nunca lido da URL.
 **Where**: `app/queries/catalog_query.rb`
@@ -685,12 +685,118 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Contrato de `design.md` §4.2 respeitado: `all | owned | missing`
-- [ ] Valor fora do contrato é ignorado, sem erro
-- [ ] Sem usuário, o filtro é ignorado e o catálogo sai completo
-- [ ] Semântica preservada: OU dentro da categoria, E entre categorias
-- [ ] Variante com quantidade zero conta como não possuída
-- [ ] Teste prova que a URL do catálogo com `owned` responde 200 para anônimo
+- [x] Contrato de `design.md` §4.2 respeitado: `all | owned | missing`
+- [x] Valor fora do contrato é ignorado, sem erro
+- [x] Sem usuário, o filtro é ignorado e o catálogo sai completo
+- [x] Semântica preservada: OU dentro da categoria, E entre categorias
+- [x] Variante com quantidade zero conta como não possuída
+- [x] Teste prova que a URL do catálogo com `owned` responde 200 para anônimo
+
+**Decisões da execução:**
+
+- **A semântica com várias variantes é a decisão central da task, e ela é de
+  partição.** `owned` = a carta tem **ao menos uma** variante possuída;
+  `missing` = a carta **não tem nenhuma**. As duas são complementares:
+  `owned ∪ missing == all` e `owned ∩ missing == ∅`, e há teste que asserta
+  exatamente isso. A alternativa ("`missing` = falta alguma variante") faria as
+  duas se **sobrepor** em 40,1% do catálogo — a fração de cartas com mais de uma
+  variante que a T8 mediu (1129 de 2815) —, e a carta com a base possuída e o
+  parallel faltando apareceria nos dois filtros ao mesmo tempo. "O que eu tenho"
+  e "o que me falta" deixariam de ser respostas a perguntas opostas, que é o que
+  o Req. 7.6 pede. Completude **por impressão** é outro requisito, o Req. 9
+  (progresso por set), que tem métrica própria e denominador decidido em AD-003;
+  resolvê-la aqui atropelaria aquela decisão. O teste que discrimina as duas
+  leituras é o da carta com uma de três variantes possuídas.
+- **O mesmo problema de `sets` e `rarities`, logo a mesma forma.** Posse é por
+  variante e o query object devolve **cartas**: `collection_items` referencia
+  `card_variants`, e não há coluna de posse em `cards`. O predicado atravessa
+  `card_variants` em subconsulta, como `VARIANT_FILTERS`/`#variant_card_ids` já
+  faziam. Nenhum caminho novo foi inventado.
+- **`NOT EXISTS`, não `NOT IN`, e a razão é de robustez futura.**
+  `id NOT IN (subconsulta)` devolve **zero linhas** se um único valor do
+  conjunto for NULL, porque `x <> NULL` é NULL e não falso — falha silenciosa,
+  sem erro e sem teste que acuse. Hoje `card_variants.card_id` e
+  `collection_items.card_variant_id` são ambos `NOT NULL` e o `NOT IN`
+  funcionaria; o `NOT EXISTS` é o que mantém a consulta correta no dia em que
+  isso mudar. O `ecc:database-reviewer` confirmou: não há bug de NULL, e a
+  negação incide sobre o `EXISTS` inteiro, nunca sobre o `IN` interno.
+- **Zero é linha existente, e o recorte sai dos scopes do model.** O predicado
+  parte de `CollectionItem.for_user(@user).owned` (`quantity >= 1`), não da
+  existência do registro. Quem zerou uma quantidade mantém a linha e tem que
+  voltar a aparecer em `missing`; usar existência como critério deixaria essa
+  pessoa fora dos dois filtros. Há teste provando que quantidade zero e ausência
+  de registro dão o **mesmo** resultado no filtro.
+- **O usuário é injetado como segundo argumento e é impossível vir da URL.**
+  `CatalogQuery.new(params, Current.user)`. Não existe caminho de `@params` para
+  `@user` dentro do objeto — o que torna `?owned=owned&user_id=7` ruído, provado
+  por quatro testes (dois no query object, dois na integração, um deles anônimo).
+  A barreira de tipo continua sendo `CollectionItem.for_user`, que levanta
+  `ArgumentError` para qualquer coisa que não seja `User` ou `nil`.
+- **Posicional, não nomeado, e a descoberta custou uma rodada da suíte.** A
+  primeira versão usava `user:` nomeado. Em Ruby, isso faz
+  `CatalogQuery.new(colors: [ "Green" ])` — a forma que **todos** os 54
+  chamadores existentes usam — ser interpretada como lista de keywords, e a
+  suíte estourou com `ArgumentError: unknown keyword: :colors` em 54 testes.
+  Posicional com default `nil`, a forma antiga continua válida e nenhum chamador
+  precisou ser tocado.
+- **`all` é o default e não vira chip.** Não há o que remover num chip "todas":
+  `all` é a ausência de recorte, não um filtro ativo. Só `owned` e `missing`
+  entram em `active_filters`. Pelo mesmo critério já vigente no arquivo, valor
+  fora do contrato e filtro descartado por falta de usuário também não viram
+  chip — o chip só representa filtro que está de fato valendo.
+- **O `authenticated?` do `CatalogController` valia para a T9 também, e essa
+  era a armadilha silenciosa.** `allow_unauthenticated_access` remove o
+  `before_action :require_authentication`, que era quem resolvia a sessão: sem a
+  chamada, `Current.user` seria `nil` na action e o filtro sairia **ignorado**
+  para quem está autenticado, com a página respondendo 200 e o catálogo inteiro
+  na tela. É o mesmo defeito que a T8 encontrou em `#owned_quantities`. A
+  chamada foi movida para o topo da action, antes de montar o query object.
+- **O filtro não passa por `@owned_quantities`, por instrução da T8 e por
+  correção.** Aquele hash cobre só as variantes da página corrente e é camada de
+  view; filtrar em Ruby sobre a página já paginada filtraria **depois** de
+  paginar e devolveria página incompleta. Filtro é consulta.
+- **Nenhuma migração e nenhum índice, como previsto.** Índice é a T10, que
+  existe para medir o plano desta consulta.
+- **Revisão do `ecc:database-reviewer`: zero CRITICAL; um HIGH aceito, um
+  índice registrado para a T10, o resto confirmado correto.**
+  - **HIGH aceito, e a falha seria silenciosa:** a subconsulta correlacionava
+    por `scope.arel_table[:id]`, isto é, pela tabela do escopo recebido. Funciona
+    hoje porque `filtered_scope` sempre parte de `cards`, mas o dia em que ele
+    passar por um alias ou uma subconsulta a correlação aponta para a coluna
+    errada **sem erro de sintaxe** — consulta que devolve o conjunto errado em
+    silêncio. Trocado por `Card.arel_table[:id]`: a raiz é fixa no código porque
+    é fixa de fato.
+  - **Índice registrado para a T10, não criado aqui:** o
+    `UNIQUE (user_id, card_variant_id)` existente localiza o usuário mas **não**
+    filtra `quantity`, então a checagem de `quantity >= 1` volta à heap. O
+    candidato é um índice **parcial**
+    `collection_items (user_id, card_variant_id) WHERE quantity >= 1`, que
+    permitiria Index Only Scan. O próprio revisor pediu medição antes: a tabela
+    pode ser pequena o bastante para o planejador preferir Seq Scan com razão —
+    que é exatamente o cuidado de seletividade realista que o "Done when" da T10
+    já exige.
+  - **Confirmado correto, sem ação:** o `IN` interno é seguro (a coluna é
+    `NOT NULL` e a negação incide sobre o `EXISTS`, não sobre ele); a precedência
+    de `NOT` não vaza para o predicado irmão, então `E` entre categorias
+    continua valendo no SQL gerado; `index_card_variants_on_card_id` já cobre o
+    lado correlacionado.
+  - **Recusado por não mudar nada:** reescrever o `IN` interno como `JOIN`. O
+    próprio revisor mediu que o planejador achata os dois na mesma forma de
+    semi-join, então a troca seria churn sem ganho — e o registro dessa conclusão
+    poupa a T10 de tentar.
+  - **LOW recusado:** `LIMIT 1`/`DISTINCT` na subconsulta interna. O revisor
+    classificou como irrelevante para correção e provavelmente para performance,
+    porque o semi-join já para na primeira correspondência.
+- **Sensor de discriminação, cinco mutações, por cópia e `cp`/`diff` — nunca
+  `git stash`.** (1) `missing` devolvendo o mesmo que `owned` (`exists.not` →
+  `exists`): **9 testes morrem**. (2) filtro valendo sem usuário
+  (`return nil if @user.nil?` removido): **5 morrem**, entre eles o de integração
+  do anônimo. (3) quantidade zero contando como posse (scope `owned` removido,
+  virando existência de registro): **10 morrem**. (4) usuário lido de
+  `params[:user_id]` — a falha de autorização que a task existe para impedir:
+  **3 morrem**, incluindo o teste anônimo de integração. (5) valor inválido
+  caindo em `"owned"` em vez de ser ignorado: **3 morrem**. Restauração conferida
+  com `diff` em todas as cinco.
 
 **Tests**: unit
 **Gate**: quick

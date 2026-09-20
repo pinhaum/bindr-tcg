@@ -66,13 +66,39 @@ class CatalogQuery
   SORTABLE = %w[card_number name cost power].freeze
   DIRECTIONS = %w[asc desc].freeze
 
+  # Contrato de `design.md` §4.2: `owned` aceita exatamente estes três valores.
+  # `all` é o default e **não é filtro** — é a ausência de recorte, e por isso
+  # não vira chip: não há o que remover de "todas". Qualquer outro valor é
+  # ignorado como qualquer parâmetro inválido, sem erro (Edge Case da spec).
+  OWNERSHIP_VALUES = %w[all owned missing].freeze
+
   Result = Struct.new(:records, :total_count, :page, :per_page, :active_filters,
                       keyword_init: true) do
     def total_pages = [ (total_count.to_f / per_page).ceil, 1 ].max
   end
 
-  def initialize(params = {})
+  # O usuário é **injetado pelo chamador**, como segundo argumento, e nunca sai
+  # de `params`. A separação é o que satisfaz o Req. 6.5 por construção:
+  # `params` é a URL, e a URL é do atacante. Se o usuário viesse de
+  # `@params[:user_id]`, qualquer anônimo leria a coleção alheia com
+  # `?owned=owned&user_id=7`. Aqui não há caminho de `params` para `@user` — a
+  # única forma de o filtro de posse valer é o chamador passar `Current.user`.
+  #
+  # **Posicional, não nomeado, e a razão é de compatibilidade.** Um `user:`
+  # nomeado competiria com o hash de parâmetros: `CatalogQuery.new(colors: [...])`
+  # passa a ser interpretado como lista de keywords e estoura
+  # `ArgumentError: unknown keyword: :colors` em todos os chamadores que não
+  # usam chaves — medido, 54 erros na suíte. Posicional, a forma antiga
+  # continua válida sem tocar em nenhum deles.
+  #
+  # `nil` é valor legítimo (o anônimo do catálogo público): o filtro é ignorado
+  # e o catálogo sai completo, sem erro (COL-11, critério 3). O tipo é validado
+  # adiante por `CollectionItem.for_user`, que levanta `ArgumentError` para
+  # qualquer coisa que não seja `User` ou `nil` — um id vindo do request não
+  # chega a virar consulta.
+  def initialize(params = {}, user = nil)
     @params = normalize_keys(params)
+    @user = user
     @active_filters = {}
   end
 
@@ -97,7 +123,8 @@ class CatalogQuery
     scope = apply_array_filters(scope)
     scope = apply_scalar_filters(scope)
     scope = apply_variant_filters(scope)
-    apply_range_filters(scope)
+    scope = apply_range_filters(scope)
+    apply_ownership_filter(scope)
   end
 
   # Filtros + busca textual. É sobre este escopo que o match exato de
@@ -276,6 +303,90 @@ class CatalogQuery
   def variant_card_ids(column, values)
     relation = CardVariant.select(:card_id)
     column == :code ? relation.joins(:card_set).where(sets: { code: values }) : relation.where(column => values)
+  end
+
+  # Filtro de posse (Req. 7.6 / COL-11). Mesmo problema que `sets` e `rarities`
+  # resolvem, e por isso a mesma forma: **posse é por variante e este objeto
+  # devolve cartas.** `collection_items` referencia `card_variants`, então o
+  # predicado tem que atravessar `card_variants` em subconsulta; filtrar
+  # `cards` direto é impossível — não há coluna de posse em `cards`.
+  #
+  # A semântica com várias variantes é a decisão desta task, e ela importa
+  # porque **40,1% das cartas do catálogo real têm mais de uma variante**
+  # (medido na T8):
+  #
+  # - `owned`   → a carta tem **ao menos uma** variante possuída;
+  # - `missing` → a carta **não tem nenhuma** variante possuída.
+  #
+  # As duas são complementares e particionam o catálogo: toda carta cai em
+  # exatamente uma delas, e `owned ∪ missing == all`. A alternativa ("missing =
+  # falta alguma variante") faria as duas se **sobrepor** — uma carta com a base
+  # possuída e o parallel faltando apareceria nos dois filtros —, e "o que me
+  # falta" deixaria de responder à pergunta que o Req. 7.6 faz. Completude por
+  # impressão é o Req. 9 (progresso por set), que tem métrica própria e
+  # denominador decidido em AD-003.
+  #
+  # `NOT EXISTS`, nunca `NOT IN` com subconsulta: `id NOT IN (SELECT card_id
+  # ...)` devolve **zero linhas** se um único `card_id` do conjunto for NULL,
+  # porque `x <> NULL` é NULL e não falso. Aqui `card_variants.card_id` é `NOT
+  # NULL`, então o `NOT IN` funcionaria hoje — e quebraria em silêncio no dia em
+  # que a coluna admitisse NULL, sem nenhum teste acusar. `NOT EXISTS` não tem
+  # esse comportamento e ainda é a forma que o planejador converte em anti-join.
+  #
+  # Zero é linha existente, não ausência de linha: o recorte sai de
+  # `CollectionItem.owned` (`quantity > 0`), e não da existência do registro.
+  # Quem zerou uma quantidade continua com a linha e tem que aparecer em
+  # `missing` — é o que distingue "não tem mais" de "nunca teve" (Req. 7.6,
+  # decisão registrada na T5).
+  #
+  # **Índice é T10, não esta task.** O `ecc:database-reviewer` apontou que o
+  # `UNIQUE (user_id, card_variant_id)` existente localiza o usuário mas não
+  # filtra `quantity`, então a checagem de `quantity >= 1` volta à heap; o
+  # candidato é um índice **parcial**
+  # `collection_items (user_id, card_variant_id) WHERE quantity >= 1`. Ele
+  # também confirmou que reescrever o `IN` interno como `JOIN` **não** muda o
+  # plano — o planejador achata os dois em semi-join —, então a forma aqui não
+  # é o que a T10 precisa mexer.
+  def apply_ownership_filter(scope)
+    mode = sanitized_ownership
+    return scope if mode.nil? || mode == "all"
+
+    @active_filters[:owned] = mode
+
+    owned = owned_variants_exists
+    mode == "owned" ? scope.where(owned.exists) : scope.where(owned.exists.not)
+  end
+
+  # `all` não é filtro e por isso não entra em `active_filters`. Sem usuário, o
+  # valor inteiro é descartado: o filtro é ignorado **e** não vira chip, porque
+  # o chip só representa filtro que está de fato valendo.
+  def sanitized_ownership
+    return nil if @user.nil?
+
+    value = @params[:owned].to_s.strip
+    OWNERSHIP_VALUES.include?(value) ? value : nil
+  end
+
+  # Subconsulta correlacionada: `card_variants.card_id = cards.id` é o que liga
+  # o `EXISTS` à linha de fora. O `WHERE user_id` sai de
+  # `CollectionItem.for_user`, que exige o objeto `User` e levanta
+  # `ArgumentError` para um id — a barreira que a T5 desenhou contra a leitura
+  # de coleção alheia.
+  #
+  # A correlação sai de `Card.arel_table`, e **não** da tabela do escopo
+  # recebido. Achado do `ecc:database-reviewer`: amarrar a correlação ao escopo
+  # funciona hoje, porque `filtered_scope` sempre parte de `cards`, mas o dia em
+  # que ele passar por um alias ou uma subconsulta a correlação aponta para a
+  # coluna errada **sem erro de sintaxe** — uma consulta que devolve o conjunto
+  # errado em silêncio. A raiz é fixa aqui porque é fixa de fato.
+  def owned_variants_exists
+    variants = CardVariant.arel_table
+
+    CardVariant
+      .where(variants[:card_id].eq(Card.arel_table[:id]))
+      .where(id: CollectionItem.for_user(@user).owned.select(:card_variant_id))
+      .select(1)
+      .arel
   end
 
   # `counter` NULL significa "não tem counter", nunca counter 0. Comparação com

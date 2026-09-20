@@ -49,13 +49,14 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) ENCERRADA** — T5, T6, T7
-  e **T8** fechadas. Fase 3 (T9–T13: filtro, total e wishlist) a seguir.
+- **Phase / Task**: Feature `colecao`, **Fase 3 em execução** — **T9 fechada**
+  (parâmetro `owned` no `CatalogQuery`). Fase 2 (posse) encerrada com T5–T8.
+  Restam T10–T13: índice/plano, total e wishlist.
   Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois lotes verificados (B1 e
   B2, ambos PASS, autor ≠ verificador). Os achados dos Verifiers e da revisão
   de a11y foram corrigidos e commitados.
 - **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
-  T6, T7, **T8**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
+  T6, T7, T8, **T9**. `colecao` Fase 1 (T1–T4) e **Fase 2 (T5–T8)** encerradas;
   `.context/tasks.md` §4.1, §4.2 e **§4.3** fechados. A §4.2 cobria T5+T6+T7 e
   fechou na T7. A **§4.3 cobria T6+T8 e fechou na T8**, conferida bullet a
   bullet: "incremento e decremento em ação única, sem formulário" e "sem
@@ -65,16 +66,73 @@
   os scopes `owned`/`unowned` e teste em `collection_item_test.rb`; "disponível
   tanto na grade quanto no detalhe, sempre por variante" — T8.
   **As §4.4 e §4.5 continuam abertas**: filtro de posse e total (T9–T11) e
-  wishlist (T12–T13).
+  wishlist (T12–T13). A **§4.4 não fecha na T9** e isso foi conferido no texto
+  dela: ela cobre T9+T10+T11 e exige, além do filtro, "Total de cartas possuídas
+  contando cópias", que é a **T11**. Fecha lá.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T9** de `.specs/features/colecao/tasks.md`
-  (parâmetro `owned` no `CatalogQuery`, com valores `all|owned|missing`, o
-  usuário injetado pelo chamador e nunca lido da URL). A decisão central segue
-  de pé: **não rodar `bin/rails generate authentication`**.
+- **Next step**: **Executar T10** de `.specs/features/colecao/tasks.md` (filtro
+  de posse sem full table scan: medir o plano de execução da consulta que a T9
+  escreveu e criar índice **se** a medição pedir). A decisão central segue de
+  pé: **não rodar `bin/rails generate authentication`**.
+- **O que a T10 precisa saber sobre a forma da consulta que a T9 escreveu.** O
+  filtro vive em `CatalogQuery#apply_ownership_filter` e a subconsulta em
+  `#owned_variants_exists`. O SQL gerado, medido:
+
+  ```sql
+  -- owned
+  SELECT cards.* FROM cards WHERE EXISTS (
+    SELECT 1 FROM card_variants
+    WHERE card_variants.card_id = cards.id
+      AND card_variants.id IN (
+        SELECT collection_items.card_variant_id FROM collection_items
+        WHERE collection_items.user_id = $1 AND collection_items.quantity >= 1))
+  -- missing: o mesmo, sob NOT (EXISTS (...)), combinado por AND com os demais filtros
+  ```
+
+  - **É semi-join duplo** (`cards` → `card_variants` → `collection_items`), e o
+    `ecc:database-reviewer` mediu que o planejador **achata** tanto o `EXISTS`
+    quanto o `IN` em semi/anti-join. **Reescrever o `IN` interno como `JOIN` não
+    muda o plano** — não gastar a T10 tentando isso; o que pode mudar o plano é
+    índice.
+  - **O índice candidato já está identificado e deliberadamente NÃO foi criado
+    na T9**: parcial,
+    `collection_items (user_id, card_variant_id) WHERE quantity >= 1`. O
+    `UNIQUE (user_id, card_variant_id)` existente localiza o usuário mas não
+    filtra `quantity`, então a checagem de `quantity >= 1` volta à heap; o
+    parcial permitiria Index Only Scan. **Medir antes de criar**: a tabela pode
+    ser pequena o bastante para o Seq Scan ser a escolha certa, que é o cuidado
+    de seletividade realista que o próprio "Done when" da T10 exige (o mesmo
+    erro que a T4 do `catalogo` evitou semeando 20k cartas).
+  - `index_card_variants_on_card_id` já existe e cobre o lado correlacionado;
+    `card_variants.id` é PK. O revisor não pediu índice nenhum nessas duas.
+  - A correlação usa `Card.arel_table[:id]`, **não** a tabela do escopo
+    recebido — foi um achado HIGH do revisor, corrigido na T9. Não reverter para
+    `scope.arel_table`: um alias no escopo faria a correlação apontar para a
+    coluna errada sem erro de sintaxe.
+  - **Se a T10 criar migração**, ela é aditiva e `schema_format = :sql` exige
+    `db:migrate` para regenerar `db/structure.sql`.
+- **A semântica de `owned`/`missing` é de partição, e a T11 herda isso.**
+  `owned` = a carta tem ao menos uma variante possuída; `missing` = não tem
+  nenhuma. `owned ∪ missing == all`, sem sobreposição, com teste que asserta a
+  complementaridade. Isso **não** é "falta alguma variante" — sob aquela leitura
+  os dois filtros se sobreporiam em 40,1% do catálogo (as cartas com mais de uma
+  variante, medidas na T8). Completude por impressão é o **Req. 9**, com métrica
+  própria e denominador de AD-003; não resolver aquilo aqui.
+- **O usuário entra no `CatalogQuery` como segundo argumento POSICIONAL**
+  (`CatalogQuery.new(params, Current.user)`), não nomeado, e a escolha não é
+  estética: com `user:` nomeado, `CatalogQuery.new(colors: [ "Green" ])` — a
+  forma dos 54 chamadores existentes — vira lista de keywords e a suíte estoura
+  com `ArgumentError: unknown keyword: :colors`. Medido. Não trocar por keyword
+  sem converter todos os chamadores.
+- **`CatalogController#index` chama `authenticated?` antes de montar o query
+  object**, pelo mesmo motivo de `#owned_quantities`: `allow_unauthenticated_access`
+  não resolve a sessão, e sem a chamada o filtro sai **silenciosamente ignorado**
+  para o usuário autenticado (200, catálogo inteiro, nenhum erro). Terceira vez
+  que essa armadilha aparece na feature.
 - **O que a T9 e a T11 precisam saber sobre a contagem de posse que a T8
   introduziu.** O `CatalogController` agora carrega, antes de renderizar, um
   hash `@owned_quantities` no formato `card_variant_id => quantity`, montado

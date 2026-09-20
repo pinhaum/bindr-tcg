@@ -317,4 +317,30 @@ class CatalogGridTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal 3, Card.count
   end
+
+  # T9 / COL-11, critério 3 e Success Criteria da `spec.md`: "/catalog responde
+  # 200 sem sessão, inclusive com `owned` na URL". Uma URL compartilhada por
+  # quem tem conta chega em quem não tem, e o filtro de posse não pode
+  # transformá-la em erro nem em tela vazia — ele é simplesmente ignorado.
+  test "filtro de posse na URL não quebra a página para o anônimo" do
+    %w[all owned missing banana].each do |valor|
+      get catalog_path(owned: valor)
+
+      assert_response :success, "owned=#{valor} tinha que responder 200 sem sessão"
+      assert_select ".card-tile", 3, "o anônimo vê o catálogo completo com owned=#{valor}"
+    end
+  end
+
+  # O usuário do filtro é injetado pelo controller a partir da sessão. Um
+  # `user_id` na URL não escolhe coleção de ninguém — se escolhesse, esta
+  # requisição anônima recortaria o catálogo.
+  test "user_id na URL não ativa o filtro de posse para o anônimo" do
+    usuario = User.create!(email: "anonimo-t9@example.com", password: "log-pose-77")
+    CollectionItem.create!(user: usuario, card_variant: @com_imagem, quantity: 3)
+
+    get catalog_path(owned: "owned", user_id: usuario.id)
+
+    assert_response :success
+    assert_select ".card-tile", 3
+  end
 end
