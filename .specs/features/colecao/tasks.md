@@ -299,7 +299,7 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
-### T6: Incremento e decremento por variante
+### T6: Incremento e decremento por variante ✅
 
 **What**: Controller de coleção com incremento e decremento em uma ação, derivando o usuário de `Current.user` e nunca do request.
 **Where**: `app/controllers/collection_items_controller.rb`
@@ -313,11 +313,87 @@ T8 → T9 → T10 → T11 → T12 → T13
 
 **Done when**:
 
-- [ ] Uma requisição por operação, sem formulário intermediário
-- [ ] Decremento abaixo de zero é rejeitado e mantém a quantidade anterior
-- [ ] Decremento de variante sem registro não cria registro negativo
-- [ ] Anônimo é redirecionado e a alteração não é aplicada
-- [ ] Teste de integração cobre incremento, decremento, piso em zero e anônimo
+- [x] Uma requisição por operação, sem formulário intermediário
+- [x] Decremento abaixo de zero é rejeitado e mantém a quantidade anterior
+- [x] Decremento de variante sem registro não cria registro negativo
+- [x] Anônimo é redirecionado e a alteração não é aplicada
+- [x] Teste de integração cobre incremento, decremento, piso em zero e anônimo
+
+**Decisões da execução:**
+
+- **A rota opera por `card_variant_id`, não por id de `collection_item`, e
+  isso decide o que a T7 pode testar.** O botão "+1" nasce na grade do
+  catálogo, onde na imensa maioria das vezes ainda não existe registro de
+  coleção: exigir um id de item forçaria uma leitura prévia só para descobrir
+  que não há o que ler, ou semear linhas zeradas para o catálogo inteiro. O
+  registro é encontrado-ou-criado pelo par (`Current.user`, variante), que é a
+  chave natural já protegida pelo `UNIQUE (user_id, card_variant_id)`.
+  **Consequência: não existe nenhuma rota por id de item.** A T7 exige provar
+  "id de item de outro usuário devolve 404", e hoje não há URL onde esse id
+  caiba — é decisão do orquestrador na T7 se acrescenta rota por id (mostrar
+  ou remover um item) ou se reformula o critério. O terreno está pronto para a
+  primeira opção: `CollectionItem.for_user(Current.user)` é o único caminho de
+  leitura, e uma busca por id dentro dele cai em `RecordNotFound` → 404 por
+  construção, sem checagem de dono espalhada.
+- **A corrida foi resolvida no banco, em um statement por operação.** O
+  incremento é
+  `INSERT ... ON CONFLICT (user_id, card_variant_id) DO UPDATE SET quantity =
+  collection_items.quantity + 1`; o decremento é
+  `UPDATE ... SET quantity = quantity - 1 WHERE ... AND quantity > 0`. A
+  alternativa ingênua (`item.update!(quantity: item.quantity + 1)`) lê em Ruby
+  e escreve depois: duas abas incrementando de 1 leem 1 as duas, escrevem 2 as
+  duas, e uma operação do usuário evapora — o *lost update* que o
+  `ecc:database-reviewer` apontou na T5 como problema **desta** camada.
+  `SELECT ... FOR UPDATE` também resolveria, mas custa uma ida a mais ao banco
+  e uma transação explícita para proteger um contador de inteiro, enquanto o
+  `ON CONFLICT` usa o mesmo lock de linha que o `UPDATE` já toma. O
+  `ON CONFLICT` ainda cobre a corrida de **criação** — duas abas incrementando
+  uma variante ainda não possuída viram atualização em vez de
+  `RecordNotUnique`, como os Edge Cases da spec exigem.
+- **O piso de zero mora no `WHERE`, e um `WHERE` cobre os dois casos de
+  rejeição.** `AND quantity > 0` faz o banco decidir, na mesma linha que vai
+  travar, se ainda há o que decrementar; checar antes em Ruby reabriria a
+  janela. Zero linha afetada é simultaneamente "já está em zero" e "não existe
+  registro", e como `UPDATE` não cria linha, decrementar o que não existe não
+  tem como produzir registro negativo — não há o que inserir. O
+  `CHECK (quantity >= 0)` do schema continua sendo a garantia real (a T5 o
+  prova por `UPDATE` direto); o `WHERE` é o que transforma a violação em
+  mensagem em português em vez de 500. O sensor de discriminação confirmou:
+  removido o `AND quantity > 0`, dois testes morrem com `PG::CheckViolation`.
+- **Nenhuma migração, como previsto.** A tabela, o `UNIQUE`, o `CHECK` e as
+  duas FKs `restrict` são da migração `20260919120200`; esta task só os
+  consome.
+- **Nada de view e nada de Turbo — é T8.** A resposta é `redirect_back
+  fallback_location: catalog_path`, que devolve o usuário à grade ou ao
+  detalhe de onde ele veio. Esse redirect não é provisório: depois da T8 ele
+  continua sendo o caminho sem JavaScript, que os Edge Cases da spec exigem
+  continuar funcionando.
+- **Revisão do `ecc:security-reviewer`: zero achado CRITICAL ou HIGH.** O
+  controller não tem `allow_unauthenticated_access`, então herda o default de
+  `ApplicationController` e o anônimo é barrado **antes** de a action rodar —
+  o teste prova isso pela ausência de registro, não só pelo 302. O SQL cru usa
+  bind params (`exec_query` com `QueryAttribute`), sem interpolação; `params`
+  só contribui com o id da variante, que é catálogo público. O CSRF do Rails
+  está ativo (nada desativa `protect_from_forgery` em lugar nenhum) e o
+  `UNIQUE` + o `WHERE user_id = $1` tornam a escrita cruzada estruturalmente
+  impossível.
+  - **O MEDIUM foi aceito, com a razão corrigida.** O revisor apontou
+    `redirect_back` sem `allow_other_host: false` como open redirect teórico
+    pelo `Referer`. **Medido: não era exploitável** —
+    `config.load_defaults 8.0` liga `raise_on_open_redirects`, que é de onde
+    sai o default do parâmetro, e um `Referer` de outro host já caía no
+    `fallback_location` com 302, sem exceção. A correção entrou mesmo assim,
+    por um motivo diferente do alegado: a garantia era **indireta**, vinda de
+    uma config global que ninguém relaciona com a linha do redirect — o mesmo
+    defeito que já está registrado como dívida no `secure` do cookie de
+    sessão. Agora é explícita e tem teste de regressão próprio.
+  - **O LOW foi recusado.** Guardar `Current.user` contra `nil` dentro da
+    action duplicaria o trabalho do `before_action :require_authentication` e
+    trocaria uma falha barulhenta por uma silenciosa: se alguém puser
+    `allow_unauthenticated_access` aqui por engano, um `NoMethodError` é
+    exatamente o que se quer ver, e não um incremento que não acontece. O
+    próprio revisor classificou como "não é risco de segurança per se" e não
+    pediu mudança de código.
 
 **Tests**: integration
 **Gate**: full

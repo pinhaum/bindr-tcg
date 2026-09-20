@@ -49,27 +49,49 @@
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
 
 - **Feature**: colecao (`.specs/features/colecao/`) — `catalogo` encerrada
-- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) em andamento** — T5
-  fechada, T6 a seguir. Feature `catalogo` ENCERRADA: 14 de 14 tasks, os dois
-  lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os achados dos
-  Verifiers e da revisão de a11y foram corrigidos e commitados.
-- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, **T5**.
-  `colecao` Fase 1 (T1–T4) encerrada; `.context/tasks.md` §4.1 fechado.
-  A T5 abriu a Fase 2. **`.context/tasks.md` §4.2 continua ABERTO de
-  propósito**: ele cobre T5, T6 e T7 — a parte "um usuário não acessa a coleção
-  de outro" é a T7, e só ela fecha a seção.
+- **Phase / Task**: Feature `colecao`, **Fase 2 (posse) em andamento** — T5 e
+  T6 fechadas, T7 a seguir. Feature `catalogo` ENCERRADA: 14 de 14 tasks, os
+  dois lotes verificados (B1 e B2, ambos PASS, autor ≠ verificador). Os achados
+  dos Verifiers e da revisão de a11y foram corrigidos e commitados.
+- **Completed**: `catalogo` inteira (14 tasks). `colecao`: T1, T2, T3, T4, T5,
+  **T6**. `colecao` Fase 1 (T1–T4) encerrada; `.context/tasks.md` §4.1 fechado.
+  **Duas seções do `.context/tasks.md` continuam ABERTAS de propósito**: a §4.2
+  cobre T5, T6 e T7 — a parte "um usuário não acessa a coleção de outro" é a
+  T7, e só ela fecha a seção; a §4.3 cobre T6 e T8 — "sem recarregar a página
+  inteira" e "disponível na grade e no detalhe" são a T8, e só ela a fecha.
   Detalhe do `catalogo`: 0.1, 0.2, 0.3, 1.1 (T1), 1.2 (T2), 2.1–2.7 (T3–T9),
   3.1 (T10), 3.2 (T11), 3.3 (T12), 3.4 (T13), 3.5 (T14). Verifier B1 + B2 PASS
   em `.specs/features/catalogo/validation.md` (B1 linhas 1–414, B2 a partir da
   419).
 - **In-progress** (file:line): nenhum
-- **Next step**: **Executar T6** de `.specs/features/colecao/tasks.md`
-  (`CollectionItemsController`, incremento e decremento em ação única). O model
-  `CollectionItem` já está pronto e testado: use `CollectionItem.for_user(
-  Current.user)` — o scope **exige o objeto `User` e levanta `ArgumentError`
-  para um id**, de modo que `for_user(params[:user_id])` não compila por
-  acidente. A decisão central segue de pé: **não rodar
-  `bin/rails generate authentication`**.
+- **Next step**: **Executar T7** de `.specs/features/colecao/tasks.md`
+  (isolamento entre usuários, `test/integration/collection_authorization_test.rb`).
+  A decisão central segue de pé: **não rodar `bin/rails generate authentication`**.
+- **A T6 não deixou nenhuma rota por id de `collection_item` — decisão a tomar
+  na T7.** As duas rotas são
+  `POST /collection_items/:card_variant_id/increment` e `.../decrement`: a
+  chave é a **variante**, porque o botão "+1" sai da grade do catálogo, onde o
+  registro de coleção normalmente ainda não existe. O critério da T7 "id de
+  item de outro usuário devolve 404" não tem hoje URL onde esse id caiba —
+  **é decisão do orquestrador** acrescentar rota por id de item (mostrar ou
+  remover) ou reformular o critério. O terreno está pronto para a primeira
+  opção: `CollectionItem.for_user(Current.user)` é o único caminho de leitura,
+  e uma busca por id dentro dele cai em `RecordNotFound` → 404 por construção.
+  O critério "nenhuma action lê `params[:user_id]`" já é verificável hoje e já
+  tem um teste na T6 (`user_id` no request é ignorado).
+- **A T6 resolveu a corrida no banco, e a T8 não pode desfazer isso.** O
+  incremento é `INSERT ... ON CONFLICT (user_id, card_variant_id) DO UPDATE SET
+  quantity = collection_items.quantity + 1`; o decremento é
+  `UPDATE ... WHERE ... AND quantity > 0`. Ler em Ruby e escrever depois
+  (`item.update!(quantity: item.quantity + 1)`) perde uma das duas abas — é o
+  *lost update* que o `ecc:database-reviewer` apontou na T5 como problema da
+  camada de aplicação. Se a T8 reescrever a action para renderizar Turbo
+  Stream, **manter os dois statements**: o que muda é a resposta, não a
+  escrita.
+- **O `redirect_back` da T6 não é provisório.** A T8 acrescenta Turbo Stream
+  por cima, mas o redirect continua sendo o caminho sem JavaScript que os Edge
+  Cases da spec exigem continuar funcionando — `respond_to` com `format.html`
+  preservado, não substituído.
 - **A T5 não precisou de migração, e a T6 também não deve precisar.** As três
   garantias de `collection_items` (`UNIQUE (user_id, card_variant_id)`,
   `CHECK (quantity >= 0)` e as duas FKs `restrict`) nasceram na migração
@@ -93,11 +115,13 @@
   deixaria o espaço de força bruta no menor denominador; o piso
   (`minimum: 8`) entrou na T4 por isso, e é a metade que não depende de
   infraestrutura.
-- **A T5 herda o padrão de sonda de teste.** `CollectionItemsController` é a T6,
-  então tanto `authentication_test.rb` quanto `sessions_test.rb` definem um
-  controller-sonda anônimo com rota desenhada no `setup`. Quando a T6 chegar,
-  **não remover as sondas**: elas cobrem o concern em si — o default herdado por
-  uma action que não declara nada — e continuam sendo o único teste disso.
+- **As sondas de teste continuam de pé depois da T6, e continuam necessárias.**
+  Tanto `authentication_test.rb` quanto `sessions_test.rb` definem um
+  controller-sonda anônimo com rota desenhada no `setup`. A T6 entregou o
+  `CollectionItemsController` e **não removeu nenhuma das duas**: elas cobrem o
+  concern em si — o default herdado por uma action que não declara nada — e
+  continuam sendo o único teste disso. O `CollectionItemsController` é um
+  consumidor desse default, não um substituto do teste dele.
 - **A sonda de teste da T3 não é código de produção.** Quando a T3 rodou não
   havia nenhuma action protegida no app, então
   `test/integration/authentication_test.rb` define um controller anônimo com

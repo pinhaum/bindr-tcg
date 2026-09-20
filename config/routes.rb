@@ -18,5 +18,18 @@ Rails.application.routes.draw do
   # a própria conta e pronto.
   resource :registration, only: %i[new create]
 
+  # Posse por variante (Req. 7.2). A chave da URL é a **variante**, não o id do
+  # registro de coleção: o botão sai da grade do catálogo, onde o registro
+  # normalmente ainda não existe. O usuário nunca aparece aqui — vem de
+  # `Current.user` (Req. 6.5).
+  #
+  # `POST` e não `PATCH` porque a operação cria o registro quando ele falta; e
+  # duas rotas distintas em vez de uma com `?operation=` porque incremento e
+  # decremento são verbos diferentes, cada um com o seu statement.
+  post "collection_items/:card_variant_id/increment" => "collection_items#increment",
+       as: :increment_collection_item
+  post "collection_items/:card_variant_id/decrement" => "collection_items#decrement",
+       as: :decrement_collection_item
+
   root "catalog#index"
 end
