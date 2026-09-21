@@ -1135,15 +1135,119 @@ que é recuperável.
 
 **Done when**:
 
-- [ ] Teste prova a **ida e volta**: exportar, reimportar o arquivo **sem edição**, confirmar, e a coleção fica **idêntica** ao estado exportado (POR-11) — item a item, não só na contagem
-- [ ] A ida e volta é exercitada com acento, vírgula no nome e mais de um set, para que o escape e a resolução sejam exercidos de verdade
-- [ ] Teste prova que **dois usuários que importam o mesmo arquivo** mantêm coleções independentes (critério 3 da história P2)
-- [ ] Teste prova que exportar por dois usuários com posses distintas devolve a cada um **só o seu**
-- [ ] Teste prova que importar o arquivo de um estando autenticado como o outro **não altera a coleção do primeiro**
+- [x] Teste prova a **ida e volta**: exportar, reimportar o arquivo **sem edição**, confirmar, e a coleção fica **idêntica** ao estado exportado (POR-11) — item a item, não só na contagem
+- [x] A ida e volta é exercitada com acento, vírgula no nome e mais de um set, para que o escape e a resolução sejam exercidos de verdade
+- [x] Teste prova que **dois usuários que importam o mesmo arquivo** mantêm coleções independentes (critério 3 da história P2)
+- [x] Teste prova que exportar por dois usuários com posses distintas devolve a cada um **só o seu**
+- [x] Teste prova que importar o arquivo de um estando autenticado como o outro **não altera a coleção do primeiro**
 - [ ] `ecc:pr-test-analyzer` revisou os testes desta task e os de isolamento; achados resumidos nas "Decisões da execução"
 
 **Tests**: integration
 **Gate**: full
+
+---
+
+**Decisões da execução:**
+
+- **A prova é o retrato inteiro, e ele inclui as linhas de quantidade zero.**
+  A idempotência é verificada comparando o hash `(card_variant_id => quantity)`
+  com `assert_equal` antes do export e depois da confirmação. Contar linhas não
+  provaria nada: somar dobra as quantidades **sem** mudar a contagem. Incluir as
+  zeradas no retrato é o que faz o teste enxergar um registro apagado, que um
+  retrato só de `owned` confundiria com "nunca existiu" — e é por isso que a
+  variante possuída com zero (que o export não escreve, POR-02) tem teste
+  próprio nos dois sentidos: a volta não pode nem ressuscitá-la nem apagá-la.
+
+- **Três ciclos, não um.** Um ciclo só separa "correto" de "grosseiramente
+  errado"; não separa "idempotente" de "estável por acaso na primeira volta".
+  Sob soma, o primeiro ciclo dobra e o segundo quadruplica, e há teste que
+  afirma o retrato **a cada ciclo**, dizendo em qual deles a coleção mudou.
+
+- **A ida e volta também é afirmada sobre o arquivo, não só sobre o banco.** Um
+  export cuja ordem ou cujo nome de carta mudasse depois da volta manteria o
+  retrato intacto e mudaria o que o usuário vê na planilha. O teste compara os
+  dois exports **byte a byte** (`.b`), que é a forma literal do que o POR-11
+  afirma.
+
+- **`response.body` é mutado pelo upload seguinte — e isso custou um
+  diagnóstico.** `Rack::Test::UploadedFile.new(StringIO.new(s), …)` lê `s` e
+  deixa a codificação dela em `ASCII-8BIT`; o objeto que `response.body`
+  devolve é **o mesmo** que o teste guardou. Sem cópia, o arquivo capturado
+  antes do upload muda de codificação por causa do próprio upload, e comparar
+  dois exports falha com os bytes idênticos dos dois lados. Investigado com
+  sonda descartável antes de tocar em produção: a hipótese inicial ("o produto
+  responde em codificação diferente") foi **falsificada** — dois exports
+  consecutivos, sem upload entre eles, saem os dois em UTF-8, e a resposta
+  declara `charset=utf-8` nas duas vezes. É artefato do harness, não do
+  produto; o `exportar` devolve `response.body.dup`, com o motivo escrito no
+  helper.
+
+- **O cenário é construído para discriminar.** Quantidades todas distintas
+  entre si (2, 3, 5, 7, e 11/13/17 do outro usuário): com quantidades iguais,
+  trocar a de uma variante pela de outra sobreviveria ao retrato. Dois sets,
+  porque com um só um bug que resolvesse pelo `variant_code` sozinho —
+  ignorando o `card_number` — poderia não aparecer. E **duas variantes em comum
+  entre os dois usuários, com quantidades diferentes**, que é o que torna
+  vazamento visível.
+
+- **Um sobrevivente do sensor revelou um furo real, e o teste foi
+  consertado.** Trocar o alvo da escrita do `Commit` para outro usuário
+  **passava** por todos os treze testes da primeira versão. A causa é que a ida
+  e volta afirma só que a coleção da origem ficou **igual** — e uma escrita que
+  vai para o dono errado deixa a origem igual justamente por não tocá-la. Pior:
+  com os dois usuários importando, as duas trocas se cancelam e o estado final
+  parece correto. O que faltava era afirmar o **lado positivo**: a confirmação
+  precisa gravar, na coleção de quem confirmou, uma linha que só o arquivo
+  traz. Com o teste novo (`a confirmação grava na coleção de quem confirmou`),
+  a mutação morre. Fica a lição: *"nada mudou" não é prova de que a escrita
+  aconteceu no lugar certo* — uma suíte só de invariâncias negativas é cega a
+  escrita que não acontece.
+
+- **Sensor de discriminação: quatro mutações, em cópia sob `tmp/`, nunca
+  `git stash`; original restaurado e conferido por `diff` depois de cada uma.**
+  (1) Somar em vez de substituir no `UPSERT_SQL` → **morre**, 7 falhas, entre
+  elas as três da ida e volta e as duas do isolamento. (2) Remover o
+  `.for_user(user)` do export → **morre**, 10 falhas, incluindo as duas que
+  afirmam "só o seu" e as de quantidade por usuário. (3) Trocar o alvo da
+  escrita para um usuário diferente do da sessão → **sobrevivia**; depois do
+  teste novo descrito acima, **morre** (1 falha). (4) Pular a gravação de
+  `:inalterada` → **sobrevive, conscientemente**.
+
+- **O sobrevivente consciente, e por que ele é legítimo.** Na ida e volta toda
+  linha é `:inalterada` e o valor gravado é o que já está lá, então pular a
+  escrita é observacionalmente idêntico **neste recorte**: o retrato final é o
+  mesmo por definição. A razão pela qual a T14 grava assim mesmo é outra janela
+  — entre a pré-visualização e a confirmação o usuário pode ter mexido na
+  coleção por outro caminho, e "inalterada" é afirmação sobre o estado de
+  quando a tela foi montada. Verificado que essa janela **tem** guarda: com a
+  mesma mutação aplicada, `collection_import_commit_test` falha (1 de 29). O
+  comportamento está coberto; não por este arquivo, e é o recorte correto —
+  cobri-lo aqui duplicaria o teste da T14 em vez de acrescentar prova.
+
+- **Uma variante de mutação descartada por ser equivalente no caminho
+  legítimo.** Derivar o `user_id` da escrita de `CollectionImport.find_by(token:)`
+  em vez de `@user` **não** é uma mutação discriminante: `find_by_token_for` já
+  filtra por dono, então no caminho legítimo o dono do staging **é** o usuário
+  da sessão e os dois valores coincidem. Quem guarda esse ponto é o teste de
+  confirmação de pré-visualização alheia, da T14. Registrado como achado sobre
+  o desenho — a autorização está no carregamento, não na escrita —, não como
+  falha do sensor.
+
+- **Dois `SPEC_DEVIATION` no cabeçalho do arquivo.** (1) Não há navegador no
+  container, logo não há download nem upload por formulário: a ida e volta
+  corre por requisição HTTP, reenviando o corpo da resposta do export **sem
+  edição** como `Rack::Test::UploadedFile`. É o mesmo arquivo que o navegador
+  mandaria, sem a camada de interface. (2) Nenhuma planilha real abre o arquivo
+  no meio do caminho — Excel e LibreOffice reescrevem o que salvam (BOM,
+  delimitador regional, aspas), e isso é coberto pelos Edge Cases nos testes do
+  parser (T8); aqui a volta é do arquivo **como o app o gerou**, que é o que o
+  POR-11 afirma.
+
+- **Revisão `ecc:pr-test-analyzer` pendente**: o executor desta task não
+  despacha subagente. Fica para o orquestrador, sobre
+  `test/integration/collection_csv_roundtrip_test.rb` e os testes de isolamento
+  já existentes (`collection_authorization_test.rb`,
+  `collection_import_commit_test.rb`).
 
 ---
 
