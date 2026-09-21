@@ -123,6 +123,55 @@ module CollectionCsv
       assert_equal :variante_inexistente, item.motivo
     end
 
+    # Done when (T9): o par é a chave, não o `variant_code` sozinho — **provado
+    # com mais de uma carta no mesmo lote**.
+    #
+    # Os dois testes acima exercitam o par, mas nenhum deles **discrimina**: com
+    # uma linha só, o `WHERE cards.card_number IN (...)` de `variantes_por_par`
+    # traz apenas as variantes daquela carta, e um índice chaveado só pelo
+    # `variant_code` não tem com o que colidir. A consulta mascara o defeito.
+    # Medido: trocar a chave do hash de `[card_number, variant_code]` para
+    # `variant_code` sozinho deixa a suíte **inteira** verde (771 runs, 0
+    # falhas) — a mutação sobrevive, e é exatamente o defeito que a `spec.md`
+    # descreve como "casar a variante errada em silêncio".
+    #
+    # O que discrimina é o caso normal do produto: duas cartas no mesmo
+    # arquivo partilhando o `variant_code`. A fonte reemite `_p1` sob centenas
+    # de cartas, e o `UNIQUE` do schema é `(card_id, variant_code)` — por
+    # carta, não global. Sob a mutação, as duas linhas resolvem para a **mesma**
+    # variante (a última que o `to_h` escreveu), e uma delas grava na carta
+    # errada.
+    test "duas cartas com o mesmo variant_code no lote resolvem cada uma na sua" do
+      user = create_user(email: "par-no-lote@example.com")
+      set = create_set("z1")
+      primeira = create_card(suffix: "z1", name: "Nami", set: set)
+      segunda = create_card(suffix: "z2", name: "Usopp", set: set)
+
+      da_primeira = CardVariant.create!(card: primeira, card_set: set,
+        variant_code: "_p1", rarity: "R", art_kind: "parallel",
+        last_seen_at: Time.current)
+      da_segunda = CardVariant.create!(card: segunda, card_set: set,
+        variant_code: "_p1", rarity: "R", art_kind: "parallel",
+        last_seen_at: Time.current)
+
+      assert_not_equal da_primeira.id, da_segunda.id,
+        "pré-condição: o mesmo código sob cartas diferentes são variantes distintas"
+
+      resultado = resolver(user, [
+        linha(primeira.card_number, "_p1"),
+        linha(segunda.card_number, "_p1")
+      ])
+
+      resolvidas = resultado.linhas.map(&:card_variant_id)
+
+      assert_equal [ da_primeira.id, da_segunda.id ], resolvidas,
+        "cada linha tem de resolver na variante da **sua** carta; resolver pelo " \
+        "`variant_code` sozinho faria as duas caírem na mesma e uma gravaria na " \
+        "carta errada, em silêncio"
+      assert_equal 2, resolvidas.uniq.size,
+        "duas cartas distintas não podem colapsar na mesma variante"
+    end
+
     # --- Rejeição isolada não aborta o lote (POR-05, POR-06) --------------
 
     # Done when: linha com variante inexistente é rejeitada com motivo e as
