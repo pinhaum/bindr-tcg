@@ -1187,7 +1187,7 @@ que é recuperável.
 - [x] Teste prova que **dois usuários que importam o mesmo arquivo** mantêm coleções independentes (critério 3 da história P2)
 - [x] Teste prova que exportar por dois usuários com posses distintas devolve a cada um **só o seu**
 - [x] Teste prova que importar o arquivo de um estando autenticado como o outro **não altera a coleção do primeiro**
-- [ ] `ecc:pr-test-analyzer` revisou os testes desta task e os de isolamento; achados resumidos nas "Decisões da execução"
+- [x] `ecc:pr-test-analyzer` revisou os testes desta task e os de isolamento; achados resumidos nas "Decisões da execução"
 
 **Tests**: integration
 **Gate**: full
@@ -1295,6 +1295,42 @@ que é recuperável.
   `test/integration/collection_csv_roundtrip_test.rb` e os testes de isolamento
   já existentes (`collection_authorization_test.rb`,
   `collection_import_commit_test.rb`).
+
+**Revisão de isolamento — feita pelo orquestrador, com medição própria.**
+A revisão por `ecc:pr-test-analyzer` foi despachada e chegou a confirmar, de
+forma independente, que a mutação do dono da escrita morre na suíte corrigida
+(4 de 15 na `roundtrip`); foi interrompida por tempo enquanto refinava o ponto
+de injeção, e o orquestrador concluiu a auditoria medindo diretamente.
+
+A pergunta que motivava a revisão era a lição desta task: **quantos testes de
+isolamento da suíte afirmam só invariância negativa ("nada mudou"), sem um par
+positivo que prove que a escrita caiu no dono certo?** O furo encontrado aqui
+podia existir nos outros arquivos.
+
+Medição: mutação que troca **apenas o alvo da escrita** no `upsert` de
+`Commit` (`bind("user_id", ...)` para outro usuário), sem tocar na busca do
+token — o ponto de injeção correto, que não contamina o resultado com `404`s
+de `find_by_token_for`. Rodada em cópia sob `tmp/`, originais conferidos por
+`diff` e árvore limpa ao final. Nunca `git stash`.
+
+Resultado sobre os quatro arquivos de isolamento (72 testes):
+**15 falhas** — 14 em `collection_import_commit_test.rb` e 1 em
+`collection_csv_roundtrip_test.rb` (o teste de lado positivo desta task).
+
+**Conclusão: o furo da T16 não se repete nos outros arquivos.** A garantia não
+está pendurada num teste só — a T14 sozinha a sustenta em catorze pontos. A
+leitura dos nomes confirma que os três arquivos já tinham pares positivos:
+`collection_authorization_test.rb:258` ("trocar de sessão na mesma conexão
+**troca o dono da escrita**"), `collection_exports_test.rb:169` ("troca o dono
+do arquivo") e `collection_import_commit_test.rb:175` ("cada classificação
+**produz o efeito** que a tela anunciou") afirmam que algo acontece no lugar
+certo, não apenas que nada mudou.
+
+Os dois arquivos que **não** falharam sob esta mutação — `authorization` e
+`exports` — não falham por desenho: o primeiro cobre o incremento/decremento
+da grade e o segundo é leitura, e nenhum dos dois passa pelo `Commit`. A
+ausência de falha ali é escopo, não lacuna.
+
 
 ---
 
