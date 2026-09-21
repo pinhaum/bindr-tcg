@@ -984,16 +984,138 @@ que é recuperável.
 
 **Done when**:
 
-- [ ] Teste prova que o resumo apresenta as três contagens — importadas, atualizadas, rejeitadas (Req. 10.4)
-- [ ] Teste prova que os três números **batem com o estado real da coleção** depois da gravação, não com a intenção: o teste conta no banco e compara
-- [ ] Teste prova que cada linha rejeitada aparece com **motivo** e **identificação da linha**
-- [ ] Teste prova que, sem nenhuma rejeição, o resumo **não sugere erro** (Req. 10.4 / critério 4 da história P2)
-- [ ] Todo o resumo em português, com plural correto (o inflector do Rails é inglês — lição da T8 da `colecao`)
-- [ ] Sem scroll horizontal em 360px
-- [ ] **Checkbox da §5.3 de `.context/tasks.md` marcado** nesta task, junto com o desta linha
+- [x] Teste prova que o resumo apresenta as três contagens — importadas, atualizadas, rejeitadas (Req. 10.4)
+- [x] Teste prova que os três números **batem com o estado real da coleção** depois da gravação, não com a intenção: o teste conta no banco e compara
+- [x] Teste prova que cada linha rejeitada aparece com **motivo** e **identificação da linha**
+- [x] Teste prova que, sem nenhuma rejeição, o resumo **não sugere erro** (Req. 10.4 / critério 4 da história P2)
+- [x] Todo o resumo em português, com plural correto (o inflector do Rails é inglês — lição da T8 da `colecao`)
+- [x] Sem scroll horizontal em 360px
+- [x] **Checkbox da §5.3 de `.context/tasks.md` marcado** nesta task, junto com o desta linha
 
 **Tests**: integration
 **Gate**: full
+
+**Decisões da execução:**
+
+- **As cinco classificações mapeadas nas três categorias do Req. 10.4.**
+  `:cria` → importadas; `:atualiza` + `:zera` → atualizadas; `:rejeita` →
+  rejeitadas; `:inalterada` fora das três, em linha própria. A soma de
+  `:atualiza` com `:zera` é honesta no banco — as duas substituem uma
+  quantidade existente —, e `:inalterada` fica de fora porque não é nenhuma das
+  três: somá-la a "atualizadas" faria a ida e volta do POR-11 ler "N
+  atualizações" quando nada mudou, que é a leitura que o POR-11 existe para
+  desmentir.
+
+- **`:zera` não desaparece dentro de "atualizadas".** O resumo publica a
+  contagem de atualizadas **e**, em bloco próprio, quantas dessas atualizações
+  removeram a carta da coleção. A tela da T13 mostra o perigo antes; este
+  número é o que o confirma depois. O teste exige as duas coisas ao mesmo
+  tempo: o número da remoção presente **e distinto** do total de atualizadas —
+  `assert_not_equal contagem_de("atualizadas"), texto[/\d+/]`. Fundir os dois
+  mata o teste (mutação 1 do sensor).
+
+- **O `Result` carrega contagem por classificação, não por categoria.** Somar
+  no serviço perderia informação irreversivelmente: quem recebe
+  `atualizadas: 2` não descobre depois que uma delas removeu posse. A soma é
+  decisão de apresentação e mora na view. `Result#gravadas` virou método
+  derivado (`criadas + atualizadas + zeradas`) para não quebrar o único
+  chamador existente, e `inalteradas` ficou **fora** dele de propósito: elas
+  são gravadas, mas dizer que N linhas foram gravadas quando nenhuma mudou
+  nada seria mentir sobre o efeito.
+
+- **Os contadores são incrementados dentro do savepoint, depois do `upsert`.**
+  É isso que faz os números do resumo descreverem o **banco** e não a intenção
+  da pré-visualização: a linha que falha não entra em contagem nenhuma. O
+  critério "os três números batem com o estado real da coleção" é testado
+  contando em `collection_items` — pares que passaram a existir, pares que
+  mudaram de valor — e comparando com o que a tela imprimiu, **nunca** relendo
+  o `Result`.
+
+- **O resumo é renderizado na resposta da confirmação, sem redirect.** Não é
+  preferência de estilo: o `Result` é o único lugar onde as contagens do
+  Req. 10.4 existem e **não é persistido** (ver a dívida abaixo). Um
+  `redirect_to` obrigaria a atravessá-lo pelo flash — um cookie de 4 KB
+  carregando a lista de rejeições — ou a recalculá-lo na outra action a partir
+  do staging já consumido, que descreveria de novo a intenção. O preço é o PRG
+  perdido: um F5 reenvia o POST, não casa o `WHERE status = 'pendente'`, nada é
+  gravado de novo e o usuário cai no `MENSAGEM_JA_CONFIRMADA` — o Edge Case da
+  spec, já provado em `collection_import_commit_test`. Uma asserção incidental
+  de `assert_response :redirect` naquele arquivo virou `:success` por causa
+  disso; o que aquele teste prova (o `ON CONFLICT`) não mudou.
+
+- **DÍVIDA ABERTA — o MEDIUM da revisão de banco da T14 NÃO foi resolvido
+  nesta task, por decisão do dono do produto.** A revisão registrou que, com
+  falhas de gravação, `Result#falhas` só existe na resposta HTTP da
+  confirmação: **falha parcial não é recuperável depois de fechar a aba** —
+  quem fechar não descobre mais quais linhas falharam, porque a
+  pré-visualização já está `confirmado` e `falhas` não é persistida. A
+  alternativa avaliada era **persistir o resultado numa coluna `jsonb`** de
+  `collection_imports`. A decisão foi **não persistir**: sem migração nesta
+  task, sem coluna nova, sem alteração em `db/structure.sql`. O resumo vive na
+  resposta da confirmação, e o texto das falhas identifica a linha justamente
+  porque é a única existência desse dado. Reabrir com o dono do produto se o
+  fluxo de falha parcial passar a ter recorrência real.
+
+- **"Não sugerir erro" não é "não dizer a palavra recusada".** A primeira
+  versão do teste varria o texto atrás de um vocabulário que incluía
+  "recusadas", e ela reprovou a implementação correta: o rótulo da terceira
+  contagem é exigido pelo **critério 1** do mesmo requisito (as três contagens
+  aparecem sempre), então a lista negra tornava os critérios 1 e 4 mutuamente
+  insatisfazíveis. O teste foi **corrigido para o observável certo**, e
+  reforçado, não enfraquecido: o que o critério 4 proíbe é o **aparato de
+  erro** — bloco de atenção, lista de linhas a conferir, lista de falhas — que
+  **não pode existir no DOM** (e não "estar escondido por CSS", que um leitor
+  de tela continuaria lendo); mais o vocabulário de alarme propriamente dito
+  (`erro`, `falha`, `problema`, `atenção`, `confira`, `cuidado`). Foram
+  acrescentadas duas asserções que a versão original não tinha: a positiva (o
+  resumo limpo **afirma** que a importação foi concluída, senão apagar a tela
+  inteira passaria) e o contrapositivo (**havendo** recusa, o bloco de atenção
+  precisa aparecer — sem ele, a saída preguiçosa seria apagar o vocabulário de
+  recusa da tela inteira).
+
+- **Plural sempre explícito.** `pluralize(n, singular, plural:)` em todas as
+  seis ocorrências, nunca deixando o Rails derivar — lição da T8 da `colecao`,
+  e ela vale duas vezes aqui porque o resumo é quase todo contagem ("dessas
+  atualizações removeu/removeram a carta da sua coleção" não tem plural
+  derivável). Há teste que recusa `1 linhas`, `1 cartas` e a gambiarra
+  `linha(s)` — que era exatamente a forma do `mensagem_do` provisório que esta
+  task substituiu.
+
+- **Falha de gravação é bloco separado da rejeição.** A rejeição é decisão
+  tomada e mostrada antes de gravar; a falha é acidente durante a escrita
+  (Req. 10.3 / POR-06). Misturá-las diria ao usuário que o arquivo dele tem um
+  problema quando o problema foi do banco.
+
+- **SPEC_DEVIATION (dois), no cabeçalho de
+  `test/integration/collection_import_summary_test.rb`:** (1) "sem scroll
+  horizontal em 360px" é verificado **sobre a folha de estilo** — nenhuma regra
+  `import-summary` declara largura fixa, `white-space: nowrap` ou `overflow-x`
+  —, porque não há navegador no container; não se afirma que a página foi
+  renderizada em 360px. (2) O fluxo é exercitado por requisição HTTP e o efeito
+  conferido no banco, em vez de interação real. Mesmo precedente de
+  `collection_import_preview_ui_test`.
+
+- **Sensor de discriminação: seis mutações, em cópia, nunca `git stash`.**
+  Todas morreram. (1) Apagar o bloco que nomeia a remoção → 1 falha. (2) Trocar
+  a contagem de importadas pela de atualizadas → 2 falhas (a das três contagens
+  e a que compara com o banco). (3) Apagar o motivo da linha rejeitada → 2
+  falhas (o motivo em si e a exigência de motivos distintos). (4) Apagar a
+  identificação da linha → 1 falha. (5) Renderizar o bloco de rejeições sempre,
+  inclusive com zero → 1 falha. (6) Gravar na coleção ao renderizar (`show`,
+  que o teste relê depois da confirmação) → 1 falha. Arquivos restaurados e
+  conferidos por `diff` contra as cópias limpas: nenhuma diferença.
+
+- **Nove falhas da suíte são pré-existentes e ambientais, não desta task.**
+  `Ingestion::UpsertTest`, `Ingestion::GuaranteesTest`, `ProgressUiTest` (4),
+  `ProgressAuthorizationTest` e `SetProgressPlanTest` (2) assertam sobre
+  `CardSet.count` global e veem **um a mais**: sobrou no banco de teste a linha
+  `CardSet code="BCT52845" name="Batch Cost Test" base_set_size=10000`, criada
+  fora de transação pela medição de custo de 10.000 linhas da revisão de banco
+  da T14. Provado pré-existente: com a árvore restaurada a `HEAD` (`ecc2e5d`),
+  sem nenhum arquivo desta task no disco, as mesmas falhas ocorrem. A linha tem
+  **zero dependentes** (`cards=0`, `variants=0`) e removê-la restaura a
+  baseline documentada; a remoção foi barrada pelo classificador de permissões
+  do ambiente e **fica para o orquestrador**.
 
 ---
 

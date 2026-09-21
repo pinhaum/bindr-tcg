@@ -65,16 +65,52 @@ module CollectionCsv
   # num `if` em Ruby. O mesmo statement também cobre a expiração, pelo mesmo
   # motivo: um prazo verificado em Ruby e escrito depois tem a mesma janela.
   class Commit
-    # O que a confirmação devolve para o controller e, na T15, para o resumo:
-    # o que efetivamente entrou na coleção, separado do que a escrita recusou.
+    # O que a confirmação devolve para o controller e para o resumo da T15: o
+    # que efetivamente entrou na coleção, separado do que a escrita recusou.
     #
     # `reivindicada` distingue "confirmou agora" de "já estava confirmada, ou
     # venceu": o controller precisa dos dois desfechos, e `gravadas: 0` sozinho
     # não os separa — um lote legítimo de zero linhas aceitas também grava zero.
-    Result = Struct.new(:reivindicada, :gravadas, :inalteradas, :rejeitadas, :falhas,
+    #
+    # ## As cinco classificações e as três categorias do Req. 10.4 (T15)
+    #
+    # O `Resolver` (T9) produz cinco classificações e o Req. 10.4 nomeia três.
+    # O `Result` carrega as contagens **por classificação**, e não as três
+    # categorias já somadas, porque a soma é decisão de apresentação e a perda
+    # de informação é irreversível: quem recebe `atualizadas: 2` não tem como
+    # descobrir depois que uma delas removeu posse.
+    #
+    # | Categoria do Req. 10.4 | Classificações |
+    # |---|---|
+    # | importadas | `:cria` → `criadas` |
+    # | atualizadas | `:atualiza` + `:zera` → `atualizadas` + `zeradas` |
+    # | rejeitadas | `:rejeita` → `rejeitadas` |
+    # | (fora das três) | `:inalterada` → `inalteradas` |
+    #
+    # **`zeradas` é campo próprio, e tem de continuar sendo.** Dobrá-lo dentro
+    # de `atualizadas` cumpriria a letra do Req. 10.4 e falharia no propósito
+    # do Req. 10.5: o usuário confirmou um efeito destrutivo, e o resumo que
+    # não o nomeia não confirma que ele aconteceu. A tela da T13 mostra o
+    # perigo **antes**; este campo é o que permite ao resumo confirmá-lo
+    # **depois**.
+    #
+    # `rejeitadas_detalhadas` traz as linhas recusadas em si — motivo e
+    # identificação —, porque o POR-10 pede o motivo **por linha** e um número
+    # não o carrega. Elas vêm do staging, que é o que a tela mostrou.
+    Result = Struct.new(:reivindicada, :criadas, :atualizadas, :zeradas, :inalteradas,
+      :rejeitadas, :rejeitadas_detalhadas, :falhas,
       keyword_init: true) do
       def reivindicada?
         reivindicada
+      end
+
+      # O total de linhas que mudaram a coleção, que é o que o controller usa
+      # para a mensagem curta. `inalteradas` fica de fora de propósito: elas
+      # são gravadas (ver `CLASSIFICACOES_GRAVAVEIS`), mas dizer que N linhas
+      # foram gravadas quando nenhuma delas mudou nada seria mentir sobre o
+      # efeito.
+      def gravadas
+        criadas.to_i + atualizadas.to_i + zeradas.to_i
       end
     end
 
@@ -179,8 +215,13 @@ module CollectionCsv
     private
 
       def gravar(preview)
-        gravadas = 0
-        inalteradas = 0
+        # Contagem **por classificação**, e não por categoria do Req. 10.4: a
+        # soma é decisão da tela, e somar aqui apagaria a distinção entre
+        # trocar um número e apagar uma posse. O contador é incrementado
+        # **dentro** do savepoint, depois do `upsert`, de modo que a linha que
+        # falha não entra em contagem nenhuma — é o que faz os números do
+        # resumo descreverem o banco, e não a intenção da pré-visualização.
+        contagens = Hash.new(0)
         falhas = []
 
         # Teto redundante com o do `Parser`, e deliberadamente redundante —
@@ -204,8 +245,11 @@ module CollectionCsv
         # garante que uma confirmação abandonada no meio não deixe a
         # pré-visualização marcada como consumida com a coleção pela metade.
         CollectionImport.transaction do
-          return Result.new(reivindicada: false, gravadas: 0, inalteradas: 0,
-                            rejeitadas: 0, falhas: []) unless self.class.reivindicar(preview.id)
+          unless self.class.reivindicar(preview.id)
+            return Result.new(reivindicada: false, criadas: 0, atualizadas: 0, zeradas: 0,
+                              inalteradas: 0, rejeitadas: 0, rejeitadas_detalhadas: [],
+                              falhas: [])
+          end
 
           linhas_gravaveis(preview).each do |linha|
             # Savepoint por linha. O erro desfaz **esta** linha e nada mais; a
@@ -214,7 +258,7 @@ module CollectionCsv
             # um envelope que precisa permanecer atômico.
             CollectionImport.transaction(requires_new: true) do
               upsert(linha)
-              linha.classificacao == :inalterada ? inalteradas += 1 : gravadas += 1
+              contagens[linha.classificacao] += 1
             end
           # `StandardError`, e não `ActiveRecord::ActiveRecordError`: a revisão de
           # banco (autor ≠ revisor) mostrou, com duas conexões reais, que o
@@ -242,8 +286,15 @@ module CollectionCsv
           end
         end
 
-        Result.new(reivindicada: true, gravadas: gravadas, inalteradas: inalteradas,
-                   rejeitadas: preview.linhas_resolvidas.count(&:rejeitada?),
+        rejeitadas = preview.linhas_resolvidas.select(&:rejeitada?)
+
+        Result.new(reivindicada: true,
+                   criadas: contagens[:cria],
+                   atualizadas: contagens[:atualiza],
+                   zeradas: contagens[:zera],
+                   inalteradas: contagens[:inalterada],
+                   rejeitadas: rejeitadas.size,
+                   rejeitadas_detalhadas: rejeitadas,
                    falhas: falhas)
       end
 

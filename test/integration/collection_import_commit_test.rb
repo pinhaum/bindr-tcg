@@ -777,7 +777,13 @@ class CollectionImportCommitTest < ActionDispatch::IntegrationTest
 
     assert_equal 4, quantidade(@nami, @nova),
                  "o `ON CONFLICT` transforma a criação em atualização; um INSERT cego estouraria"
-    assert_response :redirect
+
+    # A confirmação **renderiza** o resumo (T15) em vez de redirecionar: o
+    # `Result` é o único lugar onde as contagens do Req. 10.4 existem e não é
+    # persistido, então ele não sobrevive a um redirect. Esta asserção é aqui
+    # incidental — o que a prova acima exercita é o `ON CONFLICT` —, e o que
+    # importa é que a resposta **não** é um erro.
+    assert_response :success
   end
 
   # A contrapartida: uma linha `:atualiza` cujo registro **sumiu** entre a

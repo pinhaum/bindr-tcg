@@ -1,0 +1,228 @@
+<%#
+  T15 — o resumo final da importação (POR-09, POR-10 / Req. 10.4).
+
+  ## Por que esta tela existe
+
+  A T13 mostra o que **vai** acontecer; esta mostra o que **aconteceu**. As
+  duas parecem a mesma tela e não são, e a diferença é o motivo de esta
+  existir: entre a pré-visualização e a gravação cabe um intervalo em que o
+  usuário pode ter mexido na coleção por outro caminho, e cabe a falha isolada
+  de linha do Req. 10.3. Um resumo que reimprimisse a pré-visualização mentiria
+  nos dois casos.
+
+  Por isso **os números daqui vêm do `Commit::Result`**, contados dentro do
+  savepoint de cada linha depois do `upsert` — a linha que falhou não entra em
+  contagem nenhuma. Eles descrevem o banco, não a intenção. O teste
+  correspondente conta em `collection_items` e compara com o que esta tela
+  imprime, em vez de reler o `Result`.
+
+  ## As CINCO classificações e as TRÊS categorias do Req. 10.4
+
+  | Categoria do Req. 10.4 | Classificações |
+  |---|---|
+  | importadas | `:cria` |
+  | atualizadas | `:atualiza` + `:zera` |
+  | rejeitadas | `:rejeita` |
+  | (fora das três) | `:inalterada` |
+
+  A soma de `:atualiza` com `:zera` cumpre o Req. 10.4 — as duas são, no
+  banco, a mesma operação: uma quantidade existente foi substituída. Mas
+  **somar e calar** é o que o Req. 10.5 existe para impedir: o usuário
+  confirmou um efeito destrutivo e o resumo não confirmaria que ele aconteceu.
+  Por isso o bloco de atualizadas carrega, em texto, quantas dessas
+  atualizações **removeram a carta da coleção** — recorte, não total, e há
+  teste que falha se os dois números forem iguais ou se o segundo sumir.
+
+  `:inalterada` fica fora das três porque não é nenhuma delas: não entrou, não
+  mudou e não foi recusada. Some-la a "atualizadas" faria a ida e volta do
+  POR-11 — reimportar o próprio export — ler "N atualizações" quando nada
+  mudou, que é precisamente a leitura que o POR-11 existe para desmentir.
+
+  ## Sem rejeição, sem vocabulário de erro (critério 4 da história P2)
+
+  O bloco de rejeitadas e o aviso de atenção **não são renderizados** quando
+  não há recusa — não são escondidos por CSS nem impressos com zero ao lado de
+  uma palavra de alarme. Um resumo limpo não pode conter "rejeitada", "falha"
+  nem "erro" em lugar nenhum, e há teste que varre o texto inteiro atrás dessas
+  palavras. O contrapositivo também tem teste, e é ele que impede a solução
+  preguiçosa de apagar o vocabulário de recusa da tela inteira: **havendo**
+  recusa, o aviso precisa aparecer.
+
+  A contagem de rejeitadas continua publicada mesmo em zero, porque o Req. 10.4
+  pede as três; o que não aparece é a **lista** e o **alarme**. "0 recusadas"
+  não sugere erro — sugere que não houve.
+
+  ## Plural: o inflector do Rails é inglês
+
+  Lição da T8 da `colecao`, e ela vale duas vezes aqui porque o resumo é quase
+  todo contagem. `pluralize(n, "linha", plural: "linhas")` sempre com o plural
+  explícito, nunca deixando o Rails derivar — "carta que saiu da sua coleção"
+  não tem plural derivável, e `linha(s)` é gambiarra que o teste recusa.
+
+  ## O `card_name` vem do arquivo, não do catálogo
+
+  Mesmo achado da revisão de segurança da T10 que a tela da T13 carrega: nas
+  linhas rejeitadas o nome é texto que o usuário escreveu no CSV. O escape
+  default do ERB resolve, e por isso **nenhum `raw`, `html_safe` ou `<%==`
+  aparece neste arquivo** e não pode aparecer. Há teste com `<script>` numa
+  célula de nome.
+
+  ## Esta tela não escreve nada
+
+  A invariante da feature é que a coleção só muda com confirmação explícita, e
+  quem grava é `CollectionCsv::Commit`, uma vez, antes desta renderização. Aqui
+  não há chamada de escrita, e há teste que confere o retrato inteiro da tabela
+  de coleção em volta de uma releitura.
+%>
+<% content_for :title, "Importação concluída" %>
+
+<%
+  importadas = @resultado.criadas.to_i
+  zeradas = @resultado.zeradas.to_i
+  atualizadas = @resultado.atualizadas.to_i + zeradas
+  inalteradas = @resultado.inalteradas.to_i
+  rejeitadas = @resultado.rejeitadas_detalhadas.to_a
+  falhas = @resultado.falhas.to_a
+
+  # As três contagens do Req. 10.4, na ordem em que o requisito as nomeia.
+  # Cada uma viaja num elemento próprio com `data-categoria`, e não num texto
+  # corrido: num texto corrido "3 importadas, 2 atualizadas" e "2 importadas,
+  # 3 atualizadas" só se distinguem casando ordem, e a troca de uma pela outra
+  # passaria por um teste frouxo.
+  contagens = [
+    [ "importadas", "Importadas", importadas,
+      "Variantes que não estavam na sua coleção e passaram a estar." ],
+    [ "atualizadas", "Atualizadas", atualizadas,
+      "Variantes que já estavam na sua coleção e tiveram a quantidade substituída." ],
+    [ "rejeitadas", "Recusadas", rejeitadas.size,
+      "Linhas do arquivo que não foram aplicadas." ]
+  ]
+%>
+
+<main class="import-summary">
+  <h1 class="import-summary__title">Importação concluída</h1>
+
+  <p class="import-summary__file">
+    Arquivo: <%= @collection_import&.filename %> — sua coleção foi atualizada.
+  </p>
+
+  <ul class="import-summary__counts">
+    <% contagens.each do |categoria, rotulo, quantidade, apoio| %>
+      <li class="import-summary__count" data-categoria="<%= categoria %>">
+        <p class="import-summary__count-head">
+          <span class="import-summary__number"><%= quantidade %></span>
+          <span class="import-summary__label"><%= rotulo %></span>
+        </p>
+        <p class="import-summary__count-help"><%= apoio %></p>
+      </li>
+    <% end %>
+  </ul>
+
+  <%#
+    O recorte destrutivo dentro de "atualizadas". Ele fica **logo abaixo** do
+    bloco de contagens e não dentro do cartão de atualizadas, porque é uma
+    afirmação sobre o que aconteceu com a coleção do usuário e não um número a
+    mais para comparar — quem lê com leitor de tela encontra a frase inteira,
+    não um segundo numeral solto ao lado do primeiro.
+
+    Só aparece quando houve remoção: dizer "0 removeram" a quem não removeu
+    nada é sugerir um perigo que não houve, que é o mesmo defeito que o
+    critério 4 da história P2 nomeia sobre as rejeições.
+  %>
+  <% if zeradas.positive? %>
+    <p class="import-summary__removidas">
+      <strong>
+        <%= pluralize(zeradas, "dessas atualizações removeu a carta da sua coleção",
+                      plural: "dessas atualizações removeram a carta da sua coleção") %>:
+      </strong>
+      o arquivo trazia zero para
+      <%= pluralize(zeradas, "uma variante que você possuía",
+                    plural: "variantes que você possuía") %>.
+    </p>
+  <% end %>
+
+  <% if inalteradas.positive? %>
+    <p class="import-summary__inalteradas">
+      <%= pluralize(inalteradas, "linha do arquivo já estava assim",
+                    plural: "linhas do arquivo já estavam assim") %>
+      na sua coleção: nada mudou nelas.
+    </p>
+  <% end %>
+
+  <%#
+    As rejeições: cada uma com **motivo** e **identificação da linha**
+    (POR-10). A identificação é o número da linha no arquivo, não o índice do
+    resolvedor — o `indice` é zero-based sobre as linhas de dado e o usuário
+    abre o arquivo num editor em que o cabeçalho é a linha 1. Sem o `+ 2` o
+    resumo mandaria corrigir duas linhas acima do erro, que é pior do que não
+    dizer nada.
+  %>
+  <% if rejeitadas.any? %>
+    <section class="import-summary__rejeicoes">
+      <p class="import-summary__alert">
+        <strong>Confira estas linhas:</strong>
+        <%= pluralize(rejeitadas.size, "linha do arquivo não foi aplicada",
+                      plural: "linhas do arquivo não foram aplicadas") %>.
+        Sua coleção não foi alterada por
+        <%= rejeitadas.size == 1 ? "ela" : "elas" %>.
+      </p>
+
+      <ul class="import-summary__rejeitadas">
+        <% rejeitadas.each do |linha| %>
+          <li class="import-summary__rejeitada">
+            <p class="import-summary__card">
+              <span class="import-summary__number-card"><%= linha.card_number || "—" %></span>
+              <span class="import-summary__variant"><%= linha.variant_code || "—" %></span>
+              <span class="import-summary__name"><%= linha.card_name %></span>
+            </p>
+
+            <p class="import-summary__origin">Linha <%= linha.indice.to_i + 2 %> do arquivo</p>
+
+            <p class="import-summary__motivo"><%= linha.mensagem %></p>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <%#
+    As falhas de gravação são um desfecho **diferente** da rejeição: a rejeição
+    é decisão tomada e mostrada antes de gravar; a falha é acidente durante a
+    escrita (Req. 10.3 / POR-06). Misturá-las diria ao usuário que o arquivo
+    dele tem um problema quando o problema foi do banco.
+
+    **Este texto é a única existência desse dado** — `Result#falhas` não é
+    persistido, e quem fechar a aba não descobre mais quais linhas falharam
+    (MEDIUM da revisão de banco da T14, decisão registrada do dono do produto
+    de não persistir nesta task). Por isso ele identifica a linha, que é o que
+    permite refazer o import só dela.
+  %>
+  <% if falhas.any? %>
+    <section class="import-summary__falhas">
+      <p class="import-summary__alert">
+        <strong>Atenção:</strong>
+        <%= pluralize(falhas.size, "linha não pôde ser gravada",
+                      plural: "linhas não puderam ser gravadas") %>
+        por um problema ao salvar. As demais entraram normalmente.
+        Envie o arquivo de novo com
+        <%= falhas.size == 1 ? "essa linha" : "essas linhas" %> para tentar outra vez.
+      </p>
+
+      <ul class="import-summary__falhadas">
+        <% falhas.each do |falha| %>
+          <li class="import-summary__falhada">
+            Linha <%= falha[:indice].to_i + 2 %> do arquivo —
+            <%= falha[:card_number] %> <%= falha[:variant_code] %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <p class="import-summary__next">
+    <%= link_to "Ver minha coleção", progress_path, class: "import-summary__link" %>
+    ou
+    <%= link_to "importar outro arquivo", new_collection_import_path,
+                class: "import-summary__link" %>.
+  </p>
+</main>

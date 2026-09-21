@@ -204,7 +204,7 @@ Regras de execução:
   - `card_number`, identificador da variante, nome e quantidade.
   - _Requisitos: 10.1_
 
-- [ ] **5.3 Import CSV**
+- [x] **5.3 Import CSV**
   - Aceitar o mesmo formato do export.
   - Pré-visualização com confirmação obrigatória antes de gravar.
   - Linha com variante inexistente é rejeitada com motivo; as demais seguem.

@@ -132,21 +132,28 @@ class CollectionImportsController < ApplicationController
       return
     end
 
-    redirect_to collection_import_path(params[:token]), notice: mensagem_do(resultado)
+    # **O resumo é renderizado aqui, e não depois de um redirect** (T15). Não é
+    # preferência de estilo: o `Result` é o único lugar onde as contagens do
+    # Req. 10.4 existem, e ele não é persistido (ver o cabeçalho de
+    # `_resumo`). Um `redirect_to` obrigaria a atravessá-lo pelo flash — um
+    # cookie, com teto de 4 KB, carregando a lista de rejeições — ou a
+    # recalculá-lo na outra action a partir do staging já consumido, que
+    # descreveria de novo a **intenção** e não o que foi gravado. Renderizar na
+    # própria resposta é o que mantém o resumo amarrado à escrita que acabou de
+    # acontecer.
+    #
+    # O preço é o PRG perdido: um F5 reenvia o POST. O desfecho é o do Edge
+    # Case da spec — a segunda confirmação não casa o `WHERE status =
+    # 'pendente'`, nada é gravado de novo, e o usuário cai no
+    # `MENSAGEM_JA_CONFIRMADA`. Barato, e já provado por
+    # `collection_import_commit_test`.
+    @resultado = resultado
+    @collection_import = CollectionImport.find_by_token_for(Current.user, params[:token])
+
+    render :resumo
   end
 
   private
-
-    # O resumo de verdade é da T15, com as contagens na tela. Esta frase existe
-    # para que a confirmação não termine em silêncio enquanto isso — um fluxo
-    # que grava na coleção e não diz nada é pior que um resumo provisório.
-    def mensagem_do(resultado)
-      base = "Importação confirmada: #{resultado.gravadas} linha(s) gravada(s)."
-
-      return base if resultado.falhas.empty?
-
-      "#{base} #{resultado.falhas.size} linha(s) não puderam ser gravadas."
-    end
 
     # O arquivo do Rack chega em **ASCII-8BIT**: são bytes de rede, e o Rack não
     # tem por que adivinhar a codificação deles. O `Parser` (T8) espera uma
