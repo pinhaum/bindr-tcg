@@ -1314,16 +1314,128 @@ que é recuperável.
 
 **Done when**:
 
-- [ ] Teste prova que o número de consultas do export **não cresce** com a quantidade de linhas: medido em dois volumes diferentes, com o mesmo número de consultas
-- [ ] Teste prova o mesmo para a pré-visualização (POR-13 / critério 5 da história P2)
-- [ ] A medição usa volume realista — centenas a milhares de linhas —, não três registros, pelo mesmo cuidado de seletividade da T4 do `catalogo`
-- [ ] `ANALYZE` roda antes de qualquer `EXPLAIN` (o banco de teste carrega `pg_class.reltuples` de execuções anteriores, que não é transacional)
-- [ ] Se a medição reprovar o alvo, a saída registrada é **otimizar consulta ou índice**, com medição — não trocar de stack nem partir para assíncrono sem dado
-- [ ] Qualquer índice criado é **medido antes**, com `EXPLAIN (ANALYZE, BUFFERS)`, como na T10 da `colecao` — que mediu e **não** criou
-- [ ] `ecc:database-reviewer` revisou o plano; achados resumidos nas "Decisões da execução"
+- [x] Teste prova que o número de consultas do export **não cresce** com a quantidade de linhas: medido em dois volumes diferentes, com o mesmo número de consultas
+- [x] Teste prova o mesmo para a pré-visualização (POR-13 / critério 5 da história P2)
+- [x] A medição usa volume realista — centenas a milhares de linhas —, não três registros, pelo mesmo cuidado de seletividade da T4 do `catalogo`
+- [x] `ANALYZE` roda antes de qualquer `EXPLAIN` (o banco de teste carrega `pg_class.reltuples` de execuções anteriores, que não é transacional)
+- [x] Se a medição reprovar o alvo, a saída registrada é **otimizar consulta ou índice**, com medição — não trocar de stack nem partir para assíncrono sem dado
+- [x] Qualquer índice criado é **medido antes**, com `EXPLAIN (ANALYZE, BUFFERS)`, como na T10 da `colecao` — que mediu e **não** criou
+- [x] `ecc:database-reviewer` revisou o plano; achados resumidos nas "Decisões da execução"
 
 **Tests**: unit
 **Gate**: full
+
+---
+
+**Decisões da execução:**
+
+- **A asserção de POR-13 é contagem de consultas, e deliberadamente NÃO a dupla
+  `refute_match(Seq Scan)` + `assert_match(Index Scan)` do padrão da casa.** Os
+  critérios 4 e 5 da história P2 falam em **número de consultas**, não em
+  operador de acesso, e a revisão de banco despachada antes desta task mediu
+  que aqui `Seq Scan` é o plano **correto**: exigir índice reprovaria o plano
+  melhor — o erro que a T10 da `colecao` cometeu e teve de corrigir, aqui
+  antecipado pela medição. O que ficou de plano é só o `refute_match(/Seq Scan
+  on collection_items/)`, sobre a única tabela que cresce com as linhas **do
+  usuário** e a única com predicado seletivo a explorar; as varreduras de
+  `cards` e `card_variants` ficam livres de propósito.
+
+- **Achados da revisão `ecc:database-reviewer`, reproduzidos e confirmados
+  nesta task.** (1) Dois regimes de seletividade, com formas de plano
+  diferentes: ~2% possuído entra por `index_collection_items_on_user_id` e
+  sonda `cards` por `cards_pkey` em nested loop (custo 1130, 2,3ms); ~21%
+  troca para hash join e varre `cards` (custo 2102, 7,0ms). (2) Contrafactual
+  `SET LOCAL enable_seqscan = off` sobre a consulta de variantes do resolvedor
+  com 5.000 números: custo sobe de **2505,53 para 6832,82 (+173%)**, porque o
+  `Index Scan using index_card_variants_on_card_id` sozinho custa 5268 contra
+  941 do `Seq Scan` — o planejador está certo e **nenhum índice foi criado**.
+  (3) O `loops=343` no cenário de 2% **não** é violação de POR-13: o export é
+  uma consulta só (`joins` + `pluck`, `export.rb:52-60`), e `loops` é iteração
+  de nested loop **dentro** dela, não round-trip por linha. (4) Observação
+  **LOW**: o `Planning Time` da consulta de variantes cresce com o tamanho da
+  lista literal do `IN` — ~4,8ms com 5.000 números neste seed, ~10,6ms com
+  5.000 e ~17–19,5ms com 10.000 no banco da revisão —, custo de **parsear** a
+  lista e não de executar (o `Execution Time` fica em ~4,4ms). Não viola
+  POR-13; fica registrado junto da dívida da T14: se o teto de 10.000 linhas da
+  AD-008 apertar o tempo de resposta, a saída medida é passar a lista por
+  `VALUES`/`unnest`, **com medição**, nunca trocar de stack nem partir para
+  assíncrono no escuro.
+
+- **A tentativa de promover o `loops=` a asserção foi escrita, medida e
+  descartada — e é o achado próprio desta task.** A hipótese era que no regime
+  de fração alta o planejador se protege sozinho trocando o nested loop por
+  hash join, e que isso viraria `refute_match(/Nested Loop/)` sobre o cenário
+  grande. A hipótese é **falsa como invariante**: a asserção passou na execução
+  do arquivo inteiro e **falhou nas três execuções seguintes** rodada sozinha,
+  com o mesmo seed e o mesmo volume. Medido, o mesmo cenário produz tanto
+  `Hash Join` (custo 2102, sem paralelismo) quanto `Gather Merge` →
+  `Nested Loop ... loops=4525` (custo 14078, dois workers) — a escolha depende
+  de cache e de paralelismo, não de nada que POR-13 vigie. É a lição da T10 da
+  `colecao` na versão pior: um teste que falha de forma **intermitente** por
+  motivo que não é defeito é o que acaba apagado na primeira vez que atrapalha.
+  No lugar ficou a asserção estável — uma consulta por regime, qualquer que
+  seja a forma do plano —, verde em 3 de 3 execuções isoladas onde a removida
+  falhou em 3 de 3.
+
+- **A pré-visualização é medida por requisição HTTP, e não sobre o `Resolver`
+  isolado.** A T9 já trava a forma do resolvedor; isso não basta para o
+  critério 5, que é sobre a requisição que o usuário dispara. O upload
+  atravessa parser, resolvedor, gravação do staging e o `resume_session` do
+  concern, e uma escrita de staging por linha — ou um `find` de variante na
+  serialização — deixaria o resolvedor intacto e a requisição N+1 mesmo assim.
+  A asserção principal é a **diferença entre dois volumes de arquivo** (40 e
+  2.000 linhas): o custo de sessão, CSRF e layout é idêntico nos dois e se
+  cancela na subtração, seja ele qual for.
+
+- **Uma quinta consulta constante foi descoberta pelo próprio teste.** A
+  contagem prevista era 3 além da sessão (as duas do `Resolver` e o `INSERT` do
+  staging); a medida é **4**. A extra é um `CollectionImport Exists?`, o
+  `SELECT 1` que o `validates :token, uniqueness: true` emite por gravação. É
+  constante — um token por upload, não um por linha —, logo não toca POR-13,
+  mas está **nomeada** na constante em vez de embutida no número, que é o que
+  torna visível uma sexta consulta que alguém acrescente amanhã.
+
+- **Toda asserção de volume e de estatística virou asserção, não premissa.** É
+  a lição literal da T10 da `colecao`: um seed reduzido não faz as medições
+  falharem, faz elas **pararem de significar** o que dizem. Há teste que exige
+  as 20.000 variantes, os dois regimes (<5% e >15%) e o item zerado; e há teste
+  que exige estatística em `pg_stats` — **síncrono e transacional**, nunca
+  `pg_class.reltuples` (verde por resíduo, não é transacional) nem
+  `pg_stat_user_tables.last_analyze` (intermitente, passa pelo coletor
+  assíncrono), as duas formas já reprovadas na T8 da `progresso`.
+
+- **A drenagem de pending list da AD-009 NÃO se aplica aqui e não foi imitada.**
+  Nenhuma das colunas que o export e o resolvedor tocam
+  (`collection_items.user_id`, `cards.card_number`, `card_variants.card_id`)
+  usa índice GIN — aquela decisão é de `catalog_search_test.rb`, onde os três
+  índices da busca são GIN com `fastupdate`. Copiar por imitação teria
+  acrescentado chamada sem efeito.
+
+- **Seed inteiro dentro da transação do teste, por SQL direto.** Nenhuma linha
+  sobrevive ao teste — conferido por consulta depois da suíte: `CardSet`,
+  `Card`, `CardVariant`, `User`, `CollectionItem` e `CollectionImport` todos em
+  zero, e nenhum resíduo de `T17V`, `plano-t17-%`, `T17-%` ou das sondas
+  `SND%`. É o que impede um `sets` órfão de quebrar os testes de outras
+  features que assertam `CardSet.count` global — o defeito que a medição da
+  revisão da T14 causou e que esta task tomou o cuidado de não repetir. O
+  `teardown` de `SemTransacaoTest` (AD-010) **não** foi imitado.
+
+- **Sensor de discriminação: quatro mutações, em cópia sob `tmp/`, nunca
+  `git stash`; original restaurado e conferido por `diff` depois de cada uma.**
+  (1) N+1 de verdade no export — trocar o `pluck` com `joins` por iteração que
+  faz `CardVariant.find` e lê `carta.name` por linha → **morre**, 3 falhas, com
+  a mensagem "exportar 4545 linhas custou 8404 consulta(s) a mais que exportar
+  343". (2) N+1 no resolvedor — `variantes_por_par` consultando um
+  `card_number` por vez → **morre**, 2 falhas, as duas da pré-visualização.
+  (3) Remover o `ANALYZE` do seed → **morre**, 1 falha, a asserção de
+  `pg_stats`. (4) Reduzir o seed de 400/5.000 para 4/20 itens → **morre**, 1
+  falha, a asserção que guarda o próprio seed. Nenhum sobrevivente.
+
+- **Nenhuma linha de código de produção foi alterada** — a task é só de
+  medição, e as quatro mutações rodaram em cópia com restauração conferida por
+  `diff`.
+
+---
 
 ## Plano de delegação
 
