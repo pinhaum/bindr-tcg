@@ -546,3 +546,121 @@ Para não pagar retrabalho nas fases futuras:
   fazer agora além de não colapsar as duas entidades. Continua sendo a fase mais
   incerta do roadmap, por depender de uma fonte de mercado que talvez não exista
   de forma confiável.
+
+---
+
+## 11. Camada de apresentação
+
+Origem: design system **Bindr**, mantido fora do repositório como artifact
+(`claude.ai/artifact/S2bVbVwhKiYym2Uw3wYtNq`). Ele é **proposta derivada dos
+requisitos de UI** (Req. 2, 4, 7, 11), escrita antes de existir CSS no projeto —
+não foi extraído do código. Os valores abaixo são a cópia normativa: em
+divergência com o artifact, vale o que está aqui, pela mesma regra que faz
+`.context/` vencer `.specs/` (AD-005).
+
+### 11.1 Princípio
+
+**A arte da carta é o conteúdo; a interface é a moldura.** Nenhum elemento de
+interface compete em croma com a arte de uma carta. É isso que justifica cada
+decisão seguinte, e é o critério para resolver qualquer caso que os tokens não
+cubram.
+
+### 11.2 Tema único
+
+Um tema, escuro. Fundo azul-petróleo porque a arte é saturada e a tela é olhada
+com o celular perto do rosto, em mesa de loja. `color-scheme: dark`, sem
+`prefers-color-scheme` — um tema claro exigiria valor novo para `on-accent` (hoje
+ele **é** o `surface-base`) e `danger` já está no limite: sobre estes fundos todo
+vermelho escuro o bastante para parecer grave reprova em 4.5:1.
+
+### 11.3 Tokens de cor
+
+| Token | Valor | Uso |
+|---|---|---|
+| `surface-base` | `#051b23` | Fundo da página |
+| `surface-raised` | `#102b36` | Tile, barra de filtros, painel de detalhe |
+| `surface-sunken` | `#011018` | Poço da imagem e placeholder do Req. 2.3 |
+| `border` | `#1c3a47` | Hairline **decorativa** — 1.47:1, nunca em controle |
+| `border-strong` | `#717e84` | Borda de controle — 4.23:1 sobre base |
+| `ink` | `#e9f0f3` | Texto primário — 15.35:1 sobre base |
+| `ink-muted` | `#9ba7ad` | Texto secundário — 7.18:1 sobre base |
+| `accent` | `#ff9e14` | Única cor de ação — 8.55:1 sobre base |
+| `on-accent` | `#051b23` | Texto sobre `accent` e sobre `danger` |
+| `danger` | `#ff5448` | Apenas ação destrutiva confirmada — 5.57:1 |
+
+Duas matizes e mais nada: azul-petróleo 228° e âmbar 66°, separados por 158°.
+`danger` (28°) é a exceção controlada — o que o separa de `accent` é a dupla
+diferença de matiz (38°) e luminosidade (0.10), já que ambos são quentes.
+
+`surface-raised` fica a **1.20:1** de `surface-base`: preenchimento sozinho não
+delimita, sempre acompanhar de `border` ou `border-strong`.
+
+### 11.4 Tipografia
+
+Pilha do sistema, **sem webfont**: a grade carrega 2815 cartas com imagens
+hotlinkadas (Req. 11.2), e um arquivo de fonte na rota crítica competiria com o
+recurso que já é o gargalo.
+
+| Estilo | Métrica | Uso |
+|---|---|---|
+| `display` | 700 28px/32px | Título de página, nome da carta no detalhe |
+| `title` | 600 20px/26px | Cabeçalho de seção |
+| `body` | 400 15px/22px | Texto corrido, estados vazios |
+| `body-strong` | 600 15px/22px | Nome no tile, label de campo |
+| `caption` | 400 13px/18px | Metadado em `ink-muted` |
+| `code` | 500 13px/18px mono | **Exclusivo** de `card_number` e `variant_code` |
+
+`code` sempre, inclusive inline no meio de frase: são identificadores lidos
+caractere a caractere, onde `0`/`O` e `1`/`l` precisam se distinguir, e o Req. 3.4
+faz do `card_number` alvo de busca exata.
+
+### 11.5 Espaçamento e raio
+
+Base 4px, quatro passos: `space-1` 4px, `space-2` 8px, `space-3` 16px,
+`space-4` 24px. Escala curta é o que impede a grade de estourar os 360px do
+Req. 2.5 — a 360px a conta é `360 − 2×24` de margem `− 8` de gutter = **152px por
+tile**, duas colunas. Toda decisão de tamanho se verifica contra essa conta.
+
+Raios: `radius-sm` 4px (chip, input, badge de raridade), `radius-md` 8px (tile,
+poço, botão), `radius-full` (**apenas** badge de quantidade — o tile é retangular
+porque a carta é).
+
+### 11.6 Regras que nenhum token expressa
+
+- **Sem sombra, sem gradiente.** Sombra sobre fundo escuro não separa e custa
+  pintura numa grade longa; gradiente quebraria a leitura de par frio/quente.
+- **Posse não é cor.** Variante possuída recebe badge `radius-full` em `accent`
+  com a quantidade; faltante **não recebe badge nenhum**. Proibido usar dois
+  níveis de âmbar — a distinção precisa sobreviver a quem não discrimina cor.
+- **`accent` é raro por construção.** Se o âmbar aparecer em mais de dois lugares
+  na mesma tela, algo está usando `accent` como decoração.
+- **Anel de foco:** 2px sólido em `accent`, 2px de deslocamento, nunca translúcido
+  — precisa manter 3:1 sobre as três superfícies, e mantém (7.15:1 no pior caso).
+- **`danger`** só em ação destrutiva já confirmada. Nunca em validação, alerta
+  informativo ou botão primário.
+- **Sem emoji, sem ícone.** Não há conjunto escolhido; até haver, escreva a
+  palavra. Quando houver: traço único monocromático herdando `ink`/`ink-muted`,
+  20px na interface e 16px em chip.
+- **Termo do jogo nunca é traduzido** — `Leader`, `Character`, `Trigger`, `DON!!`,
+  raridades e códigos de set saem como a Bandai publica, inclusive a caixa. O
+  rótulo em volta é traduzido.
+- **Chip das seis cores do jogo:** fill é a própria cor do jogo, selecionado ou
+  não; seleção é anel de 2px em `accent` mais rótulo em `body-strong`. **Nunca
+  preencher chip de cor com `accent`.** Chip de raridade, tipo ou set é o
+  contrário: seleção com fill `accent` e texto `on-accent`. Os hexadecimais das
+  seis cores são a pendência **P8** e não existem — enquanto isso, tratamento
+  neutro com `border-strong` mais rótulo.
+
+### 11.7 Restrição de implementação
+
+`app/assets/stylesheets/catalog.css` é **objeto de teste**, não só folha de
+estilo: seis arquivos em `test/` asseveram sobre o seu texto, lendo com
+`File.read` e filtrando regras por prefixo de seletor (`progress-*`,
+`import-preview*`, `import-summary*`). Acrescentar a camada de tokens não pode
+reorganizar, renomear nem dividir o arquivo — isso quebraria os testes por
+construção, sem que a página mudasse.
+
+A verificação dos 360px continua sendo **textual**, não renderizada: nenhum teste
+mede scroll horizontal de verdade, e `STATE.md` registra que o Req. 2.5 foi
+conferido à mão em Chromium e que uma regressão de layout passaria no CI. Isso
+permanece dívida aberta, fora do escopo desta camada.

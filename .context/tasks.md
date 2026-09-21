@@ -213,16 +213,51 @@ Regras de execução:
 
 ---
 
-## 6 — Fechamento do MVP
+## 6 — Camada de apresentação
 
-- [ ] **6.1 Verificação do critério de sucesso**
+- [ ] **6.1 Camada de tokens**
+  - Declarar cor, tipografia, espaçamento e raio como custom properties em `:root`.
+  - `color-scheme: dark`; sem `prefers-color-scheme`.
+  - Acrescentar ao `catalog.css` **sem reorganizar, renomear ou dividir** o arquivo:
+    seis testes asseveram sobre o texto dele filtrando por prefixo de seletor.
+  - _Requisitos: 12.1, 12.2, 12.4_
+
+- [ ] **6.2 Contraste como teste**
+  - Cálculo de luminância relativa sobre os valores dos tokens; 4.5:1 para texto,
+    3:1 para texto ≥24px, borda de controle, anel de foco e ícone.
+  - Falha do teste reprova o valor do token, não afrouxa o limiar.
+  - _Requisitos: 12.3_
+
+- [ ] **6.3 Aplicar os tokens aos blocos existentes**
+  - Os 21 blocos BEM de `catalog.css` passam a consumir tokens em vez de literais.
+  - Sem sombra, sem gradiente. `accent` raro por construção.
+  - Verificações de 360px do Req. 2.5 continuam passando.
+  - _Requisitos: 12.1, 12.5, 12.12_
+
+- [ ] **6.4 Modificadores BEM sem regra**
+  - Os 23 modificadores escritos nas views e nunca estilizados, inclusive
+    `flash--notice` / `flash--alert`, que hoje deixam erro e sucesso idênticos.
+  - Significado nunca só por cor; posse por badge com número.
+  - _Requisitos: 12.6, 12.8_
+
+- [ ] **6.5 Regras de conteúdo e foco**
+  - `code` em `card_number` e `variant_code`, em toda ocorrência.
+  - Anel de foco sólido de 2px em `accent`, 2px de deslocamento.
+  - Sem emoji. Chip das seis cores do jogo em tratamento neutro (P8 aberta).
+  - _Requisitos: 12.7, 12.9, 12.10, 12.11_
+
+---
+
+## 7 — Fechamento do MVP
+
+- [ ] **7.1 Verificação do critério de sucesso**
   - Registrar uma caixa de boosters inteira pelo celular, sem planilha.
   - Responder "quanto falta do set X?" em no máximo três toques.
   - Anotar todo atrito encontrado — isso vira o backlog da Fase 2, não correção
     de última hora.
   - _Referência: `product.md` §7_
 
-- [ ] **6.2 Documentar e revisar os specs**
+- [ ] **7.2 Documentar e revisar os specs**
   - README com subida local em um comando e execução da ingestão.
   - Atualizar `requirements.md` e `design.md` com tudo que mudou durante a
     execução. Remover todos os `⚠️ VERIFICAR` já resolvidos.

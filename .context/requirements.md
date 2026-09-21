@@ -251,6 +251,58 @@ não ficar preso à aplicação e poder migrar de uma planilha existente.
 
 ---
 
+## Requisito 12 — Camada de apresentação
+
+**User story:** Como colecionador usando o app em mesa de loja, com o celular perto
+do rosto e um booster na outra mão, quero uma interface que não dispute atenção com
+a arte das cartas, para achar o que procuro de relance.
+
+O design system que este requisito aplica está em
+`.context/design.md` §11. Ele nasceu de proposta derivada dos requisitos de UI
+(Req. 2, 4, 7, 11) antes de existir CSS no repositório — não foi extraído do
+código. Onde o CSS atual divergir dele, **o design system vence**, exceto no que
+os critérios abaixo preservam explicitamente.
+
+### Critérios de aceitação
+
+1. O sistema DEVE declarar todos os valores de cor, tipografia, espaçamento e raio
+   como custom properties CSS em `:root`, e nenhum bloco DEVE repetir um valor
+   literal que exista como token.
+2. O sistema DEVE ter **um único tema, escuro**, declarado com `color-scheme: dark`,
+   e NÃO DEVE declarar `prefers-color-scheme`.
+3. Todo par de texto sobre fundo DEVE atingir contraste de 4.5:1, exceto texto a
+   partir de 24px, bordas de controle, anéis de foco e ícones, que DEVEM atingir
+   3:1 — verificável por cálculo de luminância relativa sobre os valores dos tokens.
+4. O sistema DEVE usar exatamente duas matizes — azul-petróleo (228°) nas
+   superfícies, bordas e tinta, e âmbar (66°) na ação — e NÃO DEVE introduzir uma
+   terceira, com a exceção única de `danger` (28°).
+5. O sistema NÃO DEVE usar sombra nem gradiente em nenhum elemento de interface.
+6. Nenhum estado, quantidade ou posse DEVE ser comunicado apenas por cor: posse se
+   distingue por presença de badge com número, e estado ativo de filtro por rótulo
+   escrito.
+7. O sistema DEVE renderizar `card_number` e `variant_code` no estilo monoespaçado
+   `code`, em toda ocorrência, inclusive quando inline em meio a texto corrido.
+8. QUANDO uma mensagem for de erro ENTÃO o sistema DEVE distingui-la visualmente de
+   uma mensagem de sucesso por mais do que a cor.
+9. O anel de foco DEVE ser sólido de 2px em `accent`, com 2px de deslocamento, e
+   NÃO DEVE ser translúcido.
+10. O sistema NÃO DEVE usar emoji em nenhum ponto da interface.
+11. O chip de filtro das seis cores do jogo NÃO DEVE ser preenchido com `accent`;
+    sua seleção DEVE ser indicada por anel de 2px em `accent` mais rótulo escrito.
+12. As verificações de viewport de 360px do Req. 2.5 DEVEM continuar passando após a
+    aplicação dos tokens.
+
+> **Pendência P8 — hexadecimais das seis cores do jogo.** `Red`, `Green`, `Blue`,
+> `Purple`, `Black` e `Yellow` são o eixo do filtro do Req. 4 e **não têm valor
+> definido**: precisam sair das faces das cartas ou do material da Bandai, nunca de
+> estimativa sobre imagem hotlinkada comprimida. Enquanto não existirem, o critério
+> 11 é satisfeito com tratamento neutro (`border-strong` mais rótulo). Quando
+> entrarem, cada cor precisa de um par `on-<cor>` verificado — `Yellow` e `Black`
+> não suportam o mesmo texto — e `Yellow` precisa ser conferido contra `accent`: a
+> menos de ~25° de matiz, quem se desloca é `accent`.
+
+---
+
 ## Rastreamento de pendências
 
 Itens que **bloqueiam** o início da implementação:
@@ -261,3 +313,4 @@ Itens que **bloqueiam** o início da implementação:
 | P2 | Confirmação dos campos, raridades, sets e attributes reais | `product.md` §6 |
 | P3 | Definição de "set completo" (Req. 9) | Req. 9 |
 | P4 | Escolha de stack | `design.md` §2 |
+| P8 | Hexadecimais das seis cores do jogo (Req. 12.11) | Req. 12 |

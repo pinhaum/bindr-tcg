@@ -82,6 +82,14 @@
 - **Date**: 2026-09-20
 - **Status**: active
 
+### AD-011
+- **Decision**: A camada de apresentação vem do design system **Bindr**, mantido como artifact externo (`claude.ai/artifact/S2bVbVwhKiYym2Uw3wYtNq`) e **copiado para `.context/design.md` §11**, que é a cópia normativa. Tema **único, escuro**; duas matizes (azul-petróleo 228° em superfície/borda/tinta, âmbar 66° em ação) mais `danger` 28° como exceção; sem sombra, sem gradiente, sem webfont, sem ícone. Contraste vira **teste automatizado** por luminância relativa sobre os tokens, não afirmação do documento.
+- **Reason**: O CSS atual (1100 linhas, 21 blocos BEM) **não declara nenhum token de cor** e herda tudo do user-agent; `:root` tem duas custom properties (`--tile-min`, `--gap`). O design system foi escrito a partir dos requisitos de UI (Req. 2, 4, 7, 11) **antes de existir CSS no repo** — é proposta, não retrato, e o próprio `meta.note` dele diz isso. Copiar para `.context/` resolve a precedência pela regra que já existe (AD-005): o artifact é externo, editável fora do projeto e pode divergir. O tema único não é omissão: o README do design system justifica por uso — a arte das cartas é saturada e a tela é olhada com o celular perto do rosto, então fundo claro competiria com o conteúdo.
+- **Trade-off**: (1) Um tema claro passa a exigir trabalho próprio: `on-accent` **é** literalmente o `surface-base` escuro, e `danger` já está no limite — sobre estes fundos todo vermelho escuro o bastante para parecer grave reprova em 4.5:1 (carmim `#bf3447` dá 3.20:1). (2) `catalog.css` é **objeto de teste**: seis arquivos asseveram sobre o texto dele filtrando regras por prefixo de seletor, então a camada de tokens só pode ser **acrescentada** — reorganizar, renomear ou dividir o arquivo quebraria os testes por construção, com a página renderizando idêntica. (3) Os hexadecimais das seis cores do jogo ficam como pendência **P8**: o design system proíbe estimá-los, e amostrar JPEG hotlinkado de terceiro dá cor de compressão, não cor de marca — enquanto isso os chips de cor ficam neutros, o que torna a tela menos distintiva do que o sistema promete.
+- **Scope**: `.context/requirements.md` Req. 12, `.context/design.md` §11, `.context/tasks.md` §6, `.specs/features/interface/`. A dívida de verificação real de viewport (`STATE.md`, Req. 2.5 conferido à mão em Chromium) permanece aberta e fora deste escopo.
+- **Date**: 2026-09-20
+- **Status**: active
+
 ## Handoff
 
 > **Começando uma sessão nova?** Leia **`.specs/HANDOFF-colecao.md`** primeiro:
