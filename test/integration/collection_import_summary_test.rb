@@ -499,6 +499,185 @@ class CollectionImportSummaryTest < ActionDispatch::IntegrationTest
                     "o nome vem do arquivo do usuário e não pode ser HTML")
   end
 
+  # --- Req. 10.3 / POR-06: a falha de gravação na tela ---
+
+  # Lacuna HIGH encontrada por revisão de cobertura de testes: o bloco
+  # `.import-summary__falhas` da view **nunca foi renderizado por teste
+  # nenhum**. A única referência a `.import-summary__falhada` na suíte era o
+  # `assert_empty` do cenário limpo — que prova que o bloco some, nunca que ele
+  # aparece certo quando há falha. E é o bloco mais crítico da tela: o
+  # `Result#falhas` **não é persistido** (decisão do dono do produto no MEDIUM
+  # da revisão de banco da T14), então esta renderização é a **única**
+  # oportunidade que o usuário tem de descobrir quais linhas não entraram.
+  # Fechar a aba apaga o dado para sempre.
+  #
+  # A técnica é a da T14 (`collection_import_commit_test`): substituir o
+  # `upsert` de **uma** variante por um erro, com restauração no `ensure`. Ela
+  # é o único jeito de produzir falha numa linha escolhida **sem** tirar a
+  # variante do catálogo — e tirar a variante do catálogo mudaria a
+  # classificação da linha, que é justamente o que estes testes precisam manter
+  # fixo para comparar contagem.
+  def com_upsert_falhando_em(card_variant_id, erro)
+    original = CollectionCsv::Commit.instance_method(:upsert)
+
+    CollectionCsv::Commit.define_method(:upsert) do |linha|
+      raise erro if linha.card_variant_id == card_variant_id
+
+      original.bind_call(self, linha)
+    end
+
+    yield
+  ensure
+    CollectionCsv::Commit.define_method(:upsert, original)
+  end
+
+  # Confirma o lote fazendo a gravação de `variante` falhar. Devolve o retrato
+  # do "antes" para que a contagem seja conferida no banco, e não no `Result`.
+  def confirmar_com_falha_em(variante, conteudo = csv_completo)
+    preview = previsualizar(conteudo)
+    antes = retrato_de(@nami)
+
+    com_upsert_falhando_em(variante.id, PG::Error.new("conexão perdida")) do
+      post confirm_collection_import_path(preview.token)
+    end
+
+    [ preview, antes ]
+  end
+
+  # 1. O bloco aparece, e identifica a linha de um jeito que permite refazer o
+  #    import só dela: número da linha **no arquivo** (cabeçalho = 1, logo
+  #    `indice + 2`, mesma regra das rejeições), `card_number` e
+  #    `variant_code`. Sem os três o usuário não consegue achar a linha no
+  #    editor nem saber de qual impressão se trata — e não há segunda chance,
+  #    porque o dado não é persistido.
+  test "a linha que falhou ao gravar aparece identificada no resumo" do
+    sign_in
+    preview, _antes = confirmar_com_falha_em(@cria_b)
+
+    assert_response :success
+
+    falhadas = css_select(".import-summary__falhada")
+
+    assert_equal 1, falhadas.size,
+                 "a linha que não pôde ser gravada precisa aparecer na tela: " \
+                 "o resumo é a única existência desse dado"
+
+    texto = falhadas.first.text.squish
+
+    # O número da linha **no arquivo**, derivado do staging e não escrito à
+    # mão: `@cria_b` é a segunda linha de dado, que o usuário vê como linha 3.
+    esperada = preview.linhas_resolvidas
+      .find { |linha| linha.card_variant_id == @cria_b.id }
+      .indice.to_i + 2
+
+    assert_equal 3, esperada,
+                 "o cenário precisa de uma linha cujo número no arquivo difira do índice"
+    assert_match(/\b#{esperada}\b/, texto,
+                 "a linha citada é a do arquivo (cabeçalho = 1), não o índice interno: #{texto}")
+    assert_match(/#{Regexp.escape(@cria_b.card.card_number)}/, texto,
+                 "sem o código da carta o usuário não sabe qual linha refazer: #{texto}")
+    assert_match(/#{Regexp.escape(@cria_b.variant_code)}/, texto,
+                 "coleção é por variante: sem o código da variante a identificação " \
+                 "é ambígua entre impressões da mesma carta: #{texto}")
+  end
+
+  # 2. Falha e rejeição são desfechos **diferentes** — a rejeição é decisão
+  #    tomada antes de gravar, sobre o arquivo do usuário; a falha é acidente
+  #    do banco durante a escrita. A view reusa `.import-summary__alert` nos
+  #    dois blocos, e só a `<section>` pai os distingue: num cenário com os
+  #    dois ao mesmo tempo há dois elementos de mesma classe. Este teste é o
+  #    que impede que os dois avisos digam a mesma coisa — dizer ao usuário que
+  #    o arquivo dele tem problema quando o problema foi do banco manda
+  #    corrigir o que está certo.
+  test "o aviso de falha de gravação é distinguível do aviso de rejeição" do
+    sign_in
+    confirmar_com_falha_em(@cria_b)
+
+    rejeicoes = css_select(".import-summary__rejeicoes .import-summary__alert")
+    falhas = css_select(".import-summary__falhas .import-summary__alert")
+
+    assert_equal 1, rejeicoes.size,
+                 "o cenário tem rejeição: o aviso dela precisa estar na seção dela"
+    assert_equal 1, falhas.size,
+                 "o cenário tem falha de gravação: o aviso dela precisa estar " \
+                 "na seção dela, e não diluído no de rejeição"
+
+    texto_rejeicao = rejeicoes.first.text.squish
+    texto_falha = falhas.first.text.squish
+
+    assert_not_equal texto_rejeicao, texto_falha,
+                     "dois avisos idênticos não dizem ao usuário se o problema " \
+                     "foi do arquivo dele ou do banco"
+
+    # E a distinção é **semântica**, não só textual: o aviso de falha fala de
+    # salvar e de tentar de novo; o de rejeição fala de conferir o arquivo.
+    # Reenviar o arquivo não conserta uma linha recusada, e conferir o arquivo
+    # não conserta uma queda de conexão.
+    assert_match(/salvar/i, texto_falha,
+                 "o aviso de falha precisa dizer que o problema foi ao gravar: #{texto_falha}")
+    assert_match(/de novo|outra vez|novamente/i, texto_falha,
+                 "a falha é transitória: o usuário precisa saber que pode reenviar: #{texto_falha}")
+    assert_no_match(/salvar/i, texto_rejeicao,
+                    "a rejeição não é problema de gravação: #{texto_rejeicao}")
+  end
+
+  # 3. O que a tela imprime continua sendo o que está no banco, **inclusive
+  #    quando uma linha falha**: a linha falhada não entra em contagem nenhuma.
+  #    O nível do `Commit` já é coberto pela T14; o que nunca foi verificado é
+  #    a **tela**. Como no resto deste arquivo, a conferência é contra o banco.
+  test "a contagem do resumo não inclui a linha que falhou ao gravar" do
+    sign_in
+    _preview, antes = confirmar_com_falha_em(@cria_b)
+    depois = retrato_de(@nami)
+
+    criadas_no_banco = (depois.keys - antes.keys).size
+
+    assert_equal 2, criadas_no_banco,
+                 "das três linhas `:cria`, uma falhou: só duas entraram no banco"
+    assert_nil depois[@cria_b.id],
+               "a linha que falhou não gravou nada"
+
+    assert_equal criadas_no_banco.to_s, contagem_de("importadas"),
+                 "a tela precisa contar o que entrou no banco (2), não o que o " \
+                 "arquivo pedia (3): contar a linha falhada faria o usuário " \
+                 "acreditar numa carta que não está na coleção dele"
+
+    # As demais categorias não são contaminadas pela falha: a falha não vira
+    # rejeição (não é decisão sobre o arquivo) nem atualização.
+    assert_equal "2", contagem_de("atualizadas"),
+                 "a falha numa linha `:cria` não pode mexer na contagem de atualizadas"
+    assert_equal "2", contagem_de("rejeitadas"),
+                 "uma falha de gravação não é uma rejeição: são desfechos diferentes"
+  end
+
+  # 4. O simétrico: sem falha de gravação, o aparato de falha **não existe no
+  #    DOM** — nem a seção, nem o aviso próprio dela. O `assert_empty` do
+  #    cenário limpo cobre a lista; a seção e o aviso não tinham teste. E a
+  #    verificação é feita num cenário **com rejeição**, que é o caso em que a
+  #    confusão é possível: ali existe um `.import-summary__alert`, e uma tela
+  #    que renderizasse a seção de falhas vazia passaria por qualquer asserção
+  #    que só contasse alertas.
+  test "sem falha de gravação o resumo não traz seção de falha alguma" do
+    sign_in
+    confirmar_com_retrato
+
+    assert_empty css_select(".import-summary__falhas"),
+                 "sem falha de gravação não existe seção de falhas — nem vazia"
+    assert_empty css_select(".import-summary__falhada"),
+                 "sem falha de gravação não existe lista de linhas que falharam"
+    assert_empty css_select(".import-summary__falhas .import-summary__alert"),
+                 "sem falha de gravação não existe aviso de falha"
+
+    # E o alerta que **existe** neste cenário é o da rejeição, não um de falha
+    # com o texto trocado: sem isto, fundir os dois blocos passaria.
+    alertas = css_select(".import-summary__alert")
+
+    assert_equal 1, alertas.size,
+                 "o cenário tem rejeição e nenhuma falha: um alerta só"
+    assert_no_match(/salvar/i, alertas.first.text.squish,
+                    "o único alerta aqui é o de rejeição; falar em gravação " \
+                    "atribuiria ao banco um problema que é do arquivo")
+  end
   private
 
     # As regras da folha cujo seletor menciona o prefixo, sem os comentários —

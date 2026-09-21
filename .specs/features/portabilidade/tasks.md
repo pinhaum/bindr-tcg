@@ -1117,6 +1117,53 @@ que é recuperável.
   baseline documentada; a remoção foi barrada pelo classificador de permissões
   do ambiente e **fica para o orquestrador**.
 
+**Correção de cobertura pós-T16 (não é task do plano):**
+
+- **O bloco de falha de gravação do resumo não tinha teste nenhum.** Lacuna
+  **HIGH** levantada por revisão de cobertura de testes (`ecc:pr-test-analyzer`)
+  e confirmada pelo orquestrador entre a T16 e a T17: o branch
+  `if falhas.any?` da `resumo.html.erb` — a `<section
+  class="import-summary__falhas">`, o aviso e a lista de linhas que não
+  puderam ser gravadas — **nunca havia sido renderizado por teste algum**. A
+  única referência a `.import-summary__falhada` na suíte era o `assert_empty`
+  do cenário limpo, que prova que o bloco **some** quando não há falha e nunca
+  que ele **aparece certo** quando há. Os três testes da T14 que produzem falha
+  de gravação conferem só o banco, nunca o HTML.
+
+  Isso pesa mais do que uma lacuna comum por causa da dívida registrada acima:
+  como o dono do produto decidiu **não persistir** o resultado da gravação,
+  essa renderização é a **única** chance que o usuário tem de descobrir quais
+  linhas falharam. O branch sem cobertura era justamente o mais crítico da
+  tela.
+
+  **Agravante confirmado no mesmo diagnóstico:** a classe
+  `.import-summary__alert` é reusada nos dois blocos (rejeições e falhas), e só
+  a `<section>` pai os distingue. Num cenário com rejeição **e** falha
+  coexistindo — que nenhum teste montava — havia dois elementos de mesma classe
+  e nada provando que dizem coisas diferentes. Mandar "confira o arquivo" a
+  quem sofreu uma queda de conexão manda corrigir o que está certo.
+
+  Fechada por **quatro testes de integração** acrescentados a
+  `test/integration/collection_import_summary_test.rb`, sobre a resposta HTTP do
+  `confirm` (que renderiza, não redireciona), reusando a injeção de falha
+  `com_upsert_falhando_em` da T14: (1) a linha falhada aparece identificada por
+  número **no arquivo** (`indice + 2`), `card_number` e `variant_code`; (2) num
+  cenário com rejeição e falha simultâneas, os dois avisos coexistem, cada um
+  na sua `<section>`, e são semanticamente distintos — o de falha fala em
+  salvar e reenviar, o de rejeição não; (3) a contagem de importadas que a
+  **tela** imprime exclui a linha falhada, conferido contra o banco e não
+  contra o `Result`; (4) sem falha, a seção, a lista e o aviso de falha não
+  existem no DOM — verificado num cenário **com** rejeição, que é onde a
+  confusão era possível.
+
+  **Nenhuma linha de código de produção foi alterada** — é correção de
+  cobertura. Sensor de discriminação rodado em **cópia** do arquivo da view,
+  restaurada e conferida por `diff`: seis mutações (`+2`→`+1` no índice;
+  remoção do `card_number` do `<li>`; `falhas.any?`→`falhas.size > 1`;
+  `falhas.any?`→`true`; fusão do texto do aviso de falha com o de rejeição;
+  contagem de importadas somando as falhas) — **todas mortas**, cada uma por
+  pelo menos um dos testes novos.
+
 ---
 
 ### T16: Ida e volta fechada e isolamento entre usuários
