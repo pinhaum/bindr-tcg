@@ -214,15 +214,15 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Luminância relativa e razão implementadas pela fórmula WCAG 2.x — ⚠️ VERIFICAR a constante de linearização sRGB (0.03928 na WCAG 2.x, 0.04045 na IEC 61966-2-1) em fonte primária W3C antes de fechar
-- [ ] O cálculo é provado contra valores conhecidos: preto/branco = 21:1, par idêntico = 1:1
-- [ ] Pares a 4.5:1: `ink`, `ink-muted` e `accent` sobre `surface-base`, `surface-raised` e `surface-sunken`; `on-accent` sobre `accent` e sobre `danger`; `danger` sobre `surface-base`
-- [ ] Pares a 3:1: `border-strong` e `accent` (anel de foco) sobre as três superfícies
-- [ ] Os valores declarados em §11.3 e §11.6 (15.35, 7.18, 8.55, 5.57, 4.23, 7.15) são **recalculados**, não copiados: o teste assere o limiar, e a razão medida aparece na mensagem
-- [ ] Falha nomeia o par e a razão medida — provado com um par reprovado sintético dentro do próprio teste, não por mutação da folha
-- [ ] Token referenciado por um par e ausente da folha **falha**, não é pulado (Edge Case)
-- [ ] Se algum par do design system reprovar, o token é corrigido na folha e em §11.3 no mesmo commit, com a razão nova
-- [ ] Gate quick passa
+- [x] Luminância relativa e razão implementadas pela fórmula WCAG 2.2 — **Verificado contra W3C (0.04045, WCAG 2.2, Note 2)**: "Before May 2021 the value of 0.04045 in the definition was different (0.03928). It has no practical effect on the calculations."
+- [x] O cálculo é provado contra valores conhecidos: preto/branco = 21:1, par idêntico = 1:1
+- [x] Pares a 4.5:1: `ink`, `ink-muted` e `accent` sobre `surface-base`, `surface-raised` e `surface-sunken`; `on-accent` sobre `accent` e sobre `danger`; `danger` sobre `surface-base`
+- [x] Pares a 3:1: `border-strong` e `accent` (anel de foco) sobre as três superfícies
+- [x] Os valores declarados em §11.3 e §11.6 (15.35, 7.18, 8.55, 5.57, 4.23, 7.15) são **recalculados**, não copiados: o teste assere o limiar, e a razão medida aparece na mensagem
+- [x] Falha nomeia o par e a razão medida — provado com um par reprovado sintético dentro do próprio teste, não por mutação da folha
+- [x] Token referenciado por um par e ausente da folha **falha**, não é pulado (Edge Case)
+- [x] Se algum par do design system reprovar, o token é corrigido na folha e em §11.3 no mesmo commit, com a razão nova (todos passam)
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick
