@@ -66,14 +66,14 @@ class CardImageCacheTest < ActiveSupport::TestCase
   # Done when: host permitido é constante, esquema https, porta 443; URL
   # malformada, outro host, outro esquema ou outra porta falham **sem** chamar
   # o cliente HTTP.
-  test "host alheio → NotFound, zero chamadas ao cliente" do
+  test "host alheio → Unavailable, zero chamadas ao cliente" do
     http = ResponderCom.new(200, "png-bytes")
     variant = create_variant(
       variant_code: "OP01-001",
       image_url: "https://evil.test/image.png"
     )
 
-    erro = assert_raises(CardImageCache::NotFound) do
+    erro = assert_raises(CardImageCache::Unavailable) do
       cache(http: http).fetch(variant)
     end
 
@@ -81,14 +81,14 @@ class CardImageCacheTest < ActiveSupport::TestCase
     assert_empty http.calls
   end
 
-  test "http em vez de https → NotFound, zero chamadas ao cliente" do
+  test "http em vez de https → Unavailable, zero chamadas ao cliente" do
     http = ResponderCom.new(200, "png-bytes")
     variant = create_variant(
       variant_code: "OP01-001",
       image_url: "http://#{ALLOWED_HOST}/image.png"
     )
 
-    erro = assert_raises(CardImageCache::NotFound) do
+    erro = assert_raises(CardImageCache::Unavailable) do
       cache(http: http).fetch(variant)
     end
 
@@ -96,14 +96,14 @@ class CardImageCacheTest < ActiveSupport::TestCase
     assert_empty http.calls
   end
 
-  test "porta 8443 em vez de 443 → NotFound, zero chamadas ao cliente" do
+  test "porta 8443 em vez de 443 → Unavailable, zero chamadas ao cliente" do
     http = ResponderCom.new(200, "png-bytes")
     variant = create_variant(
       variant_code: "OP01-001",
       image_url: "https://#{ALLOWED_HOST}:8443/image.png"
     )
 
-    erro = assert_raises(CardImageCache::NotFound) do
+    erro = assert_raises(CardImageCache::Unavailable) do
       cache(http: http).fetch(variant)
     end
 
@@ -111,14 +111,14 @@ class CardImageCacheTest < ActiveSupport::TestCase
     assert_empty http.calls
   end
 
-  test "URL malformada → NotFound, zero chamadas ao cliente" do
+  test "URL malformada → Unavailable, zero chamadas ao cliente" do
     http = ResponderCom.new(200, "png-bytes")
     variant = create_variant(
       variant_code: "OP01-001",
       image_url: "not a url at all"
     )
 
-    erro = assert_raises(CardImageCache::NotFound) do
+    erro = assert_raises(CardImageCache::Unavailable) do
       cache(http: http).fetch(variant)
     end
 

@@ -4,6 +4,12 @@ require "net/http"
 # traversal. Baixa a arte da fonte uma vez, grava atomicamente em disco e
 # serve das requisições seguintes, ou falha de forma tipada e não cacheia.
 #
+# **Exceções:**
+# - NotFound: variante nil, sem image_url, variant_code inválido, ou caminho
+#   que sairia de storage_dir.
+# - Unavailable: URL malformada, host/esquema/porta recusados, extensão não
+#   permitida, status ≠ 200 da fonte, corpo vazio, timeout, ou erro de rede.
+#
 # **Invariantes de segurança (AD-012):**
 # - A URL de saída sempre vem de `card_variants.image_url`, nunca do request.
 # - Host, esquema e porta são validados contra `ALLOWED_HOST` e https:443.
@@ -95,19 +101,19 @@ class CardImageCache
     uri = begin
       URI.parse(url)
     rescue URI::InvalidURIError
-      raise NotFound, "URL malformada"
+      raise Unavailable, "URL malformada"
     end
 
     if uri.scheme != "https"
-      raise NotFound, "esquema deve ser https"
+      raise Unavailable, "esquema deve ser https"
     end
 
     if uri.host != ALLOWED_HOST
-      raise NotFound, "host não permitido"
+      raise Unavailable, "host não permitido"
     end
 
     if uri.port && uri.port != 443
-      raise NotFound, "porta deve ser 443"
+      raise Unavailable, "porta deve ser 443"
     end
 
     ext = File.extname(uri.path).downcase
