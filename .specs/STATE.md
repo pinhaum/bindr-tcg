@@ -100,6 +100,15 @@
 
 ## Handoff
 
+> **Estado em 2026-09-22, noite — este bloco vence os de baixo.** A `interface`
+> tem **T1–T3 commitadas** (`7662a60`, `14fbd39`, `d2409f7`) e fica **pausada
+> antes da T4** para corrigir as imagens: o hotlink da AD-004 nunca exibiu arte
+> (CORP `same-site`); AD-012 decide cache em disco servido pela aplicação; task
+> aberta em `.context/tasks.md` §3.6. Os docs da AD-012 entraram por acidente no
+> commit `d2409f7` da `interface` — o conteúdo está correto, só a mensagem não o
+> descreve. Próximo passo: especificar e executar a §3.6 como feature própria
+> (`.specs/features/imagens/`); só depois retomar a T4 da `interface`.
+
 > **Estado em 2026-09-22 — este bloco vence o que vem abaixo.** Fase 5
 > encerrada: `progresso` (§5.1) e `portabilidade` (§5.2–5.3) verificadas, PASS,
 > autor ≠ verificador (`validation.md` de cada uma; `validate_state.py` limpo).

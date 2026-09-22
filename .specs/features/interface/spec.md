@@ -25,9 +25,9 @@ para este app (`.context/design.md` §11) que nunca foi aplicado.
 | Feature | Reason |
 |---|---|
 | Tema claro | Design system define tema único escuro (`.context/design.md` §11.2); um claro exigiria valor novo para `on-accent` e `danger` já está no limite de contraste |
-| Hexadecimais das seis cores do jogo | Pendência **P8**: precisam sair do material da Bandai, não de estimativa sobre JPEG hotlinkado comprimido |
+| Hexadecimais das seis cores do jogo | Pendência **P8**: precisam sair do material da Bandai, não de estimativa sobre a arte comprimida das cartas |
 | Ícones | Nenhum conjunto escolhido; o design system manda escrever a palavra até haver decisão |
-| Webfont | Grade de 2815 cartas com imagens hotlinkadas (Req. 11.2) — fonte na rota crítica competiria com o gargalo |
+| Webfont | Grade de 2815 cartas com imagem cada (Req. 11.2; servidas pela aplicação desde a AD-012) — fonte na rota crítica competiria com o gargalo |
 | Redesenho de fluxo ou marcação | Esta feature estiliza o que existe; nenhuma view muda de estrutura |
 | Verificação real de viewport em navegador | Não há navegador no container; dívida registrada em `STATE.md` |
 | Reorganizar ou dividir `catalog.css` | Seis testes asseveram sobre o texto do arquivo filtrando por prefixo de seletor |

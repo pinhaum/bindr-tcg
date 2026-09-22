@@ -902,3 +902,15 @@ D3), e uma afirmação de design que a evidência não sustenta mais (`UNION` vs
 
 **Próximo passo**: os três fixes são pequenos e independentes. D1 é o único que
 muda comportamento; D2 e D3 são asserções novas. Nenhum bloqueia a Fase 4.
+
+---
+
+## Adendo pós-validação (2026-09-22)
+
+O "risco baixo" da seção *Placeholder por CSS* estava errado no fato, não no
+raciocínio: o mecanismo funciona, e por isso **escondeu** que nenhuma imagem
+jamais carregou. A fonte responde `Cross-Origin-Resource-Policy: same-site`; o
+navegador descarta toda imagem hotlinkada e o placeholder aparece em 100% das
+cartas. Os PASS do Req. 2.1 (imagem na grade) e 5.2 (imagem por variante) valem
+para o HTML renderizado, não para o que o usuário vê. Correção: AD-012,
+`.context/tasks.md` §3.6. Este relatório não é reescrito — o adendo é o registro.

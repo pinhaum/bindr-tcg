@@ -625,8 +625,8 @@ delimita, sempre acompanhar de `border` ou `border-strong`.
 
 ### 11.4 Tipografia
 
-Pilha do sistema, **sem webfont**: a grade carrega 2815 cartas com imagens
-hotlinkadas (Req. 11.2), e um arquivo de fonte na rota crítica competiria com o
+Pilha do sistema, **sem webfont**: a grade carrega 2815 cartas com imagem
+cada (Req. 11.2), e um arquivo de fonte na rota crítica competiria com o
 recurso que já é o gargalo.
 
 | Estilo | Métrica | Uso |

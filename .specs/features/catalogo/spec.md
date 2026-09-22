@@ -25,7 +25,7 @@ porque é a impressão que se coleciona.
 | ------- | ------ |
 | Deck builder e validador | Fase 2 — regras do jogo precisam de confirmação no regulamento oficial |
 | Preços e valor da coleção | Fase 3 — optcgjson não traz preço; depende de outra fonte |
-| Cache local de imagens | AD-004 — hotlink e medir; só entra se o Req. 11.2 falhar na prática |
+| Cache local de imagens | AD-004 — hotlink e medir. **Superada pela AD-012 (2026-09-22)**: vira `.context/tasks.md` §3.6, fora desta feature |
 | Cartas DON!! | P7 — a fonte não as traz |
 | Scanner por câmera / OCR | Fora da Fase 1 |
 
@@ -38,7 +38,7 @@ porque é a impressão que se coleciona.
 | Fonte do catálogo | `hugoprudente/optcgjson` em revisão fixa | Única fonte que preserva Card × CardVariant (AD-001) | y |
 | `variant_code` | campo `id` da fonte, sem hash | A fonte fornece identificador estável por impressão | y |
 | Stack | Rails 8 + Hotwire + PostgreSQL | Recursos de busca do Postgres são o núcleo do design (AD-002) | y |
-| Imagens | hotlink, sem cache | Preferir referenciar a redistribuir arte (AD-004) | y |
+| Imagens | ~~hotlink, sem cache~~ | ~~Preferir referenciar a redistribuir arte (AD-004)~~ — **falso**: CORP `same-site` impede o navegador de exibir; ver AD-012 | n |
 | Licença da fonte | uso pessoal, não comercial | O repositório não declara licença; risco aceito e registrado | y |
 | Variante em dois sets | `variant_code` único global | `P-029_r1` aparece em PRB01 e ST16 — relação variante↔set não é 1:1 | y |
 

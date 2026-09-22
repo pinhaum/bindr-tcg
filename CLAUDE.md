@@ -152,7 +152,7 @@ reabrir sem motivo novo:
 | P3 | "Set completo" = `baseSetSize` (variantes base); parallels em métrica separada | AD-003 |
 | P4 | Rails 8 + Hotwire + PostgreSQL | AD-002 |
 | P5 | Não se aplica: a fonte dá `id` estável por variante (`OP01-001_p1`) | AD-001 |
-| P6 | Sem cache de imagens na Fase 1; hotlink de `imageUrl` | AD-004 |
+| P6 | ~~Hotlink de `imageUrl`~~ → app serve a imagem com cache em disco (CORP `same-site` bloqueia hotlink) | AD-004 → **AD-012** |
 | P7 | `DON!!` fora do catálogo na Fase 1 | task 0.2 |
 
 A escolha da fonte em AD-001 é o que **elimina** a fragilidade que o design

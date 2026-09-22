@@ -299,7 +299,7 @@ os critérios abaixo preservam explicitamente.
 > **Pendência P8 — hexadecimais das seis cores do jogo.** `Red`, `Green`, `Blue`,
 > `Purple`, `Black` e `Yellow` são o eixo do filtro do Req. 4 e **não têm valor
 > definido**: precisam sair das faces das cartas ou do material da Bandai, nunca de
-> estimativa sobre imagem hotlinkada comprimida. Enquanto não existirem, o critério
+> estimativa sobre a arte comprimida das cartas. Enquanto não existirem, o critério
 > 11 é satisfeito com tratamento neutro (`border-strong` mais rótulo). Quando
 > entrarem, cada cor precisa de um par `on-<cor>` verificado — `Yellow` e `Black`
 > não suportam o mesmo texto — e `Yellow` precisa ser conferido contra `accent`: a
