@@ -44,6 +44,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: .specs/features/catalogo/validation.md D1 (app/queries/catalog_query.rb:158) (pagination)
 - last seen: 2026-09-19T22:54:58Z
 
+### L-006 - Escrita atômica: teste só verifica ausência de .part final, não previne arquivo pela metade em concorrência. Mutante 2 (gravar direto em final_path) sobreviveu.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · harmful: 0
+- features: imagens
+- evidence: test/services/card_image_cache_test.rb:242-256
+- last seen: 2026-09-22T23:15:52Z
+
+### L-007 - Cleanup em exceção: remover ensure File.delete(temporary) não foi detectado. Nenhum teste força exception durante persist() para verificar remoção de .part.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · harmful: 0
+- features: imagens
+- evidence: test/services/card_image_cache_test.rb:173-185
+- last seen: 2026-09-22T23:15:56Z
+
+### L-008 - Status HTTP: trocar status == 200 por status.between?(200, 299) não foi detectado. Testes aceitam qualquer 2xx e redirect; spec exige exatamente 200.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · harmful: 0
+- features: imagens
+- evidence: test/services/card_image_cache_test.rb:298-310
+- last seen: 2026-09-22T23:16:01Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 6,
+  "next_id": 9,
   "lessons": [
     {
       "id": "L-001",
@@ -94,6 +94,60 @@
       ],
       "created": "2026-09-19T22:54:58Z",
       "last_seen": "2026-09-19T22:54:58Z"
+    },
+    {
+      "id": "L-006",
+      "key": "surviving_mutant::escrita atomica teste so verifica ausencia de part final nao previne arquivo pela metade em concorrencia mutante 2 gravar direto em final path sobreviveu",
+      "text": "Escrita atômica: teste só verifica ausência de .part final, não previne arquivo pela metade em concorrência. Mutante 2 (gravar direto em final_path) sobreviveu.",
+      "signal": "surviving_mutant",
+      "scope": "",
+      "status": "candidate",
+      "features": [
+        "imagens"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "test/services/card_image_cache_test.rb:242-256"
+      ],
+      "created": "2026-09-22T23:15:52Z",
+      "last_seen": "2026-09-22T23:15:52Z"
+    },
+    {
+      "id": "L-007",
+      "key": "surviving_mutant::cleanup em excecao remover ensure file delete temporary nao foi detectado nenhum teste forca exception durante persist para verificar remocao de part",
+      "text": "Cleanup em exceção: remover ensure File.delete(temporary) não foi detectado. Nenhum teste força exception durante persist() para verificar remoção de .part.",
+      "signal": "surviving_mutant",
+      "scope": "",
+      "status": "candidate",
+      "features": [
+        "imagens"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "test/services/card_image_cache_test.rb:173-185"
+      ],
+      "created": "2026-09-22T23:15:56Z",
+      "last_seen": "2026-09-22T23:15:56Z"
+    },
+    {
+      "id": "L-008",
+      "key": "surviving_mutant::status http trocar status 200 por status between 200 299 nao foi detectado testes aceitam qualquer 2xx e redirect spec exige exatamente 200",
+      "text": "Status HTTP: trocar status == 200 por status.between?(200, 299) não foi detectado. Testes aceitam qualquer 2xx e redirect; spec exige exatamente 200.",
+      "signal": "surviving_mutant",
+      "scope": "",
+      "status": "candidate",
+      "features": [
+        "imagens"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "test/services/card_image_cache_test.rb:298-310"
+      ],
+      "created": "2026-09-22T23:16:01Z",
+      "last_seen": "2026-09-22T23:16:01Z"
     }
   ]
 }
