@@ -70,7 +70,7 @@ T2 → T3
 
 ## Task Breakdown
 
-### T1: `CardImageCache` — fetch restrito ao host, escrita atômica, falha não cacheada
+### T1: `CardImageCache` — fetch restrito ao host, escrita atômica, falha não cacheada ✅
 
 **What**: Serviço que recebe uma `CardVariant` e devolve o caminho do arquivo em disco (baixando e gravando na primeira vez) ou falha tipada, sem nunca ler URL de fora do registro.
 **Where**: `app/services/card_image_cache.rb`
@@ -85,15 +85,15 @@ T2 → T3
 
 **Done when**:
 
-- [ ] Host permitido é constante (`asia-en.onepiece-cardgame.com`), esquema `https`, porta 443; URL malformada, outro host, outro esquema ou outra porta falham **sem** chamar o cliente HTTP — teste com dublê que registra chamadas prova zero chamadas
-- [ ] Extensão vem do caminho de `image_url` e só `.png`, `.jpg`, `.jpeg`, `.webp` são aceitas; outra extensão falha sem chamar o cliente
-- [ ] Cliente próprio com timeouts curtos (ordem de segundos), sem seguir redirect; status ≠ 200 (inclusive 301/302) e corpo vazio são falha
-- [ ] Erro de rede e timeout (`Net::OpenTimeout`, `Net::ReadTimeout` e a mesma lista de `Ingestion::Fetch`) viram falha tipada, nunca exceção crua
-- [ ] Sucesso grava `<dir>/<variant_code>.<ext>` via temporário único no mesmo diretório + `rename`; teste prova que os bytes gravados são os do dublê
-- [ ] Arquivo já em disco é devolvido sem chamar o cliente
-- [ ] Falha não deixa arquivo final nem temporário no diretório; a chamada seguinte chama o cliente de novo
-- [ ] Variante sem `image_url` falha sem chamar o cliente
-- [ ] Diretório injetável; default `Rails.root.join("storage", "card_images")`; testes usam `Dir.mktmpdir`
+- [x] Host permitido é constante (`asia-en.onepiece-cardgame.com`), esquema `https`, porta 443; URL malformada, outro host, outro esquema ou outra porta falham **sem** chamar o cliente HTTP — teste com dublê que registra chamadas prova zero chamadas
+- [x] Extensão vem do caminho de `image_url` e só `.png`, `.jpg`, `.jpeg`, `.webp` são aceitas; outra extensão falha sem chamar o cliente
+- [x] Cliente próprio com timeouts curtos (ordem de segundos), sem seguir redirect; status ≠ 200 (inclusive 301/302) e corpo vazio são falha
+- [x] Erro de rede e timeout (`Net::OpenTimeout`, `Net::ReadTimeout` e a mesma lista de `Ingestion::Fetch`) viram falha tipada, nunca exceção crua
+- [x] Sucesso grava `<dir>/<variant_code>.<ext>` via temporário único no mesmo diretório + `rename`; teste prova que os bytes gravados são os do dublê
+- [x] Arquivo já em disco é devolvido sem chamar o cliente
+- [x] Falha não deixa arquivo final nem temporário no diretório; a chamada seguinte chama o cliente de novo
+- [x] Variante sem `image_url` falha sem chamar o cliente
+- [x] Diretório injetável; default `Rails.root.join("storage", "card_images")`; testes usam `Dir.mktmpdir`
 
 **Tests**: unit
 **Gate**: quick
