@@ -548,4 +548,104 @@ class CardImageCacheTest < ActiveSupport::TestCase
       cache(http: http).fetch(variant)
     end
   end
+
+  # --- Escrita atômica: prova que o arquivo é criado antes de conversão para string ---
+
+  # Dublê de corpo que levanta erro ao tentar conversão. Responde `blank?` →
+  # false e `bytesize` → 10 (passa validação), mas `to_s`/`to_str` levanta
+  # IOError. Prova que Pathname#binwrite abre/cria o arquivo ANTES de chamar
+  # `to_s`, ou usa outro método de conversão.
+  BodyComErroNaConversao = Struct.new(:dummy) do
+    def blank?
+      false
+    end
+
+    def bytesize
+      10
+    end
+
+    def to_s
+      raise IOError, "erro durante to_s"
+    end
+
+    def to_str
+      raise IOError, "erro durante to_str"
+    end
+  end
+
+  test "falha no meio da escrita (corpo levanta IOError em to_s) → Unavailable, sem arquivo final nem .part" do
+    body = BodyComErroNaConversao.new(nil)
+    http = ResponderCom.new(200, body)
+    variant = create_variant(
+      variant_code: "OP01-001",
+      image_url: "https://#{ALLOWED_HOST}/image.png"
+    )
+
+    erro = assert_raises(CardImageCache::Unavailable) do
+      cache(http: http).fetch(variant)
+    end
+
+    # Não existe o arquivo final
+    final_path = @storage.join("OP01-001.png")
+    assert !final_path.exist?, "arquivo final não deveria existir após falha"
+
+    # Nenhum arquivo temporário (.part) sobrou
+    part_files = @storage.children.select { |f| f.to_s.end_with?(".part") }
+    assert_empty part_files, "arquivo temporário .part não foi limpado"
+
+    # Próxima chamada com cliente normal grava corretamente
+    http2 = ResponderCom.new(200, "correct-bytes")
+    result = cache(http: http2).fetch(variant)
+
+    assert_equal 1, http2.calls.size, "cliente deveria ter sido chamado"
+    assert_equal "correct-bytes", result.path.read, "bytes corretos não foram gravados"
+  end
+
+  # --- Status 2xx diferente de 200 ---
+
+  # Validação: fetch_and_store rejeita status != 200, mesmo sendo 2xx.
+  test "status 201 → Unavailable, nenhum arquivo deixado" do
+    http = ResponderCom.new(201, "bytes")
+    variant = create_variant(
+      variant_code: "OP01-001",
+      image_url: "https://#{ALLOWED_HOST}/image.png"
+    )
+
+    erro = assert_raises(CardImageCache::Unavailable) do
+      cache(http: http).fetch(variant)
+    end
+
+    assert_match(/status/, erro.message)
+    assert_empty @storage.children
+  end
+
+  test "status 204 → Unavailable, nenhum arquivo deixado" do
+    http = ResponderCom.new(204, "")
+    variant = create_variant(
+      variant_code: "OP01-001",
+      image_url: "https://#{ALLOWED_HOST}/image.png"
+    )
+
+    erro = assert_raises(CardImageCache::Unavailable) do
+      cache(http: http).fetch(variant)
+    end
+
+    assert_match(/status/, erro.message)
+    assert_empty @storage.children
+  end
+
+  test "status 206 (partial content) → Unavailable, nenhum arquivo deixado" do
+    http = ResponderCom.new(206, "partial-bytes")
+    variant = create_variant(
+      variant_code: "OP01-001",
+      image_url: "https://#{ALLOWED_HOST}/image.png"
+    )
+
+    erro = assert_raises(CardImageCache::Unavailable) do
+      cache(http: http).fetch(variant)
+    end
+
+    assert_match(/status/, erro.message)
+    assert_empty @storage.children
+  end
 end
