@@ -2,6 +2,12 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Imagens das cartas, servidas pela aplicação em vez de hotlink (AD-012).
+  # O `variant_code` é validado no controller antes de qualquer consulta.
+  # Nenhum parâmetro do request entra na URL de saída — ela vem do banco.
+  get "card_images/:variant_code" => "card_images#show", as: :card_image, format: false,
+      constraints: { variant_code: /[^\/]+/ }
+
   # A carta é identificada pelo `card_number` na URL, não pelo id: é o
   # identificador que o usuário conhece e o que torna a URL compartilhável.
   # O ponto em códigos como `P-029` exigiria `format: false`; os códigos reais

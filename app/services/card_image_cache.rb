@@ -54,8 +54,12 @@ class CardImageCache
   # real. Trocável em teste via `CardImageCache.default_http =`.
   class_attribute :default_http, default: NetHttpClient.new
 
-  def initialize(storage_dir: Rails.root.join("storage", "card_images"), http: nil)
-    @storage_dir = Pathname(storage_dir)
+  # `storage_dir` é injetável para que o teste use diretório temporário em vez de
+  # sujar o storage real. Trocável em teste via `CardImageCache.default_storage_dir =`.
+  class_attribute :default_storage_dir, default: -> { Rails.root.join("storage", "card_images") }
+
+  def initialize(storage_dir: nil, http: nil)
+    @storage_dir = Pathname(storage_dir || self.class.default_storage_dir.call)
     @http = http || self.class.default_http
   end
 

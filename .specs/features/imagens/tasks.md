@@ -98,7 +98,7 @@ T2 → T3
 **Tests**: unit
 **Gate**: quick
 
-### T2: Rota pública `GET /card_images/:variant_code` e `CardImagesController`
+### T2: Rota pública `GET /card_images/:variant_code` e `CardImagesController` ✅
 
 **What**: Rota e controller público que valida o formato de `variant_code`, resolve a variante no banco, delega ao `CardImageCache` e serve o arquivo com cache HTTP longo, ou responde erro sem corpo.
 **Where**: `config/routes.rb`, `app/controllers/card_images_controller.rb`
@@ -113,15 +113,15 @@ T2 → T3
 
 **Done when**:
 
-- [ ] Rota `get "card_images/:variant_code"` com helper `card_image_path`, sem formato (`format: false`), comentada no estilo do `routes.rb`
-- [ ] `variant_code` validado contra `\A[A-Za-z0-9]+(-[A-Za-z0-9]+)*(_[a-z0-9]+)?\z` no controller **antes** de qualquer consulta; teste com `..`, `%2F`, `OP01-001.png` e similares prova 404 sem chamada ao cliente e sem arquivo criado
-- [ ] Anônimo recebe 200 (não redirect) para variante com imagem
-- [ ] 200 traz os bytes do dublê, `Content-Type` pela extensão (`image/png`), `Cache-Control` com `public` e `max-age=31536000`, disposição inline
-- [ ] Segunda requisição da mesma variante não chama o cliente
-- [ ] Variante inexistente e variante sem `image_url` → 404 corpo vazio, sem chamada ao cliente
-- [ ] Falha da fonte (status ≠ 200, timeout, host recusado) → 502 corpo vazio; nada gravado
-- [ ] Nenhum parâmetro do request além de `variant_code` é lido; teste com `?url=https://evil.test/x.png` prova que o cliente recebe a URL do banco
-- [ ] Controller não lê `Current.user` (não há dado de usuário aqui)
+- [x] Rota `get "card_images/:variant_code"` com helper `card_image_path`, sem formato (`format: false`), comentada no estilo do `routes.rb`
+- [x] `variant_code` validado contra `\A[A-Za-z0-9]+(-[A-Za-z0-9]+)*(_[a-z0-9]+)?\z` no controller **antes** de qualquer consulta; teste com `..`, `%2F`, `OP01-001.png` e similares prova 404 sem chamada ao cliente e sem arquivo criado
+- [x] Anônimo recebe 200 (não redirect) para variante com imagem
+- [x] 200 traz os bytes do dublê, `Content-Type` pela extensão (`image/png`), `Cache-Control` com `public` e `max-age=31536000`, disposição inline
+- [x] Segunda requisição da mesma variante não chama o cliente
+- [x] Variante inexistente e variante sem `image_url` → 404 corpo vazio, sem chamada ao cliente
+- [x] Falha da fonte (status ≠ 200, timeout, host recusado) → 502 corpo vazio; nada gravado
+- [x] Nenhum parâmetro do request além de `variant_code` é lido; teste com `?url=https://evil.test/x.png` prova que o cliente recebe a URL do banco
+- [x] Controller não lê `Current.user` (não há dado de usuário aqui)
 
 **Tests**: integration
 **Gate**: quick
