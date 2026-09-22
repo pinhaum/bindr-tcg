@@ -11,7 +11,7 @@ class CardImagesTest < ActionDispatch::IntegrationTest
   setup do
     @card_set = CardSet.create!(code: "OP01", name: "Test", kind: "booster")
     @card = Card.create!(set_id: @card_set.id, card_number: "OP01-001",
-                         name: "Zoro", card_type: "leader", colors: ["Red"])
+                         name: "Zoro", card_type: "leader", colors: [ "Red" ])
 
     @dir = Dir.mktmpdir("card-images-integration-test")
     @http_default = CardImageCache.default_http
@@ -40,7 +40,7 @@ class CardImagesTest < ActionDispatch::IntegrationTest
 
     def get(url)
       @calls << url
-      [status, body]
+      [ status, body ]
     end
   end
 
