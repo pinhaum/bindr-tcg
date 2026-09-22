@@ -248,6 +248,10 @@ não ficar preso à aplicação e poder migrar de uma planilha existente.
 5. O pipeline de ingestão DEVE ter teste automatizado com dados de exemplo
    fixos (fixture), sem depender de rede.
 6. O sistema DEVE ser executável localmente com um único comando documentado.
+7. As imagens das cartas DEVEM ser entregues ao navegador pela origem da própria
+   aplicação. A fonte responde `Cross-Origin-Resource-Policy: same-site`, que faz
+   o navegador descartar a imagem em qualquer página fora do domínio dela — um
+   `<img>` apontando para a URL original nunca exibe arte (AD-012).
 
 ---
 

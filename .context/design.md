@@ -461,23 +461,51 @@ rastreável.
 
 Restrição de origem: ver `product.md` §5.1.
 
-**Fase 1:** referenciar `image_url` diretamente da fonte original, com `loading="lazy"`
-(Req. 11.2) e placeholder no evento de erro (Req. 2.3).
+> **Revisado em 2026-09-22 — AD-012 supersede a P6 / AD-004.** O hotlink nunca
+> funcionou em navegador: a fonte responde `Cross-Origin-Resource-Policy:
+> same-site` em toda imagem, e o navegador descarta a resposta fora de
+> `*.onepiece-cardgame.com`. O texto abaixo é o desenho vigente.
 
-Riscos reconhecidos:
+**A aplicação serve as imagens, sob demanda, com cache em disco.**
 
-- A fonte pode bloquear hotlinking → as imagens simplesmente não carregam.
-- A fonte pode mudar URLs → imagens quebram até a próxima ingestão.
-- Latência fora do seu controle.
+- Rota pública `GET /card_images/:variant_code` (catálogo é público, §6). O
+  `<img>` da grade e do detalhe aponta para ela, nunca para `image_url`.
+- Primeira requisição: busca a variante por `variant_code`, baixa `image_url`
+  servidor-a-servidor (CORP não se aplica fora do navegador), grava em
+  `storage/card_images/<variant_code>.<ext>` e serve. Seguintes: servem do disco.
+- Resposta com cache HTTP longo. O arquivo muda só se a fonte trocar a arte sob o
+  mesmo `variant_code`, caso em que apagar o arquivo basta.
+- **Falha é placeholder.** Variante inexistente, sem `image_url`, erro ou timeout
+  da fonte → resposta de erro sem corpo de imagem; o placeholder em CSS que já
+  fica atrás do `<img>` (Req. 2.3) aparece. Falha não é gravada em disco — a
+  próxima requisição tenta de novo.
 
-**Se isso doer**, a saída é cache local dos arquivos com um caminho de fallback
-para a URL original — não redistribuição como asset próprio. Isso é
-deliberadamente uma task da Fase 2, não do MVP: pode ser que nunca incomode.
+Invariantes:
 
-> **P6 DECIDIDA (task 0.3):** aceitar o hotlink e medir — ver
-> `docs/adr/002-stack-set-completo-e-imagens.md`. O placeholder do Req. 2.2
-> (nome + código quando a imagem falha) deixa de ser detalhe de robustez e passa
-> a ser a mitigação desta decisão.
+- **A URL de saída nunca vem do request.** Só `variant_code` entra; a URL é lida
+  do banco. O host é conferido contra o da fonte antes do fetch — sem isso o
+  endpoint é SSRF assim que a ingestão gravar uma URL inesperada.
+- `variant_code` é validado por formato antes de virar nome de arquivo (nada de
+  `/` ou `..`). Ele é único globalmente e estável (AD-001, §9), por isso é chave
+  suficiente para o arquivo sem tabela de mapeamento.
+- Escrita atômica: arquivo temporário + `rename`, para que duas requisições
+  simultâneas da mesma carta nunca sirvam arquivo pela metade.
+- Nada de bytes no Postgres nem Active Storage: a imagem é regenerável de
+  `image_url`, e o banco guarda o único dado insubstituível (a coleção).
+- `storage/card_images/` é ignorado pelo git (o `.gitignore` já cobre
+  `/storage/*`).
+
+Riscos que continuam:
+
+- A fonte pode mudar URLs → a imagem quebra até a próxima ingestão (e até o
+  arquivo em disco ser apagado, se a arte mudou sob o mesmo código).
+- A primeira visualização de cada carta paga a latência da fonte.
+- O cache é local ao processo/container; mais de um container de produção
+  duplica downloads.
+
+`image_url_large` segue sem fonte: a fixture não traz campo de imagem maior, e a
+coluna está vazia nas 4933 variantes. O Req. 5.1 ("imagem em resolução maior")
+não é atendido hoje — pendência separada desta decisão.
 
 ---
 
@@ -511,7 +539,7 @@ Ver `docs/adr/001-fonte-de-dados-do-catalogo.md` e
 | P3  | Definição de "set completo"                        | ✅ | **Variantes base** (`baseSetSize`) como denominador; parallels em métrica separada. Ambos os números vêm da fonte. ADR 002. |
 | P4  | Stack                                              | ✅ | **Rails 8 + Hotwire + PostgreSQL.** ADR 002. |
 | P5  | `variant_code` estável                             | ✅ | **Sem hash derivado.** A fonte fornece `id` estável (`OP01-001_p1`). Usar direto. |
-| P6  | Cache de imagens na Fase 1                         | ✅ | **Não.** Hotlink de `imageUrl` e medir; o placeholder do Req. 2.2 é a mitigação. ADR 002. |
+| P6  | Cache de imagens na Fase 1                         | ✅ | ~~Não; hotlink.~~ **Revista em 2026-09-22 (AD-012):** hotlink bloqueado por CORP `same-site`; a aplicação serve a imagem com cache em disco sob demanda. §7. |
 | P7  | `DON!!` entra no catálogo?                         | ✅ | Não. A fonte não traz cartas DON!!, então não há decisão a tomar na Fase 1. |
 
 ### Consequências para a ingestão (achadas na amostra)

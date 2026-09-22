@@ -67,6 +67,11 @@ removido.
 
 ## P6 — Sem cache de imagens na Fase 1
 
+> **Superada em 2026-09-22 — ver AD-012 em `.specs/STATE.md` e `design.md` §7.**
+> O risco assumido abaixo não era risco, era o estado desde o primeiro dia: a
+> fonte responde `Cross-Origin-Resource-Policy: same-site` e o navegador nunca
+> exibiu uma imagem hotlinkada. O texto original fica como registro.
+
 **Decisão:** hotlink direto de `imageUrl` (`onepiece-cardgame.com`), medir, e só
 reconsiderar se doer.
 

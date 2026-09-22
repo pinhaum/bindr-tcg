@@ -246,16 +246,18 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Nenhum hex, `rgb()` ou `hsl()` fora de `:root` (comentários descontados)
-- [ ] Todo hex de `:root` tem matiz dentro de uma tolerância declarada no teste em torno de 228° ou 66°, ou é `danger` em torno de 28°; para cor de saturação muito baixa, onde a matiz é instável, a regra é explícita no teste, não um `skip`
-- [ ] Nenhuma ocorrência de `box-shadow`, `text-shadow`, `drop-shadow` ou `gradient(`
-- [ ] Nenhuma palavra-chave de cor nomeada (`red`, `white`, …) além de `currentcolor`, `transparent` e `inherit`
-- [ ] Gate quick passa — §6.2 fecha aqui
+- [x] Nenhum hex, `rgb()` ou `hsl()` fora de `:root` (comentários descontados)
+- [x] Todo hex de `:root` tem matiz dentro de uma tolerância declarada no teste em torno de 228° ou 66°, ou é `danger` em torno de 28°; para cor de saturação muito baixa, onde a matiz é instável, a regra é explícita no teste, não um `skip`
+- [x] Nenhuma ocorrência de `box-shadow`, `text-shadow`, `drop-shadow` ou `gradient(`
+- [x] Nenhuma palavra-chave de cor nomeada (`red`, `white`, …) além de `currentcolor`, `transparent` e `inherit`
+- [x] Gate quick passa — §6.2 fecha aqui
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `test(interface): travar a paleta em duas matizes e sem sombra`
+
+**Nota**: as duas ocorrências de `rgb(0 0 0 / 6%)` em `.card-tile__art` (linha 171) e `.variant__art` (linha 251) de `app/assets/stylesheets/catalog.css` foram trocadas por `var(--surface-sunken)` na T3, adiantando o poço da T4, porque a guarda de literais de cor exige que toda cor use token.
 
 ---
 

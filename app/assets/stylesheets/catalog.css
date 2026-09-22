@@ -168,7 +168,7 @@ body {
   aspect-ratio: 5 / 7;
   overflow: hidden;
   border-radius: 0.25rem;
-  background: rgb(0 0 0 / 6%);
+  background: var(--surface-sunken);
 }
 
 .card-tile__image,
@@ -248,7 +248,7 @@ body {
   aspect-ratio: 5 / 7;
   overflow: hidden;
   border-radius: 0.25rem;
-  background: rgb(0 0 0 / 6%);
+  background: var(--surface-sunken);
 }
 
 .variant__image,

@@ -32,7 +32,7 @@
 - **Trade-off**: Se a Bandai bloquear hotlink, a grade fica sem arte. O placeholder do Req. 2.2 deixa de ser detalhe de robustez e passa a ser a mitigação desta decisão. Nenhum dado de usuário depende de imagem.
 - **Scope**: Grade do catálogo e detalhe da carta.
 - **Date**: 2026-09-19
-- **Status**: active
+- **Status**: superseded by AD-012
 
 ### AD-005
 - **Decision**: Os documentos de especificação continuam em `.context/` (`product.md`, `requirements.md`, `design.md`, `tasks.md`); `.specs/` guarda o recorte por feature, o log de decisões e os artefatos de verificação.
@@ -88,6 +88,14 @@
 - **Trade-off**: (1) Um tema claro passa a exigir trabalho próprio: `on-accent` **é** literalmente o `surface-base` escuro, e `danger` já está no limite — sobre estes fundos todo vermelho escuro o bastante para parecer grave reprova em 4.5:1 (carmim `#bf3447` dá 3.20:1). (2) `catalog.css` é **objeto de teste**: seis arquivos asseveram sobre o texto dele filtrando regras por prefixo de seletor, então a camada de tokens só pode ser **acrescentada** — reorganizar, renomear ou dividir o arquivo quebraria os testes por construção, com a página renderizando idêntica. (3) Os hexadecimais das seis cores do jogo ficam como pendência **P8**: o design system proíbe estimá-los, e amostrar JPEG hotlinkado de terceiro dá cor de compressão, não cor de marca — enquanto isso os chips de cor ficam neutros, o que torna a tela menos distintiva do que o sistema promete.
 - **Scope**: `.context/requirements.md` Req. 12, `.context/design.md` §11, `.context/tasks.md` §6, `.specs/features/interface/`. A dívida de verificação real de viewport (`STATE.md`, Req. 2.5 conferido à mão em Chromium) permanece aberta e fora deste escopo.
 - **Date**: 2026-09-20
+- **Status**: active
+
+### AD-012
+- **Decision**: As imagens das cartas passam a ser servidas **pela própria aplicação**: uma rota pública por `variant_code` baixa `image_url` na primeira requisição, grava em `storage/card_images/<variant_code>.<ext>` e serve do disco dali em diante. Nada de bytes no Postgres, nada de Active Storage, nada de download na ingestão.
+- **Reason**: O hotlink da AD-004 **nunca funcionou em navegador**. Toda imagem de `asia-en.onepiece-cardgame.com` responde `Cross-Origin-Resource-Policy: same-site`, e o navegador descarta a resposta para qualquer página fora de `*.onepiece-cardgame.com` — o placeholder aparecia para 100% das cartas. Passou despercebido porque `curl` ignora CORP (responde 200, 217 KB, com Referer e cabeçalhos de navegador) e o projeto não tem system test. CORP só vale para o navegador; um fetch servidor-a-servidor não é afetado. Disco em vez de banco: a imagem é o dado mais regenerável do sistema (rebaixável de `image_url`), e ~1 GB de `bytea` faria o `pg_dump` da coleção — o único dado insubstituível — crescer três ordens de grandeza. Caminho derivado do `variant_code` porque ele é único globalmente e estável (AD-001, `design.md` §9), então não precisa de tabela de mapeamento. Sob demanda em vez de na ingestão: o custo fica proporcional ao que é visto, e a ingestão continua sem rede para imagem.
+- **Trade-off**: (1) O app passa a **redistribuir** arte da Bandai em vez de referenciá-la, contra a preferência de `product.md` §5.1 — aceitável só porque o projeto é pessoal e não comercial; se virar público, a questão volta. (2) A primeira visualização de cada carta paga a latência do servidor oficial dentro de uma requisição do app. (3) O "fallback para a URL original" que `design.md` §7 previa é inútil — o navegador bloqueia a URL original; o fallback real é o placeholder. (4) Endpoint que faz requisição de saída é superfície de SSRF: a URL nunca vem do request, só do banco, e o host é restrito ao da fonte. (5) Cache em disco local não é compartilhado entre containers de produção; aceito enquanto houver um só.
+- **Scope**: `.context/design.md` §7, `.context/requirements.md` Req. 11.7, `.context/tasks.md` §3.6, grade e detalhe do catálogo. Supersede a AD-004 e a P6 do ADR 002.
+- **Date**: 2026-09-22
 - **Status**: active
 
 ## Handoff

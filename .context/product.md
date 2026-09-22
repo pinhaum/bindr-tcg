@@ -58,9 +58,11 @@ orientação legal:
 - O projeto é de uso pessoal e não comercial. Se em algum momento virar público
   ou monetizado, a questão precisa de avaliação real, não de um parágrafo num
   spec.
-- **Preferir referenciar imagens por URL da fonte original** a redistribuir os
-  arquivos. Cache local, se necessário, é detalhe de performance — ver
-  `design.md` §7.
+- ~~Preferir referenciar imagens por URL da fonte original a redistribuir os
+  arquivos.~~ **Inviável (AD-012, 2026-09-22):** a fonte bloqueia carregamento
+  fora do próprio domínio por CORP, então a aplicação serve as imagens a partir
+  de cache local — ver `design.md` §7. Isso só se sustenta enquanto o projeto for
+  pessoal e não comercial.
 - Nenhuma arte deve ser servida como se fosse conteúdo próprio da aplicação.
 
 ### 5.2 Fonte de dados

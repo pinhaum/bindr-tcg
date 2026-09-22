@@ -154,6 +154,21 @@ Regras de execução:
   - Campos não aplicáveis ao tipo de carta são omitidos, não exibidos vazios.
   - _Requisitos: 5.1, 5.2, 5.4, 5.5_
 
+- [ ] **3.6 Imagens servidas pela aplicação** ← *correção da AD-004 (AD-012)*
+  - A 3.3 e a 3.5 foram marcadas com hotlink que nunca exibiu arte em navegador:
+    a fonte responde CORP `same-site`. Detectado em 2026-09-22 por inspeção
+    visual; os testes de HTML renderizado não enxergam CORP.
+  - Rota pública por `variant_code`; download sob demanda de `image_url`, gravação
+    atômica em `storage/card_images/`, cache HTTP longo. Contrato em `design.md` §7.
+  - Grade e detalhe apontam o `<img>` para a rota, nunca para `image_url`.
+  - URL de saída só do banco, host restrito ao da fonte, `variant_code` validado
+    por formato antes de virar caminho.
+  - Falha da fonte, variante inexistente ou sem `image_url` → erro sem imagem, e
+    o placeholder aparece; falha não é cacheada.
+  - Testes sem rede: fetch substituído por dublê; nenhum teste depende do
+    servidor da Bandai.
+  - _Requisitos: 2.1, 2.3, 5.2, 11.2, 11.7_
+
 ---
 
 ## 4 — Usuário e coleção
@@ -222,7 +237,7 @@ Regras de execução:
     seis testes asseveram sobre o texto dele filtrando por prefixo de seletor.
   - _Requisitos: 12.1, 12.2, 12.4_
 
-- [ ] **6.2 Contraste como teste**
+- [x] **6.2 Contraste como teste**
   - Cálculo de luminância relativa sobre os valores dos tokens; 4.5:1 para texto,
     3:1 para texto ≥24px, borda de controle, anel de foco e ícone.
   - Falha do teste reprova o valor do token, não afrouxa o limiar.
@@ -274,6 +289,5 @@ Não implemente, mesmo que pareça rápido — cada um destes precisa passar por
   regulamento oficial antes de qualquer código.
 - Preços e valor da coleção (Fase 3) — depende de fonte de mercado ainda não
   identificada.
-- Cache local de imagens — só se o Req. 11.2 falhar na prática.
 - Uso offline / PWA — não é requisito hoje. Se importar, vira requisito antes de
   virar task.
