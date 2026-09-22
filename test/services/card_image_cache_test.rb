@@ -464,6 +464,26 @@ class CardImageCacheTest < ActiveSupport::TestCase
     assert_empty @storage.children
   end
 
+  # --- Limite de tamanho do corpo ---
+
+  # Done when: corpo acima de MAX_BODY_BYTES levanta Unavailable e nada fica em
+  # disco. Net::HTTP carrega inteiro em memória — limite impede anomalia da fonte.
+  test "corpo de #{CardImageCache::MAX_BODY_BYTES + 1} bytes → Unavailable, nenhum arquivo deixado" do
+    oversized_body = "x" * (CardImageCache::MAX_BODY_BYTES + 1)
+    http = ResponderCom.new(200, oversized_body)
+    variant = create_variant(
+      variant_code: "OP01-001",
+      image_url: "https://#{ALLOWED_HOST}/image.png"
+    )
+
+    erro = assert_raises(CardImageCache::Unavailable) do
+      cache(http: http).fetch(variant)
+    end
+
+    assert_match(/grande/, erro.message)
+    assert_empty @storage.children
+  end
+
   # --- Exceções de rede ---
 
   # Done when: erro de rede e timeout viram falha tipada, nunca exceção crua.

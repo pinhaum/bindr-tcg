@@ -28,8 +28,9 @@ class CardImageCache
   class Unavailable < StandardError; end
 
   ALLOWED_HOST = "asia-en.onepiece-cardgame.com".freeze
-  VARIANT_CODE_PATTERN = /\A[A-Za-z0-9]+(-[A-Za-z0-9]+)*(_[a-z0-9]+)?\z/.freeze
+  VARIANT_CODE_FORMAT = /\A[A-Za-z0-9]+(-[A-Za-z0-9]+)*(_[a-z0-9]+)?\z/.freeze
   ALLOWED_EXTENSIONS = %w[.png .jpg .jpeg .webp].freeze
+  MAX_BODY_BYTES = 5 * 1024 * 1024
 
   OPEN_TIMEOUT = 5
   READ_TIMEOUT = 10
@@ -85,7 +86,7 @@ class CardImageCache
   private
 
   def validate_variant_code(variant_code)
-    unless variant_code.match?(VARIANT_CODE_PATTERN)
+    unless variant_code.match?(VARIANT_CODE_FORMAT)
       raise NotFound, "variant_code inválido: não casou o padrão esperado"
     end
 
@@ -154,6 +155,12 @@ class CardImageCache
 
     if body.blank?
       raise Unavailable, "fonte retornou corpo vazio"
+    end
+
+    # Net::HTTP carrega o corpo inteiro em memória; limite impede que
+    # resposta anômala da fonte encha disco/memória.
+    if body.bytesize > MAX_BODY_BYTES
+      raise Unavailable, "corpo muito grande (#{body.bytesize} bytes > #{MAX_BODY_BYTES})"
     end
 
     persist(body, final_path)

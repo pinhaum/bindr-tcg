@@ -293,4 +293,20 @@ class CardImagesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  # --- Cabeçalho X-Content-Type-Options ---
+
+  # Done when: resposta de sucesso traz X-Content-Type-Options: nosniff
+  # (default do Rails com secure_headers).
+  test "sucesso traz X-Content-Type-Options: nosniff" do
+    variant = create_variant(
+      variant_code: "OP01-001",
+      image_url: "https://#{ALLOWED_HOST}/image.png"
+    )
+
+    get card_image_path(variant.variant_code)
+
+    assert_response :success
+    assert_equal "nosniff", response.headers["X-Content-Type-Options"]
+  end
 end

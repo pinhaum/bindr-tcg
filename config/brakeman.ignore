@@ -6,7 +6,7 @@
     },
     {
       "fingerprint": "c37c93362933bc9da0848c3b1c690c9f5395afea8b32e3d29bce73ae1ef857d2",
-      "note": "T2: CardImagesController#show: variant_code é validado por padrão RFC \\A[A-Za-z0-9]+(-[A-Za-z0-9]+)*(_[a-z0-9]+)?\\z antes de send_file (linhas 17-20). Pattern fecha path traversal e SSRF. Brakeman não rastreia validação por pattern após find_by e reporta false positive (AD-012, design.md §7)."
+      "note": "CardImagesController#show: variant_code é validado por CardImageCache::VARIANT_CODE_FORMAT (sem / nem .), com extensão de lista fechada, e o serviço confere que o caminho expandido fica dentro de storage_dir; nenhum dado do request chega ao caminho além do variant_code validado (AD-012, design.md §7)."
     }
   ],
   "brakeman_version": "8.0.6"
