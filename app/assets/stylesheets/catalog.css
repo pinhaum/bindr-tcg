@@ -8,16 +8,72 @@
  */
 
 :root {
+  /* Tokens existentes */
   --tile-min: 150px;
   --gap: 0.75rem;
+
+  /* Cores — §11.3 */
+  --surface-base: #051b23;
+  --surface-raised: #102b36;
+  --surface-sunken: #011018;
+  --border: #1c3a47;
+  --border-strong: #717e84;
+  --ink: #e9f0f3;
+  --ink-muted: #9ba7ad;
+  --accent: #ff9e14;
+  --on-accent: #051b23;
+  --danger: #ff5448;
+
+  /* Tipografia — §11.4 */
+  --font-sans: system-ui, sans-serif;
+  --font-mono: monospace;
+
+  --display-size: 28px;
+  --display-line-height: 32px;
+  --display-weight: 700;
+
+  --title-size: 20px;
+  --title-line-height: 26px;
+  --title-weight: 600;
+
+  --body-size: 15px;
+  --body-line-height: 22px;
+  --body-weight: 400;
+
+  --body-strong-size: 15px;
+  --body-strong-line-height: 22px;
+  --body-strong-weight: 600;
+
+  --caption-size: 13px;
+  --caption-line-height: 18px;
+  --caption-weight: 400;
+
+  --code-size: 13px;
+  --code-line-height: 18px;
+  --code-weight: 500;
+
+  /* Espaçamento — §11.5 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+
+  /* Raio — §11.5 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-full: 360px;
+
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.5;
+  background-color: var(--surface-base);
+  color: var(--ink);
 }
 
 .catalog {

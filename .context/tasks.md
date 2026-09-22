@@ -215,7 +215,7 @@ Regras de execução:
 
 ## 6 — Camada de apresentação
 
-- [ ] **6.1 Camada de tokens**
+- [x] **6.1 Camada de tokens**
   - Declarar cor, tipografia, espaçamento e raio como custom properties em `:root`.
   - `color-scheme: dark`; sem `prefers-color-scheme`.
   - Acrescentar ao `catalog.css` **sem reorganizar, renomear ou dividir** o arquivo:

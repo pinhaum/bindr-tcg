@@ -118,7 +118,7 @@ suíte roda em paralelo. `bin/rails test` sem argumento inclui `test/design/`.
 A contagem de base é medida no início da T1 (`bin/rails test`, total de runs) e
 registrada aqui. Todo gate depois disso compara contra ela: o total só cresce.
 
-**Contagem de base**: _medir na T1_
+**Contagem de base**: 772 runs, 3390 assertions (medido em main antes de T1)
 
 ## Execution Plan
 
@@ -183,14 +183,14 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Contagem de base medida e registrada em "Gate Check Commands"
-- [ ] `:root` declara os dez tokens de cor com os valores de §11.3, os seis estilos de tipografia de §11.4 (tamanho, altura de linha e peso como tokens separados, mais `--font-sans` e `--font-mono`), `space-1..4` e `radius-sm/md/full` de §11.5
-- [ ] `:root` declara `color-scheme: dark`; a folha não contém `prefers-color-scheme`
-- [ ] `body` usa `background-color: var(--surface-base)` e `color: var(--ink)`
-- [ ] `test/design/tokens_test.rb` lê `:root` da folha e prova cada token com o valor de §11 — a lista esperada vive no teste, não é lida do CSS; token ausente ou com valor diferente falha nomeando o token
-- [ ] Teste prova `color-scheme: dark` presente e `prefers-color-scheme` ausente
-- [ ] Os sete arquivos de teste que leem `catalog.css` passam sem edição
-- [ ] Gate full passa; total = base + novos
+- [x] Contagem de base medida e registrada em "Gate Check Commands"
+- [x] `:root` declara os dez tokens de cor com os valores de §11.3, os seis estilos de tipografia de §11.4 (tamanho, altura de linha e peso como tokens separados, mais `--font-sans` e `--font-mono`), `space-1..4` e `radius-sm/md/full` de §11.5
+- [x] `:root` declara `color-scheme: dark`; a folha não contém `prefers-color-scheme`
+- [x] `body` usa `background-color: var(--surface-base)` e `color: var(--ink)`
+- [x] `test/design/tokens_test.rb` lê `:root` da folha e prova cada token com o valor de §11 — a lista esperada vive no teste, não é lida do CSS; token ausente ou com valor diferente falha nomeando o token
+- [x] Teste prova `color-scheme: dark` presente e `prefers-color-scheme` ausente
+- [x] Os sete arquivos de teste que leem `catalog.css` passam sem edição
+- [x] Gate full passa; total = base + novos
 
 **Tests**: unit
 **Gate**: full
