@@ -126,7 +126,7 @@ T2 → T3
 **Tests**: integration
 **Gate**: quick
 
-### T3: Grade e detalhe apontam o `<img>` para a rota
+### T3: Grade e detalhe apontam o `<img>` para a rota ✅
 
 **What**: `_card_tile.html.erb` e `catalog/show.html.erb` passam a usar `card_image_path(variant.variant_code)` no `<img>`, mantendo o placeholder e o `loading="lazy"`; comentário de cabeçalho do tile deixa de explicar o hotlink.
 **Where**: `app/views/catalog/_card_tile.html.erb`, `app/views/catalog/show.html.erb`, `test/integration/catalog_grid_test.rb`, `test/integration/card_detail_test.rb`
@@ -141,15 +141,15 @@ T2 → T3
 
 **Done when**:
 
-- [ ] O `<img>` da grade e o de cada variante do detalhe têm `src` igual a `card_image_path(variant_code)`; teste asserta que nenhum `src` contém o valor de `image_url`
-- [ ] Variante sem `image_url` continua sem `<img>`; os testes de placeholder existentes continuam passando sem asserção enfraquecida (Req. 2.3)
-- [ ] `loading="lazy"` continua no `<img>` da grade
-- [ ] O detalhe deixa de usar `image_url_large` (Out of Scope; coluna vazia), sem outra mudança de layout
-- [ ] Cabeçalho de `_card_tile.html.erb` descreve AD-012 (imagem servida pela aplicação; placeholder atrás cobre falha 404/502) em vez do hotlink da AD-004; comentários de teste que citam hotlink/AD-004 atualizados para AD-012
-- [ ] Se `catalog/show.html.erb:112` se deslocar, a citação em `.specs/features/interface/tasks.md` (T11) é atualizada no mesmo commit
-- [ ] Nenhum arquivo CSS alterado
-- [ ] Checkbox marcado aqui e em `.context/tasks.md` §3.6
-- [ ] Gate full e `bin/brakeman` limpos
+- [x] O `<img>` da grade e o de cada variante do detalhe têm `src` igual a `card_image_path(variant_code)`; teste asserta que nenhum `src` contém o valor de `image_url`
+- [x] Variante sem `image_url` continua sem `<img>`; os testes de placeholder existentes continuam passando sem asserção enfraquecida (Req. 2.3)
+- [x] `loading="lazy"` continua no `<img>` da grade
+- [x] O detalhe deixa de usar `image_url_large` (Out of Scope; coluna vazia), sem outra mudança de layout
+- [x] Cabeçalho de `_card_tile.html.erb` descreve AD-012 (imagem servida pela aplicação; placeholder atrás cobre falha 404/502) em vez do hotlink da AD-004; comentários de teste que citam hotlink/AD-004 atualizados para AD-012
+- [x] Se `catalog/show.html.erb:112` se deslocar, a citação em `.specs/features/interface/tasks.md` (T11) é atualizada no mesmo commit — linha 112 mantém-se a mesma, sem deslocamento
+- [x] Nenhum arquivo CSS alterado
+- [x] Checkbox marcado aqui e em `.context/tasks.md` §3.6
+- [x] Gate full e `bin/brakeman` limpos
 
 **Tests**: integration
 **Gate**: full

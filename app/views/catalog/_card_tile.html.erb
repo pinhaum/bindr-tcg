@@ -2,12 +2,12 @@
   Uma carta da grade. A imagem exibida é a da primeira variante — a grade fala
   de cartas (Req. 3/4 operam sobre `cards`); as variantes aparecem no detalhe.
 
-  O placeholder não é detalhe cosmético: a arte é hotlink de terceiro (AD-004)
-  e some sem aviso.
+  O placeholder não é detalhe cosmético: a imagem é servida pela aplicação
+  (AD-012) e pode falhar (404/502) sem aviso.
 
   Ele funciona **sem JavaScript**: é renderizado sempre, na camada de baixo, e
   a imagem fica por cima. Sem `image_url` não há imagem e o placeholder é o
-  que aparece; com o hotlink quebrado o navegador não pinta nada no lugar do
+  que aparece; com a rota falhando o navegador não pinta nada no lugar do
   `<img>` e o placeholder continua visível por trás. Um `onerror` em JS faria
   o mesmo e dependeria de o script carregar — o placeholder foi resolvido em
   CSS antes de o importmap existir e continua assim de propósito.
@@ -43,7 +43,7 @@
       </div>
 
       <% if variant&.image_url.present? %>
-        <%= image_tag variant.image_url,
+        <%= image_tag card_image_path(variant.variant_code),
                       alt: "",
                       loading: "lazy",
                       class: "card-tile__image" %>

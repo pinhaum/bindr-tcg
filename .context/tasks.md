@@ -154,7 +154,7 @@ Regras de execução:
   - Campos não aplicáveis ao tipo de carta são omitidos, não exibidos vazios.
   - _Requisitos: 5.1, 5.2, 5.4, 5.5_
 
-- [ ] **3.6 Imagens servidas pela aplicação** ← *correção da AD-004 (AD-012)*
+- [x] **3.6 Imagens servidas pela aplicação** ← *correção da AD-004 (AD-012)*
   - A 3.3 e a 3.5 foram marcadas com hotlink que nunca exibiu arte em navegador:
     a fonte responde CORP `same-site`. Detectado em 2026-09-22 por inspeção
     visual; os testes de HTML renderizado não enxergam CORP.

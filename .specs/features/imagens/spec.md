@@ -126,21 +126,21 @@ público que faz requisição de saída e escreve arquivo.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| IMG-01 | `<img>` aponta para a rota da aplicação, nunca para `image_url` (Req. 11.7, 2.1, 5.2) | 3.6 | Pending |
-| IMG-02 | Sem `image_url`, só placeholder (Req. 2.3) | 3.6 | Pending |
-| IMG-03 | Lazy loading mantido na grade (Req. 11.2) | 3.6 | Pending |
-| IMG-04 | Rota pública, sem sessão (Req. 6.3) | 3.6 | Pending |
-| IMG-05 | Primeira requisição baixa e grava; seguintes servem do disco | 3.6 | Pending |
-| IMG-06 | Escrita atômica (temporário + rename) | 3.6 | Pending |
-| IMG-07 | `Content-Type` pela extensão e cache HTTP de um ano | 3.6 | Pending |
-| IMG-08 | URL de saída só do banco; host, esquema e porta restritos (SSRF) | 3.6 | Pending |
-| IMG-09 | `variant_code` validado por formato antes de virar caminho | 3.6 | Pending |
-| IMG-10 | Extensão em lista fechada; redirect não é seguido | 3.6 | Pending |
-| IMG-11 | Inexistente ou sem `image_url` → 404 sem imagem | 3.6 | Pending |
-| IMG-12 | Falha ou timeout da fonte → 502 sem imagem, nada gravado | 3.6 | Pending |
-| IMG-13 | Testes sem rede (Req. 11.5, por analogia) | 3.6 | Pending |
+| IMG-01 | `<img>` aponta para a rota da aplicação, nunca para `image_url` (Req. 11.7, 2.1, 5.2) | 3.6 | Done |
+| IMG-02 | Sem `image_url`, só placeholder (Req. 2.3) | 3.6 | Done |
+| IMG-03 | Lazy loading mantido na grade (Req. 11.2) | 3.6 | Done |
+| IMG-04 | Rota pública, sem sessão (Req. 6.3) | 3.6 | Done |
+| IMG-05 | Primeira requisição baixa e grava; seguintes servem do disco | 3.6 | Done |
+| IMG-06 | Escrita atômica (temporário + rename) | 3.6 | Done |
+| IMG-07 | `Content-Type` pela extensão e cache HTTP de um ano | 3.6 | Done |
+| IMG-08 | URL de saída só do banco; host, esquema e porta restritos (SSRF) | 3.6 | Done |
+| IMG-09 | `variant_code` validado por formato antes de virar caminho | 3.6 | Done |
+| IMG-10 | Extensão em lista fechada; redirect não é seguido | 3.6 | Done |
+| IMG-11 | Inexistente ou sem `image_url` → 404 sem imagem | 3.6 | Done |
+| IMG-12 | Falha ou timeout da fonte → 502 sem imagem, nada gravado | 3.6 | Done |
+| IMG-13 | Testes sem rede (Req. 11.5, por analogia) | 3.6 | Done |
 
-**Coverage:** 13 total, mapeados em `tasks.md`.
+**Coverage:** 13 total, 13 mapeados a T1–T3.
 
 ## Success Criteria
 

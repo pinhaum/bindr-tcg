@@ -44,8 +44,15 @@ class CardDetailTest < ActionDispatch::IntegrationTest
     assert_select ".variant__set", text: /Romance Dawn/
     assert_select ".variant__set", text: /Straw Hat Crew/
 
+    # A imagem de cada variante agora é servida pela aplicação via /card_images/:variant_code (AD-012)
+    assert_select "img[src=?]", card_image_path("OP01-001")
+    assert_select "img[src=?]", card_image_path("OP01-001_p1")
+    assert_select "img[src=?]", card_image_path("ST01-001")
+
+    # Nenhuma imagem aponta para o hotlink original
     %w[base alt st01].each do |arquivo|
-      assert_select "img[src=?]", "https://example.test/#{arquivo}.png"
+      refute_includes response.body, "example.test/#{arquivo}.png",
+                      "imagem não pode apontar para hotlink de terceiro (#{arquivo})"
     end
   end
 
@@ -61,7 +68,8 @@ class CardDetailTest < ActionDispatch::IntegrationTest
     assert_select ".variant__code", text: "OP01-001_p1"
   end
 
-  # Mesma mitigação do AD-004 da grade: a arte é hotlink e pode sumir.
+  # Mesma mitigação da AD-012 da grade: a imagem é servida pela aplicação
+  # e pode falhar (404/502), por isso o placeholder sempre fica por baixo.
   test "variante sem imagem exibe placeholder com nome e código" do
     nami = create_card(card_number: "OP01-002", name: "Nami", card_type: "character",
                        colors: [ "Green" ], cost: 1, power: 1000)
@@ -137,6 +145,27 @@ class CardDetailTest < ActionDispatch::IntegrationTest
     assert_select ".field--cost", text: /2/
     assert_select ".field--power", 0
     assert_select ".field--life", 0
+  end
+
+  # --- Req. IMG-01: as imagens apontam para a rota servida pela aplicação ---
+
+  test ".variant__image aponta para /card_images/:variant_code" do
+    zoro = create_card(card_number: "OP01-001", name: "Roronoa Zoro",
+                       card_type: "leader", colors: [ "Red" ], power: 5000, life: 5)
+    add_variant(zoro, "OP01-001", rarity: "L", image: "https://example.test/base.png")
+    add_variant(zoro, "OP01-001_p1", rarity: "SEC", image: "https://example.test/alt.png")
+
+    get card_path("OP01-001")
+
+    assert_select ".variant__image" do |imagens|
+      imagens.each do |img|
+        src = img["src"]
+        assert_match(/^\/card_images\//, src,
+                     "imagem da variante deve apontar para /card_images/:variant_code")
+        refute_includes src, "example.test",
+                        "imagem da variante não pode apontar para hotlink de terceiro"
+      end
+    end
   end
 
   # `counter` NULL é "não tem counter", não counter 0 — a distinção do schema

@@ -48,7 +48,8 @@ class CatalogGridTest < ActionDispatch::IntegrationTest
     assert_select ".card-tile", 3
     assert_select ".card-tile__name", text: "Roronoa Zoro"
     assert_select ".card-tile__number", text: "OP01-001"
-    assert_select "img[src=?]", "https://example.test/OP01-001.png"
+    # A imagem agora é servida pela aplicação via /card_images/:variant_code (AD-012)
+    assert_select "img[src=?]", card_image_path("OP01-001")
   end
 
   # --- Req. 11.2: lazy loading ---
@@ -65,6 +66,34 @@ class CatalogGridTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # --- Req. IMG-01: as imagens apontam para a rota servida pela aplicação ---
+
+  test "<img> da grade aponta para /card_images/:variant_code" do
+    get catalog_path
+
+    assert_select "img.card-tile__image" do |imagens|
+      imagens.each do |img|
+        src = img["src"]
+        assert_match(/^\/card_images\//, src,
+                     "imagem da grade deve apontar para /card_images/:variant_code")
+        refute_includes src, "example.test",
+                        "imagem da grade não pode apontar para hotlink de terceiro"
+      end
+    end
+  end
+
+  test "nenhuma <img> na página aponta para example.test (hotlink recusado)" do
+    get catalog_path
+
+    assert_select "img" do |imagens|
+      imagens.each do |img|
+        src = img["src"]
+        refute_includes src, "example.test",
+                        "nenhuma imagem pode apontar para o host de teste"
+      end
+    end
+  end
+
   # --- Req. 2.3: placeholder com nome e código ---
 
   test "carta sem imagem exibe placeholder com nome e código" do
@@ -76,19 +105,19 @@ class CatalogGridTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # O placeholder existe para quando o hotlink falhar (AD-004), não só para
-  # quando a URL for nula — e tem que funcionar sem JavaScript, que este
-  # projeto ainda não serve. A mitigação é de camada: o placeholder é sempre
-  # renderizado, embaixo, e a imagem por cima; imagem quebrada não pinta nada
-  # e o placeholder continua visível.
+  # O placeholder existe para quando a imagem servida falha (404/502 AD-012),
+  # não só para quando a URL for nula — e tem que funcionar sem JavaScript,
+  # que este projeto ainda não serve. A mitigação é de camada: o placeholder
+  # é sempre renderizado, embaixo, e a imagem por cima; imagem quebrada não
+  # pinta nada e o placeholder continua visível.
   test "o placeholder é renderizado mesmo quando existe imagem" do
     get catalog_path
 
     # A carta OP01-001 tem `image_url`. O placeholder dela precisa existir
-    # assim mesmo, senão o hotlink quebrado deixa o espaço vazio.
+    # assim mesmo, senão quando a rota responde 404/502 o espaço fica vazio.
     assert_select ".card-tile", 3
     assert_select ".card-tile__placeholder", 3,
-                  "toda carta precisa de placeholder por baixo da imagem (AD-004)"
+                  "toda carta precisa de placeholder por baixo da imagem (AD-012)"
     assert_select ".card-tile__placeholder-number", text: "OP01-001"
   end
 

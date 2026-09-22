@@ -113,7 +113,7 @@
             </div>
 
             <% if variant.image_url.present? %>
-              <%= image_tag variant.image_url_large.presence || variant.image_url,
+              <%= image_tag card_image_path(variant.variant_code),
                             alt: "",
                             loading: "lazy",
                             class: "variant__image" %>
