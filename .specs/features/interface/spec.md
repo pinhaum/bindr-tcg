@@ -146,21 +146,20 @@ por mais que matiz; uma variante com quantidade zero não exibe badge.
 
 | Requirement ID | Story | Origem em `.context` | Status |
 |---|---|---|---|
-| INT-01 | P1 | Req. 12.1 | Pending |
-| INT-02 | P1 | Req. 12.2 | Pending |
-| INT-03 | P1 | Req. 12.4 | Pending |
-| INT-04 | P1 | Req. 12.5 | Pending |
-| INT-05 | P2 | Req. 12.3 | Pending |
-| INT-06 | P3 | Req. 12.8 | Pending |
-| INT-07 | P3 | Req. 12.6 | Pending |
-| INT-08 | P3 | Req. 12.7 | Pending |
-| INT-09 | P3 | Req. 12.9 | Pending |
-| INT-10 | P3 | Req. 12.10 | Pending |
-| INT-11 | P3 | Req. 12.11 | Pending |
-| INT-12 | P1 | Req. 12.12 | Pending |
+| INT-01 | P1 | Req. 12.1 | Mapped (T1, T4–T7) |
+| INT-02 | P1 | Req. 12.2 | Mapped (T1) |
+| INT-03 | P1 | Req. 12.4 | Mapped (T3) |
+| INT-04 | P1 | Req. 12.5 | Mapped (T3) |
+| INT-05 | P2 | Req. 12.3 | Mapped (T2, T12) |
+| INT-06 | P3 | Req. 12.8 | Mapped (T8, T10) |
+| INT-07 | P3 | Req. 12.6 | Mapped (T9, T10) |
+| INT-08 | P3 | Req. 12.7 | Mapped (T11) |
+| INT-09 | P3 | Req. 12.9 | Mapped (T12) |
+| INT-10 | P3 | Req. 12.10 | Mapped (T13) |
+| INT-11 | P3 | Req. 12.11 | Mapped (T13) |
+| INT-12 | P1 | Req. 12.12 | Mapped (T4, T7) |
 
-**Coverage:** 12 no total, 0 mapeados a tasks (o plano de tasks é escrito quando a
-execução começar), 0 sem origem.
+**Coverage:** 12 no total, 12 mapeados a tasks (`tasks.md`, T1–T14), 0 sem origem.
 
 ---
 

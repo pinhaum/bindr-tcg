@@ -92,6 +92,19 @@
 
 ## Handoff
 
+> **Estado em 2026-09-22 — este bloco vence o que vem abaixo.** Fase 5
+> encerrada: `progresso` (§5.1) e `portabilidade` (§5.2–5.3) verificadas, PASS,
+> autor ≠ verificador (`validation.md` de cada uma; `validate_state.py` limpo).
+> Feature em execução: **`interface`** (Fase 6, §6.1–6.5). Spec em
+> `e4fad81`; **`tasks.md` escrito, 14 tasks em dois lotes (B1 = T1–T7, B2 =
+> T8–T14), **aprovado pelo dono do produto em 2026-09-22.** Nenhum código da
+> feature existe ainda. Próximo passo: abrir a T1 em sessão nova (medir a
+> contagem de base primeiro). Divergência
+> registrada no plano: a spec conta 23 modificadores sem regra; a medição dá 25
+> classes (15 modificadores + 10 elementos). A T10 fecha pela guarda derivada,
+> e a contagem da spec se corrige na §7.2.
+> O bloco abaixo é histórico do fim da `colecao`.
+
 > **Começando uma sessão nova?** Leia **`.specs/HANDOFF-colecao.md`** primeiro:
 > estado, decisões, armadilhas de ambiente e método para a feature `colecao`.
 > O `HANDOFF-fase-4.md` continua válido como histórico do fim do `catalogo`.
