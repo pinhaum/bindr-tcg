@@ -628,14 +628,34 @@ body {
 .ownership__button[aria-disabled="true"] { opacity: 0.45; cursor: default; }
 
 /*
- * SC 2.4.11 — indicador de foco reforçado. O default do navegador é fino e
- * some sobre a arte da carta; o `outline-offset` separa o contorno do próprio
- * botão para ele não se confundir com a borda.
+ * Anel de foco único do projeto (§11.6, SC 2.4.11): 2px sólido em `accent`,
+ * 2px de deslocamento, nunca translúcido — 3:1 sobre as três superfícies. O
+ * default do navegador é fino e some sobre a arte da carta; o deslocamento
+ * separa o contorno da borda do controle.
+ *
+ * Uma regra só, para os dois lados não divergirem. Os elementos cobrem todo
+ * focável; as classes continuam listadas porque os testes de progresso, export
+ * e posse procuram cada controle **neste** agrupamento.
  */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
 .ownership__button:focus-visible,
 .ownership__sign-in:focus-visible,
-.card-tile__variants-link:focus-visible {
-  outline: 2px solid currentcolor;
+.card-tile__variants-link:focus-visible,
+.wishlist-item__remove:focus-visible,
+.wishlist-item__link:focus-visible,
+.wishlist-mark__input:focus-visible,
+.wishlist-mark__submit:focus-visible,
+.progress-set__catalog-link:focus-visible,
+.collection-export__link:focus-visible,
+.import-preview__confirm:focus-visible,
+.import-preview__again:focus-visible,
+.import-summary__link:focus-visible {
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -811,25 +831,6 @@ body {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   cursor: pointer;
-}
-
-/*
- * SC 2.4.11 — mesmo indicador de foco reforçado dos controles de posse.
- *
- * `.progress-set__catalog-link` entra **neste** seletor agrupado em vez de
- * ganhar regra própria: uma segunda regra com a mesma declaração é a forma de
- * as duas divergirem no dia em que alguém ajustar a espessura numa só, e o
- * ponto do reforço é ser o mesmo contorno em todo controle do projeto. O
- * agrupamento é o que torna a divergência impossível em vez de detectável.
- */
-.wishlist-item__remove:focus-visible,
-.wishlist-item__link:focus-visible,
-.wishlist-mark__input:focus-visible,
-.wishlist-mark__submit:focus-visible,
-.progress-set__catalog-link:focus-visible,
-.collection-export__link:focus-visible {
-  outline: 2px solid currentcolor;
-  outline-offset: 2px;
 }
 
 /*
@@ -1191,13 +1192,6 @@ body {
   overflow-wrap: anywhere;
 }
 
-/* SC 2.4.11 — foco reforçado, como nos demais controles do projeto. */
-.import-preview__confirm:focus-visible,
-.import-preview__again:focus-visible {
-  outline: 2px solid currentcolor;
-  outline-offset: 2px;
-}
-
 /* Rótulo que nomeia o "antes" e o "depois" da pré-visualização para quem não vê
  * a posição. Achado HIGH da revisão de a11y da T13 (SC 1.3.1): a relação entre
  * os dois números vivia só na frase "De X para Y", e quem lê um `<span>`
@@ -1394,9 +1388,3 @@ body {
 .import-summary__motivo { margin: 0; overflow-wrap: anywhere; }
 
 .import-summary__next { margin: var(--space-3) 0 0; overflow-wrap: anywhere; }
-
-/* SC 2.4.11 — foco reforçado, como nos demais controles do projeto. */
-.import-summary__link:focus-visible {
-  outline: 2px solid currentcolor;
-  outline-offset: 2px;
-}

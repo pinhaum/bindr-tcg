@@ -508,11 +508,11 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Uma regra `:focus-visible` cobre `a`, `button`, `input`, `select`, `textarea` e `summary`, com `outline: 2px solid var(--accent)` e `outline-offset: 2px`
-- [ ] Nenhuma regra declara `outline: none` ou `outline: 0` sem substituto, nem cor de outline com transparência
-- [ ] O par do anel a 3:1 sobre as três superfícies está na T2 (conferir que existe, não reescrever)
-- [ ] `var(--border)` não aparece em regra de controle nem de foco — teste textual sobre seletores de `button`, `input`, `select`, `*__button`, `*__input` e `:focus*`
-- [ ] Gate full passa
+- [x] Uma regra `:focus-visible` cobre `a`, `button`, `input`, `select`, `textarea` e `summary`, com `outline: 2px solid var(--accent)` e `outline-offset: 2px`
+- [x] Nenhuma regra declara `outline: none` ou `outline: 0` sem substituto, nem cor de outline com transparência
+- [x] O par do anel a 3:1 sobre as três superfícies está na T2 (conferir que existe, não reescrever)
+- [x] `var(--border)` não aparece em regra de controle nem de foco — teste textual sobre seletores de `button`, `input`, `select`, `*__button`, `*__input` e `:focus*`
+- [x] Gate full passa
 
 **Tests**: unit
 **Gate**: full
