@@ -261,6 +261,18 @@ Regras de execução:
   - Sem emoji. Chip das seis cores do jogo em tratamento neutro (P8 aberta).
   - _Requisitos: 12.7, 12.9, 12.10, 12.11_
 
+- [ ] **6.6 Navegação e layout das telas**
+  - Navegação principal única: barra inferior fixa em viewport estreita, coluna
+    lateral em viewport larga; sem entrada para baralho ou preço.
+  - "Minha pasta" = página de progresso com total de cópias, variantes distintas
+    e links para wishlist, import e export. Rota continua `/progress`.
+  - Controles de filtro na grade (cor, tipo, raridade, set, posse) sobre o
+    query object existente, sem JavaScript obrigatório.
+  - Detalhe da carta em duas colunas na viewport larga.
+  - Não reorganizar `catalog.css` (mesma restrição da §6.1); 360px e Req. 12
+    continuam passando.
+  - _Requisitos: 4.9, 13.1–13.8_
+
 ---
 
 ## 7 — Fechamento do MVP

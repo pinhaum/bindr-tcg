@@ -110,6 +110,15 @@ perguntas como "quais Characters vermelhos de custo 3 com counter 2000 existem?"
    possa ser compartilhada ou recarregada reproduzindo o mesmo resultado.
 8. O sistema DEVE exibir a contagem total de cartas que satisfazem os filtros
    atuais.
+9. O sistema DEVE oferecer na grade controles para aplicar filtro de cor, tipo de
+   carta, raridade, set e posse sem que o usuário edite a URL. Os filtros por
+   faixa (custo, power, counter), `attribute` e `trait` continuam acessíveis pela
+   URL e ficam sem controle até decisão própria.
+
+> Acrescentado em 2026-09-22 (feature `navegacao`). Até aqui o Req. 4 era
+> satisfeito pelo query object e pelos chips removíveis, mas a grade não tinha
+> nenhum controle para **aplicar** filtro — o único caminho era a URL ou o link
+> "ver no catálogo" do progresso.
 
 ---
 
@@ -307,6 +316,41 @@ os critérios abaixo preservam explicitamente.
 > entrarem, cada cor precisa de um par `on-<cor>` verificado — `Yellow` e `Black`
 > não suportam o mesmo texto — e `Yellow` precisa ser conferido contra `accent`: a
 > menos de ~25° de matiz, quem se desloca é `accent`.
+
+---
+
+## Requisito 13 — Navegação e layout das telas
+
+**User story:** Como colecionador, quero alcançar catálogo e pasta de qualquer
+tela com o polegar, e ver o resumo da minha coleção num lugar só, para registrar
+uma caixa de boosters e responder "quanto falta do set X?" sem procurar menu.
+
+O layout de referência é o canvas **"Bindr — telas"**
+(`claude.ai/artifact/P7WCTR9YkH1i52DWoVwPn8`), externo ao repo. Ele desenha
+também baralho (Fase 2) e preços (Fase 3); esses elementos **não** fazem parte
+deste requisito. Em divergência, este documento vence (AD-005).
+
+### Critérios de aceitação
+
+1. O sistema DEVE exibir em toda página uma navegação principal com as entradas
+   "Catálogo" e, para quem tem sessão, "Minha pasta" e "Sair"; para anônimo,
+   "Entrar" e "Criar conta" no lugar das duas últimas.
+2. A entrada da página atual DEVE ser marcada com `aria-current="page"` e
+   distinguida por mais do que a cor.
+3. Em viewport estreita a navegação DEVE ficar fixa na borda inferior, com alvos
+   de toque de no mínimo 44px, sem cobrir o fim do conteúdo; em viewport larga
+   DEVE ficar numa coluna lateral.
+4. "Minha pasta" DEVE ser a página de progresso por set, acrescida do total de
+   cópias (Req. 7.7), do número de variantes distintas possuídas e de links para
+   a wishlist, o import e o export.
+5. Em viewport larga, os controles de filtro do Req. 4.9 DEVEM ficar numa coluna
+   ao lado da grade; em viewport estreita, acima dela.
+6. Em viewport larga, o detalhe da carta DEVE exibir a arte ao lado dos dados da
+   carta; em viewport estreita, empilhado.
+7. As verificações de 360px do Req. 2.5 e os critérios do Req. 12 DEVEM continuar
+   passando.
+8. A navegação NÃO DEVE exibir entrada para funcionalidade que não existe
+   (baralho, preços).
 
 ---
 
