@@ -76,6 +76,25 @@ class CollectionItem < ApplicationRecord
     for_user(user).owned.count
   end
 
+  # Req. 13.4 / NAV-17, NAV-18 — os dois indicadores de Minha pasta em uma única
+  # consulta: total de cópias e variantes distintas. Retorna um Hash com as chaves
+  # `:total_copies` e `:distinct_variants`.
+  #
+  # O uso é em `views/progress/index.html.erb` para renderizar os indicadores sem
+  # adicionar uma segunda consulta à página. O teste de plano
+  # (`set_progress_plan_test.rb`) mede que a página resolve com duas consultas de
+  # sessão + uma agregação por set + uma agregação dos indicadores = três consultas
+  # no total (sem contar a conclusão de transação).
+  def self.collection_stats_for(user)
+    result = for_user(user).owned.pluck(Arel.sql("SUM(quantity) as total_copies, COUNT(*) as distinct_variants")).first
+
+    if result.nil?
+      { total_copies: 0, distinct_variants: 0 }
+    else
+      { total_copies: result[0] || 0, distinct_variants: result[1] || 0 }
+    end
+  end
+
   # Req. 7.3 — a pergunta "o usuário tem esta variante?" é sobre a quantidade,
   # não sobre a existência do registro.
   def owned?

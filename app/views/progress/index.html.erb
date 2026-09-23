@@ -1,4 +1,4 @@
-<% content_for :title, "Progresso por set" %>
+<% content_for :title, "Minha pasta" %>
 
 <%#
   T5 — progresso por set (PRG-01, PRG-02, PRG-06, PRG-10).
@@ -63,7 +63,28 @@
   informação sem dizer qual, e um traço é invisível para leitor de tela.
 %>
 <main class="progress">
-  <h1 class="progress__title" id="progress_title">Progresso por set</h1>
+  <h1 class="progress__title">Minha pasta</h1>
+
+  <%#
+    T3 — total de cópias e variantes distintas
+    (NAV-17, NAV-18, NAV-20, NAV-21).
+
+    Os dois indicadores são calculados juntos numa única consulta
+    (`collection_stats_for`) para não adicionar consultas à página. O plural
+    segue a lógica de `catalog/_owned_total`.
+  %>
+  <% stats = CollectionItem.collection_stats_for(Current.user) %>
+
+  <p class="progress__summary">
+    <span class="progress__stat">
+      <%= stats[:total_copies] %> <%= stats[:total_copies] == 1 ? "carta na pasta" : "cartas na pasta" %>
+    </span>
+    <span class="progress__stat">
+      <%= stats[:distinct_variants] %> <%= stats[:distinct_variants] == 1 ? "carta diferente" : "cartas diferentes" %>
+    </span>
+  </p>
+
+  <h2 class="progress__heading" id="progress_title">Progresso por set</h2>
 
   <p class="progress__count">
     <%= @rows.size == 1 ? "1 set" : "#{@rows.size} sets" %>
@@ -91,10 +112,10 @@
   <ul class="progress__list" aria-labelledby="progress_title">
     <% @rows.each do |row| %>
       <li class="progress-set" id="progress_set_<%= row.set_code %>">
-        <h2 class="progress-set__name">
+        <h3 class="progress-set__name">
           <%= row.set_name %>
           <span class="progress-set__code"><%= row.set_code %></span>
-        </h2>
+        </h3>
 
         <%#
           Possuídas e total (PRG-01). O total é o de **impressões** do set e sai

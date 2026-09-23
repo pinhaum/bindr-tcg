@@ -219,13 +219,15 @@ automaticamente.
 
 **Done when**:
 
-- [ ] `h1` "Minha pasta". `h2` "Progresso por set" carrega o `id` que o `aria-labelledby` da lista usa. Nome do set em `h3`, sem nível pulado
-- [ ] Com 3 cópias de uma variante e 1 de outra: "4 cartas na pasta" e "2 cartas diferentes". O total é igual ao que o catálogo mostra para o mesmo usuário
-- [ ] Usuário sem cópia vê os dois indicadores com 0
-- [ ] `?user_id=` de outro usuário não muda os números. O controller continua sem ler `params`
-- [ ] Anônimo em `/progress` continua redirecionado ao login
-- [ ] Classes novas são elementos de `progress` e têm regra na folha (`class_coverage_test` passa)
-- [ ] `progress_ui_test.rb` passa **sem edição**; gate full passa, contagem registrada
+- [x] `h1` "Minha pasta". `h2` "Progresso por set" carrega o `id` que o `aria-labelledby` da lista usa. Nome do set em `h3`, sem nível pulado
+- [x] Com 3 cópias de uma variante e 1 de outra: "4 cartas na pasta" e "2 cartas diferentes". O total é igual ao que o catálogo mostra para o mesmo usuário
+- [x] Usuário sem cópia vê os dois indicadores com 0
+- [x] `?user_id=` de outro usuário não muda os números. O controller continua sem ler `params`
+- [x] Anônimo em `/progress` continua redirecionado ao login
+- [x] Classes novas são elementos de `progress` e têm regra na folha (`class_coverage_test` passa)
+- [x] `progress_ui_test.rb` passa **sem edição**; gate full passa, contagem registrada
+
+**Resultado**: 985 runs, 0 failures (gate full); rubocop limpo.
 
 **Tests**: integration
 **Gate**: full

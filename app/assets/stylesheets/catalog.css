@@ -852,6 +852,25 @@ summary:focus-visible,
 .progress__count { font-size: var(--caption-size); line-height: var(--caption-line-height); margin: 0 0 var(--space-2); color: var(--ink-muted); }
 
 /*
+ * T3 — indicadores de Minha pasta (NAV-17, NAV-18, NAV-20, NAV-21).
+ *
+ * Os dois indicadores (total de cópias e variantes distintas) são renderizados
+ * como uma linha de métricas acima da lista de sets. Cada métrica é um `span`
+ * em fluxo.
+ */
+.progress__summary { margin: 0 0 var(--space-3); font-size: var(--body-size); line-height: var(--body-line-height); }
+
+.progress__stat { margin-right: var(--space-2); }
+
+/*
+ * T3 — título "Progresso por set" rebaixado de h1 para h2.
+ *
+ * Mantém o mesmo estilo e rótulo de acessibilidade do h1 anterior, e é o
+ * alvo do `aria-labelledby` da lista de sets.
+ */
+.progress__heading { font-size: var(--display-size); line-height: var(--display-line-height); font-weight: var(--display-weight); margin: 0 0 var(--space-2); }
+
+/*
  * Entrada do export da coleção (T7 / POR-01).
  *
  * `min-height` **e** `min-width` de 24px pelo SC 2.5.8, ao contrário de

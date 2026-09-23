@@ -169,10 +169,12 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   # cego: duas consultas de catálogo constantes também se cancelariam. Aqui o
   # que é descontado é **nomeado** — as duas consultas que o `resume_session` do
   # concern `Authentication` emite (`Session Load` e `User Load`) — e o que
-  # resta tem de ser exatamente uma, a agregação. Se um dia a página passar a
-  # precisar de uma segunda consulta legítima, este teste falha e obriga a
-  # decisão a ser explícita, em vez de a segunda consulta entrar sem ninguém ver.
-  test "descontadas as consultas de sessão, a página resolve em uma agregação só" do
+  # resta tem de ser exatamente duas: a agregação por set (para o progresso) e a
+  # agregação dos indicadores de Minha pasta (T3, NAV-17, NAV-18). Se um dia a
+  # página passar a precisar de uma terceira consulta legítima, este teste falha
+  # e obriga a decisão a ser explícita, em vez de a terceira consulta entrar sem
+  # ninguém ver.
+  test "descontadas as consultas de sessão, a página resolve em duas agregações" do
     semear_sets(SETS_GRANDE, prefixo: "U")
     entrar
 
@@ -182,12 +184,14 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
     assert_equal CONSULTAS_DE_SESSAO.size, de_sessao.size,
                  "as consultas de sessão descontadas mudaram de forma; a conta precisa ser refeita à mão.\n" \
                  "#{formatar(consultas)}"
-    assert_equal 1, restantes.size,
-                 "a página deveria resolver em **uma** consulta além da sessão, e emitiu #{restantes.size}.\n" \
+    assert_equal 2, restantes.size,
+                 "a página deveria resolver em **duas** consultas além da sessão " \
+                 "(sets + indicadores de Minha pasta), e emitiu #{restantes.size}.\n" \
                  "#{formatar(restantes)}"
-    assert_match(/GROUP BY/i, restantes.first.last,
-                 "a consulta restante não é a agregação por set; a página pode ter trocado de forma.\n" \
-                 "#{formatar(restantes)}")
+    # Pelo menos uma das duas deve ser a agregação por set (com GROUP BY)
+    assert restantes.any? { |_, sql| sql.match?(/GROUP BY/i) },
+                 "nenhuma consulta restante é a agregação por set; a página pode ter trocado de forma.\n" \
+                 "#{formatar(restantes)}"
   end
 
   # A contagem acima mede a requisição inteira, o que é o certo — e por isso

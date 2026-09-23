@@ -203,12 +203,12 @@ de antes.
 | NAV-13 | P1: Filtrar a grade | Req. 6.3 | Pending |
 | NAV-14 | P1: Filtrar a grade | Req. 4.9 | Pending |
 | NAV-15 | P1: Filtrar a grade | Req. 12.11 | Pending |
-| NAV-16 | P1: Minha pasta | Req. 13.4 | Pending |
-| NAV-17 | P1: Minha pasta | Req. 13.4, 7.7 | Pending |
-| NAV-18 | P1: Minha pasta | Req. 13.4 | Implemented (T2) |
+| NAV-16 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
+| NAV-17 | P1: Minha pasta | Req. 13.4, 7.7 | Implemented (T3) |
+| NAV-18 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-19 | P1: Minha pasta | Req. 13.4 | Pending |
-| NAV-20 | P1: Minha pasta | Req. 13.4 | Implemented (T2) |
-| NAV-21 | P1: Minha pasta | Req. 6.5 | Implemented (T2) |
+| NAV-20 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
+| NAV-21 | P1: Minha pasta | Req. 6.5 | Implemented (T3) |
 | NAV-22 | P2: Layout largo | Req. 13.5 | Pending |
 | NAV-23 | P2: Layout largo | Req. 13.5 | Pending |
 | NAV-24 | P2: Layout largo | Req. 13.6 | Pending |
@@ -216,7 +216,7 @@ de antes.
 | NAV-26 | Edge case | Req. 4 (parâmetro inválido ignorado) | Pending |
 | NAV-27 | Edge case | Req. 3.6 | Pending |
 | NAV-28 | Edge case | Req. 2.5, 13.7 | Pending |
-| NAV-29 | Edge case | Req. 6.4 | Pending |
+| NAV-29 | Edge case | Req. 6.4 | Implemented (T3) |
 
 **Coverage:** 29 total, 0 mapped to tasks, 29 unmapped ⚠️ (tasks ainda não
 escritas)
