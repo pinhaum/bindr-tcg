@@ -27,7 +27,10 @@ class RegistrationsController < ApplicationController
   end
 
   private
+    # `form_with model: @user` aninha os campos em `user[...]`. Ler os
+    # parâmetros de topo aqui descarta tudo em silêncio e o cadastro recusa um
+    # formulário preenchido como se estivesse em branco.
     def registration_params
-      params.permit(:email, :password, :password_confirmation)
+      params.expect(user: %i[email password password_confirmation])
     end
 end

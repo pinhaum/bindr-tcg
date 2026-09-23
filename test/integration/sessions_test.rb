@@ -33,9 +33,9 @@ class SessionsTest < ActionDispatch::IntegrationTest
 
   test "cadastrar, sair, entrar de novo e alcançar página protegida" do
     assert_difference -> { User.count }, 1 do
-      post registration_path, params: {
+      post registration_path, params: { user: {
         email: "nami@example.com", password: "log-pose-77", password_confirmation: "log-pose-77"
-      }
+      } }
     end
 
     # Cadastrar já autentica: exigir digitar de novo o que acabou de ser
@@ -140,16 +140,35 @@ class SessionsTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
+  # Os outros testes montam os parâmetros à mão, e foi assim que o controller
+  # passou a ler chaves de topo enquanto o formulário enviava `user[...]`: tudo
+  # verde e nenhum cadastro possível pelo navegador. Aqui os nomes saem do HTML
+  # renderizado, então formulário e controller não divergem sem este teste cair.
+  test "cadastro enviado com os nomes de campo do próprio formulário cria a conta" do
+    get new_registration_path
+    valores = { "email" => "robin@example.com", "password" => "ohara-poneglyph-9",
+                "password_confirmation" => "ohara-poneglyph-9" }
+    campos = css_select("form.auth__form input[name]").to_h do |input|
+      nome = input["name"]
+      [ nome, valores[nome[/\[(\w+)\]\z/, 1] || nome] || input["value"] ]
+    end
+
+    assert_difference -> { User.count }, 1 do
+      post registration_path, params: campos
+    end
+    assert_equal "robin@example.com", User.sole.email
+  end
+
   # --- Cadastro: validação ---
 
   test "e-mail já cadastrado reapresenta o formulário em vez de estourar" do
     User.create!(email: "chopper@example.com", password: "rumble-42")
 
     assert_no_difference -> { User.count } do
-      post registration_path, params: {
+      post registration_path, params: { user: {
         email: "CHOPPER@example.com", password: "outra-senha-1",
         password_confirmation: "outra-senha-1"
-      }
+      } }
     end
 
     assert_response :unprocessable_entity
@@ -158,9 +177,9 @@ class SessionsTest < ActionDispatch::IntegrationTest
 
   test "confirmação divergente não cria conta" do
     assert_no_difference -> { User.count } do
-      post registration_path, params: {
+      post registration_path, params: { user: {
         email: "jinbe@example.com", password: "senha-uma-11", password_confirmation: "senha-duas-22"
-      }
+      } }
     end
 
     assert_response :unprocessable_entity
@@ -171,9 +190,9 @@ class SessionsTest < ActionDispatch::IntegrationTest
   # passaria igual com uma senha de um caractere.
   test "senha curta demais não cria conta" do
     assert_no_difference -> { User.count } do
-      post registration_path, params: {
+      post registration_path, params: { user: {
         email: "koby@example.com", password: "curta1", password_confirmation: "curta1"
-      }
+      } }
     end
 
     assert_response :unprocessable_entity
@@ -182,7 +201,7 @@ class SessionsTest < ActionDispatch::IntegrationTest
 
   test "senha em branco não cria conta" do
     assert_no_difference -> { User.count } do
-      post registration_path, params: { email: "koby@example.com", password: "", password_confirmation: "" }
+      post registration_path, params: { user: { email: "koby@example.com", password: "", password_confirmation: "" } }
     end
 
     assert_response :unprocessable_entity
@@ -191,9 +210,9 @@ class SessionsTest < ActionDispatch::IntegrationTest
   # A senha nunca é persistida em claro — o Req. 6.2 é da T1, mas o cadastro é
   # o caminho por onde uma senha entra no sistema pela primeira vez.
   test "cadastro grava digest e nenhuma coluna guarda a senha em claro" do
-    post registration_path, params: {
+    post registration_path, params: { user: {
       email: "law@example.com", password: "room-shambles-3", password_confirmation: "room-shambles-3"
-    }
+    } }
 
     user = User.sole
     assert_not_equal "room-shambles-3", user.password_digest
@@ -208,9 +227,9 @@ class SessionsTest < ActionDispatch::IntegrationTest
     assert_select ".site-header__nav a[href=?]", new_session_path
     assert_select ".site-header__nav a[href=?]", new_registration_path
 
-    post registration_path, params: {
+    post registration_path, params: { user: {
       email: "shanks@example.com", password: "akagami-10", password_confirmation: "akagami-10"
-    }
+    } }
 
     get catalog_path
     assert_select ".site-header__nav form[action=?]", session_path
