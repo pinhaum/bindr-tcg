@@ -205,10 +205,10 @@ de antes.
 | NAV-15 | P1: Filtrar a grade | Req. 12.11 | Pending |
 | NAV-16 | P1: Minha pasta | Req. 13.4 | Pending |
 | NAV-17 | P1: Minha pasta | Req. 13.4, 7.7 | Pending |
-| NAV-18 | P1: Minha pasta | Req. 13.4 | Pending |
+| NAV-18 | P1: Minha pasta | Req. 13.4 | Implemented (T2) |
 | NAV-19 | P1: Minha pasta | Req. 13.4 | Pending |
-| NAV-20 | P1: Minha pasta | Req. 13.4 | Pending |
-| NAV-21 | P1: Minha pasta | Req. 6.5 | Pending |
+| NAV-20 | P1: Minha pasta | Req. 13.4 | Implemented (T2) |
+| NAV-21 | P1: Minha pasta | Req. 6.5 | Implemented (T2) |
 | NAV-22 | P2: Layout largo | Req. 13.5 | Pending |
 | NAV-23 | P2: Layout largo | Req. 13.5 | Pending |
 | NAV-24 | P2: Layout largo | Req. 13.6 | Pending |

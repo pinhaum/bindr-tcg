@@ -195,4 +195,60 @@ class CollectionItemTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) { CollectionItem.for_user(user.id) }
     assert_raises(ArgumentError) { CollectionItem.for_user(user.id.to_s) }
   end
+
+  # Done when: T2 — contar as variantes distintas possuídas.
+  # Req. 9 / NAV-18 — número de variantes distintas com quantidade ≥ 1.
+  # Diferencia de `total_copies_for`: três cópias de uma variante e uma de
+  # outra dão 2 variantes distintas (mesmo que o total seja 4 cópias). A
+  # barreira de tipo de `for_user` é a mesma — nada de id, só User ou nil.
+  test "distinct_variants_for conta variantes com quantidade >= 1" do
+    user = create_user(email: "dist-1@example.com")
+    var1 = create_variant(suffix: "d1")
+    var2 = create_variant(suffix: "d2")
+
+    CollectionItem.create!(user: user, card_variant: var1, quantity: 3)
+    CollectionItem.create!(user: user, card_variant: var2, quantity: 1)
+
+    assert_equal 2, CollectionItem.distinct_variants_for(user)
+  end
+
+  test "distinct_variants_for exclui variantes com quantidade zero" do
+    user = create_user(email: "dist-zero@example.com")
+    var1 = create_variant(suffix: "dz1")
+    var2 = create_variant(suffix: "dz2")
+
+    CollectionItem.create!(user: user, card_variant: var1, quantity: 2)
+    CollectionItem.create!(user: user, card_variant: var2, quantity: 0)
+
+    assert_equal 1, CollectionItem.distinct_variants_for(user)
+  end
+
+  test "distinct_variants_for devolve zero para usuário sem itens" do
+    user = create_user(email: "dist-empty@example.com")
+
+    assert_equal 0, CollectionItem.distinct_variants_for(user)
+  end
+
+  test "distinct_variants_for devolve zero para nil" do
+    assert_equal 0, CollectionItem.distinct_variants_for(nil)
+  end
+
+  test "distinct_variants_for só conta itens do usuário informado" do
+    user1 = create_user(email: "dist-iso-1@example.com")
+    user2 = create_user(email: "dist-iso-2@example.com")
+    var = create_variant(suffix: "di1")
+
+    CollectionItem.create!(user: user1, card_variant: var, quantity: 1)
+    CollectionItem.create!(user: user2, card_variant: var, quantity: 1)
+
+    assert_equal 1, CollectionItem.distinct_variants_for(user1)
+    assert_equal 1, CollectionItem.distinct_variants_for(user2)
+  end
+
+  test "distinct_variants_for recusa um id no lugar do objeto User" do
+    user = create_user(email: "dist-id@example.com")
+
+    assert_raises(ArgumentError) { CollectionItem.distinct_variants_for(user.id) }
+    assert_raises(ArgumentError) { CollectionItem.distinct_variants_for(user.id.to_s) }
+  end
 end

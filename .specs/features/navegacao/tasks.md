@@ -191,10 +191,12 @@ automaticamente.
 
 **Done when**:
 
-- [ ] Três cópias de uma variante e uma de outra dão 2. Item com quantidade 0 não conta
-- [ ] Usuário sem nenhum item dá 0, e `nil` dá 0
-- [ ] Itens de outro usuário não entram. Um id em vez de `User` levanta `ArgumentError`, pela barreira de `for_user`
-- [ ] Teste em `test/models/`; gate quick passa, contagem registrada
+- [x] Três cópias de uma variante e uma de outra dão 2. Item com quantidade 0 não conta
+- [x] Usuário sem nenhum item dá 0, e `nil` dá 0
+- [x] Itens de outro usuário não entram. Um id em vez de `User` levanta `ArgumentError`, pela barreira de `for_user`
+- [x] Teste em `test/models/`; gate quick passa, contagem registrada
+
+**Resultado**: 269 runs, 0 failures (gate quick); rubocop limpo.
 
 **Tests**: unit
 **Gate**: quick

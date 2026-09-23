@@ -62,6 +62,20 @@ class CollectionItem < ApplicationRecord
     for_user(user).owned.sum(:quantity)
   end
 
+  # Req. 9 / NAV-18 — o número de **variantes distintas** possuídas pelo usuário.
+  #
+  # Diferencia de `total_copies_for`: a métrica aqui é quantidade de variantes
+  # (cada uma conta uma vez), não a soma de cópias. Quem tem 3 cópias de uma
+  # variante e 1 de outra tem total_copies_for = 4 e distinct_variants_for = 2.
+  #
+  # `count` e não `sum` porque estamos contando **registros**, não somando um
+  # campo. O `owned` filtra pela quantidade ≥ 1, exatamente como em total_copies_for.
+  # Um usuário com nenhum item ou `nil` devolve 0. A barreira de tipo de `for_user`
+  # vale aqui também — nunca um id, só User ou nil.
+  def self.distinct_variants_for(user)
+    for_user(user).owned.count
+  end
+
   # Req. 7.3 — a pergunta "o usuário tem esta variante?" é sobre a quantidade,
   # não sobre a existência do registro.
   def owned?
