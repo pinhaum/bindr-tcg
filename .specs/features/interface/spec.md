@@ -118,7 +118,8 @@ sucesso e possuída de faltante, para usar o app sem depender de matiz.
 2. WHILE uma variante estiver possuída, o sistema SHALL exibir badge com a
    quantidade; variante faltante SHALL não receber badge.
 3. The system SHALL renderizar `card_number` e `variant_code` no estilo `code` em
-   toda ocorrência, inclusive inline em texto corrido.
+   toda ocorrência, inclusive inline em texto corrido, exceto em mensagem de
+   flash, que é texto puro (Req. 12.7, emendado em 2026-09-22).
 4. The system SHALL renderizar o anel de foco sólido de 2px em `accent` com 2px de
    deslocamento.
 5. The system SHALL não usar emoji em nenhum ponto da interface.

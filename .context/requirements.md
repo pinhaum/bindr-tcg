@@ -286,6 +286,9 @@ os critérios abaixo preservam explicitamente.
    escrito.
 7. O sistema DEVE renderizar `card_number` e `variant_code` no estilo monoespaçado
    `code`, em toda ocorrência, inclusive quando inline em meio a texto corrido.
+   Exceção: mensagens de flash são texto puro e ficam fora da regra — marcá-las
+   exigiria HTML montado no controller e mais uma superfície de escape
+   (decisão do dono do produto em 2026-09-22, no fechamento da `interface`).
 8. QUANDO uma mensagem for de erro ENTÃO o sistema DEVE distingui-la visualmente de
    uma mensagem de sucesso por mais do que a cor.
 9. O anel de foco DEVE ser sólido de 2px em `accent`, com 2px de deslocamento, e
