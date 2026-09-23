@@ -135,6 +135,16 @@ body {
   overflow-wrap: anywhere; /* trait longo não pode empurrar o layout */
 }
 
+.filter-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  min-width: 24px;
+  color: inherit;
+  text-decoration: none;
+}
+
 .catalog__count {
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
@@ -226,6 +236,7 @@ body {
 }
 
 .card-tile__placeholder-number { font-variant-numeric: tabular-nums; color: var(--ink-muted); }
+.card-tile__placeholder-name { font-weight: var(--body-strong-weight); overflow-wrap: anywhere; }
 
 .card-tile__name {
   font-size: var(--body-strong-size);
@@ -247,7 +258,24 @@ body {
   margin-top: var(--space-3);
 }
 
+.pagination__prev,
+.pagination__next {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  min-width: 24px;
+  padding: var(--space-1) var(--space-2);
+}
+
+.pagination__status { color: var(--ink-muted); }
+
 .catalog__empty { padding: var(--space-3) 0; }
+
+.catalog__empty-reset {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
 
 /* Detalhe da carta (Req. 5). Mesmas regras de 360px da grade. */
 
@@ -285,8 +313,21 @@ body {
 }
 .field dd { margin: 0; overflow-wrap: anywhere; }
 
+/* Texto de lista ocupa a linha inteira; número alinha pelos dígitos. */
+.field--card-type,
+.field--colors { min-width: 0; }
+.field--attributes,
+.field--traits { grid-column: 1 / -1; min-width: 0; }
+.field--cost,
+.field--power,
+.field--life,
+.field--counter,
+.field--block { font-variant-numeric: tabular-nums; }
+
 .card-detail__effect p,
 .card-detail__trigger p { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
+
+.card-detail__variants { max-width: 100%; }
 
 .variant-list {
   display: grid;
@@ -343,6 +384,9 @@ body {
   color: var(--ink-muted);
 }
 .variant__meta dd { margin: 0; overflow-wrap: anywhere; }
+.variant__code { font-variant-numeric: tabular-nums; }
+.variant__rarity { font-weight: var(--body-strong-weight); }
+.variant__set { overflow-wrap: anywhere; }
 
 /*
  * Cabeçalho, flash e formulários de conta (Fase 4).
@@ -535,6 +579,10 @@ body {
 
 .ownership__form { margin: 0; }
 
+/* "+1" e "−1" se distinguem pelo rótulo, não por cor; nenhum é destrutivo. */
+.ownership__button--increment,
+.ownership__button--decrement { font-weight: var(--body-strong-weight); }
+
 .ownership__button {
   display: inline-flex;
   align-items: center;
@@ -671,6 +719,10 @@ body {
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
 }
+
+/* Reforço por forma: tracejado enquanto falta, contorno cheio e peso quando atendido. */
+.wishlist-item__status--pending { border-style: dashed; }
+.wishlist-item__status--fulfilled { border-width: 2px; font-weight: var(--body-strong-weight); }
 
 .wishlist-item--fulfilled { border-width: 2px; }
 

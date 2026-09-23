@@ -56,4 +56,12 @@ class OwnershipBadgeUiTest < ActionDispatch::IntegrationTest
       assert_select ".ownership__count--owned", 0
     end
   end
+
+  # T10: incremento e decremento se distinguem pelo rótulo visível, não por cor.
+  test "incremento e decremento se distinguem pelo rótulo" do
+    get card_path(@card.card_number)
+
+    assert_select "#{control(@duas)} .ownership__button--increment", text: "+1"
+    assert_select "#{control(@duas)} .ownership__button--decrement", text: "\u22121"
+  end
 end

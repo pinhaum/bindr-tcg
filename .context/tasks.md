@@ -249,7 +249,7 @@ Regras de execução:
   - Verificações de 360px do Req. 2.5 continuam passando.
   - _Requisitos: 12.1, 12.5, 12.12_
 
-- [ ] **6.4 Modificadores BEM sem regra**
+- [x] **6.4 Modificadores BEM sem regra**
   - Os 23 modificadores escritos nas views e nunca estilizados, inclusive
     `flash--notice` / `flash--alert`, que hoje deixam erro e sucesso idênticos.
   - Significado nunca só por cor; posse por badge com número.

@@ -451,12 +451,12 @@ T13 → T14
 
 **Done when**:
 
-- [ ] O teste extrai as classes de `class="…"` e `class: "…"` em `app/views` e `app/helpers` e exige um seletor correspondente em `catalog.css`; a classe interpolada `flash--<%= kind %>` é expandida por uma lista declarada no teste (`notice`, `alert`), conferida contra os `flash[:…]` usados em `app/controllers`
-- [ ] Antes das regras, o teste falha listando as classes do inventário (prova de que discrimina)
-- [ ] Seletor sem declaração não conta como regra
-- [ ] `ownership__button--increment` e `--decrement` se distinguem por rótulo, não por cor; nenhum deles em `danger` (decremento não é destrutivo confirmado)
-- [ ] `wishlist-item__status--pending` e `--fulfilled` se distinguem pelo texto que já exibem; a regra não faz da cor o único sinal
-- [ ] Gate full passa — §6.4 fecha aqui
+- [x] O teste extrai as classes de `class="…"` e `class: "…"` em `app/views` e `app/helpers` e exige um seletor correspondente em `catalog.css`; a classe interpolada `flash--<%= kind %>` é expandida por uma lista declarada no teste (`notice`, `alert`), conferida contra os `flash[:…]` usados em `app/controllers`
+- [x] Antes das regras, o teste falha listando as classes do inventário (prova de que discrimina)
+- [x] Seletor sem declaração não conta como regra
+- [x] `ownership__button--increment` e `--decrement` se distinguem por rótulo, não por cor; nenhum deles em `danger` (decremento não é destrutivo confirmado)
+- [x] `wishlist-item__status--pending` e `--fulfilled` se distinguem pelo texto que já exibem; a regra não faz da cor o único sinal
+- [x] Gate full passa — §6.4 fecha aqui
 
 **Tests**: unit
 **Gate**: full
