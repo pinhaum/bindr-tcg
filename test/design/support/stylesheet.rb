@@ -97,4 +97,49 @@ module Stylesheet
       L: lab_l.round(4)
     }
   end
+
+  # Regras da folha fora de :root, comentários descontados.
+  # Retorna [[seletor, corpo], ...] na ordem em que aparecem.
+  def self.rules(css = read_stylesheet)
+    css.gsub(%r{/\*.*?\*/}m, "")
+       .scan(/([^{}]+)\{([^{}]*)\}/)
+       .map { |selector, body| [ selector.strip, body ] }
+       .reject { |selector, _| selector == ":root" }
+  end
+
+  # Declarações de um corpo de regra: [[propriedade, valor], ...]
+  def self.declarations(body)
+    body.split(";").filter_map do |declaration|
+      property, value = declaration.split(":", 2)
+      next if value.nil?
+
+      [ property.strip.downcase, value.strip ]
+    end
+  end
+
+  # Blocos BEM citados por um seletor: `.card-tile__art, .flash--alert` → card-tile, flash.
+  # Seletor sem classe (`*`, `body`) não cita bloco nenhum.
+  def self.blocks_of(selector)
+    selector.scan(/\.([a-z0-9]+(?:-[a-z0-9]+)*)/).flatten.uniq
+  end
+
+  # Resolve um valor com var(--x) encadeado até pixels. `rem` assume raiz de 16px,
+  # o default do navegador: a folha não redefine `font-size` em `:root` nem em `html`.
+  REM_IN_PIXELS = 16.0
+
+  def self.to_pixels(value, tokens = read_root_tokens)
+    value = value.strip
+    if (name = value[/\Avar\((--[a-z0-9-]+)\)\z/, 1])
+      raise ArgumentError, "token #{name} não declarado em :root" unless tokens.key?(name)
+
+      return to_pixels(tokens[name], tokens)
+    end
+
+    case value
+    when "0" then 0.0
+    when /\A(\d+(?:\.\d+)?)px\z/ then Regexp.last_match(1).to_f
+    when /\A(\d+(?:\.\d+)?)rem\z/ then Regexp.last_match(1).to_f * REM_IN_PIXELS
+    else raise ArgumentError, "valor sem conversão para pixel: #{value.inspect}"
+    end
+  end
 end

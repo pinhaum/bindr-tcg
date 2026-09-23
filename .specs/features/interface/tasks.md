@@ -276,14 +276,14 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Nos blocos listados, `font-size`, `line-height`, `font-weight`, `color`, `background-color`, `border-color`, `padding`, `margin`, `gap` e `border-radius` usam `var(--…)`; `opacity: 0.7` usado como texto secundário vira `color: var(--ink-muted)`
-- [ ] `border: 1px solid currentcolor` vira `border-strong` em controle e `border` só em hairline decorativa
-- [ ] `surface-raised` nunca aparece sem borda no mesmo seletor (§11.3: 1.20:1 não delimita sozinho)
-- [ ] Tile e poço da imagem em `radius-md`; placeholder em `surface-sunken` ocupando a mesma caixa da imagem (Edge Case do reflow) — provado por teste textual de que placeholder e imagem compartilham a mesma `aspect-ratio`
-- [ ] `test/design/literal_values_test.rb` prova, para os blocos desta task, que nenhuma das propriedades acima tem literal (exceções declaradas no teste: `0`, `auto`, `100%`, `1fr`, `inherit`)
-- [ ] `test/design/layout_test.rb` prova a conta de §11.5 com os valores reais da folha: `2 × --tile-min + 2 × padding lateral da página + gap da grade ≤ 360`
-- [ ] Os testes de 360px de `catalog_grid_test.rb` passam sem edição
-- [ ] Gate full passa
+- [x] Nos blocos listados, `font-size`, `line-height`, `font-weight`, `color`, `background-color`, `border-color`, `padding`, `margin`, `gap` e `border-radius` usam `var(--…)`; `opacity: 0.7` usado como texto secundário vira `color: var(--ink-muted)`
+- [x] `border: 1px solid currentcolor` vira `border-strong` em controle e `border` só em hairline decorativa
+- [x] `surface-raised` nunca aparece sem borda no mesmo seletor (§11.3: 1.20:1 não delimita sozinho)
+- [x] Tile e poço da imagem em `radius-md`; placeholder em `surface-sunken` ocupando a mesma caixa da imagem (Edge Case do reflow) — provado por teste textual de que placeholder e imagem compartilham a mesma `aspect-ratio`
+- [x] `test/design/literal_values_test.rb` prova, para os blocos desta task, que nenhuma das propriedades acima tem literal (exceções declaradas no teste: `0`, `auto`, `100%`, `1fr`, `inherit`)
+- [x] `test/design/layout_test.rb` prova a conta de §11.5 com os valores reais da folha: `2 × --tile-min + 2 × padding lateral da página + gap da grade ≤ 360`
+- [x] Os testes de 360px de `catalog_grid_test.rb` passam sem edição
+- [x] Gate full passa
 
 **Tests**: unit
 **Gate**: full
