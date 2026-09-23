@@ -503,9 +503,19 @@ Riscos que continuam:
 - O cache é local ao processo/container; mais de um container de produção
   duplica downloads.
 
-`image_url_large` segue sem fonte: a fixture não traz campo de imagem maior, e a
-coluna está vazia nas 4933 variantes. O Req. 5.1 ("imagem em resolução maior")
-não é atendido hoje — pendência separada desta decisão.
+**Pendência aberta — Req. 5.1 ("imagem em resolução maior"). ⚠️ VERIFICAR.**
+Não é atendido hoje e fica fora do escopo da AD-012:
+
+- `image_url_large` está vazio nas 4933 variantes, e nenhum código de `app/` ou
+  `lib/` grava a coluna.
+- A fixture não traz campo de imagem maior; o único campo de imagem é
+  `imageUrl`.
+- `test/integration/card_detail_test.rb:21` grava a mesma URL nos dois campos e
+  não prova nada sobre imagem maior.
+
+Fica `⚠️ VERIFICAR` até alguém confirmar em fonte primária se existe uma URL de
+resolução maior. Não se deriva nem se adivinha URL. O detalhe serve a mesma
+imagem da grade.
 
 ---
 

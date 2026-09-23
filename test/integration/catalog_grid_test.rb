@@ -8,8 +8,11 @@ require "test_helper"
 # task, registrada como pendência. Todos os critérios do "Done when" da T12 são
 # observáveis no HTML renderizado: o placeholder é markup, não comportamento de
 # JS; o estado na URL é query string; os chips são links; o lazy loading é
-# atributo. O que **não** fica coberto é a execução do `onerror` da imagem num
-# navegador real — a marcação que o dispara é asserida, o disparo em si não.
+# atributo. O placeholder é CSS: fica por baixo do `<img>` e aparece quando a
+# imagem não pinta. Desde a AD-012 a falha que importa é a da rota
+# `/card_images` (404/502), coberta em `card_images_test.rb`. O que **não** fica
+# coberto é o navegador real pintando o placeholder quando a rota falha — a
+# marcação é asserida, a renderização não.
 class CatalogGridTest < ActionDispatch::IntegrationTest
   setup do
     @op01 = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")

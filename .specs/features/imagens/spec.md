@@ -25,7 +25,7 @@ público que faz requisição de saída e escreve arquivo.
 
 ## Goals
 
-- [ ] O navegador recebe a arte das cartas pela origem da aplicação, na grade e no detalhe.
+- [x] O navegador recebe a arte das cartas pela origem da aplicação, na grade e no detalhe.
 - [ ] Cada imagem é baixada da fonte no máximo uma vez com sucesso; as seguintes saem do disco.
 - [ ] Nenhum dado do request decide para onde a aplicação faz requisição de saída nem onde grava arquivo.
 - [ ] Falha da fonte vira placeholder, nunca 500, e não envenena o cache.
@@ -61,7 +61,21 @@ público que faz requisição de saída e escreve arquivo.
 | Autorização | `allow_unauthenticated_access` no controller | Catálogo é público (Req. 6.3); a imagem aparece para o anônimo | Sim — `CatalogController` é o precedente |
 | Verificação visual | Integração sobre HTML e resposta HTTP, mais verificação do dono no navegador dele antes do PASS | Não há navegador no container; CORP só se prova em navegador real | Sim — `CLAUDE.md` |
 
-**Open questions:** none.
+**Open questions:**
+
+- ⚠️ VERIFICAR — **Req. 5.1 ("imagem em resolução maior") é pendência aberta.**
+  Fora do escopo de implementação desta feature; não atendido hoje. Fatos
+  medidos em 2026-09-22:
+  - `image_url_large` está vazio nas **4933** variantes do banco de
+    desenvolvimento (0 com valor), e nenhum código de `app/` ou `lib/` grava a
+    coluna.
+  - A fixture `spec/fixtures/optcgjson-subset.json` não traz campo de imagem
+    maior: o único campo de imagem é `imageUrl`.
+  - `test/integration/card_detail_test.rb:21` grava a mesma URL em `image_url`
+    e `image_url_large` e por isso **não prova nada** sobre imagem maior.
+
+  Continua `⚠️ VERIFICAR` até alguém confirmar em fonte primária se existe uma
+  URL de resolução maior e qual é. Não se deriva nem se adivinha URL.
 
 ## User Stories
 
@@ -144,10 +158,10 @@ público que faz requisição de saída e escreve arquivo.
 
 ## Success Criteria
 
-- [ ] O dono abre a grade no navegador e vê arte real, sem placeholder, nas cartas com `image_url`.
-- [ ] Existe teste que prova que o segundo pedido da mesma imagem não chama o cliente HTTP.
-- [ ] Existe teste que prova que uma `image_url` com host alheio não chama o cliente HTTP.
-- [ ] Existe teste que prova que `variant_code` com `..`, `/` ou `.` responde 404 sem tocar disco nem rede.
-- [ ] Existe teste que prova que falha da fonte não deixa arquivo no diretório de cache.
-- [ ] Os testes de placeholder de `catalog_grid_test.rb` e `card_detail_test.rb` continuam passando e provando o Req. 2.3.
-- [ ] `bin/rails test`, `bin/rubocop` e `bin/brakeman` limpos.
+- [x] O dono abre a grade no navegador e vê arte real, sem placeholder, nas cartas com `image_url`.
+- [x] Existe teste que prova que o segundo pedido da mesma imagem não chama o cliente HTTP.
+- [x] Existe teste que prova que uma `image_url` com host alheio não chama o cliente HTTP.
+- [x] Existe teste que prova que `variant_code` com `..`, `/` ou `.` responde 404 sem tocar disco nem rede.
+- [x] Existe teste que prova que falha da fonte não deixa arquivo no diretório de cache.
+- [x] Os testes de placeholder de `catalog_grid_test.rb` e `card_detail_test.rb` continuam passando e provando o Req. 2.3.
+- [x] `bin/rails test`, `bin/rubocop` e `bin/brakeman` limpos.

@@ -173,13 +173,15 @@ Feature ready. Todos os 13 acceptance criteria cobertos; testes fortalecidos em 
 1. Path traversal validation (M6): redundante com padrão restritivo do `variant_code`. Não é testado; é defesa em profundidade.
 
 **Next steps**:
-Feature ready. Verification visual no navegador (PENDENTE) conforme spec.md.
+Feature ready. Verificação visual no navegador confirmada pelo dono (ver seção abaixo).
 
 ---
 
-## Verificação Visual no Navegador — PENDENTE
+## Verificação Visual no Navegador — CONFIRMADA (2026-09-22)
 
-O PASS final depende de o dono da aplicação confirmar no navegador que:
+O dono da aplicação confirmou no navegador dele, em 2026-09-22, que as imagens
+aparecem na grade ("as imagens apareceram"). O PASS final dependia de ele
+confirmar no navegador que:
 - A grade mostra arte real (imagens do jogo) em vez de placeholders
 - Variantes sem `image_url` mostram apenas placeholder
 - Lazy loading está funcional

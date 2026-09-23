@@ -100,14 +100,27 @@
 
 ## Handoff
 
-> **Estado em 2026-09-22, noite — este bloco vence os de baixo.** A `interface`
-> tem **T1–T3 commitadas** (`7662a60`, `14fbd39`, `d2409f7`) e fica **pausada
-> antes da T4** para corrigir as imagens: o hotlink da AD-004 nunca exibiu arte
-> (CORP `same-site`); AD-012 decide cache em disco servido pela aplicação; task
-> aberta em `.context/tasks.md` §3.6. Os docs da AD-012 entraram por acidente no
-> commit `d2409f7` da `interface` — o conteúdo está correto, só a mensagem não o
-> descreve. Próximo passo: especificar e executar a §3.6 como feature própria
-> (`.specs/features/imagens/`); só depois retomar a T4 da `interface`.
+> **Estado em 2026-09-22, fim da noite — este bloco vence os de baixo.** A
+> feature **`imagens` (§3.6, AD-012) está encerrada**: T1–T3 verificadas, PASS,
+> autor ≠ verificador (`.specs/features/imagens/validation.md`,
+> `validate_state.py imagens` limpo), e o dono confirmou no navegador dele que
+> a grade mostra arte real. A T4 da `imagens` fechou as pendências derivadas do
+> `catalogo` (D3 testado com campo inaplicável preenchido e mutante morto em
+> cópia descartável; Fix 4b no comentário da grade; D1, D2, Fix 4a conferidos
+> como já feitos; Fix 4c sem objeto). Registro item a item no adendo final de
+> `.specs/features/catalogo/validation.md`.
+>
+> **Única pendência aberta do `catalogo`: Req. 5.1** ("imagem em resolução
+> maior"), `⚠️ VERIFICAR` em `.specs/features/imagens/spec.md` e em
+> `.context/design.md` §7: `image_url_large` vazio nas 4933 variantes, fixture
+> sem campo de imagem maior. Não implementar sem confirmação em fonte primária.
+>
+> **Próximo passo: a `interface` retoma na T4** (T1–T3 commitadas em
+> `7662a60`, `14fbd39`, `d2409f7`). A T11 cita `app/views/catalog/show.html.erb:112`
+> por número de linha; conferido nesta data, a linha ainda é o
+> `<span><%= variant.variant_code %></span>` do placeholder, igual a quando a T11
+> foi escrita (`642def6`). Reconferir se a T4–T10 mexer na view antes da T11.
+> Gate full no fechamento: 884 testes, 0 falhas, RuboCop limpo.
 
 > **Estado em 2026-09-22 — este bloco vence o que vem abaixo.** Fase 5
 > encerrada: `progresso` (§5.1) e `portabilidade` (§5.2–5.3) verificadas, PASS,

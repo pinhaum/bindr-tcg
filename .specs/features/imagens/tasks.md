@@ -68,6 +68,16 @@ T1 → T2
 T2 → T3
 ```
 
+### Phase 4: Pendências derivadas do `catalogo`
+
+Fecha a seção "Fix Plans" de `.specs/features/catalogo/validation.md` antes de
+devolver o projeto à `interface`. Não depende de T1–T3 no código; entra aqui
+por ordem de execução.
+
+```
+T3 → T4
+```
+
 ## Task Breakdown
 
 ### T1: `CardImageCache` — fetch restrito ao host, escrita atômica, falha não cacheada ✅
@@ -150,6 +160,31 @@ T2 → T3
 - [x] Nenhum arquivo CSS alterado
 - [x] Checkbox marcado aqui e em `.context/tasks.md` §3.6
 - [x] Gate full e `bin/brakeman` limpos
+
+**Tests**: integration
+**Gate**: full
+
+### T4: Fechar as pendências do `catalogo` (D3, Fix 4) e registrar o Req. 5.1 ✅
+
+**What**: Testes de detalhe com o campo inaplicável **preenchido** (D3), comentário da grade alinhado à AD-012 (Fix 4b), conferência de D1/D2/Fix 4a/4c contra o código, e o Req. 5.1 registrado como pendência aberta.
+**Where**: `test/integration/card_detail_test.rb`, `test/integration/catalog_grid_test.rb`, `.specs/features/catalogo/validation.md` (adendo), `.specs/features/imagens/spec.md`, `.context/design.md` §7
+**Depends on**: T3
+**Reuses**: helpers `create_card` e `add_variant` de `card_detail_test.rb`
+**Requirement**: Req. 5.5 (D3); Req. 5.1 fica registrado, não atendido
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Leader com `cost: 4, counter: 1000` não exibe `.field--cost` nem `.field--counter`; Event com `power: 3000, counter: 1000` não exibe `.field--power` nem `.field--counter`
+- [x] Discriminação provada em cópia descartável (nunca `git stash`): com `field_applicable?` removido de `display_field?`, os dois testes novos falham e os 20 antigos passam; cópia e banco descartável apagados, `git status --porcelain` igual ao baseline
+- [x] Comentário de cabeçalho de `catalog_grid_test.rb` fala do placeholder CSS e da falha da rota `/card_images`, sem `onerror`
+- [x] D1, D2, Fix 4a e Fix 4c conferidos com `file:line` no adendo de `catalogo/validation.md`, sem reescrever o relatório
+- [x] Req. 5.1 registrado como `⚠️ VERIFICAR` em `spec.md` e em `design.md` §7; nenhuma URL maior pesquisada nem implementada
+- [x] Gate full limpo
 
 **Tests**: integration
 **Gate**: full

@@ -914,3 +914,21 @@ navegador descarta toda imagem hotlinkada e o placeholder aparece em 100% das
 cartas. Os PASS do Req. 2.1 (imagem na grade) e 5.2 (imagem por variante) valem
 para o HTML renderizado, não para o que o usuário vê. Correção: AD-012,
 `.context/tasks.md` §3.6. Este relatório não é reescrito — o adendo é o registro.
+
+### Fechamento dos Fix Plans (2026-09-22, T4 da `imagens`)
+
+Conferido contra o código do HEAD `0fbfd4c`, item por item. O relatório acima
+não foi reescrito.
+
+| Item | Estado | Evidência |
+|---|---|---|
+| **D1 / Fix 1** — prepend só na página 1 | ✅ Feito antes desta task | `app/queries/catalog_query.rb:185` prepende `exact` só com `page == 1`; `:187` devolve a página ≥ 2 sem `[ exact ] +` e sem `.last(per_page)`. Testes: `test/queries/catalog_search_test.rb:237` (exato não repete na página 2), `:254` (nenhuma página excede `per_page`), `:263` (a soma das páginas cobre o total uma vez) |
+| **D2 / Fix 2** — limiar inferior da busca | ✅ Feito antes desta task | `test/queries/catalog_search_test.rb:275` cria "Zoan Morgan", que pontua 0.4 contra "Zoro", e `:284` faz `refute_includes`. A carta foi escolhida para cair entre 0.1 e 0.5; "Nami", sugerido no Fix 2, pontua 0 e não discriminaria |
+| **D3 / Fix 3** — `field_applicable?` isolado de "tem valor" | ✅ Feito nesta task | `test/integration/card_detail_test.rb:142` (Leader `cost: 4, counter: 1000` → `:151`, `:152` ausentes) e `:155` (Event `power: 3000, counter: 1000` → `:164`, `:165` ausentes). Sensor numa cópia rsync descartável, fora da árvore, com banco próprio: remover `return false unless field_applicable?(field)` de `app/models/card.rb:39` derruba **exatamente** os dois testes novos (`:151`, `:164`); os 20 anteriores passam com o mutante. É o M13 deste relatório, agora morto. Cópia e banco apagados; `git status --porcelain` idêntico ao baseline |
+| **Fix 4a** — `design.md` §4.1.2 | ✅ Feito antes desta task | `.context/design.md:284` renomeia a seção para "A busca só é indexável com GIN trigram em `card_number`"; `:291` atribui o Seq Scan à falta do índice, `:299-301` registra que o `OR` planeja como `BitmapOr` com o índice e que "o `UNION` não é o que resolve a indexabilidade", e `:303-307` mantém o `UNION` como escolha de previsibilidade |
+| **Fix 4b** — comentário de `catalog_grid_test.rb` | ✅ Feito nesta task | `test/integration/catalog_grid_test.rb:11-16` não fala mais em `onerror`: descreve o placeholder em CSS e a falha da rota `/card_images` (404/502) desde a AD-012. A menção a `onerror` em `app/views/catalog/_card_tile.html.erb:11` é outra coisa, a justificativa de **não** usar JS, e fica |
+| **Fix 4c** — registrar a ausência de `owned` | ⚪ Perdeu o sentido | `owned` deixou de estar ausente: a `colecao` T9 o integrou ao query object. `app/queries/catalog_query.rb:73` (`OWNERSHIP_VALUES = %w[all owned missing]`), `:350-357` (`apply_ownership_filter`) e `:382` (`owned_variants_exists`) |
+
+Fica aberto só o **Req. 5.1** ("imagem em resolução maior"), que nunca fez parte
+destes Fix Plans e está registrado como `⚠️ VERIFICAR` em
+`.specs/features/imagens/spec.md` e em `.context/design.md` §7.

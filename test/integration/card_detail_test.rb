@@ -135,6 +135,36 @@ class CardDetailTest < ActionDispatch::IntegrationTest
     assert_select ".field--counter", 0, "Event não tem counter"
   end
 
+  # Os dois testes acima dão `nil` ao campo inaplicável, e aí "não se aplica ao
+  # tipo" e "não tem valor" dão o mesmo resultado. Estes preenchem o campo:
+  # só a regra de aplicabilidade por tipo o esconde. É o caso de a fonte
+  # entregar counter num Event.
+  test "Leader com cost e counter preenchidos não exibe nenhum dos dois" do
+    leader = create_card(card_number: "OP01-001", name: "Roronoa Zoro",
+                         card_type: "leader", colors: [ "Red" ],
+                         power: 5000, life: 5, cost: 4, counter: 1000)
+    add_variant(leader, "OP01-001", rarity: "L")
+
+    get card_path("OP01-001")
+
+    assert_select ".field--power", text: /5000/
+    assert_select ".field--cost", 0, "cost não se aplica a Leader, mesmo com valor"
+    assert_select ".field--counter", 0, "counter não se aplica a Leader, mesmo com valor"
+  end
+
+  test "Event com power e counter preenchidos não exibe nenhum dos dois" do
+    evento = create_card(card_number: "OP01-004", name: "Gum-Gum Pistol",
+                         card_type: "event", colors: [ "Red" ], cost: 1,
+                         power: 3000, counter: 1000, effect_text: "Draw one card.")
+    add_variant(evento, "OP01-004", rarity: "C")
+
+    get card_path("OP01-004")
+
+    assert_select ".field--cost", text: /1/
+    assert_select ".field--power", 0, "power não se aplica a Event, mesmo com valor"
+    assert_select ".field--counter", 0, "counter não se aplica a Event, mesmo com valor"
+  end
+
   test "Stage não exibe power nem life" do
     stage = create_card(card_number: "OP01-030", name: "Thousand Sunny",
                         card_type: "stage", colors: [ "Red" ], cost: 2)
