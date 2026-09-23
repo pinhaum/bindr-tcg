@@ -1,5 +1,7 @@
 # Navegação e layout das telas — Especificação
 
+**Status**: Approved (2026-09-23, pelo dono do produto)
+
 ## Problem Statement
 
 O app tem as telas do MVP, mas elas não têm estrutura de navegação: um cabeçalho
@@ -46,18 +48,18 @@ preço.
 | O que é "Minha pasta" | A página de progresso, com total de cópias, variantes distintas e links para wishlist, import e export | Nenhuma rota nova; o progresso já é a página "da minha coleção" | y |
 | Controles de filtro | Cor, tipo, raridade, set e posse | Os que o canvas desenha, mais set; o resto continua pela URL | y |
 | Fonte de verdade | `.context/requirements.md` Req. 4.9 e Req. 13; canvas é referência visual | O canvas é externo e editável fora do repo (AD-005, como na AD-011) | y |
-| Itens da navegação com sessão | Catálogo, Minha pasta, Sair | Três itens cabem com folga em 360px; "Sair" continua alcançável como hoje | n |
-| Itens da navegação sem sessão | Catálogo, Entrar, Criar conta | Link para página que exige sessão só levaria ao login (regra já usada no cabeçalho atual) | n |
-| Fronteira estreita/larga | 1024px de largura | O canvas desenha 390px e 1280px; 1024px deixa tablet em retrato com barra inferior | n |
-| Uma marcação ou duas para a navegação | Uma só, reposicionada por CSS | Duas cópias divergem na primeira correção e duplicam os links para leitor de tela | n |
-| Filtro sem JavaScript | Os controles funcionam como formulário GET ou links; JS é opcional | Stimulus não está pinado no projeto; o Req. 4.7 já exige estado na URL | n |
-| Fileiras de chips em 360px | Quebram linha, sem rolagem horizontal interna | O canvas rola a fileira; controle escondido fora da tela é pior de descobrir e de testar | n |
-| Controle de posse para anônimo | Não renderizado | O query object já ignora `owned` sem usuário; mostrar controle inerte é promessa quebrada | n |
-| Título da página de progresso | `h1` "Minha pasta", "Progresso por set" vira `h2` | É a entrada da navegação; o nome da seção continua dizendo o que a lista é | n |
+| Itens da navegação com sessão | Catálogo, Minha pasta, Sair | Três itens cabem com folga em 360px; "Sair" continua alcançável como hoje | y |
+| Itens da navegação sem sessão | Catálogo, Entrar, Criar conta | Link para página que exige sessão só levaria ao login (regra já usada no cabeçalho atual) | y |
+| Fronteira estreita/larga | 1024px de largura | O canvas desenha 390px e 1280px; 1024px deixa tablet em retrato com barra inferior | y |
+| Uma marcação ou duas para a navegação | Uma só, reposicionada por CSS | Duas cópias divergem na primeira correção e duplicam os links para leitor de tela | y |
+| Filtro sem JavaScript | Os controles funcionam como formulário GET ou links; JS é opcional | Stimulus não está pinado no projeto; o Req. 4.7 já exige estado na URL | y |
+| Fileiras de chips em 360px | Quebram linha, sem rolagem horizontal interna | O canvas rola a fileira; controle escondido fora da tela é pior de descobrir e de testar | y |
+| Controle de posse para anônimo | Não renderizado | O query object já ignora `owned` sem usuário; mostrar controle inerte é promessa quebrada | y |
+| Título da página de progresso | `h1` "Minha pasta", "Progresso por set" vira `h2` | É a entrada da navegação; o nome da seção continua dizendo o que a lista é | y |
 | Testes que leem `catalog.css` como texto | Não são editados; regras novas só são acrescentadas | Mesma restrição da `interface` (AD-011, trade-off 2) | y |
 
-**Open questions:** none — as linhas `Confirmed? = n` são defaults do agente,
-revisáveis na aprovação desta spec.
+**Open questions:** none — os defaults do agente foram confirmados pelo dono
+na aprovação desta spec (2026-09-23).
 
 ---
 
