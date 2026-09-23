@@ -162,11 +162,13 @@ automaticamente.
 
 **Done when**:
 
-- [ ] As chaves do retorno são os nomes de parâmetro do query object (`colors`, `card_types`, `rarities`, `sets`), lidos das constantes e não repetidos
-- [ ] Carta multicolor contribui com cada uma das cores. Valor repetido aparece uma vez só. Catálogo vazio devolve listas vazias
-- [ ] Raridade vem das variantes, não das cartas
-- [ ] Carta marcada como ausente da fonte (Req. 1.7) segue as mesmas regras de visibilidade que a grade já aplica
-- [ ] `test/queries/catalog_filter_options_test.rb` novo; gate quick passa, contagem registrada
+- [x] As chaves do retorno são os nomes de parâmetro do query object (`colors`, `card_types`, `rarities`, `sets`), lidos das constantes e não repetidos
+- [x] Carta multicolor contribui com cada uma das cores. Valor repetido aparece uma vez só. Catálogo vazio devolve listas vazias
+- [x] Raridade vem das variantes, não das cartas
+- [x] Carta marcada como ausente da fonte (Req. 1.7) segue as mesmas regras de visibilidade que a grade já aplica
+- [x] `test/queries/catalog_filter_options_test.rb` novo; gate quick passa, contagem registrada
+
+**Resultado**: 261 runs, 0 failures (gate quick); rubocop limpo.
 
 **Tests**: unit
 **Gate**: quick

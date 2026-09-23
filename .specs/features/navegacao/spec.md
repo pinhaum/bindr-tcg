@@ -195,7 +195,7 @@ de antes.
 | NAV-05 | P1: Navegação principal | Req. 13.3 | Pending |
 | NAV-06 | P1: Navegação principal | Req. 13.3 | Pending |
 | NAV-07 | P1: Navegação principal | Req. 13.8 | Pending |
-| NAV-08 | P1: Filtrar a grade | Req. 4.9 | Pending |
+| NAV-08 | P1: Filtrar a grade | Req. 4.9 | Implemented (T1) |
 | NAV-09 | P1: Filtrar a grade | Req. 4.9, 4.7 | Pending |
 | NAV-10 | P1: Filtrar a grade | Req. 4.3, 4.7 | Pending |
 | NAV-11 | P1: Filtrar a grade | Req. 12.6 | Pending |

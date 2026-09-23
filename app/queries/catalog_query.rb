@@ -134,6 +134,66 @@ class CatalogQuery
 
   def active_filters = @active_filters
 
+  # NAV-08 — devolve os valores distintos de cor, tipo de carta, raridade e sets
+  # presentes no banco, ordenados. Destina-se ao formulário de filtro na grade.
+  #
+  # Retorna um hash com chaves exatamente iguais aos nomes de parâmetro do
+  # query object: `:colors`, `:card_types`, `:rarities`, `:sets`. As três
+  # primeiras são arrays de strings; `:sets` é um array de hashes `{code:, name:}`.
+  def self.filter_options
+    colors = distinct_colors
+    card_types = distinct_card_types
+    rarities = distinct_rarities
+    sets = distinct_sets
+
+    {
+      colors: colors,
+      card_types: card_types,
+      rarities: rarities,
+      sets: sets
+    }
+  end
+
+  # Cores com `&&` (elemento em comum): multicolorida contribui com cada uma.
+  # Escopo base é a grade: cartas presentes, variantes que existem.
+  def self.distinct_colors
+    sql = <<~SQL
+      SELECT DISTINCT unnest(colors) AS color
+      FROM cards
+      INNER JOIN card_variants ON card_variants.card_id = cards.id
+      ORDER BY color
+    SQL
+    ActiveRecord::Base.connection.select_values(sql)
+  end
+
+  # Tipos de carta da grade.
+  def self.distinct_card_types
+    Card.select(:card_type)
+        .distinct
+        .order(:card_type)
+        .pluck(:card_type)
+  end
+
+  # Raridades das variantes da grade: variante pode estar em set diferente do de
+  # estreia da carta (1402 casos no catálogo real), então consulta em
+  # `card_variants` e não em `cards`.
+  def self.distinct_rarities
+    CardVariant.select(:rarity)
+               .distinct
+               .order(:rarity)
+               .pluck(:rarity)
+  end
+
+  # Sets que têm ao menos uma variante de carta presente. Retorna array de
+  # hashes `{code:, name:}` ordenado por código.
+  def self.distinct_sets
+    CardSet.joins(:card_variants)
+           .select(:code, :name)
+           .distinct
+           .order(:code)
+           .map { |set| { code: set.code, name: set.name } }
+  end
+
   # Exposto para o teste de plano de execução (Req. 11.3): a asserção é sobre
   # o SQL das ramificações da busca, que é onde os índices são escolhidos.
   def search_match_sql
