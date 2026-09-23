@@ -31,13 +31,18 @@ class FlashTest < ActiveSupport::TestCase
     expand(rules.select { |sel, _| sel == selector }.flat_map { |_, body| Stylesheet.declarations(body) })
   end
 
-  # Estilo que a mensagem de fato recebe (`.flash` mais o modificador), sem as
-  # propriedades de cor. Comparar só as regras dos modificadores deixaria
-  # passar um modificador que repete o valor herdado da base.
+  # Propriedades de texto que o flash herda de `body` quando não as declara.
+  INHERITED = %w[font-family font-size line-height font-weight font-style letter-spacing text-transform].freeze
+
+  # Estilo que a mensagem de fato recebe (herança de `body`, `.flash` e o
+  # modificador), sem as propriedades de cor. Comparar só as regras dos
+  # modificadores deixaria passar um modificador que repete o valor herdado da
+  # base, ou que omite o peso que o outro declara igual ao herdado.
   def self.non_chromatic(rules, modifier)
-    declared(rules, ".flash").to_h
-                             .merge(declared(rules, modifier).to_h)
-                             .reject { |property, _| property.match?(CHROMATIC_PROPERTY) }
+    declared(rules, "body").to_h.slice(*INHERITED)
+                           .merge(declared(rules, ".flash").to_h)
+                           .merge(declared(rules, modifier).to_h)
+                           .reject { |property, _| property.match?(CHROMATIC_PROPERTY) }
   end
 
   setup { @rules = Stylesheet.rules }
@@ -72,6 +77,19 @@ class FlashTest < ActiveSupport::TestCase
     css = <<~CSS
       .flash { border: 1px solid var(--border); }
       .flash--alert { border-width: 1px; border-color: var(--border-strong); font-weight: var(--body-weight); }
+      .flash--notice { border-style: solid; font-weight: var(--body-weight); }
+    CSS
+    rules = Stylesheet.rules(css)
+
+    assert_equal self.class.non_chromatic(rules, ".flash--alert"),
+                 self.class.non_chromatic(rules, ".flash--notice")
+  end
+
+  test "a comparação acusa modificador que omite o peso herdado de body" do
+    css = <<~CSS
+      body { font-weight: var(--body-weight); }
+      .flash { border: 1px solid var(--border); }
+      .flash--alert { border-width: 1px; border-color: var(--border-strong); }
       .flash--notice { border-style: solid; font-weight: var(--body-weight); }
     CSS
     rules = Stylesheet.rules(css)
