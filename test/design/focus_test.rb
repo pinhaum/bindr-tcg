@@ -30,9 +30,21 @@ class FocusTest < ActiveSupport::TestCase
   # Regra de controle ou de foco que usa a hairline decorativa `border`.
   CONTROL_SELECTOR = /(?:\A|[\s,>+~(])(?:button|input|select)\b|__button\b|__input\b|:focus/
 
+  # Toda classe que recebe o anel de foco é controle, mesmo fora do padrão
+  # `__button`/`__input` (`.wishlist-mark__submit`, `.import-preview__confirm`).
+  def self.focus_ring_classes(rules)
+    rules.select { |selector, _| selector.include?(":focus") }
+         .flat_map { |selector, _| selector.scan(/\.([a-zA-Z0-9_-]+):focus/).flatten }
+         .uniq
+  end
+
   def self.decorative_border_on_controls(rules)
-    rules.select { |selector, body| selector.match?(CONTROL_SELECTOR) && body.match?(/var\(--border\)/) }
-         .map(&:first)
+    control_classes = focus_ring_classes(rules)
+    rules.select do |selector, body|
+      control = selector.match?(CONTROL_SELECTOR) ||
+                selector.scan(/\.([a-zA-Z0-9_-]+)/).flatten.intersect?(control_classes)
+      control && body.match?(/var\(--border\)/)
+    end.map(&:first)
   end
 
   setup { @rules = Stylesheet.rules }
@@ -83,9 +95,11 @@ class FocusTest < ActiveSupport::TestCase
       .z:focus-visible { outline: 2px solid var(--border); }
       .w__field input { border: 1px solid var(--border-strong); }
       .v__card { border: 1px solid var(--border); }
+      .u__submit:focus-visible { outline: 2px solid var(--accent); }
+      .u__submit { border: 1px solid var(--border); }
     CSS
 
-    assert_equal %w[.x__button .y__input .z:focus-visible],
+    assert_equal %w[.x__button .y__input .z:focus-visible .u__submit],
                  self.class.decorative_border_on_controls(Stylesheet.rules(css))
   end
 end

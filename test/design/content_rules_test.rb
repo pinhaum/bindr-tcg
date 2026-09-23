@@ -37,6 +37,10 @@ class ContentRulesTest < ActiveSupport::TestCase
   test "nenhuma view, helper ou locale contém emoji" do
     files = SOURCES.flat_map { |dir| Dir[Rails.root.join(dir, "**/*")] }.select { |path| File.file?(path) }
     assert_operator files.size, :>, 10, "a varredura parou de encontrar arquivos"
+    %w[app/views app/helpers config/locales].each do |dir|
+      assert files.any? { |path| path.start_with?(Rails.root.join(dir).to_s + "/") },
+             "a varredura não entrou em #{dir}"
+    end
 
     offenses = files.flat_map do |path|
       self.class.emoji_offenses(File.read(path, encoding: "UTF-8")).map { |line| "#{path.delete_prefix("#{Rails.root}/")}:#{line}" }

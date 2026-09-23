@@ -43,6 +43,8 @@ class OwnershipBadgeUiTest < ActionDispatch::IntegrationTest
     assert_select "turbo-stream[target=?] template", control(@sem_registro).delete("#") do
       assert_select ".ownership__count.ownership__count--owned", text: "1"
     end
+    assert_select "turbo-stream template .ownership__count--owned", 1,
+                  "o payload do Stream traz mais de um badge"
   end
 
   test "o Stream do decremento de 1 para 0 não traz o badge" do
