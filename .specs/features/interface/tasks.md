@@ -393,11 +393,11 @@ T13 → T14
 
 **Done when**:
 
-- [ ] `flash--alert` e `flash--notice` têm regras próprias que diferem em pelo menos uma propriedade não-cromática (espessura ou estilo de borda, peso do texto)
-- [ ] **`flash--alert` não usa `danger`**: é mensagem de validação, e §11.6 reserva `danger` para ação destrutiva confirmada
-- [ ] Teste textual prova a diferença não-cromática: descontadas as declarações de cor das duas regras, elas continuam diferentes
-- [ ] Teste de integração provoca um `alert` (login inválido) e um `notice` e prova a classe certa em cada um
-- [ ] Gate full passa
+- [x] `flash--alert` e `flash--notice` têm regras próprias que diferem em pelo menos uma propriedade não-cromática (espessura ou estilo de borda, peso do texto)
+- [x] **`flash--alert` não usa `danger`**: é mensagem de validação, e §11.6 reserva `danger` para ação destrutiva confirmada
+- [x] Teste textual prova a diferença não-cromática: descontadas as declarações de cor das duas regras, elas continuam diferentes
+- [x] Teste de integração provoca um `alert` (login inválido) e um `notice` e prova a classe certa em cada um
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

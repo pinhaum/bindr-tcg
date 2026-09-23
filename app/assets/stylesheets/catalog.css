@@ -390,6 +390,19 @@ body {
   line-height: var(--body-line-height);
 }
 
+/*
+ * Erro e sucesso diferem por forma e peso, não só por cor (SC 1.4.1). O erro é
+ * validação, não ação destrutiva: fica em `border-strong`, nunca em `danger`
+ * (§11.6).
+ */
+.flash--notice { border-style: solid; font-weight: var(--body-weight); }
+
+.flash--alert {
+  border-width: 2px;
+  border-color: var(--border-strong);
+  font-weight: var(--body-strong-weight);
+}
+
 .auth {
   max-width: 24rem;
   padding: var(--space-4);
