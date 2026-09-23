@@ -12,13 +12,13 @@ para este app (`.context/design.md` §11) que nunca foi aplicado.
 
 ## Goals
 
-- [ ] Todo valor de cor, tipografia, espaçamento e raio vem de token; zero literal
+- [x] Todo valor de cor, tipografia, espaçamento e raio vem de token; zero literal
       duplicado nos blocos
-- [ ] Contraste verificado por teste automatizado nos pares texto/fundo, sem
+- [x] Contraste verificado por teste automatizado nos pares texto/fundo, sem
       navegador
-- [ ] Os 23 modificadores BEM sem regra passam a ter regra, e nenhum estado é
+- [x] As 25 classes sem regra (15 modificadores + 10 elementos; a spec contava 23) passam a ter regra, e nenhum estado é
       comunicado apenas por cor
-- [ ] As verificações de 360px do Req. 2.5 continuam passando, byte a byte
+- [x] As verificações de 360px do Req. 2.5 continuam passando, byte a byte
 
 ## Out of Scope
 
@@ -147,29 +147,29 @@ por mais que matiz; uma variante com quantidade zero não exibe badge.
 
 | Requirement ID | Story | Origem em `.context` | Status |
 |---|---|---|---|
-| INT-01 | P1 | Req. 12.1 | Mapped (T1, T4–T7) |
-| INT-02 | P1 | Req. 12.2 | Mapped (T1) |
-| INT-03 | P1 | Req. 12.4 | Mapped (T3) |
-| INT-04 | P1 | Req. 12.5 | Mapped (T3) |
-| INT-05 | P2 | Req. 12.3 | Mapped (T2, T12) |
-| INT-06 | P3 | Req. 12.8 | Mapped (T8, T10) |
-| INT-07 | P3 | Req. 12.6 | Mapped (T9, T10) |
-| INT-08 | P3 | Req. 12.7 | Mapped (T11) |
-| INT-09 | P3 | Req. 12.9 | Mapped (T12) |
-| INT-10 | P3 | Req. 12.10 | Mapped (T13) |
-| INT-11 | P3 | Req. 12.11 | Mapped (T13) |
-| INT-12 | P1 | Req. 12.12 | Mapped (T4, T7) |
+| INT-01 | P1 | Req. 12.1 | Verified (T1, T4–T7) |
+| INT-02 | P1 | Req. 12.2 | Verified (T1) |
+| INT-03 | P1 | Req. 12.4 | Verified (T3) |
+| INT-04 | P1 | Req. 12.5 | Verified (T3) |
+| INT-05 | P2 | Req. 12.3 | Verified (T2, T12) |
+| INT-06 | P3 | Req. 12.8 | Verified (T8, T10) |
+| INT-07 | P3 | Req. 12.6 | Verified (T9, T10) |
+| INT-08 | P3 | Req. 12.7 | Verified (T11) |
+| INT-09 | P3 | Req. 12.9 | Verified (T12) |
+| INT-10 | P3 | Req. 12.10 | Verified (T13) |
+| INT-11 | P3 | Req. 12.11 | Verified (T13) |
+| INT-12 | P1 | Req. 12.12 | Verified (T4, T7) |
 
-**Coverage:** 12 no total, 12 mapeados a tasks (`tasks.md`, T1–T14), 0 sem origem.
+**Coverage:** 12 no total, 12 verificados (Verifier PASS na rodada 3, `validation.md`), 0 sem origem.
 
 ---
 
 ## Success Criteria
 
-- [ ] Nenhum valor de cor, tamanho de fonte, espaçamento ou raio aparece literal
+- [x] Nenhum valor de cor, tamanho de fonte, espaçamento ou raio aparece literal
       fora de `:root`
-- [ ] Teste de contraste cobre todo par texto/fundo dos tokens e passa
-- [ ] Os 23 modificadores BEM têm regra; erro e sucesso são distinguíveis sem cor
-- [ ] As seis verificações de 360px existentes passam sem edição
-- [ ] `bin/rails test && bin/rubocop` limpos
+- [x] Teste de contraste cobre todo par texto/fundo dos tokens e passa
+- [x] As 25 classes sem regra (a spec contava 23) têm regra; erro e sucesso são distinguíveis sem cor
+- [x] As seis verificações de 360px existentes passam sem edição
+- [x] `bin/rails test && bin/rubocop` limpos
 - [ ] Revisão visual aprovada pelo dono do produto em `docker compose up`
