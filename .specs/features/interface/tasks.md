@@ -336,12 +336,12 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Os quatro blocos sem literal nas propriedades da T4
-- [ ] Inputs de `auth` com borda `border-strong`, fundo `surface-sunken`, raio `radius-sm`; título em `display`
-- [ ] Botão de envio de `auth` é a única ação em `accent` da tela, com texto `on-accent`
-- [ ] `wishlist-item--fulfilled` não comunica "atendido" só por cor — o rótulo escrito que já existe continua sendo o sinal
-- [ ] A guarda cobre os blocos da T4 à T6
-- [ ] Gate full passa
+- [x] Os quatro blocos sem literal nas propriedades da T4
+- [x] Inputs de `auth` com borda `border-strong`, fundo `surface-sunken`, raio `radius-sm`; título em `display`
+- [x] Botão de envio de `auth` é a única ação em `accent` da tela, com texto `on-accent`
+- [x] `wishlist-item--fulfilled` não comunica "atendido" só por cor — o rótulo escrito que já existe continua sendo o sinal
+- [x] A guarda cobre os blocos da T4 à T6
+- [x] Gate full passa
 
 **Tests**: unit
 **Gate**: full

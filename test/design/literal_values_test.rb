@@ -6,12 +6,13 @@ require_relative "support/stylesheet"
 # Nos blocos guardados, as propriedades de cor, tipografia, espaçamento e raio
 # só aceitam `var(--…)` de um token declarado em `:root`. A guarda cresce por
 # task: T4 cobre o seletor raiz e os blocos de layout e catálogo; T5, o detalhe
-# da carta e o controle de posse.
+# da carta e o controle de posse; T6, autenticação e wishlist.
 class LiteralValuesTest < ActiveSupport::TestCase
   # Blocos BEM guardados. A lista vive aqui, não é lida da folha.
   GUARDED_BLOCKS = %w[
     site-header flash-area flash catalog filter-chip card-tile pagination
     card-detail field variant variant-list ownership
+    auth wishlist wishlist-item wishlist-mark
   ].freeze
 
   # Opacidade aceita só como estado inerte de controle, nunca como texto secundário.
@@ -230,5 +231,48 @@ class LiteralValuesTest < ActiveSupport::TestCase
       selector.include?("ownership__button") && rule_body.match?(/background(?:-color)?\s*:[^;]*var\(--accent\)/)
     end
     assert_empty accent_fill.map(&:first), "botão de posse com fundo `accent`"
+  end
+
+  test "os campos de autenticação são controles em surface-sunken com border-strong e radius-sm" do
+    body = rule(".auth__field input")
+
+    assert_match(/border:\s*1px solid var\(--border-strong\)/, body)
+    assert_match(/background-color:\s*var\(--surface-sunken\)/, body)
+    assert_match(/border-radius:\s*var\(--radius-sm\)/, body)
+  end
+
+  test "o título da autenticação está em display" do
+    body = rule(".auth__title")
+
+    assert_match(/font-size:\s*var\(--display-size\)/, body)
+    assert_match(/line-height:\s*var\(--display-line-height\)/, body)
+    assert_match(/font-weight:\s*var\(--display-weight\)/, body)
+  end
+
+  # §11.6: `accent` é raro por construção. Nas regras que a tela de autenticação
+  # renderiza (cabeçalho, flash e o próprio bloco), só o envio o usa.
+  test "o envio da autenticação é a única ação em accent da tela, com texto on-accent" do
+    submit = rule(".auth__submit")
+    assert_match(/background-color:\s*var\(--accent\)/, submit)
+    assert_match(/(?<![-\w])color:\s*var\(--on-accent\)/, submit)
+
+    screen_blocks = %w[auth site-header flash flash-area]
+    accent_users = @rules.select do |selector, body|
+      Stylesheet.blocks_of(selector).intersect?(screen_blocks) && body.include?("var(--accent)")
+    end
+    assert_equal [ ".auth__submit" ], accent_users.map(&:first),
+                 "outra regra da tela de autenticação usa `accent`"
+  end
+
+  # SC 1.4.1: o rótulo "Atendido" é o sinal (provado em
+  # test/integration/wishlist_items_test.rb:235); o modificador só reforça, e
+  # reforça por forma. Descontada a cor, a regra continua diferindo.
+  test "o modificador de wishlist atendida não depende de cor" do
+    declarations = Stylesheet.declarations(rule(".wishlist-item--fulfilled"))
+    non_chromatic = declarations.reject do |property, _|
+      property.match?(/\A(?:color|background(?:-color)?|border(?:-(?:top|right|bottom|left))?-color)\z/)
+    end
+
+    assert_not_empty non_chromatic, "`wishlist-item--fulfilled` difere só por cor"
   end
 end
