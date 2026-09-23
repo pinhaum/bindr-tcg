@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 9,
+  "next_id": 15,
   "lessons": [
     {
       "id": "L-001",
@@ -148,6 +148,114 @@
       ],
       "created": "2026-09-22T23:16:01Z",
       "last_seen": "2026-09-22T23:16:01Z"
+    },
+    {
+      "id": "L-009",
+      "key": "surviving_mutant::teste textual que compara regras css de modificador deve comparar o estilo efetivo com a cascata do bloco base nao a lista de declaracoes do modificador senao uma declaracao que repete o valor herdado conta como diferenca visual",
+      "text": "Teste textual que compara regras CSS de modificador deve comparar o estilo efetivo com a cascata do bloco base, não a lista de declarações do modificador, senão uma declaração que repete o valor herdado conta como diferença visual.",
+      "signal": "surviving_mutant",
+      "scope": "css/text-tests",
+      "status": "candidate",
+      "features": [
+        "interface"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md M2b; test/design/flash_test.rb:29 (css/text-tests)"
+      ],
+      "created": "2026-09-23T01:20:41Z",
+      "last_seen": "2026-09-23T01:20:41Z"
+    },
+    {
+      "id": "L-010",
+      "key": "ac_gap::ao inventariar ocorrencias de um dado na interface incluir as strings compostas no controller e exibidas por flash nao so as views porque o flash tambem e texto renderizado",
+      "text": "Ao inventariar ocorrências de um dado na interface, incluir as strings compostas no controller e exibidas por flash, não só as views, porque o flash também é texto renderizado.",
+      "signal": "ac_gap",
+      "scope": "views/flash",
+      "status": "candidate",
+      "features": [
+        "interface"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md INT-08; app/controllers/wishlist_items_controller.rb:50 (views/flash)"
+      ],
+      "created": "2026-09-23T01:20:41Z",
+      "last_seen": "2026-09-23T01:20:41Z"
+    },
+    {
+      "id": "L-011",
+      "key": "spec_precision_gap::numero de itens citado na spec deve sair de uma medicao registrada ou a spec deve descrever o criterio sem o numero porque uma contagem estimada diverge da medida e desalinha spec e plano",
+      "text": "Número de itens citado na spec deve sair de uma medição registrada, ou a spec deve descrever o critério sem o número, porque uma contagem estimada diverge da medida e desalinha spec e plano.",
+      "signal": "spec_precision_gap",
+      "scope": "spec/counts",
+      "status": "candidate",
+      "features": [
+        "interface"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md ponto (c); spec.md Problem Statement (spec/counts)"
+      ],
+      "created": "2026-09-23T01:20:41Z",
+      "last_seen": "2026-09-23T01:20:41Z"
+    },
+    {
+      "id": "L-012",
+      "key": "spec_precision_gap::quando uma pendencia aberta suspende parte de um requisito o texto do requisito deve dizer que a clausula so vale depois da pendencia senao o requisito contradiz o design que aplica o tratamento provisorio",
+      "text": "Quando uma pendência aberta suspende parte de um requisito, o texto do requisito deve dizer que a cláusula só vale depois da pendência, senão o requisito contradiz o design que aplica o tratamento provisório.",
+      "signal": "spec_precision_gap",
+      "scope": "spec/pending-decisions",
+      "status": "candidate",
+      "features": [
+        "interface"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md ressalva 3; .context/requirements.md Req. 12.11 (spec/pending-decisions)"
+      ],
+      "created": "2026-09-23T01:20:41Z",
+      "last_seen": "2026-09-23T01:20:41Z"
+    },
+    {
+      "id": "L-013",
+      "key": "spec_precision_gap::todo token que o teste assere com valor exato precisa ter esse valor escrito no documento normativo senao o teste trava um numero que a spec nao define",
+      "text": "Todo token que o teste assere com valor exato precisa ter esse valor escrito no documento normativo, senão o teste trava um número que a spec não define.",
+      "signal": "spec_precision_gap",
+      "scope": "design-tokens",
+      "status": "candidate",
+      "features": [
+        "interface"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md ressalva 2; test/design/tokens_test.rb:50 (design-tokens)"
+      ],
+      "created": "2026-09-23T01:20:41Z",
+      "last_seen": "2026-09-23T01:20:41Z"
+    },
+    {
+      "id": "L-014",
+      "key": "surviving_mutant::o estilo efetivo usado para comparar regras css deve incluir as propriedades herdadas do ancestral senao uma declaracao ausente conta como diferente de um valor explicito igual ao herdado",
+      "text": "O estilo efetivo usado para comparar regras CSS deve incluir as propriedades herdadas do ancestral, senão uma declaração ausente conta como diferente de um valor explícito igual ao herdado.",
+      "signal": "surviving_mutant",
+      "scope": "css/text-tests",
+      "status": "candidate",
+      "features": [
+        "interface"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md rodada 2 M2d; test/design/flash_test.rb:37-41; app/assets/stylesheets/catalog.css:76 (css/text-tests)"
+      ],
+      "created": "2026-09-23T01:32:26Z",
+      "last_seen": "2026-09-23T01:32:26Z"
     }
   ]
 }

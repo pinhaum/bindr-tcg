@@ -62,6 +62,42 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: test/services/card_image_cache_test.rb:298-310
 - last seen: 2026-09-22T23:16:01Z
 
+### L-009 - Teste textual que compara regras CSS de modificador deve comparar o estilo efetivo com a cascata do bloco base, não a lista de declarações do modificador, senão uma declaração que repete o valor herdado conta como diferença visual.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `css/text-tests` · harmful: 0
+- features: interface
+- evidence: validation.md M2b; test/design/flash_test.rb:29 (css/text-tests)
+- last seen: 2026-09-23T01:20:41Z
+
+### L-010 - Ao inventariar ocorrências de um dado na interface, incluir as strings compostas no controller e exibidas por flash, não só as views, porque o flash também é texto renderizado.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `views/flash` · harmful: 0
+- features: interface
+- evidence: validation.md INT-08; app/controllers/wishlist_items_controller.rb:50 (views/flash)
+- last seen: 2026-09-23T01:20:41Z
+
+### L-011 - Número de itens citado na spec deve sair de uma medição registrada, ou a spec deve descrever o critério sem o número, porque uma contagem estimada diverge da medida e desalinha spec e plano.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec/counts` · harmful: 0
+- features: interface
+- evidence: validation.md ponto (c); spec.md Problem Statement (spec/counts)
+- last seen: 2026-09-23T01:20:41Z
+
+### L-012 - Quando uma pendência aberta suspende parte de um requisito, o texto do requisito deve dizer que a cláusula só vale depois da pendência, senão o requisito contradiz o design que aplica o tratamento provisório.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec/pending-decisions` · harmful: 0
+- features: interface
+- evidence: validation.md ressalva 3; .context/requirements.md Req. 12.11 (spec/pending-decisions)
+- last seen: 2026-09-23T01:20:41Z
+
+### L-013 - Todo token que o teste assere com valor exato precisa ter esse valor escrito no documento normativo, senão o teste trava um número que a spec não define.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `design-tokens` · harmful: 0
+- features: interface
+- evidence: validation.md ressalva 2; test/design/tokens_test.rb:50 (design-tokens)
+- last seen: 2026-09-23T01:20:41Z
+
+### L-014 - O estilo efetivo usado para comparar regras CSS deve incluir as propriedades herdadas do ancestral, senão uma declaração ausente conta como diferente de um valor explícito igual ao herdado.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `css/text-tests` · harmful: 0
+- features: interface
+- evidence: validation.md rodada 2 M2d; test/design/flash_test.rb:37-41; app/assets/stylesheets/catalog.css:76 (css/text-tests)
+- last seen: 2026-09-23T01:32:26Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

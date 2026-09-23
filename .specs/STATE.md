@@ -100,6 +100,28 @@
 
 ## Handoff
 
+> **Estado em 2026-09-22, madrugada — este bloco vence os de baixo.** A feature
+> **`interface` (Fase 6, §6.1–6.5)** tem T1–T13 commitadas e verificadas: o
+> Verifier deu PASS na rodada 3 (`.specs/features/interface/validation.md`) e
+> `validate_state.py interface` está limpo. A suíte fecha com 951 runs e
+> RuboCop limpo. Dois pontos seguem em aberto:
+> - **A T14 está aberta** (item humano): falta o dono do produto abrir grade,
+>   detalhe, wishlist, progresso, import e login em `docker compose up`,
+>   inclusive a 360px, e registrar o que aprova ou reprova na T14 do `tasks.md`.
+>   Depois disso vem o gate build e o commit
+>   `docs(interface): registrar a revisão visual e de acessibilidade`.
+> - **O Req. 12.7 foi emendado** (`a8a9187`): o flash é texto puro e não leva
+>   `code`.
+>
+> Ressalvas ⚠️ que ficam para a §7.2:
+> - a contagem de 23 para 25 classes;
+> - o Req. 12.11 fala em anel `accent` no chip, e isso só vale depois da P8;
+> - `--radius-full: 360px` não aparece na §11.5.
+>
+> Há trabalho de outra frente não commitado em
+> `app/controllers/registrations_controller.rb` e
+> `test/integration/sessions_test.rb`. Não é da `interface`.
+
 > **Estado em 2026-09-22, fim da noite — este bloco vence os de baixo.** A
 > feature **`imagens` (§3.6, AD-012) está encerrada**: T1–T3 verificadas, PASS,
 > autor ≠ verificador (`.specs/features/imagens/validation.md`,

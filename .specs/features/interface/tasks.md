@@ -21,7 +21,7 @@ A feature é governada por **AD-011** e por `.context/design.md` §11, que é a
 cópia normativa do design system. Os valores de token saem de lá, não do
 artifact externo.
 
-**Status**: Approved (2026-09-22, pelo dono do produto) — execução não iniciada
+**Status**: Approved (2026-09-22, pelo dono do produto) — T1–T13 executadas e verificadas (Verifier PASS na rodada 3, `validation.md`); T14 aguarda a revisão visual do dono
 
 ## Execution Protocol
 
@@ -563,9 +563,37 @@ T13 → T14
 
 **Done when**:
 
-- [ ] `ecc:a11y-architect` revisou `catalog.css` e as views tocadas; achados CRITICAL/HIGH viraram task de correção antes do Verifier
+- [x] `ecc:a11y-architect` revisou `catalog.css` e as views tocadas; achados CRITICAL/HIGH viraram task de correção antes do Verifier
 - [ ] O dono do produto abriu grade, detalhe, wishlist, progresso, import e login em `docker compose up`, inclusive a 360px, e aprovou ou listou o que reprova
 - [ ] O resultado está registrado nesta task, com o que foi visto
+
+**Revisão de acessibilidade (2026-09-22, `ecc:a11y-architect`, só leitura, diff `d9fa961..4c223e4`)**:
+nenhum CRITICAL. Houve um HIGH, que o orquestrador rebaixou: o reviewer disse
+que "focável fora da lista fica sem anel", mas a regra de `catalog.css:640`
+cobre por elemento todo `a`, `button`, `input`, `select`, `textarea` e
+`summary`, com qualquer classe. O único `tabindex` do app é `-1`, em
+`auth__errors`, que recebe foco por programa, não por teclado. Ficou como
+LOW, sem correção. Os outros achados não exigiram mudança:
+- MEDIUM: o badge de posse usa `on-accent` sobre `accent`, par já coberto por
+  `contrast_test.rb`.
+- LOW: `<code>` inline pode ser soletrado por TTS, mas o nome da carta vem antes.
+- LOW: `min-width` inconsistente em links de texto, já documentado.
+
+Estado exclusivamente por cor, regiões vivas do Turbo Stream e alvos de 24px
+foram conferidos e descartados como problema.
+
+**Análise de testes (`ecc:pr-test-analyzer`, T8–T13)**: três lacunas que
+discriminavam foram corrigidas em `278e66b`:
+- a varredura de emoji não provava que entrava em `config/locales`;
+- a guarda de `border` não enxergava controle fora de `__button`/`__input`;
+- o payload do Stream podia trazer um badge duplicado.
+
+Os mutantes das duas primeiras foram mortos em cópia descartável.
+
+**Verifier**: rodada 1 FAIL. O gap 1 foi o M2b, corrigido em `28d1094`. O gap
+2 foi o flash da wishlist sem `code`, resolvido pela emenda do Req. 12.7 em
+`a8a9187`, por decisão do dono. Rodada 2 FAIL por causa do M2d, corrigido em
+`2b67f20`. Rodada 3 PASS.
 - [ ] Gate build passa
 
 **Tests**: none
