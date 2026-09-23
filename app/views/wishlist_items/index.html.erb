@@ -37,8 +37,7 @@
         <% card = variant.card %>
         <li class="wishlist-item <%= "wishlist-item--fulfilled" if item.fulfilled? %>">
           <p class="wishlist-item__card">
-            <%= link_to "#{card.name} #{variant.variant_code}", card_path(card.card_number),
-                        class: "wishlist-item__link" %>
+            <%= link_to card_path(card.card_number), class: "wishlist-item__link" do %><%= card.name %> <code class="code"><%= variant.variant_code %></code><% end %>
           </p>
 
           <%#

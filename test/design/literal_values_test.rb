@@ -9,10 +9,11 @@ require_relative "support/stylesheet"
 # folha inteira; o conjunto de blocos é conferido contra uma lista fixa para
 # que bloco novo não entre sem alguém olhar.
 class LiteralValuesTest < ActiveSupport::TestCase
-  # Os 21 blocos BEM medidos no inventário de `.specs/features/interface/tasks.md`.
+  # Os 21 blocos BEM medidos no inventário de `.specs/features/interface/tasks.md`,
+  # mais `code`, o envoltório inline de identificador da T11.
   # A lista vive aqui, não é lida da folha.
   EXPECTED_BLOCKS = %w[
-    auth card-detail card-tile catalog collection-export field filter-chip
+    auth card-detail card-tile catalog code collection-export field filter-chip
     flash flash-area import-preview import-summary ownership pagination
     progress progress-set site-header variant variant-list wishlist
     wishlist-item wishlist-mark

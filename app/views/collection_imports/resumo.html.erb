@@ -212,7 +212,7 @@
         <% falhas.each do |falha| %>
           <li class="import-summary__falhada">
             Linha <%= falha[:indice].to_i + 2 %> do arquivo —
-            <%= falha[:card_number] %> <%= falha[:variant_code] %>
+            <code class="code"><%= falha[:card_number] %></code> <code class="code"><%= falha[:variant_code] %></code>
           </li>
         <% end %>
       </ul>

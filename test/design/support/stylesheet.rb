@@ -142,4 +142,25 @@ module Stylesheet
     else raise ArgumentError, "valor sem conversão para pixel: #{value.inspect}"
     end
   end
+
+  # Declarações que valem para uma classe sozinha: as de toda regra em que
+  # `.classe` aparece como seletor de uma parte da lista, a última vencendo.
+  # Retorna { "propriedade" => "valor" }.
+  def self.resolved(klass, rules = self.rules)
+    rules.select { |selector, _| selector.split(",").map(&:strip).include?(".#{klass}") }
+         .flat_map { |_, body| declarations(body) }
+         .to_h
+  end
+
+  CODE_STYLE = {
+    "font-family" => "var(--font-mono)",
+    "font-size" => "var(--code-size)",
+    "line-height" => "var(--code-line-height)",
+    "font-weight" => "var(--code-weight)"
+  }.freeze
+
+  # A classe renderiza no estilo `code` de §11.4?
+  def self.code_styled?(klass, rules = self.rules)
+    resolved(klass, rules).slice(*CODE_STYLE.keys) == CODE_STYLE
+  end
 end

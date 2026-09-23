@@ -480,11 +480,11 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Toda classe que envolve só o identificador consome os tokens de `code` (`--font-mono`, 500, 13px/18px)
-- [ ] Onde o identificador está inline sem envoltório próprio — `ownership__variant`, o `<span>` de `catalog/show.html.erb:112`, o link de `wishlist_items/index.html.erb:40`, `collection_imports/resumo.html.erb:215` — ele ganha um `<code>` com classe `code`, sem mudar a árvore em volta
-- [ ] `aria-label` e `<title>` ficam como estão (não são texto renderizado)
-- [ ] Teste de integração por tela (grade, detalhe, posse, wishlist, pré-visualização e resumo do import) prova que o texto do identificador está dentro de um elemento em estilo `code`
-- [ ] Gate full passa
+- [x] Toda classe que envolve só o identificador consome os tokens de `code` (`--font-mono`, 500, 13px/18px)
+- [x] Onde o identificador está inline sem envoltório próprio — `ownership__variant`, o `<span>` de `catalog/show.html.erb:112`, o link de `wishlist_items/index.html.erb:40`, `collection_imports/resumo.html.erb:215` — ele ganha um `<code>` com classe `code`, sem mudar a árvore em volta
+- [x] `aria-label` e `<title>` ficam como estão (não são texto renderizado)
+- [x] Teste de integração por tela (grade, detalhe, posse, wishlist, pré-visualização e resumo do import) prova que o texto do identificador está dentro de um elemento em estilo `code`
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

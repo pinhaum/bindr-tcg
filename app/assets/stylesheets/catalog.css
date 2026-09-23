@@ -78,6 +78,26 @@ body {
   color: var(--ink);
 }
 
+/*
+ * `code` (§11.4): exclusivo de `card_number` e `variant_code`, identificadores
+ * lidos caractere a caractere. `.code` é o envoltório inline; as demais classes
+ * já envolvem só o identificador.
+ */
+.code,
+.card-tile__number,
+.card-tile__placeholder-number,
+.card-detail__number,
+.variant__code,
+.import-preview__number,
+.import-preview__variant,
+.import-summary__number-card,
+.import-summary__variant {
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  line-height: var(--code-line-height);
+  font-weight: var(--code-weight);
+}
+
 .catalog {
   max-width: 100%;
   padding: var(--space-4);
@@ -245,8 +265,6 @@ body {
   overflow-wrap: anywhere;
 }
 .card-tile__number {
-  font-size: var(--caption-size);
-  line-height: var(--caption-line-height);
   color: var(--ink-muted);
 }
 
@@ -1109,7 +1127,7 @@ body {
 
 .import-preview__card { margin: 0; overflow-wrap: anywhere; }
 
-.import-preview__number { font-weight: var(--display-weight); }
+.import-preview__number { font-variant-numeric: tabular-nums; }
 
 .import-preview__variant { font-variant-numeric: tabular-nums; }
 
@@ -1365,7 +1383,7 @@ body {
 
 .import-summary__card { margin: 0; overflow-wrap: anywhere; }
 
-.import-summary__number-card { font-weight: var(--display-weight); }
+.import-summary__number-card { font-variant-numeric: tabular-nums; }
 
 .import-summary__variant { font-variant-numeric: tabular-nums; }
 
