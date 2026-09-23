@@ -421,13 +421,13 @@ T13 → T14
 
 **Done when**:
 
-- [ ] `ownership__count` recebe o modificador `ownership__count--owned` só quando `quantity > 0`; a árvore do partial não muda
-- [ ] A regra de `ownership__count--owned` usa `radius-full`, fundo `accent`, texto `on-accent`, e é o **único** uso de `radius-full` na folha (provado por teste textual)
-- [ ] Teste de integração: variante com quantidade 2 renderiza o badge com "2"; variante com quantidade 0 e variante sem registro não renderizam badge — as duas ausências medidas
-- [ ] O payload do Turbo Stream do incremento de 0 para 1 contém o badge, e o do decremento de 1 para 0 não contém
-- [ ] Nenhum outro nível de âmbar indica posse (não existe segundo token de accent)
-- [ ] Os testes de região viva de `collection_ownership_ui_test.rb` passam sem edição
-- [ ] Gate full passa
+- [x] `ownership__count` recebe o modificador `ownership__count--owned` só quando `quantity > 0`; a árvore do partial não muda
+- [x] A regra de `ownership__count--owned` usa `radius-full`, fundo `accent`, texto `on-accent`, e é o **único** uso de `radius-full` na folha (provado por teste textual)
+- [x] Teste de integração: variante com quantidade 2 renderiza o badge com "2"; variante com quantidade 0 e variante sem registro não renderizam badge — as duas ausências medidas
+- [x] O payload do Turbo Stream do incremento de 0 para 1 contém o badge, e o do decremento de 1 para 0 não contém
+- [x] Nenhum outro nível de âmbar indica posse (não existe segundo token de accent)
+- [x] Os testes de região viva de `collection_ownership_ui_test.rb` passam sem edição
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

@@ -498,6 +498,17 @@ body {
 }
 
 .ownership__count { font-weight: var(--display-weight); font-variant-numeric: tabular-nums; }
+
+/*
+ * Posse não é cor (§11.6): a variante possuída ganha badge com a quantidade; a
+ * faltante não recebe badge nenhum. Único uso de `radius-full` da folha.
+ */
+.ownership__count--owned {
+  padding: 0 var(--space-2);
+  color: var(--on-accent);
+  background-color: var(--accent);
+  border-radius: var(--radius-full);
+}
 .ownership__unit { color: var(--ink-muted); }
 
 /*

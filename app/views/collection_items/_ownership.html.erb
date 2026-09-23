@@ -31,7 +31,7 @@
      aria-live="polite" aria-atomic="true">
   <% if authenticated? %>
     <p class="ownership__quantity">
-      <span class="ownership__count"><%= quantity %></span>
+      <span class="ownership__count<%= " ownership__count--owned" if quantity.positive? %>"><%= quantity %></span>
       <%#
         Plural explícito, não `pluralize`: o inflector do Rails é inglês e não
         sabe acentuação portuguesa — `"cópia".pluralize(2)` devolve "cópia",
