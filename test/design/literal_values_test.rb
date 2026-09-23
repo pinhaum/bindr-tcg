@@ -3,17 +3,27 @@ require_relative "support/stylesheet"
 
 # Guarda de literais (INT-01, INT-12; `.context/design.md` §11.3–§11.5).
 #
-# Nos blocos guardados, as propriedades de cor, tipografia, espaçamento e raio
-# só aceitam `var(--…)` de um token declarado em `:root`. A guarda cresce por
-# task: T4 cobre o seletor raiz e os blocos de layout e catálogo; T5, o detalhe
-# da carta e o controle de posse; T6, autenticação e wishlist.
+# Em toda regra fora de `:root`, as propriedades de cor, tipografia,
+# espaçamento e raio só aceitam `var(--…)` de um token declarado em `:root`.
+# A guarda cresceu por task (T4 a T6, por grupo de blocos) e desde a T7 varre a
+# folha inteira; o conjunto de blocos é conferido contra uma lista fixa para
+# que bloco novo não entre sem alguém olhar.
 class LiteralValuesTest < ActiveSupport::TestCase
-  # Blocos BEM guardados. A lista vive aqui, não é lida da folha.
-  GUARDED_BLOCKS = %w[
-    site-header flash-area flash catalog filter-chip card-tile pagination
-    card-detail field variant variant-list ownership
-    auth wishlist wishlist-item wishlist-mark
+  # Os 21 blocos BEM medidos no inventário de `.specs/features/interface/tasks.md`.
+  # A lista vive aqui, não é lida da folha.
+  EXPECTED_BLOCKS = %w[
+    auth card-detail card-tile catalog collection-export field filter-chip
+    flash flash-area import-preview import-summary ownership pagination
+    progress progress-set site-header variant variant-list wishlist
+    wishlist-item wishlist-mark
   ].freeze
+
+  # Seletores sem classe: o seletor raiz.
+  EXPECTED_CLASSLESS_SELECTORS = [ "*", "body" ].freeze
+
+  # Técnica de ocultação visual (fora do fluxo, recortada): `margin: -1px` é parte
+  # dela e não é espaçamento de layout.
+  VISUALLY_HIDDEN_EXCEPTIONS = [ [ ".import-preview__rotulo-valor", "margin", "-1px" ] ].freeze
 
   # Opacidade aceita só como estado inerte de controle, nunca como texto secundário.
   OPACITY_ALLOWED_SELECTORS = [ '.ownership__button[aria-disabled="true"]' ].freeze
@@ -39,15 +49,12 @@ class LiteralValuesTest < ActiveSupport::TestCase
 
   VAR_REFERENCE = /var\((--[a-z0-9-]+)\)/
 
-  def self.guarded?(selector)
-    blocks = Stylesheet.blocks_of(selector)
-    blocks.empty? || blocks.intersect?(GUARDED_BLOCKS)
-  end
-
   # Devolve as violações de uma folha, uma string por declaração infratora.
   def self.violations(css, tokens)
-    Stylesheet.rules(css).select { |selector, _| guarded?(selector) }.flat_map do |selector, body|
+    Stylesheet.rules(css).flat_map do |selector, body|
       Stylesheet.declarations(body).filter_map do |property, value|
+        next if VISUALLY_HIDDEN_EXCEPTIONS.include?([ selector, property, value ])
+
         problem = value_problem(property, value, tokens)
         "#{selector.squish} { #{property}: #{value} } — #{problem}" if problem
       end
@@ -79,7 +86,7 @@ class LiteralValuesTest < ActiveSupport::TestCase
     @rules = Stylesheet.rules
   end
 
-  test "os blocos guardados não têm literal em cor, tipografia, espaçamento e raio" do
+  test "nenhuma regra da folha tem literal em cor, tipografia, espaçamento e raio" do
     violations = self.class.violations(Stylesheet.read_stylesheet, @tokens)
 
     assert_empty violations,
@@ -93,22 +100,37 @@ class LiteralValuesTest < ActiveSupport::TestCase
       .filter-chip { border: 1px solid currentcolor; }
       .card-tile { padding: var(--space-9); }
       .pagination { gap: var(--space-2); border: 1px solid var(--border-strong); }
-      .fora-da-guarda { font-size: 12px; }
+      .bloco-novo { font-size: 12px; }
     CSS
 
     violations = self.class.violations(css, Stylesheet.read_root_tokens.slice("--space-2", "--border-strong"))
 
-    assert_equal 3, violations.size, violations.join("\n")
+    assert_equal 4, violations.size, violations.join("\n")
+    assert violations.any? { |v| v.include?(".bloco-novo") }, "a guarda não pode depender de lista de blocos"
     assert violations.any? { |v| v.include?(".catalog__title") && v.include?("literal 1.5rem") }
     assert violations.any? { |v| v.include?(".filter-chip") && v.include?("borda sem token") }
     assert violations.any? { |v| v.include?(".card-tile") && v.include?("--space-9") }
   end
 
-  test "todo bloco guardado existe na folha" do
-    present = @rules.flat_map { |selector, _| Stylesheet.blocks_of(selector) }.uniq
+  test "o conjunto de blocos da folha é o esperado" do
+    present = @rules.flat_map { |selector, _| Stylesheet.blocks_of(selector) }.uniq.sort
 
-    assert_empty GUARDED_BLOCKS - present,
-                 "bloco guardado sem regra na folha: a guarda estaria vigiando o vazio"
+    assert_equal EXPECTED_BLOCKS.sort, present,
+                 "bloco novo ou sumido na folha: revise a guarda e esta lista juntos"
+
+    classless = @rules.map(&:first).select { |selector| Stylesheet.blocks_of(selector).empty? }
+    assert_equal EXPECTED_CLASSLESS_SELECTORS, classless,
+                 "seletor sem classe novo ou sumido na folha"
+  end
+
+  test "a exceção de ocultação visual continua sendo ocultação visual" do
+    VISUALLY_HIDDEN_EXCEPTIONS.each do |selector, property, value|
+      body = rule(selector)
+
+      assert_includes Stylesheet.declarations(body), [ property, value ]
+      assert_match(/position:\s*absolute/, body)
+      assert_match(/clip-path:\s*inset\(50%\)/, body)
+    end
   end
 
   test "o seletor raiz está sob a guarda e consome os tokens de corpo" do
@@ -122,9 +144,9 @@ class LiteralValuesTest < ActiveSupport::TestCase
   # `opacity: 0.7` fazia o papel de texto secundário; o design system tem token
   # para isso (`ink-muted`), e opacidade sobre fundo escuro não tem contraste
   # verificável pelo teste de pares.
-  test "texto secundário dos blocos guardados usa ink-muted, não opacidade" do
-    offenders = @rules.select do |selector, body|
-      self.class.guarded?(selector) && body.match?(/(?<![-\w])opacity\s*:/)
+  test "texto secundário usa ink-muted, não opacidade" do
+    offenders = @rules.select do |_, body|
+      body.match?(/(?<![-\w])opacity\s*:/)
     end
 
     assert_empty offenders.map(&:first) - OPACITY_ALLOWED_SELECTORS, "opacidade usada no lugar de `ink-muted`"
@@ -274,5 +296,16 @@ class LiteralValuesTest < ActiveSupport::TestCase
     end
 
     assert_not_empty non_chromatic, "`wishlist-item--fulfilled` difere só por cor"
+  end
+
+  # §11.4: `code` é exclusivo de identificador lido caractere a caractere, e o
+  # código de set é um deles.
+  test "o código de set no progresso está em code" do
+    body = rule(".progress-set__code")
+
+    assert_match(/font-family:\s*var\(--font-mono\)/, body)
+    assert_match(/font-size:\s*var\(--code-size\)/, body)
+    assert_match(/line-height:\s*var\(--code-line-height\)/, body)
+    assert_match(/font-weight:\s*var\(--code-weight\)/, body)
   end
 end

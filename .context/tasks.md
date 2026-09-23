@@ -243,7 +243,7 @@ Regras de execução:
   - Falha do teste reprova o valor do token, não afrouxa o limiar.
   - _Requisitos: 12.3_
 
-- [ ] **6.3 Aplicar os tokens aos blocos existentes**
+- [x] **6.3 Aplicar os tokens aos blocos existentes**
   - Os 21 blocos BEM de `catalog.css` passam a consumir tokens em vez de literais.
   - Sem sombra, sem gradiente. `accent` raro por construção.
   - Verificações de 360px do Req. 2.5 continuam passando.

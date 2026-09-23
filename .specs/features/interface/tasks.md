@@ -365,11 +365,11 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Os cinco blocos sem literal nas propriedades da T4
-- [ ] `progress-set__code` em `code` (código de set, identificador lido caractere a caractere)
-- [ ] A guarda deixa de ter lista de blocos: varre **todo** seletor fora de `:root`; e um teste prova que o conjunto de blocos da folha é o esperado, para bloco novo não escapar em silêncio
-- [ ] Os arquivos que filtram a folha por prefixo (`progress-*`, `import-preview*`, `import-summary*`, `collection-export*`) passam sem edição
-- [ ] Gate full passa — §6.3 fecha aqui
+- [x] Os cinco blocos sem literal nas propriedades da T4
+- [x] `progress-set__code` em `code` (código de set, identificador lido caractere a caractere)
+- [x] A guarda deixa de ter lista de blocos: varre **todo** seletor fora de `:root`; e um teste prova que o conjunto de blocos da folha é o esperado, para bloco novo não escapar em silêncio
+- [x] Os arquivos que filtram a folha por prefixo (`progress-*`, `import-preview*`, `import-summary*`, `collection-export*`) passam sem edição
+- [x] Gate full passa — §6.3 fecha aqui
 
 **Tests**: unit
 **Gate**: full
