@@ -255,7 +255,7 @@ Regras de execução:
   - Significado nunca só por cor; posse por badge com número.
   - _Requisitos: 12.6, 12.8_
 
-- [ ] **6.5 Regras de conteúdo e foco**
+- [x] **6.5 Regras de conteúdo e foco**
   - `code` em `card_number` e `variant_code`, em toda ocorrência.
   - Anel de foco sólido de 2px em `accent`, 2px de deslocamento.
   - Sem emoji. Chip das seis cores do jogo em tratamento neutro (P8 aberta).

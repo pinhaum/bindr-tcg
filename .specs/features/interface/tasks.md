@@ -536,10 +536,10 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Varredura de `app/views`, `app/helpers` e `config/locales` por codepoints de emoji (faixas Unicode declaradas no teste, incluindo o seletor de variação U+FE0F); a varredura é provada contra uma string sintética com emoji
-- [ ] `filter-chip` e descendentes não usam `var(--accent)` como `background-color`; o chip ativo de cor do jogo usa `border-strong` mais o rótulo escrito que já existe (P8 aberta)
-- [ ] Teste de integração com filtro de cor ativo prova que o chip exibe o nome da cor por escrito
-- [ ] Gate full passa — §6.5 fecha aqui
+- [x] Varredura de `app/views`, `app/helpers` e `config/locales` por codepoints de emoji (faixas Unicode declaradas no teste, incluindo o seletor de variação U+FE0F); a varredura é provada contra uma string sintética com emoji
+- [x] `filter-chip` e descendentes não usam `var(--accent)` como `background-color`; o chip ativo de cor do jogo usa `border-strong` mais o rótulo escrito que já existe (P8 aberta)
+- [x] Teste de integração com filtro de cor ativo prova que o chip exibe o nome da cor por escrito
+- [x] Gate full passa — §6.5 fecha aqui
 
 **Tests**: unit
 **Gate**: full
