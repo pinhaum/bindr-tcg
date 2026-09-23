@@ -56,4 +56,15 @@ class LayoutTest < ActiveSupport::TestCase
     assert_equal 12.0, Stylesheet.to_pixels("0.75rem", @tokens)
     assert_raises(ArgumentError) { Stylesheet.to_pixels("var(--nao-existe)", @tokens) }
   end
+
+  test "duas impressões da carta cabem em 360px com a margem do detalhe e o gutter" do
+    tile_min = Stylesheet.to_pixels(@tokens.fetch("--tile-min"), @tokens)
+    page = horizontal_padding(declaration(".card-detail", "padding"))
+    gutter = Stylesheet.to_pixels(declaration(".variant-list", "gap"), @tokens)
+
+    total = 2 * tile_min + page + gutter
+
+    assert_operator total, :<=, VIEWPORT,
+                    "2 × #{tile_min} + #{page} de margem + #{gutter} de gutter = #{total}px, acima de #{VIEWPORT}px"
+  end
 end

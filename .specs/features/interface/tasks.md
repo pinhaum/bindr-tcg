@@ -307,12 +307,12 @@ T13 → T14
 
 **Done when**:
 
-- [ ] Os cinco blocos sem literal nas propriedades da T4
-- [ ] `card-detail__name` em `display`; `field dt` e `variant__meta dt` em `caption` com `ink-muted`
-- [ ] Botões de `ownership` com borda `border-strong` e raio `radius-md`; nenhum usa `accent` como fundo (o uso de `accent` na posse é o badge da T9)
-- [ ] A guarda cobre os blocos da T4 e da T5
-- [ ] `collection_ownership_ui_test.rb` passa sem edição
-- [ ] Gate full passa
+- [x] Os cinco blocos sem literal nas propriedades da T4
+- [x] `card-detail__name` em `display`; `field dt` e `variant__meta dt` em `caption` com `ink-muted`
+- [x] Botões de `ownership` com borda `border-strong` e raio `radius-md`; nenhum usa `accent` como fundo (o uso de `accent` na posse é o badge da T9)
+- [x] A guarda cobre os blocos da T4 e da T5
+- [x] `collection_ownership_ui_test.rb` passa sem edição
+- [x] Gate full passa
 
 **Tests**: unit
 **Gate**: full

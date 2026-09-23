@@ -5,12 +5,17 @@ require_relative "support/stylesheet"
 #
 # Nos blocos guardados, as propriedades de cor, tipografia, espaçamento e raio
 # só aceitam `var(--…)` de um token declarado em `:root`. A guarda cresce por
-# task: T4 cobre o seletor raiz e os blocos de layout e catálogo.
+# task: T4 cobre o seletor raiz e os blocos de layout e catálogo; T5, o detalhe
+# da carta e o controle de posse.
 class LiteralValuesTest < ActiveSupport::TestCase
   # Blocos BEM guardados. A lista vive aqui, não é lida da folha.
   GUARDED_BLOCKS = %w[
     site-header flash-area flash catalog filter-chip card-tile pagination
+    card-detail field variant variant-list ownership
   ].freeze
+
+  # Opacidade aceita só como estado inerte de controle, nunca como texto secundário.
+  OPACITY_ALLOWED_SELECTORS = [ '.ownership__button[aria-disabled="true"]' ].freeze
 
   # Propriedades cujo valor precisa vir de token.
   GOVERNED_PROPERTY = /\A(?:
@@ -58,7 +63,8 @@ class LiteralValuesTest < ActiveSupport::TestCase
     rest = value.gsub(VAR_REFERENCE, " ").split(/[\s,]+/).reject(&:empty?)
 
     if border
-      return if value.match?(VAR_REFERENCE) || rest.all? { |part| part.match?(/\A(?:0|none)\z/) }
+      return if rest.all? { |part| part.match?(/\A(?:0|none)\z/) }
+      return if value.match?(VAR_REFERENCE) && rest.all? { |part| part.match?(BORDER_PART) }
 
       "borda sem token de cor"
     else
@@ -120,9 +126,9 @@ class LiteralValuesTest < ActiveSupport::TestCase
       self.class.guarded?(selector) && body.match?(/(?<![-\w])opacity\s*:/)
     end
 
-    assert_empty offenders.map(&:first), "opacidade usada no lugar de `ink-muted`"
+    assert_empty offenders.map(&:first) - OPACITY_ALLOWED_SELECTORS, "opacidade usada no lugar de `ink-muted`"
 
-    %w[.card-tile__number .card-tile__placeholder-number].each do |selector|
+    %w[.card-tile__number .card-tile__placeholder-number .card-detail__number .ownership__unit].each do |selector|
       body = @rules.find { |sel, _| sel == selector }&.last
       assert body, "regra #{selector} sumiu da folha"
       assert_match(/(?<![-\w])color:\s*var\(--ink-muted\)/, body, "#{selector} precisa de `ink-muted`")
@@ -187,5 +193,42 @@ class LiteralValuesTest < ActiveSupport::TestCase
     placeholder = @rules.find { |selector, _| selector == ".card-tile__placeholder" }&.last
     assert_match(/background-color:\s*var\(--surface-sunken\)/, placeholder.to_s,
                  "o placeholder é o poço em `surface-sunken`")
+  end
+
+  def rule(selector)
+    body = @rules.find { |sel, _| sel == selector }&.last
+    assert body, "regra #{selector} sumiu da folha"
+    body
+  end
+
+  test "o nome da carta no detalhe está em display" do
+    body = rule(".card-detail__name")
+
+    assert_match(/font-size:\s*var\(--display-size\)/, body)
+    assert_match(/line-height:\s*var\(--display-line-height\)/, body)
+    assert_match(/font-weight:\s*var\(--display-weight\)/, body)
+  end
+
+  test "rótulos de campo e de metadado da variante estão em caption com ink-muted" do
+    [ ".field dt", ".variant__meta dt" ].each do |selector|
+      body = rule(selector)
+
+      assert_match(/font-size:\s*var\(--caption-size\)/, body, "#{selector} fora de `caption`")
+      assert_match(/line-height:\s*var\(--caption-line-height\)/, body, "#{selector} fora de `caption`")
+      assert_match(/(?<![-\w])color:\s*var\(--ink-muted\)/, body, "#{selector} sem `ink-muted`")
+    end
+  end
+
+  # §11.6: o uso de `accent` na posse é o badge de quantidade (T9), não o botão.
+  test "os botões de posse têm borda border-strong, raio radius-md e nenhum fundo accent" do
+    body = rule(".ownership__button")
+
+    assert_match(/border:\s*1px solid var\(--border-strong\)/, body)
+    assert_match(/border-radius:\s*var\(--radius-md\)/, body)
+
+    accent_fill = @rules.select do |selector, rule_body|
+      selector.include?("ownership__button") && rule_body.match?(/background(?:-color)?\s*:[^;]*var\(--accent\)/)
+    end
+    assert_empty accent_fill.map(&:first), "botão de posse com fundo `accent`"
   end
 end
