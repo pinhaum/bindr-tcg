@@ -100,6 +100,20 @@
 
 ## Handoff
 
+> **Estado em 2026-09-23 — este bloco vence os de baixo.** A feature
+> **`interface` (Fase 6, §6.1–6.5) está encerrada**: T1–T14 fechadas, Verifier
+> PASS na rodada 3, revisão visual aprovada pelo dono em 2026-09-23 (grade,
+> detalhe, wishlist, progresso, import e login, inclusive a 360px) e gate build
+> limpo. `validate_state.py interface` limpo.
+>
+> **Próximo passo: aprovar a spec da `navegacao`** (`18c2823`, 29 requisitos,
+> NAV-01..NAV-29, de Req. 4.9 e Req. 13). Nove premissas estão com
+> `Confirmed? = n` e são revisáveis na aprovação. Depois vem o `tasks.md`.
+>
+> Armadilha de ambiente: `docker compose build` falha no WSL porque o
+> `~/.docker/config.json` usa `credsStore` do Docker Desktop, que não está no
+> PATH. Contorno sem mexer na config: `DOCKER_CONFIG=<dir com {}> docker compose build`.
+
 > **Estado em 2026-09-22, madrugada — este bloco vence os de baixo.** A feature
 > **`interface` (Fase 6, §6.1–6.5)** tem T1–T13 commitadas e verificadas: o
 > Verifier deu PASS na rodada 3 (`.specs/features/interface/validation.md`) e

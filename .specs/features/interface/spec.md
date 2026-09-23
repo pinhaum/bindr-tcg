@@ -172,4 +172,4 @@ por mais que matiz; uma variante com quantidade zero não exibe badge.
 - [x] As 25 classes sem regra (a spec contava 23) têm regra; erro e sucesso são distinguíveis sem cor
 - [x] As seis verificações de 360px existentes passam sem edição
 - [x] `bin/rails test && bin/rubocop` limpos
-- [ ] Revisão visual aprovada pelo dono do produto em `docker compose up`
+- [x] Revisão visual aprovada pelo dono do produto em `docker compose up`

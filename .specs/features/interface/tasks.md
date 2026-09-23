@@ -21,7 +21,7 @@ A feature é governada por **AD-011** e por `.context/design.md` §11, que é a
 cópia normativa do design system. Os valores de token saem de lá, não do
 artifact externo.
 
-**Status**: Approved (2026-09-22, pelo dono do produto) — T1–T13 executadas e verificadas (Verifier PASS na rodada 3, `validation.md`); T14 aguarda a revisão visual do dono
+**Status**: Approved (2026-09-22, pelo dono do produto) — T1–T14 executadas; T1–T13 verificadas (Verifier PASS na rodada 3, `validation.md`); T14 aprovada pelo dono em 2026-09-23
 
 ## Execution Protocol
 
@@ -564,8 +564,8 @@ T13 → T14
 **Done when**:
 
 - [x] `ecc:a11y-architect` revisou `catalog.css` e as views tocadas; achados CRITICAL/HIGH viraram task de correção antes do Verifier
-- [ ] O dono do produto abriu grade, detalhe, wishlist, progresso, import e login em `docker compose up`, inclusive a 360px, e aprovou ou listou o que reprova
-- [ ] O resultado está registrado nesta task, com o que foi visto
+- [x] O dono do produto abriu grade, detalhe, wishlist, progresso, import e login em `docker compose up`, inclusive a 360px, e aprovou ou listou o que reprova
+- [x] O resultado está registrado nesta task, com o que foi visto
 
 **Revisão de acessibilidade (2026-09-22, `ecc:a11y-architect`, só leitura, diff `d9fa961..4c223e4`)**:
 nenhum CRITICAL. Houve um HIGH, que o orquestrador rebaixou: o reviewer disse
@@ -594,7 +594,11 @@ Os mutantes das duas primeiras foram mortos em cópia descartável.
 2 foi o flash da wishlist sem `code`, resolvido pela emenda do Req. 12.7 em
 `a8a9187`, por decisão do dono. Rodada 2 FAIL por causa do M2d, corrigido em
 `2b67f20`. Rodada 3 PASS.
-- [ ] Gate build passa
+
+**Revisão visual do dono (2026-09-23)**: aprovada, sem reprovação. O dono abriu
+grade, detalhe, wishlist, progresso, import e login em `docker compose up`
+(catálogo completo: 2834 cartas, 4933 variantes), em largura normal e a 360px.
+- [x] Gate build passa (2026-09-23, `docker compose build` exit 0; rodado com `DOCKER_CONFIG` vazio porque o `credsStore` do Docker Desktop não existe no PATH do WSL)
 
 **Tests**: none
 **Gate**: build
