@@ -134,64 +134,30 @@ class CatalogQuery
 
   def active_filters = @active_filters
 
-  # NAV-08 — devolve os valores distintos de cor, tipo de carta, raridade e sets
-  # presentes no banco, ordenados. Destina-se ao formulário de filtro na grade.
+  # NAV-08 — valores distintos de cor, tipo de carta, raridade e set presentes
+  # no banco, ordenados, para o formulário de filtro da grade.
   #
-  # Retorna um hash com chaves exatamente iguais aos nomes de parâmetro do
-  # query object: `:colors`, `:card_types`, `:rarities`, `:sets`. As três
-  # primeiras são arrays de strings; `:sets` é um array de hashes `{code:, name:}`.
+  # As chaves e as colunas saem das mesmas constantes que `call` usa para
+  # filtrar: um filtro renomeado ou apontado para outra coluna muda aqui junto,
+  # e o formulário nunca oferece um parâmetro que o query object ignoraria.
+  # `:sets` é um array de `{ code:, name: }`; as outras chaves, de strings.
+  # Valor NULL fica de fora: `card_variants.rarity` aceita NULL e um controle
+  # sem rótulo não filtra nada.
   def self.filter_options
-    colors = distinct_colors
-    card_types = distinct_card_types
-    rarities = distinct_rarities
-    sets = distinct_sets
+    color_column = Card.connection.quote_column_name(ARRAY_FILTERS.fetch(:colors))
+    type_column = SCALAR_FILTERS.fetch(:card_types)
+    rarity_column = VARIANT_FILTERS.fetch(:rarities)
+    set_column = VARIANT_FILTERS.fetch(:sets)
 
     {
-      colors: colors,
-      card_types: card_types,
-      rarities: rarities,
-      sets: sets
+      colors: Card.connection.select_values(
+        "SELECT DISTINCT unnest(cards.#{color_column}) AS value FROM cards ORDER BY value"
+      ),
+      card_types: Card.distinct.order(type_column).pluck(type_column),
+      rarities: CardVariant.where.not(rarity_column => nil).distinct.order(rarity_column).pluck(rarity_column),
+      sets: CardSet.joins(:card_variants).distinct.order(set_column).pluck(set_column, :name)
+                   .map { |code, name| { code: code, name: name } }
     }
-  end
-
-  # Cores com `&&` (elemento em comum): multicolorida contribui com cada uma.
-  # Escopo base é a grade: cartas presentes, variantes que existem.
-  def self.distinct_colors
-    sql = <<~SQL
-      SELECT DISTINCT unnest(colors) AS color
-      FROM cards
-      INNER JOIN card_variants ON card_variants.card_id = cards.id
-      ORDER BY color
-    SQL
-    ActiveRecord::Base.connection.select_values(sql)
-  end
-
-  # Tipos de carta da grade.
-  def self.distinct_card_types
-    Card.select(:card_type)
-        .distinct
-        .order(:card_type)
-        .pluck(:card_type)
-  end
-
-  # Raridades das variantes da grade: variante pode estar em set diferente do de
-  # estreia da carta (1402 casos no catálogo real), então consulta em
-  # `card_variants` e não em `cards`.
-  def self.distinct_rarities
-    CardVariant.select(:rarity)
-               .distinct
-               .order(:rarity)
-               .pluck(:rarity)
-  end
-
-  # Sets que têm ao menos uma variante de carta presente. Retorna array de
-  # hashes `{code:, name:}` ordenado por código.
-  def self.distinct_sets
-    CardSet.joins(:card_variants)
-           .select(:code, :name)
-           .distinct
-           .order(:code)
-           .map { |set| { code: set.code, name: set.name } }
   end
 
   # Exposto para o teste de plano de execução (Req. 11.3): a asserção é sobre

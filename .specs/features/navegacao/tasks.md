@@ -168,7 +168,7 @@ automaticamente.
 - [x] Carta marcada como ausente da fonte (Req. 1.7) segue as mesmas regras de visibilidade que a grade já aplica
 - [x] `test/queries/catalog_filter_options_test.rb` novo; gate quick passa, contagem registrada
 
-**Resultado**: 261 runs, 0 failures (gate quick); rubocop limpo.
+**Resultado**: 263 runs, 0 failures (gate quick); rubocop limpo. Revisão do orquestrador: chaves e colunas passaram a sair das constantes do query object, e raridade NULL ficou de fora das opções.
 
 **Tests**: unit
 **Gate**: quick

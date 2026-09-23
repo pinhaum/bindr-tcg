@@ -166,4 +166,19 @@ class CatalogFilterOptionsTest < ActiveSupport::TestCase
     # Ordenados: OP00, OP01, OP02, ST01
     assert_equal codes.sort, codes
   end
+
+  test "raridade nula da variante não vira opção de filtro" do
+    card = create_card(card_number: "OP01-099", name: "Sem Raridade", card_type: "character",
+                       colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    create_variant(card, "OP01-099", rarity: nil, card_set: @op01)
+
+    assert_not_includes CatalogQuery.filter_options[:rarities], nil
+  end
+
+  test "as chaves são os nomes de parâmetro que o query object filtra" do
+    filtered = CatalogQuery::ARRAY_FILTERS.keys + CatalogQuery::SCALAR_FILTERS.keys +
+               CatalogQuery::VARIANT_FILTERS.keys
+
+    CatalogQuery.filter_options.each_key { |key| assert_includes filtered, key }
+  end
 end
