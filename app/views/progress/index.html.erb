@@ -91,13 +91,25 @@
   </p>
 
   <%#
-    T7 — entrada do export (POR-01). Acima da lista de propósito: são 63 sets
-    na página real, e um controle depois deles exigiria percorrer a lista
-    inteira por rolagem, por tabulação e em leitura de leitor de tela. As
-    razões de rótulo, posição e ausência de condicional estão no próprio
-    partial.
+    T4 — links para wishlist, import e export (NAV-19).
+
+    Os três links de ação sobre a coleção moram aqui, onde o usuário olha o
+    resumo do que tem. Acima da lista de sets de propósito: 63 itens depois deles
+    exigiriam rolagem para chegar num controle no fim.
   %>
-  <%= render "progress/export_link" %>
+  <div class="progress__actions">
+    <%= render "progress/export_link" %>
+
+    <p class="progress__action">
+      <%= link_to "Lista de desejos", wishlist_items_path,
+                  class: "progress__action-link" %>
+    </p>
+
+    <p class="progress__action">
+      <%= link_to "Importar coleção", new_collection_import_path,
+                  class: "progress__action-link" %>
+    </p>
+  </div>
 
   <%#
     Achado MEDIUM da revisão de a11y: `aria-labelledby` apontando para o `<h1>`.

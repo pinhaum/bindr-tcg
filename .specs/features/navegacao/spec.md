@@ -206,7 +206,7 @@ de antes.
 | NAV-16 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-17 | P1: Minha pasta | Req. 13.4, 7.7 | Implemented (T3) |
 | NAV-18 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
-| NAV-19 | P1: Minha pasta | Req. 13.4 | Pending |
+| NAV-19 | P1: Minha pasta | Req. 13.4 | Implemented (T4) |
 | NAV-20 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-21 | P1: Minha pasta | Req. 6.5 | Implemented (T3) |
 | NAV-22 | P2: Layout largo | Req. 13.5 | Pending |

@@ -651,6 +651,7 @@ summary:focus-visible,
 .wishlist-mark__input:focus-visible,
 .wishlist-mark__submit:focus-visible,
 .progress-set__catalog-link:focus-visible,
+.progress__action-link:focus-visible,
 .collection-export__link:focus-visible,
 .import-preview__confirm:focus-visible,
 .import-preview__again:focus-visible,
@@ -893,6 +894,24 @@ summary:focus-visible,
 .collection-export { margin: 0 0 var(--space-3); font-size: var(--body-size); line-height: var(--body-line-height); }
 
 .collection-export__link {
+  display: inline-block;
+  min-height: 24px;
+  min-width: 24px;
+  padding: var(--space-1) 0;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * T4 — links para wishlist, import e export de Minha pasta (NAV-19).
+ *
+ * Container com os três links. Mesmo padrão de `.collection-export`:
+ * sem largura fixa, `inline-block` permite quebra de texto em 360px.
+ */
+.progress__actions { margin: 0 0 var(--space-3); }
+
+.progress__action { margin: 0 0 var(--space-2); font-size: var(--body-size); line-height: var(--body-line-height); }
+
+.progress__action-link {
   display: inline-block;
   min-height: 24px;
   min-width: 24px;
