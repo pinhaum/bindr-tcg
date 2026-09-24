@@ -539,14 +539,20 @@ class WishlistItemsTest < ActionDispatch::IntegrationTest
 
   # --- Navegação ---
 
-  test "o cabeçalho leva à lista de desejos para quem tem sessão" do
+  test "a lista de desejos é alcançável a partir de Minha pasta para quem tem sessão" do
+    # A T5 tira a wishlist do cabeçalho e a torna alcançável via "Minha pasta".
+    # O teste de UI de progresso (progress_ui_test) valida que o link está em
+    # `/progress` e não em `/catalog`. Este teste valida que o link funciona.
     sign_in
-    get catalog_path
+    get progress_path
 
     assert_select "a[href=?]", wishlist_items_path, text: "Lista de desejos"
   end
 
-  test "o anônimo não vê a entrada da lista de desejos" do
+  test "o anônimo não vê a entrada da lista de desejos em nenhum lugar" do
+    # Sem sessão, a página de progresso redireciona ao login (Req. 6.4).
+    # O cabeçalho não exibe links internos (Req. 6.3, NAV-03), então
+    # nenhuma entrada para wishlist aparece de jeito nenhum.
     get catalog_path
 
     assert_response :success

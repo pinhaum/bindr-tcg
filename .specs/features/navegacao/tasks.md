@@ -275,12 +275,12 @@ automaticamente.
 
 **Done when**:
 
-- [ ] Exatamente um `nav` principal por página, `aria-label="Principal"`, com classe `site-header__nav`, dentro de `header.site-header`
-- [ ] Com sessão, as entradas são Catálogo, Minha pasta (`/progress`) e Sair. Sem sessão, Catálogo, Entrar e Criar conta. "Progresso por set" e "Lista de desejos" saem do cabeçalho
-- [ ] `aria-current="page"` só em "Catálogo" no catálogo, só em "Minha pasta" em `/progress`, e em nenhuma entrada no detalhe da carta
-- [ ] Nenhuma entrada de baralho, preço ou cotação (NAV-07), verificado por texto e por `href`
-- [ ] `wishlist_items_test.rb:542-546` reescrito: a wishlist é alcançável a partir de "Minha pasta" e não aparece para anônimo. O motivo vai no comentário do teste
-- [ ] `progress_ui_test.rb` e `sessions_test.rb` passam sem edição; gate full passa, contagem registrada
+- [x] Exatamente um `nav` principal por página, `aria-label="Principal"`, com classe `site-header__nav`, dentro de `header.site-header`
+- [x] Com sessão, as entradas são Catálogo, Minha pasta (`/progress`) e Sair. Sem sessão, Catálogo, Entrar e Criar conta. "Progresso por set" e "Lista de desejos" saem do cabeçalho
+- [x] `aria-current="page"` só em "Catálogo" no catálogo, só em "Minha pasta" em `/progress`, e em nenhuma entrada no detalhe da carta
+- [x] Nenhuma entrada de baralho, preço ou cotação (NAV-07), verificado por texto e por `href`
+- [x] `wishlist_items_test.rb:542-546` reescrito: a wishlist é alcançável a partir de "Minha pasta" e não aparece para anônimo. O motivo vai no comentário do teste
+- [x] `progress_ui_test.rb` e `sessions_test.rb` passam sem edição; gate full passa, contagem registrada
 
 **Tests**: integration
 **Gate**: full

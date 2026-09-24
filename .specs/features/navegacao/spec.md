@@ -188,13 +188,13 @@ de antes.
 
 | Requirement ID | Story | Origem | Status |
 |---|---|---|---|
-| NAV-01 | P1: Navegação principal | Req. 13.1 | Pending |
-| NAV-02 | P1: Navegação principal | Req. 13.1 | Pending |
-| NAV-03 | P1: Navegação principal | Req. 13.1 | Pending |
-| NAV-04 | P1: Navegação principal | Req. 13.2 | Pending |
+| NAV-01 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
+| NAV-02 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
+| NAV-03 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
+| NAV-04 | P1: Navegação principal | Req. 13.2 | Implemented (T5) |
 | NAV-05 | P1: Navegação principal | Req. 13.3 | Pending |
 | NAV-06 | P1: Navegação principal | Req. 13.3 | Pending |
-| NAV-07 | P1: Navegação principal | Req. 13.8 | Pending |
+| NAV-07 | P1: Navegação principal | Req. 13.8 | Implemented (T5) |
 | NAV-08 | P1: Filtrar a grade | Req. 4.9 | Implemented (T1) |
 | NAV-09 | P1: Filtrar a grade | Req. 4.9, 4.7 | Pending |
 | NAV-10 | P1: Filtrar a grade | Req. 4.3, 4.7 | Pending |

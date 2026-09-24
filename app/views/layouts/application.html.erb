@@ -26,37 +26,13 @@
     <header class="site-header">
       <%= link_to "Bindr", root_path, class: "site-header__brand" %>
 
-      <nav class="site-header__nav" aria-label="Conta">
-        <%# `authenticated?` é helper do concern `Authentication`. O catálogo é
-            público, então este cabeçalho é renderizado para anônimo também. %>
+      <nav class="site-header__nav" aria-label="Principal">
         <% if authenticated? %>
-          <%#
-            A wishlist é uma lista própria, não um recorte do catálogo: ela
-            mistura impressões de sets e cartas diferentes e não tem filtro,
-            busca nem paginação em comum com a grade. Por isso rota própria
-            (`/wishlist`) e entrada no cabeçalho, ao lado de "Sair" — é o único
-            lugar de onde ela é alcançável, e escondê-la dentro do catálogo
-            exigiria inventar um estado de navegação que o produto não tem.
-
-            Só para quem tem sessão: o catálogo é público (Req. 6.3), mas a
-            wishlist exige sessão em toda action (Req. 6.4), e um link que só
-            leva ao login é promessa quebrada.
-          %>
-          <%#
-            Progresso por set (T5 / Req. 9). Mesma razão de a wishlist estar
-            aqui: é uma página própria, não um recorte do catálogo — agrega a
-            coleção inteira por set e não tem busca, filtro nem paginação em
-            comum com a grade. O cabeçalho é o único lugar de onde ela é
-            alcançável.
-
-            Só para quem tem sessão, pela mesma regra: a página exige sessão em
-            toda action (Req. 6.4, PRG-09) e um link que só leva ao login é
-            promessa quebrada.
-          %>
-          <%= link_to "Progresso por set", progress_path, class: "site-header__action" %>
-          <%= link_to "Lista de desejos", wishlist_items_path, class: "site-header__action" %>
+          <%= nav_link_to "Catálogo", catalog_path, class: "site-header__action" %>
+          <%= nav_link_to "Minha pasta", progress_path, class: "site-header__action" %>
           <%= button_to "Sair", session_path, method: :delete, class: "site-header__action" %>
         <% else %>
+          <%= nav_link_to "Catálogo", catalog_path, class: "site-header__action" %>
           <%= link_to "Entrar", new_session_path, class: "site-header__action" %>
           <%= link_to "Criar conta", new_registration_path, class: "site-header__action" %>
         <% end %>
