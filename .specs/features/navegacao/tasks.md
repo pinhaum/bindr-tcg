@@ -398,7 +398,7 @@ automaticamente.
 - [x] Controles com `min-height` e `min-width` de 24px
 - [x] `test/design/filter_layout_test.rb` novo; `layout_test.rb` e os sete arquivos protegidos passam sem edição; gate full passa, contagem registrada
 
-**Resultado**: 1060 runs, 0 failures (gate full); rubocop limpo.
+**Resultado**: 1062 runs, 0 failures (gate full); rubocop limpo. Correção T9a: coluna de filtros estreitada para 12–16rem, grade deslocada para coluna 2, demais filhos em 1/-1, e novos testes para grid-column.
 
 **Tests**: unit
 **Gate**: full

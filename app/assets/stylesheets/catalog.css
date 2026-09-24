@@ -1548,12 +1548,20 @@ summary:focus-visible,
 
   .catalog {
     display: grid;
-    grid-template-columns: minmax(200px, 1fr) 1fr;
-    gap: var(--gap);
+    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+    column-gap: var(--gap);
+    align-items: start;
   }
+
+  .catalog > * { grid-column: 1 / -1; }
 
   .catalog__filters {
     grid-column: 1;
+    grid-row: span 2;
     flex-direction: column;
   }
+
+  .catalog__grid,
+  .catalog__empty,
+  .pagination { grid-column: 2; }
 }
