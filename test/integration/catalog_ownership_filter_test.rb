@@ -173,6 +173,19 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
     assert_select ".catalog__count", text: /^0 cartas$/
   end
 
+  test "outro usuário possui a carta X; o usuário logado não. Em ?owned=missing, a carta X aparece" do
+    # Coloca Zoro na coleção de outro_user
+    CollectionItem.create!(user: @other_user, card_variant: @zoro_variant, quantity: 1)
+
+    post session_path, params: { email: "zoro@example.com", password: "password" }
+    get catalog_path(owned: "missing")
+
+    # Para @user, Zoro está em "não tenho" porque a posse de outro_user não entra
+    assert_select ".catalog__count", text: /^3 cartas$/
+    # E Zoro de fato está lá
+    assert_select "li", /Roronoa Zoro/
+  end
+
   private
 
   # Simula o envio nativo do formulário pelo navegador.

@@ -345,4 +345,27 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert_select ".catalog__filters"
     assert_select ".catalog__filter-group"
   end
+
+  test "sem sessão, ?owned=owned ignora o filtro e dá a mesma contagem do catálogo sem parâmetro" do
+    get catalog_path
+    from_no_param = css_select(".catalog__count").text.strip
+
+    get catalog_path(owned: "owned")
+    from_owned_param = css_select(".catalog__count").text.strip
+
+    assert_equal from_no_param, from_owned_param
+    assert_equal "5 cartas", from_owned_param
+  end
+
+  test "dois sets no reenvio: submit_filter_form com [] dá a mesma contagem de catalog_path(sets: [\"OP01\",\"OP02\"])" do
+    # Primeiro acesso com dois sets
+    get catalog_path(sets: [ "OP01", "OP02" ])
+    expected_count = css_select(".catalog__count").text.strip
+    assert_equal "5 cartas", expected_count
+
+    # Simula reenvio do formulário com nenhum set selecionado ([] == "Todos os sets")
+    new_count = submit_filter_form([])
+
+    assert_equal expected_count, new_count
+  end
 end
