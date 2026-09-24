@@ -64,6 +64,7 @@
   --nav-height: 56px;
   --body-grid-columns: 1fr;
   --body-padding-bottom: var(--nav-height);
+  scroll-padding-bottom: var(--body-padding-bottom);
 
   /* Raio — §11.5 */
   --radius-sm: 4px;
@@ -1579,8 +1580,4 @@ summary:focus-visible,
   .card-detail__data { grid-column: 1; }
 
   .card-detail__variants { grid-column: 2; }
-}
-
-html {
-  scroll-padding-bottom: var(--body-padding-bottom);
 }

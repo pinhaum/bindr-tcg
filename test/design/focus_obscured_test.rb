@@ -2,23 +2,24 @@ require "test_helper"
 require_relative "support/stylesheet"
 
 # SC 2.4.11 (Res. 12.10): navegação fixa não esconde o foco ao tabular.
-# A regra `html { scroll-padding-bottom: var(--body-padding-bottom); }`
-# dimensiona o espaço reservado para scroll quando um elemento ganha foco.
+# O bloco `:root` base (fora de @media) declara
+# `scroll-padding-bottom: var(--body-padding-bottom);`, dimensionando o espaço
+# reservado para scroll quando um elemento ganha foco. `:root` casa com `html`,
+# o scroller do documento.
 class FocusObscuredTest < ActiveSupport::TestCase
-  setup { @rules = Stylesheet.rules }
+  test ":root base declara scroll-padding-bottom igual a var(--body-padding-bottom)" do
+    content = Stylesheet.read_stylesheet
+    # Extrai o primeiro bloco :root (base, fora de @media)
+    root_match = content.match(/:root\s*\{([^{}]+)\}/m)
+    assert root_match, "nenhuma regra :root encontrada"
 
-  test "html declara scroll-padding-bottom igual a var(--body-padding-bottom)" do
-    html_rules = @rules.select { |selector, _| selector.strip == "html" }
-    assert_not_empty html_rules, "nenhuma regra para html"
+    has_scroll_padding = root_match[1].match?(/scroll-padding-bottom:\s*var\(--body-padding-bottom\)/)
+    assert has_scroll_padding, ":root não declara scroll-padding-bottom: var(--body-padding-bottom)"
+  end
 
-    declarations = html_rules.flat_map do |_selector, body|
-      Stylesheet.declarations(body)
-    end
-
-    has_scroll_padding = declarations.any? do |property, value|
-      property == "scroll-padding-bottom" && value == "var(--body-padding-bottom)"
-    end
-
-    assert has_scroll_padding, "html não declara scroll-padding-bottom: var(--body-padding-bottom)"
+  test "a folha não tem nenhuma regra com seletor html fora de :root" do
+    content = Stylesheet.content_outside_root
+    html_rules = content.scan(/html\s*\{/)
+    assert_empty html_rules, "folha tem regra para html (deve estar em :root)"
   end
 end

@@ -436,6 +436,8 @@ automaticamente.
 
 ### T11: Revisão de acessibilidade e revisão visual do dono
 
+**Correções da revisão**: nomeou o seletor de set com `label for="filter-sets"` e `select id="filter-sets" name="sets[]"` (SC 4.1.2 e 1.3.1); moveu `scroll-padding-bottom: var(--body-padding-bottom)` para o bloco `:root` base (SC 2.4.11, Res. 12.10). Testes novos: `test/design/focus_obscured_test.rb` (2 testes). Gate: 1075 runs, 0 failures; RuboCop limpo.
+
 **What**: Rodar a revisão de a11y sobre o diff da feature e submeter as telas ao dono do produto em `docker compose up`, em 360px e em 1280px.
 **Where**: `.specs/features/navegacao/tasks.md`
 **Depends on**: T10
