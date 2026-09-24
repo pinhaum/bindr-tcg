@@ -1503,6 +1503,37 @@ summary:focus-visible,
   min-width: 44px;
 }
 
+/* Filtros em fluxo normal abaixo de 1024px, com flex para fileiras de controles (T9) */
+.catalog__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.catalog__filter-group {
+  flex: 1 1 100%;
+}
+
+.catalog__filter-group > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: center;
+}
+
+.catalog__color-option:has(:checked) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.catalog__filter-group input[type="checkbox"],
+.catalog__filter-group input[type="radio"],
+.catalog__filter-group select,
+.catalog__filters button[type="submit"] {
+  min-height: 24px;
+  min-width: 24px;
+}
+
 @media (min-width: 64rem) {
   :root {
     --body-grid-columns: minmax(200px, 1fr) 3fr;
@@ -1514,4 +1545,15 @@ summary:focus-visible,
   .site-header__nav { position: static; flex-direction: column; height: auto; align-items: flex-start; border-top: none; }
 
   .site-header ~ * { grid-column: 2; min-width: 0; }
+
+  .catalog {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 1fr;
+    gap: var(--gap);
+  }
+
+  .catalog__filters {
+    grid-column: 1;
+    flex-direction: column;
+  }
 }

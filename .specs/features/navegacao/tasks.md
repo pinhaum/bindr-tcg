@@ -64,7 +64,7 @@ Medidas em `main` (`2234e11`):
 
 | Ponto | Escolha | Motivo |
 |---|---|---|
-| Barra inferior | Mobile-first: a regra base é a estreita, com `position: fixed; bottom: 0` em `.site-header__nav` e altura `var(--nav-height)`. `body` reserva `padding-bottom: var(--nav-height)`. `@media (min-width: 1024px)` desfaz as duas coisas | `position: sticky` não serve: a `nav` fica dentro do `header`, e sticky não escapa do contêiner. Um token para a altura da barra e para a reserva faz o NAV-05 ser uma igualdade verificável |
+| Barra inferior | Mobile-first: a regra base é a estreita, com `position: fixed; bottom: 0` em `.site-header__nav` e altura `var(--nav-height)`. `body` reserva `padding-bottom: var(--nav-height)`. `@media (min-width: 64rem)` (= 1024px; `catalog_grid_test.rb` varre `px`) desfaz as duas coisas | `position: sticky` não serve: a `nav` fica dentro do `header`, e sticky não escapa do contêiner. Um token para a altura da barra e para a reserva faz o NAV-05 ser uma igualdade verificável |
 | Token novo `--nav-height` | Acrescentado em `:root`, com valor ≥ 44px, e registrado em `.context/design.md` §11.5 no mesmo commit | A guarda de literais recusa `calc()` com número solto em `padding` |
 | Coluna lateral | Em `≥ 1024px`, `body` vira grid de duas colunas. `header.site-header` ocupa a primeira, com marca em cima e `nav` vertical. Flash e `main` ficam na segunda | Uma marcação só (premissa confirmada). A ordem do DOM (navegação antes do conteúdo) é a mesma nas duas larguras |
 | `aria-current` | Helper `nav_link_to` com `current_page?`. "Catálogo" fica corrente em `/` e em `/catalog`, "Minha pasta" em `/progress`, "Entrar" e "Criar conta" nas próprias páginas. No detalhe da carta nenhuma entrada fica corrente | NAV-04 fala da página da navegação aberta. O detalhe não é entrada |
@@ -392,11 +392,13 @@ automaticamente.
 
 **Done when**:
 
-- [ ] Fora de media query, os filtros não têm `position` nem `float`, e cada fileira de controles quebra linha (`flex-wrap: wrap`), sem `overflow-x`
-- [ ] Dentro de `@media (min-width: 1024px)`, filtros e grade ficam em duas colunas
-- [ ] O chip de cor marcado tem `outline` ou `box-shadow` de 2px com `var(--accent)`, e nenhum `background` com `accent`, em nenhum estado
-- [ ] Controles com `min-height` e `min-width` de 24px
-- [ ] `test/design/filter_layout_test.rb` novo; `layout_test.rb` e os sete arquivos protegidos passam sem edição; gate full passa, contagem registrada
+- [x] Fora de media query, os filtros não têm `position` nem `float`, e cada fileira de controles quebra linha (`flex-wrap: wrap`), sem `overflow-x`
+- [x] Dentro de `@media (min-width: 64rem)` (= 1024px; `catalog_grid_test.rb` varre `px`), filtros e grade ficam em duas colunas
+- [x] O chip de cor marcado tem `outline` ou `box-shadow` de 2px com `var(--accent)`, e nenhum `background` com `accent`, em nenhum estado
+- [x] Controles com `min-height` e `min-width` de 24px
+- [x] `test/design/filter_layout_test.rb` novo; `layout_test.rb` e os sete arquivos protegidos passam sem edição; gate full passa, contagem registrada
+
+**Resultado**: 1060 runs, 0 failures (gate full); rubocop limpo.
 
 **Tests**: unit
 **Gate**: full

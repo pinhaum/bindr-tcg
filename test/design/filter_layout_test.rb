@@ -1,0 +1,168 @@
+require "test_helper"
+require_relative "support/stylesheet"
+
+# T9: Filtros em fluxo normal abaixo de 1024px, em duas colunas acima (NAV-22, NAV-23, NAV-28)
+# Anel da cor selecionada com 2px em accent (NAV-15)
+class FilterLayoutTest < ActiveSupport::TestCase
+  setup do
+    @stylesheet = Stylesheet.read_stylesheet
+    @tokens = Stylesheet.read_root_tokens
+  end
+
+  # Extrai o conteúdo dentro de @media (min-width: 64rem) até o fim da folha
+  def media_64rem_content
+    match = @stylesheet.match(/@media\s*\([^)]*min-width:\s*64rem[^)]*\)\s*\{(.*)\}\s*\z/m)
+    assert match, "@media (min-width: 64rem) não encontrada ou não é o último bloco"
+    match[1]
+  end
+
+  # Extrai tudo que está FORA de @media queries (antes da primeira)
+  def content_outside_media
+    match = @stylesheet.match(/\A(.*?)@media/m)
+    return @stylesheet unless match
+    match[1]
+  end
+
+  test "fora de media query, .catalog__filters usa display: flex; flex-wrap: wrap" do
+    outside = content_outside_media
+
+    # Procura a regra .catalog__filters (última antes de @media, pois há redefinição)
+    assert outside.include?(".catalog__filters"),
+           "regra .catalog__filters não encontrada fora de media query"
+
+    # Encontra a última .catalog__filters { ... } antes de @media (vence em cascata CSS)
+    # scan com grupo retorna array de arrays: [["corpo1"], ["corpo2"]]
+    all_matches = outside.scan(/\.catalog__filters\s*\{([^}]*)\}/)
+    assert all_matches.any?, "regra .catalog__filters não tem corpo"
+
+    body = all_matches.last[0]  # Última ocorrência vence em CSS cascata; [0] extrai do array interno
+    assert body.include?("display: flex"),
+           ".catalog__filters deve ter 'display: flex' fora de media query"
+    assert body.include?("flex-wrap: wrap"),
+           ".catalog__filters deve ter 'flex-wrap: wrap' fora de media query"
+    assert !body.include?("overflow-x"),
+           ".catalog__filters não deve ter 'overflow-x' fora de media query"
+  end
+
+  test "fora de media query, .catalog__filters não tem position nem float" do
+    outside = content_outside_media
+
+    # Última ocorrência (scan com grupo retorna array de arrays)
+    all_matches = outside.scan(/\.catalog__filters\s*\{([^}]*)\}/)
+    body = all_matches.last[0]
+
+    # Verifica se há position: ... (fora de media query)
+    refute body.match?(/position:\s*(?!static)/),
+           ".catalog__filters não deve ter 'position' diferente de static fora de media query"
+
+    refute body.include?("float:"),
+           ".catalog__filters não deve ter 'float' fora de media query"
+  end
+
+  test "dentro de @media (min-width: 64rem), .catalog usa grid de duas colunas" do
+    media = media_64rem_content
+
+    assert media.include?(".catalog"),
+           ".catalog não aparece em @media (min-width: 64rem)"
+
+    catalog_match = media.match(/\.catalog\s*\{([^}]*)\}/)
+    assert catalog_match, ".catalog não tem corpo em media query"
+
+    body = catalog_match[1]
+    assert body.include?("display: grid"),
+           ".catalog deve ter 'display: grid' em @media (min-width: 64rem)"
+    assert body.include?("grid-template-columns:"),
+           ".catalog deve ter 'grid-template-columns:' em @media (min-width: 64rem)"
+  end
+
+  test "dentro de @media (min-width: 64rem), .catalog__filters está na coluna 1" do
+    media = media_64rem_content
+
+    assert media.include?(".catalog__filters"),
+           ".catalog__filters não aparece em @media (min-width: 64rem)"
+
+    filters_match = media.match(/\.catalog__filters\s*\{([^}]*)\}/)
+    assert filters_match, ".catalog__filters não tem corpo em media query"
+
+    body = filters_match[1]
+    assert body.include?("grid-column: 1"),
+           ".catalog__filters deve ter 'grid-column: 1' em @media (min-width: 64rem)"
+  end
+
+  test ".catalog__color-option:has(:checked) tem outline de 2px com var(--accent)" do
+    outside = content_outside_media
+
+    # Procura a regra .catalog__color-option:has(:checked)
+    assert outside.include?(".catalog__color-option:has(:checked)"),
+           "regra .catalog__color-option:has(:checked) não encontrada"
+
+    rule_match = outside.match(/\.catalog__color-option:has\(:checked\)\s*\{([^}]*)\}/)
+    assert rule_match, ".catalog__color-option:has(:checked) não tem corpo"
+
+    body = rule_match[1]
+
+    # Verifica outline ou box-shadow
+    has_outline = body.include?("outline:") && body.include?("2px") && body.include?("var(--accent)")
+    has_box_shadow = body.include?("box-shadow:") && body.include?("2px") && body.include?("var(--accent)")
+
+    assert has_outline || has_box_shadow,
+           ".catalog__color-option:has(:checked) deve ter 'outline' ou 'box-shadow' de 2px com var(--accent)"
+  end
+
+  test ".catalog__color-option nenhuma regra usa background com accent" do
+    # Procura qualquer regra que comece com .catalog__color-option
+    all_rules = Stylesheet.rules(@stylesheet)
+
+    color_option_rules = all_rules.select do |selector, _|
+      selector.include?(".catalog__color-option")
+    end
+
+    assert color_option_rules.any?,
+           "nenhuma regra de .catalog__color-option encontrada"
+
+    color_option_rules.each do |selector, body|
+      # Verifica se background contém accent (case-insensitive)
+      refute body.match?(/background(?:-color)?\s*:\s*[^;]*accent/i),
+             "#{selector} não deve usar 'accent' em background ou background-color"
+    end
+  end
+
+  test "checkbox, rádio, select e botão têm min-height e min-width de 24px" do
+    outside = content_outside_media
+
+    # Procura a regra dos mínimos
+    assert outside.include?("min-height: 24px"),
+           "min-height: 24px não encontrado"
+    assert outside.include?("min-width: 24px"),
+           "min-width: 24px não encontrado"
+
+    # Verifica que checkbox, rádio, select e botão estão na mesma regra (ou em regra separada)
+    rule_match = outside.match(/\.catalog__filter-group\s+input\[type="checkbox"\][\s,]*\.catalog__filter-group\s+input\[type="radio"\][\s,]*\.catalog__filter-group\s+select[\s,]*\.catalog__filters\s+button\[type="submit"\]\s*\{([^}]*)\}/)
+
+    if rule_match
+      body = rule_match[1]
+      assert body.include?("min-height: 24px") && body.include?("min-width: 24px"),
+             "regra conjunta deve ter min-height e min-width de 24px"
+    else
+      # Verifica se cada um tem seu próprio min-height e min-width
+      selectors = [
+        ".catalog__filter-group input[type=\"checkbox\"]",
+        ".catalog__filter-group input[type=\"radio\"]",
+        ".catalog__filter-group select",
+        ".catalog__filters button[type=\"submit\"]"
+      ]
+
+      selectors.each do |selector|
+        rule_match = outside.match(/#{Regexp.escape(selector)}\s*\{([^}]*)\}/)
+        assert rule_match,
+               "#{selector} não tem regra CSS"
+
+        body = rule_match[1]
+        assert body.include?("min-height") && body.include?("24px"),
+               "#{selector} deve ter min-height de 24px"
+        assert body.include?("min-width") && body.include?("24px"),
+               "#{selector} deve ter min-width de 24px"
+      end
+    end
+  end
+end

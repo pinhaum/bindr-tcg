@@ -202,15 +202,15 @@ de antes.
 | NAV-12 | P1: Filtrar a grade | Req. 4.9, 7.6 | Implemented (T8) |
 | NAV-13 | P1: Filtrar a grade | Req. 6.3 | Implemented (T8) |
 | NAV-14 | P1: Filtrar a grade | Req. 4.9 | Implemented (T7) |
-| NAV-15 | P1: Filtrar a grade | Req. 12.11 | Pending |
+| NAV-15 | P1: Filtrar a grade | Req. 12.11 | Implemented (T9) |
 | NAV-16 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-17 | P1: Minha pasta | Req. 13.4, 7.7 | Implemented (T3) |
 | NAV-18 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-19 | P1: Minha pasta | Req. 13.4 | Implemented (T4) |
 | NAV-20 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-21 | P1: Minha pasta | Req. 6.5 | Implemented (T3) |
-| NAV-22 | P2: Layout largo | Req. 13.5 | Pending |
-| NAV-23 | P2: Layout largo | Req. 13.5 | Pending |
+| NAV-22 | P2: Layout largo | Req. 13.5 | Implemented (T9) |
+| NAV-23 | P2: Layout largo | Req. 13.5 | Implemented (T9) |
 | NAV-24 | P2: Layout largo | Req. 13.6 | Pending |
 | NAV-25 | P2: Layout largo | Req. 13.6 | Pending |
 | NAV-26 | Edge case | Req. 4 (parâmetro inválido ignorado) | Implemented (T7) |

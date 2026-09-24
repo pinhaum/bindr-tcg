@@ -108,7 +108,7 @@
       <fieldset>
         <legend>Cor</legend>
         <% @filter_options[:colors].each do |color| %>
-          <div>
+          <div class="catalog__color-option">
             <input type="checkbox" id="color-<%= color %>" name="colors[]" value="<%= color %>"
                    <% if Array(@result.active_filters[:colors]).include?(color) %>checked<% end %>>
             <label for="color-<%= color %>"><%= color %></label>
