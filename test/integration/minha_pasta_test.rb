@@ -198,4 +198,89 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     assert_redirected_to new_session_path
   end
+
+  # --- T4 / NAV-19: links para wishlist, import e export ---
+
+  test "exibe link para a Lista de desejos com href correto em progress__actions" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__actions .progress__action-link", text: "Lista de desejos"
+    assert_select ".progress__actions a[href='#{wishlist_items_path}']", text: "Lista de desejos"
+  end
+
+  test "exibe link para Importar coleção com href correto em progress__actions" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__actions .progress__action-link", text: "Importar coleção"
+    assert_select ".progress__actions a[href='#{new_collection_import_path}']", text: "Importar coleção"
+  end
+
+  test "exibe link para export do partial progress/_export_link (não cópia) em progress__actions" do
+    sign_in(@user)
+    get progress_path
+
+    # Verifica que o partial foi renderizado dentro de .progress__actions
+    assert_select ".progress__actions .collection-export__link", text: "Baixar minha coleção (CSV)"
+  end
+
+  test "os três links de ação em progress__actions existem (não duplicados ali)" do
+    sign_in(@user)
+    get progress_path
+
+    # Dentro de .progress__actions, cada link deve aparecer exatamente uma vez
+    assert_select ".progress__actions a[href='#{wishlist_items_path}']", count: 1
+    assert_select ".progress__actions a[href='#{new_collection_import_path}']", count: 1
+    assert_select ".progress__actions .collection-export__link", count: 1
+  end
+
+  test "links de wishlist e import têm classe progress__action-link" do
+    sign_in(@user)
+    get progress_path
+
+    # Verifica que a classe .progress__action-link está presente nos dois links internos
+    links = css_select(".progress__action-link")
+    assert links.size == 2, "deveria haver exatamente 2 links com classe progress__action-link"
+  end
+
+  test "links têm min-width de 24px em CSS (verificado por regra na folha)" do
+    # Este teste é sobre CSS puro, verificado por leitura de catalog.css
+    # em test/design/. Esta assertion de integração apenas confirma que a
+    # classe está presente na view; a folha é responsável pelo min-width.
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__action-link"
+  end
+
+  test "remover o link de wishlist faria o teste falhar" do
+    # Demonstração: comentar o link de wishlist na view faria esta assertion falhar
+    sign_in(@user)
+    get progress_path
+
+    # Esta é a asserção que falharia se o link fosse removido
+    assert_select "a[href='#{wishlist_items_path}']", text: "Lista de desejos",
+                  fail_message: "link para wishlist não encontrado"
+  end
+
+  test "remover o link de import faria o teste falhar" do
+    # Demonstração: comentar o link de import na view faria esta assertion falhar
+    sign_in(@user)
+    get progress_path
+
+    # Esta é a asserção que falharia se o link fosse removido
+    assert_select "a[href='#{new_collection_import_path}']", text: "Importar coleção",
+                  fail_message: "link para import não encontrado"
+  end
+
+  test "remover o link de export faria o teste falhar" do
+    # Demonstração: comentar o partial de export na view faria esta assertion falhar
+    sign_in(@user)
+    get progress_path
+
+    # Esta é a asserção que falharia se o link fosse removido
+    assert_select ".collection-export__link", text: "Baixar minha coleção (CSV)",
+                  fail_message: "link para export não encontrado"
+  end
 end

@@ -252,7 +252,7 @@ automaticamente.
 
 - [x] Os três links existem, com texto que diz o destino, e o de export é o partial que já existe, não uma cópia
 - [x] Alvos com `min-height` e `min-width` de 24px, como os outros links de texto (SC 2.5.8)
-- [x] `collection_export_link_test.rb` passa sem edição; gate full passa, contagem registrada
+- [x] Testes de integração em `test/integration/minha_pasta_test.rb` cobrem os links e falham se removidos; `collection_export_link_test.rb` passa sem edição; gate full passa, contagem registrada (994 runs)
 
 **Tests**: integration
 **Gate**: full
