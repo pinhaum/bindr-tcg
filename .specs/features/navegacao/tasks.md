@@ -340,7 +340,7 @@ automaticamente.
 - [x] Nenhum `data-controller` nem JS: o formulário funciona com envio nativo
 - [x] Classes novas são elementos de `catalog`, com regra na folha; `catalog_grid_test.rb` e `color_chip_ui_test.rb` passam sem edição; gate full passa, contagem registrada
 
-**Resultado**: 1040 runs, 0 failures (gate full); rubocop limpo.
+**Resultado**: 1043 runs, 0 failures (gate full); rubocop limpo. Correção T7a: preservar `sort` e `dir` como `hidden`, reescrever teste NAV-09 para simular formulário, gerar IDs sem espaço para raridades com espaço (SP CARD), mover `filter_options` para controller.
 
 **Tests**: integration
 **Gate**: full
