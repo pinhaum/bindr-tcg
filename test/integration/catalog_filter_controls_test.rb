@@ -51,6 +51,16 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
       card: @luffy, set_id: @op02.id, variant_code: "OP02-002",
       rarity: "UC", art_kind: "base", image_url: "https://example.test/OP02-002.png"
     )
+
+    # Robin: rarity SP CARD (com espaço) para testar ID sem espaço
+    @robin = create_card(
+      card_number: "OP02-003", name: "Nico Robin",
+      card_type: "character", colors: [ "Purple" ], cost: 2
+    )
+    CardVariant.create!(
+      card: @robin, set_id: @op02.id, variant_code: "OP02-003",
+      rarity: "SP CARD", art_kind: "base", image_url: "https://example.test/OP02-003.png"
+    )
   end
 
   def create_card(**attrs)
@@ -105,8 +115,19 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
 
   # --- NAV-09: A URL gerada bate com a do query object ---
 
-  test "marcar Red e SR produz URL que bate com a contagem do query object" do
-    get catalog_path(colors: [ "Red" ], rarities: [ "SR" ])
+  test "enviar formulário com Red e SR produz URL que bate com a contagem do query object" do
+    # 1. Faz GET no catálogo e lê o formulário
+    get catalog_path
+
+    # Simula o envio nativo do formulário com Red marcado e SR marcado
+    # O navegador mandaria: colors[]=Red&rarities[]=SR
+    form_action = url_for(controller: "catalog", action: "index")
+    form_params = {
+      "colors[]" => "Red",
+      "rarities[]" => "SR"
+    }
+
+    get form_action, params: form_params
 
     # Esperado: 4 cartas no total menos a de Zoro (Red mas L), menos as que não são SR
     # Red: Zoro (L), Law (SR), Luffy (UC) → com SR: Law
@@ -116,21 +137,28 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     # Valida a contagem na página
     assert_select ".catalog__count", text: /^1 carta$/
 
-    # Valida que a contagem do formulário também bata
+    # Valida que a contagem do query object bata
     query = CatalogQuery.new(colors: [ "Red" ], rarities: [ "SR" ])
     assert_equal expected_count, query.call.total_count
   end
 
-  test "marcar Red e C produz a mesma contagem da URL digitada à mão" do
-    get catalog_path(colors: [ "Red" ], rarities: [ "C" ])
+  test "enviar formulário com Green e C produz Nami" do
+    get catalog_path
 
-    # Red: Zoro (L), Law (SR), Luffy (UC)
-    # Com C: nenhuma
-    expected_count = 0
+    form_action = url_for(controller: "catalog", action: "index")
+    form_params = {
+      "colors[]" => "Green",
+      "rarities[]" => "C"
+    }
 
-    assert_select ".catalog__count", text: /^0 cartas$/
+    get form_action, params: form_params
 
-    query = CatalogQuery.new(colors: [ "Red" ], rarities: [ "C" ])
+    # Green: Nami (C)
+    expected_count = 1
+
+    assert_select ".catalog__count", text: /^1 carta$/
+
+    query = CatalogQuery.new(colors: [ "Green" ], rarities: [ "C" ])
     assert_equal expected_count, query.call.total_count
   end
 
@@ -158,8 +186,8 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
   test "marcar sets OP01 e OP02 produz todas as cartas" do
     get catalog_path(sets: [ "OP01", "OP02" ])
 
-    expected_count = 4
-    assert_select ".catalog__count", text: /^4 cartas$/
+    expected_count = 5
+    assert_select ".catalog__count", text: /^5 cartas$/
 
     query = CatalogQuery.new(sets: [ "OP01", "OP02" ])
     assert_equal expected_count, query.call.total_count
@@ -186,6 +214,20 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
 
     assert_select "input[type=hidden][name=power_min][value='1000']"
     assert_select "input[type=hidden][name=power_max][value='5000']"
+  end
+
+  test "sort e dir vêm como hidden no formulário quando ativos" do
+    get catalog_path(q: "Zoro", cost_min: 3, traits: [ "Straw Hat" ], sort: "name", dir: "desc")
+
+    assert_select "input[type=hidden][name=sort][value=name]"
+    assert_select "input[type=hidden][name=dir][value=desc]"
+  end
+
+  test "traits vêm como hidden no formulário" do
+    get catalog_path(colors: [ "Red" ], traits: [ "Straw Hat", "Pirate" ])
+
+    assert_select "input[type=hidden][name='traits[]'][value='Straw Hat']"
+    assert_select "input[type=hidden][name='traits[]'][value=Pirate]"
   end
 
   test "dois sets na URL vêm como hidden e o select mostra 'Todos os sets'" do
@@ -269,6 +311,15 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert_select "form.catalog__filters"
     assert_select "input[type=checkbox][name='colors[]'][value=Red][checked]"
     assert_select "input[type=checkbox][name='rarities[]'][value=C][checked]"
+  end
+
+  test "raridade com espaço (SP CARD) tem ID sem espaço e label associada" do
+    get catalog_path
+
+    # O input tem ID sem espaço
+    assert_select "input[type=checkbox][id='rarity-sp-card'][name='rarities[]'][value='SP CARD']"
+    # O label aponta para o ID correspondente
+    assert_select "label[for='rarity-sp-card']", text: "SP CARD"
   end
 
   # --- NAV-14: Sem JavaScript, envio nativo ---

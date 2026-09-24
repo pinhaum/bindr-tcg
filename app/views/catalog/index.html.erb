@@ -96,13 +96,18 @@
         <input type="hidden" name="attributes[]" value="<%= attr %>">
       <% end %>
     <% end %>
+    <% if @result.active_filters[:sort].present? %>
+      <input type="hidden" name="sort" value="<%= @result.active_filters[:sort] %>">
+    <% end %>
+    <% if @result.active_filters[:dir].present? %>
+      <input type="hidden" name="dir" value="<%= @result.active_filters[:dir] %>">
+    <% end %>
 
     <%# Cores %>
-    <% filter_options = CatalogQuery.filter_options %>
     <div class="catalog__filter-group">
       <fieldset>
         <legend>Cor</legend>
-        <% filter_options[:colors].each do |color| %>
+        <% @filter_options[:colors].each do |color| %>
           <div>
             <input type="checkbox" id="color-<%= color %>" name="colors[]" value="<%= color %>"
                    <% if Array(@result.active_filters[:colors]).include?(color) %>checked<% end %>>
@@ -116,11 +121,11 @@
     <div class="catalog__filter-group">
       <fieldset>
         <legend>Tipo</legend>
-        <% filter_options[:card_types].each do |card_type| %>
+        <% @filter_options[:card_types].each do |card_type| %>
           <div>
-            <input type="checkbox" id="type-<%= card_type %>" name="card_types[]" value="<%= card_type %>"
+            <input type="checkbox" id="type-<%= card_type.parameterize(separator: '-') %>" name="card_types[]" value="<%= card_type %>"
                    <% if Array(@result.active_filters[:card_types]).include?(card_type) %>checked<% end %>>
-            <label for="type-<%= card_type %>"><%= card_type %></label>
+            <label for="type-<%= card_type.parameterize(separator: '-') %>"><%= card_type %></label>
           </div>
         <% end %>
       </fieldset>
@@ -130,11 +135,11 @@
     <div class="catalog__filter-group">
       <fieldset>
         <legend>Raridade</legend>
-        <% filter_options[:rarities].each do |rarity| %>
+        <% @filter_options[:rarities].each do |rarity| %>
           <div>
-            <input type="checkbox" id="rarity-<%= rarity %>" name="rarities[]" value="<%= rarity %>"
+            <input type="checkbox" id="rarity-<%= rarity.parameterize(separator: '-') %>" name="rarities[]" value="<%= rarity %>"
                    <% if Array(@result.active_filters[:rarities]).include?(rarity) %>checked<% end %>>
-            <label for="rarity-<%= rarity %>"><%= rarity %></label>
+            <label for="rarity-<%= rarity.parameterize(separator: '-') %>"><%= rarity %></label>
           </div>
         <% end %>
       </fieldset>
@@ -148,7 +153,7 @@
           <% sets_count = Array(@result.active_filters[:sets]).size %>
           <% is_multiple_or_none = sets_count > 1 || sets_count == 0 %>
           <option value="" <% if is_multiple_or_none %>selected<% end %>>Todos os sets</option>
-          <% filter_options[:sets].each do |set_option| %>
+          <% @filter_options[:sets].each do |set_option| %>
             <option value="<%= set_option[:code] %>"
                     <% if sets_count == 1 && Array(@result.active_filters[:sets]).include?(set_option[:code]) %>selected<% end %>>
               <%= set_option[:name] %>

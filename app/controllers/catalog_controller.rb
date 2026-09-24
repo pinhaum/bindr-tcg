@@ -23,6 +23,7 @@ class CatalogController < ApplicationController
 
     @query = CatalogQuery.new(params, Current.user)
     @result = @query.call
+    @filter_options = CatalogQuery.filter_options
 
     # `preload` e não `includes`: o `CatalogQuery` monta a página em Ruby (o
     # match exato é prependido a um array), então o que chega aqui é um Array
