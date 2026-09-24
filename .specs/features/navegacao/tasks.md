@@ -421,12 +421,14 @@ automaticamente.
 
 **Done when**:
 
-- [ ] As regras de duas colunas do detalhe existem só dentro de `@media (min-width: 1024px)`
-- [ ] Nenhuma view do detalhe perde campo ou controle. `card_detail_test.rb`, `collection_ownership_ui_test.rb` e `wishlist_mark_ui_test.rb` passam sem edição
-- [ ] Se a view precisar de um contêiner a mais para as duas colunas, ele é elemento de `card-detail`, com regra na folha, e não muda a ordem de leitura
-- [ ] `test/design/detail_layout_test.rb` novo; gate full passa, contagem registrada
+- [x] As regras de duas colunas do detalhe existem só dentro de `@media (min-width: 64rem)` (= 1024px; `catalog_grid_test.rb` varre `px`)
+- [x] Nenhuma view do detalhe perde campo ou controle. `card_detail_test.rb`, `collection_ownership_ui_test.rb` e `wishlist_mark_ui_test.rb` passam sem edição
+- [x] Se a view precisar de um contêiner a mais para as duas colunas, ele é elemento de `card-detail`, com regra na folha, e não muda a ordem de leitura
+- [x] `test/design/detail_layout_test.rb` novo; `test/integration/card_detail_layout_test.rb` novo; gate full passa, contagem registrada
 
-**Tests**: unit
+**Resultado**: 1069 runs, 0 failures, 0 errors, 2 skips; rubocop limpo. Estrutura HTML: `main.card-detail > [p, .card-detail__data > [header, dl, section?], .card-detail__variants]`. CSS: `.card-detail__data { min-width: 0; }` fora de media query, regras de grid dentro de `@media (min-width: 64rem)`.
+
+**Tests**: unit + integration
 **Gate**: full
 **Commit**: `feat(navegacao): pôr a arte ao lado dos dados no detalhe largo`
 

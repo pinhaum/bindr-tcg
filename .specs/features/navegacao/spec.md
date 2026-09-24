@@ -211,8 +211,8 @@ de antes.
 | NAV-21 | P1: Minha pasta | Req. 6.5 | Implemented (T3) |
 | NAV-22 | P2: Layout largo | Req. 13.5 | Implemented (T9) |
 | NAV-23 | P2: Layout largo | Req. 13.5 | Implemented (T9) |
-| NAV-24 | P2: Layout largo | Req. 13.6 | Pending |
-| NAV-25 | P2: Layout largo | Req. 13.6 | Pending |
+| NAV-24 | P2: Layout largo | Req. 13.6 | Implemented (T10) |
+| NAV-25 | P2: Layout largo | Req. 13.6 | Implemented (T10) |
 | NAV-26 | Edge case | Req. 4 (parâmetro inválido ignorado) | Implemented (T7) |
 | NAV-27 | Edge case | Req. 3.6 | Implemented (T7) |
 | NAV-28 | Edge case | Req. 2.5, 13.7 | Pending |

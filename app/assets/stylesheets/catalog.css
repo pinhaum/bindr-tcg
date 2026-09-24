@@ -309,6 +309,8 @@ body {
 
 .card-detail { max-width: 100%; padding: var(--space-4); }
 
+.card-detail__data { min-width: 0; }
+
 .card-detail__name {
   font-size: var(--display-size);
   line-height: var(--display-line-height);
@@ -1564,4 +1566,17 @@ summary:focus-visible,
   .catalog__grid,
   .catalog__empty,
   .pagination { grid-column: 2; }
+
+  .card-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--gap);
+    align-items: start;
+  }
+
+  .card-detail > * { grid-column: 1 / -1; }
+
+  .card-detail__data { grid-column: 1; }
+
+  .card-detail__variants { grid-column: 2; }
 }
