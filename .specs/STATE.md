@@ -100,6 +100,29 @@
 
 ## Handoff
 
+> **Estado em 2026-09-23, noite — este bloco vence os de baixo.** Feature em
+> execução: **`navegacao`** (spec e `tasks.md` aprovados em `dd3cafa`). O **lote
+> B1 (T1–T6) está fechado**: T1 `55aea4b` + `8876302`, T2 `ac6793c`, T3
+> `6394755`, T4 `2c823b0` + T4a `5b74c70` (teste que faltava), T5 `42e0dda` +
+> T5a `bb73312` (testes e correção do `aria-current`), T6 `363d17e` + T6a
+> `4376fc0` (grade da tela larga e §6.6 desmarcada). Gate full: 1020 runs, 0
+> falhas, RuboCop limpo (relato dos workers).
+>
+> **Próximo passo: lote B2 (T7–T11)**, uma task por worker Haiku no Orca,
+> conferindo cada commit antes de disparar a seguinte. Depois da T11, o
+> Verifier roda automaticamente.
+>
+> Pendências para o Verifier:
+> - `6394755` (T3) editou `test/queries/set_progress_plan_test.rb`, que é um dos
+>   sete testes protegidos. Conferir se havia justificativa.
+> - O teste "24px" da T4a não lê a folha, e os três testes "remover faria
+>   falhar" repetem asserções.
+> - Falta teste de `nav` único e de ausência de `aria-current` no detalhe da
+>   carta (T5). A correção do helper entrou num commit `test(...)`.
+> - A T6 trocou `1024px` por `64rem` porque o `catalog_grid_test.rb` varre `px`
+>   (os dois valores dão a mesma quebra). A T9 e a T10 devem usar a mesma
+>   media query.
+
 > **Estado em 2026-09-23 — este bloco vence os de baixo.** A feature
 > **`interface` (Fase 6, §6.1–6.5) está encerrada**: T1–T14 fechadas, Verifier
 > PASS na rodada 3, revisão visual aprovada pelo dono em 2026-09-23 (grade,
