@@ -426,7 +426,7 @@ automaticamente.
 - [x] Se a view precisar de um contêiner a mais para as duas colunas, ele é elemento de `card-detail`, com regra na folha, e não muda a ordem de leitura
 - [x] `test/design/detail_layout_test.rb` novo; `test/integration/card_detail_layout_test.rb` novo; gate full passa, contagem registrada
 
-**Resultado**: 1069 runs, 0 failures, 0 errors, 2 skips; rubocop limpo. Estrutura HTML: `main.card-detail > [p, .card-detail__data > [header, dl, section?], .card-detail__variants]`. CSS: `.card-detail__data { min-width: 0; }` fora de media query, regras de grid dentro de `@media (min-width: 64rem)`.
+**Resultado**: 1069 runs, 0 failures, 0 errors, 0 skips; rubocop limpo. Estrutura HTML: `main.card-detail > [p, .card-detail__data > [header, dl, section?, section?], .card-detail__variants]`. CSS: `.card-detail__data { min-width: 0; }` fora de media query, regras de grid dentro de `@media (min-width: 64rem)`. Correção T10a: remover `skip` do teste e implementar `setup` com dados reais, provando que `.card-detail__effect` e `.card-detail__trigger` estão dentro do contêiner de dados e que há duas variantes.
 
 **Tests**: unit + integration
 **Gate**: full
