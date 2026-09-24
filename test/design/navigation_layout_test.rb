@@ -114,4 +114,46 @@ class NavigationLayoutTest < ActiveSupport::TestCase
     nav_current = @tokens["--nav-current-weight"]
     assert nav_current, "--nav-current-weight não declarado em :root"
   end
+
+  test "dentro de @media (min-width: 64rem), .site-header está na coluna 1 cobrindo as linhas dos irmãos" do
+    stylesheet = Stylesheet.read_stylesheet
+
+    # Encontra a media query inteira
+    media_match = stylesheet.match(/@media\s*\([^)]*min-width:\s*64rem[^)]*\)\s*\{(.*)\}\s*\z/m)
+    assert media_match, "@media (min-width: 64rem) não encontrada"
+
+    media_content = media_match[1]
+
+    # Verifica .site-header com grid-column: 1
+    assert media_content.include?(".site-header"),
+           ".site-header não aparece em @media (min-width: 64rem)"
+    assert media_content.include?("grid-column: 1"),
+           ".site-header deve ter grid-column: 1"
+
+    # Verifica grid-row: 1 / span 3 para cobrir as três linhas dos irmãos
+    assert media_content.include?("grid-row: 1 / span 3"),
+           ".site-header deve ter grid-row: 1 / span 3"
+
+    assert media_content.include?("align-self: start"),
+           ".site-header deve ter align-self: start"
+  end
+
+  test "dentro de @media (min-width: 64rem), todo irmão de .site-header está na coluna 2" do
+    stylesheet = Stylesheet.read_stylesheet
+
+    # Encontra a media query inteira
+    media_match = stylesheet.match(/@media\s*\([^)]*min-width:\s*64rem[^)]*\)\s*\{(.*)\}\s*\z/m)
+    assert media_match, "@media (min-width: 64rem) não encontrada"
+
+    media_content = media_match[1]
+
+    # Verifica seletor .site-header ~ * com grid-column: 2
+    assert media_content.include?(".site-header ~ *"),
+           "seletor .site-header ~ * não aparece em @media (min-width: 64rem)"
+    assert media_content.include?("grid-column: 2"),
+           ".site-header ~ * deve ter grid-column: 2"
+
+    assert media_content.include?("min-width: 0"),
+           ".site-header ~ * deve ter min-width: 0"
+  end
 end

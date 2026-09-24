@@ -1453,7 +1453,9 @@ summary:focus-visible,
     --body-padding-bottom: 0;
   }
 
-  .site-header { flex-direction: column; }
+  .site-header { grid-column: 1; grid-row: 1 / span 3; align-self: start; flex-direction: column; }
 
   .site-header__nav { position: static; flex-direction: column; height: auto; align-items: flex-start; border-top: none; }
+
+  .site-header ~ * { grid-column: 2; min-width: 0; }
 }
