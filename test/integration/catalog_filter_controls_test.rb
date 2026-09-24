@@ -222,6 +222,13 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert_select "input[type=hidden][name='traits[]'][value=Pirate]"
   end
 
+  test "attributes vêm como hidden no formulário" do
+    get catalog_path(colors: [ "Red" ], attributes: [ "Attacker", "Slasher" ])
+
+    assert_select "input[type=hidden][name='attributes[]'][value=Attacker]"
+    assert_select "input[type=hidden][name='attributes[]'][value=Slasher]"
+  end
+
   test "dois sets na URL vêm como hidden e o select mostra 'Todos os sets'" do
     get catalog_path(sets: [ "OP01", "OP02" ])
 
