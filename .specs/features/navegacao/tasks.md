@@ -303,12 +303,12 @@ automaticamente.
 
 **Done when**:
 
-- [ ] Token `--nav-height` ≥ 44px em `:root`, registrado em `.context/design.md` §11.5 no mesmo commit
-- [ ] Fora de media query: `.site-header__nav` com `position: fixed`, `bottom: 0` e `height: var(--nav-height)`, cada entrada com `min-height` ≥ 44px, e `body` com `padding-bottom: var(--nav-height)`. É o mesmo token dos dois lados
-- [ ] Dentro de `@media (min-width: 1024px)`: a navegação sai de `fixed`, a reserva é zerada, e o layout de duas colunas põe o cabeçalho à esquerda do conteúdo
-- [ ] `[aria-current="page"]` na navegação com `font-weight` de token diferente do das outras entradas
-- [ ] A barra cabe em 360px com três entradas: nenhuma largura fixa soma mais que o viewport
-- [ ] `test/design/navigation_layout_test.rb` novo, com recorte próprio de `@media`; os arquivos existentes de `test/design/` passam sem edição; gate full passa, contagem registrada
+- [x] Token `--nav-height` ≥ 44px em `:root`, registrado em `.context/design.md` §11.5 no mesmo commit
+- [x] Fora de media query: `.site-header__nav` com `position: fixed`, `bottom: 0` e `height: var(--nav-height)`, cada entrada com `min-height` ≥ 44px, e `body` com `padding-bottom: var(--nav-height)`. É o mesmo token dos dois lados
+- [x] Dentro de `@media (min-width: 64rem)`: a navegação sai de `fixed`, a reserva é zerada, e o layout de duas colunas põe o cabeçalho à esquerda do conteúdo
+- [x] `[aria-current="page"]` na navegação com `font-weight` de token diferente do das outras entradas
+- [x] A barra cabe em 360px com três entradas: nenhuma largura fixa soma mais que o viewport
+- [x] `test/design/navigation_layout_test.rb` novo, com recorte próprio de `@media`; os arquivos existentes de `test/design/` passam sem edição; gate full passa, contagem registrada
 
 **Tests**: unit
 **Gate**: full

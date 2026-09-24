@@ -261,7 +261,7 @@ Regras de execução:
   - Sem emoji. Chip das seis cores do jogo em tratamento neutro (P8 aberta).
   - _Requisitos: 12.7, 12.9, 12.10, 12.11_
 
-- [ ] **6.6 Navegação e layout das telas**
+- [x] **6.6 Navegação e layout das telas**
   - Navegação principal única: barra inferior fixa em viewport estreita, coluna
     lateral em viewport larga; sem entrada para baralho ou preço.
   - "Minha pasta" = página de progresso com total de cópias, variantes distintas
