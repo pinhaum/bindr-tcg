@@ -170,6 +170,32 @@
       <% end %>
     <% end %>
 
+    <%# Posse (com sessão) — NAV-12, NAV-13 %>
+    <% if authenticated? %>
+      <div class="catalog__filter-group">
+        <fieldset>
+          <legend>Posse</legend>
+          <% owned_value = @result.active_filters[:owned] %>
+          <% active_owned = CatalogQuery::OWNERSHIP_VALUES.include?(owned_value) ? owned_value : "all" %>
+          <div>
+            <input type="radio" id="owned-all" name="owned" value="all"
+                   <% if active_owned == "all" %>checked<% end %>>
+            <label for="owned-all">Todas</label>
+          </div>
+          <div>
+            <input type="radio" id="owned-owned" name="owned" value="owned"
+                   <% if active_owned == "owned" %>checked<% end %>>
+            <label for="owned-owned">Tenho</label>
+          </div>
+          <div>
+            <input type="radio" id="owned-missing" name="owned" value="missing"
+                   <% if active_owned == "missing" %>checked<% end %>>
+            <label for="owned-missing">Não tenho</label>
+          </div>
+        </fieldset>
+      </div>
+    <% end %>
+
     <button type="submit">Filtrar</button>
   </form>
 

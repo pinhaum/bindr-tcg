@@ -363,11 +363,13 @@ automaticamente.
 
 **Done when**:
 
-- [ ] Com sessão: três rádios `owned=all|owned|missing`, com os rótulos da spec, dentro de um `fieldset` com `legend`
-- [ ] O valor ativo vem de `active_filters[:owned]`. Sem valor na URL, "todas" fica marcado. Valor inválido cai em "todas", como o query object faz
-- [ ] Sem sessão, nenhum campo `owned` no HTML, nem com `?owned=owned` na URL
-- [ ] "tenho" e "não tenho" produzem as mesmas cartas que a URL digitada à mão (Req. 7.6)
-- [ ] Gate full passa, contagem registrada
+- [x] Com sessão: três rádios `owned=all|owned|missing`, com os rótulos da spec, dentro de um `fieldset` com `legend`
+- [x] O valor ativo vem de `active_filters[:owned]`. Sem valor na URL, "todas" fica marcado. Valor inválido cai em "todas", como o query object faz
+- [x] Sem sessão, nenhum campo `owned` no HTML, nem com `?owned=owned` na URL
+- [x] "tenho" e "não tenho" produzem as mesmas cartas que a URL digitada à mão (Req. 7.6)
+- [x] Gate full passa, contagem registrada
+
+**Resultado**: 1053 runs, 0 failures (gate full); rubocop limpo.
 
 **Tests**: integration
 **Gate**: full

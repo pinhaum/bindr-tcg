@@ -199,8 +199,8 @@ de antes.
 | NAV-09 | P1: Filtrar a grade | Req. 4.9, 4.7 | Implemented (T7) |
 | NAV-10 | P1: Filtrar a grade | Req. 4.3, 4.7 | Implemented (T7) |
 | NAV-11 | P1: Filtrar a grade | Req. 12.6 | Implemented (T7) |
-| NAV-12 | P1: Filtrar a grade | Req. 4.9, 7.6 | Pending |
-| NAV-13 | P1: Filtrar a grade | Req. 6.3 | Pending |
+| NAV-12 | P1: Filtrar a grade | Req. 4.9, 7.6 | Implemented (T8) |
+| NAV-13 | P1: Filtrar a grade | Req. 6.3 | Implemented (T8) |
 | NAV-14 | P1: Filtrar a grade | Req. 4.9 | Implemented (T7) |
 | NAV-15 | P1: Filtrar a grade | Req. 12.11 | Pending |
 | NAV-16 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
