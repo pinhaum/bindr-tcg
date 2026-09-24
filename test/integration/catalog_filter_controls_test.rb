@@ -115,51 +115,43 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
 
   # --- NAV-09: A URL gerada bate com a do query object ---
 
-  test "enviar formulário com Red e SR produz URL que bate com a contagem do query object" do
-    # 1. Faz GET no catálogo e lê o formulário
-    get catalog_path
+  # Simula o envio nativo: hidden + select selecionado + checkboxes marcados.
+  def submit_filter_form(checked_values)
+    form = Nokogiri::HTML(response.body).at_css("form.catalog__filters")
+    assert form, "formulário de filtros ausente"
 
-    # Simula o envio nativo do formulário com Red marcado e SR marcado
-    # O navegador mandaria: colors[]=Red&rarities[]=SR
-    form_action = url_for(controller: "catalog", action: "index")
-    form_params = {
-      "colors[]" => "Red",
-      "rarities[]" => "SR"
-    }
+    checkboxes = form.css("input[type=checkbox]").select { |box| checked_values.include?(box["value"]) }
+    assert_equal checked_values.size, checkboxes.size, "controle ausente para #{checked_values.inspect}"
 
-    get form_action, params: form_params
+    pairs = form.css("input[type=hidden]").map { |input| [ input["name"], input["value"] ] }
+    form.css("select").each do |select|
+      option = select.at_css("option[selected]") || select.at_css("option")
+      pairs << [ select["name"], option["value"] ]
+    end
+    pairs += checkboxes.map { |box| [ box["name"], box["value"] ] }
 
-    # Esperado: 4 cartas no total menos a de Zoro (Red mas L), menos as que não são SR
-    # Red: Zoro (L), Law (SR), Luffy (UC) → com SR: Law
-    # Total esperado: 1 carta (Law)
-    expected_count = 1
-
-    # Valida a contagem na página
-    assert_select ".catalog__count", text: /^1 carta$/
-
-    # Valida que a contagem do query object bata
-    query = CatalogQuery.new(colors: [ "Red" ], rarities: [ "SR" ])
-    assert_equal expected_count, query.call.total_count
+    get "#{form["action"]}?#{URI.encode_www_form(pairs)}"
+    css_select(".catalog__count").text.strip
   end
 
-  test "enviar formulário com Green e C produz Nami" do
+  test "o envio nativo do formulário com Red e SR dá a mesma contagem da URL digitada à mão" do
     get catalog_path
+    from_form = submit_filter_form(%w[Red SR])
 
-    form_action = url_for(controller: "catalog", action: "index")
-    form_params = {
-      "colors[]" => "Green",
-      "rarities[]" => "C"
-    }
+    get catalog_path(colors: [ "Red" ], rarities: [ "SR" ])
+    assert_equal css_select(".catalog__count").text.strip, from_form
+    assert_equal "1 carta", from_form
+    assert_equal 1, CatalogQuery.new(colors: [ "Red" ], rarities: [ "SR" ]).call.total_count
+  end
 
-    get form_action, params: form_params
+  test "o envio nativo do formulário com Green e C dá a mesma contagem da URL digitada à mão" do
+    get catalog_path
+    from_form = submit_filter_form(%w[Green C])
 
-    # Green: Nami (C)
-    expected_count = 1
-
-    assert_select ".catalog__count", text: /^1 carta$/
-
-    query = CatalogQuery.new(colors: [ "Green" ], rarities: [ "C" ])
-    assert_equal expected_count, query.call.total_count
+    get catalog_path(colors: [ "Green" ], rarities: [ "C" ])
+    assert_equal css_select(".catalog__count").text.strip, from_form
+    assert_equal "1 carta", from_form
+    assert_equal 1, CatalogQuery.new(colors: [ "Green" ], rarities: [ "C" ]).call.total_count
   end
 
   test "marcar Green e C produz Nami" do
