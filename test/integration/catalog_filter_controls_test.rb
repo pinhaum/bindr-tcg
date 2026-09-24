@@ -113,6 +113,13 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert_select ".catalog__filter-group label", text: /C|L|UC|SR/
   end
 
+  test "select de set tem label acessível e id correspondente" do
+    get catalog_path
+
+    assert_select "label[for=filter-sets]", text: "Set"
+    assert_select "select#filter-sets[name='sets[]']"
+  end
+
   # --- NAV-09: A URL gerada bate com a do query object ---
 
   # Simula o envio nativo: hidden + select selecionado + checkboxes marcados.

@@ -1580,3 +1580,7 @@ summary:focus-visible,
 
   .card-detail__variants { grid-column: 2; }
 }
+
+html {
+  scroll-padding-bottom: var(--body-padding-bottom);
+}

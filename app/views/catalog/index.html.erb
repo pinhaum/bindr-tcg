@@ -147,20 +147,18 @@
 
     <%# Sets %>
     <div class="catalog__filter-group">
-      <fieldset>
-        <legend>Set</legend>
-        <select name="sets[]">
-          <% sets_count = Array(@result.active_filters[:sets]).size %>
-          <% is_multiple_or_none = sets_count > 1 || sets_count == 0 %>
-          <option value="" <% if is_multiple_or_none %>selected<% end %>>Todos os sets</option>
-          <% @filter_options[:sets].each do |set_option| %>
-            <option value="<%= set_option[:code] %>"
-                    <% if sets_count == 1 && Array(@result.active_filters[:sets]).include?(set_option[:code]) %>selected<% end %>>
-              <%= set_option[:name] %>
-            </option>
-          <% end %>
-        </select>
-      </fieldset>
+      <label for="filter-sets">Set</label>
+      <select id="filter-sets" name="sets[]">
+        <% sets_count = Array(@result.active_filters[:sets]).size %>
+        <% is_multiple_or_none = sets_count > 1 || sets_count == 0 %>
+        <option value="" <% if is_multiple_or_none %>selected<% end %>>Todos os sets</option>
+        <% @filter_options[:sets].each do |set_option| %>
+          <option value="<%= set_option[:code] %>"
+                  <% if sets_count == 1 && Array(@result.active_filters[:sets]).include?(set_option[:code]) %>selected<% end %>>
+            <%= set_option[:name] %>
+          </option>
+        <% end %>
+      </select>
     </div>
 
     <%# Se houver mais de um set ativo, coloca os extras como hidden %>

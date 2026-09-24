@@ -20,7 +20,7 @@ class LiteralValuesTest < ActiveSupport::TestCase
   ].freeze
 
   # Seletores sem classe: o seletor raiz.
-  EXPECTED_CLASSLESS_SELECTORS = [ "*", "body" ].freeze
+  EXPECTED_CLASSLESS_SELECTORS = [ "*", "body", "html" ].freeze
 
   # Técnica de ocultação visual (fora do fluxo, recortada): `margin: -1px` é parte
   # dela e não é espaçamento de layout.
