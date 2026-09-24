@@ -196,12 +196,12 @@ de antes.
 | NAV-06 | P1: Navegação principal | Req. 13.3 | Pending |
 | NAV-07 | P1: Navegação principal | Req. 13.8 | Implemented (T5) |
 | NAV-08 | P1: Filtrar a grade | Req. 4.9 | Implemented (T1) |
-| NAV-09 | P1: Filtrar a grade | Req. 4.9, 4.7 | Pending |
-| NAV-10 | P1: Filtrar a grade | Req. 4.3, 4.7 | Pending |
-| NAV-11 | P1: Filtrar a grade | Req. 12.6 | Pending |
+| NAV-09 | P1: Filtrar a grade | Req. 4.9, 4.7 | Implemented (T7) |
+| NAV-10 | P1: Filtrar a grade | Req. 4.3, 4.7 | Implemented (T7) |
+| NAV-11 | P1: Filtrar a grade | Req. 12.6 | Implemented (T7) |
 | NAV-12 | P1: Filtrar a grade | Req. 4.9, 7.6 | Pending |
 | NAV-13 | P1: Filtrar a grade | Req. 6.3 | Pending |
-| NAV-14 | P1: Filtrar a grade | Req. 4.9 | Pending |
+| NAV-14 | P1: Filtrar a grade | Req. 4.9 | Implemented (T7) |
 | NAV-15 | P1: Filtrar a grade | Req. 12.11 | Pending |
 | NAV-16 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-17 | P1: Minha pasta | Req. 13.4, 7.7 | Implemented (T3) |
@@ -213,8 +213,8 @@ de antes.
 | NAV-23 | P2: Layout largo | Req. 13.5 | Pending |
 | NAV-24 | P2: Layout largo | Req. 13.6 | Pending |
 | NAV-25 | P2: Layout largo | Req. 13.6 | Pending |
-| NAV-26 | Edge case | Req. 4 (parâmetro inválido ignorado) | Pending |
-| NAV-27 | Edge case | Req. 3.6 | Pending |
+| NAV-26 | Edge case | Req. 4 (parâmetro inválido ignorado) | Implemented (T7) |
+| NAV-27 | Edge case | Req. 3.6 | Implemented (T7) |
 | NAV-28 | Edge case | Req. 2.5, 13.7 | Pending |
 | NAV-29 | Edge case | Req. 6.4 | Implemented (T3) |
 

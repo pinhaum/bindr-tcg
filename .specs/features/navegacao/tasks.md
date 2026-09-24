@@ -331,14 +331,16 @@ automaticamente.
 
 **Done when**:
 
-- [ ] Um controle por valor presente de cor, tipo e raridade, com rótulo escrito, e um `select` de set com "Todos os sets"
-- [ ] Os nomes dos campos produzem a URL que o query object aceita. Para `colors[]=Red&rarities[]=SR`, a contagem da página enviada pelo formulário é a mesma da URL digitada à mão
-- [ ] Com `q`, faixa de custo, `traits` e `sort` ativos, o formulário os carrega como `hidden`. Dois sets vindos da URL também continuam, com o `select` mostrando "Todos os sets"
-- [ ] O valor ativo aparece `checked` ou `selected`, sem depender de cor
-- [ ] Parâmetro desconhecido ou valor inválido não marca controle nenhum e não gera erro
-- [ ] Com zero resultados, os controles continuam na página com os valores ativos marcados
-- [ ] Nenhum `data-controller` nem JS: o formulário funciona com envio nativo
-- [ ] Classes novas são elementos de `catalog`, com regra na folha; `catalog_grid_test.rb` e `color_chip_ui_test.rb` passam sem edição; gate full passa, contagem registrada
+- [x] Um controle por valor presente de cor, tipo e raridade, com rótulo escrito, e um `select` de set com "Todos os sets"
+- [x] Os nomes dos campos produzem a URL que o query object aceita. Para `colors[]=Red&rarities[]=SR`, a contagem da página enviada pelo formulário é a mesma da URL digitada à mão
+- [x] Com `q`, faixa de custo, `traits` e `sort` ativos, o formulário os carrega como `hidden`. Dois sets vindos da URL também continuam, com o `select` mostrando "Todos os sets"
+- [x] O valor ativo aparece `checked` ou `selected`, sem depender de cor
+- [x] Parâmetro desconhecido ou valor inválido não marca controle nenhum e não gera erro
+- [x] Com zero resultados, os controles continuam na página com os valores ativos marcados
+- [x] Nenhum `data-controller` nem JS: o formulário funciona com envio nativo
+- [x] Classes novas são elementos de `catalog`, com regra na folha; `catalog_grid_test.rb` e `color_chip_ui_test.rb` passam sem edição; gate full passa, contagem registrada
+
+**Resultado**: 1040 runs, 0 failures (gate full); rubocop limpo.
 
 **Tests**: integration
 **Gate**: full

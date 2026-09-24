@@ -63,6 +63,111 @@
     <%= render "catalog/owned_total", total: @owned_total %>
   <% end %>
 
+  <form class="catalog__filters" method="get" action="<%= catalog_path %>">
+    <%# Filtros ativos sem controle, preservados como hidden %>
+    <% if @result.active_filters[:q].present? %>
+      <input type="hidden" name="q" value="<%= @result.active_filters[:q] %>">
+    <% end %>
+    <% if @result.active_filters[:cost_min].present? %>
+      <input type="hidden" name="cost_min" value="<%= @result.active_filters[:cost_min] %>">
+    <% end %>
+    <% if @result.active_filters[:cost_max].present? %>
+      <input type="hidden" name="cost_max" value="<%= @result.active_filters[:cost_max] %>">
+    <% end %>
+    <% if @result.active_filters[:power_min].present? %>
+      <input type="hidden" name="power_min" value="<%= @result.active_filters[:power_min] %>">
+    <% end %>
+    <% if @result.active_filters[:power_max].present? %>
+      <input type="hidden" name="power_max" value="<%= @result.active_filters[:power_max] %>">
+    <% end %>
+    <% if @result.active_filters[:counter_min].present? %>
+      <input type="hidden" name="counter_min" value="<%= @result.active_filters[:counter_min] %>">
+    <% end %>
+    <% if @result.active_filters[:counter_max].present? %>
+      <input type="hidden" name="counter_max" value="<%= @result.active_filters[:counter_max] %>">
+    <% end %>
+    <% if @result.active_filters[:traits].present? %>
+      <% Array(@result.active_filters[:traits]).each do |trait| %>
+        <input type="hidden" name="traits[]" value="<%= trait %>">
+      <% end %>
+    <% end %>
+    <% if @result.active_filters[:attributes].present? %>
+      <% Array(@result.active_filters[:attributes]).each do |attr| %>
+        <input type="hidden" name="attributes[]" value="<%= attr %>">
+      <% end %>
+    <% end %>
+
+    <%# Cores %>
+    <% filter_options = CatalogQuery.filter_options %>
+    <div class="catalog__filter-group">
+      <fieldset>
+        <legend>Cor</legend>
+        <% filter_options[:colors].each do |color| %>
+          <div>
+            <input type="checkbox" id="color-<%= color %>" name="colors[]" value="<%= color %>"
+                   <% if Array(@result.active_filters[:colors]).include?(color) %>checked<% end %>>
+            <label for="color-<%= color %>"><%= color %></label>
+          </div>
+        <% end %>
+      </fieldset>
+    </div>
+
+    <%# Tipos de carta %>
+    <div class="catalog__filter-group">
+      <fieldset>
+        <legend>Tipo</legend>
+        <% filter_options[:card_types].each do |card_type| %>
+          <div>
+            <input type="checkbox" id="type-<%= card_type %>" name="card_types[]" value="<%= card_type %>"
+                   <% if Array(@result.active_filters[:card_types]).include?(card_type) %>checked<% end %>>
+            <label for="type-<%= card_type %>"><%= card_type %></label>
+          </div>
+        <% end %>
+      </fieldset>
+    </div>
+
+    <%# Raridades %>
+    <div class="catalog__filter-group">
+      <fieldset>
+        <legend>Raridade</legend>
+        <% filter_options[:rarities].each do |rarity| %>
+          <div>
+            <input type="checkbox" id="rarity-<%= rarity %>" name="rarities[]" value="<%= rarity %>"
+                   <% if Array(@result.active_filters[:rarities]).include?(rarity) %>checked<% end %>>
+            <label for="rarity-<%= rarity %>"><%= rarity %></label>
+          </div>
+        <% end %>
+      </fieldset>
+    </div>
+
+    <%# Sets %>
+    <div class="catalog__filter-group">
+      <fieldset>
+        <legend>Set</legend>
+        <select name="sets[]">
+          <% sets_count = Array(@result.active_filters[:sets]).size %>
+          <% is_multiple_or_none = sets_count > 1 || sets_count == 0 %>
+          <option value="" <% if is_multiple_or_none %>selected<% end %>>Todos os sets</option>
+          <% filter_options[:sets].each do |set_option| %>
+            <option value="<%= set_option[:code] %>"
+                    <% if sets_count == 1 && Array(@result.active_filters[:sets]).include?(set_option[:code]) %>selected<% end %>>
+              <%= set_option[:name] %>
+            </option>
+          <% end %>
+        </select>
+      </fieldset>
+    </div>
+
+    <%# Se houver mais de um set ativo, coloca os extras como hidden %>
+    <% if Array(@result.active_filters[:sets]).size > 1 %>
+      <% Array(@result.active_filters[:sets]).each do |set_code| %>
+        <input type="hidden" name="sets[]" value="<%= set_code %>">
+      <% end %>
+    <% end %>
+
+    <button type="submit">Filtrar</button>
+  </form>
+
   <% if @result.records.empty? %>
     <section class="catalog__empty">
       <p>

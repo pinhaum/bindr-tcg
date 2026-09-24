@@ -1447,6 +1447,62 @@ summary:focus-visible,
 
 .import-summary__next { margin: var(--space-3) 0 0; overflow-wrap: anywhere; }
 
+/* Formulário de filtros da grade */
+.catalog__filters {
+  margin: var(--space-2) 0;
+  padding: var(--space-2);
+  background-color: var(--surface-raised);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.catalog__filter-group {
+  margin-bottom: var(--space-2);
+}
+
+.catalog__filter-group fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.catalog__filter-group legend {
+  font-weight: var(--body-strong-weight);
+  margin-bottom: var(--space-1);
+  display: block;
+}
+
+.catalog__filter-group input[type="checkbox"],
+.catalog__filter-group input[type="radio"] {
+  margin-right: var(--space-1);
+}
+
+.catalog__filter-group label {
+  display: inline;
+}
+
+.catalog__filter-group select {
+  width: 100%;
+  padding: var(--space-1);
+  margin-bottom: var(--space-1);
+  background-color: var(--surface-base);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.catalog__filters button[type="submit"] {
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: var(--body-strong-weight);
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+}
+
 @media (min-width: 64rem) {
   :root {
     --body-grid-columns: minmax(200px, 1fr) 3fr;
