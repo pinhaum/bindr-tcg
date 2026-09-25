@@ -2,10 +2,11 @@
 
 **Spec**: `.specs/features/navegacao/spec.md` (Approved, 2026-09-23)
 **Design**: inline, na seção "Decisões de implementação" abaixo; não há `design.md`
-**Status**: Approved (2026-09-23, pelo dono do produto)
+**Status**: Approved (2026-09-23, pelo dono do produto). Emendado em 2026-09-24
+com T12–T21 (Fases 6–10), depois da reprovação visual registrada na T11.
 
-Cobre a §6 de `.context/tasks.md` no item de Req. 4.9 e 13.1–13.8 (linha 274).
-A seção só fecha na T11.
+Cobre a §6 de `.context/tasks.md` no item de Req. 4.9 e 13.1–13.14.
+A seção só fecha na T21.
 
 ## Execution Protocol
 
@@ -23,6 +24,13 @@ Critical Rules dela. Se a skill não puder ser ativada, parar e avisar.
   `set_progress_plan_test.rb`). Esse é o Success Criterion da spec. Se um deles
   quebrar, o sinal é real: corrigir a view ou o CSS, não o teste. Arquivo
   **novo** em `test/design/` é permitido.
+- **Testes criados por esta feature** (`test/design/navigation_layout_test.rb`,
+  `filter_layout_test.rb`, `test/integration/catalog_filter_controls_test.rb`,
+  `catalog_ownership_filter_test.rb`) podem ser reescritos nas Fases 6–10, e só
+  onde o critério que provam mudou com a emenda de 2026-09-24. O commit diz
+  qual asserção caiu e qual NAV a substitui. Asserção de critério que não mudou
+  (URL resultante, preservação de filtro, isolamento de posse, NAV-26, NAV-27)
+  é mantida ou reescrita com a mesma força.
 - `catalog.css` **não é reorganizado** (§11.7). Regras novas são acrescentadas.
 - Um commit atômico por task, em português brasileiro, Conventional Commits, sem
   linha de atribuição. O checkbox é marcado neste arquivo antes do commit.
@@ -73,6 +81,11 @@ Medidas em `main` (`2234e11`):
 | Set múltiplo vindo da URL | O `select` mostra "Todos os sets" e os sets ativos seguem em `hidden` | Um `select` simples não representa dois valores, e a URL não pode perder filtro (NAV-10) |
 | Estado ativo | Checkbox e rádio nativos visíveis, marcados. O chip de cor ganha anel de 2px `accent` via `:has(:checked)` | O estado marcado é anunciado e visível sem depender de cor (NAV-11). O anel é o do Req. 12.11 (NAV-15) |
 | Indicadores da pasta | `CollectionItem.total_copies_for` (já existe) e `CollectionItem.distinct_variants_for` (novo, ao lado) | O mesmo número do catálogo por construção (NAV-17). A barreira de tipo de `for_user` vale para os dois (NAV-21) |
+| Chips de filtro (emenda) | Cada valor de cor, tipo, raridade e posse é um `<a>` gerado por um helper novo `filter_toggle_url(active_filters, key, value)` em `catalog_helper.rb`, ao lado de `filters_without`: acrescenta o valor inativo, remove o ativo, descarta `page`. Posse usa a mesma função com valor escalar | A URL parte dos filtros normalizados, como os chips de remoção (Req. 4.6). Um toque aplica, sem JS e sem botão |
+| Nome acessível do chip | Inativo: sem `aria-label`, o nome é o texto visível. Ativo: `aria-label="Remover filtro <Categoria>: <valor>"` e "×" com `aria-hidden` | O nome contém o rótulo visível (SC 2.5.3). É o padrão que o `filter-chip` já usa |
+| Set (emenda) | Continua `select` num formulário GET próprio, com botão "Aplicar" e os filtros ativos em `hidden` | Dezenas de sets virariam dezenas de chips em 360px. O formulário e os `hidden` da T7 são reaproveitados |
+| Coluna lateral com filtros (emenda) | Em ≥ 64rem, `body` define `grid-template-columns: var(--sidebar-width) minmax(0, 1fr)`. No catálogo, `main.catalog` ocupa `1 / -1` com `grid-template-columns: subgrid` e `grid-template-rows: subgrid`, e a view agrupa os filhos em `catalog__head` (título, busca, chips ativos), `catalog__filters` e `catalog__body` (status, grade, paginação). `head` vai para a coluna 2 e linha 1, `filters` para a coluna 1 e linha 2, `body` para a coluna 2 e linha 2. O cabeçalho fica na coluna 1 e linha 1 | A ordem do DOM continua a do celular: título, busca, filtros, grade. `display: contents` em `main` foi descartado porque apaga o landmark em parte dos navegadores (⚠️ VERIFICAR se a T18 achar fonte primária em contrário). Subgrid é Baseline desde 2023 |
+| Barra de progresso do set | `<progress value max>` com `aria-hidden="true"`, dentro da linha do set, fora do `<p>` da contagem | A contagem escrita já diz o mesmo. Um `progress` exposto repetiria cada número para leitor de tela. O elemento dispensa `style` inline |
 | Hierarquia de títulos da pasta | `h1` "Minha pasta" → `h2` "Progresso por set" → nome de cada set vira `h3` | O nome do set hoje é `h2`. Ele desce um nível para não pular hierarquia (SC 1.3.1) |
 
 ## Test Coverage Matrix
@@ -135,14 +148,45 @@ T4 → T5 → T6
 T6 → T7 → T8 → T9
 ```
 
-### Phase 5: Detalhe largo e fechamento
+### Phase 5: Detalhe largo e primeira revisão
 
 ```
 T9 → T10 → T11
 ```
 
+### Phase 6: Navegação no desenho do canvas
+
+```
+T11 → T12
+```
+
+### Phase 7: Filtros como chips
+
+```
+T12 → T13 → T14 → T15 → T16 → T17
+```
+
+### Phase 8: Filtros na coluna lateral
+
+```
+T17 → T18
+```
+
+### Phase 9: Minha pasta no desenho do canvas
+
+```
+T18 → T19 → T20
+```
+
+### Phase 10: Fechamento
+
+```
+T20 → T21
+```
+
 Lotes para o Execute: **B1 = Fases 1–3 (T1–T6)** e **B2 = Fases 4–5
-(T7–T11)**. Workers só com aceite explícito. Depois da T11, o Verifier roda
+(T7–T11)**, ambos fechados. **B3 = Fases 6–7 (T12–T17)** e **B4 = Fases 8–10
+(T18–T21)**. Workers só com aceite explícito. Depois da T21, o Verifier roda
 automaticamente.
 
 ## Task Breakdown
@@ -451,14 +495,310 @@ automaticamente.
 
 **Done when**:
 
-- [ ] `ecc:a11y-architect` revisou layout, navegação, formulário de filtro e pasta. Achados CRITICAL e HIGH viraram task de correção antes do Verifier
-- [ ] O dono abriu catálogo, filtro, detalhe e Minha pasta, com sessão e sem sessão, em 360px e em 1280px, e aprovou ou listou o que reprova
-- [ ] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.8 de `.context/tasks.md` §6 está fechado
+- [x] `ecc:a11y-architect` revisou layout, navegação, formulário de filtro e pasta. Achados CRITICAL e HIGH viraram task de correção antes do Verifier
+- [x] O dono abriu catálogo, filtro, detalhe e Minha pasta, com sessão e sem sessão, em 360px e em 1280px, e aprovou ou listou o que reprova
+
+Os dois itens de fechamento (Success Criteria e gate build) passaram para a T21.
+
+**Resultado (2026-09-24)**: **reprovada pelo dono**. A interface não segue o
+canvas "Bindr — telas". Divergências, comparando o HTML e a folha com os
+`.dc.html` do canvas:
+
+1. Barra inferior: entradas centralizadas em vez de dividir a largura; fundo
+   `surface-base` em vez de `surface-raised`; entrada atual marcada só pelo peso,
+   sem o fundo `surface-sunken`.
+2. Coluna lateral: `minmax(200px, 1fr)` sem fundo nem borda, contra 280px fixos
+   em `surface-raised` com borda direita.
+3. Catálogo largo: os filtros formam uma segunda coluna dentro de `main`, e a
+   tela fica com três colunas. No canvas, eles ficam dentro da coluna lateral,
+   abaixo da navegação.
+4. Filtros: checkboxes e rádios nativos num painel com botão "Filtrar", contra
+   chips de 44px que aplicam com um toque (ativo em `accent` com "×", cor com
+   anel).
+5. Falta a linha de status com "N filtros ativos" e "Limpar filtros".
+6. Minha pasta: indicadores em texto corrido em vez de cartões; set sem barra
+   de progresso; falta "Adicionar cartas".
+
+Causa: NAV-01..NAV-29 descrevem estrutura e comportamento, e a spec tratava o
+canvas só como "referência visual". A T7 chegou a pedir checkbox
+explicitamente. Correção: Req. 13.9–13.14, NAV-30..NAV-39 e as tasks T12–T21.
+Continuam como decididos na spec: chips que quebram linha em vez de rolar, sem
+Baralhos, sem valor estimado nem "% do catálogo", sem "Zerar quantidade", busca
+com botão.
+
+**Tests**: none
+**Gate**: none
+**Commit**: `docs(navegacao): registrar a reprovação visual e emendar a spec com o desenho do canvas`
+
+---
+
+### T12: Barra inferior e coluna lateral no desenho do canvas
+
+**What**: A barra inferior divide a largura entre as entradas, sobre `surface-raised`, com a entrada atual em `surface-sunken`. A partir de 1024px, a coluna lateral tem largura fixa, fundo elevado e borda direita.
+**Where**: `app/assets/stylesheets/catalog.css`, `.context/design.md` §11.5
+**Depends on**: T11
+**Reuses**: `--nav-height`, `--nav-current-weight`, `--body-grid-columns`, os tokens de superfície de §11.3
+**Requirement**: NAV-30, NAV-31, NAV-04, NAV-05, NAV-28
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Fora de media query: `.site-header__nav` com `background-color: var(--surface-raised)` e cada entrada (link e botão "Sair") com `flex: 1`
+- [ ] `.site-header__nav [aria-current="page"]` com `background-color: var(--surface-sunken)` e `color: var(--ink)`; as demais entradas com `color: var(--ink-muted)`. O peso distinto de NAV-04 continua
+- [ ] Token `--sidebar-width: 280px` em `:root`, registrado em §11.5 junto com a troca de `body-grid-columns` em ≥ 64rem para `var(--sidebar-width) minmax(0, 1fr)`
+- [ ] Dentro de `@media (min-width: 64rem)`: `.site-header` com `background-color: var(--surface-raised)`, `border-right: 1px solid var(--border)`, altura da página inteira, e as entradas empilhadas com `min-height: 44px`
+- [ ] Em 360px a barra continua sem largura fixa que some mais que o viewport (NAV-28)
+- [ ] Testes textuais novos em `test/design/navigation_canvas_test.rb`. `navigation_layout_test.rb` só muda onde a coluna deixou de ser `minmax(200px, 1fr)`. Gate full passa, contagem registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(navegacao): desenhar a barra inferior e a coluna lateral como no canvas`
+
+---
+
+### T13: URL de alternância de um valor de filtro
+
+**What**: Um helper devolve a URL do catálogo com um valor de filtro acrescentado, se inativo, ou removido, se ativo, preservando todo o resto menos `page`.
+**Where**: `app/helpers/catalog_helper.rb`
+**Depends on**: T12
+**Reuses**: `filters_without`, `NON_FILTER_KEYS`, os filtros normalizados de `@result.active_filters`
+**Requirement**: NAV-33, NAV-09, NAV-10, NAV-26
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `filter_toggle_url(active_filters, :colors, "Green")` com `colors: ["Red"]` gera `colors[]=Red&colors[]=Green`. Com `"Red"`, gera a URL sem `colors`
+- [ ] `q`, faixas, `traits`, `attributes`, `sort` e `dir` sobrevivem à alternância; `page` nunca sobrevive
+- [ ] Para `:owned` (escalar), `"owned"` troca o valor e `"all"` remove a chave
+- [ ] Valor inválido que o query object descartou não reaparece na URL
+- [ ] Teste unit em `test/helpers/catalog_helper_test.rb` (novo ou existente, conferir antes). Gate full passa, contagem registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(navegacao): gerar a URL que liga ou desliga um valor de filtro`
+
+---
+
+### T14: Chips de cor, tipo e raridade
+
+**What**: Os checkboxes de cor, tipo e raridade dão lugar a chips-link, um por valor presente, apontando para `filter_toggle_url`. O set continua `select` num formulário GET com botão "Aplicar" e os filtros ativos em `hidden`.
+**Where**: `app/views/catalog/index.html.erb`
+**Depends on**: T13
+**Reuses**: `filter_toggle_url` (T13), `@filter_options` (T1), `FILTER_LABELS`, os `hidden` da T7
+**Requirement**: NAV-08, NAV-09, NAV-10, NAV-11, NAV-14, NAV-26, NAV-27, NAV-33, NAV-34
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Um `<a>` por valor presente de cor, tipo e raridade, agrupado sob um título por categoria, com classe de elemento de `catalog`
+- [ ] Seguir o `href` de "Red" e depois o de "SR" dá a mesma contagem de `colors[]=Red&rarities[]=SR` digitada à mão
+- [ ] Chip ativo: "×" visível com `aria-hidden` e `aria-label` "Remover filtro Cor: Red". Chip inativo sem `aria-label`
+- [ ] O `select` de set, com "Todos os sets", "Aplicar" e os `hidden`, mantém os casos da T7: dois sets vindos da URL, set único `selected`, `sort` e `dir` preservados
+- [ ] Nenhum checkbox de filtro nem botão "Filtrar" no HTML. Nenhum `data-controller`
+- [ ] Parâmetro desconhecido não marca chip. Com zero resultados, os chips continuam com os ativos marcados
+- [ ] `catalog_filter_controls_test.rb` reescrito conforme o protocolo; `catalog_grid_test.rb` e `color_chip_ui_test.rb` passam sem edição; gate full passa, contagem registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(navegacao): aplicar cor, tipo e raridade com um toque no chip`
+
+---
+
+### T15: Chips de posse
+
+**What**: Com sessão, os rádios de posse dão lugar a três chips-link, "Todas", "Tenho" e "Não tenho", exclusivos entre si. Sem sessão, nada é renderizado.
+**Where**: `app/views/catalog/index.html.erb`
+**Depends on**: T14
+**Reuses**: `filter_toggle_url` (T13), `CatalogQuery::OWNERSHIP_VALUES`
+**Requirement**: NAV-12, NAV-13, NAV-33, NAV-34
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Com sessão, três links. O ativo segue NAV-34; sem `owned` na URL ou com valor inválido, "Todas" é o ativo
+- [ ] "Tenho" e "Não tenho" levam às mesmas cartas que `?owned=owned` e `?owned=missing` digitados à mão, e a posse de outro usuário não entra
+- [ ] Sem sessão, nenhum link com `owned` no HTML, nem com `?owned=owned` na URL
+- [ ] `catalog_ownership_filter_test.rb` reescrito conforme o protocolo, mantendo os dois testes de isolamento; gate full passa, contagem registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(navegacao): filtrar por posse com um toque no chip`
+
+---
+
+### T16: Folha dos chips de filtro
+
+**What**: Os chips ganham o desenho do canvas: 44px, borda `border-strong`, ativo preenchido de `accent` com "×". O chip de cor leva amostra tracejada neutra e, ativo, anel de 2px em `accent` sem preenchimento.
+**Where**: `app/assets/stylesheets/catalog.css`
+**Depends on**: T15
+**Reuses**: `--accent`, `--on-accent`, `--border-strong`, `--radius-sm`, `--caption-size`
+**Requirement**: NAV-15, NAV-35, NAV-11, NAV-28
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Chip com `min-height: 44px`, `border: 1px solid var(--border-strong)` e `border-radius: var(--radius-sm)`, em fileira que quebra linha, sem `overflow-x`
+- [ ] Chip ativo que não é de cor: `background-color: var(--accent)` e `color: var(--on-accent)`
+- [ ] Chip de cor ativo: `outline: 2px solid var(--accent)` com `outline-offset: 2px`, e nenhuma regra do chip de cor com `background` em `accent`, em nenhum estado
+- [ ] Amostra do chip de cor com borda tracejada `border-strong` sobre `surface-sunken` (P8 aberta)
+- [ ] `filter_layout_test.rb` reescrito conforme o protocolo (o anel sai de `:has(:checked)` para o chip ativo); os testes de `test/design/` anteriores à feature e o contraste passam sem edição; gate full passa, contagem registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(navegacao): desenhar os chips de filtro como no canvas`
+
+---
+
+### T17: Linha de status do catálogo
+
+**What**: A contagem de resultados fica numa linha de status. Com filtro ativo, a linha diz quantos são e oferece "Limpar filtros".
+**Where**: `app/views/catalog/index.html.erb`, `app/assets/stylesheets/catalog.css`
+**Depends on**: T16
+**Reuses**: `catalog_chips` (a contagem de filtros é o número de chips), `.catalog__count`
+**Requirement**: NAV-36, NAV-27
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Sem filtro: só "N cartas". Com `colors[]=Red&rarities[]=SR`: "2 filtros ativos" e "Limpar filtros". Com um: "1 filtro ativo"
+- [ ] "Limpar filtros" aponta para o catálogo sem filtros, mantendo `sort` e `dir` quando ativos
+- [ ] `sort`, `dir` e `page` não contam como filtro
+- [ ] Com zero resultados, a linha continua, e o "Limpar filtros" do estado vazio não fica duplicado sem motivo (decidir e registrar no resultado)
+- [ ] "Limpar filtros" com alvo ≥ 24px; `catalog_grid_test.rb` passa sem edição; gate full passa, contagem registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(navegacao): mostrar filtros ativos e limpar filtros na linha de status`
+
+---
+
+### T18: Filtros na coluna lateral do catálogo largo
+
+**What**: A partir de 1024px, os filtros do catálogo ficam na coluna lateral, abaixo da navegação, e título, busca, status e grade ocupam a coluna de conteúdo. Abaixo de 1024px, nada muda.
+**Where**: `app/views/catalog/index.html.erb`, `app/assets/stylesheets/catalog.css`
+**Depends on**: T17
+**Reuses**: `--sidebar-width` (T12), o grid de `body` da T6
+**Requirement**: NAV-32, NAV-22, NAV-23, NAV-06
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Antes do código, conferir em fonte primária (MDN, caniuse) o suporte a `subgrid` e o efeito de `display: contents` sobre o landmark `main`. Registrar no resultado
+- [ ] A view agrupa os filhos de `main.catalog` em `catalog__head`, `catalog__filters` e `catalog__body`, nessa ordem de DOM; o `main` continua sendo o landmark e contém os filtros
+- [ ] Só dentro de `@media (min-width: 64rem)`: `main.catalog` em `grid-column: 1 / -1` com `subgrid` nos dois eixos; `head` na coluna 2 e linha 1, `filters` na coluna 1 e linha 2, `body` na coluna 2 e linha 2; `.site-header` na coluna 1 e linha 1
+- [ ] Detalhe da carta e Minha pasta continuam na coluna 2 (`navigation_layout_test.rb` ajustado conforme o protocolo só na exceção do catálogo)
+- [ ] O flash continua acima do conteúdo e as duas regiões vivas continuam no DOM
+- [ ] Teste de integração da ordem dos três grupos e testes textuais das regras; gate full passa, contagem registrada
+
+**Tests**: unit + integration
+**Gate**: full
+**Commit**: `feat(navegacao): pôr os filtros na coluna lateral do catálogo largo`
+
+---
+
+### T19: Minha pasta com cartões e barra por set
+
+**What**: Os dois indicadores viram cartões com o número em destaque, e cada set ganha uma barra de progresso ao lado da contagem "possuídas / total".
+**Where**: `app/views/progress/index.html.erb`, `app/assets/stylesheets/catalog.css`
+**Depends on**: T18
+**Reuses**: `progress__stat`, `row.owned_variants`, `row.total_variants`, `row.completion_percent_known?`
+**Requirement**: NAV-37, NAV-38, NAV-17, NAV-18, NAV-20, NAV-28
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Cada indicador é um cartão (`surface-raised`, borda `border`, `radius-md`), com o número em `display` e a legenda em `caption`. Com zero cópias, os dois mostram 0
+- [ ] Em 360px os cartões dividem a largura em duas colunas sem estourar (NAV-28)
+- [ ] Set com total conhecido: `<progress value="owned" max="total" aria-hidden="true">`, fora do `<p>` da contagem, trilho `surface-sunken` e preenchimento `border-strong`. Sem total conhecido, sem barra
+- [ ] A mudança na view é só acréscimo: classes e textos que `progress_ui_test.rb` e `minha_pasta_test.rb` leem continuam. `progress_ui_test.rb` passa **sem edição**
+- [ ] Classes novas são elementos de `progress` ou `progress-set`, com regra na folha; gate full passa, contagem registrada
+
+**Tests**: integration + unit
+**Gate**: full
+**Commit**: `feat(navegacao): mostrar a pasta em cartões e com barra por set`
+
+---
+
+### T20: Adicionar cartas a partir da pasta
+
+**What**: "Minha pasta" ganha o link "Adicionar cartas", em estilo de ação principal, que leva ao catálogo.
+**Where**: `app/views/progress/index.html.erb`, `app/assets/stylesheets/catalog.css`
+**Depends on**: T19
+**Reuses**: `progress__actions`, `--accent`, `--on-accent`
+**Requirement**: NAV-39
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Link "Adicionar cartas" para `catalog_path`, antes dos links de wishlist, import e export, com `min-height: 44px`
+- [ ] Fundo `accent` e texto `on-accent`; o contraste é o par já verificado em `test/design/`
+- [ ] Teste em `minha_pasta_test.rb` que falha sem o link; gate full passa, contagem registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(navegacao): levar da pasta ao catálogo com adicionar cartas`
+
+---
+
+### T21: Segunda revisão visual e fechamento
+
+**What**: Rodar a revisão de a11y sobre o diff das Fases 6–9 e submeter as telas de novo ao dono, comparando lado a lado com o canvas, em 360px e em 1280px.
+**Where**: `.specs/features/navegacao/tasks.md`, `.context/tasks.md`
+**Depends on**: T20
+**Reuses**: o plano de delegação (`ecc:a11y-architect`, só leitura)
+**Requirement**: NAV-01..NAV-39 (Success Criteria da spec)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE — subagente `ecc:a11y-architect`, só leitura
+
+**Done when**:
+
+- [ ] `ecc:a11y-architect` revisou chips, linha de status, coluna lateral e pasta. Achados CRITICAL e HIGH viraram task de correção antes do Verifier
+- [ ] O dono comparou catálogo, filtro, detalhe e Minha pasta com o canvas, com sessão e sem sessão, em 360px e em 1280px, e aprovou ou listou o que reprova
+- [ ] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.14 de `.context/tasks.md` §6 está fechado
 - [ ] Gate build passa
 
 **Tests**: none
 **Gate**: build
-**Commit**: `docs(navegacao): registrar a revisão visual e de acessibilidade`
+**Commit**: `docs(navegacao): registrar a segunda revisão visual e de acessibilidade`
 
 ---
 
@@ -469,6 +809,8 @@ automaticamente.
 | T3, T5 — títulos, `aria-current`, links | `ecc:a11y-architect` na T11 |
 | T6, T9 — alvo de 44px, anel, reflow | `ecc:a11y-architect` na T11 |
 | T7, T8 — formulário sem JS e preservação de URL | `ecc:pr-test-analyzer` antes do Verifier |
+| T13–T15 — URL de alternância e chips | `ecc:pr-test-analyzer` sobre os testes reescritos, antes do Verifier |
+| T12, T16, T18–T20 — barra, chips, coluna, pasta | `ecc:a11y-architect` na T21 |
 | T1, T2 — consultas novas | `ecc:database-reviewer` se `filter_options` fizer full scan na tabela de variantes |
 
 ## Task Granularity Check
@@ -486,6 +828,16 @@ automaticamente.
 | T9 | um grupo de regras | ✅ |
 | T10 | um grupo de regras | ✅ |
 | T11 | revisão | ✅ |
+| T12 | um grupo de regras mais um token | ✅ coeso |
+| T13 | um helper | ✅ |
+| T14 | três grupos de chips e o `select` que fica | ✅ um conceito |
+| T15 | um grupo de chips | ✅ |
+| T16 | um grupo de regras | ✅ |
+| T17 | uma linha da view com a regra dela | ✅ |
+| T18 | agrupamento da view mais as regras de subgrid | ⚠️ dois arquivos, um conceito |
+| T19 | cartões e barra da pasta | ✅ coeso |
+| T20 | um link | ✅ |
+| T21 | revisão | ✅ |
 
 Separar o helper `nav_link_to` da T5 deixaria uma task com helper sem uso e sem
 teste de integração.
@@ -505,6 +857,16 @@ teste de integração.
 | T9 | T8 | T8 → T9 | ✅ |
 | T10 | T9 | T9 → T10 (Fase 5) | ✅ |
 | T11 | T10 | T10 → T11 | ✅ |
+| T12 | T11 | T11 → T12 (Fase 6) | ✅ |
+| T13 | T12 | T12 → T13 (Fase 7) | ✅ |
+| T14 | T13 | T13 → T14 | ✅ |
+| T15 | T14 | T14 → T15 | ✅ |
+| T16 | T15 | T15 → T16 | ✅ |
+| T17 | T16 | T16 → T17 | ✅ |
+| T18 | T17 | T17 → T18 (Fase 8) | ✅ |
+| T19 | T18 | T18 → T19 (Fase 9) | ✅ |
+| T20 | T19 | T19 → T20 | ✅ |
+| T21 | T20 | T20 → T21 (Fase 10) | ✅ |
 
 ## Test Co-location Validation
 
@@ -521,3 +883,13 @@ teste de integração.
 | T9 | folha | unit (textual) | unit | ✅ |
 | T10 | folha | unit (textual) | unit | ✅ |
 | T11 | revisão | none | none | ✅ |
+| T12 | folha | unit (textual) | unit | ✅ |
+| T13 | helper | unit | unit | ✅ |
+| T14 | view | integration | integration | ✅ |
+| T15 | view | integration | integration | ✅ |
+| T16 | folha | unit (textual) | unit | ✅ |
+| T17 | view e folha | integration | integration | ✅ |
+| T18 | view e folha | integration + unit (textual) | unit + integration | ✅ |
+| T19 | view e folha | integration + unit (textual) | integration + unit | ✅ |
+| T20 | view | integration | integration | ✅ |
+| T21 | revisão | none | none | ✅ |

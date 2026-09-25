@@ -1,6 +1,8 @@
 # Navegação e layout das telas — Especificação
 
-**Status**: Approved (2026-09-23, pelo dono do produto)
+**Status**: Approved (2026-09-23, pelo dono do produto). Emendada em 2026-09-24
+com NAV-30..NAV-39 (Req. 13.9–13.14), depois da reprovação visual na T11,
+aprovada pelo dono na mesma data.
 
 ## Problem Statement
 
@@ -47,12 +49,14 @@ preço.
 | O que o canvas vira agora | Layout do MVP, só com dados que existem | Baralho e preço são fases futuras com pendências próprias | y |
 | O que é "Minha pasta" | A página de progresso, com total de cópias, variantes distintas e links para wishlist, import e export | Nenhuma rota nova; o progresso já é a página "da minha coleção" | y |
 | Controles de filtro | Cor, tipo, raridade, set e posse | Os que o canvas desenha, mais set; o resto continua pela URL | y |
+| Forma dos controles (emenda de 2026-09-24) | Cor, tipo, raridade e posse viram chips-link que aplicam ou removem o valor com um toque; set continua `select` num formulário GET | É o que o canvas desenha. Um link por valor dispensa JS e o botão "Filtrar"; set em chip daria dezenas de chips em 360px | y |
+| Coluna lateral no catálogo largo (emenda) | Filtros abaixo da navegação, na mesma coluna, sem tirar o formulário de dentro de `main` | Mover os filtros no DOM mudaria a ordem de leitura no celular; `display: contents` em `main` apaga o landmark em parte dos navegadores | y |
 | Fonte de verdade | `.context/requirements.md` Req. 4.9 e Req. 13; canvas é referência visual | O canvas é externo e editável fora do repo (AD-005, como na AD-011) | y |
 | Itens da navegação com sessão | Catálogo, Minha pasta, Sair | Três itens cabem com folga em 360px; "Sair" continua alcançável como hoje | y |
 | Itens da navegação sem sessão | Catálogo, Entrar, Criar conta | Link para página que exige sessão só levaria ao login (regra já usada no cabeçalho atual) | y |
 | Fronteira estreita/larga | 1024px de largura | O canvas desenha 390px e 1280px; 1024px deixa tablet em retrato com barra inferior | y |
 | Uma marcação ou duas para a navegação | Uma só, reposicionada por CSS | Duas cópias divergem na primeira correção e duplicam os links para leitor de tela | y |
-| Filtro sem JavaScript | Os controles funcionam como formulário GET ou links; JS é opcional | Stimulus não está pinado no projeto; o Req. 4.7 já exige estado na URL | y |
+| Filtro sem JavaScript | Os controles funcionam como links (cor, tipo, raridade, posse) ou formulário GET (set); JS é opcional | Stimulus não está pinado no projeto; o Req. 4.7 já exige estado na URL | y |
 | Fileiras de chips em 360px | Quebram linha, sem rolagem horizontal interna | O canvas rola a fileira; controle escondido fora da tela é pior de descobrir e de testar | y |
 | Controle de posse para anônimo | Não renderizado | O query object já ignora `owned` sem usuário; mostrar controle inerte é promessa quebrada | y |
 | Título da página de progresso | `h1` "Minha pasta", "Progresso por set" vira `h2` | É a entrada da navegação; o nome da seção continua dizendo o que a lista é | y |
@@ -161,6 +165,37 @@ de antes.
 
 ---
 
+### P1: Telas no desenho do canvas ⭐ MVP
+
+**User Story**: Como colecionador, quero que as telas tenham a forma do canvas
+"Bindr — telas", com filtros que respondem a um toque e uma pasta que se lê de
+relance, para não ter de marcar caixas e procurar um botão "Filtrar".
+
+**Why P1**: A revisão visual do dono (T11, 2026-09-24) reprovou a feature com
+todos os NAV-01..NAV-29 cumpridos: nenhum deles descrevia a forma visual.
+Estes critérios trazem essa forma para a spec (Req. 13.9–13.14).
+
+**Acceptance Criteria**:
+
+1. WHILE a largura da viewport for menor que 1024px, the system SHALL dividir a largura da barra inferior em partes iguais entre as entradas e dar à entrada atual fundo `surface-sunken`, distinto do `surface-raised` da barra. <!-- NAV-30 -->
+2. WHILE a largura da viewport for de 1024px ou mais, the system SHALL renderizar a coluna lateral com largura fixa `var(--sidebar-width)`, fundo `surface-raised` e borda direita `border`. <!-- NAV-31 -->
+3. WHILE a largura da viewport for de 1024px ou mais, the system SHALL posicionar, no catálogo, os controles de filtro na coluna lateral, abaixo da navegação. <!-- NAV-32 -->
+4. The system SHALL renderizar cada valor de cor, tipo, raridade e posse como um link cujo destino é a URL atual com aquele valor acrescentado, se inativo, ou removido, se ativo, sem o parâmetro `page`. Posse é exclusiva: "todas" remove `owned`. <!-- NAV-33 -->
+5. WHILE um valor estiver ativo, the system SHALL exibir no chip um "×" visível e dar a ele nome acessível que começa por "Remover filtro" e contém o rótulo visível. O chip inativo SHALL ter como nome acessível o próprio rótulo visível. <!-- NAV-34 -->
+6. The system SHALL dar a cada chip de filtro altura mínima de 44px. <!-- NAV-35 -->
+7. The system SHALL exibir sempre a contagem de resultados. WHILE houver filtro ativo, the system SHALL exibir também "N filtros ativos" e o link "Limpar filtros", que leva ao catálogo sem filtros e preserva só a ordenação. <!-- NAV-36 -->
+8. The system SHALL renderizar os indicadores de "Minha pasta" (NAV-17, NAV-18) como cartões, com o número no estilo `display` e a legenda no estilo `caption`. <!-- NAV-37 -->
+9. WHEN um set tiver total de variantes base conhecido THEN the system SHALL exibir, ao lado da contagem "possuídas / total", uma barra de progresso com esses mesmos valores. Sem total conhecido, a contagem fica e a barra não é renderizada. <!-- NAV-38 -->
+10. The system SHALL oferecer em "Minha pasta" o link "Adicionar cartas", que leva ao catálogo. <!-- NAV-39 -->
+
+**Independent Test**: No catálogo com `colors[]=Red`, o chip "Red" aponta para a
+URL sem `colors`, mostra "×" e se chama "Remover filtro Cor: Red"; o chip
+"Green" aponta para `colors[]=Red&colors[]=Green`. A linha de status diz "1
+filtro ativo". Em "Minha pasta", cada set traz uma barra com os valores da
+contagem.
+
+---
+
 ## Edge Cases
 
 - IF um parâmetro de filtro for desconhecido ou inválido THEN the system SHALL ignorá-lo também nos controles, sem marcar nenhum como ativo e sem erro. <!-- NAV-26 -->
@@ -192,8 +227,8 @@ de antes.
 | NAV-02 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
 | NAV-03 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
 | NAV-04 | P1: Navegação principal | Req. 13.2 | Implemented (T5) |
-| NAV-05 | P1: Navegação principal | Req. 13.3 | Pending |
-| NAV-06 | P1: Navegação principal | Req. 13.3 | Pending |
+| NAV-05 | P1: Navegação principal | Req. 13.3 | Implemented (T6) |
+| NAV-06 | P1: Navegação principal | Req. 13.3 | Implemented (T6) |
 | NAV-07 | P1: Navegação principal | Req. 13.8 | Implemented (T5) |
 | NAV-08 | P1: Filtrar a grade | Req. 4.9 | Implemented (T1) |
 | NAV-09 | P1: Filtrar a grade | Req. 4.9, 4.7 | Implemented (T7) |
@@ -215,11 +250,20 @@ de antes.
 | NAV-25 | P2: Layout largo | Req. 13.6 | Implemented (T10) |
 | NAV-26 | Edge case | Req. 4 (parâmetro inválido ignorado) | Implemented (T7) |
 | NAV-27 | Edge case | Req. 3.6 | Implemented (T7) |
-| NAV-28 | Edge case | Req. 2.5, 13.7 | Pending |
+| NAV-28 | Edge case | Req. 2.5, 13.7 | Implemented (T6, T9) |
 | NAV-29 | Edge case | Req. 6.4 | Implemented (T3) |
+| NAV-30 | P1: Telas no desenho do canvas | Req. 13.9 | Pending (T12) |
+| NAV-31 | P1: Telas no desenho do canvas | Req. 13.10 | Pending (T12) |
+| NAV-32 | P1: Telas no desenho do canvas | Req. 13.10 | Pending (T18) |
+| NAV-33 | P1: Telas no desenho do canvas | Req. 13.11 | Pending (T13, T14, T15) |
+| NAV-34 | P1: Telas no desenho do canvas | Req. 13.11 | Pending (T14, T15) |
+| NAV-35 | P1: Telas no desenho do canvas | Req. 13.11 | Pending (T16) |
+| NAV-36 | P1: Telas no desenho do canvas | Req. 13.12 | Pending (T17) |
+| NAV-37 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
+| NAV-38 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
+| NAV-39 | P1: Telas no desenho do canvas | Req. 13.14 | Pending (T20) |
 
-**Coverage:** 29 total, 0 mapped to tasks, 29 unmapped ⚠️ (tasks ainda não
-escritas)
+**Coverage:** 39 total, 39 mapped to tasks, 0 unmapped
 
 ---
 

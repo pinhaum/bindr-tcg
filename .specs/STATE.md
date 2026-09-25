@@ -98,7 +98,31 @@
 - **Date**: 2026-09-22
 - **Status**: active
 
+### AD-013
+- **Decision**: O canvas "Bindr — telas" (`claude.ai/artifact/P7WCTR9YkH1i52DWoVwPn8`) deixa de ser só "referência visual". O que ele desenha e vale para o MVP vira critério testável: Req. 13.9–13.14 e NAV-30..NAV-39. Os filtros de cor, tipo, raridade e posse passam a ser chips-link que aplicam com um toque, e o set continua num `select`.
+- **Reason**: A revisão visual da `navegacao` (T11, 2026-09-24) foi reprovada com NAV-01..NAV-29 todos cumpridos e o gate verde. Nenhum critério descrevia a forma visual, então a implementação chegou a outra interface sem quebrar teste nenhum, e a T7 chegou a pedir checkbox explicitamente. Referência que não vira critério não é verificada por ninguém antes do dono.
+- **Trade-off**: (1) Os testes de formulário da T7 e da T8 são reescritos para `href`; as asserções de URL, preservação e isolamento continuam com a mesma força. (2) Os filtros na coluna lateral exigem `subgrid` e três grupos na view; `display: contents` em `main` foi descartado pelo risco de apagar o landmark. (3) O que o canvas desenha e a spec recusou continua recusado: rolagem horizontal dos chips, baralho, preço, "% do catálogo", "Zerar quantidade".
+- **Scope**: `.context/requirements.md` Req. 13, `.specs/features/navegacao/spec.md`, `tasks.md` T11–T21. Vale para qualquer feature futura com canvas: o desenho entra na spec como critério, não como anexo.
+- **Date**: 2026-09-24
+- **Status**: active
+
 ## Handoff
+
+> **Estado em 2026-09-24 — este bloco vence os de baixo.** Feature em execução:
+> **`navegacao`**. Lotes B1 (T1–T6) e B2 (T7–T11) fechados. A **T11 foi
+> reprovada** pelo dono: a interface não segue o canvas (ver o resultado da
+> T11 e a AD-013). A spec ganhou NAV-30..NAV-39 (Req. 13.9–13.14) e o plano
+> ganhou T12–T21 (Fases 6–10), emendas aprovadas pelo dono em 2026-09-24.
+> `validate_spec` e `validate_tasks` limpos.
+>
+> **Próximo passo: lote B3 (T12–T17)**, depois o B4 (T18–T21). O Verifier roda
+> depois da T21. Pendências para ele: as mesmas do bloco de 2026-09-23 abaixo,
+> mais conferir que as reescritas de teste nas Fases 6–10 seguem a regra do
+> Execution Protocol (só onde o critério mudou).
+>
+> Não há navegador no ambiente (Playwright e chrome-devtools sem Chrome
+> instalado). A comparação com o canvas foi feita sobre HTML, folha e os
+> `.dc.html` do artifact.
 
 > **Estado em 2026-09-23, noite — este bloco vence os de baixo.** Feature em
 > execução: **`navegacao`** (spec e `tasks.md` aprovados em `dd3cafa`). O **lote

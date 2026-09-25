@@ -271,7 +271,11 @@ Regras de execução:
   - Detalhe da carta em duas colunas na viewport larga.
   - Não reorganizar `catalog.css` (mesma restrição da §6.1); 360px e Req. 12
     continuam passando.
-  - _Requisitos: 4.9, 13.1–13.8_
+  - Aderência ao canvas (emenda de 2026-09-24, após a reprovação visual):
+    barra e coluna lateral no desenho do canvas, filtros como chips que
+    aplicam com um toque, linha de status, filtros na coluna lateral e pasta
+    com cartões e barras.
+  - _Requisitos: 4.9, 13.1–13.14_
 
 ---
 

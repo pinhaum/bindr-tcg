@@ -352,6 +352,31 @@ deste requisito. Em divergência, este documento vence (AD-005).
 8. A navegação NÃO DEVE exibir entrada para funcionalidade que não existe
    (baralho, preços).
 
+Os critérios 9 a 14 foram acrescentados em 2026-09-24, depois que o dono do
+produto reprovou a revisão visual da `navegacao`. A implementação cumpria os
+critérios 1 a 8 e mesmo assim não se parecia com o canvas, porque nenhum deles
+descrevia a forma visual. Eles trazem para cá o que o canvas desenha e que
+passa a ser obrigatório.
+
+9. Em viewport estreita, as entradas da barra inferior DEVEM dividir a largura
+   da barra em partes iguais, e a entrada atual DEVE ter fundo distinto das
+   demais, além do peso de fonte.
+10. Em viewport larga, a coluna lateral DEVE ter largura fixa e superfície
+    elevada, separada do conteúdo por borda. No catálogo, ela DEVE conter os
+    controles de filtro abaixo da navegação.
+11. Os controles de cor, tipo, raridade e posse DEVEM ser chips de no mínimo
+    44px de altura que aplicam ou removem o valor com um toque, sem JavaScript.
+    O chip ativo DEVE exibir um sinal de remoção visível, e seu nome acessível
+    DEVE dizer que o toque remove o filtro. O set continua num controle de
+    seleção.
+12. O catálogo DEVE exibir sempre a contagem de resultados. Com filtro ativo,
+    DEVE exibir também quantos filtros estão ativos e a ação "Limpar filtros".
+13. Em "Minha pasta", os indicadores do critério 4 DEVEM aparecer como cartões
+    com o número em destaque, e cada set DEVE ter uma barra de progresso ao lado
+    da contagem "possuídas / total".
+14. "Minha pasta" DEVE oferecer a ação "Adicionar cartas", que leva ao
+    catálogo.
+
 ---
 
 ## Rastreamento de pendências
