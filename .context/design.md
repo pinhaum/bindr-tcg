@@ -659,10 +659,11 @@ Base 4px, quatro passos: `space-1` 4px, `space-2` 8px, `space-3` 16px,
 Req. 2.5 — a 360px a conta é `360 − 2×24` de margem `− 8` de gutter = **152px por
 tile**, duas colunas. Toda decisão de tamanho se verifica contra essa conta.
 
-Navegação (Fase 6 — NAV-05, NAV-06): `nav-height` 56px (altura da barra fixa em
-mobile, ≥ 44px do Req. 12.8); `nav-current-weight` 600 (peso da entrada ativa da
-navegação); `body-grid-columns` 1fr (mobile) e minmax(200px, 1fr) 3fr (≥ 64rem);
-`body-padding-bottom` var(--nav-height) em mobile, 0 em ≥ 64rem.
+Navegação (Fases 6–10 — NAV-05, NAV-06, NAV-28, NAV-30, NAV-31): `nav-height` 56px
+(altura da barra fixa em mobile, ≥ 44px do Req. 12.8); `nav-current-weight` 600
+(peso da entrada ativa); `sidebar-width` 280px (largura da coluna lateral em desktop,
+Fase 6 — T12); `body-grid-columns` 1fr (mobile) e `var(--sidebar-width) minmax(0, 1fr)`
+(≥ 64rem); `body-padding-bottom` var(--nav-height) em mobile, 0 em ≥ 64rem.
 
 Raios: `radius-sm` 4px (chip, input, badge de raridade), `radius-md` 8px (tile,
 poço, botão), `radius-full` (**apenas** badge de quantidade — o tile é retangular

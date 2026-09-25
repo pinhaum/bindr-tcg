@@ -547,12 +547,12 @@ com botão.
 
 **Done when**:
 
-- [ ] Fora de media query: `.site-header__nav` com `background-color: var(--surface-raised)` e cada entrada (link e botão "Sair") com `flex: 1`
-- [ ] `.site-header__nav [aria-current="page"]` com `background-color: var(--surface-sunken)` e `color: var(--ink)`; as demais entradas com `color: var(--ink-muted)`. O peso distinto de NAV-04 continua
-- [ ] Token `--sidebar-width: 280px` em `:root`, registrado em §11.5 junto com a troca de `body-grid-columns` em ≥ 64rem para `var(--sidebar-width) minmax(0, 1fr)`
-- [ ] Dentro de `@media (min-width: 64rem)`: `.site-header` com `background-color: var(--surface-raised)`, `border-right: 1px solid var(--border)`, altura da página inteira, e as entradas empilhadas com `min-height: 44px`
-- [ ] Em 360px a barra continua sem largura fixa que some mais que o viewport (NAV-28)
-- [ ] Testes textuais novos em `test/design/navigation_canvas_test.rb`. `navigation_layout_test.rb` só muda onde a coluna deixou de ser `minmax(200px, 1fr)`. Gate full passa, contagem registrada
+- [x] Fora de media query: `.site-header__nav` com `background-color: var(--surface-raised)` e cada entrada (link e botão "Sair") com `flex: 1`
+- [x] `.site-header__nav [aria-current="page"]` com `background-color: var(--surface-sunken)` e `color: var(--ink)`; as demais entradas com `color: var(--ink-muted)`. O peso distinto de NAV-04 continua
+- [x] Token `--sidebar-width: 280px` em `:root`, registrado em §11.5 junto com a troca de `body-grid-columns` em ≥ 64rem para `var(--sidebar-width) minmax(0, 1fr)`
+- [x] Dentro de `@media (min-width: 64rem)`: `.site-header` com `background-color: var(--surface-raised)`, `border-right: 1px solid var(--border)`, altura da página inteira, e as entradas empilhadas com `min-height: 44px`
+- [x] Em 360px a barra continua sem largura fixa que some mais que o viewport (NAV-28)
+- [x] Testes textuais novos em `test/design/navigation_canvas_test.rb`. `navigation_layout_test.rb` só muda onde a coluna deixou de ser `minmax(200px, 1fr)`. Gate full passa, contagem registrada
 
 **Tests**: unit
 **Gate**: full
