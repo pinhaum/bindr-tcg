@@ -888,15 +888,40 @@ summary:focus-visible,
 .progress__count { font-size: var(--caption-size); line-height: var(--caption-line-height); margin: 0 0 var(--space-2); color: var(--ink-muted); }
 
 /*
- * T3 — indicadores de Minha pasta (NAV-17, NAV-18, NAV-20, NAV-21).
+ * T3, T19 — indicadores de Minha pasta (NAV-17, NAV-18, NAV-20, NAV-21, NAV-37).
  *
  * Os dois indicadores (total de cópias e variantes distintas) são renderizados
- * como uma linha de métricas acima da lista de sets. Cada métrica é um `span`
- * em fluxo.
+ * como cartões (T19): número em display, legenda em caption, dentro de
+ * surface-raised com borda e raio. Em 360px, dois cartões numa linha com gap 8px.
  */
-.progress__summary { margin: 0 0 var(--space-3); font-size: var(--body-size); line-height: var(--body-line-height); }
+.progress__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
+  margin: 0 0 var(--space-3);
+}
 
-.progress__stat { margin-right: var(--space-2); }
+.progress__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.progress__stat-value {
+  font-size: var(--display-size);
+  line-height: var(--display-line-height);
+  font-weight: var(--display-weight);
+}
+
+.progress__stat-label {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
 
 /*
  * T3 — título "Progresso por set" rebaixado de h1 para h2.
@@ -980,6 +1005,23 @@ summary:focus-visible,
   font-size: var(--code-size);
   line-height: var(--code-line-height);
   font-weight: var(--code-weight);
+}
+
+/*
+ * T19 — barra de progresso de set (NAV-38).
+ *
+ * `<progress>` renderizado ao lado da contagem "possuídas / total". Trilho em
+ * surface-sunken, preenchimento em border-strong. Altura 8px, raio 4px, sem
+ * `style` inline. `aria-hidden` porque a contagem escrita já diz o mesmo e um
+ * leitor de tela repetiria cada número.
+ */
+.progress-set__bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--surface-sunken);
+  border: none;
+  border-radius: var(--radius-sm);
+  accent-color: var(--border-strong);
 }
 
 .progress-set__owned-line,
@@ -1633,4 +1675,7 @@ summary:focus-visible,
   align-items: center;
   gap: var(--space-1);
   min-height: 44px;
+}
+
+.catalog__chip--active {
 }

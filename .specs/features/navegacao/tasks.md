@@ -739,11 +739,11 @@ com botão.
 
 **Done when**:
 
-- [ ] Cada indicador é um cartão (`surface-raised`, borda `border`, `radius-md`), com o número em `display` e a legenda em `caption`. Com zero cópias, os dois mostram 0
-- [ ] Em 360px os cartões dividem a largura em duas colunas sem estourar (NAV-28)
-- [ ] Set com total conhecido: `<progress value="owned" max="total" aria-hidden="true">`, fora do `<p>` da contagem, trilho `surface-sunken` e preenchimento `border-strong`. Sem total conhecido, sem barra
-- [ ] A mudança na view é só acréscimo: classes e textos que `progress_ui_test.rb` e `minha_pasta_test.rb` leem continuam. `progress_ui_test.rb` passa **sem edição**
-- [ ] Classes novas são elementos de `progress` ou `progress-set`, com regra na folha; gate full passa, contagem registrada
+- [x]  Cada indicador é um cartão (`surface-raised`, borda `border`, `radius-md`), com o número em `display` e a legenda em `caption`. Com zero cópias, os dois mostram 0
+- [x]  Em 360px os cartões dividem a largura em duas colunas sem estourar (NAV-28)
+- [x]  Set com total conhecido: `<progress value="owned" max="total" aria-hidden="true">`, fora do `<p>` da contagem, trilho `surface-sunken` e preenchimento `border-strong`. Sem total conhecido, sem barra
+- [x]  A mudança na view é só acréscimo: classes e textos que `progress_ui_test.rb` e `minha_pasta_test.rb` leem continuam. `progress_ui_test.rb` passa **sem edição**
+- [x]  Classes novas são elementos de `progress` ou `progress-set`, com regra na folha; gate full passa, contagem registrada
 
 **Tests**: integration + unit
 **Gate**: full

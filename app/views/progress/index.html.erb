@@ -75,14 +75,20 @@
   %>
   <% stats = CollectionItem.collection_stats_for(Current.user) %>
 
-  <p class="progress__summary">
-    <span class="progress__stat">
-      <%= stats[:total_copies] %> <%= stats[:total_copies] == 1 ? "carta na pasta" : "cartas na pasta" %>
-    </span>
-    <span class="progress__stat">
-      <%= stats[:distinct_variants] %> <%= stats[:distinct_variants] == 1 ? "carta diferente" : "cartas diferentes" %>
-    </span>
-  </p>
+  <div class="progress__summary">
+    <div class="progress__stat">
+      <div class="progress__stat-value"><%= stats[:total_copies] %></div>
+      <div class="progress__stat-label">
+        <%= stats[:total_copies] == 1 ? "carta na pasta" : "cartas na pasta" %>
+      </div>
+    </div>
+    <div class="progress__stat">
+      <div class="progress__stat-value"><%= stats[:distinct_variants] %></div>
+      <div class="progress__stat-label">
+        <%= stats[:distinct_variants] == 1 ? "carta diferente" : "cartas diferentes" %>
+      </div>
+    </div>
+  </div>
 
   <h2 class="progress__heading" id="progress_title">Progresso por set</h2>
 
@@ -140,6 +146,13 @@
           <span class="progress-set__total"><%= row.total_variants %></span>
           <%= row.total_variants == 1 ? "variante" : "variantes" %>
         </p>
+
+        <% if row.completion_percent_known? %>
+          <progress class="progress-set__bar"
+                    value="<%= row.owned_variants %>"
+                    max="<%= row.total_variants %>"
+                    aria-hidden="true"></progress>
+        <% end %>
 
         <p class="progress-set__percent <%= "progress-set__percent--unknown" unless row.completion_percent_known? %>">
           <% if row.completion_percent_known? %>

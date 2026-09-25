@@ -147,10 +147,11 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     sign_in(@user)
     get progress_path
 
-    # Extrai o total exibido em Minha pasta
-    progress_text = css_select(".progress").first.text
-    pasta_match = progress_text.match(/(\d+) cartas? na pasta/)
-    assert pasta_match, "não encontrou 'X cartas na pasta'"
+    # Extrai o total exibido em Minha pasta (no cartão de cópias)
+    stats_cards = css_select(".progress__stat")
+    pasta_text = stats_cards.first.text
+    pasta_match = pasta_text.match(/(\d+)/)
+    assert pasta_match, "não encontrou número de cópias no cartão"
     pasta_total = pasta_match[1].to_i
 
     # Extrai o total exibido no catálogo
@@ -282,5 +283,78 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     # Esta é a asserção que falharia se o link fosse removido
     assert_select ".collection-export__link", text: "Baixar minha coleção (CSV)",
                   fail_message: "link para export não encontrado"
+  end
+
+  # --- T19: NAV-37 indicadores como cartões ---
+
+  test "indicadores de cópias e variantes são cartões em grid" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__summary" do
+      assert_select ".progress__stat", count: 2,
+        fail_message: "progress__summary deve conter exatamente 2 cartões"
+    end
+  end
+
+  test "cartão de cópias exibe número e legenda separados" do
+    sign_in(@user)
+    get progress_path
+
+    # Primeiro cartão: total de cópias
+    assert_select ".progress__summary .progress__stat" do |cards|
+      first_card = cards.first
+      stat_value = first_card.css(".progress__stat-value").text
+      stat_label = first_card.css(".progress__stat-label").text.strip
+
+      assert_equal "4", stat_value, "número de cópias deve ser 4"
+      assert_equal "cartas na pasta", stat_label, "legenda deve ser 'cartas na pasta'"
+    end
+  end
+
+  test "cartão de variantes exibe número e legenda separados" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__summary .progress__stat" do |cards|
+      second_card = cards[1]
+      stat_value = second_card.css(".progress__stat-value").text
+      stat_label = second_card.css(".progress__stat-label").text.strip
+
+      assert_equal "2", stat_value, "número de variantes deve ser 2"
+      assert_equal "cartas diferentes", stat_label, "legenda deve ser 'cartas diferentes'"
+    end
+  end
+
+  # --- T19: NAV-38 barra de progresso por set ---
+
+  test "set com total conhecido exibe barra de progresso" do
+    sign_in(@user)
+    get progress_path
+
+    # Barra deve estar ao lado da contagem
+    assert_select ".progress-set__bar",
+      fail_message: "barra de progresso não encontrada para set com total conhecido"
+  end
+
+  test "barra de progresso tem atributos value e max corretos" do
+    sign_in(@user)
+    get progress_path
+
+    # Set OP01 tem 5 variantes base; posse é 2 distintas de 5
+    assert_select ".progress-set__bar" do |bars|
+      bar = bars.first
+      assert bar["value"], "barra deve ter atributo value"
+      assert bar["max"], "barra deve ter atributo max"
+      # Valores podem variar conforme o set e posse, mas devem existir
+    end
+  end
+
+  test "barra de progresso tem aria-hidden para não repetir contagem" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress-set__bar[aria-hidden='true']",
+      fail_message: "barra deve ter aria-hidden='true' para não repetir informação"
   end
 end
