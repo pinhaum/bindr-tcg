@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Catálogo — grade filtrável (mobile)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #051b23; color: #e9f0f3; }
+a { color: #ff9e14; }
+a:hover { color: #ffb44d; }
+</style>
+</helmet>
+<div style="width: 390px; height: 1000px; box-sizing: border-box; background: #051b23; position: relative; overflow: hidden; display: flex; flex-direction: column;">
+
+<div style="padding: 24px 24px 0 24px; display: flex; flex-direction: column; gap: 16px;">
+
+<h1 style="margin: 0; font-size: 28px; line-height: 32px; font-weight: 700; color: #e9f0f3;">Catálogo</h1>
+
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<label for="busca" style="font-size: 13px; line-height: 18px; font-weight: 400; color: #9ba7ad;">Buscar por nome ou card_number</label>
+<input id="busca" type="search" placeholder="OP01-024" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; background: #102b36; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 15px; line-height: 22px;">
+</div>
+
+<div style="margin: 0 -24px; padding: 0 24px; overflow-x: auto; display: flex; gap: 8px; align-items: center;">
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 8px 0 12px; display: flex; align-items: center; gap: 8px; background: #ff9e14; border: 1px solid #ff9e14; border-radius: 4px; color: #051b23; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600;">SR<span aria-hidden="true" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 15px;">×</span></button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 8px 0 12px; display: flex; align-items: center; gap: 8px; background: #ff9e14; border: 1px solid #ff9e14; border-radius: 4px; color: #051b23; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600;">OP01<span aria-hidden="true" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 15px;">×</span></button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 16px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;">Character</button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 16px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;">Leader</button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 16px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;">owned</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<div style="font-size: 13px; line-height: 18px; color: #9ba7ad;">Filtrar por cor</div>
+<div style="margin: 0 -24px; padding: 0 24px; overflow-x: auto; display: flex; gap: 8px; align-items: center;">
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid #717e84; border-radius: 4px; outline: 2px solid #ff9e14; outline-offset: 2px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 600;"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 4px; background: #011018; border: 1px dashed #717e84;"></span>Red</button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 4px; background: #011018; border: 1px dashed #717e84;"></span>Green</button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 4px; background: #011018; border: 1px dashed #717e84;"></span>Blue</button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 4px; background: #011018; border: 1px dashed #717e84;"></span>Purple</button>
+<button type="button" style="flex-shrink: 0; height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 4px; background: #011018; border: 1px dashed #717e84;"></span>Black</button>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+<div style="font-size: 13px; line-height: 18px; color: #9ba7ad;">112 cartas</div>
+<button type="button" style="height: 44px; padding: 0 16px; background: transparent; border: 1px solid #717e84; border-radius: 4px; color: #e9f0f3; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 400;">Limpar filtros</button>
+</div>
+
+</div>
+
+<div style="flex-grow: 1; overflow: hidden; padding: 16px 24px 0 24px;">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+
+<a href="Mobile-Carta.dc.html" style="background: #102b36; border: 1px solid #1c3a47; border-radius: 8px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #e9f0f3;">
+<div style="position: relative; width: 135px; height: 189px; background: #011018; border-radius: 8px; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3;">Monkey.D.Luffy</div>
+<div style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP01-024</div>
+<div style="position: absolute; top: 8px; right: 8px; min-width: 24px; height: 24px; box-sizing: border-box; padding: 0 8px; border-radius: 999px; background: #ff9e14; color: #051b23; font-size: 13px; line-height: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center;">3</div>
+</div>
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Monkey.D.Luffy</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP01-024</span>
+<span style="font-size: 13px; line-height: 18px; color: #9ba7ad;">SR</span>
+</div>
+</a>
+
+<a href="Mobile-Carta.dc.html" style="background: #102b36; border: 1px solid #1c3a47; border-radius: 8px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #e9f0f3;">
+<div style="position: relative; width: 135px; height: 189px; background: #011018; border-radius: 8px; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3;">Roronoa Zoro</div>
+<div style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP01-025</div>
+<div style="position: absolute; top: 8px; right: 8px; min-width: 24px; height: 24px; box-sizing: border-box; padding: 0 8px; border-radius: 999px; background: #ff9e14; color: #051b23; font-size: 13px; line-height: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center;">4</div>
+</div>
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Roronoa Zoro</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP01-025</span>
+<span style="font-size: 13px; line-height: 18px; color: #9ba7ad;">SR</span>
+</div>
+</a>
+
+<a href="Mobile-Carta.dc.html" style="background: #102b36; border: 1px solid #1c3a47; border-radius: 8px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #e9f0f3;">
+<div style="position: relative; width: 135px; height: 189px; background: #011018; border-radius: 8px; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3;">Nami</div>
+<div style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP01-016</div>
+</div>
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nami</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP01-016</span>
+<span style="font-size: 13px; line-height: 18px; color: #9ba7ad;">C</span>
+</div>
+</a>
+
+<a href="Mobile-Carta.dc.html" style="background: #102b36; border: 1px solid #1c3a47; border-radius: 8px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #e9f0f3;">
+<div style="position: relative; width: 135px; height: 189px; background: #011018; border-radius: 8px; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3;">Trafalgar Law</div>
+<div style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP02-046</div>
+<div style="position: absolute; top: 8px; right: 8px; min-width: 24px; height: 24px; box-sizing: border-box; padding: 0 8px; border-radius: 999px; background: #ff9e14; color: #051b23; font-size: 13px; line-height: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center;">1</div>
+</div>
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Trafalgar Law</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP02-046</span>
+<span style="font-size: 13px; line-height: 18px; color: #9ba7ad;">L</span>
+</div>
+</a>
+
+<a href="Mobile-Carta.dc.html" style="background: #102b36; border: 1px solid #1c3a47; border-radius: 8px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #e9f0f3;">
+<div style="position: relative; width: 135px; height: 189px; background: #011018; border-radius: 8px; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3;">Sanji</div>
+<div style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">ST01-012</div>
+<div style="position: absolute; top: 8px; right: 8px; min-width: 24px; height: 24px; box-sizing: border-box; padding: 0 8px; border-radius: 999px; background: #ff9e14; color: #051b23; font-size: 13px; line-height: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center;">4</div>
+</div>
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sanji</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">ST01-012</span>
+<span style="font-size: 13px; line-height: 18px; color: #9ba7ad;">C</span>
+</div>
+</a>
+
+<a href="Mobile-Carta.dc.html" style="background: #102b36; border: 1px solid #1c3a47; border-radius: 8px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #e9f0f3;">
+<div style="position: relative; width: 135px; height: 189px; background: #011018; border-radius: 8px; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3;">Yamato</div>
+<div style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP09-093</div>
+</div>
+<div style="font-size: 15px; line-height: 22px; font-weight: 600; color: #e9f0f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Yamato</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="font-family: ui-monospace, SFMono-Regular, &quot;JetBrains Mono&quot;, Menlo, monospace; font-size: 13px; line-height: 18px; font-weight: 500; color: #9ba7ad;">OP09-093</span>
+<span style="font-size: 13px; line-height: 18px; color: #9ba7ad;">SEC</span>
+</div>
+</a>
+
+</div>
+</div>
+
+<nav style="position: absolute; left: 0; bottom: 0; width: 390px; height: 64px; box-sizing: border-box; background: #102b36; border-top: 1px solid #1c3a47; display: flex;">
+<a href="Main.dc.html" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-decoration: none; background: #011018; color: #e9f0f3; font-size: 13px; line-height: 18px; font-weight: 600;">Catálogo</a>
+<a href="Mobile-Pasta.dc.html" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #9ba7ad; font-size: 13px; line-height: 18px; font-weight: 400;">Minha pasta</a>
+<a href="Mobile-Baralho.dc.html" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #9ba7ad; font-size: 13px; line-height: 18px; font-weight: 400;">Baralhos</a>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

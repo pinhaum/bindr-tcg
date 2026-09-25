@@ -792,6 +792,7 @@ com botão.
 **Done when**:
 
 - [ ] `ecc:a11y-architect` revisou chips, linha de status, coluna lateral e pasta. Achados CRITICAL e HIGH viraram task de correção antes do Verifier
+- [ ] Um revisor que não escreveu nenhuma das T12–T20 conferiu o HTML renderizado e a folha contra os artboards versionados em `.specs/features/navegacao/canvas/` (`Main`, `Mobile-Carta`, `Mobile-Pasta`, `Desktop-Catalogo`, `Desktop-Carta`, `Desktop-Pasta`), elemento por elemento: estrutura, ordem, medidas, tokens de cor e estado ativo. Cada divergência cita o artboard e o seletor e é classificada como defeito (vira task de correção antes do dono) ou recusa registrada na spec (Baralhos, preço, "% do catálogo", "Zerar quantidade", rolagem horizontal dos chips). O relatório fica em `.specs/features/navegacao/canvas-conformance.md`
 - [ ] O dono comparou catálogo, filtro, detalhe e Minha pasta com o canvas, com sessão e sem sessão, em 360px e em 1280px, e aprovou ou listou o que reprova
 - [ ] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.14 de `.context/tasks.md` §6 está fechado
 - [ ] Gate build passa

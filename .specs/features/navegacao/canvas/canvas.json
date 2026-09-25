@@ -1,0 +1,123 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Desktop-Baralho.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Baralho · desktop",
+      "w": 1280,
+      "x": 2720,
+      "y": 1580
+    },
+    "Desktop-Carta.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Detalhe da carta · desktop",
+      "w": 1280,
+      "x": 1360,
+      "y": 1580
+    },
+    "Desktop-Catalogo.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Catálogo · desktop",
+      "w": 1280,
+      "x": 0,
+      "y": 1580
+    },
+    "Desktop-Pasta.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Minha pasta · desktop",
+      "w": 1280,
+      "x": 4080,
+      "y": 1580
+    },
+    "Main.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Catálogo · mobile",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Mobile-Baralho.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Baralho · mobile",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Mobile-Carta.dc.html": {
+      "h": 1180,
+      "is_interactive": true,
+      "title": "Detalhe da carta · mobile",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Mobile-Pasta.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Minha pasta · mobile",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-21T02:05:05.600Z",
+    "v": 1
+  },
+  "designSystems": [
+    {
+      "artifact": "https://claude.ai/code/artifact/caad77a3-e9da-47da-bf32-56bc32550896",
+      "copiedAt": "2026-09-21T02:35:00Z",
+      "namespace": "bindr",
+      "title": "Bindr",
+      "version": null
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "n-desktop": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "Desktop — 1280 px",
+      "w": 240,
+      "x": 0,
+      "y": 1280
+    },
+    "n-mobile": {
+      "kind": "title1",
+      "maxW": 1800,
+      "text": "Mobile — 390 px",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "n-pend": {
+      "color": "gray",
+      "text": "Pendências herdadas do design system:\n\n1. As seis cores do jogo não têm hexadecimal definido. Os chips de cor aparecem com swatch tracejado neutro — o fill real sai das faces das cartas, não de estimativa.\n\n2. Toda caixa de arte usa o placeholder do Req. 2.3 (nome + card_number sobre surface-sunken), porque não há arte real disponível aqui. A caixa tem exatamente a medida da imagem, então nada faz reflow quando o hotlink falha.\n\n3. Nomes, card_numbers e valores são ilustrativos. Troque pelos fixtures reais antes de usar como referência.",
+      "w": 420,
+      "x": 1900,
+      "y": 0
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Mobile-Carta.dc.html",
+    "Mobile-Baralho.dc.html",
+    "Mobile-Pasta.dc.html",
+    "Desktop-Catalogo.dc.html",
+    "Desktop-Carta.dc.html",
+    "Desktop-Baralho.dc.html",
+    "Desktop-Pasta.dc.html"
+  ],
+  "pages": [],
+  "title": "Bindr — telas"
+}

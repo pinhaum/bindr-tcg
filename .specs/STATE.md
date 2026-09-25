@@ -106,6 +106,14 @@
 - **Date**: 2026-09-24
 - **Status**: active
 
+### AD-014
+- **Decision**: O lote T12–T20 da `navegacao` roda em paralelo onde as dependências reais permitem, e não na cadeia linear do plano: T12 ∥ T13, depois T14 ∥ T19, T15 ∥ T20, e em seguida T16 → T17 → T18. Tasks que rodam juntas não editam o mesmo arquivo. Cada worker usa seu próprio banco de teste (`POSTGRES_TEST_DB=bindr_test_<task>`). Os artboards do canvas ficam versionados em `.specs/features/navegacao/canvas/`, e a T21 ganha uma conferência de conformidade feita por um revisor que não escreveu as tasks.
+- **Reason**: Pedido do dono em 2026-09-25. A cadeia do plano é mais estreita que as dependências reais: o helper da T13 não usa a folha da T12, e a pasta (T19, T20) não depende dos chips do catálogo. A conferência contra o canvas responde à reprovação da T11 (AD-013), em que a interface divergiu sem que nenhum teste falhasse.
+- **Trade-off**: (1) Os commits saem fora da ordem numérica. (2) Um gate pode ver edição em andamento de outro worker na mesma árvore. Falha em arquivo alheio é reportada, não corrigida. (3) A cópia do canvas no repo pode envelhecer. Ela vale como foto de 2026-09-25, e o artifact continua sendo o original.
+- **Scope**: `navegacao` T12–T21.
+- **Date**: 2026-09-25
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-09-24 — este bloco vence os de baixo.** Feature em execução:
