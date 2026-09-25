@@ -575,11 +575,11 @@ com botão.
 
 **Done when**:
 
-- [ ] `filter_toggle_url(active_filters, :colors, "Green")` com `colors: ["Red"]` gera `colors[]=Red&colors[]=Green`. Com `"Red"`, gera a URL sem `colors`
-- [ ] `q`, faixas, `traits`, `attributes`, `sort` e `dir` sobrevivem à alternância; `page` nunca sobrevive
-- [ ] Para `:owned` (escalar), `"owned"` troca o valor e `"all"` remove a chave
-- [ ] Valor inválido que o query object descartou não reaparece na URL
-- [ ] Teste unit em `test/helpers/catalog_helper_test.rb` (novo ou existente, conferir antes). Gate full passa, contagem registrada
+- [x] `filter_toggle_url(active_filters, :colors, "Green")` com `colors: ["Red"]` gera `colors[]=Red&colors[]=Green`. Com `"Red"`, gera a URL sem `colors`
+- [x] `q`, faixas, `traits`, `attributes`, `sort` e `dir` sobrevivem à alternância; `page` nunca sobrevive
+- [x] Para `:owned` (escalar), `"owned"` troca o valor e `"all"` remove a chave
+- [x] Valor inválido que o query object descartou não reaparece na URL
+- [x] Teste unit em `test/helpers/catalog_helper_test.rb` (novo ou existente, conferir antes). Gate full passa, contagem registrada
 
 **Tests**: unit
 **Gate**: full

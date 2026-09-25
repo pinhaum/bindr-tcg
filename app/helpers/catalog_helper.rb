@@ -59,4 +59,38 @@ module CatalogHelper
   def catalog_page_url(active_filters, page)
     catalog_path(active_filters.merge(page: page))
   end
+
+  # Alterna um valor de filtro: acrescenta se inativo, remove se ativo,
+  # descartando `page` sempre. Para `owned` (escalar), remove a chave em vez de
+  # tentar manter um array. Filtros normalizados preservam a forma já validada.
+  def filter_toggle_url(active_filters, key, value)
+    filters = active_filters.dup
+
+    if key.to_sym == :owned
+      # Posse é escalar: toggling "owned" ou "missing" remove; "all" (default)
+      # também remove. Qualquer outro valor é ligado.
+      if filters[key].to_s == value.to_s
+        filters.delete(key)
+      elsif value == "all"
+        filters.delete(key)
+      else
+        filters[key] = value
+      end
+    elsif filters[key].is_a?(Array)
+      # Filtro de array: verifica se já existe
+      if filters[key].include?(value)
+        # Valor ativo: remover
+        rest = filters[key] - [ value ]
+        rest.empty? ? filters.delete(key) : filters[key] = rest
+      else
+        # Valor inativo: adicionar
+        filters[key] = filters[key] + [ value ]
+      end
+    else
+      # Filtro não existe ainda: criar array com o valor
+      filters[key] = [ value ]
+    end
+
+    catalog_path(filters.except(:page))
+  end
 end
