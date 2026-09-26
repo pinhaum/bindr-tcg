@@ -1634,17 +1634,45 @@ summary:focus-visible,
 
   .site-header ~ * { grid-column: 2; min-width: 0; }
 
+  /*
+   * Catálogo largo (NAV-32): os filtros descem na coluna lateral, abaixo da
+   * navegação. As linhas do body ficam explícitas — duas regiões de flash, a
+   * linha do cabeçalho e a dos filtros — e o `main` cobre as duas últimas com
+   * subgrid nos dois eixos, para o título ficar ao lado da marca e os filtros
+   * logo abaixo da navegação. O cabeçalho deixa de medir 100vh (empurraria o
+   * `main` para baixo da dobra) e fica acima da célula vazia do `main` na
+   * coluna 1, senão essa célula capturaria o clique nos links.
+   */
+  body:has(> main.catalog) {
+    grid-template-rows: auto auto auto 1fr;
+    min-height: 100vh;
+  }
+
+  body:has(> main.catalog) > .site-header {
+    grid-row: 1 / span 3;
+    height: auto;
+    z-index: 1;
+  }
+
   .catalog {
     grid-column: 1 / -1;
+    grid-row: 3 / span 2;
     display: grid;
     grid-template-columns: subgrid;
-    grid-template-rows: auto 1fr;
-    row-gap: var(--gap);
+    grid-template-rows: subgrid;
+    row-gap: 0;
   }
 
   .catalog__head { grid-column: 2; grid-row: 1; }
 
-  .catalog__filters { grid-column: 1; grid-row: 2; }
+  .catalog__filters {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: stretch;
+    padding: var(--space-4);
+    background-color: var(--surface-raised);
+    border-right: 1px solid var(--border);
+  }
 
   .catalog__body { grid-column: 2; grid-row: 2; }
 

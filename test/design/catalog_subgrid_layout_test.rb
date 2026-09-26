@@ -73,4 +73,38 @@ class CatalogSubgridLayoutTest < ActiveSupport::TestCase
     row_gap = declarations.find { |p, _| p == "row-gap" }
     assert_not_nil row_gap, "row-gap not found in .catalog"
   end
+
+  def declarations_in_media(selector)
+    rule = rules_in_media_query.find { |candidate, _| candidate.strip == selector }
+    assert_not_nil rule, "regra #{selector} não encontrada em @media (min-width: 64rem)"
+    Stylesheet.declarations(rule[1]).to_h
+  end
+
+  # Sem linhas explícitas, `main` (colunas 1 / -1) não pode sobrepor o cabeçalho
+  # das linhas 1–3 e cai para baixo dele, depois de uma tela inteira.
+  test "no catálogo largo o main cobre a linha do cabeçalho e a dos filtros, com subgrid nas linhas" do
+    catalog = declarations_in_media(".catalog")
+    assert_equal "3 / span 2", catalog["grid-row"]
+    assert_equal "subgrid", catalog["grid-template-rows"]
+
+    body = declarations_in_media("body:has(> main.catalog)")
+    assert_equal 4, body["grid-template-rows"].split.size,
+                 "o body do catálogo precisa das linhas flash, flash, cabeçalho e filtros"
+  end
+
+  test "no catálogo largo o cabeçalho não mede a tela inteira e fica acima do main" do
+    header = declarations_in_media("body:has(> main.catalog) > .site-header")
+    assert_equal "1 / span 3", header["grid-row"]
+    assert_equal "auto", header["height"]
+    assert_equal "1", header["z-index"]
+  end
+
+  # Desktop-Catalogo.dc.html: os filtros ficam no aside de 280px, em
+  # surface-raised com borda direita, até o fim da página.
+  test "os filtros continuam a coluna lateral" do
+    filters = declarations_in_media(".catalog__filters")
+    assert_equal "var(--surface-raised)", filters["background-color"]
+    assert_equal "1px solid var(--border)", filters["border-right"]
+    assert_equal "stretch", filters["align-self"]
+  end
 end
