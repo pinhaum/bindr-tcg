@@ -185,8 +185,11 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     get catalog_path(q: "Zoro", colors: [ "Red" ])
 
     assert_select "form.catalog__filters input[type=hidden][name=q][value=Zoro]"
-    # Red deve estar ativo (com --active class) pois está em colors parametro
-    assert_select "a.catalog__chip.catalog__chip--active[href*='colors%5B%5D=Red']"
+    assert_select "a.catalog__chip.catalog__chip--active[aria-label='Remover filtro Cor: Red']"
+    # Chip ativo remove o valor (alternância, NAV-33), não o contém
+    assert_select "a.catalog__chip.catalog__chip--active[aria-label='Remover filtro Cor: Red']", 1 do |chip|
+      refute chip.attr("href").include?("colors%5B%5D=Red")
+    end
   end
 
   test "faixa de custo, power, counter vêm como hidden no formulário de set" do
@@ -242,7 +245,11 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     get catalog_path(unknown_param: "value", colors: [ "Red" ])
 
     assert_response :success
-    assert_select "a.catalog__chip.catalog__chip--active[href*='colors%5B%5D=Red']"
+    assert_select "a.catalog__chip.catalog__chip--active[aria-label='Remover filtro Cor: Red']", count: 1
+    # Chip ativo remove o valor (alternância, NAV-33), não o contém
+    assert_select "a.catalog__chip.catalog__chip--active[aria-label='Remover filtro Cor: Red']", 1 do |chip|
+      refute chip.attr("href").include?("colors%5B%5D=Red")
+    end
     assert_select ".catalog__count"
   end
 

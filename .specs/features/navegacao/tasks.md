@@ -602,13 +602,13 @@ com botão.
 
 **Done when**:
 
-- [ ] Um `<a>` por valor presente de cor, tipo e raridade, agrupado sob um título por categoria, com classe de elemento de `catalog`
-- [ ] Seguir o `href` de "Red" e depois o de "SR" dá a mesma contagem de `colors[]=Red&rarities[]=SR` digitada à mão
-- [ ] Chip ativo: "×" visível com `aria-hidden` e `aria-label` "Remover filtro Cor: Red". Chip inativo sem `aria-label`
-- [ ] O `select` de set, com "Todos os sets", "Aplicar" e os `hidden`, mantém os casos da T7: dois sets vindos da URL, set único `selected`, `sort` e `dir` preservados
-- [ ] Nenhum checkbox de filtro nem botão "Filtrar" no HTML. Nenhum `data-controller`
-- [ ] Parâmetro desconhecido não marca chip. Com zero resultados, os chips continuam com os ativos marcados
-- [ ] `catalog_filter_controls_test.rb` reescrito conforme o protocolo; `catalog_grid_test.rb` e `color_chip_ui_test.rb` passam sem edição; gate full passa, contagem registrada
+- [x] Um `<a>` por valor presente de cor, tipo e raridade, agrupado sob um título por categoria, com classe de elemento de `catalog`
+- [x] Seguir o `href` de "Red" e depois o de "SR" dá a mesma contagem de `colors[]=Red&rarities[]=SR` digitada à mão
+- [x] Chip ativo: "×" visível com `aria-hidden` e `aria-label` "Remover filtro Cor: Red". Chip inativo sem `aria-label`
+- [x] O `select` de set, com "Todos os sets", "Aplicar" e os `hidden`, mantém os casos da T7: dois sets vindos da URL, set único `selected`, `sort` e `dir` preservados
+- [x] Nenhum checkbox de filtro nem botão "Filtrar" no HTML. Nenhum `data-controller`
+- [x] Parâmetro desconhecido não marca chip. Com zero resultados, os chips continuam com os ativos marcados
+- [x] `catalog_filter_controls_test.rb` reescrito conforme o protocolo; `catalog_grid_test.rb` e `color_chip_ui_test.rb` passam sem edição; gate full passa, contagem registrada
 
 **Tests**: integration
 **Gate**: full
