@@ -116,6 +116,37 @@
 
 ## Handoff
 
+> **Estado em 2026-09-25, noite — este bloco vence os de baixo.** Feature em
+> execução: **`navegacao`**. T12–T20 commitadas em ondas paralelas (AD-014), com
+> workers Haiku no Orca (run `run_4b9560d7d569`). Gate full no HEAD: 1140 runs,
+> 0 falhas, RuboCop limpo. Da T21 estão feitos a revisão de a11y e a conferência
+> com o canvas (`canvas-conformance.md`). Ambas vieram com triagem, e só os
+> achados que procederam viraram correção.
+>
+> **Próximo passo: revisão visual do dono** (T21, item humano) em 360px e
+> 1280px, com e sem sessão, comparando com o canvas. Depois: Success Criteria,
+> §6 de `.context/tasks.md`, gate build (`DOCKER_CONFIG=<dir com {}> docker compose build`)
+> e o Verifier.
+>
+> Pendências para o Verifier, além das do bloco de 2026-09-23:
+> - O histórico de T12–T18 não é atômico, por edição fora do lock na mesma
+>   árvore. As regras mínimas dos chips da T14 entraram em `285cc7a` (T12). A
+>   regra vazia do chip ativo entrou em `f70c1b1` (T19), e a T20 (`444f26f`)
+>   preencheu essa regra. A view de posse da T15 entrou em `9a3889d` (T14), e a
+>   T15 (`97db558`) só reescreveu testes. Não houve rebase.
+> - Os workers declararam `succeeded` com gate vermelho (T14) e escreveram teste
+>   que espelha a implementação (T16a, T12). Houve correções do coordenador em
+>   `954ae0b`, `824b213`, `3ac60b2`, `87495d4` e `1206aeb`. Rodar o sensor de
+>   mutação sobre `test/design/filter_layout_test.rb`,
+>   `navigation_canvas_test.rb`, `catalog_subgrid_layout_test.rb` e
+>   `catalog_status_line_test.rb`, que ainda têm asserções por `include?` solto
+>   vindas dos workers.
+> - `filter_toggle_url` (T13) usa `filters[key]` e depende de a chave vir como
+>   símbolo, e está mais comentado que o resto do arquivo.
+> - Nada foi renderizado em navegador. O layout largo do catálogo (`:has()`,
+>   subgrid nas duas direções, `z-index` no cabeçalho) foi conferido por leitura
+>   da cascata.
+
 > **Estado em 2026-09-24 — este bloco vence os de baixo.** Feature em execução:
 > **`navegacao`**. Lotes B1 (T1–T6) e B2 (T7–T11) fechados. A **T11 foi
 > reprovada** pelo dono: a interface não segue o canvas (ver o resultado da

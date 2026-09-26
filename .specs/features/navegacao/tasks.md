@@ -791,11 +791,21 @@ com botão.
 
 **Done when**:
 
-- [ ] `ecc:a11y-architect` revisou chips, linha de status, coluna lateral e pasta. Achados CRITICAL e HIGH viraram task de correção antes do Verifier
-- [ ] Um revisor que não escreveu nenhuma das T12–T20 conferiu o HTML renderizado e a folha contra os artboards versionados em `.specs/features/navegacao/canvas/` (`Main`, `Mobile-Carta`, `Mobile-Pasta`, `Desktop-Catalogo`, `Desktop-Carta`, `Desktop-Pasta`), elemento por elemento: estrutura, ordem, medidas, tokens de cor e estado ativo. Cada divergência cita o artboard e o seletor e é classificada como defeito (vira task de correção antes do dono) ou recusa registrada na spec (Baralhos, preço, "% do catálogo", "Zerar quantidade", rolagem horizontal dos chips). O relatório fica em `.specs/features/navegacao/canvas-conformance.md`
+- [x] `ecc:a11y-architect` revisou chips, linha de status, coluna lateral e pasta. Achados CRITICAL e HIGH viraram task de correção antes do Verifier
+- [x] Um revisor que não escreveu nenhuma das T12–T20 conferiu o HTML renderizado e a folha contra os artboards versionados em `.specs/features/navegacao/canvas/` (`Main`, `Mobile-Carta`, `Mobile-Pasta`, `Desktop-Catalogo`, `Desktop-Carta`, `Desktop-Pasta`), elemento por elemento: estrutura, ordem, medidas, tokens de cor e estado ativo. Cada divergência cita o artboard e o seletor e é classificada como defeito (vira task de correção antes do dono) ou recusa registrada na spec (Baralhos, preço, "% do catálogo", "Zerar quantidade", rolagem horizontal dos chips). O relatório fica em `.specs/features/navegacao/canvas-conformance.md`
 - [ ] O dono comparou catálogo, filtro, detalhe e Minha pasta com o canvas, com sessão e sem sessão, em 360px e em 1280px, e aprovou ou listou o que reprova
 - [ ] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.14 de `.context/tasks.md` §6 está fechado
 - [ ] Gate build passa
+
+**Resultado parcial (2026-09-25)**: a revisão de a11y (revisor Haiku no Orca, só
+leitura, no papel do `ecc:a11y-architect`) listou 2 CRITICAL e 4 HIGH. Nenhum se
+sustentou na triagem: o chip de cor ativo se distingue por anel, peso e "×"
+visível (não só por cor); o `aria-label` "Remover filtro Cor: Red" contém o
+rótulo visível, que é o que o SC 2.5.3 exige, e é o texto que a NAV-34 manda; a
+borda `border-strong` tem 4,23:1 sobre `surface-base` e 3,53:1 sobre
+`surface-raised`; o "×" fica dentro do link de 44px. A conferência com o canvas
+está em `canvas-conformance.md`: dois defeitos procedentes, corrigidos em
+`1206aeb`. Faltam a revisão do dono e o gate build.
 
 **Tests**: none
 **Gate**: build
