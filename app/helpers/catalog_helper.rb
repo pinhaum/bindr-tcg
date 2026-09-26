@@ -94,10 +94,9 @@ module CatalogHelper
     catalog_path(filters.except(:page))
   end
 
-  # Conta o número de filtros ativos (exclusivo de sort, dir, page).
-  # Usado na linha de status para dizer "N filtros ativos".
+  # Um filtro ativo é um chip: duas cores contam dois (NAV-36).
   def active_filter_count(active_filters)
-    active_filters.except(*NON_FILTER_KEYS).size
+    catalog_chips(active_filters).size
   end
 
   # URL para limpar todos os filtros, mantendo sort e dir.

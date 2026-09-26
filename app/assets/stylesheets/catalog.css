@@ -1736,14 +1736,17 @@ summary:focus-visible,
   margin: var(--space-2) 0;
 }
 
-.catalog__status > p {
+.catalog__status .catalog__count,
+.catalog__filter-count {
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
   color: var(--ink-muted);
   margin: 0;
 }
 
-.catalog__status > a {
+.catalog__filter-count { margin-inline-start: auto; }
+
+.catalog__clear-filters {
   display: inline-flex;
   align-items: center;
   justify-content: center;

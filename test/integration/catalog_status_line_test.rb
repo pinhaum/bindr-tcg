@@ -128,22 +128,16 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
 
   # --- NAV-36: Estado vazio com filtro ativo ---
 
-  test "com zero resultados e filtro ativo, exibe a linha de status com 'Limpar filtros'" do
+  # Decisão da T17: com zero resultados a linha de status continua dizendo
+  # quantos filtros estão ativos, e o "Limpar filtros" fica só no estado vazio,
+  # que o catalog_grid_test já exige.
+  test "com zero resultados e filtro ativo, a linha diz o filtro e o vazio oferece limpar" do
     get catalog_path(colors: [ "Purple" ])
 
     assert_response :success
-
-    # Deve dizer "1 filtro ativo" mesmo com zero resultados
-    assert_select ".catalog__status", text: /1 filtro ativo/
-
-    # Deve oferecer "Limpar filtros"
-    assert_select ".catalog__status a", text: "Limpar filtros"
-
-    # E não deve ter outro "Limpar filtros" na seção de vazio
-    # (A spec diz "não fica duplicado sem motivo")
-    clear_buttons = css_select("a:contains('Limpar filtros')")
-    # Pode haver no máximo 1 na linha de status e 1 na seção vazia (decidir e registrar)
-    # Para esta implementação, se o filtro estiver ativo, deve haver apenas 1 na linha de status.
+    assert_select ".catalog__status .catalog__filter-count", text: /1 filtro ativo/
+    assert_select ".catalog__status a", count: 0
+    assert_select ".catalog__empty a", text: "Limpar filtros", count: 1
   end
 
   # --- NAV-27: Alvo ≥ 24px para "Limpar filtros" ---
@@ -156,5 +150,35 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
     # O link deve ter classe com as regras de 24px (verificável em design test)
     # Aqui testamos que existe o elemento
     assert_select ".catalog__status a[href*='/catalog']", text: "Limpar filtros"
+  end
+
+  # --- NAV-36: a contagem é a de chips, e o total mora na mesma linha ---
+
+  test "duas cores contam dois filtros, como dois chips" do
+    get catalog_path(colors: [ "Red", "Green" ])
+
+    assert_select ".catalog__status .catalog__filter-count", text: /^\s*2 filtros ativos\s*$/
+  end
+
+  test "o total de cartas fica dentro da linha de status, com ou sem filtro" do
+    get catalog_path
+    assert_select ".catalog__status .catalog__count", text: /^\s*3 cartas\s*$/
+
+    get catalog_path(colors: [ "Red" ])
+    assert_select ".catalog__status .catalog__count", text: /^\s*1 carta\s*$/
+    assert_select ".catalog__status .catalog__clear-filters", text: "Limpar filtros"
+  end
+
+  test "a linha de status não usa style inline" do
+    get catalog_path(colors: [ "Red" ])
+
+    assert_select ".catalog__status [style]", count: 0
+  end
+
+  test "com zero resultados, Limpar filtros aparece uma vez só" do
+    get catalog_path(colors: [ "Red" ], rarities: [ "C" ])
+
+    assert_select ".catalog__empty"
+    assert_select "a", text: "Limpar filtros", count: 1
   end
 end
