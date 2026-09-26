@@ -109,37 +109,32 @@ class FilterLayoutTest < ActiveSupport::TestCase
            ".catalog__chip--active deve ter 'color: var(--on-accent)'"
   end
 
-  test ".catalog__chip--color.catalog__chip--active tem outline 2px accent sem preenchimento" do
-    assert @stylesheet.include?(".catalog__chip--color.catalog__chip--active"),
-           "regra .catalog__chip--color.catalog__chip--active não encontrada"
-    assert @stylesheet.include?("outline: 2px solid var(--accent)"),
-           "outline: 2px solid var(--accent) não encontrado"
-    assert @stylesheet.include?("outline-offset: 2px"),
-           "outline-offset: 2px não encontrado"
-    # Verifica que background herda (não é accent)
-    assert @stylesheet.include?("background-color: inherit"),
-           "background-color: inherit não encontrado"
-  end
+  # NAV-35: o chip de cor ativo é um anel sem preenchimento, como o "Red" ativo
+  # do canvas (Main.dc.html). O fundo accent do chip ativo exclui o de cor.
+  test "chip de cor ativo tem anel de 2px em accent e nenhum preenchimento" do
+    active = Stylesheet.resolved("catalog__chip--color.catalog__chip--active")
+    assert_equal "2px solid var(--accent)", active["outline"]
+    assert_equal "2px", active["outline-offset"]
 
-  test ".catalog__chip--color tem regra própria com display: inline-block" do
-    assert @stylesheet.include?(".catalog__chip--color"),
-           "regra .catalog__chip--color não encontrada"
-    # Procura a declaração dentro de .catalog__chip--color { ... }
-    match = @stylesheet.match(/\.catalog__chip--color\s*\{([^}]*)\}/)
-    assert match, ".catalog__chip--color não tem corpo"
-    body = match[1]
-    assert body.include?("display: inline-block"),
-           ".catalog__chip--color deve ter 'display: inline-block'"
-  end
-
-  test "nenhuma regra de chip de cor com background accent em nenhum estado" do
-    # Busca por qualquer regra que contenha .catalog__chip--color E background...accent
-    color_rules = @stylesheet.scan(/\.catalog__chip--color[^{]*\{[^}]*\}/)
-    color_rules.each do |rule|
-      refute rule.match?(/background.*accent/i),
-             "Nenhuma regra de chip de cor deve ter background com accent. Encontrado: #{rule}"
+    filled = Stylesheet.rules.select do |selector, body|
+      selector.include?("catalog__chip--active") &&
+        Stylesheet.declarations(body).any? { |property, value| property.start_with?("background") && value.include?("accent") }
+    end
+    refute_empty filled, "o chip ativo que não é de cor perdeu o fundo accent"
+    filled.each do |selector, _|
+      assert_includes selector, ":not(.catalog__chip--color)",
+                      "#{selector} preenche de accent também o chip de cor"
     end
   end
+
+  # O chip de cor continua flex como os outros chips, para a amostra, o nome e
+  # o "×" ficarem alinhados ao centro dos 44px.
+  test "chip de cor não sobrescreve o display flex do chip" do
+    assert_equal "inline-flex", Stylesheet.resolved("catalog__chip")["display"]
+    assert_nil Stylesheet.resolved("catalog__chip--color")["display"],
+               ".catalog__chip--color não pode trocar o display de .catalog__chip"
+  end
+
 
   test "dentro de @media (min-width: 64rem), .catalog__grid está na coluna 2" do
     media = media_64rem_content
