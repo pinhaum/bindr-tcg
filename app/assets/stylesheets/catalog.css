@@ -971,12 +971,25 @@ summary:focus-visible,
 
 .progress__action { margin: 0 0 var(--space-2); font-size: var(--body-size); line-height: var(--body-line-height); }
 
+.progress__action--primary { margin: 0 0 var(--space-2); }
+
 .progress__action-link {
   display: inline-block;
   min-height: 24px;
   min-width: 24px;
   padding: var(--space-1) 0;
   overflow-wrap: anywhere;
+}
+
+.progress__action-link--primary {
+  display: block;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-2);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  text-align: center;
 }
 
 .progress__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
@@ -1678,4 +1691,5 @@ summary:focus-visible,
 }
 
 .catalog__chip--active {
+  font-weight: inherit;
 }

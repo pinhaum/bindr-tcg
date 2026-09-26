@@ -98,12 +98,21 @@
 
   <%#
     T4 — links para wishlist, import e export (NAV-19).
+    T20 — link para adicionar cartas (NAV-39).
 
-    Os três links de ação sobre a coleção moram aqui, onde o usuário olha o
+    Os quatro links de ação sobre a coleção moram aqui, onde o usuário olha o
     resumo do que tem. Acima da lista de sets de propósito: 63 itens depois deles
     exigiriam rolagem para chegar num controle no fim.
+
+    "Adicionar cartas" é o primeiro e ação principal (fundo accent), os demais
+    links seguem em secundário.
   %>
   <div class="progress__actions">
+    <p class="progress__action progress__action--primary">
+      <%= link_to "Adicionar cartas", catalog_path,
+                  class: "progress__action-link progress__action-link--primary" %>
+    </p>
+
     <%= render "progress/export_link" %>
 
     <p class="progress__action">

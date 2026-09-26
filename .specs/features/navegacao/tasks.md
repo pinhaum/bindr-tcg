@@ -766,9 +766,9 @@ com botão.
 
 **Done when**:
 
-- [ ] Link "Adicionar cartas" para `catalog_path`, antes dos links de wishlist, import e export, com `min-height: 44px`
-- [ ] Fundo `accent` e texto `on-accent`; o contraste é o par já verificado em `test/design/`
-- [ ] Teste em `minha_pasta_test.rb` que falha sem o link; gate full passa, contagem registrada
+- [x] Link "Adicionar cartas" para `catalog_path`, antes dos links de wishlist, import e export, com `min-height: 44px`
+- [x] Fundo `accent` e texto `on-accent`; o contraste é o par já verificado em `test/design/`
+- [x] Teste em `minha_pasta_test.rb` que falha sem o link; gate full passa, contagem registrada
 
 **Tests**: integration
 **Gate**: full

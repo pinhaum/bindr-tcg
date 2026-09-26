@@ -236,13 +236,13 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert_select ".progress__actions .collection-export__link", count: 1
   end
 
-  test "links de wishlist e import têm classe progress__action-link" do
+  test "links de wishlist, import e Adicionar cartas têm classe progress__action-link" do
     sign_in(@user)
     get progress_path
 
-    # Verifica que a classe .progress__action-link está presente nos dois links internos
+    # Verifica que a classe .progress__action-link está presente nos links
     links = css_select(".progress__action-link")
-    assert links.size == 2, "deveria haver exatamente 2 links com classe progress__action-link"
+    assert links.size == 3, "deveria haver 3 links com classe progress__action-link (Adicionar cartas, wishlist, import)"
   end
 
   test "links têm min-width de 24px em CSS (verificado por regra na folha)" do
@@ -356,5 +356,45 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
 
     assert_select ".progress-set__bar[aria-hidden='true']",
       fail_message: "barra deve ter aria-hidden='true' para não repetir informação"
+  end
+
+  # --- T20: NAV-39 link "Adicionar cartas" ---
+
+  test "exibe link Adicionar cartas apontando para o catálogo" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__actions a[href='#{catalog_path}']", text: "Adicionar cartas"
+  end
+
+  test "Adicionar cartas é o primeiro link dentro de progress__actions" do
+    sign_in(@user)
+    get progress_path
+
+    links = css_select(".progress__actions a")
+    assert links.size >= 1, "deve haver pelo menos um link em progress__actions"
+    assert_equal "Adicionar cartas", links.first.text, "primeiro link deve ser 'Adicionar cartas'"
+  end
+
+  test "Adicionar cartas tem classe progress__action-link--primary para estilo" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__action-link--primary", text: "Adicionar cartas"
+  end
+
+  test "Adicionar cartas tem min-height de 44px em CSS (via classe progress__action-link--primary)" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__action-link--primary"
+  end
+
+  test "remover o link Adicionar cartas faria o teste falhar" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select "a[href='#{catalog_path}']", text: "Adicionar cartas",
+                  fail_message: "link para Adicionar cartas não encontrado"
   end
 end
