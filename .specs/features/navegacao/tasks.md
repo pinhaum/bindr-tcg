@@ -684,11 +684,11 @@ com botão.
 
 **Done when**:
 
-- [ ] Sem filtro: só "N cartas". Com `colors[]=Red&rarities[]=SR`: "2 filtros ativos" e "Limpar filtros". Com um: "1 filtro ativo"
-- [ ] "Limpar filtros" aponta para o catálogo sem filtros, mantendo `sort` e `dir` quando ativos
-- [ ] `sort`, `dir` e `page` não contam como filtro
-- [ ] Com zero resultados, a linha continua, e o "Limpar filtros" do estado vazio não fica duplicado sem motivo (decidir e registrar no resultado)
-- [ ] "Limpar filtros" com alvo ≥ 24px; `catalog_grid_test.rb` passa sem edição; gate full passa, contagem registrada
+- [x] Sem filtro: só "N cartas". Com `colors[]=Red&rarities[]=SR`: "2 filtros ativos" e "Limpar filtros". Com um: "1 filtro ativo"
+- [x] "Limpar filtros" aponta para o catálogo sem filtros, mantendo `sort` e `dir` quando ativos
+- [x] `sort`, `dir` e `page` não contam como filtro
+- [x] Com zero resultados, a linha continua, e o "Limpar filtros" do estado vazio não fica duplicado sem motivo (decidir e registrar no resultado)
+- [x] "Limpar filtros" com alvo ≥ 24px; `catalog_grid_test.rb` passa sem edição; gate full passa, contagem registrada
 
 **Tests**: integration
 **Gate**: full

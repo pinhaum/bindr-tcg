@@ -25,6 +25,17 @@
     </ul>
   <% end %>
 
+  <% filter_count = active_filter_count(@result.active_filters) %>
+
+  <% if filter_count > 0 %>
+    <div class="catalog__status">
+      <p style="margin: 0;">
+        <%= pluralize(filter_count, "filtro ativo", plural: "filtros ativos") %>
+      </p>
+      <%= link_to "Limpar filtros", clear_filters_url(@result.active_filters) %>
+    </div>
+  <% end %>
+
   <p class="catalog__count">
     <%= pluralize(@result.total_count, "carta", plural: "cartas") %>
   </p>

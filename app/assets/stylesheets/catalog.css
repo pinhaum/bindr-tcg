@@ -1725,3 +1725,36 @@ summary:focus-visible,
   background-color: var(--surface-sunken);
   border: 1px dashed var(--border-strong);
 }
+
+/* Linha de status do catálogo (T17 / NAV-36, NAV-27). */
+.catalog__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  margin: var(--space-2) 0;
+}
+
+.catalog__status > p {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.catalog__status > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  font-weight: var(--caption-weight);
+  text-decoration: none;
+}

@@ -93,4 +93,17 @@ module CatalogHelper
 
     catalog_path(filters.except(:page))
   end
+
+  # Conta o número de filtros ativos (exclusivo de sort, dir, page).
+  # Usado na linha de status para dizer "N filtros ativos".
+  def active_filter_count(active_filters)
+    active_filters.except(*NON_FILTER_KEYS).size
+  end
+
+  # URL para limpar todos os filtros, mantendo sort e dir.
+  def clear_filters_url(active_filters)
+    clear_filters = active_filters.except(*NON_FILTER_KEYS)
+    remaining = active_filters.except(*clear_filters.keys)
+    catalog_path(remaining)
+  end
 end
