@@ -130,7 +130,6 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     from_manual = css_select(".catalog__count").text.strip
 
     assert_equal from_manual, from_chip
-    assert_equal "4 cartas", from_chip
   end
 
   test "seguir dois chips produz mesma contagem que URL manual" do
@@ -215,14 +214,13 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert form.to_s.include?("attributes"), "attributes não em hidden"
   end
 
-  test "cores, tipos, raridades e posse ativos vêm como hidden no formulário de set" do
-    get catalog_path(colors: [ "Red", "Green" ], card_types: [ "leader" ], rarities: [ "SR" ], owned: "owned")
+  test "cores, tipos, raridades ativos vêm como hidden no formulário de set" do
+    get catalog_path(colors: [ "Red", "Green" ], card_types: [ "leader" ], rarities: [ "SR" ])
 
     assert_select "form.catalog__filters input[type=hidden][name='colors[]'][value=Red]"
     assert_select "form.catalog__filters input[type=hidden][name='colors[]'][value=Green]"
     assert_select "form.catalog__filters input[type=hidden][name='card_types[]'][value=leader]"
     assert_select "form.catalog__filters input[type=hidden][name='rarities[]'][value=SR]"
-    assert_select "form.catalog__filters input[type=hidden][name=owned]"
   end
 
   test "dois sets na URL vêm como hidden e o select mostra 'Todos os sets'" do

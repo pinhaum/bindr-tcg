@@ -70,7 +70,7 @@
       <% @filter_options[:colors].each do |color| %>
         <% is_active = Array(@result.active_filters[:colors]).include?(color) %>
         <% url = filter_toggle_url(@result.active_filters, :colors, color) %>
-        <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+        <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
            <% if is_active %>aria-label="Remover filtro Cor: <%= color %>"<% end %>>
           <%= color %>
           <% if is_active %><span aria-hidden="true">&times;</span><% end %>
@@ -86,7 +86,7 @@
       <% @filter_options[:card_types].each do |card_type| %>
         <% is_active = Array(@result.active_filters[:card_types]).include?(card_type) %>
         <% url = filter_toggle_url(@result.active_filters, :card_types, card_type) %>
-        <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+        <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
            <% if is_active %>aria-label="Remover filtro Tipo: <%= card_type %>"<% end %>>
           <%= card_type %>
           <% if is_active %><span aria-hidden="true">&times;</span><% end %>
@@ -102,7 +102,7 @@
       <% @filter_options[:rarities].each do |rarity| %>
         <% is_active = Array(@result.active_filters[:rarities]).include?(rarity) %>
         <% url = filter_toggle_url(@result.active_filters, :rarities, rarity) %>
-        <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+        <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
            <% if is_active %>aria-label="Remover filtro Raridade: <%= rarity %>"<% end %>>
           <%= rarity %>
           <% if is_active %><span aria-hidden="true">&times;</span><% end %>
@@ -206,7 +206,7 @@
           <% label_text = val == "all" ? "Todas" : (val == "owned" ? "Tenho" : "Não tenho") %>
           <% is_active = active_owned == val %>
           <% url = filter_toggle_url(@result.active_filters, :owned, val) %>
-          <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+          <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
              <% if is_active %>aria-label="Remover filtro Posse: <%= label_text %>"<% end %>>
             <%= label_text %>
             <% if is_active %><span aria-hidden="true">&times;</span><% end %>
