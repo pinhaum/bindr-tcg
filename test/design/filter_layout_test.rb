@@ -109,13 +109,36 @@ class FilterLayoutTest < ActiveSupport::TestCase
            ".catalog__chip--active deve ter 'color: var(--on-accent)'"
   end
 
-  test ".catalog__chip--active de cor tem outline 2px accent sem background" do
-    assert @stylesheet.include?(".catalog__chip--active:is([class*=\"color\"], [class*=\"colors\"])"),
-           "regra para chip de cor ativo não encontrada"
+  test ".catalog__chip--color.catalog__chip--active tem outline 2px accent sem preenchimento" do
+    assert @stylesheet.include?(".catalog__chip--color.catalog__chip--active"),
+           "regra .catalog__chip--color.catalog__chip--active não encontrada"
     assert @stylesheet.include?("outline: 2px solid var(--accent)"),
            "outline: 2px solid var(--accent) não encontrado"
     assert @stylesheet.include?("outline-offset: 2px"),
            "outline-offset: 2px não encontrado"
+    # Verifica que background herda (não é accent)
+    assert @stylesheet.include?("background-color: inherit"),
+           "background-color: inherit não encontrado"
+  end
+
+  test ".catalog__chip--color tem regra própria com display: inline-block" do
+    assert @stylesheet.include?(".catalog__chip--color"),
+           "regra .catalog__chip--color não encontrada"
+    # Procura a declaração dentro de .catalog__chip--color { ... }
+    match = @stylesheet.match(/\.catalog__chip--color\s*\{([^}]*)\}/)
+    assert match, ".catalog__chip--color não tem corpo"
+    body = match[1]
+    assert body.include?("display: inline-block"),
+           ".catalog__chip--color deve ter 'display: inline-block'"
+  end
+
+  test "nenhuma regra de chip de cor com background accent em nenhum estado" do
+    # Busca por qualquer regra que contenha .catalog__chip--color E background...accent
+    color_rules = @stylesheet.scan(/\.catalog__chip--color[^{]*\{[^}]*\}/)
+    color_rules.each do |rule|
+      refute rule.match?(/background.*accent/i),
+             "Nenhuma regra de chip de cor deve ter background com accent. Encontrado: #{rule}"
+    end
   end
 
   test "dentro de @media (min-width: 64rem), .catalog__grid está na coluna 2" do

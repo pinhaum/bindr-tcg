@@ -70,7 +70,7 @@
       <% @filter_options[:colors].each do |color| %>
         <% is_active = Array(@result.active_filters[:colors]).include?(color) %>
         <% url = filter_toggle_url(@result.active_filters, :colors, color) %>
-        <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
+        <a href="<%= url %>" class="catalog__chip catalog__chip--color<%= " catalog__chip--active" if is_active %>"
            <% if is_active %>aria-label="Remover filtro Cor: <%= color %>"<% end %>>
           <span aria-hidden="true" class="catalog__chip-swatch"></span>
           <%= color %>

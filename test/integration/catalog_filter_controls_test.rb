@@ -326,4 +326,26 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     ownership_chips = html.css("a.catalog__chip[href*='owned']")
     assert ownership_chips.empty?, "não deve haver chips de posse sem sessão"
   end
+
+  # --- T16a: Chip de cor ativo com classe catalog__chip--color ---
+
+  test "com colors[]=Red, o chip ativo de Red tem as classes catalog__chip--color e catalog__chip--active (T16a)" do
+    get catalog_path(colors: [ "Red" ])
+
+    # Chip de cor Red deve ter AMBAS as classes
+    assert_select "a.catalog__chip--color.catalog__chip--active[aria-label='Remover filtro Cor: Red']", count: 1
+  end
+
+  test "chip ativo de raridade (rarities[]=SR) NÃO tem catalog__chip--color (T16a)" do
+    get catalog_path(rarities: [ "SR" ])
+
+    html = Nokogiri::HTML(response.body)
+    # Procura pelo chip ativo de raridade
+    rarity_chip = html.at_css("a.catalog__chip--active[aria-label='Remover filtro Raridade: SR']")
+    assert rarity_chip, "Chip ativo de raridade não encontrado"
+
+    # Verifica que NÃO tem a classe catalog__chip--color
+    refute rarity_chip["class"].include?("catalog__chip--color"),
+           "Chip de raridade não deve ter classe catalog__chip--color"
+  end
 end

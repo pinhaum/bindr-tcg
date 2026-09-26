@@ -1704,7 +1704,11 @@ summary:focus-visible,
   font-weight: var(--body-strong-weight);
 }
 
-.catalog__chip--active:is([class*="color"], [class*="colors"]) {
+.catalog__chip--color {
+  display: inline-block;
+}
+
+.catalog__chip--color.catalog__chip--active {
   background-color: inherit;
   color: var(--ink);
   font-weight: var(--body-strong-weight);
