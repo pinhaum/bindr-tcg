@@ -447,21 +447,27 @@ body {
   height: var(--nav-height);
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+  align-items: stretch;
   background-color: var(--surface-raised);
   border-top: 1px solid var(--border);
 }
 
 .site-header__nav form { margin: 0; }
 
+/*
+ * NAV-30: as entradas dividem a barra em partes iguais, encostadas. O item
+ * flex do "Sair" é o `form` que o `button_to` gera, não o botão: é o form que
+ * cresce, e o botão ocupa o form inteiro.
+ */
 .site-header__nav > a,
-.site-header__nav button { flex: 1; }
+.site-header__nav > form { flex: 1; display: flex; }
+
+.site-header__nav > form > button { flex: 1; }
 
 .site-header__action {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 44px;
   min-width: 44px;
   padding: var(--space-1) var(--space-2);
@@ -1624,8 +1630,14 @@ summary:focus-visible,
     position: static;
     flex-direction: column;
     height: auto;
-    align-items: flex-start;
+    gap: var(--space-1);
     border-top: none;
+  }
+
+  .site-header__action {
+    justify-content: flex-start;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
   }
 
   .site-header__nav a { min-height: 44px; }

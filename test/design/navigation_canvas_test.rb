@@ -44,12 +44,15 @@ class NavigationCanvasTest < Minitest::Test
       ".site-header__nav deve ter background-color: var(--surface-raised)"
   end
 
+  # O "Sair" é um `button_to`: o item flex da barra é o form, não o botão.
+  # Canvas (Main.dc.html): entradas com flex-grow 1, encostadas.
   def test_mobile_nav_entries_flex_grow
-    # Validação direta: grep pelo padrão de flex: 1 após os seletores
-    stylesheet = Stylesheet.read_stylesheet
-    # Procura por ".site-header__nav > a" seguido por ".site-header__nav button" com "flex: 1"
-    assert stylesheet.match?(/\.site-header__nav\s*>\s*a[,\s]+\.site-header__nav\s+button\s*\{\s*flex:\s*1\s*;\s*\}/),
-      ".site-header__nav > a e .site-header__nav button devem ter flex: 1"
+    assert_equal "1", Stylesheet.resolved("site-header__nav > a")["flex"]
+    assert_equal "1", Stylesheet.resolved("site-header__nav > form")["flex"],
+      "o form do Sair precisa crescer como os links"
+    assert_equal "1", Stylesheet.resolved("site-header__nav > form > button")["flex"]
+    assert_nil find_rule(".site-header__nav").then { |rule| parse_declarations(rule)["gap"] },
+      "as entradas da barra inferior se encostam, sem gap"
   end
 
   # AC 2: .site-header__nav [aria-current="page"] com surface-sunken e ink;
