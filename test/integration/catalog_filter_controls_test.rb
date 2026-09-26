@@ -89,7 +89,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert_select "a.catalog__chip[href*='rarities%5B%5D=SR']"
 
     # Select de set com "Todos os sets" e botão "Aplicar"
-    assert_select "form.catalog__filters" do
+    assert_select ".catalog__filters form" do
       assert_select "select[name='sets[]']" do
         assert_select "option", text: "Todos os sets"
         assert_select "option[value=OP01]", text: "Romance Dawn"
@@ -188,7 +188,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
   test "q ativo vem como hidden no formulário de set" do
     get catalog_path(q: "Zoro", colors: [ "Red" ])
 
-    assert_select "form.catalog__filters input[type=hidden][name=q][value=Zoro]"
+    assert_select ".catalog__filters form input[type=hidden][name=q][value=Zoro]"
     assert_select "a.catalog__chip.catalog__chip--active[aria-label='Remover filtro Cor: Red']"
     # Chip ativo remove o valor (alternância, NAV-33), não o contém
     assert_select "a.catalog__chip.catalog__chip--active[aria-label='Remover filtro Cor: Red']", 1 do |chip|
@@ -199,7 +199,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
   test "faixa de custo, power, counter vêm como hidden no formulário de set" do
     get catalog_path(colors: [ "Red" ], cost_min: 3, cost_max: 5, power_min: 1000, power_max: 5000, counter_min: 1, counter_max: 10)
 
-    form = css_select("form.catalog__filters").first
+    form = css_select(".catalog__filters form").first
     assert form.to_s.include?("name=\"cost_min\""), "cost_min não em hidden"
     assert form.to_s.include?("name=\"cost_max\""), "cost_max não em hidden"
     assert form.to_s.include?("name=\"power_min\""), "power_min não em hidden"
@@ -208,7 +208,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
   test "sort e dir vêm como hidden no formulário de set quando ativos" do
     get catalog_path(q: "Zoro", cost_min: 3, traits: [ "Straw Hat" ], sort: "name", dir: "desc")
 
-    form = css_select("form.catalog__filters").first
+    form = css_select(".catalog__filters form").first
     assert form.to_s.include?("name=\"sort\""), "sort não em hidden"
     assert form.to_s.include?("name=\"dir\""), "dir não em hidden"
   end
@@ -216,7 +216,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
   test "traits e attributes vêm como hidden no formulário de set" do
     get catalog_path(colors: [ "Red" ], traits: [ "Straw Hat", "Pirate" ], attributes: [ "Attacker", "Slasher" ])
 
-    form = css_select("form.catalog__filters").first
+    form = css_select(".catalog__filters form").first
     assert form.to_s.include?("traits"), "traits não em hidden"
     assert form.to_s.include?("attributes"), "attributes não em hidden"
   end
@@ -224,16 +224,16 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
   test "cores, tipos, raridades ativos vêm como hidden no formulário de set" do
     get catalog_path(colors: [ "Red", "Green" ], card_types: [ "leader" ], rarities: [ "SR" ])
 
-    assert_select "form.catalog__filters input[type=hidden][name='colors[]'][value=Red]"
-    assert_select "form.catalog__filters input[type=hidden][name='colors[]'][value=Green]"
-    assert_select "form.catalog__filters input[type=hidden][name='card_types[]'][value=leader]"
-    assert_select "form.catalog__filters input[type=hidden][name='rarities[]'][value=SR]"
+    assert_select ".catalog__filters form input[type=hidden][name='colors[]'][value=Red]"
+    assert_select ".catalog__filters form input[type=hidden][name='colors[]'][value=Green]"
+    assert_select ".catalog__filters form input[type=hidden][name='card_types[]'][value=leader]"
+    assert_select ".catalog__filters form input[type=hidden][name='rarities[]'][value=SR]"
   end
 
   test "dois sets na URL vêm como hidden e o select mostra 'Todos os sets'" do
     get catalog_path(sets: [ "OP01", "OP02" ])
 
-    form = css_select("form.catalog__filters").first
+    form = css_select(".catalog__filters form").first
     form_text = form.to_s
     # Verifica hidden: dois sets
     assert form_text.scan(/name="sets\[\]".*value="OP01"/).any?, "OP01 não em hidden"

@@ -136,33 +136,32 @@ class FilterLayoutTest < ActiveSupport::TestCase
   end
 
 
-  test "dentro de @media (min-width: 64rem), .catalog__grid está na coluna 2" do
+  test "dentro de @media (min-width: 64rem), .catalog__body está na coluna 2" do
     media = media_64rem_content
 
-    assert media.include?(".catalog__grid"),
-           ".catalog__grid não aparece em @media (min-width: 64rem)"
+    assert media.include?(".catalog__body"),
+           ".catalog__body não aparece em @media (min-width: 64rem)"
 
-    # .catalog__grid pode estar em seletor multi-classe (.catalog__grid, .catalog__empty, ...)
-    grid_match = media.match(/\.catalog__grid[^{]*\{([^}]*)\}/)
-    assert grid_match, ".catalog__grid não tem corpo em media query"
+    body_match = media.match(/\.catalog__body[^{]*\{([^}]*)\}/)
+    assert body_match, ".catalog__body não tem corpo em media query"
 
-    body = grid_match[1]
+    body = body_match[1]
     assert body.include?("grid-column: 2"),
-           ".catalog__grid deve ter 'grid-column: 2' em @media (min-width: 64rem)"
+           ".catalog__body deve ter 'grid-column: 2' em @media (min-width: 64rem)"
   end
 
-  test "dentro de @media (min-width: 64rem), os demais filhos (.catalog > *) ocupam 1 / -1" do
+  test "dentro de @media (min-width: 64rem), .catalog__head está na coluna 2" do
     media = media_64rem_content
 
-    assert media.include?(".catalog > *"),
-           ".catalog > * não aparece em @media (min-width: 64rem)"
+    assert media.include?(".catalog__head"),
+           ".catalog__head não aparece em @media (min-width: 64rem)"
 
-    rule_match = media.match(/\.catalog\s*>\s*\*\s*\{([^}]*)\}/)
-    assert rule_match, ".catalog > * não tem corpo em media query"
+    head_match = media.match(/\.catalog__head[^{]*\{([^}]*)\}/)
+    assert head_match, ".catalog__head não tem corpo em media query"
 
-    body = rule_match[1]
-    assert body.include?("grid-column: 1 / -1"),
-           ".catalog > * deve ter 'grid-column: 1 / -1' em @media (min-width: 64rem)"
+    body = head_match[1]
+    assert body.include?("grid-column: 2"),
+           ".catalog__head deve ter 'grid-column: 2' em @media (min-width: 64rem)"
   end
 
   test "checkbox, rádio, select e botão têm min-height e min-width de 24px" do

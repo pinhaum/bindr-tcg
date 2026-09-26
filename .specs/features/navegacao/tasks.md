@@ -711,12 +711,12 @@ com botão.
 
 **Done when**:
 
-- [ ] Antes do código, conferir em fonte primária (MDN, caniuse) o suporte a `subgrid` e o efeito de `display: contents` sobre o landmark `main`. Registrar no resultado
-- [ ] A view agrupa os filhos de `main.catalog` em `catalog__head`, `catalog__filters` e `catalog__body`, nessa ordem de DOM; o `main` continua sendo o landmark e contém os filtros
-- [ ] Só dentro de `@media (min-width: 64rem)`: `main.catalog` em `grid-column: 1 / -1` com `subgrid` nos dois eixos; `head` na coluna 2 e linha 1, `filters` na coluna 1 e linha 2, `body` na coluna 2 e linha 2; `.site-header` na coluna 1 e linha 1
-- [ ] Detalhe da carta e Minha pasta continuam na coluna 2 (`navigation_layout_test.rb` ajustado conforme o protocolo só na exceção do catálogo)
-- [ ] O flash continua acima do conteúdo e as duas regiões vivas continuam no DOM
-- [ ] Teste de integração da ordem dos três grupos e testes textuais das regras; gate full passa, contagem registrada
+- [x] Antes do código, conferir em fonte primária (MDN, caniuse) o suporte a `subgrid` e o efeito de `display: contents` sobre o landmark `main`. Registrar no resultado
+- [x] A view agrupa os filhos de `main.catalog` em `catalog__head`, `catalog__filters` e `catalog__body`, nessa ordem de DOM; o `main` continua sendo o landmark e contém os filtros
+- [x] Só dentro de `@media (min-width: 64rem)`: `main.catalog` em `grid-column: 1 / -1` com `subgrid` nos dois eixos; `head` na coluna 2 e linha 1, `filters` na coluna 1 e linha 2, `body` na coluna 2 e linha 2; `.site-header` na coluna 1 e linha 1
+- [x] Detalhe da carta e Minha pasta continuam na coluna 2 (`navigation_layout_test.rb` ajustado conforme o protocolo só na exceção do catálogo)
+- [x] O flash continua acima do conteúdo e as duas regiões vivas continuam no DOM
+- [x] Teste de integração da ordem dos três grupos e testes textuais das regras; gate full passa, contagem registrada
 
 **Tests**: unit + integration
 **Gate**: full

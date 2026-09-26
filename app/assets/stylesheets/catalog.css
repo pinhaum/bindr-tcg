@@ -1635,23 +1635,18 @@ summary:focus-visible,
   .site-header ~ * { grid-column: 2; min-width: 0; }
 
   .catalog {
+    grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
-    column-gap: var(--gap);
-    align-items: start;
+    grid-template-columns: subgrid;
+    grid-template-rows: auto 1fr;
+    row-gap: var(--gap);
   }
 
-  .catalog > * { grid-column: 1 / -1; }
+  .catalog__head { grid-column: 2; grid-row: 1; }
 
-  .catalog__filters {
-    grid-column: 1;
-    grid-row: span 2;
-    flex-direction: column;
-  }
+  .catalog__filters { grid-column: 1; grid-row: 2; }
 
-  .catalog__grid,
-  .catalog__empty,
-  .pagination { grid-column: 2; }
+  .catalog__body { grid-column: 2; grid-row: 2; }
 
   .card-detail {
     display: grid;
