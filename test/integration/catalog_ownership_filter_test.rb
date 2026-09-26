@@ -1,10 +1,10 @@
 require "test_helper"
 
-# T8 — Controle de posse (NAV-12, NAV-13).
+# T15 — Chips de posse (NAV-12, NAV-13).
 #
-# Com sessão, o formulário de filtro ganha o controle de posse com "todas", "tenho"
-# e "não tenho". Sem sessão, ele não é renderizado. Os três rádios produzem as mesmas
-# cartas que a URL digitada à mão (Req. 7.6).
+# Com sessão, aparecem três chips-link "Todas", "Tenho" e "Não tenho", exclusivos
+# entre si. Seguir o chip produz a mesma contagem que a URL digitada à mão.
+# Sem sessão, nada é renderizado.
 class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
   setup do
     @op01 = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")
@@ -46,118 +46,128 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
     @other_user = User.create!(email: "law@example.com", password: "password")
   end
 
-  # --- NAV-12: Controles com sessão ---
+  # --- NAV-12: Chips com sessão ---
 
-  test "com sessão, os três rádios aparecem dentro de fieldset com legend" do
+  test "com sessão, aparecem três chips Todas/Tenho/Não tenho" do
     post session_path, params: { email: "zoro@example.com", password: "password" }
     get catalog_path
 
     assert_response :success
 
-    # Fieldset com legend
-    assert_select "div.catalog__filter-group" do
-      assert_select "fieldset" do
-        assert_select "legend", text: "Posse"
-      end
-    end
+    # Procura dentro do fieldset de posse (que vem após o h2 "Posse")
+    ownership_chips = css_select("div.catalog__filter-group:has(h2:contains('Posse')) a.catalog__chip")
+    chip_texts = ownership_chips.map { |c| c.text.strip.delete("×").strip }
 
-    # Três rádios com nomes e valores corretos
-    assert_select "input[type=radio][name=owned][value=all]"
-    assert_select "input[type=radio][name=owned][value=owned]"
-    assert_select "input[type=radio][name=owned][value=missing]"
-
-    # Labels associados
-    assert_select "label[for=owned-all]", text: "Todas"
-    assert_select "label[for=owned-owned]", text: "Tenho"
-    assert_select "label[for=owned-missing]", text: "Não tenho"
+    assert_includes chip_texts, "Todas"
+    assert_includes chip_texts, "Tenho"
+    assert_includes chip_texts, "Não tenho"
   end
 
-  test "sem parâmetro, o rádio 'todas' fica checked" do
+  test "sem parâmetro, o chip 'Todas' fica ativo" do
     post session_path, params: { email: "zoro@example.com", password: "password" }
     get catalog_path
 
-    assert_select "input[type=radio][name=owned][value=all][checked]"
-    assert_select "input[type=radio][name=owned][value=owned]:not([checked])"
-    assert_select "input[type=radio][name=owned][value=missing]:not([checked])"
+    ownership_group = css_select("div.catalog__filter-group:has(h2:contains('Posse'))").first
+    assert ownership_group, "fieldset de posse ausente"
+
+    todas = ownership_group.at_css("a.catalog__chip.catalog__chip--active")
+    assert todas, "chip Todas ativo ausente"
+    assert_match /Todas/, todas.text
+
+    tenho = ownership_group.at_css("a.catalog__chip:not(.catalog__chip--active)")
+    assert tenho, "chip inativo ausente"
   end
 
-  test "?owned=owned marca o rádio 'tenho'" do
+  test "?owned=owned marca o chip 'Tenho' como ativo" do
     post session_path, params: { email: "zoro@example.com", password: "password" }
     get catalog_path(owned: "owned")
 
-    assert_select "input[type=radio][name=owned][value=owned][checked]"
-    assert_select "input[type=radio][name=owned][value=all]:not([checked])"
-    assert_select "input[type=radio][name=owned][value=missing]:not([checked])"
+    ownership_group = css_select("div.catalog__filter-group:has(h2:contains('Posse'))").first
+    tenho_ativo = ownership_group.css("a.catalog__chip.catalog__chip--active").find { |c| c.text.include?("Tenho") }
+    assert tenho_ativo, "chip Tenho ativo ausente"
+
+    todas_inativo = ownership_group.css("a.catalog__chip:not(.catalog__chip--active)").find { |c| c.text.include?("Todas") }
+    assert todas_inativo, "chip Todas inativo ausente"
   end
 
-  test "?owned=missing marca o rádio 'não tenho'" do
+  test "?owned=missing marca o chip 'Não tenho' como ativo" do
     post session_path, params: { email: "zoro@example.com", password: "password" }
     get catalog_path(owned: "missing")
 
-    assert_select "input[type=radio][name=owned][value=missing][checked]"
-    assert_select "input[type=radio][name=owned][value=all]:not([checked])"
-    assert_select "input[type=radio][name=owned][value=owned]:not([checked])"
+    ownership_group = css_select("div.catalog__filter-group:has(h2:contains('Posse'))").first
+    nao_tenho_ativo = ownership_group.css("a.catalog__chip.catalog__chip--active").find { |c| c.text.include?("Não tenho") }
+    assert nao_tenho_ativo, "chip Não tenho ativo ausente"
   end
 
-  test "?owned=bogus marca o rádio 'todas' como fallback" do
+  test "?owned=bogus marca o chip 'Todas' como fallback" do
     post session_path, params: { email: "zoro@example.com", password: "password" }
     get catalog_path(owned: "bogus")
 
-    assert_select "input[type=radio][name=owned][value=all][checked]"
-    assert_select "input[type=radio][name=owned][value=owned]:not([checked])"
-    assert_select "input[type=radio][name=owned][value=missing]:not([checked])"
+    ownership_group = css_select("div.catalog__filter-group:has(h2:contains('Posse'))").first
+    todas_ativo = ownership_group.css("a.catalog__chip.catalog__chip--active").find { |c| c.text.include?("Todas") }
+    assert todas_ativo, "chip Todas ativo ausente (fallback para valor inválido)"
   end
 
-  # --- NAV-13: Sem sessão, nenhum campo owned ---
+  # --- NAV-13: Sem sessão, nenhum chip owned ---
 
-  test "anônimo não vê nenhum rádio owned, mesmo sem parâmetro" do
+  test "anônimo não vê nenhum chip owned, mesmo sem parâmetro" do
     get catalog_path
 
-    assert_select "input[name=owned]", count: 0
+    ownership_chips = css_select("div.catalog__filter-group:has(h2:contains('Posse')) a.catalog__chip")
+    assert_empty ownership_chips, "chips de posse aparecem sem sessão"
   end
 
-  test "anônimo não vê nenhum rádio owned, mesmo com ?owned=owned na URL" do
+  test "anônimo não vê nenhum chip owned, mesmo com ?owned=owned na URL" do
     get catalog_path(owned: "owned")
 
-    assert_select "input[name=owned]", count: 0
+    ownership_chips = css_select("div.catalog__filter-group:has(h2:contains('Posse')) a.catalog__chip")
+    assert_empty ownership_chips, "chips de posse aparecem sem sessão com parâmetro na URL"
   end
 
-  # --- NAV-12 (continuação): Envio real do formulário ---
+  # --- Clique no chip produz a mesma contagem que a URL digitada à mão ---
 
-  test "envio do formulário com 'tenho' dá a mesma contagem de ?owned=owned digitado à mão" do
+  test "seguir o chip 'Tenho' dá a mesma contagem de ?owned=owned digitado à mão" do
     # Coloca Zoro na coleção do usuário
     CollectionItem.create!(user: @user, card_variant: @zoro_variant, quantity: 1)
 
     post session_path, params: { email: "zoro@example.com", password: "password" }
 
-    # Envia via formulário
+    # Segue o chip
     get catalog_path
-    from_form = submit_filter_form("owned")
+    link = css_select("a.catalog__chip").find { |a| a.text.strip == "Tenho" }
+    assert link, "chip Tenho ausente"
+    get link["href"]
 
-    # Envia via URL digitada à mão
+    from_chip = css_select(".catalog__count").text.strip
+
+    # Segue a URL digitada à mão
     get catalog_path(owned: "owned")
     from_url = css_select(".catalog__count").text.strip
 
-    assert_equal from_url, from_form
-    assert_equal "1 carta", from_form
+    assert_equal from_url, from_chip
+    assert_equal "1 carta", from_chip
   end
 
-  test "envio do formulário com 'não tenho' dá a mesma contagem de ?owned=missing digitado à mão" do
+  test "seguir o chip 'Não tenho' dá a mesma contagem de ?owned=missing digitado à mão" do
     # Coloca Zoro na coleção do usuário
     CollectionItem.create!(user: @user, card_variant: @zoro_variant, quantity: 1)
 
     post session_path, params: { email: "zoro@example.com", password: "password" }
 
-    # Envia via formulário
+    # Segue o chip
     get catalog_path
-    from_form = submit_filter_form("missing")
+    link = css_select("a.catalog__chip").find { |a| a.text.strip == "Não tenho" }
+    assert link, "chip Não tenho ausente"
+    get link["href"]
 
-    # Envia via URL digitada à mão
+    from_chip = css_select(".catalog__count").text.strip
+
+    # Segue a URL digitada à mão
     get catalog_path(owned: "missing")
     from_url = css_select(".catalog__count").text.strip
 
-    assert_equal from_url, from_form
-    assert_equal "2 cartas", from_form
+    assert_equal from_url, from_chip
+    assert_equal "2 cartas", from_chip
   end
 
   # --- Isolamento: posse de outro usuário não entra ---
@@ -184,26 +194,5 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
     assert_select ".catalog__count", text: /^3 cartas$/
     # E Zoro de fato está lá
     assert_select "li", /Roronoa Zoro/
-  end
-
-  private
-
-  # Simula o envio nativo do formulário pelo navegador.
-  def submit_filter_form(owned_value)
-    form = Nokogiri::HTML(response.body).at_css("form.catalog__filters")
-    assert form, "formulário de filtros ausente"
-
-    radio = form.css("input[type=radio]").find { |r| r["value"] == owned_value }
-    assert radio, "rádio #{owned_value} ausente"
-
-    pairs = form.css("input[type=hidden]").map { |input| [ input["name"], input["value"] ] }
-    form.css("select").each do |select|
-      option = select.at_css("option[selected]") || select.at_css("option")
-      pairs << [ select["name"], option["value"] ]
-    end
-    pairs << [ radio["name"], radio["value"] ]
-
-    get "#{form["action"]}?#{URI.encode_www_form(pairs)}"
-    css_select(".catalog__count").text.strip
   end
 end

@@ -631,10 +631,10 @@ com botão.
 
 **Done when**:
 
-- [ ] Com sessão, três links. O ativo segue NAV-34; sem `owned` na URL ou com valor inválido, "Todas" é o ativo
-- [ ] "Tenho" e "Não tenho" levam às mesmas cartas que `?owned=owned` e `?owned=missing` digitados à mão, e a posse de outro usuário não entra
-- [ ] Sem sessão, nenhum link com `owned` no HTML, nem com `?owned=owned` na URL
-- [ ] `catalog_ownership_filter_test.rb` reescrito conforme o protocolo, mantendo os dois testes de isolamento; gate full passa, contagem registrada
+- [x] Com sessão, três links. O ativo segue NAV-34; sem `owned` na URL ou com valor inválido, "Todas" é o ativo
+- [x] "Tenho" e "Não tenho" levam às mesmas cartas que `?owned=owned` e `?owned=missing` digitados à mão, e a posse de outro usuário não entra
+- [x] Sem sessão, nenhum link com `owned` no HTML, nem com `?owned=owned` na URL
+- [x] `catalog_ownership_filter_test.rb` reescrito conforme o protocolo, mantendo os dois testes de isolamento; gate full passa, contagem registrada
 
 **Tests**: integration
 **Gate**: full
