@@ -1687,9 +1687,36 @@ summary:focus-visible,
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  padding: 0 var(--space-3);
   min-height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  font-weight: var(--caption-weight);
+  text-decoration: none;
 }
 
 .catalog__chip--active {
-  font-weight: inherit;
+  background-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: var(--body-strong-weight);
+}
+
+.catalog__chip--active:is([class*="color"], [class*="colors"]) {
+  background-color: inherit;
+  color: var(--ink);
+  font-weight: var(--body-strong-weight);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.catalog__chip-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-sunken);
+  border: 1px dashed var(--border-strong);
 }

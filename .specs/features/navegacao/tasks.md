@@ -657,11 +657,11 @@ com botão.
 
 **Done when**:
 
-- [ ] Chip com `min-height: 44px`, `border: 1px solid var(--border-strong)` e `border-radius: var(--radius-sm)`, em fileira que quebra linha, sem `overflow-x`
-- [ ] Chip ativo que não é de cor: `background-color: var(--accent)` e `color: var(--on-accent)`
-- [ ] Chip de cor ativo: `outline: 2px solid var(--accent)` com `outline-offset: 2px`, e nenhuma regra do chip de cor com `background` em `accent`, em nenhum estado
-- [ ] Amostra do chip de cor com borda tracejada `border-strong` sobre `surface-sunken` (P8 aberta)
-- [ ] `filter_layout_test.rb` reescrito conforme o protocolo (o anel sai de `:has(:checked)` para o chip ativo); os testes de `test/design/` anteriores à feature e o contraste passam sem edição; gate full passa, contagem registrada
+- [x] Chip com `min-height: 44px`, `border: 1px solid var(--border-strong)` e `border-radius: var(--radius-sm)`, em fileira que quebra linha, sem `overflow-x`
+- [x] Chip ativo que não é de cor: `background-color: var(--accent)` e `color: var(--on-accent)`
+- [x] Chip de cor ativo: `outline: 2px solid var(--accent)` com `outline-offset: 2px`, e nenhuma regra do chip de cor com `background` em `accent`, em nenhum estado
+- [x] Amostra do chip de cor com borda tracejada `border-strong` sobre `surface-sunken` (P8 aberta)
+- [x] `filter_layout_test.rb` reescrito conforme o protocolo (o anel sai de `:has(:checked)` para o chip ativo); os testes de `test/design/` anteriores à feature e o contraste passam sem edição; gate full passa, contagem registrada
 
 **Tests**: unit
 **Gate**: full

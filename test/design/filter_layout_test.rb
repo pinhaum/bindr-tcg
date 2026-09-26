@@ -89,42 +89,33 @@ class FilterLayoutTest < ActiveSupport::TestCase
            ".catalog__filters deve ter 'grid-column: 1' em @media (min-width: 64rem)"
   end
 
-  test ".catalog__color-option:has(:checked) tem outline de 2px com var(--accent)" do
-    outside = content_outside_media
-
-    # Procura a regra .catalog__color-option:has(:checked)
-    assert outside.include?(".catalog__color-option:has(:checked)"),
-           "regra .catalog__color-option:has(:checked) não encontrada"
-
-    rule_match = outside.match(/\.catalog__color-option:has\(:checked\)\s*\{([^}]*)\}/)
-    assert rule_match, ".catalog__color-option:has(:checked) não tem corpo"
-
-    body = rule_match[1]
-
-    # Verifica outline ou box-shadow
-    has_outline = body.include?("outline:") && body.include?("2px") && body.include?("var(--accent)")
-    has_box_shadow = body.include?("box-shadow:") && body.include?("2px") && body.include?("var(--accent)")
-
-    assert has_outline || has_box_shadow,
-           ".catalog__color-option:has(:checked) deve ter 'outline' ou 'box-shadow' de 2px com var(--accent)"
+  test ".catalog__chip tem min-height 44px, border 1px border-strong, border-radius" do
+    assert @stylesheet.include?(".catalog__chip {"),
+           "regra .catalog__chip não encontrada"
+    assert @stylesheet.include?("min-height: 44px"),
+           ".catalog__chip deve ter 'min-height: 44px'"
+    assert @stylesheet.include?("border: 1px solid var(--border-strong)"),
+           ".catalog__chip deve ter 'border: 1px solid var(--border-strong)'"
+    assert @stylesheet.include?("border-radius: var(--radius-sm)"),
+           ".catalog__chip deve ter 'border-radius: var(--radius-sm)'"
   end
 
-  test ".catalog__color-option nenhuma regra usa background com accent" do
-    # Procura qualquer regra que comece com .catalog__color-option
-    all_rules = Stylesheet.rules(@stylesheet)
+  test ".catalog__chip--active com fundo accent e texto on-accent" do
+    assert @stylesheet.include?(".catalog__chip--active {"),
+           "regra .catalog__chip--active não encontrada"
+    assert @stylesheet.include?("background-color: var(--accent)"),
+           ".catalog__chip--active deve ter 'background-color: var(--accent)'"
+    assert @stylesheet.include?("color: var(--on-accent)"),
+           ".catalog__chip--active deve ter 'color: var(--on-accent)'"
+  end
 
-    color_option_rules = all_rules.select do |selector, _|
-      selector.include?(".catalog__color-option")
-    end
-
-    assert color_option_rules.any?,
-           "nenhuma regra de .catalog__color-option encontrada"
-
-    color_option_rules.each do |selector, body|
-      # Verifica se background contém accent (case-insensitive)
-      refute body.match?(/background(?:-color)?\s*:\s*[^;]*accent/i),
-             "#{selector} não deve usar 'accent' em background ou background-color"
-    end
+  test ".catalog__chip--active de cor tem outline 2px accent sem background" do
+    assert @stylesheet.include?(".catalog__chip--active:is([class*=\"color\"], [class*=\"colors\"])"),
+           "regra para chip de cor ativo não encontrada"
+    assert @stylesheet.include?("outline: 2px solid var(--accent)"),
+           "outline: 2px solid var(--accent) não encontrado"
+    assert @stylesheet.include?("outline-offset: 2px"),
+           "outline-offset: 2px não encontrado"
   end
 
   test "dentro de @media (min-width: 64rem), .catalog__grid está na coluna 2" do

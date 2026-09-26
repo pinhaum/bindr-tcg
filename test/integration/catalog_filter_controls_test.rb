@@ -165,7 +165,11 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     green_chip = green_chips.first
     assert green_chip, "chip Green inativo não encontrado"
     assert !green_chip["aria-label"], "chip inativo não deve ter aria-label"
-    assert !green_chip.at_css("span[aria-hidden]"), "chip inativo não deve ter 'x'"
+
+    # Chips inativos têm a swatch (span.catalog__chip-swatch) mas não o "×"
+    # O "×" é renderizado apenas em chips ativos, dentro de um span[aria-hidden="true"]
+    x_span = green_chip.css("span[aria-hidden='true']").find { |s| s.text.include?("×") }
+    assert !x_span, "chip inativo não deve ter '×'"
   end
 
   test "set OP01 selected dá 2 cartas, set OP02 dá 3 cartas, ambos dão 5" do
