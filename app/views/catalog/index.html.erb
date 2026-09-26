@@ -63,6 +63,55 @@
     <%= render "catalog/owned_total", total: @owned_total %>
   <% end %>
 
+  <%# Chips de cor — NAV-33, NAV-34 %>
+  <div class="catalog__filter-group">
+    <h2 class="catalog__filter-title">Cor</h2>
+    <div class="catalog__chips-group">
+      <% @filter_options[:colors].each do |color| %>
+        <% is_active = Array(@result.active_filters[:colors]).include?(color) %>
+        <% url = filter_toggle_url(@result.active_filters, :colors, color) %>
+        <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+           <% if is_active %>aria-label="Remover filtro Cor: <%= color %>"<% end %>>
+          <%= color %>
+          <% if is_active %><span aria-hidden="true">&times;</span><% end %>
+        </a>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Chips de tipo — NAV-33, NAV-34 %>
+  <div class="catalog__filter-group">
+    <h2 class="catalog__filter-title">Tipo</h2>
+    <div class="catalog__chips-group">
+      <% @filter_options[:card_types].each do |card_type| %>
+        <% is_active = Array(@result.active_filters[:card_types]).include?(card_type) %>
+        <% url = filter_toggle_url(@result.active_filters, :card_types, card_type) %>
+        <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+           <% if is_active %>aria-label="Remover filtro Tipo: <%= card_type %>"<% end %>>
+          <%= card_type %>
+          <% if is_active %><span aria-hidden="true">&times;</span><% end %>
+        </a>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Chips de raridade — NAV-33, NAV-34 %>
+  <div class="catalog__filter-group">
+    <h2 class="catalog__filter-title">Raridade</h2>
+    <div class="catalog__chips-group">
+      <% @filter_options[:rarities].each do |rarity| %>
+        <% is_active = Array(@result.active_filters[:rarities]).include?(rarity) %>
+        <% url = filter_toggle_url(@result.active_filters, :rarities, rarity) %>
+        <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+           <% if is_active %>aria-label="Remover filtro Raridade: <%= rarity %>"<% end %>>
+          <%= rarity %>
+          <% if is_active %><span aria-hidden="true">&times;</span><% end %>
+        </a>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Formulário de set — NAV-14 (set continua em form GET com botão "Aplicar") %>
   <form class="catalog__filters" method="get" action="<%= catalog_path %>">
     <%# Filtros ativos sem controle, preservados como hidden %>
     <% if @result.active_filters[:q].present? %>
@@ -102,50 +151,25 @@
     <% if @result.active_filters[:dir].present? %>
       <input type="hidden" name="dir" value="<%= @result.active_filters[:dir] %>">
     <% end %>
+    <% if @result.active_filters[:colors].present? %>
+      <% Array(@result.active_filters[:colors]).each do |color| %>
+        <input type="hidden" name="colors[]" value="<%= color %>">
+      <% end %>
+    <% end %>
+    <% if @result.active_filters[:card_types].present? %>
+      <% Array(@result.active_filters[:card_types]).each do |card_type| %>
+        <input type="hidden" name="card_types[]" value="<%= card_type %>">
+      <% end %>
+    <% end %>
+    <% if @result.active_filters[:rarities].present? %>
+      <% Array(@result.active_filters[:rarities]).each do |rarity| %>
+        <input type="hidden" name="rarities[]" value="<%= rarity %>">
+      <% end %>
+    <% end %>
+    <% if @result.active_filters[:owned].present? %>
+      <input type="hidden" name="owned" value="<%= @result.active_filters[:owned] %>">
+    <% end %>
 
-    <%# Cores %>
-    <div class="catalog__filter-group">
-      <fieldset>
-        <legend>Cor</legend>
-        <% @filter_options[:colors].each do |color| %>
-          <div class="catalog__color-option">
-            <input type="checkbox" id="color-<%= color %>" name="colors[]" value="<%= color %>"
-                   <% if Array(@result.active_filters[:colors]).include?(color) %>checked<% end %>>
-            <label for="color-<%= color %>"><%= color %></label>
-          </div>
-        <% end %>
-      </fieldset>
-    </div>
-
-    <%# Tipos de carta %>
-    <div class="catalog__filter-group">
-      <fieldset>
-        <legend>Tipo</legend>
-        <% @filter_options[:card_types].each do |card_type| %>
-          <div>
-            <input type="checkbox" id="type-<%= card_type.parameterize(separator: '-') %>" name="card_types[]" value="<%= card_type %>"
-                   <% if Array(@result.active_filters[:card_types]).include?(card_type) %>checked<% end %>>
-            <label for="type-<%= card_type.parameterize(separator: '-') %>"><%= card_type %></label>
-          </div>
-        <% end %>
-      </fieldset>
-    </div>
-
-    <%# Raridades %>
-    <div class="catalog__filter-group">
-      <fieldset>
-        <legend>Raridade</legend>
-        <% @filter_options[:rarities].each do |rarity| %>
-          <div>
-            <input type="checkbox" id="rarity-<%= rarity.parameterize(separator: '-') %>" name="rarities[]" value="<%= rarity %>"
-                   <% if Array(@result.active_filters[:rarities]).include?(rarity) %>checked<% end %>>
-            <label for="rarity-<%= rarity.parameterize(separator: '-') %>"><%= rarity %></label>
-          </div>
-        <% end %>
-      </fieldset>
-    </div>
-
-    <%# Sets %>
     <div class="catalog__filter-group">
       <label for="filter-sets">Set</label>
       <select id="filter-sets" name="sets[]">
@@ -168,34 +192,29 @@
       <% end %>
     <% end %>
 
-    <%# Posse (com sessão) — NAV-12, NAV-13 %>
-    <% if authenticated? %>
-      <div class="catalog__filter-group">
-        <fieldset>
-          <legend>Posse</legend>
-          <% owned_value = @result.active_filters[:owned] %>
-          <% active_owned = CatalogQuery::OWNERSHIP_VALUES.include?(owned_value) ? owned_value : "all" %>
-          <div>
-            <input type="radio" id="owned-all" name="owned" value="all"
-                   <% if active_owned == "all" %>checked<% end %>>
-            <label for="owned-all">Todas</label>
-          </div>
-          <div>
-            <input type="radio" id="owned-owned" name="owned" value="owned"
-                   <% if active_owned == "owned" %>checked<% end %>>
-            <label for="owned-owned">Tenho</label>
-          </div>
-          <div>
-            <input type="radio" id="owned-missing" name="owned" value="missing"
-                   <% if active_owned == "missing" %>checked<% end %>>
-            <label for="owned-missing">Não tenho</label>
-          </div>
-        </fieldset>
-      </div>
-    <% end %>
-
-    <button type="submit">Filtrar</button>
+    <button type="submit">Aplicar</button>
   </form>
+
+  <%# Chips de posse (com sessão) — NAV-33, NAV-34 %>
+  <% if authenticated? %>
+    <% owned_value = @result.active_filters[:owned] %>
+    <% active_owned = CatalogQuery::OWNERSHIP_VALUES.include?(owned_value) ? owned_value : "all" %>
+    <div class="catalog__filter-group">
+      <h2 class="catalog__filter-title">Posse</h2>
+      <div class="catalog__chips-group">
+        <% [ "all", "owned", "missing" ].each do |val| %>
+          <% label_text = val == "all" ? "Todas" : (val == "owned" ? "Tenho" : "Não tenho") %>
+          <% is_active = active_owned == val %>
+          <% url = filter_toggle_url(@result.active_filters, :owned, val) %>
+          <a href="<%= url %>" class="catalog__chip <% if is_active %>catalog__chip--active<% end %>"
+             <% if is_active %>aria-label="Remover filtro Posse: <%= label_text %>"<% end %>>
+            <%= label_text %>
+            <% if is_active %><span aria-hidden="true">&times;</span><% end %>
+          </a>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 
   <% if @result.records.empty? %>
     <section class="catalog__empty">

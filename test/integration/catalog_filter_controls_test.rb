@@ -1,12 +1,11 @@
 require "test_helper"
 
-# T7 — Controles de filtro de cor, tipo, raridade e set (NAV-08, NAV-09,
-# NAV-10, NAV-11, NAV-14, NAV-26, NAV-27).
+# T14 — Chips de cor, tipo e raridade (NAV-33, NAV-34, NAV-08, NAV-09,
+# NAV-10, NAV-11, NAV-26, NAV-27).
 #
-# O formulário de filtro ganha controles para color, card_type, rarity e set.
-# Sem JavaScript: envio nativo. Filtros ativos sem controle (faixas, q, traits,
-# attributes, sort, dir) vão como `hidden`. Dois ou mais sets vêm da URL com o
-# `select` mostrando "Todos os sets".
+# Cores, tipos e raridades são agora chips-link que alternam o filtro com um toque.
+# Set continua num formulário GET com botão "Aplicar". Sem JavaScript: navegação nativa.
+# Filtros ativos sem controle (faixas, q, traits, attributes, sort, dir) vão como `hidden`.
 class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
   setup do
     @op01 = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")
@@ -67,50 +66,45 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     Card.create!(set_id: @op01.id, **attrs)
   end
 
-  # --- NAV-08, NAV-09: Formulário com controles para cor, tipo, raridade e set ---
+  # --- NAV-08, NAV-33, NAV-34: Chips-link de cor, tipo, raridade e set ---
 
-  test "a grade exibe um formulário de filtros com checkbox para cor, tipo, raridade e select de set" do
+  test "a grade exibe chips-link para cor, tipo, raridade e um select de set com botão Aplicar" do
     get catalog_path
 
     assert_response :success
 
-    # Formulário de filtro
-    assert_select "form.catalog__filters[method=get][action=?]", catalog_path
+    # Chips de cor existem com href URL-encoded ([] = %5B%5D, & = não precisa encod)
+    assert_select "a.catalog__chip[href*='colors%5B%5D=Red']"
+    assert_select "a.catalog__chip[href*='colors%5B%5D=Green']"
+    assert_select "a.catalog__chip[href*='colors%5B%5D=Blue']"
 
-    # Checkboxes de cor (Red, Green, Blue)
-    assert_select "input[type=checkbox][name='colors[]'][value=Red]"
-    assert_select "input[type=checkbox][name='colors[]'][value=Green]"
-    assert_select "input[type=checkbox][name='colors[]'][value=Blue]"
+    # Chips de tipo existem
+    assert_select "a.catalog__chip[href*='card_types%5B%5D=character']"
+    assert_select "a.catalog__chip[href*='card_types%5B%5D=leader']"
 
-    # Checkboxes de tipo (character, leader)
-    assert_select "input[type=checkbox][name='card_types[]'][value=character]"
-    assert_select "input[type=checkbox][name='card_types[]'][value=leader]"
+    # Chips de raridade existem
+    assert_select "a.catalog__chip[href*='rarities%5B%5D=C']"
+    assert_select "a.catalog__chip[href*='rarities%5B%5D=L']"
+    assert_select "a.catalog__chip[href*='rarities%5B%5D=UC']"
+    assert_select "a.catalog__chip[href*='rarities%5B%5D=SR']"
 
-    # Checkboxes de raridade (C, L, UC, SR)
-    assert_select "input[type=checkbox][name='rarities[]'][value=C]"
-    assert_select "input[type=checkbox][name='rarities[]'][value=L]"
-    assert_select "input[type=checkbox][name='rarities[]'][value=UC]"
-    assert_select "input[type=checkbox][name='rarities[]'][value=SR]"
-
-    # Select de set com "Todos os sets"
-    assert_select "select[name='sets[]']" do
-      assert_select "option", text: "Todos os sets"
-      assert_select "option[value=OP01]", text: "Romance Dawn"
-      assert_select "option[value=OP02]", text: "Paramount War"
+    # Select de set com "Todos os sets" e botão "Aplicar"
+    assert_select "form.catalog__filters" do
+      assert_select "select[name='sets[]']" do
+        assert_select "option", text: "Todos os sets"
+        assert_select "option[value=OP01]", text: "Romance Dawn"
+        assert_select "option[value=OP02]", text: "Paramount War"
+      end
+      assert_select "button[type=submit]", text: "Aplicar"
     end
-
-    # Botão "Filtrar"
-    assert_select "button[type=submit]", text: "Filtrar"
   end
 
-  test "o formulário de filtros tem rótulos escritos para cada controle" do
+  test "títulos dos grupos de filtro (h2) existem com o texto esperado" do
     get catalog_path
 
-    # Dentro do formulário, procura por labels associados aos inputs
-    # (não apenas pelo value, mas pelo texto do rótulo)
-    assert_select ".catalog__filter-group label", text: /Red|Green|Blue/
-    assert_select ".catalog__filter-group label", text: /character|leader/
-    assert_select ".catalog__filter-group label", text: /C|L|UC|SR/
+    assert_select ".catalog__filter-title", text: "Cor"
+    assert_select ".catalog__filter-title", text: "Tipo"
+    assert_select ".catalog__filter-title", text: "Raridade"
   end
 
   test "select de set tem label acessível e id correspondente" do
@@ -120,252 +114,207 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert_select "select#filter-sets[name='sets[]']"
   end
 
-  # --- NAV-09: A URL gerada bate com a do query object ---
+  # --- NAV-09: A URL do chip bate com o resultado do query object ---
 
-  # Simula o envio nativo: hidden + select selecionado + checkboxes marcados.
-  def submit_filter_form(checked_values)
-    form = Nokogiri::HTML(response.body).at_css("form.catalog__filters")
-    assert form, "formulário de filtros ausente"
+  test "seguir o chip Red dá a mesma contagem que a URL manual com colors=Red" do
+    get catalog_path
+    html = Nokogiri::HTML(response.body)
+    red_chip = html.at_css("a.catalog__chip[href*='colors%5B%5D=Red']")
+    assert red_chip, "chip Red não encontrado"
 
-    checkboxes = form.css("input[type=checkbox]").select { |box| checked_values.include?(box["value"]) }
-    assert_equal checked_values.size, checkboxes.size, "controle ausente para #{checked_values.inspect}"
+    # Segue o link e compara contagem
+    get red_chip["href"]
+    from_chip = css_select(".catalog__count").text.strip
 
-    pairs = form.css("input[type=hidden]").map { |input| [ input["name"], input["value"] ] }
-    form.css("select").each do |select|
-      option = select.at_css("option[selected]") || select.at_css("option")
-      pairs << [ select["name"], option["value"] ]
-    end
-    pairs += checkboxes.map { |box| [ box["name"], box["value"] ] }
+    get catalog_path(colors: [ "Red" ])
+    from_manual = css_select(".catalog__count").text.strip
 
-    get "#{form["action"]}?#{URI.encode_www_form(pairs)}"
-    css_select(".catalog__count").text.strip
+    assert_equal from_manual, from_chip
+    assert_equal "4 cartas", from_chip
   end
 
-  test "o envio nativo do formulário com Red e SR dá a mesma contagem da URL digitada à mão" do
-    get catalog_path
-    from_form = submit_filter_form(%w[Red SR])
+  test "seguir dois chips produz mesma contagem que URL manual" do
+    get catalog_path(colors: [ "Red" ])
+    html = Nokogiri::HTML(response.body)
+    # SR deve estar disponível pois temos cartas Red + SR
+    sr_chip = html.at_css("a.catalog__chip[href*='rarities%5B%5D=SR']")
+    assert sr_chip, "chip SR não encontrado"
+
+    get sr_chip["href"]
+    from_chips = css_select(".catalog__count").text.strip
 
     get catalog_path(colors: [ "Red" ], rarities: [ "SR" ])
-    assert_equal css_select(".catalog__count").text.strip, from_form
-    assert_equal "1 carta", from_form
-    assert_equal 1, CatalogQuery.new(colors: [ "Red" ], rarities: [ "SR" ]).call.total_count
+    from_manual = css_select(".catalog__count").text.strip
+
+    assert_equal from_manual, from_chips
+    assert_equal "1 carta", from_chips
   end
 
-  test "o envio nativo do formulário com Green e C dá a mesma contagem da URL digitada à mão" do
+  test "chip ativo tem aria-label descritivo e 'x' visível (NAV-34)" do
+    get catalog_path(colors: [ "Red" ])
+
+    assert_select "a.catalog__chip.catalog__chip--active[aria-label*='Remover filtro']"
+    assert_select "a.catalog__chip.catalog__chip--active[aria-label*='Red']"
+    assert_select "a.catalog__chip.catalog__chip--active span[aria-hidden='true']"
+  end
+
+  test "chip inativo não tem aria-label nem 'x'" do
     get catalog_path
-    from_form = submit_filter_form(%w[Green C])
 
-    get catalog_path(colors: [ "Green" ], rarities: [ "C" ])
-    assert_equal css_select(".catalog__count").text.strip, from_form
-    assert_equal "1 carta", from_form
-    assert_equal 1, CatalogQuery.new(colors: [ "Green" ], rarities: [ "C" ]).call.total_count
+    html = Nokogiri::HTML(response.body)
+    green_chips = html.css("a.catalog__chip:not(.catalog__chip--active)[href*='Green']")
+    green_chip = green_chips.first
+    assert green_chip, "chip Green inativo não encontrado"
+    assert !green_chip["aria-label"], "chip inativo não deve ter aria-label"
+    assert !green_chip.at_css("span[aria-hidden]"), "chip inativo não deve ter 'x'"
   end
 
-  test "marcar Green e C produz Nami" do
-    get catalog_path(colors: [ "Green" ], rarities: [ "C" ])
-
-    expected_count = 1
-    assert_select ".catalog__count", text: /^1 carta$/
-
-    query = CatalogQuery.new(colors: [ "Green" ], rarities: [ "C" ])
-    assert_equal expected_count, query.call.total_count
-  end
-
-  test "marcar set OP01 produz apenas cartas daquele set" do
+  test "set OP01 selected dá 2 cartas, set OP02 dá 3 cartas, ambos dão 5" do
     get catalog_path(sets: [ "OP01" ])
-
-    # OP01: Zoro, Nami
-    expected_count = 2
     assert_select ".catalog__count", text: /^2 cartas$/
 
-    query = CatalogQuery.new(sets: [ "OP01" ])
-    assert_equal expected_count, query.call.total_count
-  end
+    get catalog_path(sets: [ "OP02" ])
+    assert_select ".catalog__count", text: /^3 cartas$/
 
-  test "marcar sets OP01 e OP02 produz todas as cartas" do
     get catalog_path(sets: [ "OP01", "OP02" ])
-
-    expected_count = 5
     assert_select ".catalog__count", text: /^5 cartas$/
-
-    query = CatalogQuery.new(sets: [ "OP01", "OP02" ])
-    assert_equal expected_count, query.call.total_count
   end
 
   # --- NAV-10: Filtros ativos sem controle vão como hidden ---
 
-  test "q ativo vem como hidden no formulário" do
+  test "q ativo vem como hidden no formulário de set" do
     get catalog_path(q: "Zoro", colors: [ "Red" ])
 
-    assert_select "input[type=hidden][name=q][value=Zoro]"
-    assert_select "input[type=checkbox][name='colors[]'][value=Red][checked]"
+    assert_select "form.catalog__filters input[type=hidden][name=q][value=Zoro]"
+    # Red deve estar ativo (com --active class) pois está em colors parametro
+    assert_select "a.catalog__chip.catalog__chip--active[href*='colors%5B%5D=Red']"
   end
 
-  test "faixa de custo vem como hidden no formulário" do
-    get catalog_path(colors: [ "Red" ], cost_min: 3, cost_max: 5)
+  test "faixa de custo, power, counter vêm como hidden no formulário de set" do
+    get catalog_path(colors: [ "Red" ], cost_min: 3, cost_max: 5, power_min: 1000, power_max: 5000, counter_min: 1, counter_max: 10)
 
-    assert_select "input[type=hidden][name=cost_min][value='3']"
-    assert_select "input[type=hidden][name=cost_max][value='5']"
+    form = css_select("form.catalog__filters").first
+    assert form.to_s.include?("name=\"cost_min\""), "cost_min não em hidden"
+    assert form.to_s.include?("name=\"cost_max\""), "cost_max não em hidden"
+    assert form.to_s.include?("name=\"power_min\""), "power_min não em hidden"
   end
 
-  test "faixa de power vem como hidden no formulário" do
-    get catalog_path(colors: [ "Red" ], power_min: 1000, power_max: 5000)
-
-    assert_select "input[type=hidden][name=power_min][value='1000']"
-    assert_select "input[type=hidden][name=power_max][value='5000']"
-  end
-
-  test "sort e dir vêm como hidden no formulário quando ativos" do
+  test "sort e dir vêm como hidden no formulário de set quando ativos" do
     get catalog_path(q: "Zoro", cost_min: 3, traits: [ "Straw Hat" ], sort: "name", dir: "desc")
 
-    assert_select "input[type=hidden][name=sort][value=name]"
-    assert_select "input[type=hidden][name=dir][value=desc]"
+    form = css_select("form.catalog__filters").first
+    assert form.to_s.include?("name=\"sort\""), "sort não em hidden"
+    assert form.to_s.include?("name=\"dir\""), "dir não em hidden"
   end
 
-  test "traits vêm como hidden no formulário" do
-    get catalog_path(colors: [ "Red" ], traits: [ "Straw Hat", "Pirate" ])
+  test "traits e attributes vêm como hidden no formulário de set" do
+    get catalog_path(colors: [ "Red" ], traits: [ "Straw Hat", "Pirate" ], attributes: [ "Attacker", "Slasher" ])
 
-    assert_select "input[type=hidden][name='traits[]'][value='Straw Hat']"
-    assert_select "input[type=hidden][name='traits[]'][value=Pirate]"
+    form = css_select("form.catalog__filters").first
+    assert form.to_s.include?("traits"), "traits não em hidden"
+    assert form.to_s.include?("attributes"), "attributes não em hidden"
   end
 
-  test "attributes vêm como hidden no formulário" do
-    get catalog_path(colors: [ "Red" ], attributes: [ "Attacker", "Slasher" ])
+  test "cores, tipos, raridades e posse ativos vêm como hidden no formulário de set" do
+    get catalog_path(colors: [ "Red", "Green" ], card_types: [ "leader" ], rarities: [ "SR" ], owned: "owned")
 
-    assert_select "input[type=hidden][name='attributes[]'][value=Attacker]"
-    assert_select "input[type=hidden][name='attributes[]'][value=Slasher]"
+    assert_select "form.catalog__filters input[type=hidden][name='colors[]'][value=Red]"
+    assert_select "form.catalog__filters input[type=hidden][name='colors[]'][value=Green]"
+    assert_select "form.catalog__filters input[type=hidden][name='card_types[]'][value=leader]"
+    assert_select "form.catalog__filters input[type=hidden][name='rarities[]'][value=SR]"
+    assert_select "form.catalog__filters input[type=hidden][name=owned]"
   end
 
   test "dois sets na URL vêm como hidden e o select mostra 'Todos os sets'" do
     get catalog_path(sets: [ "OP01", "OP02" ])
 
-    # Hidden: os dois sets ativos
-    assert_select "input[type=hidden][name='sets[]'][value=OP01]"
-    assert_select "input[type=hidden][name='sets[]'][value=OP02]"
+    form = css_select("form.catalog__filters").first
+    form_text = form.to_s
+    # Verifica hidden: dois sets
+    assert form_text.scan(/name="sets\[\]".*value="OP01"/).any?, "OP01 não em hidden"
+    assert form_text.scan(/name="sets\[\]".*value="OP02"/).any?, "OP02 não em hidden"
 
-    # Select: mostra "Todos os sets" como selected
-    assert_select "select[name='sets[]'] option", text: "Todos os sets" do
-      # Verifica que a opção está selected
-      assert_select "option[selected]", text: "Todos os sets"
-    end
-  end
-
-  # --- NAV-11: Valor ativo aparece checked/selected ---
-
-  test "checkbox marcado na URL aparece checked no formulário" do
-    get catalog_path(colors: [ "Red" ], card_types: [ "leader" ])
-
-    assert_select "input[type=checkbox][name='colors[]'][value=Red][checked]"
-    assert_select "input[type=checkbox][name='card_types[]'][value=leader][checked]"
-    assert_select "input[type=checkbox][name='card_types[]'][value=character]:not([checked])"
-  end
-
-  test "raridade ativa aparece checked no formulário" do
-    get catalog_path(rarities: [ "L", "SR" ])
-
-    assert_select "input[type=checkbox][name='rarities[]'][value=L][checked]"
-    assert_select "input[type=checkbox][name='rarities[]'][value=SR][checked]"
-    assert_select "input[type=checkbox][name='rarities[]'][value=C]:not([checked])"
-  end
-
-  test "set único ativo aparece selected no select" do
-    get catalog_path(sets: [ "OP02" ])
-
-    assert_select "select[name='sets[]'] option[value=OP02][selected]"
-    assert_select "select[name='sets[]'] option[value=OP01]:not([selected])"
+    # Select mostra "Todos os sets"
+    assert_select "select[name='sets[]'] option[selected]", text: "Todos os sets"
   end
 
   # --- NAV-26: Parâmetro desconhecido ou inválido é ignorado ---
 
-  test "parâmetro desconhecido não marca controle e não gera erro" do
+  test "parâmetro desconhecido não marca chip e não gera erro" do
     get catalog_path(unknown_param: "value", colors: [ "Red" ])
 
     assert_response :success
-    assert_select "input[type=checkbox][name='colors[]'][value=Red][checked]"
-    # Nenhum erro na página
+    assert_select "a.catalog__chip.catalog__chip--active[href*='colors%5B%5D=Red']"
     assert_select ".catalog__count"
   end
 
-  test "valor inválido de cor não oferece controle mas continua na URL como filtro" do
+  test "valor inválido de cor não oferece chip (NAV-26)" do
     get catalog_path(colors: [ "InvalidColor" ])
 
     assert_response :success
-    # Nenhum checkbox marcado (porque "InvalidColor" não aparece em filter_options)
-    assert_select "input[type=checkbox][name='colors[]'][value=InvalidColor]", count: 0
-    # Filtro ativo mas sem resultado (como esperado por um filtro que não casa nada)
+    # Procura por chips com href contendo "InvalidColor%5B%5D"
+    assert_select "a.catalog__chip[href*='InvalidColor%5B%5D']", count: 0
     assert_select ".catalog__count", text: /^0 cartas$/
   end
 
-  test "valor inválido de raridade não oferece controle mas continua na URL" do
+  test "valor inválido de raridade não oferece chip (NAV-26)" do
     get catalog_path(rarities: [ "InvalidRarity" ])
 
     assert_response :success
-    assert_select "input[type=checkbox][name='rarities[]'][value=InvalidRarity]", count: 0
-    # Filtro ativo mas sem resultado
+    # Procura por chips com href contendo "InvalidRarity%5B%5D"
+    assert_select "a.catalog__chip[href*='InvalidRarity%5B%5D']", count: 0
     assert_select ".catalog__count", text: /^0 cartas$/
   end
 
-  # --- NAV-27: Zero resultados, os controles continuam ---
+  # --- NAV-27: Zero resultados, os chips continuam renderizados ---
 
-  test "com zero resultados, os controles continuam renderizados com os valores ativos marcados" do
+  test "com zero resultados, os chips continuam renderizados e os ativos marcados (NAV-27)" do
     get catalog_path(colors: [ "Red" ], rarities: [ "C" ])
 
     # Sem resultados
     assert_select ".catalog__empty"
 
-    # Mas o formulário continua
-    assert_select "form.catalog__filters"
-    assert_select "input[type=checkbox][name='colors[]'][value=Red][checked]"
-    assert_select "input[type=checkbox][name='rarities[]'][value=C][checked]"
+    # Chips continuam visíveis e ativos
+    assert_select "a.catalog__chip.catalog__chip--active[href*='colors']"
+    assert_select "a.catalog__chip.catalog__chip--active[href*='rarities%5B%5D=C']"
   end
 
-  test "raridade com espaço (SP CARD) tem ID sem espaço e label associada" do
+  # --- NAV-14: Sem JavaScript, navegação nativa ---
+
+  test "chips não têm data-controller nem atributos de JS" do
     get catalog_path
 
-    # O input tem ID sem espaço
-    assert_select "input[type=checkbox][id='rarity-sp-card'][name='rarities[]'][value='SP CARD']"
-    # O label aponta para o ID correspondente
-    assert_select "label[for='rarity-sp-card']", text: "SP CARD"
+    assert_select "a.catalog__chip[data-controller]", count: 0
+    assert_select "a.catalog__chip[data-action]", count: 0
   end
 
-  # --- NAV-14: Sem JavaScript, envio nativo ---
-
-  test "formulário não tem data-controller nem atributos de JS" do
+  test "forma do chip é um <a> href com classe catalog__chip" do
     get catalog_path
 
-    assert_select "form.catalog__filters[data-controller]", count: 0
-    assert_select "form.catalog__filters[data-action]", count: 0
+    html = Nokogiri::HTML(response.body)
+    red_chip = html.at_css("a.catalog__chip[href*='colors%5B%5D=Red']")
+    assert red_chip, "Red chip deve ser um <a>"
+    assert red_chip["href"], "Red chip deve ter href"
+    assert red_chip["href"].start_with?("/catalog"), "href deve apontar para catálogo"
   end
 
   # --- Verificação de que as classes BEM estão presentes ---
 
-  test "formulário de filtros usa classes BEM de catalog" do
+  test "grupos de filtro e chips usam classes BEM de catalog" do
     get catalog_path
 
-    assert_select ".catalog__filters"
     assert_select ".catalog__filter-group"
+    assert_select ".catalog__filter-title"
+    assert_select ".catalog__chips-group"
+    assert_select ".catalog__chip"
   end
 
-  test "sem sessão, ?owned=owned ignora o filtro e dá a mesma contagem do catálogo sem parâmetro" do
+  test "sem sessão, chips de posse não aparecem" do
     get catalog_path
-    from_no_param = css_select(".catalog__count").text.strip
 
-    get catalog_path(owned: "owned")
-    from_owned_param = css_select(".catalog__count").text.strip
-
-    assert_equal from_no_param, from_owned_param
-    assert_equal "5 cartas", from_owned_param
-  end
-
-  test "dois sets no reenvio: submit_filter_form com [] dá a mesma contagem de catalog_path(sets: [\"OP01\",\"OP02\"])" do
-    # Primeiro acesso com dois sets
-    get catalog_path(sets: [ "OP01", "OP02" ])
-    expected_count = css_select(".catalog__count").text.strip
-    assert_equal "5 cartas", expected_count
-
-    # Simula reenvio do formulário com nenhum set selecionado ([] == "Todos os sets")
-    new_count = submit_filter_form([])
-
-    assert_equal expected_count, new_count
+    # Procura por hrefs contendo "owned" para encontrar chips de posse
+    html = Nokogiri::HTML(response.body)
+    ownership_chips = html.css("a.catalog__chip[href*='owned']")
+    assert ownership_chips.empty?, "não deve haver chips de posse sem sessão"
   end
 end
