@@ -98,6 +98,96 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md rodada 2 M2d; test/design/flash_test.rb:37-41; app/assets/stylesheets/catalog.css:76 (css/text-tests)
 - last seen: 2026-09-23T01:32:26Z
 
+### L-015 - Teste textual de CSS deve ler a declaração na regra do próprio seletor, nunca procurar o valor na folha inteira, porque outra regra com o mesmo valor mascara a remoção.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `css/text-tests` · harmful: 0
+- features: navegacao
+- evidence: M14 filter_layout_test.rb:92-110 (css/text-tests)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-016 - O teste deve exercitar o método que a tela chama, com um registro que a guarda exclui, e não um método irmão sem uso em produção.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `models/aggregates` · harmful: 0
+- features: navegacao
+- evidence: M06 collection_item.rb:89 / minha_pasta_test.rb:117 (models/aggregates)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-017 - Atributo numérico renderizado deve ser afirmado pelo valor esperado do fixture, não só pela presença do atributo.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `views/assertions` · harmful: 0
+- features: navegacao
+- evidence: M12 minha_pasta_test.rb:340-351 (views/assertions)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-018 - Cláusula de não renderização precisa de um fixture em que a condição falha e de uma asserção count: 0 no elemento.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `views/assertions` · harmful: 0
+- features: navegacao
+- evidence: M13 progress/index.html.erb:163 (views/assertions)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-019 - Asserção de marcador visível deve mirar o texto do marcador, não um seletor genérico que outro elemento decorativo também satisfaz.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `views/a11y` · harmful: 0
+- features: navegacao
+- evidence: M41 catalog_filter_controls_test.rb:156 (views/a11y)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-020 - Rótulo escondido visualmente precisa de asserção de presença no HTML, além da regra CSS que o esconde.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `views/a11y` · harmful: 0
+- features: navegacao
+- evidence: M45 show.html.erb:142 (views/a11y)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-021 - Ao reescrever testes por mudança de forma de um controle, manter as asserções dos controles cuja forma não mudou.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `test/rewrite` · harmful: 0
+- features: navegacao
+- evidence: M43 / P-5 reescrita da Fase 7 (test/rewrite)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-022 - Critério de marcação só na página X precisa de teste de ausência na página vizinha que compartilha prefixo de rota.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `views/navigation` · harmful: 0
+- features: navegacao
+- evidence: M08 application.html.erb:31 (views/navigation)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-023 - Alinhamento entre dois blocos se testa comparando os recuos dos dois, não o recuo de um só.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `css/text-tests` · harmful: 0
+- features: navegacao
+- evidence: M42 catalog_search_styling_test.rb:45-49 (css/text-tests)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-024 - Contagem total com paginação precisa de fixture maior que uma página para distinguir total de itens da página.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `pagination` · harmful: 0
+- features: navegacao
+- evidence: M39 index.html.erb:87 (pagination)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-025 - Quando o plano estreita um critério da spec, emendar a spec no mesmo commit ou cobrir o texto integral do critério.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `spec/plan` · harmful: 0
+- features: navegacao
+- evidence: NAV-04 application.html.erb:36-37 / tasks.md T5 (spec/plan)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-026 - Links com o mesmo rótulo e função devem usar o mesmo helper de URL, senão a variante alternativa perde parte do estado.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `views/catalog` · harmful: 0
+- features: navegacao
+- evidence: NAV-36 index.html.erb:313 (views/catalog)
+- last seen: 2026-09-27T19:39:23Z
+
+### L-027 - Success Criterion que afirma arquivos sem edição deve ser conferido com git diff --diff-filter=M sobre o range antes de ser marcado.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `spec/success-criteria` · harmful: 0
+- features: navegacao
+- evidence: spec.md:342-343 / 6394755 (spec/success-criteria)
+- last seen: 2026-09-27T19:39:38Z
+
+### L-028 - Em filtro exclusivo com valor padrão, a spec deve dizer se o padrão conta como filtro ativo.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec/filters` · harmful: 0
+- features: navegacao
+- evidence: NAV-34 index.html.erb:283-294 (spec/filters)
+- last seen: 2026-09-27T19:39:38Z
+
+### L-029 - Critério que amarra dois números da tela deve nomear o denominador de cada um quando o modelo tem mais de uma métrica de total.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec/progress` · harmful: 0
+- features: navegacao
+- evidence: NAV-38 progress/index.html.erb:163-167 (spec/progress)
+- last seen: 2026-09-27T19:39:39Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

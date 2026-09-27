@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 15,
+  "next_id": 30,
   "lessons": [
     {
       "id": "L-001",
@@ -256,6 +256,276 @@
       ],
       "created": "2026-09-23T01:32:26Z",
       "last_seen": "2026-09-23T01:32:26Z"
+    },
+    {
+      "id": "L-015",
+      "key": "surviving_mutant::teste textual de css deve ler a declaracao na regra do proprio seletor nunca procurar o valor na folha inteira porque outra regra com o mesmo valor mascara a remocao",
+      "text": "Teste textual de CSS deve ler a declaração na regra do próprio seletor, nunca procurar o valor na folha inteira, porque outra regra com o mesmo valor mascara a remoção.",
+      "signal": "surviving_mutant",
+      "scope": "css/text-tests",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M14 filter_layout_test.rb:92-110 (css/text-tests)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-016",
+      "key": "surviving_mutant::o teste deve exercitar o metodo que a tela chama com um registro que a guarda exclui e nao um metodo irmao sem uso em producao",
+      "text": "O teste deve exercitar o método que a tela chama, com um registro que a guarda exclui, e não um método irmão sem uso em produção.",
+      "signal": "surviving_mutant",
+      "scope": "models/aggregates",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M06 collection_item.rb:89 / minha_pasta_test.rb:117 (models/aggregates)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-017",
+      "key": "surviving_mutant::atributo numerico renderizado deve ser afirmado pelo valor esperado do fixture nao so pela presenca do atributo",
+      "text": "Atributo numérico renderizado deve ser afirmado pelo valor esperado do fixture, não só pela presença do atributo.",
+      "signal": "surviving_mutant",
+      "scope": "views/assertions",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M12 minha_pasta_test.rb:340-351 (views/assertions)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-018",
+      "key": "surviving_mutant::clausula de nao renderizacao precisa de um fixture em que a condicao falha e de uma assercao count 0 no elemento",
+      "text": "Cláusula de não renderização precisa de um fixture em que a condição falha e de uma asserção count: 0 no elemento.",
+      "signal": "surviving_mutant",
+      "scope": "views/assertions",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M13 progress/index.html.erb:163 (views/assertions)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-019",
+      "key": "surviving_mutant::assercao de marcador visivel deve mirar o texto do marcador nao um seletor generico que outro elemento decorativo tambem satisfaz",
+      "text": "Asserção de marcador visível deve mirar o texto do marcador, não um seletor genérico que outro elemento decorativo também satisfaz.",
+      "signal": "surviving_mutant",
+      "scope": "views/a11y",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M41 catalog_filter_controls_test.rb:156 (views/a11y)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-020",
+      "key": "surviving_mutant::rotulo escondido visualmente precisa de assercao de presenca no html alem da regra css que o esconde",
+      "text": "Rótulo escondido visualmente precisa de asserção de presença no HTML, além da regra CSS que o esconde.",
+      "signal": "surviving_mutant",
+      "scope": "views/a11y",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M45 show.html.erb:142 (views/a11y)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-021",
+      "key": "surviving_mutant::ao reescrever testes por mudanca de forma de um controle manter as assercoes dos controles cuja forma nao mudou",
+      "text": "Ao reescrever testes por mudança de forma de um controle, manter as asserções dos controles cuja forma não mudou.",
+      "signal": "surviving_mutant",
+      "scope": "test/rewrite",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M43 / P-5 reescrita da Fase 7 (test/rewrite)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-022",
+      "key": "surviving_mutant::criterio de marcacao so na pagina x precisa de teste de ausencia na pagina vizinha que compartilha prefixo de rota",
+      "text": "Critério de marcação só na página X precisa de teste de ausência na página vizinha que compartilha prefixo de rota.",
+      "signal": "surviving_mutant",
+      "scope": "views/navigation",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M08 application.html.erb:31 (views/navigation)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-023",
+      "key": "surviving_mutant::alinhamento entre dois blocos se testa comparando os recuos dos dois nao o recuo de um so",
+      "text": "Alinhamento entre dois blocos se testa comparando os recuos dos dois, não o recuo de um só.",
+      "signal": "surviving_mutant",
+      "scope": "css/text-tests",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M42 catalog_search_styling_test.rb:45-49 (css/text-tests)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-024",
+      "key": "surviving_mutant::contagem total com paginacao precisa de fixture maior que uma pagina para distinguir total de itens da pagina",
+      "text": "Contagem total com paginação precisa de fixture maior que uma página para distinguir total de itens da página.",
+      "signal": "surviving_mutant",
+      "scope": "pagination",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M39 index.html.erb:87 (pagination)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-025",
+      "key": "ac_gap::quando o plano estreita um criterio da spec emendar a spec no mesmo commit ou cobrir o texto integral do criterio",
+      "text": "Quando o plano estreita um critério da spec, emendar a spec no mesmo commit ou cobrir o texto integral do critério.",
+      "signal": "ac_gap",
+      "scope": "spec/plan",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "NAV-04 application.html.erb:36-37 / tasks.md T5 (spec/plan)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-026",
+      "key": "ac_gap::links com o mesmo rotulo e funcao devem usar o mesmo helper de url senao a variante alternativa perde parte do estado",
+      "text": "Links com o mesmo rótulo e função devem usar o mesmo helper de URL, senão a variante alternativa perde parte do estado.",
+      "signal": "ac_gap",
+      "scope": "views/catalog",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "NAV-36 index.html.erb:313 (views/catalog)"
+      ],
+      "created": "2026-09-27T19:39:23Z",
+      "last_seen": "2026-09-27T19:39:23Z"
+    },
+    {
+      "id": "L-027",
+      "key": "ac_gap::success criterion que afirma arquivos sem edicao deve ser conferido com git diff diff filter m sobre o range antes de ser marcado",
+      "text": "Success Criterion que afirma arquivos sem edição deve ser conferido com git diff --diff-filter=M sobre o range antes de ser marcado.",
+      "signal": "ac_gap",
+      "scope": "spec/success-criteria",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "spec.md:342-343 / 6394755 (spec/success-criteria)"
+      ],
+      "created": "2026-09-27T19:39:38Z",
+      "last_seen": "2026-09-27T19:39:38Z"
+    },
+    {
+      "id": "L-028",
+      "key": "spec_precision_gap::em filtro exclusivo com valor padrao a spec deve dizer se o padrao conta como filtro ativo",
+      "text": "Em filtro exclusivo com valor padrão, a spec deve dizer se o padrão conta como filtro ativo.",
+      "signal": "spec_precision_gap",
+      "scope": "spec/filters",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "NAV-34 index.html.erb:283-294 (spec/filters)"
+      ],
+      "created": "2026-09-27T19:39:38Z",
+      "last_seen": "2026-09-27T19:39:38Z"
+    },
+    {
+      "id": "L-029",
+      "key": "spec_precision_gap::criterio que amarra dois numeros da tela deve nomear o denominador de cada um quando o modelo tem mais de uma metrica de total",
+      "text": "Critério que amarra dois números da tela deve nomear o denominador de cada um quando o modelo tem mais de uma métrica de total.",
+      "signal": "spec_precision_gap",
+      "scope": "spec/progress",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "NAV-38 progress/index.html.erb:163-167 (spec/progress)"
+      ],
+      "created": "2026-09-27T19:39:39Z",
+      "last_seen": "2026-09-27T19:39:39Z"
     }
   ]
 }
