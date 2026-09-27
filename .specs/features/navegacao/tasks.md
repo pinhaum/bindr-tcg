@@ -968,11 +968,11 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `.site-header__nav button` com `background` transparente e `border` nula ou `transparent`, e a mesma cor de texto das entradas inativas; a entrada atual continua com fundo `surface-sunken` (NAV-30)
-- [ ] `.site-header__nav a` com `text-decoration: none`; a entrada atual continua distinta por fundo e peso (NAV-04)
-- [ ] O foco visível da navegação continua (`focus_test.rb` passa sem edição)
-- [ ] Teste novo em `test/design/` para as duas regras; `navigation_canvas_test.rb` passa ou é reescrito só onde o NAV-41 muda a expectativa
-- [ ] Capturas com sessão em 390px e 1280px: "Sair" no mesmo fundo das outras entradas inativas; gate full passa, contagem registrada
+- [x] `.site-header__nav button` com `background` transparente e `border` nula ou `transparent`, e a mesma cor de texto das entradas inativas; a entrada atual continua com fundo `surface-sunken` (NAV-30)
+- [x] `.site-header__nav a` com `text-decoration: none`; a entrada atual continua distinta por fundo e peso (NAV-04)
+- [x] O foco visível da navegação continua (`focus_test.rb` passa sem edição)
+- [x] Teste novo em `test/design/` para as duas regras; `navigation_canvas_test.rb` passa ou é reescrito só onde o NAV-41 muda a expectativa
+- [x] Capturas com sessão em 390px e 1280px: "Sair" no mesmo fundo das outras entradas inativas; gate full passa, contagem registrada
 
 **Tests**: unit (textual)
 **Gate**: full

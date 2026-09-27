@@ -23,6 +23,7 @@
   --accent: #ff9e14;
   --on-accent: #051b23;
   --danger: #ff5448;
+  --transparent: transparent;
 
   /* Tipografia — §11.4 */
   --font-sans: system-ui, sans-serif;
@@ -479,7 +480,16 @@ body {
   font-weight: var(--nav-current-weight);
 }
 
+.site-header__nav a {
+  text-decoration: none;
+}
+
 .site-header__nav a:not([aria-current="page"]) { color: var(--ink-muted); }
+
+.site-header__nav button {
+  background-color: var(--transparent);
+  border: none;
+}
 
 .site-header__nav button:not([aria-current="page"]) { color: var(--ink-muted); }
 
