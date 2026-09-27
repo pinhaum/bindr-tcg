@@ -156,4 +156,24 @@ class NavigationLayoutTest < ActiveSupport::TestCase
     assert media_content.include?("min-width: 0"),
            ".site-header ~ * deve ter min-width: 0"
   end
+
+  test "dentro de @media (min-width: 64rem), .site-header com justify-content: flex-start e align-items: stretch (T25 — NAV-40)" do
+    stylesheet = Stylesheet.read_stylesheet
+
+    media_match = stylesheet.match(/@media\s*\([^)]*min-width:\s*64rem[^)]*\)\s*\{(.*)\}\s*\z/m)
+    assert media_match, "@media (min-width: 64rem) não encontrada"
+
+    media_content = media_match[1]
+
+    # Extrai o bloco de .site-header dentro da media query
+    site_header_in_media = media_content.match(/\.site-header\s*\{([^}]*)\}/m)
+    assert site_header_in_media, ".site-header não encontrado na media query"
+
+    site_header_body = site_header_in_media[1]
+
+    assert site_header_body.include?("justify-content: flex-start"),
+           ".site-header deve ter justify-content: flex-start na media larga (T25 — NAV-40)"
+    assert site_header_body.include?("align-items: stretch"),
+           ".site-header deve ter align-items: stretch na media larga (T25 — NAV-40)"
+  end
 end

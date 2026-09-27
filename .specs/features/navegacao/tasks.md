@@ -995,10 +995,10 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] Dentro de `@media (min-width: 64rem)`, `.site-header` com `justify-content: flex-start` e `align-items: stretch`, e a marca com alinhamento à esquerda
-- [ ] Teste novo em `test/design/`, com recorte da media query, que falha se a coluna distribuir os filhos (`space-between`, `space-around`, `center`)
-- [ ] Capturas em 1280px da carta, da pasta e do catálogo: a `nav` começa logo abaixo da marca
-- [ ] `navigation_layout_test.rb` e `catalog_subgrid_layout_test.rb` passam; gate full passa, contagem registrada
+- [x] Dentro de `@media (min-width: 64rem)`, `.site-header` com `justify-content: flex-start` e `align-items: stretch`, e a marca com alinhamento à esquerda
+- [x] Teste novo em `test/design/`, com recorte da media query, que falha se a coluna distribuir os filhos (`space-between`, `space-around`, `center`)
+- [x] Capturas em 1280px da carta, da pasta e do catálogo: a `nav` começa logo abaixo da marca
+- [x] `navigation_layout_test.rb` e `catalog_subgrid_layout_test.rb` passam; gate full passa, contagem registrada
 
 **Tests**: unit (textual)
 **Gate**: full

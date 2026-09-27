@@ -1647,6 +1647,8 @@ summary:focus-visible,
     grid-row: 1 / span 3;
     align-self: start;
     flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
     background-color: var(--surface-raised);
     border-right: 1px solid var(--border);
     height: 100vh;
@@ -1659,6 +1661,8 @@ summary:focus-visible,
     gap: var(--space-1);
     border-top: none;
   }
+
+  .site-header__brand { padding: var(--space-3); }
 
   .site-header__action {
     justify-content: flex-start;
