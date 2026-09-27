@@ -1047,12 +1047,12 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `<details>` sem `open` envolve só `catalog__filters`; o `<summary>` diz "Filtros" e, com filtro ativo, "N filtro(s) ativo(s)" com a mesma contagem da linha de status
-- [ ] `ul.catalog__chips` continua fora do `<details>`, com os links de remoção
-- [ ] Sem JavaScript: abrir o `<details>` e tocar num chip aplica o filtro (NAV-14); com zero resultados, os controles continuam na página (NAV-27)
-- [ ] ⚠️ VERIFICAR: em `≥ 64rem`, `summary` fora de vista e `::details-content` visível com o `<details>` fechado, confirmado pela captura em 1280px. Se não funcionar, aplicar o fallback registrado nas Decisões de implementação e registrar a escolha na spec
-- [ ] Testes de integração novos para o `<details>`, o `<summary>` com e sem filtro, e a lista de ativos fora dele; teste de folha para a regra larga
-- [ ] Captura em 390px: a primeira carta da grade aparece acima de y=600 com o `<details>` fechado; gate full passa, contagem registrada
+- [x] `<details>` sem `open` envolve só `catalog__filters`; o `<summary>` diz "Filtros" e, com filtro ativo, "N filtro(s) ativo(s)" com a mesma contagem da linha de status
+- [x] `ul.catalog__chips` continua fora do `<details>`, com os links de remoção
+- [x] Sem JavaScript: abrir o `<details>` e tocar num chip aplica o filtro (NAV-14); com zero resultados, os controles continuam na página (NAV-27)
+- [x] ⚠️ VERIFICAR: em `≥ 64rem`, `summary` fora de vista e `::details-content` visível com o `<details>` fechado, confirmado pela captura em 1280px. Se não funcionar, aplicar o fallback registrado nas Decisões de implementação e registrar a escolha na spec
+- [x] Testes de integração novos para o `<details>`, o `<summary>` com e sem filtro, e a lista de ativos fora dele; teste de folha para a regra larga
+- [x] Captura em 390px: a primeira carta da grade aparece acima de y=600 com o `<details>` fechado; gate full passa, contagem registrada
 
 **Tests**: integration + unit (textual)
 **Gate**: full

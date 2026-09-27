@@ -77,8 +77,19 @@
     <% end %>
   </div>
 
-  <div class="catalog__filters">
-    <%# Chips de cor — NAV-33, NAV-34 %>
+  <details class="catalog__filters-toggle">
+    <% filter_count = active_filter_count(@result.active_filters) %>
+    <summary class="catalog__filters-summary">
+      Filtros
+      <% if filter_count > 0 %>
+        <span class="catalog__filters-count">
+          <%= pluralize(filter_count, "filtro ativo", plural: "filtros ativos") %>
+        </span>
+      <% end %>
+    </summary>
+
+    <div class="catalog__filters">
+      <%# Chips de cor — NAV-33, NAV-34 %>
     <div class="catalog__filter-group">
       <h2 class="catalog__filter-title">Cor</h2>
       <div class="catalog__chips-group">
@@ -231,7 +242,8 @@
         </div>
       </div>
     <% end %>
-  </div>
+    </div>
+  </details>
 
   <div class="catalog__body">
     <% if @result.records.empty? %>

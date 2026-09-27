@@ -1,14 +1,14 @@
 require "test_helper"
 
 class CatalogLayoutStructureTest < ActionDispatch::IntegrationTest
-  test "catalog main contains three groups in order: head, filters, body" do
+  test "catalog main contains three groups in order: head, filters (in details), body" do
     get catalog_path
     assert_select "main.catalog" do
       assert_select "> div.catalog__head:nth-child(1)" do
         assert_select "h1.catalog__title", text: "Catálogo"
         assert_select "form.catalog__search"
       end
-      assert_select "> div.catalog__filters:nth-child(2)" do
+      assert_select "> details.catalog__filters-toggle:nth-child(2) > div.catalog__filters" do
         assert_select ".catalog__filter-group", minimum: 1
       end
       assert_select "> div.catalog__body:nth-child(3)" do

@@ -1636,6 +1636,45 @@ summary:focus-visible,
   min-width: 24px;
 }
 
+/* Filtros recolhidos no celular (NAV-43, NAV-44) */
+.catalog__filters-toggle {
+  margin: var(--space-2) 0;
+  padding: 0;
+  border: none;
+}
+
+.catalog__filters-summary {
+  display: block;
+  padding: var(--space-2);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  font-weight: var(--body-strong-weight);
+}
+
+.catalog__filters-summary::-webkit-details-marker { display: none; }
+
+.catalog__filters-summary::marker { display: none; }
+
+.catalog__filters-summary::before {
+  content: "▶ ";
+  display: inline-block;
+  margin-right: var(--space-1);
+  transition: transform 0.2s ease;
+}
+
+.catalog__filters-toggle[open] .catalog__filters-summary::before {
+  transform: rotate(90deg);
+}
+
+.catalog__filters-count {
+  margin-left: var(--space-1);
+  font-weight: var(--body-weight);
+  color: var(--ink-muted);
+}
+
 @media (min-width: 64rem) {
   :root {
     --body-grid-columns: var(--sidebar-width) minmax(0, 1fr);
@@ -1725,6 +1764,19 @@ summary:focus-visible,
   }
 
   .catalog__filter-group { margin-bottom: 0; }
+
+  /* Filtros sempre visíveis em viewport larga (NAV-45) */
+  .catalog__filters-toggle {
+    margin: 0;
+    padding: 0;
+  }
+
+  .catalog__filters-summary { display: none; }
+
+  .catalog__filters-toggle::details-content {
+    content-visibility: visible;
+    display: contents;
+  }
 
   .catalog__body { grid-column: 2; grid-row: 2; padding: 0 var(--space-4) var(--space-4); }
 
