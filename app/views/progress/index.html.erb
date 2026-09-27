@@ -113,17 +113,19 @@
                   class: "progress__action-link progress__action-link--primary" %>
     </p>
 
-    <%= render "progress/export_link" %>
+    <nav class="progress__secondary">
+      <%= render "progress/export_link" %>
 
-    <p class="progress__action">
-      <%= link_to "Lista de desejos", wishlist_items_path,
-                  class: "progress__action-link" %>
-    </p>
+      <p class="progress__action">
+        <%= link_to "Lista de desejos", wishlist_items_path,
+                    class: "progress__action-link" %>
+      </p>
 
-    <p class="progress__action">
-      <%= link_to "Importar coleção", new_collection_import_path,
-                  class: "progress__action-link" %>
-    </p>
+      <p class="progress__action">
+        <%= link_to "Importar coleção", new_collection_import_path,
+                    class: "progress__action-link" %>
+      </p>
+    </nav>
   </div>
 
   <%#
@@ -139,22 +141,24 @@
   <ul class="progress__list" aria-labelledby="progress_title">
     <% @rows.each do |row| %>
       <li class="progress-set" id="progress_set_<%= row.set_code %>">
-        <h3 class="progress-set__name">
-          <%= row.set_name %>
-          <span class="progress-set__code"><%= row.set_code %></span>
-        </h3>
+        <div class="progress-set__header">
+          <h3 class="progress-set__name">
+            <%= row.set_name %>
+            <span class="progress-set__code"><%= row.set_code %></span>
+          </h3>
 
-        <%#
-          Possuídas e total (PRG-01). O total é o de **impressões** do set e sai
-          do catálogo — não depende de quem olha. Plural explícito, não
-          `pluralize`: o inflector do Rails é inglês e não sabe português.
-        %>
-        <p class="progress-set__owned-line">
-          <span class="progress-set__owned"><%= row.owned_variants %></span>
-          de
-          <span class="progress-set__total"><%= row.total_variants %></span>
-          <%= row.total_variants == 1 ? "variante" : "variantes" %>
-        </p>
+          <%#
+            Possuídas e total (PRG-01). O total é o de **impressões** do set e sai
+            do catálogo — não depende de quem olha. Plural explícito, não
+            `pluralize`: o inflector do Rails é inglês e não sabe português.
+          %>
+          <p class="progress-set__owned-line">
+            <span class="progress-set__owned"><%= row.owned_variants %></span>
+            de
+            <span class="progress-set__total"><%= row.total_variants %></span>
+            <%= row.total_variants == 1 ? "variante" : "variantes" %>
+          </p>
+        </div>
 
         <% if row.completion_percent_known? %>
           <progress class="progress-set__bar"

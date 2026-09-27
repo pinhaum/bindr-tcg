@@ -322,7 +322,7 @@ botões de 44px. Na pasta, cada set é uma linha sem moldura.
 | NAV-48 | P1: Acabamento conferido | Req. 13.19, 5.1 | Done (T29) |
 | NAV-49 | P1: Acabamento conferido | Req. 13.19, 5.2 | Done (T30) |
 | NAV-50 | P1: Acabamento conferido | Req. 13.19 | Done (T31) |
-| NAV-51 | P1: Acabamento conferido | Req. 13.20 | Pending (T32) |
+| NAV-51 | P1: Acabamento conferido | Req. 13.20 | Done (T32) |
 
 NAV-38 e NAV-30 ganham também as correções T23 e T24: a render mostrou a barra
 a 0% desenhada cheia e o "Sair" com fundo de botão nativo, que o faz parecer a

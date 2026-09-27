@@ -1183,10 +1183,10 @@ celular (NAV-43).
 **Done when**:
 
 - [ ] `.progress-set` sem `border` nem `background` próprios; nome e contagem "possuídas / total" na mesma linha, a barra abaixo, percentual e parallels como legenda
-- [ ] Os três links secundários num contêiner próprio, elemento de `progress`, separado de "Adicionar cartas"; o export continua sendo o partial, não uma cópia
-- [ ] `progress_ui_test.rb`, `set_progress_plan_test.rb` e `collection_export_link_test.rb` passam **sem edição**; `minha_pasta_test.rb` reescrito só onde o NAV-51 muda a expectativa
-- [ ] Em 360px, nome longo de set quebra linha sem scroll horizontal (NAV-28)
-- [ ] Teste de integração para o agrupamento e teste de folha para a linha; capturas da pasta em 390px e 1280px; gate full passa, contagem registrada
+- [x] Os três links secundários num contêiner próprio, elemento de `progress`, separado de "Adicionar cartas"; o export continua sendo o partial, não uma cópia
+- [x] `progress_ui_test.rb`, `set_progress_plan_test.rb` e `collection_export_link_test.rb` passam **sem edição**; `minha_pasta_test.rb` reescrito só onde o NAV-51 muda a expectativa
+- [x] Em 360px, nome longo de set quebra linha sem scroll horizontal (NAV-28)
+- [x] Teste de integração para o agrupamento e teste de folha para a linha; capturas da pasta em 390px e 1280px; gate full passa, contagem registrada
 
 **Tests**: integration + unit (textual)
 **Gate**: full

@@ -397,4 +397,60 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{catalog_path}']", text: "Adicionar cartas",
                   fail_message: "link para Adicionar cartas não encontrado"
   end
+
+  # --- T32: Minha pasta em linhas e ações agrupadas (NAV-51) ---
+
+  test "nome e contagem do set estão na mesma linha" do
+    sign_in(@user)
+    get progress_path
+
+    header = css_select(".progress-set__header").first
+    assert header.present?, "deve haver um contêiner .progress-set__header"
+
+    nome = header.css(".progress-set__name").text.squish
+    assert_match(/Romance Dawn/, nome, "nome do set deve estar no header")
+
+    contagem = header.css(".progress-set__owned-line").text.squish
+    assert_match(/\d+ de \d+ variantes/, contagem, "contagem deve estar no header junto ao nome")
+  end
+
+  test "barra de progresso está abaixo da linha de nome e contagem" do
+    sign_in(@user)
+    get progress_path
+
+    set = css_select("#progress_set_OP01").first
+    ordem_dom = set.children.map { _1.name }.compact
+
+    header_idx = ordem_dom.index("div")
+    barra_idx = ordem_dom.index("progress")
+
+    assert header_idx < barra_idx,
+           "a barra deve vir depois do header na ordem de leitura"
+  end
+
+  test "links secundários agrupam em nav.progress__secondary" do
+    sign_in(@user)
+    get progress_path
+
+    secundarios = css_select(".progress__secondary").first
+    assert secundarios.present?, "deve haver .progress__secondary"
+
+    links_esperados = [ "Lista de desejos", "Importar coleção", "Baixar minha coleção" ]
+    links_esperados.each do |texto|
+      assert secundarios.text.include?(texto), "#{texto} deve estar em .progress__secondary"
+    end
+  end
+
+  test "Adicionar cartas está separado dos links secundários" do
+    sign_in(@user)
+    get progress_path
+
+    secundarios = css_select(".progress__secondary").first
+    assert !secundarios.text.include?("Adicionar cartas"),
+           "Adicionar cartas não deve estar em .progress__secondary"
+
+    primarios = css_select(".progress__action--primary").first
+    assert primarios.text.include?("Adicionar cartas"),
+           "Adicionar cartas deve estar em .progress__action--primary"
+  end
 end
