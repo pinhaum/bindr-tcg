@@ -1394,9 +1394,9 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `filter_toggle_url({ colors: ["Red"] }, "colors", "Red")` devolve `/catalog` sem `colors`; `({ owned: "owned" }, "owned", "owned")` devolve URL sem `owned`; o mesmo com o hash de chaves string
-- [ ] Os comentários do método ficam na densidade do resto do arquivo
-- [ ] Gate full passa
+- [x] `filter_toggle_url({ colors: ["Red"] }, "colors", "Red")` devolve `/catalog` sem `colors`; `({ owned: "owned" }, "owned", "owned")` devolve URL sem `owned`; o mesmo com o hash de chaves string
+- [x] Os comentários do método ficam na densidade do resto do arquivo
+- [x] Gate full passa
 
 **Tests**: unit
 **Gate**: full

@@ -64,9 +64,10 @@ module CatalogHelper
   # descartando `page` sempre. Para `owned` (escalar), remove a chave em vez de
   # tentar manter um array. Filtros normalizados preservam a forma já validada.
   def filter_toggle_url(active_filters, key, value)
-    filters = active_filters.dup
+    filters = active_filters.to_h.transform_keys(&:to_sym)
+    key = key.to_sym
 
-    if key.to_sym == :owned
+    if key == :owned
       # Posse é escalar: toggling "owned" ou "missing" remove; "all" (default)
       # também remove. Qualquer outro valor é ligado.
       if filters[key].to_s == value.to_s

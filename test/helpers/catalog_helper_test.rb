@@ -78,4 +78,22 @@ class CatalogHelperTest < ActionView::TestCase
     assert_includes url, "colors%5B%5D=Red"
     assert_includes url, "colors%5B%5D=InvalidColor"
   end
+
+  test "filter_toggle_url normalizes string key to symbol" do
+    active = { colors: [ "Red" ] }
+    url = filter_toggle_url(active, "colors", "Red")
+    assert_not_includes url, "colors"
+  end
+
+  test "filter_toggle_url normalizes string key for owned scalar" do
+    active = { owned: "owned" }
+    url = filter_toggle_url(active, "owned", "owned")
+    assert_not_includes url, "owned"
+  end
+
+  test "filter_toggle_url aceita o hash de filtros com chaves string" do
+    assert_equal catalog_path, filter_toggle_url({ "colors" => [ "Red" ] }, "colors", "Red")
+    assert_equal catalog_path, filter_toggle_url({ "owned" => "owned" }, :owned, "owned")
+    assert_includes filter_toggle_url({ "colors" => [ "Red" ] }, :colors, "Green"), "colors%5B%5D=Red&colors%5B%5D=Green"
+  end
 end
