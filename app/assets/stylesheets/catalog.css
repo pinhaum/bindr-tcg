@@ -489,6 +489,7 @@ body {
 .site-header__nav button {
   background-color: var(--transparent);
   border: none;
+  font: inherit;
 }
 
 .site-header__nav button:not([aria-current="page"]) { color: var(--ink-muted); }

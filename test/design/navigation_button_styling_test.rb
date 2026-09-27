@@ -26,6 +26,8 @@ class NavigationButtonStylingTest < Minitest::Test
       ".site-header__nav button deve ter background-color: var(--transparent)"
     assert_equal "none", decl["border"],
       ".site-header__nav button deve ter border: none"
+    assert_equal "inherit", decl["font"],
+      ".site-header__nav button deve herdar a fonte das entradas (font: inherit), não a do botão nativo"
   end
 
   # NAV-41: .site-header__nav a com text-decoration: none
