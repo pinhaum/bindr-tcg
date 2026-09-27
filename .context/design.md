@@ -664,6 +664,9 @@ Navegação (Fases 6–10 — NAV-05, NAV-06, NAV-28, NAV-30, NAV-31): `nav-heig
 (peso da entrada ativa); `sidebar-width` 280px (largura da coluna lateral em desktop,
 Fase 6 — T12); `body-grid-columns` 1fr (mobile) e `var(--sidebar-width) minmax(0, 1fr)`
 (≥ 64rem); `body-padding-bottom` var(--nav-height) em mobile, 0 em ≥ 64rem.
+`transparent` (NAV-41, T24): fundo do "Sair" na navegação, que é um `<button>` e
+traz o fundo do agente de usuário. Existe só porque a guarda de literais exige
+token em cor; não é cor de superfície.
 
 Raios: `radius-sm` 4px (chip, input, badge de raridade), `radius-md` 8px (tile,
 poço, botão), `radius-full` (**apenas** badge de quantidade — o tile é retangular
