@@ -1102,11 +1102,11 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] Elemento novo de `card-detail` antes de `card-detail__data`, com a imagem da primeira variante de `@variants` e o placeholder (nome + `card_number`) na mesma medida, visível sem JS quando a imagem falha
-- [ ] A imagem tem `alt` que nomeia a carta e o código da variante; carta sem variante não renderiza o elemento e não dá erro
-- [ ] Em `≥ 64rem`, o elemento ocupa uma coluna de 320px à esquerda dos dados
-- [ ] `card_detail_test.rb`, `collection_ownership_ui_test.rb` e `wishlist_mark_ui_test.rb` passam **sem edição** (NAV-25); `card_detail_layout_test.rb` reescrito só onde o NAV-48 muda a expectativa
-- [ ] Testes de integração e de folha novos; capturas do detalhe em 390px e 1280px; gate full passa, contagem registrada
+- [x] Elemento novo de `card-detail` antes de `card-detail__data`, com a imagem da primeira variante de `@variants` e o placeholder (nome + `card_number`) na mesma medida, visível sem JS quando a imagem falha
+- [x] A imagem tem `alt` que nomeia a carta e o código da variante; carta sem variante não renderiza o elemento e não dá erro
+- [x] Em `≥ 64rem`, o elemento ocupa uma coluna de 320px à esquerda dos dados
+- [x] `card_detail_test.rb`, `collection_ownership_ui_test.rb` e `wishlist_mark_ui_test.rb` passam **sem edição** (NAV-25); `card_detail_layout_test.rb` reescrito só onde o NAV-48 muda a expectativa
+- [x] Testes de integração e de folha novos; capturas do detalhe em 390px e 1280px; gate full passa, contagem registrada
 
 **Tests**: integration + unit (textual)
 **Gate**: full

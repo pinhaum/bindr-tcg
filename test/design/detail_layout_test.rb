@@ -49,7 +49,7 @@ class DetailLayoutTest < ActiveSupport::TestCase
            ".card-detail deve ter 'grid-template-columns:' em @media (min-width: 64rem)"
   end
 
-  test "dentro de @media (min-width: 64rem), .card-detail__data está na coluna 1" do
+  test "dentro de @media (min-width: 64rem), .card-detail__data está na coluna 2 (NAV-48)" do
     media = media_64rem_content
 
     assert media.include?(".card-detail__data"),
@@ -59,8 +59,8 @@ class DetailLayoutTest < ActiveSupport::TestCase
     assert data_match, ".card-detail__data não tem corpo em media query"
 
     body = data_match[1]
-    assert body.include?("grid-column: 1"),
-           ".card-detail__data deve ter 'grid-column: 1' em @media (min-width: 64rem)"
+    assert body.include?("grid-column: 2"),
+           ".card-detail__data deve ter 'grid-column: 2' em @media (min-width: 64rem) (NAV-48: imagem na coluna 1)"
   end
 
   test "dentro de @media (min-width: 64rem), .card-detail__variants está na coluna 2" do

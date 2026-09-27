@@ -3,6 +3,22 @@
 <main class="card-detail">
   <p><%= link_to "← Voltar ao catálogo", catalog_path %></p>
 
+  <% if @variants.any? %>
+    <div class="card-detail__media">
+      <div class="card-detail__placeholder" aria-hidden="true">
+        <span><%= @card.name %></span>
+        <span><code class="code"><%= @variants.first.variant_code %></code></span>
+      </div>
+
+      <% if @variants.first.image_url.present? %>
+        <%= image_tag card_image_path(@variants.first.variant_code),
+                      alt: "#{@card.name} #{@variants.first.variant_code}",
+                      loading: "lazy",
+                      class: "card-detail__image" %>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="card-detail__data">
     <header>
       <h1 class="card-detail__name"><%= @card.name %></h1>
