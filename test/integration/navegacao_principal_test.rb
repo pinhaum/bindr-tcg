@@ -147,6 +147,17 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
     assert_nil sair_button["aria-current"], "Sair não deve ter aria-current"
   end
 
+  # A raiz é o catálogo (`root "catalog#index"`) e é para onde o cadastro e o
+  # login redirecionam; lá a entrada também é a atual (NAV-04).
+  test "na raiz, que é o catálogo, Catálogo tem aria-current=\"page\"" do
+    sign_in(@user)
+    get root_path
+
+    assert_select "header.site-header nav[aria-label='Principal'] a[aria-current='page']", count: 1 do |current|
+      assert_equal catalog_path, current.first["href"]
+    end
+  end
+
   test "no catálogo com filtro ativo, Catálogo continua com aria-current=\"page\"" do
     sign_in
     get catalog_path(colors: [ "Red" ], rarities: [ "SR" ])
