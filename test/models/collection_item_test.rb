@@ -196,12 +196,11 @@ class CollectionItemTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) { CollectionItem.for_user(user.id.to_s) }
   end
 
-  # Done when: T2 — contar as variantes distintas possuídas.
-  # Req. 9 / NAV-18 — número de variantes distintas com quantidade ≥ 1.
-  # Diferencia de `total_copies_for`: três cópias de uma variante e uma de
-  # outra dão 2 variantes distintas (mesmo que o total seja 4 cópias). A
-  # barreira de tipo de `for_user` é a mesma — nada de id, só User ou nil.
-  test "distinct_variants_for conta variantes com quantidade >= 1" do
+  # Done when: T36 — provar que collection_stats_for conta corretamente.
+  # Req. 9 / NAV-17, NAV-18 — número de cópias e variantes distintas com quantidade ≥ 1.
+  # `collection_stats_for` devolve { total_copies:, distinct_variants: } numa única
+  # consulta. A barreira de tipo de `for_user` é a mesma — nada de id, só User ou nil.
+  test "collection_stats_for conta variantes com quantidade >= 1 e total correto" do
     user = create_user(email: "dist-1@example.com")
     var1 = create_variant(suffix: "d1")
     var2 = create_variant(suffix: "d2")
@@ -209,10 +208,12 @@ class CollectionItemTest < ActiveSupport::TestCase
     CollectionItem.create!(user: user, card_variant: var1, quantity: 3)
     CollectionItem.create!(user: user, card_variant: var2, quantity: 1)
 
-    assert_equal 2, CollectionItem.distinct_variants_for(user)
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal 4, stats[:total_copies]
+    assert_equal 2, stats[:distinct_variants]
   end
 
-  test "distinct_variants_for exclui variantes com quantidade zero" do
+  test "collection_stats_for exclui variantes com quantidade zero" do
     user = create_user(email: "dist-zero@example.com")
     var1 = create_variant(suffix: "dz1")
     var2 = create_variant(suffix: "dz2")
@@ -220,35 +221,45 @@ class CollectionItemTest < ActiveSupport::TestCase
     CollectionItem.create!(user: user, card_variant: var1, quantity: 2)
     CollectionItem.create!(user: user, card_variant: var2, quantity: 0)
 
-    assert_equal 1, CollectionItem.distinct_variants_for(user)
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal 2, stats[:total_copies]
+    assert_equal 1, stats[:distinct_variants]
   end
 
-  test "distinct_variants_for devolve zero para usuário sem itens" do
+  test "collection_stats_for devolve zeros para usuário sem itens" do
     user = create_user(email: "dist-empty@example.com")
 
-    assert_equal 0, CollectionItem.distinct_variants_for(user)
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal 0, stats[:total_copies]
+    assert_equal 0, stats[:distinct_variants]
   end
 
-  test "distinct_variants_for devolve zero para nil" do
-    assert_equal 0, CollectionItem.distinct_variants_for(nil)
+  test "collection_stats_for devolve zeros para nil" do
+    stats = CollectionItem.collection_stats_for(nil)
+    assert_equal 0, stats[:total_copies]
+    assert_equal 0, stats[:distinct_variants]
   end
 
-  test "distinct_variants_for só conta itens do usuário informado" do
+  test "collection_stats_for só conta itens do usuário informado" do
     user1 = create_user(email: "dist-iso-1@example.com")
     user2 = create_user(email: "dist-iso-2@example.com")
     var = create_variant(suffix: "di1")
 
-    CollectionItem.create!(user: user1, card_variant: var, quantity: 1)
-    CollectionItem.create!(user: user2, card_variant: var, quantity: 1)
+    CollectionItem.create!(user: user1, card_variant: var, quantity: 5)
+    CollectionItem.create!(user: user2, card_variant: var, quantity: 2)
 
-    assert_equal 1, CollectionItem.distinct_variants_for(user1)
-    assert_equal 1, CollectionItem.distinct_variants_for(user2)
+    stats1 = CollectionItem.collection_stats_for(user1)
+    stats2 = CollectionItem.collection_stats_for(user2)
+    assert_equal 5, stats1[:total_copies]
+    assert_equal 1, stats1[:distinct_variants]
+    assert_equal 2, stats2[:total_copies]
+    assert_equal 1, stats2[:distinct_variants]
   end
 
-  test "distinct_variants_for recusa um id no lugar do objeto User" do
+  test "collection_stats_for recusa um id no lugar do objeto User" do
     user = create_user(email: "dist-id@example.com")
 
-    assert_raises(ArgumentError) { CollectionItem.distinct_variants_for(user.id) }
-    assert_raises(ArgumentError) { CollectionItem.distinct_variants_for(user.id.to_s) }
+    assert_raises(ArgumentError) { CollectionItem.collection_stats_for(user.id) }
+    assert_raises(ArgumentError) { CollectionItem.collection_stats_for(user.id.to_s) }
   end
 end

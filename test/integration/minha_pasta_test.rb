@@ -9,6 +9,8 @@ require "test_helper"
 #
 # Reason: **não há navegador no container** (CLAUDE.md). A maior fidelidade disponível é
 # `assert_select` sobre o HTML que a action renderiza de fato.
+require_relative "../design/support/stylesheet"
+
 class MinhaPageTest < ActionDispatch::IntegrationTest
   PASSWORD = "log-pose-77".freeze
 
@@ -165,6 +167,21 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
                  "total na pasta (#{pasta_total}) deve ser igual ao do catálogo (#{catalog_total})"
   end
 
+  # --- M06: quantidade 0 não muda os indicadores ---
+
+  test "item com quantidade zero não muda os indicadores renderizados" do
+    sign_in(@user)
+    v3 = create_variant(@set, "005", "base")
+    CollectionItem.create!(user: @user, card_variant: v3, quantity: 0)
+
+    get progress_path
+
+    # Os indicadores continuam refletindo apenas itens com quantity >= 1
+    # 3 cópias (v1) + 1 cópia (v2) = 4 cartas; 2 variantes distintas (v1, v2)
+    assert_select ".progress", text: /4 cartas na pasta/
+    assert_select ".progress", text: /2 cartas diferentes/
+  end
+
   # --- NAV-20: usuário sem cópia vê os dois com 0 ---
 
   test "usuário sem nenhuma cópia vê ambos os indicadores com 0" do
@@ -245,13 +262,13 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert links.size == 3, "deveria haver 3 links com classe progress__action-link (Adicionar cartas, wishlist, import)"
   end
 
-  test "links têm min-width de 24px em CSS (verificado por regra na folha)" do
-    # Este teste é sobre CSS puro, verificado por leitura de catalog.css
-    # em test/design/. Esta assertion de integração apenas confirma que a
-    # classe está presente na view; a folha é responsável pelo min-width.
+  test "links têm min-width de 24px em CSS" do
+    link = Stylesheet.resolved("progress__action-link")
+    assert_equal "24px", link["min-width"],
+                 ".progress__action-link deve ter 'min-width: 24px'"
+
     sign_in(@user)
     get progress_path
-
     assert_select ".progress__action-link"
   end
 
@@ -383,10 +400,13 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert_select ".progress__action-link--primary", text: "Adicionar cartas"
   end
 
-  test "Adicionar cartas tem min-height de 44px em CSS (via classe progress__action-link--primary)" do
+  test "Adicionar cartas tem min-height de 44px em CSS" do
+    primary = Stylesheet.resolved("progress__action-link--primary")
+    assert_equal "44px", primary["min-height"],
+                 ".progress__action-link--primary deve ter 'min-height: 44px'"
+
     sign_in(@user)
     get progress_path
-
     assert_select ".progress__action-link--primary"
   end
 

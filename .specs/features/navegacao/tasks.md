@@ -1317,10 +1317,10 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] Em `minha_pasta_test.rb`, um `CollectionItem` com `quantity: 0` não muda os dois indicadores renderizados (cópias e variantes distintas), com os números exatos (mata o M06)
-- [ ] `distinct_variants_for` sai de `collection_item.rb`; os seis testes dele em `collection_item_test.rb` passam a exercer `collection_stats_for` com as mesmas entradas e as mesmas expectativas (≥ 1, exclui 0, usuário sem itens, `nil`, isolamento, recusa de id)
-- [ ] Os testes de `minha_pasta_test.rb:248-255` e `:386-391`, que prometem 24px e 44px sem medir, passam a medir pela folha com `Stylesheet.resolved` (`test/design/support/stylesheet.rb`), com `assert_equal` no valor
-- [ ] Gate full passa
+- [x] Em `minha_pasta_test.rb`, um `CollectionItem` com `quantity: 0` não muda os dois indicadores renderizados (cópias e variantes distintas), com os números exatos (mata o M06)
+- [x] `distinct_variants_for` sai de `collection_item.rb`; os seis testes dele em `collection_item_test.rb` passam a exercer `collection_stats_for` com as mesmas entradas e as mesmas expectativas (≥ 1, exclui 0, usuário sem itens, `nil`, isolamento, recusa de id)
+- [x] Os testes de `minha_pasta_test.rb:248-255` e `:386-391`, que prometem 24px e 44px sem medir, passam a medir pela folha com `Stylesheet.resolved` (`test/design/support/stylesheet.rb`), com `assert_equal` no valor
+- [x] Gate full passa
 
 **Tests**: integration + unit
 **Gate**: full
