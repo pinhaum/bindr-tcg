@@ -432,13 +432,21 @@ body {
 
 .variant {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: var(--space-2);
   align-items: start;
 }
 
+/*
+ * NAV-49: miniatura e meta na primeira linha; posse e wishlist (os filhos a
+ * partir do terceiro) descem para baixo da meta. Na tela larga eles sobem para
+ * a terceira coluna.
+ */
+.variant > :nth-child(n + 3) { grid-column: 2 / -1; }
+
 .variant__art {
   position: relative;
+  grid-row: span 3;
   width: 80px;
   height: 112px;
   overflow: hidden;
@@ -482,8 +490,8 @@ body {
   font-weight: var(--caption-weight);
   color: var(--ink-muted);
   position: absolute;
-  width: var(--space-1);
-  height: var(--space-1);
+  width: 1px;
+  height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
@@ -1867,6 +1875,11 @@ summary:focus-visible,
   .card-detail__data { grid-column: 2; }
 
   .card-detail__variants { grid-column: 2; }
+
+  .variant > :nth-child(n + 3) { grid-column: 3; }
+
+  .variant__art,
+  .variant__meta { grid-row: span 2; }
 }
 
 /* Chips de filtro (T14 — NAV-33, NAV-34, NAV-35) */

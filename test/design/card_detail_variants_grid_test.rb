@@ -1,93 +1,69 @@
 require "test_helper"
 require_relative "support/stylesheet"
 
-# T30: Variantes do detalhe em linhas (NAV-49).
+# T30 — variantes do detalhe em linhas (NAV-49, NAV-28).
 #
-# Cada variante vira uma linha com grid de 3 colunas:
-# 1. Miniatura (80px de largura)
-# 2. Metadados (código, raridade, set)
-# 3. Controles (posse e wishlist)
-#
-# Os rótulos (dt) saem da vista pelo padrão de recorte.
+# Cada `li.variant` tem quatro filhos: miniatura, meta, posse e o formulário da
+# wishlist. São três colunas em toda largura; o que muda com a largura é onde
+# os controles (os filhos a partir do terceiro) caem.
 class CardDetailVariantsGridTest < ActiveSupport::TestCase
-  setup do
-    @stylesheet = Stylesheet.read_stylesheet
+  def base(selector)
+    rule = Stylesheet.rules(outside_media).find { |candidate, _| candidate.strip == selector }
+    assert_not_nil rule, "regra #{selector} não encontrada fora de media query"
+    Stylesheet.declarations(rule[1]).to_h
   end
 
-  def content_outside_media
-    match = @stylesheet.match(/\A(.*?)@media/m)
-    return @stylesheet unless match
-    match[1]
+  def wide(selector)
+    rule = Stylesheet.rules(wide_media).find { |candidate, _| candidate.strip == selector }
+    assert_not_nil rule, "regra #{selector} não encontrada em @media (min-width: 64rem)"
+    Stylesheet.declarations(rule[1]).to_h
   end
 
-  test ".variant-list fora de media query é flex coluna" do
-    outside = content_outside_media
-
-    match = outside.match(/\.variant-list\s*\{([^}]*)\}/)
-    assert match, ".variant-list não encontrada"
-
-    body = match[1]
-    assert body.include?("display: flex"),
-           ".variant-list deve ter 'display: flex'"
-    assert body.include?("flex-direction: column"),
-           ".variant-list deve ter 'flex-direction: column'"
+  def outside_media
+    Stylesheet.read_stylesheet[/\A(.*?)@media/m, 1]
   end
 
-  test ".variant é grid de 3 colunas com gap" do
-    outside = content_outside_media
-
-    match = outside.match(/\.variant\s*\{([^}]*)\}/)
-    assert match, ".variant não encontrada"
-
-    body = match[1]
-    assert body.include?("display: grid"),
-           ".variant deve ter 'display: grid'"
-    assert body.include?("grid-template-columns: auto 1fr auto"),
-           ".variant deve ter 'grid-template-columns: auto 1fr auto' (miniatura, meta, controles)"
-    assert body.include?("gap: var(--space-2)"),
-           ".variant deve ter 'gap: var(--space-2)'"
+  def wide_media
+    Stylesheet.read_stylesheet[/@media\s*\(min-width:\s*64rem\)\s*\{(.+?)\}\s*(?=@|\Z)/m, 1]
   end
 
-  test ".variant__art tem largura fixa de 80px" do
-    outside = content_outside_media
-
-    match = outside.match(/\.variant__art\s*\{([^}]*)\}/)
-    assert match, ".variant__art não encontrada"
-
-    body = match[1]
-    assert body.include?("width: 80px"),
-           ".variant__art deve ter 'width: 80px'"
-    assert body.include?("height: 112px"),
-           ".variant__art deve ter 'height: 112px' (proporção 5/7)"
+  test "a lista empilha uma variante por linha" do
+    list = base(".variant-list")
+    assert_equal "flex", list["display"]
+    assert_equal "column", list["flex-direction"]
   end
 
-  test ".variant__meta dt sai da vista pelo padrão de recorte" do
-    outside = content_outside_media
-
-    match = outside.match(/\.variant__meta dt\s*\{([^}]*)\}/)
-    assert match, ".variant__meta dt não encontrada"
-
-    body = match[1]
-    assert body.include?("position: absolute"),
-           ".variant__meta dt deve ter 'position: absolute'"
-    assert body.include?("width: var(--space-1)"),
-           ".variant__meta dt deve ter 'width: var(--space-1)'"
-    assert body.include?("height: var(--space-1)"),
-           ".variant__meta dt deve ter 'height: var(--space-1)'"
-    assert body.include?("clip-path: inset(50%)"),
-           ".variant__meta dt deve ter 'clip-path: inset(50%)'"
-    assert body.include?("white-space: nowrap"),
-           ".variant__meta dt deve ter 'white-space: nowrap'"
+  # minmax(0, 1fr): com 1fr, o nome longo do set alarga a coluna do meio e
+  # empurra os controles para fora da tela em 360px.
+  test "cada variante é um grid de miniatura, meta e controles" do
+    variant = base(".variant")
+    assert_equal "grid", variant["display"]
+    assert_equal "auto minmax(0, 1fr) auto", variant["grid-template-columns"]
   end
 
-  test ".variant__meta margin é 0" do
-    outside = content_outside_media
+  test "a miniatura tem medida fixa e ocupa a altura da linha" do
+    art = base(".variant__art")
+    assert_equal "80px", art["width"]
+    assert_equal "112px", art["height"]
+    assert_equal "span 3", art["grid-row"]
+  end
 
-    match = outside.match(/\.variant__meta\s*\{([^}]*)\}/)
-    assert match, ".variant__meta não encontrada"
+  test "na tela estreita os controles descem para baixo da meta" do
+    assert_equal "2 / -1", base(".variant > :nth-child(n + 3)")["grid-column"]
+  end
 
-    body = match[1]
-    assert body.include?("margin: 0"),
-           ".variant__meta deve ter 'margin: 0' (não mais margin-top)"
+  test "na tela larga os controles ficam na terceira coluna, ao lado da meta" do
+    assert_equal "3", wide(".variant > :nth-child(n + 3)")["grid-column"]
+  end
+
+  test "os rótulos da meta saem da vista pelo recorte, sem display none" do
+    dt = base(".variant__meta dt")
+    assert_equal "absolute", dt["position"]
+    assert_equal "1px", dt["width"]
+    assert_equal "1px", dt["height"]
+    assert_equal "hidden", dt["overflow"]
+    assert_equal "inset(50%)", dt["clip-path"]
+    assert_equal "nowrap", dt["white-space"]
+    assert_nil dt["display"], "display none tiraria o rótulo do leitor de tela"
   end
 end
