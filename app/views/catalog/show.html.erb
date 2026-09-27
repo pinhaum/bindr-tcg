@@ -7,13 +7,12 @@
     <div class="card-detail__media">
       <div class="card-detail__placeholder" aria-hidden="true">
         <span><%= @card.name %></span>
-        <span><code class="code"><%= @variants.first.variant_code %></code></span>
+        <span><%= @card.card_number %></span>
       </div>
 
       <% if @variants.first.image_url.present? %>
         <%= image_tag card_image_path(@variants.first.variant_code),
                       alt: "#{@card.name} #{@variants.first.variant_code}",
-                      loading: "lazy",
                       class: "card-detail__image" %>
       <% end %>
     </div>
