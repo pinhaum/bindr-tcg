@@ -122,6 +122,14 @@
 - **Date**: 2026-09-26
 - **Status**: active
 
+### AD-016
+- **Decision**: O artboard do canvas "Bindr — telas" é **critério de aceite** de cada tela. Toda divergência entre tela e artboard precisa de um requisito que a justifique ou de uma linha no Out of Scope da spec. Na dúvida visual, vale o canvas. O trabalho vai para a feature nova `conformidade` (`.specs/features/conformidade/`), que reaproveita por referência os NAVs da `navegacao` conformes com o canvas e reescreve os que conflitam (NAV-25, NAV-48, parte do NAV-49) e as linhas de Out of Scope revogadas (D5, D6, D7).
+- **Reason**: O dono reprovou a interface em 2026-09-27 ("ainda não tem muito a ver com o artifact"). A spec da `navegacao` copiou traços isolados do canvas (44px, tokens, `aria-current`, "×"), e a composição de cada tela nunca virou critério. Dois NAVs empurram contra o canvas, e a triagem tratava divergência sem NAV como "fica para o dono". A AD-013 tornou o canvas critério parcial, e isso não bastou.
+- **Trade-off**: (1) Cada task da `conformidade` leva uma checklist extraída do `.dc.html` do artboard, e a task final compara captura × artboard contra essa checklist, sem triagem livre. (2) O que o canvas desenha e é recusado precisa de linha explícita no Out of Scope: baralhos (Fase 2), cotações e valor estimado (Fase 3), "% do catálogo", "Faltando para os baralhos", "Zerar quantidade", marca escondida no celular e rolagem horizontal dos chips (AD-013). (3) Onde o canvas está incompleto (tipo, seletor de set, posse em três opções, "Filtros ativos", paginação, links da pasta, wishlist por variante, campos completos do detalhe), o app está certo e a spec registra isso.
+- **Scope**: `.specs/features/conformidade/`, `.context/requirements.md` Req. 7.5, 9 e 13, `colecao/spec.md` COL-18. Vale para qualquer feature de interface com canvas daqui em diante. Refina a AD-013.
+- **Date**: 2026-09-27
+- **Status**: active
+
 ### AD-017
 - **Decision**: A edição que `6394755` (T3 da `navegacao`) fez no teste protegido `test/queries/set_progress_plan_test.rb` fica aceita. O Success Criterion da spec passa a dizer "seis dos sete testes sem edição" e cita esta AD.
 - **Reason**: O Verifier de 2026-09-27 achou a edição sem justificativa registrada, e o Success Criterion afirmava o contrário. O conteúdo se sustenta: a página ganhou uma consulta legítima (os indicadores da pasta), e a contagem de consultas continua exata (`assert_equal 2`). Decisão do dono em 2026-09-27.
@@ -825,3 +833,4 @@ Nada aqui bloqueia a Fase 4; são pontos que a próxima sessão herda com os olh
 ### Pendência aberta para o orquestrador
 
 - **CI (`.github/workflows/ci.yml`) não foi alterado, por instrução.** Mas a T4 mudou o caminho do `db:prepare`: com `schema_format = :sql`, `bin/rails db:prepare` carrega `db/structure.sql` via `psql`, que precisa estar no runner **e** ser compatível com o Postgres 17 do serviço. O `ubuntu-latest` traz cliente PostgreSQL, mas a versão não está fixada. **Conferir antes de confiar no verde do CI.**
+- **Nome curto do set fica para uma feature da ingestão (D12, 2026-09-27).** O canvas mostra nomes curtos ("Memorial Collection"), e o catálogo exibe o nome cru que vem da fonte. Encurtar exige mudar o estágio Normalize, o único lugar que conhece o formato da fonte, e por isso fica fora da `conformidade`. Abrir numa feature da ingestão, com regra de derivação testada sobre a fixture, sem tocar em `card_sets.code`.
