@@ -912,12 +912,14 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `node spec/visual/capture.cjs` com `NODE_PATH` apontando para um `playwright` grava em `tmp/capturas/` as telas catálogo, detalhe de uma carta, pasta, wishlist e import, em 390×1000 e 1280×900, sem sessão (catálogo e detalhe) e com sessão (todas)
-- [ ] A sessão vem de um usuário descartável criado pelo formulário, e o script espera a URL do destino antes da captura seguinte (a corrida do Turbo fez a primeira tentativa fotografar o login)
-- [ ] Navega com `domcontentloaded`; a captura não espera imagens da origem
-- [ ] Sem `playwright` resolvível, sai com código ≠ 0 e mensagem que diz como apontar `NODE_PATH`; sem o app em `:3000`, idem
-- [ ] Imprime, por captura, a URL final e o `scrollWidth` do documento, e marca `scrollWidth` maior que a viewport (Req. 2.5)
-- [ ] `tmp/capturas/` coberto pelo `.gitignore`; `python3 spec/verify_fixture.py` continua passando
+- [x] `node spec/visual/capture.cjs` com `NODE_PATH` apontando para um `playwright` grava em `tmp/capturas/` as telas catálogo, detalhe de uma carta, pasta, wishlist e import, em 390×1000 e 1280×900, sem sessão (catálogo e detalhe) e com sessão (todas)
+- [x] A sessão vem de um usuário descartável criado pelo formulário, e o script espera a URL do destino antes da captura seguinte (a corrida do Turbo fez a primeira tentativa fotografar o login)
+- [x] Navega com `domcontentloaded`; a captura não espera imagens da origem
+- [x] Sem `playwright` resolvível, sai com código ≠ 0 e mensagem que diz como apontar `NODE_PATH`; sem o app em `:3000`, idem
+- [x] Imprime, por captura, a URL final e o `scrollWidth` do documento, e marca `scrollWidth` maior que a viewport (Req. 2.5)
+- [x] `tmp/capturas/` coberto pelo `.gitignore`; `python3 spec/verify_fixture.py` continua passando
+
+**Resultado**: script criado, 14 capturas geradas (2 viewports × 7 telas); gate full passa com 1140 runs, rubocop limpo, `verify_fixture.py` com 12 verificações passando. Capturas confirmam sessão ativa em `catalogo-390-sessao.png` e `pasta-1280-sessao.png`.
 
 **Tests**: none
 **Gate**: o script roda contra `docker compose up` e produz as 14 capturas
