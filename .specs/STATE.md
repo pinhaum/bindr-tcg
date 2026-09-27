@@ -124,6 +124,21 @@
 
 ## Handoff
 
+> **Estado em 2026-09-27 — este bloco vence os de baixo.** A **`navegacao` está
+> fechada** (T1–T33 commitadas; gate full 1197 runs, 0 falhas, RuboCop limpo;
+> gate build verde). O bloco de 2026-09-26 abaixo ficou para trás: T22–T32 já
+> estão em `main`. A aprovação visual da T33 foi **reprovada** pelo dono ("ainda
+> não tem muito a ver com o artifact") e marcada como substituída pela feature
+> nova **`conformidade`**, em que o artboard é critério de aceite de cada tela
+> (AD-016). As decisões do dono para ela estão em `tmp/handoff-conformidade.md`
+> §3 (D1–D12), fora do git.
+>
+> **Próximo passo:** Verifier da `navegacao` (confere a spec dela, não a
+> semelhança com o canvas), herdando as pendências dos blocos de 2026-09-23,
+> 09-24 e 09-25. Depois, na `conformidade`: registrar AD-016 e a pendência do
+> nome curto do set; emendar `.context/requirements.md` (Req. 7.5, 9, 13) e
+> COL-18; escrever `spec.md` e `tasks.md` e apresentar cada um ao dono.
+
 > **Estado em 2026-09-26 — este bloco vence os de baixo.** Feature em execução:
 > **`navegacao`**, na T21. A revisão do dono foi feita sobre telas renderizadas
 > (AD-015) e virou a emenda NAV-40..NAV-51 (Req. 13.15–13.20) com o plano

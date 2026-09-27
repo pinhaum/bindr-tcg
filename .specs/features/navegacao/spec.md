@@ -334,10 +334,14 @@ entrada atual.
 
 ## Success Criteria
 
-- [ ] Registrar posse e chegar a "quanto falta do set X?" a partir do catálogo em
-      no máximo três toques no celular (`product.md` §7)
-- [ ] Aplicar cor + raridade na grade sem tocar na URL, sem JavaScript
-- [ ] `bin/rails test && bin/rubocop` limpo, com os arquivos de `test/design/` e os
-      sete testes que leem `catalog.css` sem edição
-- [ ] Revisão visual aprovada pelo dono do produto em 360px e em 1280px, sobre
-      capturas renderizadas lado a lado com o canvas (AD-015)
+- [x] Registrar posse e chegar a "quanto falta do set X?" a partir do catálogo em
+      no máximo três toques no celular (`product.md` §7): um toque na carta, um no
+      controle de posse; um toque em "Minha pasta" mostra a contagem do set
+- [x] Aplicar cor + raridade na grade sem tocar na URL, sem JavaScript (chips-link,
+      NAV-30..NAV-34)
+- [x] `bin/rails test && bin/rubocop` limpo, com os arquivos de `test/design/` e os
+      sete testes que leem `catalog.css` sem edição (2026-09-27: 1197 runs, 0 falhas)
+- [x] ~~Revisão visual aprovada pelo dono do produto em 360px e em 1280px, sobre
+      capturas renderizadas lado a lado com o canvas (AD-015)~~ — **substituído pela
+      feature `conformidade`**: o dono reprovou a interface em 2026-09-27, e a
+      aderência ao canvas passa a ser critério de aceite lá (AD-016)

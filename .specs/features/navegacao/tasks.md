@@ -1182,7 +1182,7 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `.progress-set` sem `border` nem `background` próprios; nome e contagem "possuídas / total" na mesma linha, a barra abaixo, percentual e parallels como legenda
+- [x] `.progress-set` sem `border` nem `background` próprios; nome e contagem "possuídas / total" na mesma linha, a barra abaixo, percentual e parallels como legenda
 - [x] Os três links secundários num contêiner próprio, elemento de `progress`, separado de "Adicionar cartas"; o export continua sendo o partial, não uma cópia
 - [x] `progress_ui_test.rb`, `set_progress_plan_test.rb` e `collection_export_link_test.rb` passam **sem edição**; `minha_pasta_test.rb` reescrito só onde o NAV-51 muda a expectativa
 - [x] Em 360px, nome longo de set quebra linha sem scroll horizontal (NAV-28)
@@ -1209,11 +1209,11 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `ecc:a11y-architect` revisou o `<details>`, os rótulos fora da vista das variantes, os alvos de 44px e a navegação. Achados CRITICAL e HIGH triados e, os que procederem, corrigidos antes do Verifier
-- [ ] `canvas-conformance.md` ganha a conferência renderizada: captura × artboard, por tela, com defeito ou recusa registrada
-- [ ] O dono comparou as capturas com o canvas, com e sem sessão, em 360px e 1280px, e aprovou ou listou o que reprova
-- [ ] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.20 de `.context/tasks.md` §6 está fechado
-- [ ] Gate build passa
+- [x] `ecc:a11y-architect` revisou o `<details>`, os rótulos fora da vista das variantes, os alvos de 44px e a navegação. Achados CRITICAL e HIGH triados e, os que procederem, corrigidos antes do Verifier
+- [x] `canvas-conformance.md` ganha a conferência renderizada: captura × artboard, por tela, com defeito ou recusa registrada
+- [x] ~~O dono comparou as capturas com o canvas, com e sem sessão, em 360px e 1280px, e aprovou ou listou o que reprova~~ — **substituído pela feature `conformidade`**. O dono comparou as capturas em 2026-09-27 e reprovou a interface ("ainda não tem muito a ver com o artifact"). A correção não cabe nesta spec, porque NAV-25 e NAV-48 empurram contra o canvas; vai para `.specs/features/conformidade/`, com o artboard como critério de aceite (AD-016)
+- [x] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.20 de `.context/tasks.md` §6 está fechado
+- [x] Gate build passa (2026-09-27; gate full no mesmo HEAD: 1197 runs, 0 falhas, RuboCop limpo)
 
 **Tests**: none
 **Gate**: build

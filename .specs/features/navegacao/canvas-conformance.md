@@ -1,3 +1,43 @@
+# Conformidade com o canvas — navegacao T33 (conferência renderizada)
+
+> **Triagem do coordenador (2026-09-27), vence os relatórios dos revisores.**
+> Dois revisores Haiku no Orca, só leitura, sem ter escrito T22–T32: um de a11y
+> (`tmp/revisao-T33-a11y.md`) e um de canvas, que renderizou os seis artboards
+> com o Chromium do Playwright e os comparou com as capturas de
+> `spec/visual/capture.cjs` (`tmp/revisao-T33-canvas.md`). Os dois relatórios
+> ficam em `tmp/`, fora do git. Cada achado foi conferido na captura ou no
+> snapshot de acessibilidade do Chromium antes do veredito.
+
+**Canvas (captura × artboard)**
+
+| # | Achado do revisor | Veredito |
+|---|---|---|
+| 1–5 | "Baralhos" na navegação, cotações, "Zerar quantidade", "Faltando para os baralhos" e valor estimado ausentes do app | Falso: são as recusas do Out of Scope da spec. O app está certo em não mostrá-los, e o revisor inverteu o sentido da conferência |
+| 6 | Marca "Bindr" no celular, ausente no artboard `Main` | Recusa registrada: decisão do dono de 2026-09-26, a marca fica em todas as larguras |
+| 7 | Rótulo "Buscar carta" em vez de "Buscar por nome ou card_number" | Cosmético; nenhum NAV prescreve o texto |
+| — | Detalhe e pasta em desktop, "não verificados" pelo revisor | Conferidos pelo coordenador em `canvas-desktop-detalhe-1280.png` × `detalhe-1280-sessao.png`: imagem à esquerda em 320px, dados à direita e variantes em linhas com posse, como no artboard. Sobram diferenças sem critério na spec: moldura por variante e campos em chips no canvas, `dl` em grade no app. Ficam para o dono |
+
+Defeitos que o coordenador achou nas capturas durante a execução, fora dos
+relatórios, todos corrigidos antes desta conferência: "Sair" com a fonte do
+botão nativo (`3d113d1`); faixa de `surface-base` entre navegação e filtros
+(`bf16a80`); `<details>` virando item do subgrid e deslocando filtros e grade
+em 1280px (`df3fefb`); meta das variantes espremida em uma coluna de um
+caractere (`cdd9841`); código do set quebrado, contagem abaixo do nome e ações
+secundárias empilhadas na pasta (`a459591`); "Catálogo" sem `aria-current` na raiz `/`, para onde o cadastro redireciona (`8f95676`, defeito da T5 visto na comparação lado a lado).
+
+**Acessibilidade**
+
+| # | Achado do revisor | Sev. | Veredito |
+|---|---|---|---|
+| 1 | `<summary>` sem `aria-label`, nome "Filtros 1 filtro ativo" | CRITICAL | Não procede: o nome contém o rótulo visível (SC 2.5.3) e é o texto do NAV-43 |
+| 2 | `display: contents` no `<details>` apaga os filtros da árvore de acessibilidade em 1280px | HIGH | Não procede, medido: o `ariaSnapshot()` do Chromium em 1280px expõe o grupo com os títulos "Cor"/"Tipo" e os links dos chips, e o Tab alcança os chips. Firefox e Safari não foram renderizados |
+| 3 | Regra de recorte dos `dt` das variantes não encontrada | HIGH | Falso: `.variant__meta dt` tem `clip-path: inset(50%)`, 1px, sem `display: none`, e é testada em `card_detail_variants_grid_test.rb` |
+| 4 | Foco visível dos botões de posse do detalhe não verificado | MEDIUM | Não procede: o foco vem da regra global coberta por `focus_test.rb`, que passa sem edição |
+| 5 | "Sair" sem `aria-label` | MEDIUM | Não procede: o nome acessível é o texto "Sair" |
+| — | (achado do coordenador no mesmo snapshot) O `::before` "▶" entrava no nome do `<summary>` em 390px: "▶ Filtros 1 filtro ativo" | — | **Procede**, corrigido em `756ac07` |
+
+---
+
 # Conformidade com o canvas — navegacao T21
 
 > **Triagem do coordenador (2026-09-25), vence o relatório abaixo.** O relatório

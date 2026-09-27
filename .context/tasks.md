@@ -261,7 +261,7 @@ Regras de execução:
   - Sem emoji. Chip das seis cores do jogo em tratamento neutro (P8 aberta).
   - _Requisitos: 12.7, 12.9, 12.10, 12.11_
 
-- [ ] **6.6 Navegação e layout das telas**
+- [x] **6.6 Navegação e layout das telas**
   - Navegação principal única: barra inferior fixa em viewport estreita, coluna
     lateral em viewport larga; sem entrada para baralho ou preço.
   - "Minha pasta" = página de progresso com total de cópias, variantes distintas
@@ -279,6 +279,9 @@ Regras de execução:
     navegação no topo da coluna, filtros sem vão e recolhidos no celular,
     busca de 44px, imagem maior e variantes em linhas no detalhe, pasta em
     linhas; corrige a barra a 0% e o "Sair" nativo.
+  - Fechada em 2026-09-27 com a `navegacao` (T1–T33). A aprovação visual do dono
+    foi reprovada e passa para a feature `conformidade` (AD-016), que emenda o
+    Req. 13 com critérios por tela tirados dos artboards.
   - _Requisitos: 4.9, 13.1–13.20_
 
 ---
