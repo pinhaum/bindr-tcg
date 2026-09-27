@@ -74,6 +74,8 @@ preço.
 | Variantes em linha | Cada linha mantém a miniatura própria da variante | O Req. 5.2 exige imagem própria por variante; a arte alternativa é o objeto de coleção |y |
 | Rótulos "Código", "Raridade", "Set" das variantes | Continuam no HTML como `dt` e saem da vista | A linha fica compacta como no canvas sem perder a estrutura para leitor de tela |y |
 | Alvo de 44px dos controles de posse | Só no detalhe, numa regra própria; a regra base continua 24px | `collection_ownership_ui_test.rb` (protegido) exige 24px na regra base; o tile da grade não tem espaço para dois alvos de 44px em 360px |y |
+| "Todas" como valor ativo da posse (validação de 2026-09-27) | Fica como está: "Todas" aparece ativa quando não há `owned` | O nome "Remover filtro Posse: Todas" promete uma remoção que não acontece. Corrigir muda o chip de posse, que a `conformidade` reescreve; a lacuna vai para lá como critério | y |
+| Escopo do `aria-current` (validação de 2026-09-27) | Todas as entradas da navegação, inclusive "Entrar" e "Criar conta" | Decisão do dono: corrigir o código para cumprir o Req. 13.2, não estreitar o requisito | y |
 
 **Open questions:** none — os defaults do agente foram confirmados pelo dono
 na aprovação desta spec (2026-09-23). Os defaults da emenda de 2026-09-26 foram
@@ -94,10 +96,10 @@ de sucesso do `product.md` §7 ("quanto falta do set X?" em até três toques).
 
 **Acceptance Criteria**:
 
-1. The system SHALL renderizar em toda página um único elemento `nav` de navegação principal com a entrada "Catálogo" apontando para o catálogo. <!-- NAV-01 -->
+1. The system SHALL renderizar em toda página um único elemento `nav` de navegação principal com a entrada "Catálogo" apontando para o catálogo. O layout é único (`application.html.erb`), por isso a prova em duas páginas vale para todas. <!-- NAV-01 -->
 2. WHILE houver sessão, the system SHALL exibir na navegação principal as entradas "Minha pasta", apontando para `/progress`, e "Sair", que encerra a sessão. <!-- NAV-02 -->
 3. WHILE não houver sessão, the system SHALL exibir "Entrar" e "Criar conta" no lugar de "Minha pasta" e "Sair". <!-- NAV-03 -->
-4. WHEN uma página da navegação estiver aberta THEN the system SHALL marcar a entrada correspondente com `aria-current="page"` e com peso de fonte distinto das demais. <!-- NAV-04 -->
+4. WHEN uma página da navegação estiver aberta THEN the system SHALL marcar a entrada correspondente com `aria-current="page"` e com peso de fonte distinto das demais. Isso vale para todas as entradas, inclusive "Entrar" e "Criar conta". Página sem entrada própria, como o detalhe da carta, não marca nenhuma. <!-- NAV-04 -->
 5. WHILE a largura da viewport for menor que 1024px, the system SHALL fixar a navegação principal na borda inferior, com cada entrada de altura mínima de 44px, e reservar no fim do conteúdo espaço igual à altura da barra. <!-- NAV-05 -->
 6. WHILE a largura da viewport for de 1024px ou mais, the system SHALL posicionar a navegação principal numa coluna lateral à esquerda do conteúdo. <!-- NAV-06 -->
 7. The system SHALL não exibir na navegação entrada para baralho, preço ou cotação. <!-- NAV-07 -->
@@ -199,7 +201,7 @@ Estes critérios trazem essa forma para a spec (Req. 13.9–13.14).
 6. The system SHALL dar a cada chip de filtro altura mínima de 44px. <!-- NAV-35 -->
 7. The system SHALL exibir sempre a contagem de resultados. WHILE houver filtro ativo, the system SHALL exibir também "N filtros ativos" e o link "Limpar filtros", que leva ao catálogo sem filtros e preserva só a ordenação. <!-- NAV-36 -->
 8. The system SHALL renderizar os indicadores de "Minha pasta" (NAV-17, NAV-18) como cartões, com o número no estilo `display` e a legenda no estilo `caption`. <!-- NAV-37 -->
-9. WHEN um set tiver total de variantes base conhecido THEN the system SHALL exibir, ao lado da contagem "possuídas / total", uma barra de progresso com esses mesmos valores. Sem total conhecido, a contagem fica e a barra não é renderizada. <!-- NAV-38 -->
+9. WHEN um set tiver total de variantes base conhecido THEN the system SHALL exibir, ao lado da contagem "possuídas / total", uma barra de progresso com esses mesmos valores: `value` = variantes possuídas e `max` = total de variantes do set, o mesmo par da contagem. Sem total base conhecido, a contagem fica e a barra não é renderizada. <!-- NAV-38 -->
 10. The system SHALL oferecer em "Minha pasta" o link "Adicionar cartas", que leva ao catálogo. <!-- NAV-39 -->
 
 **Independent Test**: No catálogo com `colors[]=Red`, o chip "Red" aponta para a
@@ -229,11 +231,11 @@ forma que não vira critério não é verificada (Req. 13.15–13.20).
 3. WHILE a largura da viewport for de 1024px ou mais, the system SHALL separar os grupos de filtro do catálogo por espaçamento fixo `var(--space-4)`, sem crescer com a altura da grade, e renderizar navegação e filtros sobre a mesma superfície `surface-raised`, sem faixa de outro fundo entre elas. <!-- NAV-42 -->
 4. WHILE a largura da viewport for menor que 1024px, the system SHALL renderizar os controles de filtro dentro de um `<details>` fechado por padrão, cujo `<summary>` diz "Filtros" e, com filtro ativo, também "N filtros ativos". <!-- NAV-43 -->
 5. WHILE os controles de filtro estiverem recolhidos, the system SHALL manter visível, fora do `<details>`, a lista "Filtros ativos", com cada chip removível. <!-- NAV-44 -->
-6. WHILE a largura da viewport for de 1024px ou mais, the system SHALL exibir os controles de filtro sempre visíveis, sem `<summary>` visível. <!-- NAV-45 -->
+6. WHILE a largura da viewport for de 1024px ou mais, the system SHALL exibir os controles de filtro sempre visíveis, sem `<summary>` visível. Risco aceito: a prova depende de `::details-content`, conferido só no Chromium. <!-- NAV-45 -->
 7. The system SHALL renderizar o campo de busca com altura mínima de 44px, fundo `surface-raised` e borda `border-strong`, e o botão "Buscar" com altura mínima de 44px, fundo transparente e borda `border-strong`. <!-- NAV-46 -->
-8. The system SHALL alinhar a linha de status do catálogo à borda esquerda da grade, sem recuo próprio. <!-- NAV-47 -->
+8. The system SHALL alinhar a linha de status do catálogo à borda esquerda da grade, sem recuo próprio. A medida verificável deste critério vai para a `conformidade`, que reescreve a linha de status. <!-- NAV-47 -->
 9. The system SHALL exibir no topo do detalhe da carta a imagem maior da primeira variante listada, com o placeholder do Req. 2.3 na mesma medida. WHILE a largura da viewport for de 1024px ou mais, the system SHALL posicioná-la numa coluna de 320px à esquerda dos dados. <!-- NAV-48 -->
-10. The system SHALL listar as variantes no detalhe em linhas, cada uma com a miniatura própria da variante, código, raridade, set, controles de posse e marca de wishlist, com os rótulos "Código", "Raridade" e "Set" presentes no HTML e fora da vista. <!-- NAV-49 -->
+10. The system SHALL listar as variantes no detalhe em linhas, cada uma com a miniatura própria da variante, código, raridade, set, controles de posse e marca de wishlist, com os rótulos "Código", "Raridade" e "Set" presentes no HTML e fora da vista. A prova dos rótulos vai para a `conformidade`, que reescreve a linha da variante (D8–D10). <!-- NAV-49 -->
 11. WHILE estiver no detalhe da carta, the system SHALL dar a cada botão de posse altura e largura mínimas de 44px. <!-- NAV-50 -->
 12. The system SHALL renderizar cada set de "Minha pasta" sem borda nem fundo próprios, com código e nome à esquerda e a contagem "possuídas / total" à direita na mesma linha, a barra abaixo, e agrupar os links de wishlist, import e export numa linha de ações secundárias separada de "Adicionar cartas". <!-- NAV-51 -->
 
@@ -339,8 +341,10 @@ entrada atual.
       controle de posse; um toque em "Minha pasta" mostra a contagem do set
 - [x] Aplicar cor + raridade na grade sem tocar na URL, sem JavaScript (chips-link,
       NAV-30..NAV-34)
-- [x] `bin/rails test && bin/rubocop` limpo, com os arquivos de `test/design/` e os
-      sete testes que leem `catalog.css` sem edição (2026-09-27: 1197 runs, 0 falhas)
+- [x] `bin/rails test && bin/rubocop` limpo, com os arquivos de `test/design/` e seis dos
+      sete testes que leem `catalog.css` sem edição. O sétimo, `set_progress_plan_test.rb`,
+      foi editado em `6394755` (T3) e a edição foi ratificada pelo dono na AD-017
+      (2026-09-27: 1197 runs, 0 falhas)
 - [x] ~~Revisão visual aprovada pelo dono do produto em 360px e em 1280px, sobre
       capturas renderizadas lado a lado com o canvas (AD-015)~~ — **substituído pela
       feature `conformidade`**: o dono reprovou a interface em 2026-09-27, e a

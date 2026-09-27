@@ -258,10 +258,39 @@ T31 → T32
 T32 → T33
 ```
 
+### Phase 16: Correções da validação
+
+Emenda de 2026-09-27, iteração 1 do loop de correção do Verifier
+(`validation.md`). A T34 é documental. T35–T41 não compartilham arquivo e
+rodam em paralelo, cada worker com seu banco de teste
+(`POSTGRES_TEST_DB=bindr_test_<task>`, AD-014). O commit de cada uma sai
+do orquestrador, depois do gate, porque o checkbox deste arquivo é comum a
+todas.
+
+```
+T33 → T34
+T34 → T35
+T34 → T36
+T34 → T37
+T34 → T38
+T34 → T39
+T34 → T40
+T34 → T41
+T35 → T42
+T36 → T42
+T37 → T42
+T38 → T42
+T39 → T42
+T40 → T42
+T41 → T42
+```
+
 Lotes para o Execute: **B1 = Fases 1–3 (T1–T6)** e **B2 = Fases 4–5
 (T7–T11)**, ambos fechados. **B3 = Fases 6–7 (T12–T17)** e **B4 = Fases 8–10
 (T18–T21)**. Workers só com aceite explícito. **B5 = Fases 11–12 (T22–T28)** e
 **B6 = Fases 13–15 (T29–T33)**. Depois da T33, o Verifier roda automaticamente.
+**Fase 16 (T34–T42)** é o loop de correção da validação de 2026-09-27; o
+Verifier roda de novo depois da T42.
 
 ## Task Breakdown
 
@@ -1221,6 +1250,235 @@ celular (NAV-43).
 
 ---
 
+### T34: Ratificar o teste protegido e fechar as lacunas de precisão
+
+**What**: Registrar a AD-017 (edição de `6394755` aceita pelo dono), corrigir o Success Criterion e resolver na spec as seis lacunas de precisão do Verifier.
+**Where**: `.specs/STATE.md`, `.specs/features/navegacao/spec.md`
+**Depends on**: T33
+**Reuses**: `validation.md` §"Lacunas de precisão da spec"
+**Requirement**: Success Criteria, NAV-01, NAV-04, NAV-38, NAV-45, NAV-47, NAV-49
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] AD-017 em `STATE.md`, com a decisão do dono de 2026-09-27
+- [x] O Success Criterion diz "seis dos sete" e cita a AD-017
+- [x] NAV-04 inclui "Entrar" e "Criar conta" e exclui páginas sem entrada, como o detalhe (decisão do dono: corrigir o código)
+- [x] NAV-38 diz o par da barra (`value` possuídas, `max` total de variantes)
+- [x] NAV-01 e NAV-45 registram a premissa; NAV-47 e NAV-49 remetem a medida à `conformidade`; "Todas" ativo vai para a `conformidade` como critério
+
+**Tests**: none
+**Gate**: quick
+**Commit**: `docs(navegacao): ratificar a edição do teste protegido e fechar as lacunas da spec`
+
+---
+
+### T35: `aria-current` em "Entrar" e "Criar conta"
+
+**What**: As duas entradas sem sessão passam a usar `nav_link_to`, e o detalhe da carta fica sem entrada corrente.
+**Where**: `app/views/layouts/application.html.erb`, `test/integration/navegacao_principal_test.rb`
+**Depends on**: T34
+**Reuses**: `ApplicationHelper#nav_link_to`
+**Requirement**: NAV-04
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Em `/session/new`, `a[aria-current=page]` é "Entrar", e só ele; em `/registration/new`, é "Criar conta", e só ele
+- [ ] Em `card_path` de uma carta do fixture, nenhum `[aria-current]` dentro de `.site-header__nav`, com e sem sessão (mata o M08)
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(navegacao): marcar Entrar e Criar conta como entrada atual`
+
+---
+
+### T36: Indicadores da pasta provados com quantidade 0
+
+**What**: O teste de integração da pasta cobre item de quantidade 0 no método que a tela usa, e o método morto sai.
+**Where**: `test/integration/minha_pasta_test.rb`, `app/models/collection_item.rb`, `test/models/collection_item_test.rb`
+**Depends on**: T34
+**Reuses**: `CollectionItem.collection_stats_for` (`collection_item.rb:88`)
+**Requirement**: NAV-17, NAV-18
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Em `minha_pasta_test.rb`, um `CollectionItem` com `quantity: 0` não muda os dois indicadores renderizados (cópias e variantes distintas), com os números exatos (mata o M06)
+- [ ] `distinct_variants_for` sai de `collection_item.rb`; os seis testes dele em `collection_item_test.rb` passam a exercer `collection_stats_for` com as mesmas entradas e as mesmas expectativas (≥ 1, exclui 0, usuário sem itens, `nil`, isolamento, recusa de id)
+- [ ] Os testes de `minha_pasta_test.rb:248-255` e `:386-391`, que prometem 24px e 44px sem medir, passam a medir pela folha com `Stylesheet.resolved` (`test/design/support/stylesheet.rb`), com `assert_equal` no valor
+- [ ] Gate full passa
+
+**Tests**: integration + unit
+**Gate**: full
+**Commit**: `test(navegacao): provar os indicadores da pasta com quantidade zero`
+
+---
+
+### T37: Barra do set provada por valor
+
+**What**: Teste de integração novo afirma `value` e `max` da barra com os números do fixture e a ausência da barra num set sem total base.
+**Where**: `test/integration/set_progress_bar_test.rb` (novo)
+**Depends on**: T34
+**Reuses**: helpers de sessão e fixture de `minha_pasta_test.rb`
+**Requirement**: NAV-38
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] No `li` de um set com posse conhecida, `.progress-set__bar` tem `value` igual às variantes possuídas e `max` igual ao total de variantes, os dois iguais aos números da contagem da mesma linha (mata o M12)
+- [ ] Num set com `base_set_size: nil`, a contagem aparece e `.progress-set__bar` tem `count: 0` naquele `li` (mata o M13)
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test(navegacao): provar a barra do set por valor`
+
+---
+
+### T38: "Limpar filtros" do vazio preserva a ordenação
+
+**What**: O link do estado vazio usa `clear_filters_url`, e a linha de status ganha testes que medem.
+**Where**: `app/views/catalog/index.html.erb`, `test/integration/catalog_status_line_test.rb`
+**Depends on**: T34
+**Reuses**: `CatalogHelper#clear_filters_url`
+**Requirement**: NAV-36, NAV-27
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `index.html.erb:258` usa `clear_filters_url(@result.active_filters)`; com `colors[]=Purple&sort=name&dir=desc` e zero resultados, o único "Limpar filtros" aponta para uma URL com `sort=name` e `dir=desc` e sem `colors`
+- [ ] Com mais cartas que uma página, a contagem mostra o total, não o tamanho da página (mata o M39)
+- [ ] `catalog_status_line_test.rb:145`, que promete 24px sem medir, passa a medir pela folha com `Stylesheet.resolved`
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(navegacao): preservar a ordenação no Limpar filtros do vazio`
+
+---
+
+### T39: `filter_toggle_url` aceita chave string
+
+**What**: O helper normaliza chave e filtros para símbolo, e o teste cobre chave string.
+**Where**: `app/helpers/catalog_helper.rb`, `test/helpers/catalog_helper_test.rb`
+**Depends on**: T34
+**Reuses**: `filter_toggle_url` (`catalog_helper.rb:66`)
+**Requirement**: NAV-33
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `filter_toggle_url({ colors: ["Red"] }, "colors", "Red")` devolve `/catalog` sem `colors`; `({ owned: "owned" }, "owned", "owned")` devolve URL sem `owned`; o mesmo com o hash de chaves string
+- [ ] Os comentários do método ficam na densidade do resto do arquivo
+- [ ] Gate full passa
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `fix(navegacao): aceitar chave string na alternância de filtro`
+
+---
+
+### T40: Alvo de 44px do chip medido na regra do chip
+
+**What**: O teste do NAV-35 lê a regra resolvida de `.catalog__chip` em vez de procurar o texto na folha inteira.
+**Where**: `test/design/filter_layout_test.rb`
+**Depends on**: T34
+**Reuses**: `Stylesheet.resolved`
+**Requirement**: NAV-35
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `filter_layout_test.rb:92-110` usa `Stylesheet.resolved("catalog__chip")` com `assert_equal "44px"` em `min-height`, e o mesmo para borda, raio e o fundo do chip ativo (mata o M14)
+- [ ] Gate full passa
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `test(navegacao): medir o alvo do chip na regra do chip`
+
+---
+
+### T41: Set selecionado e "×" do chip de cor
+
+**What**: Restaurar a asserção do set selecionado, afirmar o "×" do chip de cor e corrigir os seletores sem efeito.
+**Where**: `test/integration/catalog_filter_controls_test.rb`
+**Depends on**: T34
+**Reuses**: fixture de ingestão
+**Requirement**: NAV-11, NAV-34, NAV-26
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `get catalog_path(sets: ["OP02"])` → `option[value=OP02][selected]` e `option[value=OP01]:not([selected])` (mata o M43)
+- [ ] O chip de cor ativo tem `span[aria-hidden='true']` com texto "×" (mata o M41)
+- [ ] Os seletores de `:265`, `:274` e `:287-288` passam a casar com o HTML real; cada um é conferido fazendo-o falhar uma vez com o valor trocado
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test(navegacao): provar o set selecionado e o × do chip de cor`
+
+---
+
+### T42: Rastreabilidade e registro da iteração
+
+**What**: Atualizar a rastreabilidade da spec e registrar no `validation.md` o que foi para a `conformidade`.
+**Where**: `.specs/features/navegacao/spec.md`, `.specs/features/navegacao/validation.md`
+**Depends on**: T35, T36, T37, T38, T39, T40, T41
+**Reuses**: tabela "Requirement Traceability"
+**Requirement**: NAV-30..NAV-39, NAV-47, NAV-49
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] NAV-30..NAV-39 deixam de estar `Pending`; NAV-04, 11, 18, 34, 35, 36 e 38 citam a task de correção
+- [ ] `validation.md` registra que M42 (NAV-47) e M45 (NAV-49) não viram correção aqui: a `conformidade` reescreve a linha de status e a linha da variante, e leva as duas medidas como critério
+- [ ] Gate full passa, contagem registrada
+
+**Tests**: none
+**Gate**: full
+**Commit**: `docs(navegacao): atualizar a rastreabilidade depois das correções`
+
+---
+
 ## Plano de delegação
 
 | Task | Revisão |
@@ -1271,6 +1529,15 @@ celular (NAV-43).
 | T31 | uma regra escopada | ✅ |
 | T32 | linha do set mais agrupamento de ações | ⚠️ dois ajustes na mesma página |
 | T33 | revisão | ✅ |
+| T34 | documentação | ✅ |
+| T35 | um layout e o teste dele | ✅ |
+| T36 | um método morto e os testes que o cobriam | ⚠️ três arquivos, um conceito |
+| T37 | um teste novo | ✅ |
+| T38 | um link e o teste da linha | ✅ |
+| T39 | um helper e o teste dele | ✅ |
+| T40 | um teste | ✅ |
+| T41 | um teste | ✅ |
+| T42 | documentação | ✅ |
 
 Separar o helper `nav_link_to` da T5 deixaria uma task com helper sem uso e sem
 teste de integração.
@@ -1312,6 +1579,15 @@ teste de integração.
 | T31 | T30 | T30 → T31 | ✅ |
 | T32 | T31 | T31 → T32 (Fase 14) | ✅ |
 | T33 | T32 | T32 → T33 (Fase 15) | ✅ |
+| T34 | T33 | T33 → T34 (Fase 16) | ✅ |
+| T35 | T34 | T34 → T35 (Fase 16) | ✅ |
+| T36 | T34 | T34 → T36 (Fase 16) | ✅ |
+| T37 | T34 | T34 → T37 (Fase 16) | ✅ |
+| T38 | T34 | T34 → T38 (Fase 16) | ✅ |
+| T39 | T34 | T34 → T39 (Fase 16) | ✅ |
+| T40 | T34 | T34 → T40 (Fase 16) | ✅ |
+| T41 | T34 | T34 → T41 (Fase 16) | ✅ |
+| T42 | T35..T41 | T35..T41 → T42 (Fase 16) | ✅ |
 
 ## Test Co-location Validation
 
@@ -1350,3 +1626,12 @@ teste de integração.
 | T31 | folha | unit (textual) | unit | ✅ |
 | T32 | view e folha | integration + unit (textual) | integration + unit | ✅ |
 | T33 | revisão | none | none | ✅ |
+| T34 | documentação | none | none | ✅ |
+| T35 | layout | integration | integration | ✅ |
+| T36 | model e view | integration + unit | integration + unit | ✅ |
+| T37 | view | integration | integration | ✅ |
+| T38 | view | integration | integration | ✅ |
+| T39 | helper | unit | unit | ✅ |
+| T40 | folha | unit (textual) | unit | ✅ |
+| T41 | view | integration | integration | ✅ |
+| T42 | documentação | none | none | ✅ |

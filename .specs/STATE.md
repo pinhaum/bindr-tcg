@@ -122,6 +122,14 @@
 - **Date**: 2026-09-26
 - **Status**: active
 
+### AD-017
+- **Decision**: A edição que `6394755` (T3 da `navegacao`) fez no teste protegido `test/queries/set_progress_plan_test.rb` fica aceita. O Success Criterion da spec passa a dizer "seis dos sete testes sem edição" e cita esta AD.
+- **Reason**: O Verifier de 2026-09-27 achou a edição sem justificativa registrada, e o Success Criterion afirmava o contrário. O conteúdo se sustenta: a página ganhou uma consulta legítima (os indicadores da pasta), e a contagem de consultas continua exata (`assert_equal 2`). Decisão do dono em 2026-09-27.
+- **Trade-off**: A forma exigida afrouxou: "a consulta restante tem `GROUP BY`" virou "alguma consulta tem `GROUP BY`", e a segunda consulta ficou sem forma exigida. Um N+1 continua sendo pego pela contagem.
+- **Scope**: `navegacao` Success Criteria; `test/queries/set_progress_plan_test.rb`.
+- **Date**: 2026-09-27
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-09-27 — este bloco vence os de baixo.** A **`navegacao` está
