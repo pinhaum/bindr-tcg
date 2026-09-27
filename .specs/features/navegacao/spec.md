@@ -311,7 +311,7 @@ botões de 44px. Na pasta, cada set é uma linha sem moldura.
 | NAV-37 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
 | NAV-38 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
 | NAV-39 | P1: Telas no desenho do canvas | Req. 13.14 | Pending (T20) |
-| NAV-40 | P1: Acabamento conferido | Req. 13.15 | Pending (T25) |
+| NAV-40 | P1: Acabamento conferido | Req. 13.15 | Done (T25) |
 | NAV-41 | P1: Acabamento conferido | Req. 13.15 | Done (T24) |
 | NAV-42 | P1: Acabamento conferido | Req. 13.16 | Pending (T26) |
 | NAV-43 | P1: Acabamento conferido | Req. 13.17 | Pending (T27) |
