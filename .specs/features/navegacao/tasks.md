@@ -1343,9 +1343,9 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] No `li` de um set com posse conhecida, `.progress-set__bar` tem `value` igual às variantes possuídas e `max` igual ao total de variantes, os dois iguais aos números da contagem da mesma linha (mata o M12)
-- [ ] Num set com `base_set_size: nil`, a contagem aparece e `.progress-set__bar` tem `count: 0` naquele `li` (mata o M13)
-- [ ] Gate full passa
+- [x] No `li` de um set com posse conhecida, `.progress-set__bar` tem `value` igual às variantes possuídas e `max` igual ao total de variantes, os dois iguais aos números da contagem da mesma linha (mata o M12)
+- [x] Num set com `base_set_size: nil`, a contagem aparece e `.progress-set__bar` tem `count: 0` naquele `li` (mata o M13)
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full
