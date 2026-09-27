@@ -1156,10 +1156,10 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] Regra `.card-detail .ownership__button` com `min-height: 44px` e `min-width: 44px`; a regra base continua com 24px
-- [ ] `collection_ownership_ui_test.rb` passa **sem edição**
-- [ ] Teste novo em `test/design/` para a regra escopada, que falha se ela sumir ou cair abaixo de 44px
-- [ ] Captura do detalhe com sessão em 390px e 1280px; gate full passa, contagem registrada
+- [x] Regra `.card-detail .ownership__button` com `min-height: 44px` e `min-width: 44px`; a regra base continua com 24px
+- [x] `collection_ownership_ui_test.rb` passa **sem edição**
+- [x] Teste novo em `test/design/` para a regra escopada, que falha se ela sumir ou cair abaixo de 44px
+- [x] Captura do detalhe com sessão em 390px e 1280px; gate full passa, contagem registrada
 
 **Tests**: unit (textual)
 **Gate**: full

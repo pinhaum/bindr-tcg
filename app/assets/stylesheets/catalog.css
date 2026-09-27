@@ -749,6 +749,12 @@ body {
   cursor: pointer;
 }
 
+/* NAV-50: no detalhe, os botões ganham alvo maior */
+.card-detail .ownership__button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 /*
  * `[aria-disabled="true"]`, e **não** `[disabled]`. O botão continua focável e
  * no DOM de propósito: um `disabled` de verdade sai da árvore de foco, e como
