@@ -69,7 +69,7 @@ preço.
 | Controle de posse para anônimo | Não renderizado | O query object já ignora `owned` sem usuário; mostrar controle inerte é promessa quebrada | y |
 | Título da página de progresso | `h1` "Minha pasta", "Progresso por set" vira `h2` | É a entrada da navegação; o nome da seção continua dizendo o que a lista é | y |
 | Testes que leem `catalog.css` como texto | Não são editados; regras novas só são acrescentadas | Mesma restrição da `interface` (AD-011, trade-off 2) | y |
-| Filtros no celular (emenda de 2026-09-26) | Dentro de `<details>` fechado por padrão; os chips da lista "Filtros ativos" ficam fora dele | Decisão do dono: a grade volta para a primeira tela sem reabrir a rolagem horizontal, e `<details>` funciona sem JS (NAV-14) | y |
+| Filtros no celular (emenda de 2026-09-26) | Dentro de `<details>` fechado por padrão; os chips da lista "Filtros ativos" ficam fora dele | Decisão do dono: a grade volta para a primeira tela sem reabrir a rolagem horizontal, e `<details>` funciona sem JS (NAV-14). Na tela larga o conteúdo aparece com o `<details>` fechado por `::details-content`, conferido na captura de 1280px na T27 (só Chromium) | y |
 | Imagem maior no detalhe | A da primeira variante na ordem em que a lista de impressões já aparece | O Req. 5.1 pede "a imagem em resolução maior" sem dizer qual; a ordem da lista já é a ordem de leitura |y |
 | Variantes em linha | Cada linha mantém a miniatura própria da variante | O Req. 5.2 exige imagem própria por variante; a arte alternativa é o objeto de coleção |y |
 | Rótulos "Código", "Raridade", "Set" das variantes | Continuam no HTML como `dt` e saem da vista | A linha fica compacta como no canvas sem perder a estrutura para leitor de tela |y |

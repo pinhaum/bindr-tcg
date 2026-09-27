@@ -1767,6 +1767,7 @@ summary:focus-visible,
 
   /* Filtros sempre visíveis em viewport larga (NAV-45) */
   .catalog__filters-toggle {
+    display: contents;
     margin: 0;
     padding: 0;
   }
