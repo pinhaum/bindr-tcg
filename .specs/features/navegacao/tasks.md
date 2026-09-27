@@ -942,10 +942,10 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `.progress-set__bar` declara `appearance: none`; `::-webkit-progress-bar` tem fundo `var(--surface-sunken)`; `::-webkit-progress-value` e `::-moz-progress-bar` têm fundo `var(--border-strong)`
-- [ ] Teste novo em `test/design/` que falha sem qualquer um dos três e nomeia o seletor que falta
-- [ ] Captura da pasta com usuário sem cópia: nenhum set desenha barra cheia
-- [ ] `progress_ui_test.rb` e `set_progress_plan_test.rb` passam **sem edição**; gate full passa, contagem registrada
+- [x] `.progress-set__bar` declara `appearance: none`; `::-webkit-progress-bar` tem fundo `var(--surface-sunken)`; `::-webkit-progress-value` e `::-moz-progress-bar` têm fundo `var(--border-strong)`
+- [x] Teste novo em `test/design/` que falha sem qualquer um dos três e nomeia o seletor que falta
+- [x] Captura da pasta com usuário sem cópia: nenhum set desenha barra cheia
+- [x] `progress_ui_test.rb` e `set_progress_plan_test.rb` passam **sem edição**; gate full passa, contagem registrada
 
 **Tests**: unit (textual)
 **Gate**: full

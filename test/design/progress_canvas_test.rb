@@ -59,13 +59,13 @@ class ProgressCanvasTest < ActiveSupport::TestCase
       ".progress__summary deve ter grid-template-columns repeat(2, ...)"
   end
 
-  # NAV-38: barra de progresso com trilho e preenchimento
-  test "progress-set__bar tem trilho surface-sunken e preenchimento border-strong" do
+  # NAV-38: barra de progresso com trilho e preenchimento nos três navegadores
+  test "progress-set__bar tem appearance: none para modo customizado" do
     props = rule_properties(".progress-set__bar")
+    assert props["appearance"] == "none",
+      ".progress-set__bar deve ter appearance: none"
     assert props["background-color"]&.include?("surface-sunken"),
-      ".progress-set__bar deve ter background-color surface-sunken (trilho)"
-    assert props["accent-color"]&.include?("border-strong"),
-      ".progress-set__bar deve ter accent-color border-strong (preenchimento)"
+      ".progress-set__bar deve ter background-color surface-sunken (trilho fallback)"
     assert props["height"] == "8px",
       ".progress-set__bar deve ter height 8px"
     assert props["border-radius"]&.include?("radius-sm"),

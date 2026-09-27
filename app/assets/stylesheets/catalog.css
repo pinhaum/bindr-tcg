@@ -1040,7 +1040,22 @@ summary:focus-visible,
   background-color: var(--surface-sunken);
   border: none;
   border-radius: var(--radius-sm);
-  accent-color: var(--border-strong);
+  appearance: none;
+}
+
+.progress-set__bar::-webkit-progress-bar {
+  background-color: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+}
+
+.progress-set__bar::-webkit-progress-value {
+  background-color: var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.progress-set__bar::-moz-progress-bar {
+  background-color: var(--border-strong);
+  border-radius: var(--radius-sm);
 }
 
 .progress-set__owned-line,
