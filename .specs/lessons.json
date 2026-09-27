@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 30,
+  "next_id": 31,
   "lessons": [
     {
       "id": "L-001",
@@ -526,6 +526,24 @@
       ],
       "created": "2026-09-27T19:39:39Z",
       "last_seen": "2026-09-27T19:39:39Z"
+    },
+    {
+      "id": "L-030",
+      "key": "surviving_mutant::ao testar pagina de detalhe por objeto activerecord com rota por slug codigo nao id usar o helper com o campo do slug explicito card path record card number nunca card path record o path helper usa to param id por padrao e gera 404 silencioso que faz assert empty passar vacuamente",
+      "text": "Ao testar página de detalhe por objeto ActiveRecord com rota por slug/código (não id), usar o helper com o campo do slug explícito (card_path(record.card_number)), nunca card_path(record) — o path_helper usa to_param/id por padrão e gera 404 silencioso que faz assert_empty passar vacuamente.",
+      "signal": "surviving_mutant",
+      "scope": "test/integration, rotas com find_by! por campo não-id",
+      "status": "candidate",
+      "features": [
+        "navegacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M08 / navegacao_principal_test.rb:289,299 (test/integration, rotas com find_by! por campo não-id)"
+      ],
+      "created": "2026-09-27T23:07:57Z",
+      "last_seen": "2026-09-27T23:07:57Z"
     }
   ]
 }

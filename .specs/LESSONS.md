@@ -188,6 +188,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: NAV-38 progress/index.html.erb:163-167 (spec/progress)
 - last seen: 2026-09-27T19:39:39Z
 
+### L-030 - Ao testar página de detalhe por objeto ActiveRecord com rota por slug/código (não id), usar o helper com o campo do slug explícito (card_path(record.card_number)), nunca card_path(record) — o path_helper usa to_param/id por padrão e gera 404 silencioso que faz assert_empty passar vacuamente.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `test/integration, rotas com find_by! por campo não-id` · harmful: 0
+- features: navegacao
+- evidence: M08 / navegacao_principal_test.rb:289,299 (test/integration, rotas com find_by! por campo não-id)
+- last seen: 2026-09-27T23:07:57Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
