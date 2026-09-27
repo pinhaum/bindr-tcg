@@ -1770,7 +1770,7 @@ summary:focus-visible,
 .catalog__filters-summary::marker { display: none; }
 
 .catalog__filters-summary::before {
-  content: "▶ ";
+  content: "▶" / "";
   display: inline-block;
   margin-right: var(--space-1);
   transition: transform 0.2s ease;

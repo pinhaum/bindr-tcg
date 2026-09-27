@@ -37,4 +37,12 @@ class FiltersToggleLayoutTest < ActiveSupport::TestCase
   test "na tela larga o details não ocupa célula do subgrid do catálogo (NAV-32)" do
     assert_equal "contents", declarations_in_media(".catalog__filters-toggle")["display"]
   end
+
+  # O triângulo é decoração: sem o texto alternativo vazio, o leitor de tela lê
+  # "triângulo preto apontando para a direita" no nome do summary (NAV-43).
+  test "o triângulo do summary não entra no nome acessível" do
+    rule = Stylesheet.rules.find { |selector, _| selector.strip == ".catalog__filters-summary::before" }
+    assert_not_nil rule, "regra .catalog__filters-summary::before não encontrada"
+    assert_equal '"▶" / ""', Stylesheet.declarations(rule[1]).to_h["content"]
+  end
 end
