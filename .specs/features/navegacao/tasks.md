@@ -1419,8 +1419,8 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `filter_layout_test.rb:92-110` usa `Stylesheet.resolved("catalog__chip")` com `assert_equal "44px"` em `min-height`, e o mesmo para borda, raio e o fundo do chip ativo (mata o M14)
-- [ ] Gate full passa
+- [x] `filter_layout_test.rb:92-110` usa `Stylesheet.resolved("catalog__chip")` com `assert_equal "44px"` em `min-height`, e o mesmo para borda, raio e o fundo do chip ativo (mata o M14)
+- [x] Gate full passa
 
 **Tests**: unit
 **Gate**: full

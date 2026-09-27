@@ -90,23 +90,32 @@ class FilterLayoutTest < ActiveSupport::TestCase
   end
 
   test ".catalog__chip tem min-height 44px, border 1px border-strong, border-radius" do
-    assert @stylesheet.include?(".catalog__chip {"),
-           "regra .catalog__chip não encontrada"
-    assert @stylesheet.include?("min-height: 44px"),
-           ".catalog__chip deve ter 'min-height: 44px'"
-    assert @stylesheet.include?("border: 1px solid var(--border-strong)"),
-           ".catalog__chip deve ter 'border: 1px solid var(--border-strong)'"
-    assert @stylesheet.include?("border-radius: var(--radius-sm)"),
-           ".catalog__chip deve ter 'border-radius: var(--radius-sm)'"
+    chip = Stylesheet.resolved("catalog__chip")
+
+    assert_equal "44px", chip["min-height"],
+                 ".catalog__chip deve ter 'min-height: 44px'"
+    assert_equal "1px solid var(--border-strong)", chip["border"],
+                 ".catalog__chip deve ter 'border: 1px solid var(--border-strong)'"
+    assert_equal "var(--radius-sm)", chip["border-radius"],
+                 ".catalog__chip deve ter 'border-radius: var(--radius-sm)'"
   end
 
-  test ".catalog__chip--active com fundo accent e texto on-accent" do
-    assert @stylesheet.include?(".catalog__chip--active {"),
-           "regra .catalog__chip--active não encontrada"
-    assert @stylesheet.include?("background-color: var(--accent)"),
-           ".catalog__chip--active deve ter 'background-color: var(--accent)'"
-    assert @stylesheet.include?("color: var(--on-accent)"),
-           ".catalog__chip--active deve ter 'color: var(--on-accent)'"
+  test ".catalog__chip--active:not(.catalog__chip--color) com fundo accent" do
+    rules = Stylesheet.rules
+    active_not_color = rules.find do |selector, body|
+      selector.include?("catalog__chip--active") &&
+        selector.include?(":not(.catalog__chip--color)") &&
+        Stylesheet.declarations(body).any? { |prop, value| prop == "background-color" }
+    end
+
+    assert active_not_color, ".catalog__chip--active:not(.catalog__chip--color) não encontrada com background-color"
+
+    declarations = Stylesheet.declarations(active_not_color[1])
+    bg_color = declarations.assoc("background-color")&.last
+    assert_equal "var(--accent)", bg_color,
+                 ".catalog__chip--active:not(.catalog__chip--color) deve ter 'background-color: var(--accent)'"
+    assert_equal "var(--on-accent)", declarations.assoc("color")&.last,
+                 ".catalog__chip--active:not(.catalog__chip--color) deve ter 'color: var(--on-accent)'"
   end
 
   # NAV-35: o chip de cor ativo é um anel sem preenchimento, como o "Red" ativo
