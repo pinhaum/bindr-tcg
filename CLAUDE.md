@@ -101,8 +101,10 @@ python3 $SKILL/scripts/validate_tasks.py .specs/features/colecao/tasks.md
 O fluxo é `requirements` → `design` → `tasks`, documentado em `.context/README.md`.
 Regras que valem para qualquer sessão de trabalho aqui:
 
-- **Uma task por vez**, em ordem, de `.context/tasks.md`. Não abrir a próxima com a
-  anterior incompleta.
+- **Tasks em ordem de dependência**, de `.context/tasks.md`. Não abrir uma task com
+  alguma de que ela depende incompleta. Tasks independentes podem rodar em
+  paralelo quando nenhuma dependência (`Depends on`) está pendente e os arquivos
+  tocados (`Where`) não se sobrepõem; na dúvida, sequencial.
 - **Toda task termina com código que roda e teste que passa.** "Estrutura criada"
   não conta como task concluída.
 - **Se um requisito se mostrar errado durante a execução, pare e corrija
