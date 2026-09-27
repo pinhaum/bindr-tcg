@@ -107,4 +107,25 @@ class CatalogSubgridLayoutTest < ActiveSupport::TestCase
     assert_equal "1px solid var(--border)", filters["border-right"]
     assert_equal "stretch", filters["align-self"]
   end
+
+  # NAV-42: filtros empilhados com espaço fixo entre grupos
+  test "os filtros da coluna lateral usam gap var(--space-4)" do
+    filters = declarations_in_media(".catalog__filters")
+    assert_equal "var(--space-4)", filters["gap"],
+                 ".catalog__filters deve ter gap: var(--space-4) para espaçamento fixo entre grupos"
+  end
+
+  # NAV-42: linha do subgrid não estica o espaço
+  test "os filtros da coluna lateral usam align-content start" do
+    filters = declarations_in_media(".catalog__filters")
+    assert_equal "start", filters["align-content"],
+                 ".catalog__filters deve ter align-content: start para não esticar entre grupos"
+  end
+
+  # NAV-42: sem margin entre grupos em ≥ 64rem
+  test "catalog__filter-group tem margin-bottom zero em ≥ 64rem" do
+    filter_group = declarations_in_media(".catalog__filter-group")
+    assert_equal "0", filter_group["margin-bottom"],
+                 ".catalog__filter-group deve ter margin-bottom: 0 em ≥ 64rem (gap controla espaço)"
+  end
 end

@@ -1021,10 +1021,10 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] Em `≥ 64rem`, `.catalog__filters` empilha os grupos com `gap: var(--space-4)` e `align-content: start`, sem que a linha do subgrid estique o espaço entre eles
-- [ ] Nenhuma faixa de `surface-base` entre o cabeçalho e os filtros na coluna 1: os dois em `surface-raised`, sem `margin` nem `row-gap` entre as linhas da coluna
-- [ ] Teste novo em `test/design/` para o `gap` e o alinhamento; `catalog_subgrid_layout_test.rb` passa ou é reescrito só onde o NAV-42 muda a expectativa
-- [ ] Captura em 1280px, com e sem sessão: "Tipo" logo abaixo das cores; gate full passa, contagem registrada
+- [x] Em `≥ 64rem`, `.catalog__filters` empilha os grupos com `gap: var(--space-4)` e `align-content: start`, sem que a linha do subgrid estique o espaço entre eles
+- [x] Nenhuma faixa de `surface-base` entre o cabeçalho e os filtros na coluna 1: os dois em `surface-raised`, sem `margin` nem `row-gap` entre as linhas da coluna
+- [x] Teste novo em `test/design/` para o `gap` e o alinhamento; `catalog_subgrid_layout_test.rb` passa ou é reescrito só onde o NAV-42 muda a expectativa
+- [x] Captura em 1280px, com e sem sessão: "Tipo" logo abaixo das cores; gate full passa, contagem registrada
 
 **Tests**: unit (textual)
 **Gate**: full

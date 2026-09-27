@@ -1714,7 +1714,13 @@ summary:focus-visible,
     padding: var(--space-4);
     background-color: var(--surface-raised);
     border-right: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    align-content: start;
   }
+
+  .catalog__filter-group { margin-bottom: 0; }
 
   .catalog__body { grid-column: 2; grid-row: 2; }
 
