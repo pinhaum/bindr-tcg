@@ -282,3 +282,9 @@ mesmos 2 já aceitos pelo dono na iteração anterior.
 **Próximo passo**: nenhuma correção obrigatória antes de fechar a `navegacao`.
 Fix Plan 1 (achado M08) pode ser uma task avulsa ou entrar como setup da
 `conformidade`. Abrir `.specs/features/conformidade/` como próxima feature.
+
+---
+
+## Correção pós-validação (2026-09-27)
+
+O M08 (NAV-04 no detalhe) sobrevivia porque `navegacao_principal_test.rb` chamava `card_path(@card)`. A rota espera `card_number`, então o teste recebia 404 e passava sem renderizar a `nav`. Agora os dois testes do detalhe usam `card_path(@card.card_number)` e exigem `assert_response :success`. Reinjetei o M08 ("Catálogo" corrente também em `/cards/*`): ele morre, com 2 falhas em `navegacao_principal_test.rb`. Restaurei o layout, e o gate full ficou verde. Com isso, NAV-04 passa a ✅ e sobram só o M42 e o M45, remetidos à `conformidade`.

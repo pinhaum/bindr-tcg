@@ -288,7 +288,8 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
 
   test "no detalhe da carta, nenhuma entrada tem aria-current com sessão" do
     sign_in
-    get card_path(@card)
+    get card_path(@card.card_number)
+    assert_response :success
 
     # Nenhum aria-current dentro da nav
     current_entries = css_select("header.site-header nav[aria-label='Principal'] [aria-current='page']")
@@ -296,7 +297,8 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
   end
 
   test "no detalhe da carta, nenhuma entrada tem aria-current sem sessão" do
-    get card_path(@card)
+    get card_path(@card.card_number)
+    assert_response :success
 
     # Nenhum aria-current dentro da nav
     current_entries = css_select("header.site-header nav[aria-label='Principal'] [aria-current='page']")
