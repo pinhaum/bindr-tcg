@@ -128,4 +128,17 @@ class CatalogSubgridLayoutTest < ActiveSupport::TestCase
     assert_equal "0", filter_group["margin-bottom"],
                  ".catalog__filter-group deve ter margin-bottom: 0 em ≥ 64rem (gap controla espaço)"
   end
+
+  # NAV-42: navegação e filtros formam uma superfície só na coluna 1. Sem isto,
+  # o padding do main (que cobre as duas colunas) recua os filtros e a margem
+  # e a borda da regra base desenham uma faixa de surface-base entre eles.
+  test "na coluna lateral os filtros encostam no cabeçalho, sem faixa de outro fundo" do
+    assert_equal "0", declarations_in_media(".catalog")["padding"],
+                 "o padding do main.catalog recua a coluna 1 e mostra surface-base em volta dos filtros"
+    filters = declarations_in_media(".catalog__filters")
+    assert_equal "0", filters["margin"], "a margem da regra base abre uma faixa entre cabeçalho e filtros"
+    assert_equal "none", filters["border"], "a moldura da regra base separa os filtros do cabeçalho"
+    assert_equal "0", filters["border-radius"]
+    assert_equal "var(--surface-raised)", filters["background-color"]
+  end
 end
