@@ -154,7 +154,8 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
 
     assert_select "a.catalog__chip.catalog__chip--active[aria-label*='Remover filtro']"
     assert_select "a.catalog__chip.catalog__chip--active[aria-label*='Red']"
-    assert_select "a.catalog__chip.catalog__chip--active span[aria-hidden='true']"
+    # Chip de cor ativo deve ter span com "×" (mata M41)
+    assert_select "a.catalog__chip--color.catalog__chip--active span[aria-hidden='true']", text: "×"
   end
 
   test "chip inativo não tem aria-label nem 'x'" do
@@ -181,6 +182,14 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
 
     get catalog_path(sets: [ "OP01", "OP02" ])
     assert_select ".catalog__count", text: /^5 cartas$/
+  end
+
+  test "set selecionado aparece como selected no select (NAV-11, mata M43)" do
+    # Um set ativo: OP02 selected, OP01 não
+    get catalog_path(sets: [ "OP02" ])
+
+    assert_select "select[name='sets[]'] option[value=OP02][selected]"
+    assert_select "select[name='sets[]'] option[value=OP01]:not([selected])"
   end
 
   # --- NAV-10: Filtros ativos sem controle vão como hidden ---
@@ -257,21 +266,28 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert_select ".catalog__count"
   end
 
-  test "valor inválido de cor não oferece chip (NAV-26)" do
+  test "cor inválida não oferece chip (NAV-26)" do
+    # Teste da robustez: passar um valor que não existe no banco.
+    # O comportamento: nenhum chip oferece a cor inválida, e a busca retorna zero.
     get catalog_path(colors: [ "InvalidColor" ])
 
     assert_response :success
-    # Procura por chips com href contendo "InvalidColor%5B%5D"
-    assert_select "a.catalog__chip[href*='InvalidColor%5B%5D']", count: 0
+    # Nenhum chip de cor com aria-label menciona InvalidColor
+    html = Nokogiri::HTML(response.body)
+    invalid_color_chips = html.css("a.catalog__chip--color[aria-label*='InvalidColor']")
+    assert invalid_color_chips.empty?, "nenhum chip deve marcar cor inválida"
     assert_select ".catalog__count", text: /^0 cartas$/
   end
 
-  test "valor inválido de raridade não oferece chip (NAV-26)" do
+  test "raridade inválida não oferece chip (NAV-26)" do
+    # Teste da robustez: valores desconhecidos não produzem erro.
     get catalog_path(rarities: [ "InvalidRarity" ])
 
     assert_response :success
-    # Procura por chips com href contendo "InvalidRarity%5B%5D"
-    assert_select "a.catalog__chip[href*='InvalidRarity%5B%5D']", count: 0
+    # Nenhum chip tem aria-label com "InvalidRarity"
+    html = Nokogiri::HTML(response.body)
+    invalid_rarity_chips = html.css("a.catalog__chip[aria-label*='InvalidRarity']")
+    assert invalid_rarity_chips.empty?, "nenhum chip deve marcar raridade inválida"
     assert_select ".catalog__count", text: /^0 cartas$/
   end
 
@@ -283,9 +299,9 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     # Sem resultados
     assert_select ".catalog__empty"
 
-    # Chips continuam visíveis e ativos
-    assert_select "a.catalog__chip.catalog__chip--active[href*='colors']"
-    assert_select "a.catalog__chip.catalog__chip--active[href*='rarities%5B%5D=C']"
+    # Chips continuam visíveis e ativos: Red de cor e C de raridade
+    assert_select "a.catalog__chip--color.catalog__chip--active[aria-label='Remover filtro Cor: Red']"
+    assert_select "a.catalog__chip.catalog__chip--active[aria-label='Remover filtro Raridade: C']"
   end
 
   # --- NAV-14: Sem JavaScript, navegação nativa ---

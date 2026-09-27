@@ -1443,10 +1443,10 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `get catalog_path(sets: ["OP02"])` → `option[value=OP02][selected]` e `option[value=OP01]:not([selected])` (mata o M43)
-- [ ] O chip de cor ativo tem `span[aria-hidden='true']` com texto "×" (mata o M41)
-- [ ] Os seletores de `:265`, `:274` e `:287-288` passam a casar com o HTML real; cada um é conferido fazendo-o falhar uma vez com o valor trocado
-- [ ] Gate full passa
+- [x] `get catalog_path(sets: ["OP02"])` → `option[value=OP02][selected]` e `option[value=OP01]:not([selected])` (mata o M43)
+- [x] O chip de cor ativo tem `span[aria-hidden='true']` com texto "×" (mata o M41)
+- [x] Os seletores de `:265`, `:274` e `:287-288` passam a casar com o HTML real; cada um é conferido fazendo-o falhar uma vez com o valor trocado
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full
