@@ -377,6 +377,31 @@ passa a ser obrigatório.
 14. "Minha pasta" DEVE oferecer a ação "Adicionar cartas", que leva ao
     catálogo.
 
+Os critérios 15 a 20 foram acrescentados em 2026-09-26, depois da primeira
+revisão com as telas renderizadas em navegador (AD-015). A implementação
+cumpria os critérios 1 a 14, mas a render mostrou a navegação no pé da coluna
+lateral, um vão entre os grupos de filtro, nenhuma carta na primeira tela do
+catálogo no celular e um detalhe sem a imagem maior que o Req. 5.1 já pedia.
+
+15. Em viewport larga, a navegação DEVE ficar logo abaixo da marca, no topo da
+    coluna lateral. As entradas da navegação NÃO DEVEM ser sublinhadas.
+16. Em viewport larga, no catálogo, navegação e filtros DEVEM ocupar uma
+    superfície contínua, com espaçamento fixo entre os grupos de filtro.
+17. Em viewport estreita, os controles de filtro DEVEM ficar recolhidos por
+    padrão num controle que diz quantos filtros estão ativos, e os filtros
+    ativos DEVEM continuar visíveis e removíveis com ele recolhido. Em viewport
+    larga, os controles DEVEM ficar sempre visíveis.
+18. O campo de busca e o botão "Buscar" DEVEM ter alvo de no mínimo 44px e as
+    superfícies do design system. A linha de status DEVE ficar alinhada à grade.
+19. O detalhe da carta DEVE exibir a imagem maior do Req. 5.1 em destaque, numa
+    coluna própria em viewport larga, e listar as variantes em linhas, cada uma
+    com sua imagem (Req. 5.2). Os controles de posse no detalhe DEVEM ter alvo de
+    no mínimo 44px.
+20. Em "Minha pasta", cada set DEVE ocupar uma linha sem moldura, com a contagem
+    "possuídas / total" na mesma linha do nome, e os links de wishlist, import e
+    export DEVEM formar um grupo de ações secundárias separado de "Adicionar
+    cartas".
+
 ---
 
 ## Rastreamento de pendências

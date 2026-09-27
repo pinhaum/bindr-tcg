@@ -114,7 +114,26 @@
 - **Date**: 2026-09-25
 - **Status**: active
 
+### AD-015
+- **Decision**: As telas passam a ser renderizadas em navegador no host, com o Chromium que o Playwright já mantém em `~/.cache/ms-playwright`, por um script versionado (`spec/visual/capture.cjs`, T22) que fotografa catálogo, detalhe, pasta, wishlist e import em 390px e 1280px, com e sem sessão. As capturas são **evidência de revisão**, não gate: a suíte continua no container, sem navegador. Toda task de layout da emenda de 2026-09-26 anexa a captura do antes e do depois, e a revisão do dono (T33) é feita sobre elas, lado a lado com o canvas.
+- **Reason**: Em 2026-09-26, a primeira render mostrou quatro divergências que a conferência por leitura da cascata (T21) tinha dado como conformes ou nem via: a navegação no pé da coluna lateral, o vão entre os grupos de filtro, a barra a 0% desenhada cheia e o "Sair" com fundo de botão nativo. Também desmentiu uma suspeita: a barra inferior não cobre o fim do conteúdo (NAV-05 cumprido). Ler a folha não substitui olhar a tela.
+- **Trade-off**: (1) O script depende de Node e de um pacote `playwright` no host, fora do `Gemfile` e do container; resolve o pacote por `NODE_PATH` e falha dizendo isso quando não acha. (2) Captura não tem asserção: um desvio só é pego por quem olha. Os critérios continuam provados pelos testes textuais e de integração. (3) O evento `load` espera as imagens da origem e pode travar; o script navega com `domcontentloaded`.
+- **Scope**: `navegacao` T22–T33 e qualquer feature de interface daqui em diante. Revoga a linha "Verificação de layout em navegador real" do Out of Scope da `navegacao` só na parte de revisão.
+- **Date**: 2026-09-26
+- **Status**: active
+
 ## Handoff
+
+> **Estado em 2026-09-26 — este bloco vence os de baixo.** Feature em execução:
+> **`navegacao`**, na T21. A revisão do dono foi feita sobre telas renderizadas
+> (AD-015) e virou a emenda NAV-40..NAV-51 (Req. 13.15–13.20) com o plano
+> T22–T33 (Fases 11–15). **Emenda aprovada pelo dono em 2026-09-26**; nada
+> foi implementado. Decisões do dono nesta data: filtros recolhidos em `<details>`
+> no celular; a marca "Bindr" fica em todas as larguras; a rolagem horizontal
+> dos chips continua recusada.
+>
+> **Próximo passo:** T22 (script de captura), depois T23–T33 em ordem. O
+> Verifier roda depois da T33 e herda as pendências dos blocos abaixo.
 
 > **Estado em 2026-09-25, noite — este bloco vence os de baixo.** Feature em
 > execução: **`navegacao`**. T12–T20 commitadas em ondas paralelas (AD-014), com

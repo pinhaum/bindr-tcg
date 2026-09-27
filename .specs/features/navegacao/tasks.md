@@ -37,6 +37,18 @@ Critical Rules dela. Se a skill não puder ser ativada, parar e avisar.
 - Não há navegador no container. A prova é textual (sobre a folha) ou de
   integração (sobre o HTML renderizado). A verificação renderizada fica com o
   dono do produto na T11.
+- **Fases 11–15 (emenda de 2026-09-26):** toda task de layout roda
+  `spec/visual/capture.cjs` (T22) antes e depois e cita no commit as capturas
+  que mudaram. Captura é evidência, não gate (AD-015). Os testes criados por
+  esta feature nas Fases 1–10 (`navigation_layout_test.rb`,
+  `navigation_canvas_test.rb`, `filter_layout_test.rb`,
+  `catalog_subgrid_layout_test.rb`, `detail_layout_test.rb`,
+  `progress_canvas_test.rb`, `catalog_filter_controls_test.rb`,
+  `catalog_ownership_filter_test.rb`, `catalog_status_line_test.rb`,
+  `catalog_layout_structure_test.rb`, `card_detail_layout_test.rb`,
+  `minha_pasta_test.rb`, `navegacao_principal_test.rb`) seguem a mesma regra
+  das Fases 6–10: reescrita só onde o critério mudou, com o commit dizendo qual
+  asserção caiu e qual NAV a substitui.
 
 ### Restrições medidas antes do plano
 
@@ -68,6 +80,28 @@ Medidas em `main` (`2234e11`):
   exige em `height`, `min-height`, `position`, `grid-template-columns` nem em
   condição de `@media`.
 
+Medidas em `main` (`491c5d5`) para a emenda de 2026-09-26:
+
+- **`.ownership__button` base continua com 24px.**
+  `collection_ownership_ui_test.rb:314-320` (protegido) exige `min-height: 24px`
+  e `min-width: 24px` na regra base. Os 44px do NAV-50 vêm de uma regra escopada
+  ao detalhe (`.card-detail .ownership__button`), que o teste não lê.
+- **A marcação do set na pasta não muda de forma.** `progress_ui_test.rb` lê
+  `.progress-set__owned`, `__total`, `__percent`, `__percent-value`,
+  `__parallel-owned` e exige os parallels fora do percentual;
+  `set_progress_plan_test.rb:533-539` lista as classes do set. O NAV-51 se faz
+  na folha, com os mesmos elementos.
+- **Nenhum bloco BEM novo** continua valendo: o `<details>` dos filtros usa
+  elementos de `catalog`, e os rótulos fora da vista usam elementos de
+  `variant`. Não existe utilitário `visually-hidden` na folha, e criar um seria
+  bloco novo.
+- **A lista "Filtros ativos" (`ul.catalog__chips`) já mora em `catalog__head`,**
+  fora de `catalog__filters`. O NAV-44 sai de graça se o `<details>` envolver só
+  `catalog__filters`.
+- A render (2026-09-26) mediu: fim do conteúdo em y=920 e barra em y=944 no
+  catálogo em 390px (NAV-05 cumprido); nav da coluna lateral em y≈765 na carta e
+  na pasta; vão de ~180px entre "Cor" e "Tipo" na coluna do catálogo.
+
 ### Decisões de implementação
 
 | Ponto | Escolha | Motivo |
@@ -87,6 +121,13 @@ Medidas em `main` (`2234e11`):
 | Coluna lateral com filtros (emenda) | Em ≥ 64rem, `body` define `grid-template-columns: var(--sidebar-width) minmax(0, 1fr)`. No catálogo, `main.catalog` ocupa `1 / -1` com `grid-template-columns: subgrid` e `grid-template-rows: subgrid`, e a view agrupa os filhos em `catalog__head` (título, busca, chips ativos), `catalog__filters` e `catalog__body` (status, grade, paginação). `head` vai para a coluna 2 e linha 1, `filters` para a coluna 1 e linha 2, `body` para a coluna 2 e linha 2. O cabeçalho fica na coluna 1 e linha 1 | A ordem do DOM continua a do celular: título, busca, filtros, grade. `display: contents` em `main` foi descartado porque apaga o landmark em parte dos navegadores (⚠️ VERIFICAR se a T18 achar fonte primária em contrário). Subgrid é Baseline desde 2023 |
 | Barra de progresso do set | `<progress value max>` com `aria-hidden="true"`, dentro da linha do set, fora do `<p>` da contagem | A contagem escrita já diz o mesmo. Um `progress` exposto repetiria cada número para leitor de tela. O elemento dispensa `style` inline |
 | Hierarquia de títulos da pasta | `h1` "Minha pasta" → `h2` "Progresso por set" → nome de cada set vira `h3` | O nome do set hoje é `h2`. Ele desce um nível para não pular hierarquia (SC 1.3.1) |
+| Script de captura (emenda) | `spec/visual/capture.cjs`, Node puro, `require('playwright')` resolvido por `NODE_PATH`, `executablePath` opcional por `CHROMIUM_PATH`. Cria um usuário descartável pelo formulário de cadastro, espera a URL do destino (o Turbo navega depois do `load`) e navega com `domcontentloaded`. Grava em `tmp/capturas/` (ignorado pelo git) | `spec/` já guarda o `verify_fixture.py`, ferramenta de host fora da suíte. Sem `package.json` no projeto: uma dependência Node no repo Rails não se paga para um script de revisão |
+| Barra a 0% (emenda) | `appearance: none` em `.progress-set__bar`, trilho em `::-webkit-progress-bar` e preenchimento em `::-webkit-progress-value` e `::-moz-progress-bar` | `accent-color` não pinta o trilho do `<progress>` no Chromium; o trilho nativo cinza lê como barra cheia |
+| "Sair" (emenda) | Regra para `.site-header__nav button` zerando `background` e `border` herdados do botão nativo, com a mesma cor das entradas inativas | O `button_to` gera `<button>`, que traz o estilo do agente de usuário |
+| Coluna lateral (emenda) | `.site-header` em `≥ 64rem` com `justify-content: flex-start` e `align-items: stretch`; a marca ganha `padding` de entrada | A regra base (barra estreita) distribui os filhos; a coluna herdava isso e jogava a `nav` para o pé |
+| Filtros recolhidos (emenda) | `<details class="catalog__filters-toggle">` envolve `catalog__filters`; `<summary class="catalog__filters-summary">` com "Filtros" e, com filtro ativo, a contagem de `active_filter_count`. Em `≥ 64rem`, `summary` sai de vista e `::details-content` recebe `content-visibility: visible` e `display: contents`. ⚠️ VERIFICAR na T27, pela captura em 1280px, que isso mostra o conteúdo com o `<details>` fechado; se não mostrar, o fallback é um script de importmap que põe `open` em `≥ 64rem`, com o `summary` visível para quem está sem JS | `::details-content` é Baseline desde 2025 (Chrome 131, Firefox 143, Safari 18.4). Sem JS, os filtros continuam funcionando (NAV-14), só recolhidos |
+| Imagem maior no detalhe (emenda) | A imagem da primeira variante de `@variants`, pelo mesmo `card_image_path` e com o mesmo placeholder em camada que o tile usa, dentro de um elemento de `card-detail` | Reaproveita o fallback sem JS do tile (Req. 2.3) em vez de um segundo |
+| Variantes em linha (emenda) | `.variant` vira grid de três colunas (miniatura, meta, controles). Os `dt` de `.variant__meta` saem da vista pelo padrão de recorte (`clip-path: inset(50%)`, 1px) | Mantém `dl` e o texto para leitor de tela sem bloco utilitário novo |
 
 ## Test Coverage Matrix
 
@@ -99,7 +140,7 @@ Medidas em `main` (`2234e11`):
 | Views, helper e controller (navegação, filtros, pasta) | integration | Com sessão e sem sessão, caminho feliz, todo edge case (NAV-26, 27, 29) e a URL resultante comparada com o resultado do query object | `test/integration/*_test.rb` — `get`, `assert_select` | `bin/rails test test/integration` |
 | Regras da folha (media query, altura, reserva, anel) | unit (textual) | Todo AC de layout (NAV-05, 06, 15, 22–24, 28), com falha que nomeia seletor e media query | `test/design/<arquivo novo>_test.rb` | `bin/rails test test/design` |
 | Guardas existentes de design e 360px | integration + unit | Passam **sem edição** | `test/design/*`, os sete arquivos protegidos | `bin/rails test` |
-| Aparência renderizada | none | Revisão visual do dono (T11), em 360px e 1280px | — | — |
+| Aparência renderizada | none (evidência) | Captura antes e depois em toda task de layout das Fases 11–14; revisão do dono sobre as capturas na T33 (AD-015) | `tmp/capturas/` | `NODE_PATH=<dir com playwright> node spec/visual/capture.cjs` (no host) |
 
 O projeto não usa fixtures YAML: cada teste cria os próprios registros no
 `setup`. A suíte roda em paralelo.
@@ -184,10 +225,43 @@ T18 → T19 → T20
 T20 → T21
 ```
 
+### Phase 11: Evidência e correções da render
+
+Emenda de 2026-09-26. O script vem primeiro para que as correções já saiam
+com captura.
+
+```
+T21 → T22 → T23 → T24
+```
+
+### Phase 12: Coluna lateral e filtros
+
+```
+T24 → T25 → T26 → T27 → T28
+```
+
+### Phase 13: Detalhe da carta
+
+```
+T28 → T29 → T30 → T31
+```
+
+### Phase 14: Minha pasta
+
+```
+T31 → T32
+```
+
+### Phase 15: Fechamento da emenda
+
+```
+T32 → T33
+```
+
 Lotes para o Execute: **B1 = Fases 1–3 (T1–T6)** e **B2 = Fases 4–5
 (T7–T11)**, ambos fechados. **B3 = Fases 6–7 (T12–T17)** e **B4 = Fases 8–10
-(T18–T21)**. Workers só com aceite explícito. Depois da T21, o Verifier roda
-automaticamente.
+(T18–T21)**. Workers só com aceite explícito. **B5 = Fases 11–12 (T22–T28)** e
+**B6 = Fases 13–15 (T29–T33)**. Depois da T33, o Verifier roda automaticamente.
 
 ## Task Breakdown
 
@@ -793,9 +867,9 @@ com botão.
 
 - [x] `ecc:a11y-architect` revisou chips, linha de status, coluna lateral e pasta. Achados CRITICAL e HIGH viraram task de correção antes do Verifier
 - [x] Um revisor que não escreveu nenhuma das T12–T20 conferiu o HTML renderizado e a folha contra os artboards versionados em `.specs/features/navegacao/canvas/` (`Main`, `Mobile-Carta`, `Mobile-Pasta`, `Desktop-Catalogo`, `Desktop-Carta`, `Desktop-Pasta`), elemento por elemento: estrutura, ordem, medidas, tokens de cor e estado ativo. Cada divergência cita o artboard e o seletor e é classificada como defeito (vira task de correção antes do dono) ou recusa registrada na spec (Baralhos, preço, "% do catálogo", "Zerar quantidade", rolagem horizontal dos chips). O relatório fica em `.specs/features/navegacao/canvas-conformance.md`
-- [ ] O dono comparou catálogo, filtro, detalhe e Minha pasta com o canvas, com sessão e sem sessão, em 360px e em 1280px, e aprovou ou listou o que reprova
-- [ ] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.14 de `.context/tasks.md` §6 está fechado
-- [ ] Gate build passa
+- [x] O dono comparou catálogo, filtro, detalhe e Minha pasta com o canvas, com sessão e sem sessão, em 360px e em 1280px, e aprovou ou listou o que reprova
+
+Os dois itens de fechamento (Success Criteria e gate build) passaram para a T33.
 
 **Resultado parcial (2026-09-25)**: a revisão de a11y (revisor Haiku no Orca, só
 leitura, no papel do `ecc:a11y-architect`) listou 2 CRITICAL e 4 HIGH. Nenhum se
@@ -807,9 +881,341 @@ borda `border-strong` tem 4,23:1 sobre `surface-base` e 3,53:1 sobre
 está em `canvas-conformance.md`: dois defeitos procedentes, corrigidos em
 `1206aeb`. Faltam a revisão do dono e o gate build.
 
+**Resultado (2026-09-26)**: **reprovada em parte**, agora sobre telas
+renderizadas (AD-015; capturas de 390px e 1280px, com e sem sessão). Das
+divergências, duas violam critério existente e viram correção (T23: barra a 0%
+desenhada cheia, NAV-38; T24: "Sair" com fundo de botão nativo, NAV-30). Dez
+viraram NAV-40..NAV-51 (T25–T32). Não procederam: barra inferior cobrindo o
+conteúdo (medido: não cobre), raridade no tile, 5 colunas fixas e tirar o
+convite de posse do tile (motivos no Out of Scope da spec). A rolagem
+horizontal dos chips continua recusada; em troca, os filtros recolhem no
+celular (NAV-43).
+
 **Tests**: none
 **Gate**: build
 **Commit**: `docs(navegacao): registrar a segunda revisão visual e de acessibilidade`
+
+---
+
+### T22: Script de captura das telas
+
+**What**: Versionar o script que fotografa as telas em 390px e 1280px, com e sem sessão, para servir de evidência às tasks de layout.
+**Where**: `spec/visual/capture.cjs`, `.gitignore`
+**Depends on**: T21
+**Reuses**: o formulário de cadastro (`registrations/new`)
+**Requirement**: AD-015 (Success Criteria da spec: revisão sobre capturas)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `node spec/visual/capture.cjs` com `NODE_PATH` apontando para um `playwright` grava em `tmp/capturas/` as telas catálogo, detalhe de uma carta, pasta, wishlist e import, em 390×1000 e 1280×900, sem sessão (catálogo e detalhe) e com sessão (todas)
+- [ ] A sessão vem de um usuário descartável criado pelo formulário, e o script espera a URL do destino antes da captura seguinte (a corrida do Turbo fez a primeira tentativa fotografar o login)
+- [ ] Navega com `domcontentloaded`; a captura não espera imagens da origem
+- [ ] Sem `playwright` resolvível, sai com código ≠ 0 e mensagem que diz como apontar `NODE_PATH`; sem o app em `:3000`, idem
+- [ ] Imprime, por captura, a URL final e o `scrollWidth` do documento, e marca `scrollWidth` maior que a viewport (Req. 2.5)
+- [ ] `tmp/capturas/` coberto pelo `.gitignore`; `python3 spec/verify_fixture.py` continua passando
+
+**Tests**: none
+**Gate**: o script roda contra `docker compose up` e produz as 14 capturas
+**Commit**: `chore(navegacao): versionar o script de captura das telas`
+
+---
+
+### T23: Barra de progresso vazia desenhada vazia
+
+**What**: A barra do set passa a desenhar trilho `surface-sunken` e preenchimento `border-strong` também no Chromium, e a 0% aparece vazia.
+**Where**: `app/assets/stylesheets/catalog.css`
+**Depends on**: T22
+**Reuses**: `.progress-set__bar` (T19)
+**Requirement**: NAV-38
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `.progress-set__bar` declara `appearance: none`; `::-webkit-progress-bar` tem fundo `var(--surface-sunken)`; `::-webkit-progress-value` e `::-moz-progress-bar` têm fundo `var(--border-strong)`
+- [ ] Teste novo em `test/design/` que falha sem qualquer um dos três e nomeia o seletor que falta
+- [ ] Captura da pasta com usuário sem cópia: nenhum set desenha barra cheia
+- [ ] `progress_ui_test.rb` e `set_progress_plan_test.rb` passam **sem edição**; gate full passa, contagem registrada
+
+**Tests**: unit (textual)
+**Gate**: full
+**Commit**: `fix(navegacao): desenhar a barra do set vazia quando nada foi coletado`
+
+---
+
+### T24: "Sair" e entradas da navegação sem estilo nativo
+
+**What**: "Sair" perde o fundo e a borda do botão nativo, e nenhuma entrada da navegação é sublinhada.
+**Where**: `app/assets/stylesheets/catalog.css`
+**Depends on**: T23
+**Reuses**: `.site-header__action`, `.site-header__nav`
+**Requirement**: NAV-41, NAV-30, NAV-31
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `.site-header__nav button` com `background` transparente e `border` nula ou `transparent`, e a mesma cor de texto das entradas inativas; a entrada atual continua com fundo `surface-sunken` (NAV-30)
+- [ ] `.site-header__nav a` com `text-decoration: none`; a entrada atual continua distinta por fundo e peso (NAV-04)
+- [ ] O foco visível da navegação continua (`focus_test.rb` passa sem edição)
+- [ ] Teste novo em `test/design/` para as duas regras; `navigation_canvas_test.rb` passa ou é reescrito só onde o NAV-41 muda a expectativa
+- [ ] Capturas com sessão em 390px e 1280px: "Sair" no mesmo fundo das outras entradas inativas; gate full passa, contagem registrada
+
+**Tests**: unit (textual)
+**Gate**: full
+**Commit**: `fix(navegacao): tirar o estilo nativo do Sair e o sublinhado da navegação`
+
+---
+
+### T25: Navegação no topo da coluna lateral
+
+**What**: Em viewport larga, a marca fica no topo da coluna, alinhada à esquerda, e a navegação logo abaixo dela.
+**Where**: `app/assets/stylesheets/catalog.css`
+**Depends on**: T24
+**Reuses**: o bloco `@media (min-width: 64rem)` de `.site-header` (T12)
+**Requirement**: NAV-40
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Dentro de `@media (min-width: 64rem)`, `.site-header` com `justify-content: flex-start` e `align-items: stretch`, e a marca com alinhamento à esquerda
+- [ ] Teste novo em `test/design/`, com recorte da media query, que falha se a coluna distribuir os filhos (`space-between`, `space-around`, `center`)
+- [ ] Capturas em 1280px da carta, da pasta e do catálogo: a `nav` começa logo abaixo da marca
+- [ ] `navigation_layout_test.rb` e `catalog_subgrid_layout_test.rb` passam; gate full passa, contagem registrada
+
+**Tests**: unit (textual)
+**Gate**: full
+**Commit**: `fix(navegacao): pôr a navegação logo abaixo da marca na coluna lateral`
+
+---
+
+### T26: Filtros da coluna lateral sem vão
+
+**What**: Os grupos de filtro na coluna ficam a `var(--space-4)` um do outro, e navegação e filtros formam uma superfície só.
+**Where**: `app/assets/stylesheets/catalog.css`
+**Depends on**: T25
+**Reuses**: `.catalog__filters` e o subgrid de `main.catalog` (T18)
+**Requirement**: NAV-42, NAV-32
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Em `≥ 64rem`, `.catalog__filters` empilha os grupos com `gap: var(--space-4)` e `align-content: start`, sem que a linha do subgrid estique o espaço entre eles
+- [ ] Nenhuma faixa de `surface-base` entre o cabeçalho e os filtros na coluna 1: os dois em `surface-raised`, sem `margin` nem `row-gap` entre as linhas da coluna
+- [ ] Teste novo em `test/design/` para o `gap` e o alinhamento; `catalog_subgrid_layout_test.rb` passa ou é reescrito só onde o NAV-42 muda a expectativa
+- [ ] Captura em 1280px, com e sem sessão: "Tipo" logo abaixo das cores; gate full passa, contagem registrada
+
+**Tests**: unit (textual)
+**Gate**: full
+**Commit**: `fix(navegacao): empilhar os filtros da coluna lateral sem vão`
+
+---
+
+### T27: Filtros recolhidos no celular
+
+**What**: Em viewport estreita, os controles de filtro ficam num `<details>` fechado que diz quantos filtros estão ativos; em viewport larga, continuam sempre visíveis.
+**Where**: `app/views/catalog/index.html.erb`, `app/assets/stylesheets/catalog.css`
+**Depends on**: T26
+**Reuses**: `active_filter_count`, `ul.catalog__chips` (lista "Filtros ativos")
+**Requirement**: NAV-43, NAV-44, NAV-45, NAV-14, NAV-27
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `<details>` sem `open` envolve só `catalog__filters`; o `<summary>` diz "Filtros" e, com filtro ativo, "N filtro(s) ativo(s)" com a mesma contagem da linha de status
+- [ ] `ul.catalog__chips` continua fora do `<details>`, com os links de remoção
+- [ ] Sem JavaScript: abrir o `<details>` e tocar num chip aplica o filtro (NAV-14); com zero resultados, os controles continuam na página (NAV-27)
+- [ ] ⚠️ VERIFICAR: em `≥ 64rem`, `summary` fora de vista e `::details-content` visível com o `<details>` fechado, confirmado pela captura em 1280px. Se não funcionar, aplicar o fallback registrado nas Decisões de implementação e registrar a escolha na spec
+- [ ] Testes de integração novos para o `<details>`, o `<summary>` com e sem filtro, e a lista de ativos fora dele; teste de folha para a regra larga
+- [ ] Captura em 390px: a primeira carta da grade aparece acima de y=600 com o `<details>` fechado; gate full passa, contagem registrada
+
+**Tests**: integration + unit (textual)
+**Gate**: full
+**Commit**: `feat(navegacao): recolher os filtros do catálogo no celular`
+
+---
+
+### T28: Busca e linha de status no desenho do canvas
+
+**What**: Campo de busca e botão "Buscar" com 44px e as superfícies do design system; linha de status rente à grade.
+**Where**: `app/assets/stylesheets/catalog.css`
+**Depends on**: T27
+**Reuses**: `.catalog__search`, `.catalog__status`
+**Requirement**: NAV-46, NAV-47
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] O `input` de `.catalog__search` com `min-height: 44px`, fundo `var(--surface-raised)` e borda `var(--border-strong)`; o botão com `min-height: 44px`, fundo transparente e borda `var(--border-strong)`
+- [ ] `.catalog__status` sem `padding` nem `margin` horizontais próprios
+- [ ] O rótulo da busca continua associado ao campo e o foco continua visível
+- [ ] Teste novo em `test/design/`; `catalog_status_line_test.rb` passa; `contrast_test.rb` passa sem edição
+- [ ] Capturas em 390px e 1280px; gate full passa, contagem registrada
+
+**Tests**: unit (textual)
+**Gate**: full
+**Commit**: `fix(navegacao): dar à busca e à linha de status a forma do canvas`
+
+---
+
+### T29: Imagem maior no detalhe da carta
+
+**What**: O detalhe exibe no topo a imagem maior da primeira variante listada e, em viewport larga, numa coluna de 320px à esquerda dos dados.
+**Where**: `app/views/catalog/show.html.erb`, `app/assets/stylesheets/catalog.css`
+**Depends on**: T28
+**Reuses**: `card_image_path` e o placeholder em camada do `_card_tile` (Req. 2.3)
+**Requirement**: NAV-48, NAV-24, NAV-25
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Elemento novo de `card-detail` antes de `card-detail__data`, com a imagem da primeira variante de `@variants` e o placeholder (nome + `card_number`) na mesma medida, visível sem JS quando a imagem falha
+- [ ] A imagem tem `alt` que nomeia a carta e o código da variante; carta sem variante não renderiza o elemento e não dá erro
+- [ ] Em `≥ 64rem`, o elemento ocupa uma coluna de 320px à esquerda dos dados
+- [ ] `card_detail_test.rb`, `collection_ownership_ui_test.rb` e `wishlist_mark_ui_test.rb` passam **sem edição** (NAV-25); `card_detail_layout_test.rb` reescrito só onde o NAV-48 muda a expectativa
+- [ ] Testes de integração e de folha novos; capturas do detalhe em 390px e 1280px; gate full passa, contagem registrada
+
+**Tests**: integration + unit (textual)
+**Gate**: full
+**Commit**: `feat(navegacao): mostrar a imagem maior no detalhe da carta`
+
+---
+
+### T30: Variantes do detalhe em linhas
+
+**What**: Cada variante vira uma linha com miniatura própria, código, raridade, set, posse e wishlist, com os rótulos fora da vista.
+**Where**: `app/assets/stylesheets/catalog.css`, `app/views/catalog/show.html.erb` (só se a grade pedir contêiner)
+**Depends on**: T29
+**Reuses**: `.variant`, `.variant__meta`, os partials de posse e de wishlist
+**Requirement**: NAV-49, NAV-25, Req. 5.2
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `.variant` em grid de três colunas (miniatura, meta, controles) em toda largura; em 360px os controles descem sem scroll horizontal (NAV-28)
+- [ ] Cada linha mantém a imagem própria da variante (Req. 5.2)
+- [ ] Os `dt` de `.variant__meta` continuam no HTML e saem da vista pelo padrão de recorte, sem `display: none`
+- [ ] Contêiner novo, se houver, é elemento de `variant`, com regra na folha, e não muda a ordem de leitura
+- [ ] `card_detail_test.rb` passa **sem edição**; teste de folha novo; captura do detalhe em 390px e 1280px; gate full passa, contagem registrada
+
+**Tests**: unit (textual)
+**Gate**: full
+**Commit**: `feat(navegacao): listar as variantes do detalhe em linhas`
+
+---
+
+### T31: Controles de posse de 44px no detalhe
+
+**What**: No detalhe, os botões +1 e −1 passam a ter alvo de 44×44px; na grade, continuam com 24px.
+**Where**: `app/assets/stylesheets/catalog.css`
+**Depends on**: T30
+**Reuses**: `.ownership__button`
+**Requirement**: NAV-50
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Regra `.card-detail .ownership__button` com `min-height: 44px` e `min-width: 44px`; a regra base continua com 24px
+- [ ] `collection_ownership_ui_test.rb` passa **sem edição**
+- [ ] Teste novo em `test/design/` para a regra escopada, que falha se ela sumir ou cair abaixo de 44px
+- [ ] Captura do detalhe com sessão em 390px e 1280px; gate full passa, contagem registrada
+
+**Tests**: unit (textual)
+**Gate**: full
+**Commit**: `fix(navegacao): dar alvo de 44px aos controles de posse do detalhe`
+
+---
+
+### T32: Minha pasta em linhas e ações agrupadas
+
+**What**: Cada set vira uma linha sem moldura, com a contagem ao lado do nome e a barra abaixo, e os links de wishlist, import e export formam um grupo separado de "Adicionar cartas".
+**Where**: `app/assets/stylesheets/catalog.css`, `app/views/progress/index.html.erb` (só o agrupamento das ações)
+**Depends on**: T31
+**Reuses**: `.progress-set`, `.progress__actions`, `progress/_export_link`
+**Requirement**: NAV-51, NAV-19, NAV-39
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `.progress-set` sem `border` nem `background` próprios; nome e contagem "possuídas / total" na mesma linha, a barra abaixo, percentual e parallels como legenda
+- [ ] Os três links secundários num contêiner próprio, elemento de `progress`, separado de "Adicionar cartas"; o export continua sendo o partial, não uma cópia
+- [ ] `progress_ui_test.rb`, `set_progress_plan_test.rb` e `collection_export_link_test.rb` passam **sem edição**; `minha_pasta_test.rb` reescrito só onde o NAV-51 muda a expectativa
+- [ ] Em 360px, nome longo de set quebra linha sem scroll horizontal (NAV-28)
+- [ ] Teste de integração para o agrupamento e teste de folha para a linha; capturas da pasta em 390px e 1280px; gate full passa, contagem registrada
+
+**Tests**: integration + unit (textual)
+**Gate**: full
+**Commit**: `feat(navegacao): mostrar a pasta em linhas e agrupar as ações`
+
+---
+
+### T33: Revisão sobre capturas e fechamento
+
+**What**: Rodar a revisão de a11y sobre o diff das Fases 11–14, submeter as capturas ao dono lado a lado com o canvas e fechar a feature.
+**Where**: `.specs/features/navegacao/tasks.md`, `.specs/features/navegacao/canvas-conformance.md`, `.context/tasks.md`
+**Depends on**: T32
+**Reuses**: `spec/visual/capture.cjs`, o plano de delegação (`ecc:a11y-architect`, só leitura)
+**Requirement**: NAV-01..NAV-51 (Success Criteria da spec)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE — subagente `ecc:a11y-architect`, só leitura
+
+**Done when**:
+
+- [ ] `ecc:a11y-architect` revisou o `<details>`, os rótulos fora da vista das variantes, os alvos de 44px e a navegação. Achados CRITICAL e HIGH triados e, os que procederem, corrigidos antes do Verifier
+- [ ] `canvas-conformance.md` ganha a conferência renderizada: captura × artboard, por tela, com defeito ou recusa registrada
+- [ ] O dono comparou as capturas com o canvas, com e sem sessão, em 360px e 1280px, e aprovou ou listou o que reprova
+- [ ] Os Success Criteria da spec estão marcados, e o item Req. 4.9 / 13.1–13.20 de `.context/tasks.md` §6 está fechado
+- [ ] Gate build passa
+
+**Tests**: none
+**Gate**: build
+**Commit**: `docs(navegacao): registrar a revisão sobre capturas e fechar a feature`
 
 ---
 
@@ -823,6 +1229,8 @@ está em `canvas-conformance.md`: dois defeitos procedentes, corrigidos em
 | T13–T15 — URL de alternância e chips | `ecc:pr-test-analyzer` sobre os testes reescritos, antes do Verifier |
 | T12, T16, T18–T20 — barra, chips, coluna, pasta | `ecc:a11y-architect` na T21 |
 | T1, T2 — consultas novas | `ecc:database-reviewer` se `filter_options` fizer full scan na tabela de variantes |
+| T24–T32 — navegação, `<details>`, busca, detalhe, pasta | `ecc:a11y-architect` na T33 |
+| T27, T29, T32 — testes de integração novos | `ecc:pr-test-analyzer` antes do Verifier |
 
 ## Task Granularity Check
 
@@ -849,6 +1257,18 @@ está em `canvas-conformance.md`: dois defeitos procedentes, corrigidos em
 | T19 | cartões e barra da pasta | ✅ coeso |
 | T20 | um link | ✅ |
 | T21 | revisão | ✅ |
+| T22 | um script de host | ✅ |
+| T23 | uma regra e dois pseudo-elementos | ✅ |
+| T24 | duas regras da navegação | ✅ coeso |
+| T25 | uma regra da coluna | ✅ |
+| T26 | uma regra dos filtros largos | ✅ |
+| T27 | um `<details>` mais a regra larga | ⚠️ view e folha, um conceito |
+| T28 | duas regras (busca, status) | ✅ coeso |
+| T29 | um elemento da view mais a coluna larga | ⚠️ view e folha, um conceito |
+| T30 | uma grade de linha | ✅ |
+| T31 | uma regra escopada | ✅ |
+| T32 | linha do set mais agrupamento de ações | ⚠️ dois ajustes na mesma página |
+| T33 | revisão | ✅ |
 
 Separar o helper `nav_link_to` da T5 deixaria uma task com helper sem uso e sem
 teste de integração.
@@ -878,6 +1298,18 @@ teste de integração.
 | T19 | T18 | T18 → T19 (Fase 9) | ✅ |
 | T20 | T19 | T19 → T20 | ✅ |
 | T21 | T20 | T20 → T21 (Fase 10) | ✅ |
+| T22 | T21 | T21 → T22 (Fase 11) | ✅ |
+| T23 | T22 | T22 → T23 | ✅ |
+| T24 | T23 | T23 → T24 | ✅ |
+| T25 | T24 | T24 → T25 (Fase 12) | ✅ |
+| T26 | T25 | T25 → T26 | ✅ |
+| T27 | T26 | T26 → T27 | ✅ |
+| T28 | T27 | T27 → T28 | ✅ |
+| T29 | T28 | T28 → T29 (Fase 13) | ✅ |
+| T30 | T29 | T29 → T30 | ✅ |
+| T31 | T30 | T30 → T31 | ✅ |
+| T32 | T31 | T31 → T32 (Fase 14) | ✅ |
+| T33 | T32 | T32 → T33 (Fase 15) | ✅ |
 
 ## Test Co-location Validation
 
@@ -904,3 +1336,15 @@ teste de integração.
 | T19 | view e folha | integration + unit (textual) | integration + unit | ✅ |
 | T20 | view | integration | integration | ✅ |
 | T21 | revisão | none | none | ✅ |
+| T22 | script de host | none | none | ✅ |
+| T23 | folha | unit (textual) | unit | ✅ |
+| T24 | folha | unit (textual) | unit | ✅ |
+| T25 | folha | unit (textual) | unit | ✅ |
+| T26 | folha | unit (textual) | unit | ✅ |
+| T27 | view e folha | integration + unit (textual) | integration + unit | ✅ |
+| T28 | folha | unit (textual) | unit | ✅ |
+| T29 | view e folha | integration + unit (textual) | integration + unit | ✅ |
+| T30 | folha | unit (textual) | unit | ✅ |
+| T31 | folha | unit (textual) | unit | ✅ |
+| T32 | view e folha | integration + unit (textual) | integration + unit | ✅ |
+| T33 | revisão | none | none | ✅ |

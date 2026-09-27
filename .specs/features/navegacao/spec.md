@@ -2,7 +2,9 @@
 
 **Status**: Approved (2026-09-23, pelo dono do produto). Emendada em 2026-09-24
 com NAV-30..NAV-39 (Req. 13.9–13.14), depois da reprovação visual na T11,
-aprovada pelo dono na mesma data.
+aprovada pelo dono na mesma data. Emendada de novo em 2026-09-26 com
+NAV-40..NAV-51 (Req. 13.15–13.20), depois da primeira revisão com as telas
+renderizadas (AD-015), aprovada pelo dono em 2026-09-26.
 
 ## Problem Statement
 
@@ -38,7 +40,13 @@ preço.
 | Rota nova para a pasta | Decisão do dono: a página de progresso vira a pasta, `/progress` permanece |
 | Hexadecimais das seis cores do jogo | Pendência P8 aberta; chips seguem neutros (Req. 12.11) |
 | Ícones na navegação | Design system não escolheu conjunto; a navegação usa palavra escrita |
-| Verificação de layout em navegador real | Não há navegador no container; UI vira teste de integração sobre HTML e teste sobre o texto da folha |
+| Verificação de layout em navegador real **como gate** | Não há navegador no container, onde a suíte roda. Desde 2026-09-26 a render existe no host e é evidência de revisão, não gate (AD-015) |
+| Rolagem horizontal das fileiras de chips | Recusa mantida (AD-013). O excesso de altura no celular se resolve recolhendo os filtros (NAV-43) |
+| Nome curto do set ("Memorial Collection" em vez de "EXTRA BOOSTER -Memorial Collection- [EB-01]") | Exige derivar o nome no estágio Normalize, outro subsistema. Pendência para uma feature da ingestão |
+| Raridade no tile da grade | O tile renderiza a carta e a raridade é da variante: carta com várias impressões não tem uma raridade só (Card ≠ CardVariant) |
+| Número fixo de colunas da grade | A grade usa `auto-fill` com largura mínima de tile; fixar 5 colunas em 1280px quebraria o reflow sem ganho funcional |
+| Tirar "Entrar para registrar posse" de cada tile | O convite vem do partial de posse da `colecao` (Req. 7.5); mudar exige emendar aquela feature |
+| Esconder a marca "Bindr" em viewport estreita | Decisão do dono (2026-09-26): a marca fica em todas as larguras |
 
 ---
 
@@ -61,9 +69,15 @@ preço.
 | Controle de posse para anônimo | Não renderizado | O query object já ignora `owned` sem usuário; mostrar controle inerte é promessa quebrada | y |
 | Título da página de progresso | `h1` "Minha pasta", "Progresso por set" vira `h2` | É a entrada da navegação; o nome da seção continua dizendo o que a lista é | y |
 | Testes que leem `catalog.css` como texto | Não são editados; regras novas só são acrescentadas | Mesma restrição da `interface` (AD-011, trade-off 2) | y |
+| Filtros no celular (emenda de 2026-09-26) | Dentro de `<details>` fechado por padrão; os chips da lista "Filtros ativos" ficam fora dele | Decisão do dono: a grade volta para a primeira tela sem reabrir a rolagem horizontal, e `<details>` funciona sem JS (NAV-14) | y |
+| Imagem maior no detalhe | A da primeira variante na ordem em que a lista de impressões já aparece | O Req. 5.1 pede "a imagem em resolução maior" sem dizer qual; a ordem da lista já é a ordem de leitura |y |
+| Variantes em linha | Cada linha mantém a miniatura própria da variante | O Req. 5.2 exige imagem própria por variante; a arte alternativa é o objeto de coleção |y |
+| Rótulos "Código", "Raridade", "Set" das variantes | Continuam no HTML como `dt` e saem da vista | A linha fica compacta como no canvas sem perder a estrutura para leitor de tela |y |
+| Alvo de 44px dos controles de posse | Só no detalhe, numa regra própria; a regra base continua 24px | `collection_ownership_ui_test.rb` (protegido) exige 24px na regra base; o tile da grade não tem espaço para dois alvos de 44px em 360px |y |
 
 **Open questions:** none — os defaults do agente foram confirmados pelo dono
-na aprovação desta spec (2026-09-23).
+na aprovação desta spec (2026-09-23). Os defaults da emenda de 2026-09-26 foram
+confirmados na aprovação dela, na mesma data.
 
 ---
 
@@ -196,6 +210,41 @@ contagem.
 
 ---
 
+### P1: Acabamento conferido na tela renderizada ⭐ MVP
+
+**User Story**: Como colecionador, quero que a navegação, os filtros, o detalhe
+e a pasta tenham o acabamento do canvas, para achar a carta na primeira tela do
+celular e ler cada tela de relance.
+
+**Why P1**: A primeira render das telas (2026-09-26) mostrou, com NAV-01..NAV-39
+cumpridos, a navegação no pé da coluna lateral, um vão de ~180px entre os grupos
+de filtro, nenhuma carta na primeira tela do catálogo em 390px (a grade começa em
+y≈940) e o detalhe sem a imagem maior do Req. 5.1. É a mesma lição da AD-013:
+forma que não vira critério não é verificada (Req. 13.15–13.20).
+
+**Acceptance Criteria**:
+
+1. WHILE a largura da viewport for de 1024px ou mais, the system SHALL empilhar a partir do topo da coluna lateral a marca e, logo abaixo dela, a navegação principal, as duas alinhadas à esquerda, sem espaço distribuído entre elas. <!-- NAV-40 -->
+2. The system SHALL renderizar as entradas da navegação principal sem sublinhado, e "Sair" com o mesmo fundo transparente e a mesma borda das demais entradas inativas. <!-- NAV-41 -->
+3. WHILE a largura da viewport for de 1024px ou mais, the system SHALL separar os grupos de filtro do catálogo por espaçamento fixo `var(--space-4)`, sem crescer com a altura da grade, e renderizar navegação e filtros sobre a mesma superfície `surface-raised`, sem faixa de outro fundo entre elas. <!-- NAV-42 -->
+4. WHILE a largura da viewport for menor que 1024px, the system SHALL renderizar os controles de filtro dentro de um `<details>` fechado por padrão, cujo `<summary>` diz "Filtros" e, com filtro ativo, também "N filtros ativos". <!-- NAV-43 -->
+5. WHILE os controles de filtro estiverem recolhidos, the system SHALL manter visível, fora do `<details>`, a lista "Filtros ativos", com cada chip removível. <!-- NAV-44 -->
+6. WHILE a largura da viewport for de 1024px ou mais, the system SHALL exibir os controles de filtro sempre visíveis, sem `<summary>` visível. <!-- NAV-45 -->
+7. The system SHALL renderizar o campo de busca com altura mínima de 44px, fundo `surface-raised` e borda `border-strong`, e o botão "Buscar" com altura mínima de 44px, fundo transparente e borda `border-strong`. <!-- NAV-46 -->
+8. The system SHALL alinhar a linha de status do catálogo à borda esquerda da grade, sem recuo próprio. <!-- NAV-47 -->
+9. The system SHALL exibir no topo do detalhe da carta a imagem maior da primeira variante listada, com o placeholder do Req. 2.3 na mesma medida. WHILE a largura da viewport for de 1024px ou mais, the system SHALL posicioná-la numa coluna de 320px à esquerda dos dados. <!-- NAV-48 -->
+10. The system SHALL listar as variantes no detalhe em linhas, cada uma com a miniatura própria da variante, código, raridade, set, controles de posse e marca de wishlist, com os rótulos "Código", "Raridade" e "Set" presentes no HTML e fora da vista. <!-- NAV-49 -->
+11. WHILE estiver no detalhe da carta, the system SHALL dar a cada botão de posse altura e largura mínimas de 44px. <!-- NAV-50 -->
+12. The system SHALL renderizar cada set de "Minha pasta" sem borda nem fundo próprios, com código e nome à esquerda e a contagem "possuídas / total" à direita na mesma linha, a barra abaixo, e agrupar os links de wishlist, import e export numa linha de ações secundárias separada de "Adicionar cartas". <!-- NAV-51 -->
+
+**Independent Test**: Em 1280px, a `nav` começa logo abaixo da marca, sem
+sublinhado. Em 390px, o catálogo com `colors[]=Red` traz um `<details>` fechado
+com "1 filtro ativo" no `<summary>` e o chip "Cor: Red" fora dele. No detalhe,
+a imagem maior vem antes dos dados e cada variante é uma linha com miniatura e
+botões de 44px. Na pasta, cada set é uma linha sem moldura.
+
+---
+
 ## Edge Cases
 
 - IF um parâmetro de filtro for desconhecido ou inválido THEN the system SHALL ignorá-lo também nos controles, sem marcar nenhum como ativo e sem erro. <!-- NAV-26 -->
@@ -262,8 +311,24 @@ contagem.
 | NAV-37 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
 | NAV-38 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
 | NAV-39 | P1: Telas no desenho do canvas | Req. 13.14 | Pending (T20) |
+| NAV-40 | P1: Acabamento conferido | Req. 13.15 | Pending (T25) |
+| NAV-41 | P1: Acabamento conferido | Req. 13.15 | Pending (T24) |
+| NAV-42 | P1: Acabamento conferido | Req. 13.16 | Pending (T26) |
+| NAV-43 | P1: Acabamento conferido | Req. 13.17 | Pending (T27) |
+| NAV-44 | P1: Acabamento conferido | Req. 13.17 | Pending (T27) |
+| NAV-45 | P1: Acabamento conferido | Req. 13.17 | Pending (T27) |
+| NAV-46 | P1: Acabamento conferido | Req. 13.18 | Pending (T28) |
+| NAV-47 | P1: Acabamento conferido | Req. 13.18 | Pending (T28) |
+| NAV-48 | P1: Acabamento conferido | Req. 13.19, 5.1 | Pending (T29) |
+| NAV-49 | P1: Acabamento conferido | Req. 13.19, 5.2 | Pending (T30) |
+| NAV-50 | P1: Acabamento conferido | Req. 13.19 | Pending (T31) |
+| NAV-51 | P1: Acabamento conferido | Req. 13.20 | Pending (T32) |
 
-**Coverage:** 39 total, 39 mapped to tasks, 0 unmapped
+NAV-38 e NAV-30 ganham também as correções T23 e T24: a render mostrou a barra
+a 0% desenhada cheia e o "Sair" com fundo de botão nativo, que o faz parecer a
+entrada atual.
+
+**Coverage:** 51 total, 51 mapped to tasks, 0 unmapped
 
 ---
 
@@ -274,4 +339,5 @@ contagem.
 - [ ] Aplicar cor + raridade na grade sem tocar na URL, sem JavaScript
 - [ ] `bin/rails test && bin/rubocop` limpo, com os arquivos de `test/design/` e os
       sete testes que leem `catalog.css` sem edição
-- [ ] Revisão visual aprovada pelo dono do produto em 360px e em 1280px
+- [ ] Revisão visual aprovada pelo dono do produto em 360px e em 1280px, sobre
+      capturas renderizadas lado a lado com o canvas (AD-015)

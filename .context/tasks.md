@@ -275,7 +275,11 @@ Regras de execução:
     barra e coluna lateral no desenho do canvas, filtros como chips que
     aplicam com um toque, linha de status, filtros na coluna lateral e pasta
     com cartões e barras.
-  - _Requisitos: 4.9, 13.1–13.14_
+  - Acabamento conferido na tela renderizada (emenda de 2026-09-26, AD-015):
+    navegação no topo da coluna, filtros sem vão e recolhidos no celular,
+    busca de 44px, imagem maior e variantes em linhas no detalhe, pasta em
+    linhas; corrige a barra a 0% e o "Sair" nativo.
+  - _Requisitos: 4.9, 13.1–13.20_
 
 ---
 
