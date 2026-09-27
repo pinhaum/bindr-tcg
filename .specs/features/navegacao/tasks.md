@@ -1075,11 +1075,11 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] O `input` de `.catalog__search` com `min-height: 44px`, fundo `var(--surface-raised)` e borda `var(--border-strong)`; o botão com `min-height: 44px`, fundo transparente e borda `var(--border-strong)`
-- [ ] `.catalog__status` sem `padding` nem `margin` horizontais próprios
-- [ ] O rótulo da busca continua associado ao campo e o foco continua visível
-- [ ] Teste novo em `test/design/`; `catalog_status_line_test.rb` passa; `contrast_test.rb` passa sem edição
-- [ ] Capturas em 390px e 1280px; gate full passa, contagem registrada
+- [x] O `input` de `.catalog__search` com `min-height: 44px`, fundo `var(--surface-raised)` e borda `var(--border-strong)`; o botão com `min-height: 44px`, fundo transparente e borda `var(--border-strong)`
+- [x] `.catalog__status` sem `padding` nem `margin` horizontais próprios
+- [x] O rótulo da busca continua associado ao campo e o foco continua visível
+- [x] Teste novo em `test/design/`; `catalog_status_line_test.rb` passa; `contrast_test.rb` passa sem edição
+- [x] Capturas em 390px e 1280px; gate full passa, contagem registrada
 
 **Tests**: unit (textual)
 **Gate**: full
