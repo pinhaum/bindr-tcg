@@ -1368,10 +1368,10 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `index.html.erb:258` usa `clear_filters_url(@result.active_filters)`; com `colors[]=Purple&sort=name&dir=desc` e zero resultados, o único "Limpar filtros" aponta para uma URL com `sort=name` e `dir=desc` e sem `colors`
-- [ ] Com mais cartas que uma página, a contagem mostra o total, não o tamanho da página (mata o M39)
-- [ ] `catalog_status_line_test.rb:145`, que promete 24px sem medir, passa a medir pela folha com `Stylesheet.resolved`
-- [ ] Gate full passa
+- [x] `index.html.erb:258` usa `clear_filters_url(@result.active_filters)`; com `colors[]=Purple&sort=name&dir=desc` e zero resultados, o único "Limpar filtros" aponta para uma URL com `sort=name` e `dir=desc` e sem `colors`
+- [x] Com mais cartas que uma página, a contagem mostra o total, não o tamanho da página (mata o M39)
+- [x] `catalog_status_line_test.rb:145`, que promete 24px sem medir, passa a medir pela folha com `Stylesheet.resolved`
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

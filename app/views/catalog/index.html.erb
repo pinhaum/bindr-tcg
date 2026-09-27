@@ -255,7 +255,7 @@
           Nenhuma carta corresponde aos filtros aplicados.
         <% end %>
       </p>
-      <%= link_to "Limpar filtros", catalog_path, class: "catalog__empty-reset" %>
+      <%= link_to "Limpar filtros", clear_filters_url(@result.active_filters), class: "catalog__empty-reset" %>
     </section>
   <% else %>
     <ul class="catalog__grid">

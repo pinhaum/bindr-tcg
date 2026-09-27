@@ -1,4 +1,5 @@
 require "test_helper"
+require_relative "../design/support/stylesheet"
 
 # T17 — Linha de status do catálogo (NAV-36, NAV-27).
 #
@@ -146,10 +147,23 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
     get catalog_path(colors: [ "Red" ])
 
     assert_response :success
+    assert_select ".catalog__status a.catalog__clear-filters", text: "Limpar filtros"
 
-    # O link deve ter classe com as regras de 24px (verificável em design test)
-    # Aqui testamos que existe o elemento
-    assert_select ".catalog__status a[href*='/catalog']", text: "Limpar filtros"
+    rule = Stylesheet.resolved("catalog__clear-filters")
+    assert_operator Stylesheet.to_pixels(rule.fetch("min-height")), :>=, 24
+    assert_operator Stylesheet.to_pixels(rule.fetch("min-width")), :>=, 24
+  end
+
+  test "com zero resultados, 'Limpar filtros' do vazio preserva sort e dir" do
+    get catalog_path(colors: [ "Purple" ], sort: "name", dir: "desc")
+
+    assert_response :success
+    assert_select ".catalog__empty a", text: "Limpar filtros", count: 1
+
+    href = css_select(".catalog__empty a").first.attr("href")
+    assert_includes href, "sort=name"
+    assert_includes href, "dir=desc"
+    assert_not_includes href, "colors"
   end
 
   # --- NAV-36: a contagem é a de chips, e o total mora na mesma linha ---
@@ -180,5 +194,26 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
 
     assert_select ".catalog__empty"
     assert_select "a", text: "Limpar filtros", count: 1
+  end
+
+  # --- NAV-36: Com paginação, contagem é o total, não o tamanho da página ---
+
+  test "a contagem mostra o total de cartas, não o tamanho da página" do
+    # Cria 35 cartas para ultrapassar uma página (padrão 30 por página)
+    @op01.update(name: "Page Test")
+    35.times do |i|
+      create_card(
+        card_number: "OP01-#{'%03d' % (i + 100)}", name: "Card #{i}",
+        card_type: "character", colors: [ "Red" ], cost: 1, power: 1000
+      )
+    end
+
+    # Primeira página tem 30 cartas, mas o total de "Red" é 35 + 1 (Zoro) = 36
+    get catalog_path(colors: [ "Red" ])
+
+    assert_response :success
+
+    # A contagem deve dizer "36 cartas", não "30 cartas"
+    assert_select ".catalog__count", text: /^\s*36 cartas\s*$/
   end
 end
