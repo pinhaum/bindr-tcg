@@ -277,21 +277,21 @@ botões de 44px. Na pasta, cada set é uma linha sem moldura.
 | NAV-01 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
 | NAV-02 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
 | NAV-03 | P1: Navegação principal | Req. 13.1 | Implemented (T5) |
-| NAV-04 | P1: Navegação principal | Req. 13.2 | Implemented (T5) |
+| NAV-04 | P1: Navegação principal | Req. 13.2 | Implemented (T5, T35) |
 | NAV-05 | P1: Navegação principal | Req. 13.3 | Implemented (T6) |
 | NAV-06 | P1: Navegação principal | Req. 13.3 | Implemented (T6) |
 | NAV-07 | P1: Navegação principal | Req. 13.8 | Implemented (T5) |
 | NAV-08 | P1: Filtrar a grade | Req. 4.9 | Implemented (T1) |
 | NAV-09 | P1: Filtrar a grade | Req. 4.9, 4.7 | Implemented (T7) |
 | NAV-10 | P1: Filtrar a grade | Req. 4.3, 4.7 | Implemented (T7) |
-| NAV-11 | P1: Filtrar a grade | Req. 12.6 | Implemented (T7) |
+| NAV-11 | P1: Filtrar a grade | Req. 12.6 | Implemented (T7, T41) |
 | NAV-12 | P1: Filtrar a grade | Req. 4.9, 7.6 | Implemented (T8) |
 | NAV-13 | P1: Filtrar a grade | Req. 6.3 | Implemented (T8) |
 | NAV-14 | P1: Filtrar a grade | Req. 4.9 | Implemented (T7) |
 | NAV-15 | P1: Filtrar a grade | Req. 12.11 | Implemented (T9) |
 | NAV-16 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-17 | P1: Minha pasta | Req. 13.4, 7.7 | Implemented (T3) |
-| NAV-18 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
+| NAV-18 | P1: Minha pasta | Req. 13.4 | Implemented (T3, T36) |
 | NAV-19 | P1: Minha pasta | Req. 13.4 | Implemented (T4) |
 | NAV-20 | P1: Minha pasta | Req. 13.4 | Implemented (T3) |
 | NAV-21 | P1: Minha pasta | Req. 6.5 | Implemented (T3) |
@@ -303,16 +303,16 @@ botões de 44px. Na pasta, cada set é uma linha sem moldura.
 | NAV-27 | Edge case | Req. 3.6 | Implemented (T7) |
 | NAV-28 | Edge case | Req. 2.5, 13.7 | Implemented (T6, T9) |
 | NAV-29 | Edge case | Req. 6.4 | Implemented (T3) |
-| NAV-30 | P1: Telas no desenho do canvas | Req. 13.9 | Pending (T12) |
-| NAV-31 | P1: Telas no desenho do canvas | Req. 13.10 | Pending (T12) |
-| NAV-32 | P1: Telas no desenho do canvas | Req. 13.10 | Pending (T18) |
-| NAV-33 | P1: Telas no desenho do canvas | Req. 13.11 | Pending (T13, T14, T15) |
-| NAV-34 | P1: Telas no desenho do canvas | Req. 13.11 | Pending (T14, T15) |
-| NAV-35 | P1: Telas no desenho do canvas | Req. 13.11 | Pending (T16) |
-| NAV-36 | P1: Telas no desenho do canvas | Req. 13.12 | Pending (T17) |
-| NAV-37 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
-| NAV-38 | P1: Telas no desenho do canvas | Req. 13.13 | Pending (T19) |
-| NAV-39 | P1: Telas no desenho do canvas | Req. 13.14 | Pending (T20) |
+| NAV-30 | P1: Telas no desenho do canvas | Req. 13.9 | Implemented (T12) |
+| NAV-31 | P1: Telas no desenho do canvas | Req. 13.10 | Implemented (T12) |
+| NAV-32 | P1: Telas no desenho do canvas | Req. 13.10 | Implemented (T18) |
+| NAV-33 | P1: Telas no desenho do canvas | Req. 13.11 | Implemented (T13, T14, T15) |
+| NAV-34 | P1: Telas no desenho do canvas | Req. 13.11 | Implemented (T14, T15, T41) |
+| NAV-35 | P1: Telas no desenho do canvas | Req. 13.11 | Implemented (T16, T40) |
+| NAV-36 | P1: Telas no desenho do canvas | Req. 13.12 | Implemented (T17, T38) |
+| NAV-37 | P1: Telas no desenho do canvas | Req. 13.13 | Implemented (T19) |
+| NAV-38 | P1: Telas no desenho do canvas | Req. 13.13 | Implemented (T19, T37) |
+| NAV-39 | P1: Telas no desenho do canvas | Req. 13.14 | Implemented (T20) |
 | NAV-40 | P1: Acabamento conferido | Req. 13.15 | Done (T25) |
 | NAV-41 | P1: Acabamento conferido | Req. 13.15 | Done (T24) |
 | NAV-42 | P1: Acabamento conferido | Req. 13.16 | Done (T26) |

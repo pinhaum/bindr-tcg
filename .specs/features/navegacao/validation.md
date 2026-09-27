@@ -307,3 +307,26 @@ Em ordem de prioridade:
 - Toda a folha coberta por asserções exatas: navegação, busca, detalhe e pasta.
 
 **Próximo passo**: rotear o Fix Plan 1–11 a um implementador e redespachar o Verifier (iteração 1 de 3).
+
+---
+
+## Iteração 1 do loop de correção (2026-09-27)
+
+Correções T34–T41, uma por commit, de `6358b96` a `86c3d21`. Gate full: 1214 runs, 0 falhas, RuboCop limpo.
+
+| Lacuna | Task | Commit |
+|---|---|---|
+| P-1, Success Criterion falso | T34 (AD-017, decisão do dono) | `6358b96` |
+| NAV-04, M08 (defeito) | T35 | `e2e1f5a` |
+| NAV-18, M06 | T36 | `3c167a8` |
+| NAV-38, M12 e M13 | T37 | `271db5d` |
+| NAV-36 (defeito), M39, `catalog_status_line_test.rb:145` | T38 | `f389169` |
+| P-4, `filter_toggle_url` com chave string | T39 | `ac956c5` |
+| NAV-35, M14 | T40 | `5adc70e` |
+| NAV-11 (M43), NAV-34 (M41), seletores sem efeito | T41 | `86c3d21` |
+
+**Não viraram correção aqui**: M42 (NAV-47) e M45 (NAV-49). A `conformidade` reescreve a linha de status do catálogo (inventário §5) e a linha da variante no detalhe (D8–D10). Por isso a medida do alinhamento da linha de status e a asserção dos rótulos "Código", "Raridade" e "Set" entram na spec nova como critério. Testar agora uma forma que vai ser trocada não compensa. O NAV-47 e o NAV-49 continuam cumpridos pelo que já existe. O que fica pendente é só a prova discriminante.
+
+**Lacunas de precisão**: as seis foram resolvidas na spec na T34. O "Todas" ativo com nome "Remover filtro" vai para a `conformidade` como critério.
+
+O próximo Verifier confere esta iteração.

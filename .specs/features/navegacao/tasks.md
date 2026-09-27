@@ -1469,9 +1469,9 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] NAV-30..NAV-39 deixam de estar `Pending`; NAV-04, 11, 18, 34, 35, 36 e 38 citam a task de correção
-- [ ] `validation.md` registra que M42 (NAV-47) e M45 (NAV-49) não viram correção aqui: a `conformidade` reescreve a linha de status e a linha da variante, e leva as duas medidas como critério
-- [ ] Gate full passa, contagem registrada
+- [x] NAV-30..NAV-39 deixam de estar `Pending`; NAV-04, 11, 18, 34, 35, 36 e 38 citam a task de correção
+- [x] `validation.md` registra que M42 (NAV-47) e M45 (NAV-49) não viram correção aqui: a `conformidade` reescreve a linha de status e a linha da variante, e leva as duas medidas como critério
+- [x] Gate full passa, contagem registrada (2026-09-27: 1214 runs, 0 falhas, RuboCop limpo)
 
 **Tests**: none
 **Gate**: full
