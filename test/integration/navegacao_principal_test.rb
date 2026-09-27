@@ -243,4 +243,63 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
                     "nenhum href deve conter baralho, deck, preço, price ou cotação"
     end
   end
+
+  # --- T35: aria-current em Entrar e Criar conta (NAV-04) ---
+
+  test "em /session/new, apenas Entrar tem aria-current=\"page\"" do
+    get new_session_path
+
+    # Entrar deve ter aria-current
+    assert_select "header.site-header nav[aria-label='Principal'] a[href='#{new_session_path}'][aria-current='page']",
+                  text: "Entrar"
+
+    # Catálogo não deve ter
+    catalog_entry = css_select("header.site-header nav[aria-label='Principal'] a[href='#{catalog_path}']").first
+    assert catalog_entry, "não encontrou entrada Catálogo"
+    assert_nil catalog_entry["aria-current"],
+               "Catálogo não deve ter aria-current em /session/new"
+
+    # Criar conta não deve ter
+    signup_entry = css_select("header.site-header nav[aria-label='Principal'] a[href='#{new_registration_path}']").first
+    assert signup_entry, "não encontrou entrada Criar conta"
+    assert_nil signup_entry["aria-current"],
+               "Criar conta não deve ter aria-current em /session/new"
+  end
+
+  test "em /registration/new, apenas Criar conta tem aria-current=\"page\"" do
+    get new_registration_path
+
+    # Criar conta deve ter aria-current
+    assert_select "header.site-header nav[aria-label='Principal'] a[href='#{new_registration_path}'][aria-current='page']",
+                  text: "Criar conta"
+
+    # Catálogo não deve ter
+    catalog_entry = css_select("header.site-header nav[aria-label='Principal'] a[href='#{catalog_path}']").first
+    assert catalog_entry, "não encontrou entrada Catálogo"
+    assert_nil catalog_entry["aria-current"],
+               "Catálogo não deve ter aria-current em /registration/new"
+
+    # Entrar não deve ter
+    login_entry = css_select("header.site-header nav[aria-label='Principal'] a[href='#{new_session_path}']").first
+    assert login_entry, "não encontrou entrada Entrar"
+    assert_nil login_entry["aria-current"],
+               "Entrar não deve ter aria-current em /registration/new"
+  end
+
+  test "no detalhe da carta, nenhuma entrada tem aria-current com sessão" do
+    sign_in
+    get card_path(@card)
+
+    # Nenhum aria-current dentro da nav
+    current_entries = css_select("header.site-header nav[aria-label='Principal'] [aria-current='page']")
+    assert_empty current_entries, "nenhuma entrada deve ter aria-current no detalhe da carta"
+  end
+
+  test "no detalhe da carta, nenhuma entrada tem aria-current sem sessão" do
+    get card_path(@card)
+
+    # Nenhum aria-current dentro da nav
+    current_entries = css_select("header.site-header nav[aria-label='Principal'] [aria-current='page']")
+    assert_empty current_entries, "nenhuma entrada deve ter aria-current no detalhe sem sessão"
+  end
 end

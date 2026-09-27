@@ -33,8 +33,8 @@
           <%= button_to "Sair", session_path, method: :delete, class: "site-header__action" %>
         <% else %>
           <%= nav_link_to "Catálogo", catalog_path, current: current_page?(root_path) || current_page?(catalog_path), class: "site-header__action" %>
-          <%= link_to "Entrar", new_session_path, class: "site-header__action" %>
-          <%= link_to "Criar conta", new_registration_path, class: "site-header__action" %>
+          <%= nav_link_to "Entrar", new_session_path, current: current_page?(new_session_path), class: "site-header__action" %>
+          <%= nav_link_to "Criar conta", new_registration_path, current: current_page?(new_registration_path), class: "site-header__action" %>
         <% end %>
       </nav>
     </header>

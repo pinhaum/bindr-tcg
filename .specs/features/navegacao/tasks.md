@@ -1292,9 +1292,9 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] Em `/session/new`, `a[aria-current=page]` é "Entrar", e só ele; em `/registration/new`, é "Criar conta", e só ele
-- [ ] Em `card_path` de uma carta do fixture, nenhum `[aria-current]` dentro de `.site-header__nav`, com e sem sessão (mata o M08)
-- [ ] Gate full passa
+- [x] Em `/session/new`, `a[aria-current=page]` é "Entrar", e só ele; em `/registration/new`, é "Criar conta", e só ele
+- [x] Em `card_path` de uma carta do fixture, nenhum `[aria-current]` dentro de `.site-header__nav`, com e sem sessão (mata o M08)
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full
