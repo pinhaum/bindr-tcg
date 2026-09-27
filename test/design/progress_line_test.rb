@@ -1,33 +1,38 @@
 require "test_helper"
 require_relative "support/stylesheet"
 
+# T32 — cada set de "Minha pasta" é uma linha sem moldura, com nome à esquerda e
+# contagem à direita, e as ações secundárias formam uma linha própria (NAV-51).
 class ProgressLineTest < ActiveSupport::TestCase
-  include Stylesheet
-
-  setup do
-    @sheet = File.read(Rails.root.join("app/assets/stylesheets/catalog.css"))
+  def declarations(selector)
+    rule = Stylesheet.rules.find { |candidate, _| candidate.strip == selector }
+    assert_not_nil rule, "regra #{selector} não encontrada na folha"
+    Stylesheet.declarations(rule[1]).to_h
   end
 
-  test "progress-set não tem border" do
-    regra = extrair_regra(".progress-set")
-    assert regra.present?, "regra .progress-set deve existir na folha"
-
-    refute regra.match?(/\bborder\s*:(?!\s*none)/i),
-           "\.progress-set não deve ter border (exceto border: none)"
+  test "o set não desenha moldura nem fundo próprios" do
+    set = declarations(".progress-set")
+    assert_nil set["border"], "a caixa do set some (NAV-51)"
+    assert_nil set["background-color"]
+    assert_nil set["background"]
   end
 
-  test "progress-set__header é flex com justify-content space-between" do
-    regra = extrair_regra(".progress-set__header")
-    assert regra.present?, "regra .progress-set__header deve existir"
-    assert regra.match?(/display\s*:\s*flex/i), "deve ser flex"
-    assert regra.match?(/justify-content\s*:\s*space-between/i),
-           "deve ter justify-content: space-between"
+  test "nome e contagem dividem a mesma linha, a contagem à direita" do
+    header = declarations(".progress-set__header")
+    assert_equal "flex", header["display"]
+    assert_equal "space-between", header["justify-content"]
+    assert_nil header["flex-wrap"], "com wrap a contagem desce para baixo do nome em 360px"
+
+    name = declarations(".progress-set__header > .progress-set__name")
+    assert_equal "0", name["min-width"], "sem isso o nome longo empurra a contagem para fora (NAV-28)"
+
+    count = declarations(".progress-set__header > .progress-set__owned-line")
+    assert_equal "none", count["flex"]
   end
 
-  def extrair_regra(seletor)
-    folha_sem_comentarios = @sheet.gsub(%r{/\*.*?\*/}m, "")
-    padrao = /#{Regexp.escape(seletor)}\s*\{([^}]*)\}/
-    match = folha_sem_comentarios.match(padrao)
-    match ? match[1] : nil
+  test "as ações secundárias formam uma linha que quebra, não uma pilha" do
+    secondary = declarations(".progress__secondary")
+    assert_equal "flex", secondary["display"]
+    assert_equal "wrap", secondary["flex-wrap"]
   end
 end

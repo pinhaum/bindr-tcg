@@ -113,7 +113,7 @@
                   class: "progress__action-link progress__action-link--primary" %>
     </p>
 
-    <nav class="progress__secondary">
+    <div class="progress__secondary">
       <%= render "progress/export_link" %>
 
       <p class="progress__action">
@@ -125,7 +125,7 @@
         <%= link_to "Importar coleção", new_collection_import_path,
                     class: "progress__action-link" %>
       </p>
-    </nav>
+    </div>
   </div>
 
   <%#

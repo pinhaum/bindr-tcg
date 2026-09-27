@@ -428,9 +428,14 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
            "a barra deve vir depois do header na ordem de leitura"
   end
 
-  test "links secundários agrupam em nav.progress__secondary" do
+  test "links secundários agrupam em .progress__secondary, sem abrir um segundo landmark de navegação" do
     sign_in(@user)
     get progress_path
+
+    # Um grupo de ações da página não é navegação do site: a única `nav` é a
+    # principal (NAV-01).
+    assert_select "nav", count: 1
+    assert_select "header.site-header nav.site-header__nav"
 
     secundarios = css_select(".progress__secondary").first
     assert secundarios.present?, "deve haver .progress__secondary"

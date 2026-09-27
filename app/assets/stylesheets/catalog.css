@@ -1085,9 +1085,15 @@ summary:focus-visible,
 }
 
 .progress__secondary {
-  display: grid;
-  gap: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: var(--space-2);
+  margin: 0 0 var(--space-3);
 }
+
+.progress__secondary > * { margin: 0; }
 
 .progress__action-link--primary {
   display: block;
@@ -1117,15 +1123,16 @@ summary:focus-visible,
 .progress-set__header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-2);
-  flex-wrap: wrap;
 }
 
+/* Nome longo quebra dentro da própria coluna; a contagem fica à direita (NAV-51). */
+.progress-set__header > .progress-set__name { flex: 1 1 auto; min-width: 0; }
+
+.progress-set__header > .progress-set__owned-line { flex: none; }
+
 .progress-set__name {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
   margin: 0;
   font-size: var(--body-strong-size);
   line-height: var(--body-strong-line-height);
