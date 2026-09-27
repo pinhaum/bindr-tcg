@@ -320,7 +320,7 @@ botões de 44px. Na pasta, cada set é uma linha sem moldura.
 | NAV-46 | P1: Acabamento conferido | Req. 13.18 | Done (T28) |
 | NAV-47 | P1: Acabamento conferido | Req. 13.18 | Done (T28) |
 | NAV-48 | P1: Acabamento conferido | Req. 13.19, 5.1 | Done (T29) |
-| NAV-49 | P1: Acabamento conferido | Req. 13.19, 5.2 | Pending (T30) |
+| NAV-49 | P1: Acabamento conferido | Req. 13.19, 5.2 | Done (T30) |
 | NAV-50 | P1: Acabamento conferido | Req. 13.19 | Pending (T31) |
 | NAV-51 | P1: Acabamento conferido | Req. 13.20 | Pending (T32) |
 

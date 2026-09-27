@@ -1129,11 +1129,11 @@ celular (NAV-43).
 
 **Done when**:
 
-- [ ] `.variant` em grid de três colunas (miniatura, meta, controles) em toda largura; em 360px os controles descem sem scroll horizontal (NAV-28)
-- [ ] Cada linha mantém a imagem própria da variante (Req. 5.2)
-- [ ] Os `dt` de `.variant__meta` continuam no HTML e saem da vista pelo padrão de recorte, sem `display: none`
-- [ ] Contêiner novo, se houver, é elemento de `variant`, com regra na folha, e não muda a ordem de leitura
-- [ ] `card_detail_test.rb` passa **sem edição**; teste de folha novo; captura do detalhe em 390px e 1280px; gate full passa, contagem registrada
+- [x] `.variant` em grid de três colunas (miniatura, meta, controles) em toda largura; em 360px os controles descem sem scroll horizontal (NAV-28)
+- [x] Cada linha mantém a imagem própria da variante (Req. 5.2)
+- [x] Os `dt` de `.variant__meta` continuam no HTML e saem da vista pelo padrão de recorte, sem `display: none`
+- [x] Contêiner novo, se houver, é elemento de `variant`, com regra na folha, e não muda a ordem de leitura
+- [x] `card_detail_test.rb` passa **sem edição**; teste de folha novo; captura do detalhe em 390px e 1280px; gate full passa, contagem registrada
 
 **Tests**: unit (textual)
 **Gate**: full
