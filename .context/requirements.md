@@ -174,8 +174,14 @@ variante eu tenho, para saber minha coleção real.
 3. QUANDO a quantidade for definida como zero ENTÃO o sistema DEVE tratar a
    variante como não possuída.
 4. O sistema NÃO DEVE permitir quantidade negativa.
-5. QUANDO o usuário registrar posse a partir da grade do catálogo ENTÃO a
-   atualização DEVE ocorrer sem recarregar a página inteira.
+5. QUANDO o usuário registrar posse no detalhe da carta ENTÃO a atualização
+   DEVE ocorrer sem recarregar a página inteira. A grade do catálogo NÃO DEVE
+   oferecer controle de posse: ela só exibe a quantidade possuída (Req. 13.22).
+
+   > Emendado em 2026-09-27 (feature `conformidade`, decisão D4 do dono). O
+   > texto anterior pedia o registro "a partir da grade do catálogo". O canvas
+   > desenha a grade só com o selo de quantidade, e o registro passa a ficar
+   > só no detalhe, onde o critério 2 continua cumprido.
 6. O sistema DEVE permitir filtrar o catálogo por "somente as que eu tenho" e
    "somente as que eu não tenho".
 7. O sistema DEVE exibir o total de cartas possuídas, contando cópias.
@@ -216,6 +222,20 @@ decidir o que caçar.
    base** do set (`baseSetSize` da fonte), não o total de impressões.
 6. O sistema DEVE exibir a contagem de parallels possuídos como **métrica
    separada**, nunca somada ao percentual de conclusão.
+7. O sistema DEVE ordenar a lista de sets por uma de duas ordens, escolhida por
+   parâmetro de URL, sem JavaScript:
+   - **"Recentes" (padrão):** pelo `updated_at` mais novo dos registros de
+     coleção do usuário naquele set, do mais novo para o mais antigo;
+   - **"Por código":** pelo código do set, crescente.
+
+   Em qualquer das duas ordens, os sets sem posse DEVEM vir no fim, por código;
+   com a coleção vazia, a lista inteira fica por código. A ordenação DEVE partir
+   do usuário da sessão (Req. 6.5). SE o parâmetro de ordem for desconhecido ou
+   inválido ENTÃO o sistema DEVE usar o padrão, sem erro.
+
+   > Acrescentado em 2026-09-27 (feature `conformidade`, decisão D11 do dono).
+   > "Recente" é a atividade do usuário, não a data de lançamento: os sets da
+   > fixture têm `releaseDate: null`.
 
 > Decidido na task 0.3 (P3) — ver `docs/adr/002-stack-set-completo-e-imagens.md`.
 > Contar todas as impressões travaria sets dominados por parallels perto de zero
@@ -328,7 +348,9 @@ uma caixa de boosters e responder "quanto falta do set X?" sem procurar menu.
 O layout de referência é o canvas **"Bindr — telas"**
 (`claude.ai/artifact/P7WCTR9YkH1i52DWoVwPn8`), externo ao repo. Ele desenha
 também baralho (Fase 2) e preços (Fase 3); esses elementos **não** fazem parte
-deste requisito. Em divergência, este documento vence (AD-005).
+deste requisito. Em divergência, este documento vence (AD-005). Desde
+2026-09-27 os artboards versionados em `.specs/features/navegacao/canvas/` são
+critério de aceite de cada tela (AD-016, critério 21).
 
 ### Critérios de aceitação
 
@@ -393,14 +415,87 @@ catálogo no celular e um detalhe sem a imagem maior que o Req. 5.1 já pedia.
     larga, os controles DEVEM ficar sempre visíveis.
 18. O campo de busca e o botão "Buscar" DEVEM ter alvo de no mínimo 44px e as
     superfícies do design system. A linha de status DEVE ficar alinhada à grade.
-19. O detalhe da carta DEVE exibir a imagem maior do Req. 5.1 em destaque, numa
-    coluna própria em viewport larga, e listar as variantes em linhas, cada uma
-    com sua imagem (Req. 5.2). Os controles de posse no detalhe DEVEM ter alvo de
-    no mínimo 44px.
+19. O detalhe da carta DEVE exibir a imagem maior do Req. 5.1 numa coluna
+    própria em viewport larga; em viewport estreita, conforme o critério 30. As
+    variantes DEVEM ser listadas em linhas, cada uma com sua imagem (Req. 5.2).
+    Os controles de posse no detalhe DEVEM ter alvo de no mínimo 44px.
+    *(Emendado em 2026-09-27: o texto anterior pedia a imagem maior "em
+    destaque" também no celular, o que empurrava contra o canvas; decisão D8.)*
 20. Em "Minha pasta", cada set DEVE ocupar uma linha sem moldura, com a contagem
     "possuídas / total" na mesma linha do nome, e os links de wishlist, import e
     export DEVEM formar um grupo de ações secundárias separado de "Adicionar
     cartas".
+
+Os critérios 21 a 39 foram acrescentados em 2026-09-27 (feature `conformidade`),
+depois que o dono reprovou de novo a revisão visual: os critérios anteriores
+copiavam traços isolados do canvas, e a composição de cada tela nunca virou
+critério. A partir daqui o artboard é critério de aceite (AD-016).
+
+21. Catálogo, detalhe e "Minha pasta" DEVEM seguir, em 390px e em 1280px, os
+    artboards versionados em `.specs/features/navegacao/canvas/`. Toda
+    divergência entre tela e artboard DEVE estar coberta por um critério deste
+    requisito ou por uma exclusão registrada na spec da feature. Em dúvida
+    visual, vale o artboard; em conflito com um critério escrito, vale o
+    critério (AD-005).
+
+**Catálogo**
+
+22. O tile da grade DEVE exibir a quantidade possuída só como um selo numérico
+    sobre o canto superior direito da arte, e só com sessão e quantidade maior
+    que zero. A grade NÃO DEVE ter controle de posse (Req. 7.5).
+23. Para anônimo, o convite a entrar para registrar posse DEVE aparecer uma
+    única vez, na linha de status, e não em cada tile.
+24. O tile DEVE exibir a raridade ao lado do código quando a carta tem uma
+    variante só; com mais de uma, a legenda "N impressões".
+25. Em viewport de 1280px, a grade DEVE ter cinco colunas. Em larguras menores,
+    as colunas se reorganizam sem scroll horizontal (Req. 2.5).
+26. A linha de status DEVE ser uma frase única, "N cartas · M filtros ativos",
+    com "Limpar filtros" à direita quando houver filtro. Em viewport larga ela
+    DEVE ficar na mesma linha do campo de busca.
+27. O campo de busca DEVE ter o rótulo "Buscar por nome ou card_number" e um
+    código de carta como exemplo no placeholder.
+28. O catálogo NÃO DEVE exibir o total de cópias da coleção; esse total fica em
+    "Minha pasta" (critério 4, Req. 7.7).
+29. Os chips de cor DEVEM seguir a ordem Red, Green, Blue, Purple, Black,
+    Yellow; os de raridade, a ordem de valor da raridade; os de tipo, o nome com
+    inicial maiúscula. Ordem e capitalização são apresentação: o valor enviado na
+    URL não muda.
+
+**Detalhe da carta**
+
+30. Em viewport estreita, o detalhe DEVE exibir uma miniatura da arte ao lado do
+    título, e a imagem maior do Req. 5.1 DEVE abrir num controle que expande no
+    próprio lugar, sem JavaScript.
+31. O cabeçalho do detalhe DEVE exibir, como chips, o tipo, a raridade e a cor
+    da carta (e o counter, em viewport larga), e uma linha "nome do set ·
+    código". Raridade e set são da variante: o cabeçalho usa os da primeira
+    variante listada, a mesma da imagem. Os demais campos do Req. 5.1 continuam
+    visíveis, em forma compacta, respeitando o Req. 5.5.
+32. O texto de trigger (Req. 5.4) DEVE aparecer dentro da seção de efeito.
+33. A seção de variantes DEVE se chamar "Variantes na pasta". Cada linha DEVE
+    exibir o código da variante, "raridade · tipo de arte", o set, uma miniatura
+    própria menor que a imagem principal e, com sessão, a quantidade possuída
+    ("não tenho" quando zero) com o controle `−` `[n]` `+`, em que `[n]` só
+    exibe a quantidade e não é editável.
+34. "Voltar ao catálogo" DEVE ser um botão bordado de no mínimo 44px, sem seta.
+    Em viewport larga ele DEVE ficar na coluna lateral, abaixo de um divisor.
+35. O detalhe DEVE exibir o selo de quantidade sobre a imagem principal quando o
+    usuário tem sessão e possui a variante, e a legenda "Ilustração: nome"
+    quando a variante tem ilustrador conhecido.
+
+**Minha pasta**
+
+36. O nome de cada set DEVE ser o link para o catálogo filtrado por ele
+    (Req. 9.3). O percentual (Req. 9.2) DEVE aparecer junto da contagem
+    "possuídas / total", e a contagem de parallels (Req. 9.6) como legenda da
+    linha. A pasta NÃO DEVE exibir a contagem total de sets.
+37. A pasta DEVE oferecer a escolha de ordem do Req. 9.7 como chips-link junto
+    do título "Progresso por set", com o chip da ordem atual marcado.
+38. A ação "Adicionar cartas à pasta" DEVE ficar fixa acima da barra inferior
+    em viewport estreita e na coluna lateral, abaixo de um divisor, em viewport
+    larga.
+39. Em viewport larga, os cartões de indicador DEVEM ter a largura do artboard,
+    um quarto da coluna de conteúdo cada, sem esticar.
 
 ---
 

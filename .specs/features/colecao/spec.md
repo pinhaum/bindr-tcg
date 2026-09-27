@@ -77,13 +77,15 @@ de que o catálogo é regenerável e a coleção é insubstituível.
 **Acceptance Criteria**:
 1. The system SHALL permitir definir para cada variante uma quantidade possuída inteira e não-negativa.
 2. WHEN o usuário acionar incremento ou decremento THEN the system SHALL aplicar a alteração em uma única ação, sem abrir formulário.
-3. WHEN o usuário registrar posse a partir da grade do catálogo THEN the system SHALL atualizar a quantidade exibida sem recarregar a página inteira.
+3. WHEN o usuário registrar posse no detalhe da carta THEN the system SHALL atualizar a quantidade exibida sem recarregar a página inteira. *(Emendado em 2026-09-27, Req. 7.5: era "a partir da grade do catálogo".)*
 4. IF uma operação levar a quantidade abaixo de zero THEN the system SHALL rejeitar a operação e manter a quantidade anterior.
 5. WHEN a quantidade de uma variante for definida como zero THEN the system SHALL tratá-la como não possuída em contagens e filtros.
 6. The system SHALL garantir no banco de dados, e não apenas na aplicação, no máximo um registro de coleção por par (usuário, variante).
-7. The system SHALL oferecer o registro de posse tanto na grade do catálogo quanto no detalhe da carta, sempre por variante.
+7. The system SHALL oferecer o registro de posse no detalhe da carta, sempre por variante; a grade do catálogo só exibe a quantidade possuída, sem controle.
 
-**Independent Test**: Autenticado, incrementar uma variante na grade e conferir que a quantidade muda sem navegação; tentar decrementar abaixo de zero; conferir `UNIQUE` e `CHECK` em `db/structure.sql`.
+> **Emenda de 2026-09-27 (feature `conformidade`, decisão D4 do dono; Req. 7.5 e 13.22).** Os critérios 3 e 7 pediam o registro de posse também na grade. O canvas desenha a grade só com o selo de quantidade, e o dono decidiu seguir o canvas. A implementação da `colecao` (controles na grade) continua em `main` até a `conformidade` retirá-la; a validação da `colecao` foi feita contra o texto anterior.
+
+**Independent Test**: Autenticado, incrementar uma variante no detalhe e conferir que a quantidade muda sem navegação; tentar decrementar abaixo de zero; conferir `UNIQUE` e `CHECK` em `db/structure.sql`.
 
 ### P1: Isolamento entre usuários ⭐ MVP
 
@@ -152,7 +154,7 @@ de que o catálogo é regenerável e a coleção é insubstituível.
 | COL-07 | Incremento/decremento em ação única (Req. 7.2) | 4 | Pending |
 | COL-08 | Zero equivale a não possuída (Req. 7.3) | 4 | Pending |
 | COL-09 | Quantidade nunca negativa (Req. 7.4) | 4 | Pending |
-| COL-10 | Atualização sem recarregar a página (Req. 7.5) | 4 | Pending |
+| COL-10 | Atualização sem recarregar a página, no detalhe (Req. 7.5 emendado em 2026-09-27) | 4 | Pending |
 | COL-11 | Filtro de posse no catálogo (Req. 7.6) | 4 | Pending |
 | COL-12 | Total de cartas possuídas (Req. 7.7) | 4 | Pending |
 | COL-13 | Um registro por (usuário, variante), no banco (Req. 7.8) | 4 | Pending |
@@ -160,7 +162,7 @@ de que o catálogo é regenerável e a coleção é insubstituível.
 | COL-15 | Listar itens desejados (Req. 8.2) | 4 | Pending |
 | COL-16 | Sinalizar item atendido (Req. 8.3) | 4 | Pending |
 | COL-17 | Remover item da wishlist (Req. 8.4) | 4 | Pending |
-| COL-18 | Registro de posse na grade e no detalhe (Req. 5.3) | 4 | Pending |
+| COL-18 | Registro de posse no detalhe; grade só exibe (Req. 5.3, 7.5 emendado em 2026-09-27) | 4 | Pending |
 
 **Coverage:** 18 total, 0 mapped to tasks, 18 unmapped ⚠️ (tasks.md ainda não escrito — próxima fase)
 

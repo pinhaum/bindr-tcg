@@ -140,7 +140,23 @@
 
 ## Handoff
 
-> **Estado em 2026-09-27 — este bloco vence os de baixo.** A **`navegacao` está
+> **Estado em 2026-09-27, tarde — este bloco vence os de baixo.** A
+> **`navegacao` está fechada e verificada**: o Verifier deu FAIL na primeira
+> passada, o loop de correção fez T34–T42 e a re-verificação deu **PASS**
+> (`validation.md`; `validate_state.py navegacao` sai com 0; gate full 1214
+> runs, 0 falhas, RuboCop limpo). NAV-47 e NAV-49 ficaram como critério da
+> `conformidade`. AD-016 (artboard é critério de aceite), AD-017 e a pendência
+> do nome curto do set estão registradas. O Req. 7.5, o Req. 9.7 (ordem da
+> pasta), os critérios 19 e 21–39 do Req. 13 e os critérios 3 e 7 da `colecao`
+> (COL-10, COL-18) foram emendados.
+>
+> **Próximo passo:** escrever `.specs/features/conformidade/spec.md` (CNF-NN) e
+> apresentá-lo ao dono; depois o `tasks.md`, com a checklist de cada artboard
+> (condensada no scratchpad da sessão a partir dos `.dc.html`), e apresentá-lo
+> também. Os workers T37 e T41 do run antigo do Orca ficaram `dispatched`, com
+> liveness não verificável; suas tasks estão commitadas.
+
+> **Estado em 2026-09-27 — superado pelo bloco acima.** A **`navegacao` está
 > fechada** (T1–T33 commitadas; gate full 1197 runs, 0 falhas, RuboCop limpo;
 > gate build verde). O bloco de 2026-09-26 abaixo ficou para trás: T22–T32 já
 > estão em `main`. A aprovação visual da T33 foi **reprovada** pelo dono ("ainda
