@@ -243,19 +243,19 @@ T11 → T12
 
 **Checklist do artboard**:
 
-- [ ] Grade 390px: `repeat(2, minmax(0, 1fr))`, `gap: 8px` (Main:55)
-- [ ] Grade 1280px: `repeat(5, minmax(0, 1fr))`, `gap: 16px` (D:77)
-- [ ] Tile: surface, borda 1px border, raio 8, padding 16 (Main:57, D:79)
-- [ ] Arte: sunken, raio 8, padding 8, com folga lateral (Main:58, D:80)
-- [ ] Coluna lateral: 280px, surface, `border-right` border, padding 24, gap 24 (D:19); divisor 1px border entre navegação e filtros (D:27)
-- [ ] Conteúdo: padding 24, coluna, gap 16 (D:62)
+- [x] Grade 390px: `repeat(2, minmax(0, 1fr))`, `gap: 8px` (Main:55)
+- [x] Grade 1280px: `repeat(5, minmax(0, 1fr))`, `gap: 16px` (D:77)
+- [x] Tile: surface, borda 1px border, raio 8, padding 16 (Main:57, D:79)
+- [x] Arte: sunken, raio 8, padding 8, com folga lateral (Main:58, D:80)
+- [x] Coluna lateral: 280px, surface, `border-right` border, padding 24, gap 24 (D:19); divisor 1px border entre navegação e filtros (D:27)
+- [x] Conteúdo: padding 24, coluna, gap 16 (D:62)
 
 **Done when**:
 
-- [ ] Dentro da media query de 1280px (ou a de 64rem, se o reflow for mantido por ela), `.catalog__grid` resolve `repeat(5, minmax(0, 1fr))` e gap 16px; fora, duas colunas e gap 8px (CNF-12)
-- [ ] O guarda de 360px sem scroll horizontal continua passando
-- [ ] `.card-tile` resolve padding 16px; `.card-tile__art` resolve fundo `var(--surface-sunken)` e padding 8px; o divisor da coluna lateral resolve `1px solid var(--border)` (CNF-13)
-- [ ] Gate full passa
+- [x] Dentro da media query de 1280px (ou a de 64rem, se o reflow for mantido por ela), `.catalog__grid` resolve `repeat(5, minmax(0, 1fr))` e gap 16px; fora, duas colunas e gap 8px (CNF-12)
+- [x] O guarda de 360px sem scroll horizontal continua passando
+- [x] `.card-tile` resolve padding 16px; `.card-tile__art` resolve fundo `var(--surface-sunken)` e padding 8px; o divisor da coluna lateral resolve `1px solid var(--border)` (CNF-13)
+- [x] Gate full passa
 
 **Tests**: unit (folha), integration
 **Gate**: full
