@@ -172,26 +172,27 @@ class ProgressTest < ActionDispatch::IntegrationTest
   end
 
   # Prova estrutural, complementar à de comportamento acima: o controller não
-  # toca `params` em lugar nenhum. É uma afirmação mais forte que a do
-  # `CollectionItemsController` — lá o teste irmão admite `:card_variant_id`,
-  # porque a variante é catálogo público e precisa vir da URL; aqui a página
-  # inteira é "o progresso de quem está na sessão" e **não tem nenhum parâmetro
-  # legítimo** a receber.
+  # deriva o **usuário** de `params` em lugar nenhum. A única chave legítima é
+  # `:order` (CNF-27/28, T1 da `conformidade`) — a ordem de apresentação da
+  # lista, que não identifica ninguém. O molde é o mesmo do teste irmão em
+  # `test/integration/collection_authorization_test.rb`, que admite
+  # `:card_variant_id` pelo mesmo motivo: um parâmetro de leitura pública ali,
+  # um parâmetro de apresentação aqui — nenhum dos dois é usuário.
   #
   # Por AST (`Ripper.sexp`) e não por regex, pela mesma razão do teste irmão: um
   # regex de `params[:user_id]` é contornado sem intenção por
   # `params.dig(:user_id)`, por `params.to_unsafe_h[:user_id]` ou por
-  # `chave = :user_id; params[chave]`, e um regex de `/params/` casaria com esta
-  # palavra dentro de um comentário. Na árvore procura-se o **identificador**, o
-  # que dispensa manter lista de formas de acesso.
+  # `chave = :user_id; params[chave]`. Na árvore procura-se a **subárvore**
+  # enraizada em `params`, e dela só os símbolos literais.
   #
   # Limite conhecido e aceito, herdado do teste irmão: isto prova que nenhum
   # dado de request vira usuário **por esta porta**. Outro caminho
   # (`request.headers`, `cookies` não assinado) é coberto pelos testes de
   # comportamento acima, cada um pelo efeito.
-  test "o controller não lê params em lugar nenhum" do
-    refute_includes identificadores_chamados(arvore_do_controller), "params",
-                    "o usuário do progresso sai de Current.user; nada vindo do request o desloca"
+  test "o controller de progresso só lê order de params, nada mais" do
+    assert_equal [ :order ], simbolos_lidos_de_params(arvore_do_controller).uniq.sort,
+      "o controller derivou de `params` algo além da ordem de apresentação: o usuário vem de " \
+      "`Current.user` e nada mais (Req. 6.5)"
   end
 
   private
@@ -203,17 +204,65 @@ class ProgressTest < ActionDispatch::IntegrationTest
     end
 
     # Todo identificador que aparece em **posição de chamada ou de referência**
-    # na árvore. `Ripper.sexp` já descarta comentários, então o que sobra é
-    # código de verdade. Cobre a chamada sem receptor (`params`,
-    # `allow_unauthenticated_access`) e a com receptor (`self.params`) pela mesma
-    # regra, porque a busca é pelo nó `@ident` e não por uma forma de invocação
-    # que teria de ser mantida à mão.
+    # na árvore. Usado pelo teste de `allow_unauthenticated_access` /
+    # `skip_before_action` acima — mais simples que a busca por símbolos de
+    # `params` porque ali o alvo é o **nome do método chamado**, não uma chave
+    # literal dentro de um acesso a `params`.
     def identificadores_chamados(no)
       return [] unless no.is_a?(Array)
 
       case no
       in [ :@ident, nome, * ] then [ nome ]
       else no.flat_map { |filho| identificadores_chamados(filho) }
+      end
+    end
+
+    # Percorre a AST e devolve todo símbolo que aparece dentro de uma expressão
+    # que toca `params`. Mesma implementação do teste irmão em
+    # `collection_authorization_test.rb` — cobre `params[:x]`, `params.dig(:x)`,
+    # `params.to_unsafe_h[:x]` e `params.permit(:x)` pela mesma regra, porque a
+    # busca é pela subárvore que contém o identificador `params`, e não por uma
+    # lista de métodos de acesso mantida à mão.
+    def simbolos_lidos_de_params(no)
+      return [] unless no.is_a?(Array)
+
+      argumentos =
+        case no
+        in [ :aref, receptor, indice ] if enraizado_em_params?(receptor) then indice
+        in [ :method_add_arg, [ :call, receptor, * ], argumentos ] if enraizado_em_params?(receptor) then argumentos
+        in [ :command_call, receptor, *, argumentos ] if enraizado_em_params?(receptor) then argumentos
+        else nil
+        end
+
+      return simbolos_em(argumentos) if argumentos
+
+      no.flat_map { |filho| simbolos_lidos_de_params(filho) }
+    end
+
+    def enraizado_em_params?(no)
+      case no
+      in [ :vcall | :var_ref, [ :@ident, "params", * ] ] then true
+      in [ :call, receptor, * ] then enraizado_em_params?(receptor)
+      in [ :aref, receptor, * ] then enraizado_em_params?(receptor)
+      in [ :method_add_arg, interno, * ] then enraizado_em_params?(interno)
+      else false
+      end
+    end
+
+    def simbolos_em(no)
+      case no
+      in [ :symbol_literal | :dyna_symbol, *resto ] then nomes_literais(resto)
+      in [ :string_literal, *resto ] then nomes_literais(resto)
+      in Array then no.flat_map { |filho| simbolos_em(filho) }
+      else []
+      end
+    end
+
+    def nomes_literais(no)
+      case no
+      in [ :@ident | :@const | :@kw | :@tstring_content, String => nome, * ] then [ nome.to_sym ]
+      in Array then no.flat_map { |filho| nomes_literais(filho) }
+      else []
       end
     end
 

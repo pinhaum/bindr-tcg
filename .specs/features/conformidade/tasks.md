@@ -113,14 +113,14 @@ T11 → T12
 
 **Done when**:
 
-- [ ] `recent`: sets ordenados pelo `MAX(collection_items.updated_at)` do usuário, mais novo primeiro; empate por código; sets sem posse no fim, por código
-- [ ] `code`: sets com posse por código, depois os sem posse por código
-- [ ] Ordem ausente, desconhecida (`xyz`), vazia ou em array cai em `recent` e responde 200 (CNF-28)
-- [ ] Coleção vazia: todos os sets por código (CNF-38)
-- [ ] Dois usuários: a atividade do segundo não muda a ordem do primeiro; a query parte de `Current.user`, nunca de ID do request (Req. 6.5)
-- [ ] Item com `quantity: 0` não conta como posse na ordem
-- [ ] `test/queries/set_progress_plan_test.rb` (protegido, AD-017) passa sem edição; se a forma da consulta obrigar a editá-lo, parar e voltar `blocked`
-- [ ] Gate full passa
+- [x] `recent`: sets ordenados pelo `MAX(collection_items.updated_at)` do usuário, mais novo primeiro; empate por código; sets sem posse no fim, por código
+- [x] `code`: sets com posse por código, depois os sem posse por código
+- [x] Ordem ausente, desconhecida (`xyz`), vazia ou em array cai em `recent` e responde 200 (CNF-28)
+- [x] Coleção vazia: todos os sets por código (CNF-38)
+- [x] Dois usuários: a atividade do segundo não muda a ordem do primeiro; a query parte de `Current.user`, nunca de ID do request (Req. 6.5)
+- [x] Item com `quantity: 0` não conta como posse na ordem
+- [x] `test/queries/set_progress_plan_test.rb` (protegido, AD-017) passa sem edição; se a forma da consulta obrigar a editá-lo, parar e voltar `blocked`
+- [x] Gate full passa
 
 **Tests**: unit, integration
 **Gate**: full

@@ -150,8 +150,17 @@ class SetProgressQuery
     end
   end
 
-  def initialize(user = nil)
+  # CNF-27/28 — `order` é lista fechada (`ORDERS`), mesmo padrão de
+  # `CatalogQuery#ordered` para `sort`/`dir`: qualquer valor fora da lista —
+  # ausente, desconhecido, vazio ou um array vindo de `params[:order]` — vira
+  # `"recent"` via `.to_s`, nunca um erro. `"code"` é a única outra opção.
+  ORDERS = %w[recent code].freeze
+
+  attr_reader :order
+
+  def initialize(user = nil, order: "recent")
     @user = user
+    @order = ORDERS.include?(order.to_s) ? order.to_s : "recent"
   end
 
   def call
@@ -177,13 +186,29 @@ class SetProgressQuery
   # `select_all` em vez de instanciar `CardSet`: o resultado é um relatório, não
   # um conjunto de registros editáveis, e as colunas agregadas não pertencem ao
   # model. `Row` é o contrato que o chamador lê.
+  #
+  # CNF-27 — a ordem é mais uma coluna e um `ORDER BY` sobre a **mesma**
+  # agregação, nunca uma segunda consulta: `last_activity_at` é
+  # `MAX(collection_items.updated_at)` do `LEFT JOIN` que já existe
+  # (`owned_join`), e por isso o teste de forma (`set_progress_plan_test.rb`,
+  # AD-017) continua vendo uma única `CardSet Load`.
+  #
+  # Nas duas ordens os sets sem posse (nenhuma linha com `quantity > 0`, logo
+  # `last_activity_at` NULL) ficam no fim, por código. `recent` ordena os com
+  # posse pela atividade, mais nova primeiro; `code`, pelo código.
   def rows
     CardSet
       .select(AGGREGATE_COLUMNS)
       .joins(variants_join)
       .joins(owned_join)
       .group("sets.id")
-      .order("sets.code ASC")
+      .order(order_clause)
+  end
+
+  def order_clause
+    return Arel.sql("MAX(owned_items.updated_at) IS NULL, sets.code ASC") if order == "code"
+
+    "last_activity_at DESC NULLS LAST, sets.code ASC"
   end
 
   AGGREGATE_COLUMNS = <<~SQL.squish.freeze
@@ -198,7 +223,8 @@ class SetProgressQuery
     COUNT(DISTINCT owned_items.card_variant_id)
       FILTER (WHERE card_variants.art_kind = 'parallel') AS parallel_owned_variants,
     COUNT(DISTINCT card_variants.id)
-      FILTER (WHERE card_variants.art_kind = 'parallel') AS parallel_variants
+      FILTER (WHERE card_variants.art_kind = 'parallel') AS parallel_variants,
+    MAX(owned_items.updated_at) AS last_activity_at
   SQL
 
   def variants_join
@@ -211,7 +237,8 @@ class SetProgressQuery
   # `CollectionItem.none`, e o `LEFT JOIN` devolve todos os sets com numerador
   # zero — o anônimo não é caso de erro, é numerador vazio.
   def owned_join
-    subquery = CollectionItem.for_user(@user).owned.select(:card_variant_id).to_sql
+    subquery = CollectionItem.for_user(@user).owned
+                             .select(:card_variant_id, :updated_at).to_sql
 
     "LEFT JOIN (#{subquery}) owned_items " \
       "ON owned_items.card_variant_id = card_variants.id"

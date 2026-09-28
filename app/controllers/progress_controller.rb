@@ -25,10 +25,15 @@ class ProgressController < ApplicationController
   # coisa. Consequência: `?user_id=7` não tem por onde entrar na consulta, e o
   # Req. 6.5 fica satisfeito por construção em vez de por verificação.
   #
-  # A action não lê `params` em lugar nenhum: não há filtro, paginação nem
-  # recorte a receber do request. A página inteira é uma consulta só, montada a
-  # partir de quem está na sessão.
+  # CNF-27/28 — `params[:order]` é a única entrada da action, e a validação
+  # por lista fechada mora em `SetProgressQuery::ORDERS`, não aqui: o
+  # controller só repassa a string. Ausente, desconhecida (`"xyz"`), vazia ou
+  # um array (`?order[]=x`, que `.to_s` transforma em algo fora da lista) caem
+  # todos no default `"recent"` da query, e a action sempre responde 200 — não
+  # há branch de erro para um parâmetro de ordenação.
   def index
-    @rows = SetProgressQuery.new(Current.user).call
+    query = SetProgressQuery.new(Current.user, order: params[:order])
+    @order = query.order
+    @rows = query.call
   end
 end

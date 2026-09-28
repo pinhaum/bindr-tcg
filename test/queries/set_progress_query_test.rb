@@ -702,4 +702,141 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   ensure
     ActiveSupport::Notifications.unsubscribe(assinante)
   end
+
+  # --- T1: ordem da pasta por atividade do usuário (CNF-27, CNF-28, CNF-38) --
+
+  # O cenário próprio da ordem: três sets, dois com posse em instantes
+  # diferentes e um sem posse nenhuma. `OPp1a`, `OPp1b` e `OPp1c` do `setup`
+  # já existem para outro fim (PRG-01) e ficariam todos com o mesmo
+  # `updated_at` se reaproveitados aqui — por isso um cenário à parte, com
+  # `travel_to` controlando exatamente qual posse é "mais recente".
+  def cenario_de_ordem
+    ordem_a = CardSet.create!(code: "OPord2", name: "Set B", kind: "booster",
+                              base_set_size: 1, total_set_size: 1)
+    ordem_b = CardSet.create!(code: "OPord1", name: "Set A", kind: "booster",
+                              base_set_size: 1, total_set_size: 1)
+    ordem_c = CardSet.create!(code: "OPord0", name: "Set C", kind: "booster",
+                              base_set_size: 1, total_set_size: 1)
+
+    variante_a = create_variant(create_card(ordem_a, "ORD-a1", "Carta A"), ordem_a, "ORD-a1")
+    variante_b = create_variant(create_card(ordem_b, "ORD-b1", "Carta B"), ordem_b, "ORD-b1")
+    create_variant(create_card(ordem_c, "ORD-c1", "Carta C"), ordem_c, "ORD-c1")
+
+    # `ordem_c` (código "OPord0", o menor) não tem posse: se alguma ordem
+    # deixasse de mandar os sets sem posse para o fim, ele apareceria primeiro.
+    # `ordem_b` (código "OPord1", alfabeticamente primeiro) recebe a posse
+    # **mais antiga**; `ordem_a` (código "OPord2") recebe a posse **mais
+    # recente**. Os dois códigos discriminam de propósito: se a ordem por
+    # `recent` caísse acidentalmente para ordem por código, `ordem_b`
+    # apareceria primeiro, e é exatamente o oposto do que a asserção espera.
+    travel_to 2.days.ago do
+      own(@user, variante_b, 1)
+    end
+    travel_to 1.day.ago do
+      own(@user, variante_a, 1)
+    end
+
+    { mais_recente: ordem_a, mais_antiga: ordem_b, sem_posse: ordem_c }
+  end
+
+  test "recent ordena pelo MAX(updated_at) da posse do usuário, mais novo primeiro" do
+    cenario_de_ordem
+
+    resultado = SetProgressQuery.new(@user, order: "recent").call.map(&:set_code)
+
+    assert_equal [ "OPord2", "OPord1", "OPord0" ], resultado.select { |code| code.start_with?("OPord") },
+                 "posse mais recente, depois a mais antiga, depois o set sem posse"
+  end
+
+  test "recent é o padrão quando order não é informado" do
+    cenario_de_ordem
+
+    padrao = SetProgressQuery.new(@user).call.map(&:set_code)
+    explicito = SetProgressQuery.new(@user, order: "recent").call.map(&:set_code)
+
+    assert_equal explicito, padrao
+  end
+
+  test "recent bota sets sem posse no fim, por código" do
+    sets = cenario_de_ordem
+
+    resultado = SetProgressQuery.new(@user, order: "recent").call.map(&:set_code)
+    posicao = resultado.each_with_index.to_h
+
+    assert_operator posicao[sets[:mais_antiga].code], :<, posicao[sets[:sem_posse].code],
+                    "quem tem posse (ainda que antiga) vem antes de quem não tem nenhuma"
+  end
+
+  test "code ordena os sets com posse pelo código e deixa os sem posse no fim" do
+    cenario_de_ordem
+
+    resultado = SetProgressQuery.new(@user, order: "code").call.map(&:set_code)
+    esperado = resultado.select { |code| code.start_with?("OPord") }
+
+    assert_equal [ "OPord1", "OPord2", "OPord0" ], esperado,
+                 "com posse por código, depois sem posse (CNF-27)"
+  end
+
+  test "order ausente, desconhecido, vazio ou em array cai em recent e não levanta erro" do
+    [ nil, "xyz", "", [ "recent" ], { a: 1 } ].each do |valor|
+      assert_nothing_raised { SetProgressQuery.new(@user, order: valor).call }
+    end
+  end
+
+  test "order desconhecido produz a mesma ordem que recent explícito" do
+    cenario_de_ordem
+
+    explicito = SetProgressQuery.new(@user, order: "recent").call.map(&:set_code)
+    desconhecido = SetProgressQuery.new(@user, order: "xyz").call.map(&:set_code)
+
+    assert_equal explicito, desconhecido
+  end
+
+  test "coleção vazia: todos os sets por código, mesmo pedindo recent" do
+    vazio = User.create!(email: "vazio-prg1@example.com", password: "log-pose-77")
+    cenario_de_ordem
+
+    resultado = SetProgressQuery.new(vazio, order: "recent").call.map(&:set_code)
+    esperado = resultado.select { |code| code.start_with?("OPord") }
+
+    assert_equal [ "OPord0", "OPord1", "OPord2" ], esperado,
+                 "sem posse nenhuma, ninguém tem atividade e o desempate por código vale para todos"
+  end
+
+  test "item com quantity zero não conta como posse na ordem" do
+    ordem_a = CardSet.create!(code: "OPord4", name: "Zerado", kind: "booster",
+                              base_set_size: 1, total_set_size: 1)
+    ordem_b = CardSet.create!(code: "OPord5", name: "Sem posse", kind: "booster",
+                              base_set_size: 1, total_set_size: 1)
+
+    variante = create_variant(create_card(ordem_a, "ORD-z1", "Carta zerada"), ordem_a, "ORD-z1")
+    own(@user, variante, 0)
+    create_variant(create_card(ordem_b, "ORD-z2", "Carta sem posse"), ordem_b, "ORD-z2")
+
+    resultado = SetProgressQuery.new(@user, order: "recent").call.map(&:set_code)
+    posicao = resultado.each_with_index.to_h
+
+    # Sem atividade real (quantity 0 não conta), os dois caem no desempate por
+    # código — "OPord4" antes de "OPord5" só porque o código é menor, não
+    # porque a posse zerada contou como atividade.
+    assert_operator posicao["OPord4"], :<, posicao["OPord5"]
+  end
+
+  # --- Req. 6.5: a ordem parte do usuário da sessão, nunca do request -------
+
+  test "a atividade de um segundo usuário não muda a ordem do primeiro" do
+    sets = cenario_de_ordem
+
+    ordem_antes = SetProgressQuery.new(@user, order: "recent").call.map(&:set_code)
+
+    # `@outro` registra atividade recentíssima no set que, para `@user`, é o
+    # mais antigo — se a consulta vazasse escopo, `mais_antiga` subiria.
+    variante_outro = create_variant(create_card(sets[:mais_antiga], "ORD-x1", "Carta X"),
+                                    sets[:mais_antiga], "ORD-x1")
+    own(@outro, variante_outro, 1)
+
+    ordem_depois = SetProgressQuery.new(@user, order: "recent").call.map(&:set_code)
+
+    assert_equal ordem_antes, ordem_depois
+  end
 end
