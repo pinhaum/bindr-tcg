@@ -218,7 +218,7 @@ body {
 /* `surface-raised` fica a 1.20:1 da página (§11.3): a borda é o que delimita. */
 .card-tile {
   max-width: 100%;
-  padding: var(--space-2);
+  padding: var(--space-3);
   background-color: var(--surface-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -241,6 +241,7 @@ body {
   position: relative;
   aspect-ratio: 5 / 7;
   overflow: hidden;
+  padding: var(--space-2);
   border-radius: var(--radius-md);
   background: var(--surface-sunken);
 }
@@ -1918,6 +1919,11 @@ summary:focus-visible,
   }
 
   .catalog__body { grid-column: 2; grid-row: 2; padding: 0 var(--space-4) var(--space-4); }
+
+  .catalog__grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
 
   .card-detail {
     display: grid;
