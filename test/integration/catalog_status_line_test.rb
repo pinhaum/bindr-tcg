@@ -2,10 +2,18 @@ require "test_helper"
 require_relative "../design/support/stylesheet"
 
 # T17 — Linha de status do catálogo (NAV-36, NAV-27).
+# T4 (conformidade) — CNF-05..CNF-09: frase única "N cartas" (+ "· M filtros
+# ativos" com filtro), "Limpar filtros" de 44px e o convite anônimo único.
 #
 # Contagem de resultados numa linha de status. Com filtro ativo, mostra quantos
 # filtros estão aplicados e oferece "Limpar filtros".
 class CatalogStatusLineTest < ActionDispatch::IntegrationTest
+  PASSWORD = "log-pose-77".freeze
+
+  def sign_in
+    user = User.create!(email: "status-line-t4@example.com", password: PASSWORD)
+    post session_path, params: { email: user.email, password: PASSWORD }
+  end
   setup do
     @op01 = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")
 
@@ -44,10 +52,12 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
   # --- NAV-36: Sem filtro, só o total ---
 
   test "sem filtro, exibe só 'N cartas'" do
+    sign_in
     get catalog_path
 
     assert_response :success
-    # Há um <p> com .catalog__count e texto "3 cartas"
+    # Há um <p> com .catalog__count e texto "3 cartas" (sem sessão o convite
+    # de login mora fora desse <p>, mas ainda assim a frase precisa ser exata)
     assert_select ".catalog__count", text: /^3 cartas$/
 
     # Não há linha de status com filtros ativos (quando não há filtro, não renderiza)
@@ -132,7 +142,11 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
   # Decisão da T17: com zero resultados a linha de status continua dizendo
   # quantos filtros estão ativos, e o "Limpar filtros" fica só no estado vazio,
   # que o catalog_grid_test já exige.
+  #
+  # Com sessão para isolar esta asserção do convite anônimo (CNF-07), que é um
+  # `<a>` à parte dentro de `.catalog__status` e tem teste próprio abaixo.
   test "com zero resultados e filtro ativo, a linha diz o filtro e o vazio oferece limpar" do
+    sign_in
     get catalog_path(colors: [ "Purple" ])
 
     assert_response :success
@@ -171,7 +185,7 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
   test "duas cores contam dois filtros, como dois chips" do
     get catalog_path(colors: [ "Red", "Green" ])
 
-    assert_select ".catalog__status .catalog__filter-count", text: /^\s*2 filtros ativos\s*$/
+    assert_select ".catalog__status .catalog__filter-count", text: /^\s*·\s*2 filtros ativos\s*$/
   end
 
   test "o total de cartas fica dentro da linha de status, com ou sem filtro" do
@@ -179,7 +193,7 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
     assert_select ".catalog__status .catalog__count", text: /^\s*3 cartas\s*$/
 
     get catalog_path(colors: [ "Red" ])
-    assert_select ".catalog__status .catalog__count", text: /^\s*1 carta\s*$/
+    assert_select ".catalog__status .catalog__count", text: /^\s*1 carta\s*·\s*1 filtro ativo\s*$/
     assert_select ".catalog__status .catalog__clear-filters", text: "Limpar filtros"
   end
 
@@ -214,6 +228,101 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # A contagem deve dizer "36 cartas", não "30 cartas"
-    assert_select ".catalog__count", text: /^\s*36 cartas\s*$/
+    assert_select ".catalog__count", text: /^\s*36 cartas\s*·\s*1 filtro ativo\s*$/
+  end
+
+  # --- CNF-05: contagem sem filtro (a frase inteira é só "N cartas") ---
+
+  test "sem filtro, a frase de status é exatamente 'N cartas', sem '· filtros ativos'" do
+    get catalog_path
+
+    assert_select ".catalog__count", text: /^3 cartas$/
+    assert_select ".catalog__filter-count", count: 0
+  end
+
+  # --- CNF-06: "Limpar filtros" ≥ 44px e preserva sort/dir ---
+
+  test "'Limpar filtros' resolve min-height e borda ≥ 44px (CNF-06)" do
+    get catalog_path(colors: [ "Red" ])
+
+    rule = Stylesheet.resolved("catalog__clear-filters")
+    assert_operator Stylesheet.to_pixels(rule.fetch("min-height")), :>=, 44
+    assert rule.fetch("border").present?, "'Limpar filtros' precisa de borda"
+  end
+
+  # --- CNF-07: convite anônimo único, dentro da linha de status ---
+
+  test "anônimo vê 'Entrar para registrar posse' exatamente uma vez, na linha de status" do
+    get catalog_path
+
+    assert_select "a", text: "Entrar para registrar posse", count: 1
+    assert_select ".catalog__status a[href=?]", new_session_path,
+      text: "Entrar para registrar posse", count: 1
+  end
+
+  test "com sessão, o convite de login não aparece" do
+    sign_in
+    get catalog_path
+
+    assert_select "a", text: "Entrar para registrar posse", count: 0
+  end
+
+  # --- CNF-09: rótulo e placeholder da busca ---
+
+  test "busca tem o rótulo e o placeholder do canvas" do
+    get catalog_path
+
+    assert_select "label[for=catalog-q]", text: "Buscar por nome ou card_number"
+    assert_select "input#catalog-q[placeholder=?]", "OP01-024"
+  end
+
+  # --- CNF-08: busca e status na mesma linha em ≥1024px, recuo igual ao corpo ---
+
+  test "em ≥1024px, o wrapper de busca+status vira flex row e a busca não estica" do
+    rule = Stylesheet.resolved("catalog__head-row")
+    assert_equal "flex", rule.fetch("display")
+
+    search_rule = Stylesheet.resolved("catalog__search")
+    assert search_rule.fetch("width").present?,
+      "a busca precisa de uma largura própria para não ocupar a linha inteira ao lado do status"
+  end
+
+  test "o recuo lateral de .catalog__head e .catalog__body é o mesmo token, em ≥1024px" do
+    head_rule = Stylesheet.resolved("catalog__head")
+    body_rule = Stylesheet.resolved("catalog__body")
+
+    # `padding` na forma "topo direita/esquerda baixo" — direita e esquerda
+    # precisam citar o mesmo token nos dois seletores.
+    assert_includes head_rule.fetch("padding"), "var(--space-4)"
+    assert_includes body_rule.fetch("padding"), "var(--space-4)"
+  end
+
+  # --- CNF-10: "Sua coleção" não aparece mais no catálogo ---
+
+  test "'Sua coleção' não aparece no catálogo, com ou sem sessão" do
+    sign_in
+    get catalog_path
+    refute response.body.include?("Sua coleção")
+    assert_select "#catalog_owned_total", 0
+
+    delete session_path
+    get catalog_path
+    refute response.body.include?("Sua coleção")
+  end
+
+  test "o incremento de posse não traz mais um Turbo Stream para catalog_owned_total" do
+    user = User.create!(email: "status-line-cnf10@example.com", password: PASSWORD)
+    set = CardSet.create!(code: "OPcnf10", name: "Romance Dawn", kind: "booster")
+    card = Card.create!(card_set: set, card_number: "OPcnf10-001", name: "Nami",
+      card_type: "character", colors: [ "Green" ], cost: 1, power: 1000)
+    variant = CardVariant.create!(card: card, card_set: set, variant_code: "OPcnf10-001",
+      rarity: "C", art_kind: "base")
+
+    post session_path, params: { email: user.email, password: PASSWORD }
+    post increment_collection_item_path(card_variant_id: variant.id),
+      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :success
+    assert_select "turbo-stream[target=catalog_owned_total]", 0
   end
 end

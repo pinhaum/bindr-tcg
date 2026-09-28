@@ -4,12 +4,52 @@
   <div class="catalog__head">
     <h1 class="catalog__title">Catálogo</h1>
 
-    <form class="catalog__search" method="get" action="<%= catalog_path %>" role="search">
-      <label class="catalog__search-label" for="catalog-q">Buscar carta</label>
-      <input id="catalog-q" type="search" name="q" value="<%= @result.active_filters[:q] %>"
-             placeholder="Nome, código ou texto de efeito">
-      <button type="submit">Buscar</button>
-    </form>
+    <%#
+      Busca e linha de status agrupadas (CNF-08): em ≥1024px ficam na mesma
+      linha, com "Limpar filtros" à direita da busca; abaixo disso, o wrapper
+      não é flex e os dois blocos empilham como sempre.
+    %>
+    <div class="catalog__head-row">
+      <form class="catalog__search" method="get" action="<%= catalog_path %>" role="search">
+        <label class="catalog__search-label" for="catalog-q">Buscar por nome ou card_number</label>
+        <input id="catalog-q" type="search" name="q" value="<%= @result.active_filters[:q] %>"
+               placeholder="OP01-024">
+        <button type="submit">Buscar</button>
+      </form>
+
+      <%#
+        Linha de status como frase única (CNF-05): "N cartas" sozinho, ou
+        acrescido de " · M filtros ativos" quando há filtro — um só <p>, não
+        dois números soltos lado a lado.
+      %>
+      <% filter_count = active_filter_count(@result.active_filters) %>
+      <div class="catalog__status">
+        <p class="catalog__count">
+          <%= pluralize(@result.total_count, "carta", plural: "cartas") %>
+          <% if filter_count > 0 %>
+            <span class="catalog__filter-count">
+              · <%= pluralize(filter_count, "filtro ativo", plural: "filtros ativos") %>
+            </span>
+          <% end %>
+        </p>
+
+        <% if filter_count > 0 %>
+          <%# Com zero resultados, quem oferece "Limpar filtros" é o estado vazio. %>
+          <% if @result.records.any? %>
+            <%= link_to "Limpar filtros", clear_filters_url(@result.active_filters), class: "catalog__clear-filters" %>
+          <% end %>
+        <% end %>
+
+        <%#
+          Convite único ao anônimo (CNF-07): vive na linha de status e em
+          nenhum outro lugar da página — os tiles pararam de oferecer o
+          próprio convite na T3.
+        %>
+        <% unless authenticated? %>
+          <%= link_to "Entrar para registrar posse", new_session_path, class: "catalog__signin-invite" %>
+        <% end %>
+      </div>
+    </div>
 
     <% chips = catalog_chips(@result.active_filters) %>
     <% if chips.any? %>
@@ -24,56 +64,6 @@
           </li>
         <% end %>
       </ul>
-    <% end %>
-
-    <% filter_count = active_filter_count(@result.active_filters) %>
-    <div class="catalog__status">
-      <p class="catalog__count">
-        <%= pluralize(@result.total_count, "carta", plural: "cartas") %>
-      </p>
-      <% if filter_count > 0 %>
-        <p class="catalog__filter-count">
-          <%= pluralize(filter_count, "filtro ativo", plural: "filtros ativos") %>
-        </p>
-        <%# Com zero resultados, quem oferece "Limpar filtros" é o estado vazio. %>
-        <% if @result.records.any? %>
-          <%= link_to "Limpar filtros", clear_filters_url(@result.active_filters), class: "catalog__clear-filters" %>
-        <% end %>
-      <% end %>
-    </div>
-
-    <%#
-      Total de cópias da coleção (Req. 7.7 / COL-12), vindo de
-      `CatalogController#owned_total` — a soma da coleção **inteira**, não do que
-      está na tela.
-
-      Anônimo não vê nada: o catálogo é público (Req. 6.3) e "0 cópias" para quem
-      não tem conta seria uma afirmação sobre uma coleção que não existe.
-      `owned_total` já devolve zero nesse caso; quem decide não renderizar é aqui.
-
-      Texto autossuficiente em vez do número solto: este parágrafo fica ao lado do
-      `.catalog__count`, que também é um número seguido de "cartas". Em leitura
-      linear por leitor de tela, "2815 cartas / 37" não diz de quem é o 37 —
-      a frase inteira é o que distingue o tamanho do catálogo do tamanho da
-      coleção. Plural explícito pelo mesmo motivo da T8: o inflector do Rails é
-      inglês e `"cópia".pluralize(2)` devolve "cópia".
-
-      **O `id` é o contrato com o Turbo Stream**, como em
-      `collection_items/_ownership`. Um "+1" na grade não recarrega a página: sem
-      este alvo, o número aqui continuaria o do carregamento enquanto a contagem
-      da variante logo abaixo já mostraria o valor novo — duas afirmações
-      contraditórias na mesma tela, e quem usa leitor de tela não teria nenhuma
-      pista da divergência (achado HIGH da revisão de a11y, SC 4.1.3).
-
-      **Sem `aria-live` aqui, e isso é deliberado.** Quem dispara a operação já
-      recebe o anúncio da região viva do controle da variante, que é específico
-      ("Nico Robin OP01-t11a, 3 cópias"). Anunciar também o total faria cada "+1"
-      produzir duas falas — e quem registra uma caixa de boosters aperta o botão
-      dezenas de vezes. O total é atualizado em silêncio, para ser lido quando o
-      usuário voltar a ele.
-    %>
-    <% if authenticated? %>
-      <%= render "catalog/owned_total", total: @owned_total %>
     <% end %>
   </div>
 
@@ -115,7 +105,8 @@
           <% url = filter_toggle_url(@result.active_filters, :card_types, card_type) %>
           <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
              <% if is_active %>aria-label="Remover filtro Tipo: <%= card_type %>"<% end %>>
-            <%= card_type %>
+            <%# Exibição com inicial maiúscula (CNF-11); a URL continua o valor cru. %>
+            <%= card_type.capitalize %>
             <% if is_active %><span aria-hidden="true">&times;</span><% end %>
           </a>
         <% end %>
@@ -233,11 +224,23 @@
             <% label_text = val == "all" ? "Todas" : (val == "owned" ? "Tenho" : "Não tenho") %>
             <% is_active = active_owned == val %>
             <% url = filter_toggle_url(@result.active_filters, :owned, val) %>
-            <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
-               <% if is_active %>aria-label="Remover filtro Posse: <%= label_text %>"<% end %>>
-              <%= label_text %>
-              <% if is_active %><span aria-hidden="true">&times;</span><% end %>
-            </a>
+            <%#
+              "Todas" sem `owned` ativo não é uma remoção (CNF-31): é a
+              ausência do filtro, marcada como atual com `aria-current`, sem
+              "×" e sem o nome acessível "Remover filtro" que prometeria uma
+              remoção que não acontece.
+            %>
+            <% if val == "all" && is_active %>
+              <a href="<%= url %>" class="catalog__chip catalog__chip--active" aria-current="true">
+                <%= label_text %>
+              </a>
+            <% else %>
+              <a href="<%= url %>" class="catalog__chip<%= " catalog__chip--active" if is_active %>"
+                 <% if is_active %>aria-label="Remover filtro Posse: <%= label_text %>"<% end %>>
+                <%= label_text %>
+                <% if is_active %><span aria-hidden="true">&times;</span><% end %>
+              </a>
+            <% end %>
           <% end %>
         </div>
       </div>

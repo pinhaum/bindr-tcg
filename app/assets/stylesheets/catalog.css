@@ -203,18 +203,6 @@ body {
 }
 
 /*
- * Total da coleção (Req. 7.7). Fica logo abaixo do total do catálogo e precisa
- * não ser confundido com ele: a frase "Sua coleção:" faz esse trabalho no
- * texto, e o peso do número o separa visualmente.
- */
-.catalog__owned-total {
-  font-size: var(--caption-size);
-  line-height: var(--caption-line-height);
-  margin: 0 0 var(--space-3);
-}
-.catalog__owned-total-count { font-weight: var(--display-weight); font-variant-numeric: tabular-nums; }
-
-/*
  * `auto-fill` + `minmax` faz a contagem de colunas derivar da largura
  * disponível. Em 360px cabem duas colunas; nada precisa de media query.
  */
@@ -1883,6 +1871,20 @@ summary:focus-visible,
 
   .catalog__head { grid-column: 2; grid-row: 1; padding: var(--space-4) var(--space-4) 0; }
 
+  /*
+   * CNF-08: busca e status na mesma linha em ≥1024px, com "Limpar filtros" à
+   * direita. O recuo lateral é herdado de `.catalog__head` (não redefinido
+   * aqui), igual ao do corpo da grade abaixo — os dois em `var(--space-4)`.
+   */
+  .catalog__head-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .catalog__search { margin: 0; width: 30rem; }
+
   .catalog__filters {
     grid-column: 1;
     grid-row: 2;
@@ -1997,27 +1999,32 @@ summary:focus-visible,
   border: 1px dashed var(--border-strong);
 }
 
-/* Linha de status do catálogo (T17 / NAV-36, NAV-27). */
+/*
+ * Linha de status do catálogo (CNF-05..CNF-08). Frase única — "N cartas" e,
+ * quando há filtro, "· M filtros ativos" dentro do mesmo <p> — com "Limpar
+ * filtros" e o convite de sessão ao lado.
+ */
 .catalog__status {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--space-2);
   padding: 0;
   margin: var(--space-2) 0;
 }
 
-.catalog__status .catalog__count,
-.catalog__filter-count {
+.catalog__status .catalog__count {
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
   color: var(--ink-muted);
   margin: 0;
+  margin-inline-end: auto;
 }
 
-.catalog__filter-count { margin-inline-start: auto; }
+.catalog__filter-count { color: var(--ink-muted); }
 
-.catalog__clear-filters {
+.catalog__clear-filters,
+.catalog__signin-invite {
   display: inline-flex;
   align-items: center;
   justify-content: center;

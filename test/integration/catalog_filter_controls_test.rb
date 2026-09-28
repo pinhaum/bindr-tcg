@@ -124,10 +124,10 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
 
     # Segue o link e compara contagem
     get red_chip["href"]
-    from_chip = css_select(".catalog__count").text.strip
+    from_chip = css_select(".catalog__count").text.squish
 
     get catalog_path(colors: [ "Red" ])
-    from_manual = css_select(".catalog__count").text.strip
+    from_manual = css_select(".catalog__count").text.squish
 
     assert_equal from_manual, from_chip
   end
@@ -140,13 +140,13 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     assert sr_chip, "chip SR não encontrado"
 
     get sr_chip["href"]
-    from_chips = css_select(".catalog__count").text.strip
+    from_chips = css_select(".catalog__count").text.squish
 
     get catalog_path(colors: [ "Red" ], rarities: [ "SR" ])
-    from_manual = css_select(".catalog__count").text.strip
+    from_manual = css_select(".catalog__count").text.squish
 
     assert_equal from_manual, from_chips
-    assert_equal "1 carta", from_chips
+    assert_equal "1 carta · 2 filtros ativos", from_chips
   end
 
   test "chip ativo tem aria-label descritivo e 'x' visível (NAV-34)" do
@@ -175,13 +175,13 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
 
   test "set OP01 selected dá 2 cartas, set OP02 dá 3 cartas, ambos dão 5" do
     get catalog_path(sets: [ "OP01" ])
-    assert_select ".catalog__count", text: /^2 cartas$/
+    assert_select ".catalog__count", text: /^2 cartas/
 
     get catalog_path(sets: [ "OP02" ])
-    assert_select ".catalog__count", text: /^3 cartas$/
+    assert_select ".catalog__count", text: /^3 cartas/
 
     get catalog_path(sets: [ "OP01", "OP02" ])
-    assert_select ".catalog__count", text: /^5 cartas$/
+    assert_select ".catalog__count", text: /^5 cartas/
   end
 
   test "set selecionado aparece como selected no select (NAV-11, mata M43)" do
@@ -276,7 +276,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     html = Nokogiri::HTML(response.body)
     invalid_color_chips = html.css("a.catalog__chip--color[aria-label*='InvalidColor']")
     assert invalid_color_chips.empty?, "nenhum chip deve marcar cor inválida"
-    assert_select ".catalog__count", text: /^0 cartas$/
+    assert_select ".catalog__count", text: /^0 cartas/
   end
 
   test "raridade inválida não oferece chip (NAV-26)" do
@@ -288,7 +288,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     html = Nokogiri::HTML(response.body)
     invalid_rarity_chips = html.css("a.catalog__chip[aria-label*='InvalidRarity']")
     assert invalid_rarity_chips.empty?, "nenhum chip deve marcar raridade inválida"
-    assert_select ".catalog__count", text: /^0 cartas$/
+    assert_select ".catalog__count", text: /^0 cartas/
   end
 
   # --- NAV-27: Zero resultados, os chips continuam renderizados ---
@@ -363,5 +363,58 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
     # Verifica que NÃO tem a classe catalog__chip--color
     refute rarity_chip["class"].include?("catalog__chip--color"),
            "Chip de raridade não deve ter classe catalog__chip--color"
+  end
+
+  # --- T4 (conformidade) — CNF-11: tipo exibido com inicial maiúscula ---
+
+  test "chips de tipo exibem inicial maiúscula, mas a URL continua minúscula (CNF-11)" do
+    get catalog_path
+
+    assert_select "a.catalog__chip", text: "Character"
+    assert_select "a.catalog__chip", text: "Leader"
+    assert_select "a.catalog__chip[href*='card_types%5B%5D=character']"
+    assert_select "a.catalog__chip[href*='card_types%5B%5D=leader']"
+  end
+
+  test "seguir o chip Leader filtra pelo valor minúsculo da URL" do
+    get catalog_path
+    html = Nokogiri::HTML(response.body)
+    leader_chip = html.at_css("a.catalog__chip[href*='card_types%5B%5D=leader']")
+    assert leader_chip, "chip Leader não encontrado"
+
+    get leader_chip["href"]
+    assert_select ".catalog__count", text: /^3 cartas/
+  end
+
+  # --- T4 (conformidade) — CNF-31: chip "Todas" sem "×" quando não há posse ativa ---
+
+  PASSWORD = "log-pose-77".freeze
+
+  def sign_in
+    user = User.create!(email: "filter-controls-t4@example.com", password: PASSWORD)
+    post session_path, params: { email: user.email, password: PASSWORD }
+  end
+
+  test "sem owned ativo, o chip 'Todas' tem aria-current e nem '×' nem nome de remoção (CNF-31)" do
+    sign_in
+    get catalog_path
+
+    html = Nokogiri::HTML(response.body)
+    todas_chip = html.css("a.catalog__chip").find { |node| node.text.strip == "Todas" }
+    assert todas_chip, "chip 'Todas' não encontrado"
+    assert_equal "true", todas_chip["aria-current"]
+    assert_nil todas_chip["aria-label"], "'Todas' sem filtro ativo não deve prometer remoção"
+    refute todas_chip.text.include?("×"), "'Todas' sem filtro ativo não deve ter '×'"
+  end
+
+  test "com owned=missing ativo, 'Todas' volta a ser um link comum de alternância" do
+    sign_in
+    get catalog_path(owned: "missing")
+
+    html = Nokogiri::HTML(response.body)
+    todas_chip = html.css("a.catalog__chip").find { |node| node.text.strip == "Todas" }
+    assert todas_chip, "chip 'Todas' não encontrado"
+    assert_nil todas_chip["aria-current"]
+    refute todas_chip["class"].include?("catalog__chip--active")
   end
 end

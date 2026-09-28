@@ -138,14 +138,14 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
     assert link, "chip Tenho ausente"
     get link["href"]
 
-    from_chip = css_select(".catalog__count").text.strip
+    from_chip = css_select(".catalog__count").text.squish
 
     # Segue a URL digitada à mão
     get catalog_path(owned: "owned")
-    from_url = css_select(".catalog__count").text.strip
+    from_url = css_select(".catalog__count").text.squish
 
     assert_equal from_url, from_chip
-    assert_equal "1 carta", from_chip
+    assert_equal "1 carta · 1 filtro ativo", from_chip
   end
 
   test "seguir o chip 'Não tenho' dá a mesma contagem de ?owned=missing digitado à mão" do
@@ -160,14 +160,14 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
     assert link, "chip Não tenho ausente"
     get link["href"]
 
-    from_chip = css_select(".catalog__count").text.strip
+    from_chip = css_select(".catalog__count").text.squish
 
     # Segue a URL digitada à mão
     get catalog_path(owned: "missing")
-    from_url = css_select(".catalog__count").text.strip
+    from_url = css_select(".catalog__count").text.squish
 
     assert_equal from_url, from_chip
-    assert_equal "2 cartas", from_chip
+    assert_equal "2 cartas · 1 filtro ativo", from_chip
   end
 
   # --- Isolamento: posse de outro usuário não entra ---
@@ -180,7 +180,7 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
     get catalog_path(owned: "owned")
 
     # Para @user, Zoro não está possuído (nenhuma cópia)
-    assert_select ".catalog__count", text: /^0 cartas$/
+    assert_select ".catalog__count", text: /^0 cartas/
   end
 
   test "outro usuário possui a carta X; o usuário logado não. Em ?owned=missing, a carta X aparece" do
@@ -191,7 +191,7 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
     get catalog_path(owned: "missing")
 
     # Para @user, Zoro está em "não tenho" porque a posse de outro_user não entra
-    assert_select ".catalog__count", text: /^3 cartas$/
+    assert_select ".catalog__count", text: /^3 cartas/
     # E Zoro de fato está lá
     assert_select "li", /Roronoa Zoro/
   end

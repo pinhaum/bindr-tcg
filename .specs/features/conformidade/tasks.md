@@ -204,23 +204,23 @@ T11 → T12
 
 **Checklist do artboard**:
 
-- [ ] Rótulo "Buscar por nome ou card_number", 13/18 muted (Main:24, D:68); input com placeholder "OP01-024", 44px, surface, border-strong, raio 4, 15px (Main:25); 480px de largura em 1280px (D:69)
-- [ ] Status em 390px: "112 cartas" 13/18 muted (Main:48) e "Limpar filtros" botão bordado de 44px, padding `0 16px`, raio 4, 13px (Main:49)
-- [ ] Status em 1280px: "112 cartas · 2 filtros ativos" com "Limpar filtros" na mesma linha da busca (D:66-75)
-- [ ] Chip ativo que não é de cor: fundo accent, texto on-accent, borda accent, 44px, peso 600, com "×" (Main:29-30, D:44, D:56); inativo transparente, border-strong, padding `0 16px`, 13px 400
-- [ ] Título h1 "Catálogo" 28/32 700 (Main:21, D:64)
+- [x] Rótulo "Buscar por nome ou card_number", 13/18 muted (Main:24, D:68); input com placeholder "OP01-024", 44px, surface, border-strong, raio 4, 15px (Main:25); 480px de largura em 1280px (D:69)
+- [x] Status em 390px: "112 cartas" 13/18 muted (Main:48) e "Limpar filtros" botão bordado de 44px, padding `0 16px`, raio 4, 13px (Main:49)
+- [x] Status em 1280px: "112 cartas · 2 filtros ativos" com "Limpar filtros" na mesma linha da busca (D:66-75)
+- [x] Chip ativo que não é de cor: fundo accent, texto on-accent, borda accent, 44px, peso 600, com "×" (Main:29-30, D:44, D:56); inativo transparente, border-strong, padding `0 16px`, 13px 400
+- [x] Título h1 "Catálogo" 28/32 700 (Main:21, D:64)
 
 **Done when**:
 
-- [ ] Sem filtro: a linha diz só "N cartas"; com dois filtros: "N cartas · 2 filtros ativos"; com um: "· 1 filtro ativo"; o N é o total do resultado com mais de uma página (CNF-05)
-- [ ] "Limpar filtros" só com filtro, preserva `sort` e `dir`, e `Stylesheet.resolved` dá `min-height` ≥ 44px e borda (CNF-06); com zero resultados continua aparecendo uma vez só
-- [ ] Anônimo: "Entrar para registrar posse" aparece exatamente uma vez na página, dentro da linha de status, apontando para `new_session_path`; com sessão, nenhuma vez (CNF-07)
-- [ ] Em ≥1024px, busca e status na mesma linha e o recuo resolvido de `.catalog__head` igual ao de `.catalog__body` (CNF-08; mata o antigo M42)
-- [ ] Rótulo e placeholder da busca como o canvas (CNF-09)
-- [ ] "Sua coleção" não aparece no catálogo; o stream de posse deixa de atualizar `catalog_owned_total`; o total continua na pasta (CNF-10, NAV-17)
-- [ ] Tipos exibidos com inicial maiúscula ("Leader") e a URL continua `card_types[]=leader` (CNF-11)
-- [ ] Sem `owned`, o chip "Todas" tem `aria-current` e não tem "×" nem nome "Remover filtro" (CNF-31)
-- [ ] Gate full passa
+- [x] Sem filtro: a linha diz só "N cartas"; com dois filtros: "N cartas · 2 filtros ativos"; com um: "· 1 filtro ativo"; o N é o total do resultado com mais de uma página (CNF-05)
+- [x] "Limpar filtros" só com filtro, preserva `sort` e `dir`, e `Stylesheet.resolved` dá `min-height` ≥ 44px e borda (CNF-06); com zero resultados continua aparecendo uma vez só
+- [x] Anônimo: "Entrar para registrar posse" aparece exatamente uma vez na página, dentro da linha de status, apontando para `new_session_path`; com sessão, nenhuma vez (CNF-07)
+- [x] Em ≥1024px, busca e status na mesma linha e o recuo resolvido de `.catalog__head` igual ao de `.catalog__body` (CNF-08; mata o antigo M42)
+- [x] Rótulo e placeholder da busca como o canvas (CNF-09)
+- [x] "Sua coleção" não aparece no catálogo; o stream de posse deixa de atualizar `catalog_owned_total`; o total continua na pasta (CNF-10, NAV-17)
+- [x] Tipos exibidos com inicial maiúscula ("Leader") e a URL continua `card_types[]=leader` (CNF-11)
+- [x] Sem `owned`, o chip "Todas" tem `aria-current` e não tem "×" nem nome "Remover filtro" (CNF-31)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

@@ -143,9 +143,15 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert_select ".progress", text: /0 cartas diferentes/
   end
 
-  # --- NAV-17 + NAV-18: igualdade com o catálogo ---
+  # --- NAV-17 + NAV-18: total exibido bate com o total real da coleção ---
 
-  test "total de cópias é igual ao que o catálogo mostra para o mesmo usuário" do
+  # SPEC_DEVIATION (conformidade T4, CNF-10): a versão original comparava o
+  # total da pasta com "Sua coleção" no catálogo. CNF-10 tirou esse texto do
+  # catálogo, então a única fonte que resta para o total real é a consulta que
+  # o alimenta — a intenção do teste (o número exibido bate com a coleção de
+  # verdade do usuário) continua a mesma, só a segunda ponta da comparação
+  # mudou de lugar.
+  test "total de cópias exibido é igual ao total real da coleção do usuário" do
     sign_in(@user)
     get progress_path
 
@@ -156,15 +162,10 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert pasta_match, "não encontrou número de cópias no cartão"
     pasta_total = pasta_match[1].to_i
 
-    # Extrai o total exibido no catálogo
-    get catalog_path
-    catalog_html = response.body
-    catalog_match = catalog_html.match(/Sua coleção: <span class="catalog__owned-total-count">(\d+)<\/span>/)
-    assert catalog_match, "não encontrou total no catálogo"
-    catalog_total = catalog_match[1].to_i
+    real_total = CollectionItem.total_copies_for(@user)
 
-    assert_equal pasta_total, catalog_total,
-                 "total na pasta (#{pasta_total}) deve ser igual ao do catálogo (#{catalog_total})"
+    assert_equal real_total, pasta_total,
+                 "total exibido na pasta (#{pasta_total}) deve ser igual ao total real da coleção (#{real_total})"
   end
 
   # --- M06: quantidade 0 não muda os indicadores ---
