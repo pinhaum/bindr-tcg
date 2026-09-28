@@ -298,7 +298,25 @@ class CatalogGridTest < ActionDispatch::IntegrationTest
   # padrão não pegava. Um teste que não assere nada é pior que nenhum.
   test "a folha de estilo não impõe largura fixa maior que a viewport de 360px" do
     css = Rails.root.join("app/assets/stylesheets/catalog.css").read
-    declaracoes = css.gsub(%r{/\*.*?\*/}m, "").scan(/([\w-]+):\s*([^;]*?\d+px[^;]*);/)
+
+    # Declarações de `@media (min-width: ...)` não valem em 360px: sai só o bloco
+    # inteiro (casando chaves), o que vem depois dele fora de media query fica.
+    css = css.gsub(%r{/\*.*?\*/}m, "")
+    while (inicio = css.index(/@media\s*\(min-width:[^)]*\)[^{]*\{/))
+      profundidade = 0
+      fim = inicio
+      css[inicio..].each_char.with_index do |caractere, indice|
+        profundidade += 1 if caractere == "{"
+        profundidade -= 1 if caractere == "}"
+        next unless profundidade.zero? && caractere == "}"
+
+        fim = inicio + indice
+        break
+      end
+      css = css[0...inicio] + css[(fim + 1)..]
+    end
+
+    declaracoes = css.scan(/([\w-]+):\s*([^;]*?\d+px[^;]*);/)
 
     refute_empty declaracoes, "nenhuma declaração em px encontrada — o padrão quebrou"
 

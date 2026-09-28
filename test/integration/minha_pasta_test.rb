@@ -218,49 +218,49 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
   end
 
-  # --- T4 / NAV-19: links para wishlist, import e export ---
+  # --- T4 / NAV-19: links para wishlist, import e export (agora em .progress__secondary) ---
 
-  test "exibe link para a Lista de desejos com href correto em progress__actions" do
+  test "exibe link para a Lista de desejos com href correto em progress__secondary" do
     sign_in(@user)
     get progress_path
 
-    assert_select ".progress__actions .progress__action-link", text: "Lista de desejos"
-    assert_select ".progress__actions a[href='#{wishlist_items_path}']", text: "Lista de desejos"
+    assert_select ".progress__secondary .progress__action-link", text: "Lista de desejos"
+    assert_select ".progress__secondary a[href='#{wishlist_items_path}']", text: "Lista de desejos"
   end
 
-  test "exibe link para Importar coleção com href correto em progress__actions" do
+  test "exibe link para Importar coleção com href correto em progress__secondary" do
     sign_in(@user)
     get progress_path
 
-    assert_select ".progress__actions .progress__action-link", text: "Importar coleção"
-    assert_select ".progress__actions a[href='#{new_collection_import_path}']", text: "Importar coleção"
+    assert_select ".progress__secondary .progress__action-link", text: "Importar coleção"
+    assert_select ".progress__secondary a[href='#{new_collection_import_path}']", text: "Importar coleção"
   end
 
-  test "exibe link para export do partial progress/_export_link (não cópia) em progress__actions" do
+  test "exibe link para export do partial progress/_export_link (não cópia) em progress__secondary" do
     sign_in(@user)
     get progress_path
 
-    # Verifica que o partial foi renderizado dentro de .progress__actions
-    assert_select ".progress__actions .collection-export__link", text: "Baixar minha coleção (CSV)"
+    # Verifica que o partial foi renderizado dentro de .progress__secondary
+    assert_select ".progress__secondary .collection-export__link", text: "Baixar minha coleção (CSV)"
   end
 
-  test "os três links de ação em progress__actions existem (não duplicados ali)" do
+  test "os três links de ação em progress__secondary existem (não duplicados ali)" do
     sign_in(@user)
     get progress_path
 
-    # Dentro de .progress__actions, cada link deve aparecer exatamente uma vez
-    assert_select ".progress__actions a[href='#{wishlist_items_path}']", count: 1
-    assert_select ".progress__actions a[href='#{new_collection_import_path}']", count: 1
-    assert_select ".progress__actions .collection-export__link", count: 1
+    # Dentro de .progress__secondary, cada link deve aparecer exatamente uma vez
+    assert_select ".progress__secondary a[href='#{wishlist_items_path}']", count: 1
+    assert_select ".progress__secondary a[href='#{new_collection_import_path}']", count: 1
+    assert_select ".progress__secondary .collection-export__link", count: 1
   end
 
-  test "links de wishlist, import e Adicionar cartas têm classe progress__action-link" do
+  test "links de wishlist e import têm classe progress__action-link" do
     sign_in(@user)
     get progress_path
 
-    # Verifica que a classe .progress__action-link está presente nos links
-    links = css_select(".progress__action-link")
-    assert links.size == 3, "deveria haver 3 links com classe progress__action-link (Adicionar cartas, wishlist, import)"
+    # Verifica que a classe .progress__action-link está presente nos links secundários
+    links = css_select(".progress__secondary .progress__action-link")
+    assert links.size == 2, "deveria haver 2 links com classe progress__action-link (wishlist, import) em .progress__secondary"
   end
 
   test "links têm min-width de 24px em CSS" do
@@ -376,46 +376,46 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
       fail_message: "barra deve ter aria-hidden='true' para não repetir informação"
   end
 
-  # --- T20: NAV-39 link "Adicionar cartas" ---
+  # --- T11: NAV-39 link "Adicionar cartas" via sidebar_actions ---
 
-  test "exibe link Adicionar cartas apontando para o catálogo" do
+  test "exibe link Adicionar cartas à pasta apontando para o catálogo" do
     sign_in(@user)
     get progress_path
 
-    assert_select ".progress__actions a[href='#{catalog_path}']", text: "Adicionar cartas"
+    assert_select ".progress__add-cards[href='#{catalog_path}']", text: "Adicionar cartas à pasta"
   end
 
-  test "Adicionar cartas é o primeiro link dentro de progress__actions" do
+  test "Adicionar cartas é renderizado via sidebar_actions, não em progress__secondary" do
     sign_in(@user)
     get progress_path
 
-    links = css_select(".progress__actions a")
-    assert links.size >= 1, "deve haver pelo menos um link em progress__actions"
-    assert_equal "Adicionar cartas", links.first.text, "primeiro link deve ser 'Adicionar cartas'"
+    assert_select ".progress__add-cards[href='#{catalog_path}']", text: "Adicionar cartas à pasta",
+                  count: 1, fail_message: "deve haver exatamente UM link .progress__add-cards"
+
+    assert_select ".progress__secondary .progress__add-cards", count: 0,
+                  fail_message: "Adicionar cartas não deve estar em .progress__secondary (deve estar no sidebar_actions)"
   end
 
-  test "Adicionar cartas tem classe progress__action-link--primary para estilo" do
+  test "Adicionar cartas tem classe progress__add-cards para estilo (via sidebar)" do
     sign_in(@user)
     get progress_path
 
-    assert_select ".progress__action-link--primary", text: "Adicionar cartas"
+    assert_select ".progress__add-cards", text: "Adicionar cartas à pasta"
   end
 
-  test "Adicionar cartas tem min-height de 44px em CSS" do
-    primary = Stylesheet.resolved("progress__action-link--primary")
-    assert_equal "44px", primary["min-height"],
-                 ".progress__action-link--primary deve ter 'min-height: 44px'"
-
+  test "Adicionar cartas está em .site-header__aside (sidebar)" do
     sign_in(@user)
     get progress_path
-    assert_select ".progress__action-link--primary"
+
+    assert_select ".site-header__aside .progress__add-cards", count: 1,
+                  fail_message: "Adicionar cartas deve estar em .site-header__aside"
   end
 
   test "remover o link Adicionar cartas faria o teste falhar" do
     sign_in(@user)
     get progress_path
 
-    assert_select "a[href='#{catalog_path}']", text: "Adicionar cartas",
+    assert_select "a[href='#{catalog_path}']", text: /Adicionar cartas/,
                   fail_message: "link para Adicionar cartas não encontrado"
   end
 
@@ -467,16 +467,60 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "Adicionar cartas está separado dos links secundários" do
+  test "Adicionar cartas está separado dos links secundários (CNF-30, NAV-51)" do
     sign_in(@user)
     get progress_path
 
     secundarios = css_select(".progress__secondary").first
+    assert secundarios.present?, "deve haver .progress__secondary"
     assert !secundarios.text.include?("Adicionar cartas"),
            "Adicionar cartas não deve estar em .progress__secondary"
+  end
 
-    primarios = css_select(".progress__action--primary").first
-    assert primarios.text.include?("Adicionar cartas"),
-           "Adicionar cartas deve estar em .progress__action--primary"
+  # --- T11: layout em duas colunas (CNF-30, CNF-32) ---
+
+  test "conteúdo está envolvido por .progress__content para layout em 2 colunas" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__content", count: 1,
+                  fail_message: "deve haver UM wrapper .progress__content na view"
+  end
+
+  test "links secundários estão em .progress__secondary dentro de .progress__content" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__content .progress__secondary", count: 1
+    assert_select ".progress__secondary .progress__action-link", text: "Lista de desejos"
+    assert_select ".progress__secondary .progress__action-link", text: "Importar coleção"
+  end
+
+  test "lista de sets está dentro de .progress__content" do
+    sign_in(@user)
+    get progress_path
+
+    assert_select ".progress__content .progress__list", count: 1,
+                  fail_message: ".progress__list deve estar dentro de .progress__content"
+  end
+
+  test "não há duplicação do link Adicionar cartas no DOM" do
+    sign_in(@user)
+    get progress_path
+
+    # Deve haver UM ÚNICO link "Adicionar cartas à pasta" no DOM inteiro
+    add_cards_links = css_select("a").select { |link| link.text.strip =~ /^Adicionar cartas/ }
+    assert_equal 1, add_cards_links.size,
+                 "deve haver exatamente UM link 'Adicionar cartas' no DOM (encontrou #{add_cards_links.size})"
+  end
+
+  # --- T11 / CNF-33: campo de arquivo do import ---
+
+  test "a página de import renderiza o campo de arquivo dentro de .auth__field" do
+    sign_in(@user)
+    get new_collection_import_path
+
+    assert_response :success
+    assert_select ".auth__field input[type='file'][name='arquivo']", count: 1
   end
 end

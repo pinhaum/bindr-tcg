@@ -450,20 +450,20 @@ T11 → T12
 
 **Checklist do artboard**:
 
-- [ ] Cartões: surface, borda, raio 8, padding 16, gap 4 (Mobile:24); número 28/32 700, legenda 13/18 muted; "cartas na pasta" (Mobile:26), "cartas diferentes" (Mobile:30)
-- [ ] Grade dos cartões: 390px `repeat(2, …)` gap 8 (Mobile:23); 1280px `repeat(4, …)` gap 16 (D:34)
-- [ ] 1280px: duas colunas com gap 24 e `align-items: flex-start` (D:53); esquerda cresce (D:55), direita 420px (D:125)
-- [ ] "Adicionar cartas à pasta" no celular: fixo acima da barra inferior, 44px, accent, on-accent, raio 8, 15/22 600, padding `16px 24px`, `border-top` (Mobile:115)
-- [ ] 1280px: divisor 1px (D:26) e "Adicionar cartas" na coluna lateral (D:27)
+- [x] Cartões: surface, borda, raio 8, padding 16, gap 4 (Mobile:24); número 28/32 700, legenda 13/18 muted; "cartas na pasta" (Mobile:26), "cartas diferentes" (Mobile:30)
+- [x] Grade dos cartões: 390px `repeat(2, …)` gap 8 (Mobile:23); 1280px `repeat(4, …)` gap 16 (D:34)
+- [x] 1280px: duas colunas com gap 24 e `align-items: flex-start` (D:53); esquerda cresce (D:55), direita 420px (D:125)
+- [x] "Adicionar cartas à pasta" no celular: fixo acima da barra inferior, 44px, accent, on-accent, raio 8, 15/22 600, padding `16px 24px`, `border-top` (Mobile:115)
+- [x] 1280px: divisor 1px (D:26) e "Adicionar cartas" na coluna lateral (D:27)
 
 **Done when**:
 
-- [ ] Em ≥1024px os cartões resolvem `repeat(4, minmax(0, 1fr))` com gap 16px e não esticam além disso (CNF-30)
-- [ ] Em ≥1024px, sets à esquerda e as ações de wishlist, import e export numa coluna de 420px (CNF-30); o grupo continua separado de "Adicionar cartas" (NAV-51)
-- [ ] Abaixo de 1024px, "Adicionar cartas à pasta" é `position: fixed` acima da barra inferior, fundo `var(--accent)`, ≥44px, e a reserva no fim do conteúdo cresce o bastante para o último set não ficar coberto (CNF-32, Req. 13.3)
-- [ ] Em ≥1024px, "Adicionar cartas" fica na coluna lateral abaixo de um divisor de 1px e não aparece fixa (CNF-32)
-- [ ] O `input type="file"` do import resolve surface, borda do design system e ≥44px (CNF-33)
-- [ ] Gate full passa
+- [x] Em ≥1024px os cartões resolvem `repeat(4, minmax(0, 1fr))` com gap 16px e não esticam além disso (CNF-30)
+- [x] Em ≥1024px, sets à esquerda e as ações de wishlist, import e export numa coluna de 420px (CNF-30); o grupo continua separado de "Adicionar cartas" (NAV-51)
+- [x] Abaixo de 1024px, "Adicionar cartas à pasta" é `position: fixed` acima da barra inferior, fundo `var(--accent)`, ≥44px, e a reserva no fim do conteúdo cresce o bastante para o último set não ficar coberto (CNF-32, Req. 13.3)
+- [x] Em ≥1024px, "Adicionar cartas" fica na coluna lateral abaixo de um divisor de 1px e não aparece fixa (CNF-32)
+- [x] O `input type="file"` do import resolve surface, borda do design system e ≥44px (CNF-33)
+- [x] Gate full passa
 
 **Tests**: unit (folha), integration
 **Gate**: full

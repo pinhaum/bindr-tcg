@@ -63,6 +63,9 @@
 
   /* Navegação — §11.5 */
   --nav-height: 56px;
+  --touch-target: 44px;
+  /* Fim da pasta: botão fixo "Adicionar cartas" (alvo + padding vertical) mais a barra inferior. */
+  --progress-reserve: calc(var(--space-4) + var(--touch-target) + var(--space-3) + var(--space-3) + var(--nav-height));
   --sidebar-width: 280px;
   --body-grid-columns: 1fr;
   --body-padding-bottom: var(--nav-height);
@@ -755,6 +758,13 @@ body {
   border-radius: var(--radius-sm);
 }
 
+/* T11 — input[type=file] estilizado com surface-raised e altura mínima (CNF-33) */
+.auth__field input[type="file"] {
+  min-height: 44px;
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+}
+
 /* A única ação em `accent` da tela (§11.6: `accent` é raro por construção). */
 .auth__submit {
   min-height: 24px;
@@ -1149,7 +1159,7 @@ summary:focus-visible,
 .progress__summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-1);
+  gap: var(--space-2);
   margin: 0 0 var(--space-3);
 }
 
@@ -1285,18 +1295,57 @@ summary:focus-visible,
 
 .progress__secondary > * { margin: 0; }
 
-.progress__action-link--primary {
-  display: block;
-  min-height: 44px;
-  padding: var(--space-2) var(--space-2);
-  background-color: var(--accent);
-  color: var(--on-accent);
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  text-align: center;
+/*
+ * T11 — layout em duas colunas em >=1024px (CNF-30, CNF-32).
+ *
+ * `.progress__content` é o wrapper que envolve o `.progress__secondary` e a
+ * lista de sets. Em <1024px eles são empilhados (grid de 1 coluna). Em
+ * >=1024px, a lista fica à esquerda (cresce), o `.progress__secondary` fica
+ * numa coluna direita de 420px, com `gap: 24px` e `align-items: flex-start`.
+ *
+ * Em >=1024px a lista fica à esquerda e o `.progress__secondary` numa coluna
+ * de 420px à direita (bloco de 64rem abaixo).
+ */
+.progress__content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
 }
 
 .progress__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+
+/*
+ * T11 — "Adicionar cartas à pasta" fixo em <1024px (CNF-32).
+ *
+ * O link vive no slot `sidebar_actions` (`.site-header__aside`, da T9). Em
+ * <1024px ele é fixo acima da barra inferior; em >=1024px o bloco de 64rem o
+ * devolve ao fluxo da coluna lateral, abaixo do divisor da T9.
+ */
+.progress__add-cards {
+  position: fixed;
+  bottom: var(--nav-height);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border-top: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-size: var(--body-strong-size);
+  line-height: var(--body-strong-line-height);
+  font-weight: var(--body-strong-weight);
+}
+
+.progress { padding-bottom: var(--progress-reserve); }
+
+/* SC 2.4.11: na pasta, o foco que rola até o fim não pode ficar sob o botão fixo. */
+:root:has(.progress__add-cards) { scroll-padding-bottom: var(--progress-reserve); }
 
 /*
  * T32 — Minha pasta em linhas (NAV-51).
@@ -2225,6 +2274,47 @@ summary:focus-visible,
   .site-header__aside {
     padding: var(--space-3);
     border-top: 1px solid var(--border);
+  }
+
+  /* Na coluna lateral o link é o mesmo botão bordado de `.site-header__back`. */
+  .progress__add-cards {
+    position: static;
+    display: inline-flex;
+    padding: 0 var(--space-3);
+    background-color: var(--transparent);
+    color: var(--ink);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--caption-size);
+    line-height: var(--caption-line-height);
+    font-weight: var(--caption-weight);
+  }
+
+  /* T11 — layout em duas colunas (CNF-30): sets à esquerda (cresce), ações à direita (420px) */
+  .progress__content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  /* No DOM as ações vêm antes da lista (celular); em duas colunas ficam à direita. */
+  .progress__list { grid-column: 1; grid-row: 1; }
+
+  .progress__secondary {
+    grid-column: 2;
+    grid-row: 1;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .progress { padding-bottom: var(--space-4); }
+  :root:has(.progress__add-cards) { scroll-padding-bottom: var(--body-padding-bottom); }
+
+  /* T11 — cartões de indicador em 4 colunas (CNF-30) */
+  .progress__summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
   }
 }
 

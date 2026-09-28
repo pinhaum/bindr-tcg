@@ -1,6 +1,18 @@
 <% content_for :title, "Minha pasta" %>
 
 <%#
+  T11 — "Adicionar cartas à pasta" reaproveita o slot `sidebar_actions` que a
+  T9 criou (`.site-header__aside`): abaixo de 1024px o CSS o fixa acima da
+  barra inferior (`position: fixed`); em 1024px ou mais ele fica na coluna
+  lateral, abaixo do divisor de 1px que a T9 já desenha no slot, sem posição
+  fixa (CNF-32, Req. 13.38). Um só link no DOM, não dois — a rota continua
+  `catalog_path`, a mesma que o link já usava antes desta task.
+%>
+<% content_for :sidebar_actions do %>
+  <%= link_to "Adicionar cartas à pasta", catalog_path, class: "progress__add-cards" %>
+<% end %>
+
+<%#
   T5 — progresso por set (PRG-01, PRG-02, PRG-06, PRG-10).
 
   ## Lista, não tabela
@@ -122,22 +134,16 @@
   </div>
 
   <%#
-    T4 — links para wishlist, import e export (NAV-19).
-    T20 — link para adicionar cartas (NAV-39).
+    T11 — layout em duas colunas em >=1024px: coluna esquerda com a grade dos
+    sets (cresce), coluna direita com as ações secundárias (wishlist, import,
+    export) em 420px. Em <1024px: empilhadas.
 
-    Os quatro links de ação sobre a coleção moram aqui, onde o usuário olha o
-    resumo do que tem. Acima da lista de sets de propósito: 63 itens depois deles
-    exigiriam rolagem para chegar num controle no fim.
-
-    "Adicionar cartas" é o primeiro e ação principal (fundo accent), os demais
-    links seguem em secundário.
+    "Adicionar cartas" é UM ÚNICO link no DOM, via content_for :sidebar_actions
+    (definido no topo da view) — em <1024px é fixo acima da barra inferior, em
+    >=1024px fica na coluna lateral abaixo do divisor de 1px da T9 (sem posição
+    fixa). Não há duplicação de link neste bloco.
   %>
-  <div class="progress__actions">
-    <p class="progress__action progress__action--primary">
-      <%= link_to "Adicionar cartas", catalog_path,
-                  class: "progress__action-link progress__action-link--primary" %>
-    </p>
-
+  <div class="progress__content">
     <div class="progress__secondary">
       <%= render "progress/export_link" %>
 
@@ -151,19 +157,18 @@
                     class: "progress__action-link" %>
       </p>
     </div>
-  </div>
 
-  <%#
-    Achado MEDIUM da revisão de a11y: `aria-labelledby` apontando para o `<h1>`.
-    Quem navega por lista (tecla "l" no NVDA) pula direto para a `<ul>` sem
-    passar pelo título — sem nome próprio ela é anunciada só como "lista, 63
-    itens", e "de quê" é justamente o que falta. O rótulo **reaproveita** o
-    `<h1>` em vez de repetir o texto num `aria-label`: duas fontes para a mesma
-    frase é como elas divergem depois. O `id` referenciado precisa existir, e há
-    teste que exige a existência do alvo — um `aria-labelledby` apontando para
-    id inexistente deixa o elemento sem nome nenhum, pior que não ter o atributo.
-  %>
-  <ul class="progress__list" aria-labelledby="progress_title">
+    <%#
+      Achado MEDIUM da revisão de a11y: `aria-labelledby` apontando para o `<h1>`.
+      Quem navega por lista (tecla "l" no NVDA) pula direto para a `<ul>` sem
+      passar pelo título — sem nome próprio ela é anunciada só como "lista, 63
+      itens", e "de quê" é justamente o que falta. O rótulo **reaproveita** o
+      `<h1>` em vez de repetir o texto num `aria-label`: duas fontes para a mesma
+      frase é como elas divergem depois. O `id` referenciado precisa existir, e há
+      teste que exige a existência do alvo — um `aria-labelledby` apontando para
+      id inexistente deixa o elemento sem nome nenhum, pior que não ter o atributo.
+    %>
+    <ul class="progress__list" aria-labelledby="progress_title">
     <% @rows.each do |row| %>
       <li class="progress-set" id="progress_set_<%= row.set_code %>">
         <div class="progress-set__header">
@@ -240,5 +245,6 @@
         </p>
       </li>
     <% end %>
-  </ul>
+    </ul>
+  </div>
 </main>
