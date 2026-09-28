@@ -952,6 +952,7 @@ summary:focus-visible,
 .wishlist-mark__input:focus-visible,
 .wishlist-mark__submit:focus-visible,
 .progress-set__catalog-link:focus-visible,
+.progress__order-link:focus-visible,
 .progress__action-link:focus-visible,
 .collection-export__link:focus-visible,
 .import-preview__confirm:focus-visible,
@@ -1138,8 +1139,6 @@ summary:focus-visible,
 
 .progress__title { font-size: var(--display-size); line-height: var(--display-line-height); font-weight: var(--display-weight); margin: 0 0 var(--space-2); }
 
-.progress__count { font-size: var(--caption-size); line-height: var(--caption-line-height); margin: 0 0 var(--space-2); color: var(--ink-muted); }
-
 /*
  * T3, T19 — indicadores de Minha pasta (NAV-17, NAV-18, NAV-20, NAV-21, NAV-37).
  *
@@ -1178,11 +1177,52 @@ summary:focus-visible,
 
 /*
  * T3 — título "Progresso por set" rebaixado de h1 para h2.
+ * T10 — tipografia corrigida para `title` (20/26/600), o valor do artboard
+ * (Mobile:41, D:56); a T3 havia herdado `display` (28/32/700) do h1 anterior.
  *
- * Mantém o mesmo estilo e rótulo de acessibilidade do h1 anterior, e é o
- * alvo do `aria-labelledby` da lista de sets.
+ * O rótulo de acessibilidade continua sendo o alvo do `aria-labelledby` da
+ * lista de sets, independente do tamanho visual.
  */
-.progress__heading { font-size: var(--display-size); line-height: var(--display-line-height); font-weight: var(--display-weight); margin: 0 0 var(--space-2); }
+.progress__heading { font-size: var(--title-size); line-height: var(--title-line-height); font-weight: var(--title-weight); margin: 0; }
+
+/*
+ * T10 — linha do cabeçalho "Progresso por set" com os chips de ordem
+ * (CNF-29). `space-between` e `wrap`: em 360px os chips descem para uma
+ * segunda linha em vez de espremer o título ou estourar a largura (Req. 2.5).
+ */
+.progress__heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+}
+
+.progress__order {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-3);
+}
+
+.progress__order-link {
+  display: inline-block;
+  min-height: 24px;
+  padding: var(--space-1) 0;
+  font-size: var(--body-size);
+  line-height: var(--body-line-height);
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+
+.progress__order-link[aria-current="page"] {
+  color: var(--ink);
+  font-weight: var(--nav-current-weight);
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
 
 /*
  * Entrada do export da coleção (T7 / POR-01).
@@ -1277,25 +1317,55 @@ summary:focus-visible,
   gap: var(--space-2);
 }
 
-/* Nome longo quebra dentro da própria coluna; a contagem fica à direita (NAV-51). */
+/* Nome longo quebra dentro da própria coluna; a contagem fica à direita (NAV-51, T10). */
 .progress-set__header > .progress-set__name { flex: 1 1 auto; min-width: 0; }
 
 .progress-set__header > .progress-set__owned-line { flex: none; }
 
+/*
+ * T10 — código e nome na mesma linha (checklist do artboard, Mobile:46-47).
+ * O `<h3>` vira o próprio flex container: `align-items: baseline` para o
+ * código mono e o link do nome dividirem a linha de base, `min-width: 0` para
+ * que o link filho possa quebrar dentro do flex item em vez de estourá-lo.
+ */
 .progress-set__name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
   margin: 0;
-  font-size: var(--body-strong-size);
-  line-height: var(--body-strong-line-height);
-  font-weight: var(--body-strong-weight);
-  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 /* Código de set: identificador lido caractere a caractere, em `code` (§11.4). */
 .progress-set__code {
+  flex: none;
   font-family: var(--font-mono);
   font-size: var(--code-size);
   line-height: var(--code-line-height);
   font-weight: var(--code-weight);
+}
+
+/*
+ * T10 — o nome do set é o link para o catálogo (CNF-25) e assume a
+ * tipografia `caption` muted do artboard (Mobile:46-47).
+ *
+ * O artboard mostra o nome truncado em reticências, mas `set_progress_plan_test.rb`
+ * (AD-017, protegido) proíbe `white-space: nowrap` em todo bloco largo do
+ * progresso — `.progress-set__catalog-link` está na lista — porque é a quebra
+ * de linha que mantém a página sem scroll horizontal em 360px (Req. 2.5). As
+ * duas exigências colidem para um nome comprido; a decisão desta task foi
+ * priorizar Req. 2.5 e o teste protegido, e deixar o nome **quebrar** em vez
+ * de truncar. `overflow-wrap: anywhere` é o mesmo mecanismo que
+ * `.progress-set__name` já usava antes da T10.
+ */
+.progress-set__catalog-link {
+  display: block;
+  min-width: 0;
+  min-height: 24px;
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
 }
 
 /*
@@ -1330,7 +1400,24 @@ summary:focus-visible,
   border-radius: var(--radius-sm);
 }
 
-.progress-set__owned-line,
+/*
+ * T10 — "possuídas / total" (e o percentual junto, quando conhecido) na
+ * tipografia `caption` muted do artboard (Mobile:49), à direita da linha do
+ * cabeçalho; `flex-shrink: 0` porque é o nome, não a contagem, que trunca
+ * quando o espaço aperta (Mobile:46-47).
+ */
+.progress-set__owned-line {
+  margin: 0;
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: var(--space-1);
+}
+
 .progress-set__percent,
 .progress-set__parallels {
   margin: 0;
@@ -1364,36 +1451,6 @@ summary:focus-visible,
   border-left: 2px solid var(--border-strong);
   padding-left: var(--space-1);
   font-style: italic;
-}
-
-/*
- * Link para o catálogo filtrado (PRG-03). Sem largura fixa e sem `nowrap`: o
- * item do set precisa continuar refluindo em 360px (Req. 2.5, medido na T8).
- *
- * `min-height` de 24px pelo SC 2.5.8, como todo controle interativo do projeto.
- * O cálculo hoje entrega 30px (`line-height` de 22px do estilo `body`, mais
- * `space-1` de padding em cima e embaixo), mas a convenção daqui é **declarar e
- * não depender de cálculo**: fonte do usuário e `line-height` herdado mudam o
- * resultado, e o achado HIGH da revisão de a11y foi exatamente este.
- *
- * `min-width` **não** é declarado, e a omissão é deliberada: o alvo é um link
- * de texto em fluxo, cuja largura é a da frase "Ver no catálogo" e nunca chega
- * perto de 24px. Declarar `min-width` num `inline-block` de texto não protege
- * nada e passaria a mentir se o texto um dia encolhesse para um ícone — aí o
- * certo seria `min-width` **e** `min-height` juntos, como em
- * `.ownership__button`, que é um alvo quadrado de verdade.
- *
- * A versão anterior deste comentário afirmava uma área de toque de 44px, que o
- * CSS não entregava em nenhuma configuração — só o `padding` vertical nunca
- * chegaria lá. O número foi corrigido para o que as regras de fato produzem.
- */
-.progress-set__catalog { margin: var(--space-1) 0 0; font-size: var(--body-size); line-height: var(--body-line-height); }
-
-.progress-set__catalog-link {
-  display: inline-block;
-  min-height: 24px;
-  padding: var(--space-1) 0;
-  overflow-wrap: anywhere;
 }
 
 /*

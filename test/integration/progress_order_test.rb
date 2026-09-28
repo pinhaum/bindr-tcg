@@ -10,9 +10,9 @@ require "test_helper"
 # desconhecido não derruba a página, e que a atividade de um segundo usuário
 # não vaza para a ordem do primeiro através da mesma rota.
 #
-# A view desta task ainda não tem os chips "Recentes / Por código" (T10,
-# `Depends on: T1, T9`) — a asserção aqui é sobre a ordem dos itens da lista,
-# não sobre marcação que só a T10 introduz.
+# T10 acrescenta os chips "Recentes" / "Por código" (CNF-29) junto do `<h2>`.
+# Os testes de chip ficam neste arquivo, e não em `progress_ui_test.rb`, porque
+# a cobertura de ordem já mora aqui — mesma fixture, mesmo par de sets.
 class ProgressOrderTest < ActionDispatch::IntegrationTest
   PASSWORD = "log-pose-77".freeze
 
@@ -146,5 +146,53 @@ class ProgressOrderTest < ActionDispatch::IntegrationTest
 
     assert_operator posicao[@set_recente.code], :<, posicao[@set_antigo.code],
                     "a posse recentíssima é do @outro; a ordem do @user não muda"
+  end
+
+  # --- CNF-29: chips "Recentes" / "Por código" ---
+
+  def chip(texto)
+    css_select(".progress__order-link").find { |node| node.text.squish == texto }
+  end
+
+  test "os dois chips existem junto do h2, cada um com o href da sua ordem" do
+    sign_in(@user)
+    get progress_path
+
+    assert_response :success
+    recentes = chip("Recentes")
+    por_codigo = chip("Por código")
+
+    assert recentes, "falta o chip 'Recentes'"
+    assert por_codigo, "falta o chip 'Por código'"
+    assert_equal progress_path(order: "recent"), recentes["href"]
+    assert_equal progress_path(order: "code"), por_codigo["href"]
+  end
+
+  test "sem parâmetro de ordem, o chip Recentes tem aria-current" do
+    sign_in(@user)
+    get progress_path
+
+    assert_equal "page", chip("Recentes")["aria-current"]
+    assert_nil chip("Por código")["aria-current"]
+  end
+
+  test "?order=code marca o chip Por código com aria-current" do
+    sign_in(@user)
+    get progress_path(order: "code")
+
+    assert_equal "page", chip("Por código")["aria-current"]
+    assert_nil chip("Recentes")["aria-current"]
+  end
+
+  # CNF-28/CNF-29 juntos: um valor desconhecido cai em "recent" na consulta
+  # (T1) e o chip precisa refletir a ordem **aplicada**, não o parâmetro bruto
+  # — é por isso que a view lê `@order`, nunca `params[:order]` diretamente.
+  test "?order=xyz (desconhecido) marca o chip Recentes, não nenhum chip" do
+    sign_in(@user)
+    get progress_path(order: "xyz")
+
+    assert_response :success
+    assert_equal "page", chip("Recentes")["aria-current"]
+    assert_nil chip("Por código")["aria-current"]
   end
 end

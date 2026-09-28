@@ -90,11 +90,36 @@
     </div>
   </div>
 
-  <h2 class="progress__heading" id="progress_title">Progresso por set</h2>
+  <%#
+    T10 — cabeçalho "Progresso por set" com os chips de ordem (CNF-29, CNF-26).
 
-  <p class="progress__count">
-    <%= @rows.size == 1 ? "1 set" : "#{@rows.size} sets" %>
-  </p>
+    A contagem total de sets ("76 sets") deixou de aparecer aqui — CNF-26 a
+    proíbe explicitamente, e o `@rows.size` que a alimentava não tem outro uso
+    na página.
+
+    Os chips usam `@order`, nunca `params[:order]`: o controller só repassa a
+    string a `SetProgressQuery`, que normaliza qualquer valor desconhecido para
+    `"recent"` (T1); ler `params[:order]` aqui duplicaria essa normalização na
+    view e poderia divergir dela (`test/integration/progress_test.rb` trava o
+    controller por AST para que `:order` seja a única chave lida de `params`, e
+    a garantia só vale enquanto a view não faz a própria leitura). `nav_link_to`
+    é reaproveitado do cabeçalho pelo mesmo `aria-current` que já marca a
+    entrada ativa da navegação.
+  %>
+  <div class="progress__heading-row">
+    <h2 class="progress__heading" id="progress_title">Progresso por set</h2>
+
+    <ul class="progress__order" aria-label="Ordenar sets">
+      <li>
+        <%= nav_link_to "Recentes", progress_path(order: "recent"),
+                        current: @order == "recent", class: "progress__order-link" %>
+      </li>
+      <li>
+        <%= nav_link_to "Por código", progress_path(order: "code"),
+                        current: @order == "code", class: "progress__order-link" %>
+      </li>
+    </ul>
+  </div>
 
   <%#
     T4 — links para wishlist, import e export (NAV-19).
@@ -143,20 +168,42 @@
       <li class="progress-set" id="progress_set_<%= row.set_code %>">
         <div class="progress-set__header">
           <h3 class="progress-set__name">
-            <%= row.set_name %>
             <span class="progress-set__code"><%= row.set_code %></span>
+            <%#
+              T10 — o nome do set é o próprio link para o catálogo filtrado
+              (CNF-25, CNF-26), substituindo o antigo "Ver no catálogo" ao pé do
+              item. O parâmetro e o `aria-label` seguem exatamente o contrato que
+              o link anterior já cumpria (T6 / PRG-03 / Req. 9.3): `sets` com o
+              **código**, nunca o id (`CatalogQuery::VARIANT_FILTERS` resolve por
+              `sets.code`), e o nome acessível carrega o nome e o código do set
+              porque o texto visível sozinho se repete 63 vezes numa lista de
+              links (WCAG 2.4.4) — mesmo raciocínio de `catalog/_card_tile`.
+            %>
+            <%= link_to row.set_name, catalog_path(sets: [ row.set_code ]),
+                        class: "progress-set__catalog-link",
+                        aria: { label: "#{row.set_name} (#{row.set_code}): ver no catálogo" } %>
           </h3>
 
           <%#
-            Possuídas e total (PRG-01). O total é o de **impressões** do set e sai
-            do catálogo — não depende de quem olha. Plural explícito, não
-            `pluralize`: o inflector do Rails é inglês e não sabe português.
+            Possuídas, total e percentual na mesma linha (CNF-25, CNF-26). O
+            total é o de **impressões** do set e sai do catálogo — não depende
+            de quem olha. Plural explícito, não `pluralize`: o inflector do
+            Rails é inglês e não sabe português.
+
+            O percentual (PRG-02/PRG-10) segue na mesma frase quando conhecido;
+            "indisponível" some da linha em vez de aparecer como "—", que um
+            leitor de tela não anuncia e que a spec proíbe interpretar como
+            dado ausente. O texto completo de indisponibilidade permanece como
+            legenda, abaixo, junto dos parallels — não duplicado aqui.
           %>
           <p class="progress-set__owned-line">
             <span class="progress-set__owned"><%= row.owned_variants %></span>
             de
             <span class="progress-set__total"><%= row.total_variants %></span>
             <%= row.total_variants == 1 ? "variante" : "variantes" %>
+            <% if row.completion_percent_known? %>
+              · <span class="progress-set__percent-value"><%= number_to_percentage(row.completion_percent, precision: 0) %></span> concluído
+            <% end %>
           </p>
         </div>
 
@@ -167,10 +214,13 @@
                     aria-hidden="true"></progress>
         <% end %>
 
+        <%#
+          Legenda da linha (CNF-26): parallels sempre, e o aviso de
+          indisponibilidade quando não há denominador — os dois cabem na mesma
+          frase porque nenhum dos dois é o percentual em si (PRG-06, PRG-10).
+        %>
         <p class="progress-set__percent <%= "progress-set__percent--unknown" unless row.completion_percent_known? %>">
           <% if row.completion_percent_known? %>
-            <span class="progress-set__percent-value"><%= number_to_percentage(row.completion_percent, precision: 0) %></span>
-            concluído
             <span class="progress-set__percent-basis">
               (<%= row.base_owned_variants %> de <%= row.base_size %> do set base)
             </span>
@@ -187,47 +237,6 @@
           <%# Req. 9.6: a métrica é separada, e o texto diz isso em vez de
               deixar a separação a cargo do layout. %>
           <span class="progress-set__parallels-note">(não entra no percentual)</span>
-        </p>
-
-        <%#
-          T6 — link para o catálogo filtrado (PRG-03 / Req. 9.3).
-
-          **O parâmetro é `sets` e o valor é o código, pelo contrato que já
-          existe.** `CatalogQuery::VARIANT_FILTERS` mapeia `sets` para a coluna
-          `code` e resolve por `joins(:card_set).where(sets: { code: values })`.
-          Passar `row.set_id` produziria uma URL sintaticamente válida que não
-          casa nenhum set e devolve catálogo vazio — 200 sem erro, o defeito
-          silencioso que a `colecao` já pagou cinco vezes. Lista (`[ code ]`) e
-          não escalar porque o filtro é `OU` dentro da categoria e o saneador
-          do query object trabalha sobre `Array(...)`.
-
-          **O nome acessível nomeia o set; o texto visível não precisa.** São 63
-          sets na página real: um texto visível repetido 63 vezes ("Ver no
-          catálogo") é o que a lista de links de um leitor de tela mostra, e
-          nela o usuário escolhe sem nenhum contexto ao redor — 63 entradas
-          idênticas são inescolhíveis (WCAG 2.4.4). O texto visível fica curto
-          porque **aí** o contexto existe: o `<h2>` do set está a três linhas
-          acima e na mesma caixa. O `aria-label` carrega o nome e o código,
-          exatamente como `catalog/_card_tile` faz com "3 impressões" numa
-          grade de 24 tiles — mesmo problema, mesma solução já adotada no
-          projeto.
-
-          `aria-label` **substitui** o texto visível no nome acessível, então
-          ele começa com o texto visível ("Ver no catálogo") para não quebrar o
-          SC 2.5.3 de quem usa comando de voz: quem diz "ver no catálogo"
-          continua acertando o link.
-
-          O link é o último elemento do item de propósito: ele é a ação sobre
-          os números acima, e vir antes deles faria o leitor de tela oferecer a
-          saída antes de dizer de onde. Nada aqui tem largura fixa nem
-          `nowrap` — a T8 mede 360px e não herda dívida.
-        %>
-        <p class="progress-set__catalog">
-          <%= link_to catalog_path(sets: [ row.set_code ]),
-                      class: "progress-set__catalog-link",
-                      aria: { label: "Ver no catálogo as cartas de #{row.set_name} (#{row.set_code})" } do %>
-            Ver no catálogo
-          <% end %>
         </p>
       </li>
     <% end %>

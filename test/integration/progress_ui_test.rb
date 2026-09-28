@@ -139,6 +139,9 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
   # --- PRG-02: percentual de conclusão ---
 
+  # T10 — o percentual passou a acompanhar "possuídas / total" na mesma linha
+  # (`.progress-set__owned-line`), CNF-25/CNF-26; `.progress-set__percent`
+  # virou a legenda com a base do cálculo, não mais o número em si.
   test "exibe o percentual com o denominador base_set_size" do
     sign_in(@luffy)
 
@@ -147,7 +150,7 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     # 3 possuídas de base/other sobre `base_set_size` 5 = 60%. Se a view usasse
     # `total_variants` (7) daria 43%; se usasse `owned_variants` no denominador
     # daria 100%.
-    assert_select "#progress_set_OPp5a .progress-set__percent", text: /60/
+    assert_select "#progress_set_OPp5a .progress-set__owned-line .progress-set__percent-value", text: /60/
     assert_no_match(/43%/, texto_do_set(@set_a))
     assert_no_match(/100%/, texto_do_set(@set_a))
   end
@@ -157,7 +160,7 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
     get progress_path
 
-    assert_select "#progress_set_OPp5b .progress-set__percent", text: /0%/
+    assert_select "#progress_set_OPp5b .progress-set__owned-line .progress-set__percent-value", text: /0%/
     # 0 possuídas de 2 impressões, e o denominador do percentual é 4 — os dois
     # números convivem na mesma linha sem se confundirem.
     assert_match(/0 de 2 variantes/, texto_do_set(@set_b))
@@ -343,8 +346,6 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
     assert_select "a.progress-set__catalog-link[hidden]", false,
                   "um link escondido não é oferecido a ninguém"
-    assert_select ".progress-set__catalog[hidden]", false,
-                  "esconder o contêiner esconde o link junto"
     assert_select "a.progress-set__catalog-link[aria-hidden=?]", "true", false,
                   "o link é a saída do set para o catálogo e não pode sumir da árvore de acessibilidade"
   end
@@ -434,6 +435,35 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     assert_equal 3, nomes.size
     assert_equal nomes.size, nomes.uniq.size,
                  "links com o mesmo nome acessível são indistinguíveis em lista de links"
+  end
+
+  # --- T10: o nome do set é o link, "Ver no catálogo" não existe mais (CNF-25, CNF-26) ---
+
+  test "o link do catálogo está dentro do h3 do nome do set, e o texto visível é o nome" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    assert_select "#progress_set_OPp5a h3.progress-set__name a.progress-set__catalog-link",
+                  text: "Romance Dawn"
+  end
+
+  test "o texto Ver no catálogo não aparece mais em lugar nenhum da página" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    assert_no_match(/Ver no catálogo/, response.body)
+  end
+
+  # CNF-26: a contagem total de sets ("76 sets") foi removida do cabeçalho.
+  test "a contagem total de sets não aparece mais junto do h2" do
+    sign_in(@luffy)
+
+    get progress_path
+
+    assert_select ".progress__count", false
+    assert_no_match(/\d+ sets?\z/, css_select(".progress__heading-row").first.text.squish)
   end
 
   # --- Correções da revisão de a11y (SC 2.4.11, SC 2.5.8, SC 1.3.1) ---

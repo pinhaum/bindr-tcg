@@ -417,17 +417,17 @@ T11 → T12
 
 **Checklist do artboard** (`Mobile-Pasta.dc.html`, `Desktop-Pasta.dc.html`):
 
-- [ ] h1 "Minha pasta" 28/32 700 (Mobile:21); h2 "Progresso por set" 20/26 600 (Mobile:41, D:56); lista em coluna, gap 8 (Mobile:43)
-- [ ] Linha: código mono 13 500 text e nome 13 muted com reticências à esquerda (Mobile:46-47); "142 / 254" 13 muted à direita (Mobile:49)
-- [ ] Barra abaixo: altura 8, trilho sunken, raio 4, preenchimento border-strong (Mobile:51)
+- [x] h1 "Minha pasta" 28/32 700 (Mobile:21); h2 "Progresso por set" 20/26 600 (Mobile:41, D:56); lista em coluna, gap 8 (Mobile:43)
+- [x] Linha: código mono 13 500 text e nome 13 muted com reticências à esquerda (Mobile:46-47); "142 / 254" 13 muted à direita (Mobile:49)
+- [x] Barra abaixo: altura 8, trilho sunken, raio 4, preenchimento border-strong (Mobile:51)
 
 **Done when**:
 
-- [ ] O nome do set é o link para `catalog_path(sets: [code])`; não existe mais "Ver no catálogo" (CNF-25, CNF-26)
-- [ ] O percentual aparece na mesma linha de "possuídas / total"; parallels como legenda; set com `base_set_size: nil` continua sem barra e com "Percentual indisponível" (NAV-38)
-- [ ] A contagem total de sets ("76 sets") não aparece (CNF-26)
-- [ ] Chips "Recentes" e "Por código" junto do h2, levando a `?order=recent` e `?order=code`, com `aria-current` no da ordem aplicada, inclusive "Recentes" quando o parâmetro é inválido (CNF-29, CNF-28)
-- [ ] Gate full passa
+- [x] O nome do set é o link para `catalog_path(sets: [code])`; não existe mais "Ver no catálogo" (CNF-25, CNF-26)
+- [x] O percentual aparece na mesma linha de "possuídas / total"; parallels como legenda; set com `base_set_size: nil` continua sem barra e com "Percentual indisponível" (NAV-38)
+- [x] A contagem total de sets ("76 sets") não aparece (CNF-26)
+- [x] Chips "Recentes" e "Por código" junto do h2, levando a `?order=recent` e `?order=code`, com `aria-current` no da ordem aplicada, inclusive "Recentes" quando o parâmetro é inválido (CNF-29, CNF-28)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full
