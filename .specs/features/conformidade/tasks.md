@@ -348,21 +348,21 @@ T11 → T12
 
 **Checklist do artboard**:
 
-- [ ] Divisores 1px border depois de Efeito e depois de Variantes (Mobile:48, :84)
-- [ ] h2 "Variantes na pasta" 20/26 600 (Mobile:51, D:67)
-- [ ] Linha: surface, borda 1px border, raio 8, padding 16, gap 8 (Mobile:53); no desktop em linha, `align-items: center`, gap 16 (D:69)
-- [ ] Código mono 13 500 (Mobile:56); "SR · arte base" / "SP CARD · alternativa" 13 muted (Mobile:57, :72); "não tenho" 13 muted com zero (Mobile:74)
-- [ ] Stepper `− [n] +` (Mobile:62-64): botões 44×44, transparentes, border-strong, raio 4, 20px; `[n]` 44px, sunken, border-strong, 15px 600, só exibe; com zero, "−" apagado (Mobile:77)
+- [x] Divisores 1px border depois de Efeito e depois de Variantes (Mobile:48, :84)
+- [x] h2 "Variantes na pasta" 20/26 600 (Mobile:51, D:67)
+- [x] Linha: surface, borda 1px border, raio 8, padding 16, gap 8 (Mobile:53); no desktop em linha, `align-items: center`, gap 16 (D:69)
+- [x] Código mono 13 500 (Mobile:56); "SR · arte base" / "SP CARD · alternativa" 13 muted (Mobile:57, :72); "não tenho" 13 muted com zero (Mobile:74)
+- [x] Stepper `− [n] +` (Mobile:62-64): botões 44×44, transparentes, border-strong, raio 4, 20px; `[n]` 44px, sunken, border-strong, 15px 600, só exibe; com zero, "−" apagado (Mobile:77)
 
 **Done when**:
 
-- [ ] Título "Variantes na pasta" e divisor `1px solid var(--border)` entre efeito e variantes (CNF-19)
-- [ ] Cada linha: código, "{raridade} · {tipo de arte}" com `base` → "arte base", `parallel` → "parallel", `other` → "alternativa", o set e a miniatura menor que a imagem principal; rótulos "Código", "Raridade" e "Set" no HTML e fora da vista (CNF-20; mata o antigo M45)
-- [ ] Com sessão, a ordem no DOM é `−`, `[n]`, `+`; `[n]` não é `input`; botões resolvem 44×44px; nomes acessíveis "Adicionar uma cópia de …" / "Remover uma cópia de …" mantidos (CNF-21)
-- [ ] Com zero: "não tenho" e `−` com `aria-disabled="true"`, sem `disabled` (CNF-21)
-- [ ] POST de incremento com `Accept: text/vnd.turbo-stream.html` responde stream que atualiza a linha da variante (CNF-22)
-- [ ] Marca de wishlist por variante continua na linha (Req. 8.1)
-- [ ] Gate full passa
+- [x] Título "Variantes na pasta" e divisor `1px solid var(--border)` entre efeito e variantes (CNF-19)
+- [x] Cada linha: código, "{raridade} · {tipo de arte}" com `base` → "arte base", `parallel` → "parallel", `other` → "alternativa", o set e a miniatura menor que a imagem principal; rótulos "Código", "Raridade" e "Set" no HTML e fora da vista (CNF-20; mata o antigo M45)
+- [x] Com sessão, a ordem no DOM é `−`, `[n]`, `+`; `[n]` não é `input`; botões resolvem 44×44px; nomes acessíveis "Adicionar uma cópia de …" / "Remover uma cópia de …" mantidos (CNF-21)
+- [x] Com zero: "não tenho" e `−` com `aria-disabled="true"`, sem `disabled` (CNF-21)
+- [x] POST de incremento com `Accept: text/vnd.turbo-stream.html` responde stream que atualiza a linha da variante (CNF-22)
+- [x] Marca de wishlist por variante continua na linha (Req. 8.1)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

@@ -435,6 +435,20 @@ body {
 .card-detail__variants { max-width: 100%; }
 
 /*
+ * CNF-19 — divisor de 1px antes de "Variantes na pasta"
+ * (Mobile-Carta.dc.html:48, Desktop-Carta.dc.html:67). `::before` e não um
+ * elemento novo no HTML: a seção de efeito é opcional (carta sem
+ * `effect_text`) e o divisor precisa aparecer mesmo assim, sempre que houver
+ * variante — a mesma técnica de `.catalog__filters::before`.
+ */
+.card-detail__variants::before {
+  content: "";
+  display: block;
+  margin-bottom: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+/*
  * T6 (conformidade) — CNF-14/15/16/36/37: miniatura ao lado do título abaixo
  * de 1024px, imagem maior dentro de um `<details>` (Mobile-Carta.dc.html:23-27),
  * coluna própria de 320px sempre visível em 1024px ou mais
@@ -532,25 +546,32 @@ body {
   padding: 0;
 }
 
+/*
+ * T8 (CNF-19/20/21) — a variante virou cartão de superfície (Mobile-Carta.dc.html:53),
+ * não mais grid de três colunas: miniatura e meta numa linha (`flex-wrap`
+ * cuida do encolhimento em 360px) e a posse (o terceiro filho, `.ownership`)
+ * numa linha própria abaixo, com o stepper. A wishlist (quarto filho) segue
+ * a posse, cada uma na própria linha.
+ */
 .variant {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-2);
-  align-items: start;
+  padding: var(--space-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
 }
 
-/*
- * NAV-49: miniatura e meta na primeira linha; posse e wishlist (os filhos a
- * partir do terceiro) descem para baixo da meta. Na tela larga eles sobem para
- * a terceira coluna.
- */
-.variant > :nth-child(n + 3) { grid-column: 2 / -1; }
+.variant > .ownership,
+.variant > .wishlist-mark { flex-basis: 100%; }
 
 .variant__art {
   position: relative;
-  grid-row: span 3;
   width: 80px;
   height: 112px;
+  flex-shrink: 0;
   overflow: hidden;
   border-radius: var(--radius-md);
   background: var(--surface-sunken);
@@ -795,6 +816,9 @@ body {
 
 .ownership__count { font-weight: var(--display-weight); font-variant-numeric: tabular-nums; }
 
+/* CNF-21 — "não tenho" no lugar visível da contagem, em zero (Mobile-Carta.dc.html:74). */
+.ownership__empty { color: var(--ink-muted); }
+
 /*
  * Posse não é cor (§11.6): a variante possuída ganha badge com a quantidade; a
  * faltante não recebe badge nenhum. Único uso de `radius-full` da folha.
@@ -855,6 +879,44 @@ body {
 .card-detail .ownership__button {
   min-height: 44px;
   min-width: 44px;
+}
+
+/*
+ * CNF-21 — o `[n]` do stepper (Mobile-Carta.dc.html:63): sunken, mesma borda
+ * dos botões ao lado, ocupa o espaço entre os dois (`flex-grow: 1`) e não é
+ * `input` — só exibe, por isso `aria-hidden` (a quantidade audível é a região
+ * viva de `.ownership__quantity`, acima).
+ */
+.ownership__step {
+  display: inline-flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: var(--space-1) var(--space-2);
+  font-weight: var(--body-strong-weight);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.card-detail .ownership__step { min-height: 44px; }
+
+/*
+ * CNF-21 — em zero, "não tenho" é o texto visível no lugar da contagem; o
+ * `.ownership__count` numérico continua no DOM (contrato do Stream e dos
+ * testes de badge fora desta task) e some da tela pelo mesmo recorte de
+ * `.ownership__variant`, não por `display: none`.
+ */
+.ownership__count--empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /*
@@ -2063,10 +2125,16 @@ summary:focus-visible,
 
   .card-detail__variants { grid-column: 2; }
 
-  .variant > :nth-child(n + 3) { grid-column: 3; }
+  /*
+   * D:69 — em 1024px ou mais, a variante inteira fica numa linha só (o
+   * `flex-wrap` da regra base deixa de quebrar porque a largura disponível
+   * passa a caber tudo); posse e wishlist não precisam mais de `flex-basis:
+   * 100%` para cada uma ganhar linha própria.
+   */
+  .variant > .ownership,
+  .variant > .wishlist-mark { flex-basis: auto; }
 
-  .variant__art,
-  .variant__meta { grid-row: span 2; }
+  .variant__meta { flex-grow: 1; min-width: 0; }
 
   /*
    * CNF-17 — em 64rem o código e a linha "set · código" ficam na mesma

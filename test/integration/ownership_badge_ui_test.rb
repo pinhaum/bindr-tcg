@@ -60,10 +60,16 @@ class OwnershipBadgeUiTest < ActionDispatch::IntegrationTest
   end
 
   # T10: incremento e decremento se distinguem pelo rótulo visível, não por cor.
+  #
+  # SPEC_DEVIATION (T8, CNF-21): o texto visível do botão deixou de trazer o
+  # "1" ("+1"/"-1") -- o stepper do canvas mostra a quantidade uma vez so, no
+  # `[n]` entre os dois botoes, e repeti-la no rotulo do botao duplicaria a
+  # informacao. A intencao original do teste continua provada: os dois botoes
+  # tem rotulos visiveis diferentes um do outro, nao distinguidos por cor.
   test "incremento e decremento se distinguem pelo rótulo" do
     get card_path(@card.card_number)
 
-    assert_select "#{control(@duas)} .ownership__button--increment", text: "+1"
-    assert_select "#{control(@duas)} .ownership__button--decrement", text: "\u22121"
+    assert_select "#{control(@duas)} .ownership__button--increment", text: "+"
+    assert_select "#{control(@duas)} .ownership__button--decrement", text: "\u2212"
   end
 end

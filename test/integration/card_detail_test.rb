@@ -37,9 +37,13 @@ class CardDetailTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".variant", 3
 
-    assert_select ".variant__rarity", text: "L"
-    assert_select ".variant__rarity", text: "SEC"
-    assert_select ".variant__rarity", text: "C"
+    # SPEC_DEVIATION (T8, CNF-20): o texto passou a combinar raridade e tipo de
+    # arte ("{raridade} · {tipo de arte}"); a intenção original — cada variante
+    # exibe a própria raridade — continua provada, só que dentro do texto
+    # combinado em vez de sozinha.
+    assert_select ".variant__rarity", text: "L · arte base"
+    assert_select ".variant__rarity", text: "SEC · arte base"
+    assert_select ".variant__rarity", text: "C · arte base"
 
     assert_select ".variant__set", text: /Romance Dawn/
     assert_select ".variant__set", text: /Straw Hat Crew/

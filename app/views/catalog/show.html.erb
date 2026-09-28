@@ -180,11 +180,26 @@
     Req. 5.2 — a coleção referencia variantes, não cartas (design.md §3.1):
     arte base e arte alternativa são objetos de coleção distintos. Por isso
     cada variante aparece inteira, com raridade, set e imagem próprias.
+
+    T8 (CNF-19) — título próprio e divisor de 1px antes desta seção
+    (Mobile-Carta.dc.html:48-51, Desktop-Carta.dc.html:67); o divisor em si é
+    `::before` na folha (mesma técnica de `.catalog__filters::before`), não um
+    elemento novo — a seção de efeito é opcional (carta sem `effect_text`) e um
+    divisor fixado nela sumiria junto.
   %>
   <section class="card-detail__variants">
-    <h2>Impressões (<%= @variants.size %>)</h2>
+    <h2>Variantes na pasta</h2>
 
     <ul class="variant-list">
+      <%#
+        CNF-20 — "{raridade} · {tipo de arte}", com `art_kind` traduzido:
+        `base` → "arte base", `parallel` → "parallel", qualquer outro valor
+        (`alternate_art`, `manga`, `promo`, `other`) → "alternativa". O mapa é
+        fechado por propósito: `art_kind` é texto livre vindo de um scraper
+        comunitário (design.md, "Detalhes de modelagem fáceis de errar"), e um
+        `else` cobre valor novo sem quebrar a ingestão nem esta view.
+      %>
+      <% art_kind_labels = { "base" => "arte base", "parallel" => "parallel" } %>
       <% @variants.each do |variant| %>
         <li class="variant">
           <div class="variant__art">
@@ -201,6 +216,10 @@
             <% end %>
           </div>
 
+          <%#
+            CNF-20 — rótulos "Código", "Raridade" e "Set" no HTML e fora da
+            vista (`.variant__meta dt`, recorte já existente na folha).
+          %>
           <dl class="variant__meta">
             <div>
               <dt>Código</dt>
@@ -209,7 +228,9 @@
             <% if variant.rarity.present? %>
               <div>
                 <dt>Raridade</dt>
-                <dd class="variant__rarity"><%= variant.rarity %></dd>
+                <dd class="variant__rarity">
+                  <%= [ variant.rarity, art_kind_labels.fetch(variant.art_kind, "alternativa") ].join(" · ") %>
+                </dd>
               </div>
             <% end %>
             <div>
@@ -224,9 +245,7 @@
             Req. 5.3 / COL-18 — o controle de posse fica **em cada variante**,
             dentro do loop que já existe. Aqui não há ambiguidade nenhuma: a
             variante aparece inteira, com código, raridade, set e imagem, e o
-            botão pertence visivelmente a ela. É o oposto da grade, onde o tile
-            fala de uma carta e o controle direto só é inequívoco quando a
-            carta tem uma variante só.
+            botão pertence visivelmente a ela.
           %>
           <%= render "collection_items/ownership",
                      variant: variant, card: @card, quantity: owned_quantity(variant) %>

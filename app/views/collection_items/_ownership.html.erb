@@ -31,7 +31,17 @@
      aria-live="polite" aria-atomic="true">
   <% if authenticated? %>
     <p class="ownership__quantity">
-      <span class="ownership__count<%= " ownership__count--owned" if quantity.positive? %>"><%= quantity %></span>
+      <%#
+        CNF-21 — em zero, "não tenho" é o texto **visível**; `.ownership__count`
+        continua no DOM com "0" (contrato do Turbo Stream e dos testes de badge
+        que já leem este nó — fora do Where desta task) e some da tela por CSS
+        quando `quantity.zero?`, a mesma técnica de recorte de
+        `.ownership__variant` logo abaixo, não `display: none`.
+      %>
+      <span class="ownership__count<%= " ownership__count--owned" if quantity.positive? %><%= " ownership__count--empty" if quantity.zero? %>"><%= quantity %></span>
+      <% if quantity.zero? %>
+        <span class="ownership__empty">não tenho</span>
+      <% end %>
       <%#
         Plural explícito, não `pluralize`: o inflector do Rails é inglês e não
         sabe acentuação portuguesa — `"cópia".pluralize(2)` devolve "cópia",
@@ -56,28 +66,19 @@
       <span class="ownership__variant"><%= card.name %> <code class="code"><%= variant.variant_code %></code></span>
     </p>
 
+    <%#
+      CNF-21 — ordem no DOM é `−`, `[n]`, `+` (Mobile-Carta.dc.html:62-64). O
+      `[n]` (`.ownership__step`) só exibe: é `aria-hidden`, porque a quantidade
+      já é anunciada pela região viva acima (`.ownership__quantity`) — repeti-la
+      aqui audível duplicaria o anúncio a cada clique.
+    %>
     <div class="ownership__actions">
-      <%#
-        O rótulo acessível cita nome da carta e código da variante. Numa grade
-        com 24 tiles, ou num detalhe com seis impressões, "Adicionar" sozinho
-        se repete idêntico e quem navega por lista de botões não distingue um
-        do outro (SC 2.4.6 / 4.1.2). O texto visível continua curto porque o
-        alvo precisa caber em 360px; o rótulo acessível carrega o contexto que
-        o visual dá pela posição.
-      %>
-      <%= button_to increment_collection_item_path(card_variant_id: variant.id),
-                    class: "ownership__button ownership__button--increment",
-                    form_class: "ownership__form",
-                    aria: { label: "Adicionar uma cópia de #{card.name} #{variant.variant_code}" } do %>
-        <span aria-hidden="true">+1</span>
-      <% end %>
-
       <%#
         Em zero, o decremento é marcado com **`aria-disabled`, não `disabled`**.
         A diferença decide se quem navega por teclado perde o lugar.
 
         Achado HIGH da revisão de a11y (`ecc:a11y-architect`), e o cenário é
-        concreto: com uma cópia, o usuário foca o "−1" e aperta Enter. O Turbo
+        concreto: com uma cópia, o usuário foca o "−" e aperta Enter. O Turbo
         troca os filhos deste contêiner e o botão volta renderizado com
         quantidade zero. Um `disabled` de verdade sai da árvore de foco — o
         elemento que tinha o foco deixa de ser focável, o navegador joga o foco
@@ -100,7 +101,24 @@
                     form_class: "ownership__form",
                     aria: { label: "Remover uma cópia de #{card.name} #{variant.variant_code}",
                             disabled: quantity.zero? } do %>
-        <span aria-hidden="true">&minus;1</span>
+        <span aria-hidden="true">&minus;</span>
+      <% end %>
+
+      <span class="ownership__step" aria-hidden="true"><%= quantity %></span>
+
+      <%#
+        O rótulo acessível cita nome da carta e código da variante. Numa grade
+        com 24 tiles, ou num detalhe com seis impressões, "Adicionar" sozinho
+        se repete idêntico e quem navega por lista de botões não distingue um
+        do outro (SC 2.4.6 / 4.1.2). O texto visível continua curto porque o
+        alvo precisa caber em 360px; o rótulo acessível carrega o contexto que
+        o visual dá pela posição.
+      %>
+      <%= button_to increment_collection_item_path(card_variant_id: variant.id),
+                    class: "ownership__button ownership__button--increment",
+                    form_class: "ownership__form",
+                    aria: { label: "Adicionar uma cópia de #{card.name} #{variant.variant_code}" } do %>
+        <span aria-hidden="true">+</span>
       <% end %>
     </div>
   <% else %>
