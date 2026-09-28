@@ -1,84 +1,76 @@
 require "test_helper"
 require_relative "support/stylesheet"
 
+# T5 (conformidade) — CNF-12 e CNF-13: grade de cinco colunas em ≥1024px, tile
+# e arte com o recuo do canvas (`Desktop-Catalogo.dc.html:77-80`,
+# `Main.dc.html:55-58`) e o divisor entre navegação e filtros (D:27).
+#
+# A folha tem um único bloco `@media (min-width: 64rem)`. Ele é recortado pelo
+# balanceamento das chaves: um regex não guloso até "}" para no fim da primeira
+# regra interna, e um guloso até "}" seguido de "@" ou do fim do arquivo engole
+# as regras que vêm depois do bloco — e aí uma regra fora da media query
+# passaria por regra de dentro.
 class CatalogGridCanvasTest < ActiveSupport::TestCase
-  def rules_in_media_query
-    @rules_in_media_query ||= begin
-      content = Stylesheet.read_stylesheet
-      media_part = content[/@media\s*\(min-width:\s*64rem\)\s*\{(.+?)\}\s*(?=@|\Z)/m, 1]
-      return [] unless media_part
-      Stylesheet.rules(media_part)
+  WIDE = /@media\s*\(min-width:\s*64rem\)\s*\{/
+
+  def self.wide_block(css = Stylesheet.content_without_comments)
+    start = css.index(WIDE) or return ""
+    open = css.index("{", start)
+    depth = 0
+    css.each_char.with_index.drop(open).each do |char, index|
+      depth += 1 if char == "{"
+      depth -= 1 if char == "}"
+      return css[(open + 1)...index] if depth.zero?
     end
+    ""
   end
 
-  def rules_outside_media_query
-    @rules_outside_media_query ||= Stylesheet.rules(Stylesheet.content_outside_root)
+  setup do
+    css = Stylesheet.content_without_comments
+    @wide = self.class.wide_block(css)
+    @narrow_rules = Stylesheet.rules(css.sub(@wide, ""))
+    @wide_rules = Stylesheet.rules(@wide)
   end
 
-  test "catalog__grid outside media query has 2 columns" do
-    grid_rule = rules_outside_media_query.find { |selector, _| selector.strip == ".catalog__grid" }
-    assert_not_nil grid_rule, "Rule for .catalog__grid not found outside media query"
-    _, body = grid_rule
-    declarations = Stylesheet.declarations(body)
-    grid_cols = declarations.find { |prop, _| prop == "grid-template-columns" }&.[](1)
-    assert_equal "repeat(auto-fill, minmax(var(--tile-min), 1fr))", grid_cols,
-                 ".catalog__grid outside media query should use auto-fill for responsive columns"
+  test "o recorte do bloco largo não inclui regra de fora dele" do
+    assert_not_empty @wide
+    assert_nil Stylesheet.resolved("pagination", @wide_rules)["display"],
+               ".pagination só é declarada fora da media query"
   end
 
-  test "catalog__grid outside media query has gap 8px" do
-    grid_rule = rules_outside_media_query.find { |selector, _| selector.strip == ".catalog__grid" }
-    assert_not_nil grid_rule
-    _, body = grid_rule
-    declarations = Stylesheet.declarations(body)
-    gap = declarations.find { |prop, _| prop == "gap" }&.[](1)
-    assert_equal "var(--space-2)", gap, ".catalog__grid outside media query should have gap: var(--space-2) (8px)"
+  test "fora do bloco largo a grade mantém o reflow com gap de 8px (D7, Req. 2.5)" do
+    grid = Stylesheet.resolved("catalog__grid", @narrow_rules)
+
+    assert_match(/\Arepeat\(auto-fill,/, grid["grid-template-columns"])
+    assert_equal 8.0, Stylesheet.to_pixels(grid["gap"])
   end
 
-  def declarations_in_media(selector)
-    rule = rules_in_media_query.find { |candidate, _| candidate.strip == selector }
-    assert_not_nil rule, "regra #{selector} não encontrada em @media (min-width: 64rem)"
-    Stylesheet.declarations(rule[1]).to_h
+  test "em ≥1024px a grade tem cinco colunas iguais e gap de 16px (CNF-12)" do
+    grid = Stylesheet.resolved("catalog__grid", @wide_rules)
+
+    assert_equal "repeat(5, minmax(0, 1fr))", grid["grid-template-columns"]
+    assert_equal 16.0, Stylesheet.to_pixels(grid["gap"])
   end
 
-  test "catalog__grid inside media query has 5 columns" do
-    grid = declarations_in_media(".catalog__grid")
-    grid_cols = grid["grid-template-columns"]
-    assert_equal "repeat(5, minmax(0, 1fr))", grid_cols,
-                 ".catalog__grid should have 5 equal columns in 1280px (CNF-12)"
+  test "o tile tem recuo de 16px, fundo surface e borda (CNF-13)" do
+    tile = Stylesheet.resolved("card-tile")
+
+    assert_equal 16.0, Stylesheet.to_pixels(tile["padding"])
+    assert_equal "var(--surface-raised)", tile["background-color"]
+    assert_equal "1px solid var(--border)", tile["border"]
   end
 
-  test "catalog__grid inside media query has gap 16px" do
-    grid = declarations_in_media(".catalog__grid")
-    gap = grid["gap"]
-    assert_equal "var(--space-3)", gap, ".catalog__grid should have gap: var(--space-3) (16px) in 1280px (CNF-12)"
+  test "a arte é emoldurada em sunken com recuo de 8px (CNF-13)" do
+    art = Stylesheet.resolved("card-tile__art")
+
+    assert_equal 8.0, Stylesheet.to_pixels(art["padding"])
+    assert_equal "var(--surface-sunken)", art["background"]
   end
 
-  test "card-tile has padding 16px" do
-    tile_rule = rules_outside_media_query.find { |selector, _| selector.strip == ".card-tile" }
-    assert_not_nil tile_rule, "Rule for .card-tile not found"
-    _, body = tile_rule
-    declarations = Stylesheet.declarations(body)
-    padding = declarations.find { |prop, _| prop == "padding" }&.[](1)
-    resolved_padding = Stylesheet.to_pixels(padding)
-    assert_equal 16.0, resolved_padding, ".card-tile should have padding: 16px (CNF-13)"
-  end
+  test "em ≥1024px há divisor de 1px entre navegação e filtros (CNF-13)" do
+    divider = Stylesheet.resolved("catalog__filters::before", @wide_rules)
 
-  test "card-tile__art has padding 8px" do
-    art_rule = rules_outside_media_query.find { |selector, _| selector.strip == ".card-tile__art" }
-    assert_not_nil art_rule, "Rule for .card-tile__art not found"
-    _, body = art_rule
-    declarations = Stylesheet.declarations(body)
-    padding = declarations.find { |prop, _| prop == "padding" }&.[](1)
-    resolved_padding = Stylesheet.to_pixels(padding)
-    assert_equal 8.0, resolved_padding, ".card-tile__art should have padding: 8px (CNF-13)"
-  end
-
-  test "card-tile__art has sunken background" do
-    art_rule = rules_outside_media_query.find { |selector, _| selector.strip == ".card-tile__art" }
-    assert_not_nil art_rule
-    _, body = art_rule
-    declarations = Stylesheet.declarations(body)
-    background = declarations.find { |prop, _| prop == "background" }&.[](1)
-    assert_equal "var(--surface-sunken)", background, ".card-tile__art should have background: var(--surface-sunken) (CNF-13)"
+    assert_equal '""', divider["content"]
+    assert_equal "1px solid var(--border)", divider["border-top"]
   end
 end

@@ -1902,6 +1902,12 @@ summary:focus-visible,
     align-content: start;
   }
 
+  /* Divisor entre a navegação e os filtros, dentro do recuo da coluna (CNF-13). */
+  .catalog__filters::before {
+    content: "";
+    border-top: 1px solid var(--border);
+  }
+
   .catalog__filter-group { margin-bottom: 0; }
 
   /* Filtros sempre visíveis em viewport larga (NAV-45) */
