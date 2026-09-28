@@ -284,6 +284,22 @@ Regras de execução:
     Req. 13 com critérios por tela tirados dos artboards.
   - _Requisitos: 4.9, 13.1–13.20_
 
+- [ ] **6.7 Conformidade com o canvas**
+  - Cada artboard versionado é critério de aceite da sua tela (AD-016); toda
+    divergência vira requisito ou exclusão registrada.
+  - Grade só com o selo de quantidade; registro de posse só no detalhe
+    (Req. 7.5 emendado), com o stepper `−` `[n]` `+`.
+  - Linha de status em frase única com convite anônimo único; busca, chips e
+    grade de cinco colunas em 1280px como o canvas.
+  - Detalhe com miniatura e `<details>` no celular, cabeçalho em chips, trigger
+    dentro do efeito, "Variantes na pasta".
+  - Pasta ordenada por "Recentes" ou "Por código" (Req. 9.7), nome do set como
+    link, "Adicionar cartas à pasta" fixo no celular.
+  - Fecha com as capturas conferidas contra a checklist de cada artboard e a
+    aprovação do dono. Plano: `.specs/features/conformidade/tasks.md` (T1–T12);
+    a seção fecha na T12.
+  - _Requisitos: 7.5, 9.7, 13.19, 13.21–13.39_
+
 ---
 
 ## 7 — Fechamento do MVP
