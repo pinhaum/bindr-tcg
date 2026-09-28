@@ -385,16 +385,16 @@ T11 → T12
 
 **Checklist do artboard**:
 
-- [ ] 390px: botão bordado 44px, padding `0 16px`, border-strong, raio 4, sem "←", `align-self: flex-start` (Mobile:21)
-- [ ] 1280px: divisor 1px e o botão na coluna lateral abaixo da navegação, 13px (D:26-27)
-- [ ] Marca "Bindr" 28/32 700 (D:20); navegação 44px, padding `0 16px`, raio 4, 15px, ativo sunken 600 (D:22-24)
+- [x] 390px: botão bordado 44px, padding `0 16px`, border-strong, raio 4, sem "←", `align-self: flex-start` (Mobile:21)
+- [x] 1280px: divisor 1px e o botão na coluna lateral abaixo da navegação, 13px (D:26-27)
+- [x] Marca "Bindr" 28/32 700 (D:20); navegação 44px, padding `0 16px`, raio 4, 15px, ativo sunken 600 (D:22-24)
 
 **Done when**:
 
-- [ ] O link "Voltar ao catálogo" não contém "←" e resolve `min-height` ≥ 44px com borda (CNF-23)
-- [ ] Em ≥1024px ele fica dentro da coluna lateral, depois da navegação e de um divisor de 1px (CNF-23)
-- [ ] A marca resolve 28px / 32px / 700 em ≥1024px (CNF-24); em 390px continua visível (decisão de 2026-09-26)
-- [ ] Gate full passa
+- [x] O link "Voltar ao catálogo" não contém "←" e resolve `min-height` ≥ 44px com borda (CNF-23)
+- [x] Em ≥1024px ele fica dentro da coluna lateral, depois da navegação e de um divisor de 1px (CNF-23)
+- [x] A marca resolve 28px / 32px / 700 em ≥1024px (CNF-24); em 390px continua visível (decisão de 2026-09-26)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

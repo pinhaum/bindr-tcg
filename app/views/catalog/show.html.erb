@@ -1,7 +1,9 @@
 <% content_for :title, "#{@card.name} (#{@card.card_number})" %>
+<% content_for :sidebar_actions do %>
+  <%= link_to "Voltar ao catálogo", catalog_path, class: "site-header__back" %>
+<% end %>
 
 <main class="card-detail">
-  <p><%= link_to "← Voltar ao catálogo", catalog_path %></p>
 
   <% if @variants.any? %>
     <% hero = @variants.first %>

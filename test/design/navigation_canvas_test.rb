@@ -124,4 +124,51 @@ class NavigationCanvasTest < Minitest::Test
     assert_equal "0", decl["bottom"],
       ".site-header__nav deve estar no topo inferior"
   end
+
+  # T9 (conformidade), CNF-23 — "Voltar ao catálogo" existe uma vez, sem "←",
+  # ≥44px e bordado (independe de viewport: a mesma regra vale em 390px e em
+  # ≥1024px, só a posição no layout muda).
+  def test_back_to_catalog_link_styling
+    resolved = Stylesheet.resolved("site-header__back")
+    assert resolved.any?, ".site-header__back deve existir"
+    assert_equal "44px", resolved["min-height"],
+      ".site-header__back deve ter min-height: ≥ 44px"
+    assert_match(/solid.*var\(--border-strong\)/, resolved["border"],
+      ".site-header__back deve ter borda border-strong")
+    assert_equal "0 var(--space-3)", resolved["padding"],
+      ".site-header__back deve ter padding 0 16px"
+  end
+
+  # T9 (conformidade), CNF-24 — Marca "Bindr" em desktop usa a tipografia
+  # `display` (28/32/700); abaixo de 1024px ela continua existindo mas sem
+  # essa tipografia (T9 não altera o mobile).
+  def test_sidebar_brand_typography_in_wide_layout
+    wide = CatalogGridCanvasTest.wide_block
+    wide_rules = Stylesheet.rules(wide)
+    resolved = Stylesheet.resolved("site-header__brand", wide_rules)
+
+    assert_equal "var(--display-size)", resolved["font-size"],
+      ".site-header__brand em ≥1024px deve usar --display-size"
+    assert_equal "var(--display-line-height)", resolved["line-height"],
+      ".site-header__brand em ≥1024px deve usar --display-line-height"
+    assert_equal "var(--display-weight)", Stylesheet.resolved("site-header__brand")["font-weight"],
+      ".site-header__brand já usa --display-weight em qualquer viewport"
+  end
+
+  # T9: o slot da coluna lateral (`site-header__aside`, reutilizado pela T11)
+  # tem o divisor de 1px antes dele só em ≥1024px — abaixo disso ele não deve
+  # aparecer separado da navegação por um traço.
+  def test_sidebar_aside_divider_only_in_wide_layout
+    wide = CatalogGridCanvasTest.wide_block
+    wide_rules = Stylesheet.rules(wide)
+    resolved = Stylesheet.resolved("site-header__aside", wide_rules)
+
+    assert_equal "1px solid var(--border)", resolved["border-top"],
+      ".site-header__aside em ≥1024px deve ter divisor border-top: 1px solid var(--border)"
+
+    narrow_rules = Stylesheet.rules(Stylesheet.content_without_comments.sub(wide, ""))
+    narrow_resolved = Stylesheet.resolved("site-header__aside", narrow_rules)
+    assert_nil narrow_resolved["border-top"],
+      ".site-header__aside não deve ter divisor fora de ≥1024px"
+  end
 end

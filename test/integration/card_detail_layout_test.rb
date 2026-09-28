@@ -57,4 +57,14 @@ class CardDetailLayoutTest < ActionDispatch::IntegrationTest
     assert_operator data_pos, :<, variants_pos,
                     ".card-detail__data must appear before .card-detail__variants"
   end
+
+  # T9 (conformidade), CNF-23 — "Voltar ao catálogo" existe uma vez, sem "←"
+  test "back to catalog link exists once without arrow" do
+    get card_path(@card.card_number)
+    assert_response :success
+
+    assert_select "a.site-header__back", count: 1
+    assert_select "a.site-header__back", text: "Voltar ao catálogo"
+    assert_select "a.site-header__back", text: /←/, count: 0
+  end
 end

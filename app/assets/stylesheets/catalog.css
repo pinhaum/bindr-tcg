@@ -2153,6 +2153,22 @@ summary:focus-visible,
 
   /* Efeito e trigger, ao lado da mídia, ficam limitados a 62ch (Desktop-Carta.dc.html:60-61). */
   .card-detail__effect { max-width: 62ch; }
+
+  /*
+   * T9 (CNF-23, CNF-24) — a coluna lateral em ≥1024px já é `.site-header`
+   * (regra acima, `grid-column: 1`). A marca ganha a tipografia `display` e
+   * o slot que a T11 reutiliza (`site-header__aside`) recebe o divisor de
+   * 1px antes dele, abaixo da navegação.
+   */
+  .site-header__brand {
+    font-size: var(--display-size);
+    line-height: var(--display-line-height);
+  }
+
+  .site-header__aside {
+    padding: var(--space-3);
+    border-top: 1px solid var(--border);
+  }
 }
 
 /* Chips de filtro (T14 — NAV-33, NAV-34, NAV-35) */
@@ -2253,4 +2269,26 @@ summary:focus-visible,
   line-height: var(--caption-line-height);
   font-weight: var(--caption-weight);
   text-decoration: none;
+}
+
+/*
+ * T9 (CNF-23, CNF-24) — "Voltar ao catálogo" mora no slot que a T11 reutiliza
+ * (`site-header__aside`), abaixo da navegação. Estilo do botão vale em
+ * qualquer viewport; o divisor e a tipografia `display` da marca só em
+ * ≥1024px (bloco único de `@media (min-width: 64rem)` acima).
+ */
+
+.site-header__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  text-decoration: none;
+  align-self: flex-start;
 }

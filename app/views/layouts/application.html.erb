@@ -37,6 +37,10 @@
           <%= nav_link_to "Criar conta", new_registration_path, current: current_page?(new_registration_path), class: "site-header__action" %>
         <% end %>
       </nav>
+
+      <% if content_for?(:sidebar_actions) %>
+        <div class="site-header__aside"><%= yield :sidebar_actions %></div>
+      <% end %>
     </header>
 
     <%#
