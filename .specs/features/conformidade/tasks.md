@@ -278,19 +278,19 @@ T11 → T12
 
 **Checklist do artboard** (`Mobile-Carta.dc.html`, `Desktop-Carta.dc.html`):
 
-- [ ] 390px: miniatura 155×217, sunken, raio 8, padding 8, ao lado do título (Mobile:23-40)
-- [ ] Selo de quantidade sobre a imagem, `top: 8px; right: 8px` (Mobile:27)
-- [ ] 1280px: imagem 320×448 em coluna própria; selo `top: 16px; right: 16px` (D:32-37, D:36)
-- [ ] Legenda "Ilustração: [nome]" 13/18 muted (D:38)
+- [x] 390px: miniatura 155×217, sunken, raio 8, padding 8, ao lado do título (Mobile:23-40)
+- [x] Selo de quantidade sobre a imagem, `top: 8px; right: 8px` (Mobile:27)
+- [x] 1280px: imagem 320×448 em coluna própria; selo `top: 16px; right: 16px` (D:32-37, D:36)
+- [x] Legenda "Ilustração: [nome]" 13/18 muted (D:38)
 
 **Done when**:
 
-- [ ] Abaixo de 1024px: a miniatura fica ao lado do `h1` e a imagem maior dentro de `<details>` com `<summary>` de texto; nenhum `<script>` novo (CNF-14)
-- [ ] Em ≥1024px: a imagem maior fica visível numa coluna de 320px resolvida na folha (o `<details>` aberto por CSS ou uma segunda instância fora dele; o teste prova a que for escolhida) (CNF-15)
-- [ ] Com sessão e 2 cópias da primeira variante: selo "2" sobre a imagem; sem posse ou anônimo: sem selo (CNF-16)
-- [ ] Variante com `illustrator: "Eiichiro Oda"`: "Ilustração: Eiichiro Oda"; sem ilustrador: sem legenda (CNF-16, CNF-37)
-- [ ] Sem `image_url`: placeholder na miniatura, no `<details>` e na coluna, nas mesmas medidas (CNF-36)
-- [ ] Gate full passa
+- [x] Abaixo de 1024px: a miniatura fica ao lado do `h1` e a imagem maior dentro de `<details>` com `<summary>` de texto; nenhum `<script>` novo (CNF-14)
+- [x] Em ≥1024px: a imagem maior fica visível numa coluna de 320px resolvida na folha (o `<details>` aberto por CSS ou uma segunda instância fora dele; o teste prova a que for escolhida) (CNF-15)
+- [x] Com sessão e 2 cópias da primeira variante: selo "2" sobre a imagem; sem posse ou anônimo: sem selo (CNF-16)
+- [x] Variante com `illustrator: "Eiichiro Oda"`: "Ilustração: Eiichiro Oda"; sem ilustrador: sem legenda (CNF-16, CNF-37)
+- [x] Sem `image_url`: placeholder na miniatura, no `<details>` e na coluna, nas mesmas medidas (CNF-36)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

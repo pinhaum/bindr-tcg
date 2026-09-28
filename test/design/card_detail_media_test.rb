@@ -1,53 +1,40 @@
 require "test_helper"
 require_relative "support/stylesheet"
 
-# T29: Imagem maior do detalhe da carta (NAV-48, NAV-24, NAV-25).
-#
-# O elemento novo `.card-detail__media` fica numa coluna de 320px em viewport
-# larga (≥64rem) à esquerda dos dados. Abaixo disso, ele é empilhado acima.
+# T6 (conformidade) — CNF-14, CNF-15: miniatura ao lado do título abaixo de
+# 1024px, imagem maior dentro de um `<details>`; em 1024px ou mais o
+# `<details>` vira coluna própria de 320px sempre visível (mesma técnica do
+# `.catalog__filters-toggle`, NAV-45).
 class CardDetailMediaTest < ActiveSupport::TestCase
   setup do
-    @stylesheet = Stylesheet.read_stylesheet
+    css = Stylesheet.content_without_comments
+    @wide = CatalogGridCanvasTest.wide_block(css)
+    @narrow_rules = Stylesheet.rules(css.sub(@wide, ""))
+    @wide_rules = Stylesheet.rules(@wide)
   end
 
-  # Extrai o conteúdo dentro de @media (min-width: 64rem) até o fim da folha
-  def media_64rem_content
-    match = @stylesheet.match(/@media\s*\([^)]*min-width:\s*64rem[^)]*\)\s*\{(.*)\}\s*\z/m)
-    assert match, "@media (min-width: 64rem) não encontrada ou não é o último bloco"
-    match[1]
-  end
+  test "fora de media query, a miniatura tem a medida do artboard (Mobile-Carta.dc.html:24)" do
+    thumb = Stylesheet.resolved("card-detail__thumb", @narrow_rules)
 
-  # Extrai tudo que está FORA de @media queries (antes da primeira)
-  def content_outside_media
-    match = @stylesheet.match(/\A(.*?)@media/m)
-    return @stylesheet unless match
-    match[1]
+    assert_equal 155.0, Stylesheet.to_pixels(thumb["width"])
+    assert_equal 217.0, Stylesheet.to_pixels(thumb["height"])
+    assert_equal "var(--surface-sunken)", thumb["background"]
   end
 
   test "fora de media query, .card-detail__media tem aspect-ratio 5/7" do
-    outside = content_outside_media
+    media = Stylesheet.resolved("card-detail__media", @narrow_rules)
 
-    all_matches = outside.scan(/\.card-detail__media\s*\{([^}]*)\}/)
-    assert all_matches.any?, "regra .card-detail__media não encontrada fora de media query"
-
-    body = all_matches.last[0]
-    assert body.include?("aspect-ratio: 5 / 7"),
-           ".card-detail__media deve ter 'aspect-ratio: 5 / 7' fora de media query"
+    assert_equal "5 / 7", media["aspect-ratio"]
   end
 
   test "fora de media query, .card-detail__media tem background var(--surface-sunken)" do
-    outside = content_outside_media
+    media = Stylesheet.resolved("card-detail__media", @narrow_rules)
 
-    all_matches = outside.scan(/\.card-detail__media\s*\{([^}]*)\}/)
-    assert all_matches.any?, "regra .card-detail__media não encontrada"
-
-    body = all_matches.last[0]
-    assert body.include?("background: var(--surface-sunken)"),
-           ".card-detail__media deve ter 'background: var(--surface-sunken)'"
+    assert_equal "var(--surface-sunken)", media["background"]
   end
 
   test "fora de media query, .card-detail__image e .card-detail__placeholder são absolutos" do
-    outside = content_outside_media
+    outside = Stylesheet.content_without_comments.sub(@wide, "")
 
     combined_match = outside.match(/\.card-detail__image,\s*\.card-detail__placeholder\s*\{([^}]*)\}/)
     assert combined_match, ".card-detail__image, .card-detail__placeholder combinados não encontrados"
@@ -59,47 +46,50 @@ class CardDetailMediaTest < ActiveSupport::TestCase
            "regra combinada deve ter 'inset: 0'"
   end
 
-  test "dentro de @media (min-width: 64rem), .card-detail tem grid com 320px na primeira coluna" do
-    media = media_64rem_content
+  test "dentro de @media (min-width: 64rem), a miniatura some (CNF-15)" do
+    thumb = Stylesheet.resolved("card-detail__thumb", @wide_rules)
 
-    assert media.include?(".card-detail {"),
-           ".card-detail não aparece em @media (min-width: 64rem)"
-
-    card_match = media.match(/\.card-detail\s*\{([^}]*)\}/)
-    assert card_match, ".card-detail não tem corpo em media query"
-
-    body = card_match[1]
-    assert body.include?("display: grid"),
-           ".card-detail deve ter 'display: grid' em @media (min-width: 64rem)"
-    assert body.include?("grid-template-columns: 320px"),
-           ".card-detail deve ter 'grid-template-columns: 320px' em @media (min-width: 64rem)"
+    assert_equal "none", thumb["display"]
   end
 
-  test "dentro de @media (min-width: 64rem), .card-detail__media está na coluna 1" do
-    media = media_64rem_content
+  test "dentro de @media (min-width: 64rem), o <details> vira coluna sempre visível (CNF-15)" do
+    expand = Stylesheet.resolved("card-detail__expand", @wide_rules)
 
-    assert media.include?(".card-detail__media"),
-           ".card-detail__media não aparece em @media (min-width: 64rem)"
+    assert_equal "contents", expand["display"]
 
-    media_match = media.match(/\.card-detail__media\s*\{([^}]*)\}/)
-    assert media_match, ".card-detail__media não tem corpo em media query"
+    forced = @wide_rules.find { |selector, _| selector == ".card-detail__expand::details-content" }&.last
+    assert forced, ".card-detail__expand::details-content não encontrada em @media (min-width: 64rem)"
+    assert_match(/content-visibility:\s*visible/, forced)
+  end
 
-    body = media_match[1]
-    assert body.include?("grid-column: 1"),
-           ".card-detail__media deve ter 'grid-column: 1' em @media (min-width: 64rem)"
+  test "dentro de @media (min-width: 64rem), .card-detail__media tem 320×448 e fica na coluna 1" do
+    media = Stylesheet.resolved("card-detail__media", @wide_rules)
+
+    assert_equal "1", media["grid-column"]
+    assert_equal 320.0, Stylesheet.to_pixels(media["width"])
+    # A altura vem de `aspect-ratio: 5 / 7` (declarado fora da media query) e
+    # não de uma segunda declaração de `height`: 320 × 7/5 = 448, a medida do
+    # artboard (Desktop-Carta.dc.html:33).
+    assert_nil media["height"]
+    assert_equal "5 / 7", Stylesheet.resolved("card-detail__media", @narrow_rules)["aspect-ratio"]
+  end
+
+  test "dentro de @media (min-width: 64rem), .card-detail__head fica na coluna 2" do
+    head = Stylesheet.resolved("card-detail__head", @wide_rules)
+
+    assert_equal "2", head["grid-column"]
+  end
+
+  test "dentro de @media (min-width: 64rem), .card-detail tem grid com 320px na primeira coluna" do
+    card_detail = Stylesheet.resolved("card-detail", @wide_rules)
+
+    assert_equal "grid", card_detail["display"]
+    assert_match(/\A320px/, card_detail["grid-template-columns"])
   end
 
   test "dentro de @media (min-width: 64rem), .card-detail__data está na coluna 2" do
-    media = media_64rem_content
+    data = Stylesheet.resolved("card-detail__data", @wide_rules)
 
-    assert media.include?(".card-detail__data"),
-           ".card-detail__data não aparece em @media (min-width: 64rem)"
-
-    data_match = media.match(/\.card-detail__data\s*\{([^}]*)\}/)
-    assert data_match, ".card-detail__data não tem corpo em media query"
-
-    body = data_match[1]
-    assert body.include?("grid-column: 2"),
-           ".card-detail__data deve ter 'grid-column: 2' em @media (min-width: 64rem)"
+    assert_equal "2", data["grid-column"]
   end
 end

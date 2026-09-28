@@ -14,18 +14,21 @@ class CardDetailLayoutTest < ActionDispatch::IntegrationTest
                         rarity: "SEC", art_kind: "alternate_art")
   end
 
+  # T6 (conformidade), CNF-14: name e number saíram de `.card-detail__data`
+  # para `.card-detail__head > .card-detail__heading`, ao lado da miniatura —
+  # é o próprio requisito novo que move o título, não uma quebra acidental.
   test "detail page renders card-detail__data containing name and fields, with variants as sibling" do
     get card_path(@card.card_number)
     assert_response :success
 
     assert_select "main.card-detail" do
-      # Link de voltar (primeiro filho)
-      assert_select "p > a[href*='/catalog']"
+      assert_select ".card-detail__head" do
+        assert_select "h1.card-detail__name", text: @card.name
+        assert_select ".card-detail__number", text: @card.card_number
+      end
 
       # Container de dados
       assert_select ".card-detail__data" do
-        assert_select "h1.card-detail__name", text: @card.name
-        assert_select ".card-detail__number", text: @card.card_number
         assert_select "dl.card-detail__fields"
         # effect e trigger estão dentro do container
         assert_select ".card-detail__effect"

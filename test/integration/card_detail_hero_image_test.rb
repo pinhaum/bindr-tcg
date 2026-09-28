@@ -1,6 +1,7 @@
 require "test_helper"
 
-# T29 — imagem maior no topo do detalhe da carta (NAV-48, Req. 5.1, Req. 2.3).
+# T6 (conformidade) — CNF-14: miniatura ao lado do título abaixo de 1024px,
+# imagem maior dentro de um `<details>` que expande no lugar, sem JavaScript.
 class CardDetailHeroImageTest < ActionDispatch::IntegrationTest
   setup do
     @set = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")
@@ -15,44 +16,74 @@ class CardDetailHeroImageTest < ActionDispatch::IntegrationTest
                         image_url: "https://example.com/OP01-001.png")
   end
 
-  test "a imagem da primeira variante listada vem antes dos dados, com alt que nomeia carta e variante" do
+  test "a miniatura da primeira variante listada fica ao lado do título, com alt que nomeia carta e variante" do
     get card_path(@card.card_number)
     assert_response :success
 
-    assert_select "main.card-detail > .card-detail__media img.card-detail__image", count: 1 do |img|
-      assert_equal card_image_path("OP01-001"), img.first["src"]
-      assert_equal "Roronoa Zoro OP01-001", img.first["alt"]
+    assert_select ".card-detail__head" do
+      assert_select ".card-detail__thumb img.card-detail__image", count: 1 do |img|
+        assert_equal card_image_path("OP01-001"), img.first["src"]
+        assert_equal "Roronoa Zoro OP01-001", img.first["alt"]
+      end
+      assert_select "h1.card-detail__name", text: "Roronoa Zoro"
     end
 
-    media_pos = response.body.index('class="card-detail__media"')
+    head_pos = response.body.index('class="card-detail__head"')
     data_pos = response.body.index('class="card-detail__data"')
-    assert_operator media_pos, :<, data_pos, "a imagem maior precisa vir antes dos dados"
+    assert_operator head_pos, :<, data_pos, "a miniatura e o título precisam vir antes dos dados"
   end
 
-  test "o placeholder com nome e card_number fica no HTML junto da imagem, para quando ela falhar sem JS" do
+  test "a imagem maior fica dentro de um <details> que expande no lugar, sem script novo" do
+    get card_path(@card.card_number)
+    assert_response :success
+
+    scripts_before = response.body.scan(/<script\b/).size
+
+    assert_select "details.card-detail__expand" do
+      assert_select "summary"
+      assert_select ".card-detail__media img.card-detail__image", count: 1 do |img|
+        assert_equal card_image_path("OP01-001"), img.first["src"]
+      end
+    end
+
+    # A página já tem os <script> do importmap/Turbo (layout padrão); o
+    # `<details>` não pode acrescentar nenhum novo para expandir a imagem.
+    assert_equal scripts_before, response.body.scan(/<script\b/).size,
+                "nenhum <script> novo deveria ser necessário para expandir a imagem"
+  end
+
+  test "o placeholder com nome e card_number fica no HTML junto da miniatura e da imagem maior" do
     get card_path(@card.card_number)
 
-    assert_select ".card-detail__media .card-detail__placeholder[aria-hidden=true]" do
+    assert_select ".card-detail__thumb .card-detail__placeholder[aria-hidden=true]" do
+      assert_select "span", text: "Roronoa Zoro"
+      assert_select "span", text: "OP01-001"
+    end
+
+    assert_select ".card-detail__expand .card-detail__placeholder[aria-hidden=true]" do
       assert_select "span", text: "Roronoa Zoro"
       assert_select "span", text: "OP01-001"
     end
   end
 
-  test "variante sem image_url mostra só o placeholder" do
+  test "variante sem image_url mostra só o placeholder na miniatura e na imagem maior" do
     CardVariant.where(card: @card).update_all(image_url: nil)
 
     get card_path(@card.card_number)
     assert_response :success
-    assert_select ".card-detail__media .card-detail__placeholder"
-    assert_select ".card-detail__media img", count: 0
+    assert_select ".card-detail__thumb .card-detail__placeholder"
+    assert_select ".card-detail__thumb img", count: 0
+    assert_select ".card-detail__expand .card-detail__placeholder"
+    assert_select ".card-detail__expand img", count: 0
   end
 
-  test "carta sem variante abre o detalhe sem o elemento da imagem" do
+  test "carta sem variante abre o detalhe sem miniatura nem <details>" do
     CardVariant.where(card: @card).delete_all
 
     get card_path(@card.card_number)
     assert_response :success
-    assert_select ".card-detail__media", count: 0
+    assert_select ".card-detail__head", count: 0
+    assert_select ".card-detail__expand", count: 0
     assert_select "h1.card-detail__name", text: "Roronoa Zoro"
   end
 end

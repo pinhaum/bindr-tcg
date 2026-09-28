@@ -4,25 +4,74 @@
   <p><%= link_to "← Voltar ao catálogo", catalog_path %></p>
 
   <% if @variants.any? %>
-    <div class="card-detail__media">
-      <div class="card-detail__placeholder" aria-hidden="true">
-        <span><%= @card.name %></span>
-        <span><%= @card.card_number %></span>
+    <% hero = @variants.first %>
+    <% hero_quantity = owned_quantity(hero) %>
+
+    <%#
+      CNF-14/15 — abaixo de 1024px a miniatura fica ao lado do título e a
+      imagem maior abre num `<details>`, sem JavaScript. Em 1024px ou mais o
+      CSS abre o `<details>` e o transforma numa coluna de 320px sempre
+      visível (T6, `card_detail_media_test.rb`) — é o mesmo elemento nos dois
+      casos, não uma segunda cópia da imagem.
+    %>
+    <div class="card-detail__head">
+      <div class="card-detail__thumb">
+        <div class="card-detail__placeholder" aria-hidden="true">
+          <span><%= @card.name %></span>
+          <span><%= @card.card_number %></span>
+        </div>
+
+        <% if hero.image_url.present? %>
+          <%= image_tag card_image_path(hero.variant_code),
+                        alt: "#{@card.name} #{hero.variant_code}",
+                        class: "card-detail__image" %>
+        <% end %>
+
+        <% if hero_quantity.positive? %>
+          <span class="card-detail__badge" role="img" aria-label="<%= hero_quantity == 1 ? "1 cópia" : "#{hero_quantity} cópias" %>"><%= hero_quantity %></span>
+        <% end %>
       </div>
 
-      <% if @variants.first.image_url.present? %>
-        <%= image_tag card_image_path(@variants.first.variant_code),
-                      alt: "#{@card.name} #{@variants.first.variant_code}",
-                      class: "card-detail__image" %>
-      <% end %>
+      <header class="card-detail__heading">
+        <h1 class="card-detail__name"><%= @card.name %></h1>
+        <p class="card-detail__number"><%= @card.card_number %></p>
+      </header>
     </div>
+
+    <details class="card-detail__expand">
+      <summary>Ver imagem maior</summary>
+
+      <div class="card-detail__media">
+        <div class="card-detail__placeholder" aria-hidden="true">
+          <span><%= @card.name %></span>
+          <span><%= @card.card_number %></span>
+        </div>
+
+        <% if hero.image_url.present? %>
+          <%= image_tag card_image_path(hero.variant_code),
+                        alt: "#{@card.name} #{hero.variant_code}",
+                        class: "card-detail__image" %>
+        <% end %>
+
+        <% if hero_quantity.positive? %>
+          <span class="card-detail__badge" role="img" aria-label="<%= hero_quantity == 1 ? "1 cópia" : "#{hero_quantity} cópias" %>"><%= hero_quantity %></span>
+        <% end %>
+      </div>
+
+      <% if hero.illustrator.present? %>
+        <p class="card-detail__illustrator">Ilustração: <%= hero.illustrator %></p>
+      <% end %>
+    </details>
   <% end %>
 
   <div class="card-detail__data">
-    <header>
-      <h1 class="card-detail__name"><%= @card.name %></h1>
-      <p class="card-detail__number"><%= @card.card_number %></p>
-    </header>
+    <%# Sem variante, o cabeçalho ainda precisa existir (mantém o teste de carta sem impressão). %>
+    <% if @variants.empty? %>
+      <header>
+        <h1 class="card-detail__name"><%= @card.name %></h1>
+        <p class="card-detail__number"><%= @card.card_number %></p>
+      </header>
+    <% end %>
 
     <%#
       Req. 5.5 — a lista de campos é filtrada por `display_field?`, que combina

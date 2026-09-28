@@ -303,11 +303,13 @@ body {
 }
 
 /*
- * O selo de posse (CNF-02): só existe com sessão e alguma cópia (view), e
+ * O selo de posse, na grade (CNF-02) e sobre a imagem do detalhe (CNF-16):
+ * só existe com sessão e alguma cópia (view), e
  * `radius-full` é exclusivo dele na folha — não existe segundo selo em
  * `accent` fora deste (`ownership_badge_test.rb`).
  */
-.card-tile__badge {
+.card-tile__badge,
+.card-detail__badge {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
@@ -408,16 +410,56 @@ body {
 .card-detail__variants { max-width: 100%; }
 
 /*
- * T29 — imagem maior do detalhe (NAV-48, NAV-24, NAV-25).
+ * T6 (conformidade) — CNF-14/15/16/36/37: miniatura ao lado do título abaixo
+ * de 1024px, imagem maior dentro de um `<details>` (Mobile-Carta.dc.html:23-27),
+ * coluna própria de 320px sempre visível em 1024px ou mais
+ * (Desktop-Carta.dc.html:32-38). `.card-detail__media` é o corpo comum da
+ * imagem grande — usado tanto dentro do `<details>` quanto, em 64rem, na
+ * coluna esquerda — porque miniatura e imagem grande nunca aparecem como o
+ * mesmo elemento: a miniatura tem texto e medida próprias (155×217, D:24).
  *
  * O placeholder funciona sem JavaScript: é renderizado sempre, na camada de
  * baixo (como no tile), e a imagem fica por cima. Mesma técnica de AD-012.
- * Em 64rem o elemento fica numa coluna de 320px à esquerda dos dados.
  */
+.card-detail__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.card-detail__heading { flex-grow: 1; min-width: 0; }
+
+.card-detail__thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 155px;
+  height: 217px;
+  overflow: hidden;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+/*
+ * O `<details>` some da árvore em 64rem (a coluna some com ele) — a regra
+ * larga reabre e o transforma em coluna sempre visível (CNF-15).
+ */
+.card-detail__expand summary {
+  width: fit-content;
+  color: var(--accent);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  cursor: pointer;
+}
+
 .card-detail__media {
   position: relative;
+  width: 100%;
+  max-width: 320px;
   aspect-ratio: 5 / 7;
+  margin-top: var(--space-2);
   overflow: hidden;
+  padding: var(--space-2);
   border-radius: var(--radius-md);
   background: var(--surface-sunken);
 }
@@ -448,6 +490,13 @@ body {
 
 .card-detail__placeholder span:first-child { font-weight: var(--body-strong-weight); overflow-wrap: anywhere; }
 .card-detail__placeholder span:last-child { font-variant-numeric: tabular-nums; color: var(--ink-muted); }
+
+.card-detail__illustrator {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+}
 
 .variant-list {
   display: flex;
@@ -1940,7 +1989,50 @@ summary:focus-visible,
 
   .card-detail > * { grid-column: 1 / -1; }
 
-  .card-detail__media { grid-column: 1; }
+  /*
+   * CNF-15 — em 64rem a miniatura não existe mais: a coluna 1 é a própria
+   * imagem grande, sempre visível. `.card-detail__head` deixa de agrupar
+   * miniatura e título (não há mais miniatura) e só posiciona o cabeçalho
+   * na coluna 2, ao lado da imagem.
+   */
+  .card-detail__head { grid-column: 2; display: block; }
+
+  .card-detail__thumb { display: none; }
+
+  .card-detail__heading { margin: 0; }
+
+  /*
+   * O `<details>` continua fechado (sem `open`), mas o conteúdo é forçado a
+   * renderizar mesmo assim — mesma técnica do `.catalog__filters-toggle`
+   * (NAV-45) para o painel de filtros sempre visível em viewport larga. Como
+   * ele vira `display: contents`, quem entra na grade é o conteúdo
+   * (`.card-detail__media`, `.card-detail__illustrator`), não o `<details>`.
+   */
+  .card-detail__expand { display: contents; }
+
+  .card-detail__expand summary { display: none; }
+
+  .card-detail__expand::details-content {
+    content-visibility: visible;
+    display: contents;
+  }
+
+  /*
+   * 320px de largura basta: a `height` vem de `aspect-ratio: 5 / 7` já
+   * declarado fora da media query (320 × 7/5 = 448, a medida do artboard,
+   * D:33) — declarar `height: 448px` de novo dispararia o guarda de 360px
+   * (`catalog_grid_test.rb`), que varre px sem olhar a media query.
+   */
+  .card-detail__media {
+    grid-column: 1;
+    max-width: none;
+    width: 320px;
+    padding: var(--space-3);
+  }
+
+  .card-detail__illustrator { grid-column: 1; }
+
+  .card-detail__badge { top: var(--space-3); right: var(--space-3); }
 
   .card-detail__data { grid-column: 2; }
 

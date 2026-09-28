@@ -26,7 +26,8 @@ class OwnershipBadgeTest < ActiveSupport::TestCase
   end
 
   def self.radius_full_users(rules)
-    rules.select { |_, body| body.include?("var(--radius-full)") }.map(&:first)
+    rules.select { |_, body| body.include?("var(--radius-full)") }
+         .flat_map { |selector, _| selector.split(",").map(&:strip) }
   end
 
   setup { @rules = Stylesheet.rules }
@@ -40,17 +41,20 @@ class OwnershipBadgeTest < ActiveSupport::TestCase
     assert_match(/(?<![-\w])color:\s*var\(--on-accent\)/, body)
   end
 
-  test "o selo da grade é radius-full, fundo accent e texto on-accent" do
-    body = @rules.find { |selector, _| selector == GRID_BADGE }&.last
+  DETAIL_BADGE = ".card-detail__badge".freeze
 
-    assert body, "regra #{GRID_BADGE} sumiu da folha"
-    assert_match(/border-radius:\s*var\(--radius-full\)/, body)
-    assert_match(/background-color:\s*var\(--accent\)/, body)
-    assert_match(/(?<![-\w])color:\s*var\(--on-accent\)/, body)
+  test "os selos da grade e do detalhe são radius-full, fundo accent e texto on-accent" do
+    [ GRID_BADGE, DETAIL_BADGE ].each do |selector|
+      rule = Stylesheet.resolved(selector.delete_prefix("."), @rules)
+
+      assert_equal "var(--radius-full)", rule["border-radius"], selector
+      assert_equal "var(--accent)", rule["background-color"], selector
+      assert_equal "var(--on-accent)", rule["color"], selector
+    end
   end
 
-  test "radius-full só aparece nos dois badges de quantidade" do
-    assert_equal [ BADGE, GRID_BADGE ].sort, self.class.radius_full_users(@rules).sort
+  test "radius-full só aparece nos badges de quantidade" do
+    assert_equal [ BADGE, GRID_BADGE, DETAIL_BADGE ].sort, self.class.radius_full_users(@rules).sort
   end
 
   test "a guarda de radius-full acusa um segundo uso" do
