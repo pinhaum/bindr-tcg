@@ -394,18 +394,43 @@ body {
 .field dd { margin: 0; overflow-wrap: anywhere; }
 
 /* Texto de lista ocupa a linha inteira; número alinha pelos dígitos. */
-.field--card-type,
-.field--colors { min-width: 0; }
 .field--attributes,
 .field--traits { grid-column: 1 / -1; min-width: 0; }
 .field--cost,
 .field--power,
 .field--life,
-.field--counter,
 .field--block { font-variant-numeric: tabular-nums; }
 
-.card-detail__effect p,
-.card-detail__trigger p { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
+.card-detail__effect p { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
+
+/*
+ * T7 — CNF-17/CNF-18/CNF-39: chips de atributo no cabeçalho e rótulo do
+ * trigger dentro da seção "Efeito" (Mobile-Carta.dc.html:29-31,
+ * Desktop-Carta.dc.html:47-52).
+ */
+.card-detail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+}
+
+.card-detail__chip {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+}
+
+/* Counter só é visível em ≥1024px (CNF-17); reaberto na media query larga, abaixo. */
+.card-detail__chip--counter { display: none; }
+
+.card-detail__set { margin: var(--space-1) 0 0; color: var(--ink-muted); font-size: var(--caption-size); line-height: var(--caption-line-height); }
+
+.card-detail__trigger-label { margin: 0 0 var(--space-2); font-weight: var(--body-strong-weight); }
 
 .card-detail__variants { max-width: 100%; }
 
@@ -2042,6 +2067,24 @@ summary:focus-visible,
 
   .variant__art,
   .variant__meta { grid-row: span 2; }
+
+  /*
+   * CNF-17 — em 64rem o código e a linha "set · código" ficam na mesma
+   * linha, ao lado um do outro (Desktop-Carta.dc.html:47-48); abaixo disso
+   * cada um ocupa a própria linha (Mobile-Carta.dc.html:32-38).
+   */
+  .card-detail__heading { display: flex; flex-direction: column; gap: var(--space-2); }
+
+  .card-detail__number,
+  .card-detail__set { margin: 0; display: inline; }
+
+  .card-detail__number { margin-inline-end: var(--space-2); }
+
+  /* Counter só aparece como chip em ≥1024px (CNF-17). */
+  .card-detail__chip--counter { display: inline-block; }
+
+  /* Efeito e trigger, ao lado da mídia, ficam limitados a 62ch (Desktop-Carta.dc.html:60-61). */
+  .card-detail__effect { max-width: 62ch; }
 }
 
 /* Chips de filtro (T14 — NAV-33, NAV-34, NAV-35) */

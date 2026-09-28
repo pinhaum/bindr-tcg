@@ -35,6 +35,31 @@
       <header class="card-detail__heading">
         <h1 class="card-detail__name"><%= @card.name %></h1>
         <p class="card-detail__number"><%= @card.card_number %></p>
+
+        <%#
+          CNF-17/CNF-39 — chips de tipo, raridade (da primeira variante
+          listada), uma entrada por cor e, só em ≥1024px, counter (visível
+          pela regra `.card-detail__chip--counter` dentro de
+          `@media (min-width: 64rem)`; counter NULL não gera chip — mesma
+          distinção NULL ≠ 0 do Req. 5.5). `<ul>` porque é uma lista de
+          atributos, não texto solto.
+        %>
+        <ul class="card-detail__chips">
+          <li class="card-detail__chip"><%= @card.card_type.humanize %></li>
+          <% if hero.rarity.present? %>
+            <li class="card-detail__chip"><%= hero.rarity %></li>
+          <% end %>
+          <% @card.colors.each do |color| %>
+            <li class="card-detail__chip"><%= color %></li>
+          <% end %>
+          <% if @card.display_field?(:counter) %>
+            <li class="card-detail__chip card-detail__chip--counter">Counter <%= @card.counter %></li>
+          <% end %>
+        </ul>
+
+        <p class="card-detail__set">
+          <%= hero.card_set.name %> · <%= hero.card_set.code %>
+        </p>
       </header>
     </div>
 
@@ -77,20 +102,12 @@
       Req. 5.5 — a lista de campos é filtrada por `display_field?`, que combina
       "se aplica a este tipo de carta" com "tem valor". Um campo inaplicável não
       é renderizado vazio: ele não é renderizado.
+
+      CNF-17 (T7) — tipo e cor saíram daqui: já aparecem como chip no
+      cabeçalho (`.card-detail__chips`, acima). Manter os dois nos dois
+      lugares duplicaria a informação.
     %>
     <dl class="card-detail__fields">
-      <div class="field field--card-type">
-        <dt>Tipo</dt>
-        <dd><%= @card.card_type.humanize %></dd>
-      </div>
-
-      <% if @card.display_field?(:colors) %>
-        <div class="field field--colors">
-          <dt>Cor</dt>
-          <dd><%= @card.colors.join(", ") %></dd>
-        </div>
-      <% end %>
-
       <% if @card.display_field?(:cost) %>
         <div class="field field--cost">
           <dt>Custo</dt>
@@ -109,13 +126,6 @@
         <div class="field field--life">
           <dt>Life</dt>
           <dd><%= @card.life %></dd>
-        </div>
-      <% end %>
-
-      <% if @card.display_field?(:counter) %>
-        <div class="field field--counter">
-          <dt>Counter</dt>
-          <dd><%= @card.counter %></dd>
         </div>
       <% end %>
 
@@ -150,13 +160,18 @@
       <section class="card-detail__effect">
         <h2>Efeito</h2>
         <%= simple_format(@card.effect_text) %>
-      </section>
-    <% end %>
 
-    <% if @card.trigger_text.present? %>
-      <section class="card-detail__trigger">
-        <h2>Trigger</h2>
-        <%= simple_format(@card.trigger_text) %>
+        <%#
+          CNF-18 (T7) — o trigger deixou de ter seção própria: mora dentro do
+          efeito, depois do texto principal. `simple_format` (mesma chamada
+          do efeito acima) preserva a quebra de linha do Req. 5.4; o rótulo
+          "Trigger" é `<strong>`, não `<span>`, porque carrega significado
+          semântico (destaca onde o trigger começa), não só peso visual.
+        %>
+        <% if @card.trigger_text.present? %>
+          <p class="card-detail__trigger-label"><strong>Trigger</strong></p>
+          <%= simple_format(@card.trigger_text) %>
+        <% end %>
       </section>
     <% end %>
   </div>

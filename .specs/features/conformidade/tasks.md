@@ -313,19 +313,19 @@ T11 → T12
 
 **Checklist do artboard**:
 
-- [ ] h1 28/32 700 (Mobile:31, D:45); código em mono 13 500 muted (Mobile:32)
-- [ ] Chips Tipo / Raridade / Cor (Mobile:33-37), mais Counter no desktop (D:50-55): padding `4px 8px`, borda 1px border-strong, raio 4, 13px, gap 8, com quebra
-- [ ] Linha "Nome do set · código" 13 muted (Mobile:38); no desktop em linha com o código (D:47-48)
-- [ ] h2 "Efeito" 20/26 600 (Mobile:43); texto 15/22 (Mobile:44); trigger inline com rótulo 600 (Mobile:45); `max-width: 62ch` no desktop (D:60-61)
+- [x] h1 28/32 700 (Mobile:31, D:45); código em mono 13 500 muted (Mobile:32)
+- [x] Chips Tipo / Raridade / Cor (Mobile:33-37), mais Counter no desktop (D:50-55): padding `4px 8px`, borda 1px border-strong, raio 4, 13px, gap 8, com quebra
+- [x] Linha "Nome do set · código" 13 muted (Mobile:38); no desktop em linha com o código (D:47-48)
+- [x] h2 "Efeito" 20/26 600 (Mobile:43); texto 15/22 (Mobile:44); trigger inline com rótulo 600 (Mobile:45); `max-width: 62ch` no desktop (D:60-61)
 
 **Done when**:
 
-- [ ] Chips com o tipo, a raridade da primeira variante listada e uma entrada por cor; carta Red/Green tem dois chips de cor (CNF-17, CNF-39)
-- [ ] Counter como chip só quando a carta tem counter, e visível só em ≥1024px (NULL ≠ 0: counter NULL não gera chip)
-- [ ] Linha "{nome do set} · {código}" da primeira variante abaixo do título
-- [ ] Custo, power, life, attribute, traits e block continuam no HTML quando se aplicam e somem quando não (Req. 5.5), em forma compacta
-- [ ] Trigger dentro da seção "Efeito", depois do efeito, com rótulo "Trigger" peso 600 e quebras de linha preservadas; não existe mais seção própria de trigger (CNF-18)
-- [ ] Gate full passa
+- [x] Chips com o tipo, a raridade da primeira variante listada e uma entrada por cor; carta Red/Green tem dois chips de cor (CNF-17, CNF-39)
+- [x] Counter como chip só quando a carta tem counter, e visível só em ≥1024px (NULL ≠ 0: counter NULL não gera chip)
+- [x] Linha "{nome do set} · {código}" da primeira variante abaixo do título
+- [x] Custo, power, life, attribute, traits e block continuam no HTML quando se aplicam e somem quando não (Req. 5.5), em forma compacta
+- [x] Trigger dentro da seção "Efeito", depois do efeito, com rótulo "Trigger" peso 600 e quebras de linha preservadas; não existe mais seção própria de trigger (CNF-18)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

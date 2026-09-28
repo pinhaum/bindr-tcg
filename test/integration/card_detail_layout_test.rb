@@ -30,9 +30,11 @@ class CardDetailLayoutTest < ActionDispatch::IntegrationTest
       # Container de dados
       assert_select ".card-detail__data" do
         assert_select "dl.card-detail__fields"
-        # effect e trigger estão dentro do container
-        assert_select ".card-detail__effect"
-        assert_select ".card-detail__trigger"
+        # T7 (conformidade), CNF-18: trigger não tem mais seção própria —
+        # mora dentro do efeito, depois do texto principal.
+        assert_select ".card-detail__effect" do
+          assert_select ".card-detail__trigger-label", text: "Trigger"
+        end
       end
 
       # Variants section, sibling of .card-detail__data

@@ -208,12 +208,15 @@ class CardDetailTest < ActionDispatch::IntegrationTest
 
     get card_path("OP01-010")
 
-    assert_select ".field--counter", 0,
+    assert_select ".card-detail__chip--counter", 0,
                   "counter NULL não pode virar 'Counter: 0' na tela"
     assert_select "body", { text: /Counter/, count: 0 },
                   "nem o rótulo de counter deve aparecer"
   end
 
+  # T7 (conformidade), CNF-17: counter saiu de `.field--counter` (o `<dl>`) e
+  # virou chip no cabeçalho — `.card-detail__chip--counter` é quem prova o
+  # valor agora.
   test "Character com counter exibe o valor" do
     com_counter = create_card(card_number: "OP01-011", name: "Com Counter",
                               card_type: "character", colors: [ "Blue" ],
@@ -222,7 +225,7 @@ class CardDetailTest < ActionDispatch::IntegrationTest
 
     get card_path("OP01-011")
 
-    assert_select ".field--counter", text: /2000/
+    assert_select ".card-detail__chip--counter", text: /2000/
   end
 
   # Counter 1000 é valor real; counter 0 não existe no jogo. A asserção existe
@@ -259,6 +262,9 @@ class CardDetailTest < ActionDispatch::IntegrationTest
     assert_select ".card-detail__effect", text: /trash one card/
   end
 
+  # T7 (conformidade), CNF-18: trigger não tem mais seção própria — mora
+  # dentro de `.card-detail__effect`, depois do efeito, com o rótulo
+  # "Trigger" em `.card-detail__trigger-label`.
   test "trigger_text preserva quebras de linha e só aparece quando existe" do
     com_trigger = create_card(card_number: "OP01-021", name: "Com Trigger",
                               card_type: "event", colors: [ "Red" ], cost: 1,
@@ -268,12 +274,15 @@ class CardDetailTest < ActionDispatch::IntegrationTest
 
     get card_path("OP01-021")
 
-    assert_select ".card-detail__trigger" do |elementos|
-      assert_match(/<br/, elementos.first.to_html)
+    assert_select ".card-detail__effect" do |elementos|
+      html = elementos.first.to_html
+      assert_match(/<br/, html,
+                   "a quebra de linha do trigger_text tem que sobreviver ao HTML (Req. 5.4)")
     end
+    assert_select ".card-detail__effect .card-detail__trigger-label", text: "Trigger"
   end
 
-  test "carta sem trigger não exibe a seção de trigger" do
+  test "carta sem trigger não exibe o rótulo de trigger" do
     sem_trigger = create_card(card_number: "OP01-022", name: "Sem Trigger",
                               card_type: "character", colors: [ "Red" ],
                               cost: 1, power: 1000, effect_text: "Só efeito.",
@@ -282,7 +291,7 @@ class CardDetailTest < ActionDispatch::IntegrationTest
 
     get card_path("OP01-022")
 
-    assert_select ".card-detail__trigger", 0
+    assert_select ".card-detail__trigger-label", 0
   end
 
   test "carta sem texto de efeito não exibe seção de efeito vazia" do
@@ -311,6 +320,8 @@ class CardDetailTest < ActionDispatch::IntegrationTest
 
   # --- Req. 5.1: campos conhecidos e imagem maior ---
 
+  # T7 (conformidade), CNF-17/CNF-39: tipo e cor saíram do `<dl>` e viraram
+  # chip no cabeçalho; carta com duas cores tem um chip por cor.
   test "exibe os campos conhecidos da carta" do
     carta = create_card(card_number: "OP01-005", name: "Completa",
                         card_type: "character", colors: [ "Red", "Green" ],
@@ -323,11 +334,11 @@ class CardDetailTest < ActionDispatch::IntegrationTest
 
     assert_select ".card-detail__name", text: "Completa"
     assert_select ".card-detail__number", text: "OP01-005"
-    assert_select ".field--colors", text: /Red/
-    assert_select ".field--colors", text: /Green/
+    assert_select ".card-detail__chip", text: "Red"
+    assert_select ".card-detail__chip", text: "Green"
     assert_select ".field--traits", text: /Straw Hat Crew/
     assert_select ".field--attributes", text: /Slash/
-    assert_select ".field--card-type", text: /Character/i
+    assert_select ".card-detail__chip", text: /Character/i
   end
 
   test "carta inexistente responde 404 em vez de erro" do
