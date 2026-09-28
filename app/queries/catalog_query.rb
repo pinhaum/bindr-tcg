@@ -150,14 +150,29 @@ class CatalogQuery
     set_column = VARIANT_FILTERS.fetch(:sets)
 
     {
-      colors: Card.connection.select_values(
-        "SELECT DISTINCT unnest(cards.#{color_column}) AS value FROM cards ORDER BY value"
+      colors: in_known_order(
+        Card.connection.select_values(
+          "SELECT DISTINCT unnest(cards.#{color_column}) AS value FROM cards"
+        ),
+        KNOWN_COLORS
       ),
       card_types: Card.distinct.order(type_column).pluck(type_column),
-      rarities: CardVariant.where.not(rarity_column => nil).distinct.order(rarity_column).pluck(rarity_column),
+      rarities: in_known_order(
+        CardVariant.where.not(rarity_column => nil).distinct.pluck(rarity_column),
+        KNOWN_RARITIES
+      ),
       sets: CardSet.joins(:card_variants).distinct.order(set_column).pluck(set_column, :name)
                    .map { |code, name| { code: code, name: name } }
     }
+  end
+
+  # Ordem do canvas (CNF-11). Valor fora da lista vai para o fim, em ordem
+  # alfabética, em vez de sumir: a fonte é um scraper comunitário (CNF-40).
+  KNOWN_COLORS = [ "Red", "Green", "Blue", "Purple", "Black", "Yellow" ].freeze
+  KNOWN_RARITIES = [ "C", "UC", "R", "SR", "SEC", "L" ].freeze
+
+  def self.in_known_order(present, known)
+    (known & present) + (present - known).sort
   end
 
   # Exposto para o teste de plano de execução (Req. 11.3): a asserção é sobre

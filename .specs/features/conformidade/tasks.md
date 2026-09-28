@@ -143,10 +143,10 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Cores: Red, Green, Blue, Purple, Black, Yellow (`Desktop-Catalogo.dc.html:32-37`), só as presentes no catálogo
-- [ ] Raridades: C, UC, R, SR, SEC, L, depois as demais em ordem alfabética; uma raridade fora da lista (ex.: `"X"`) aparece no fim, sem erro (CNF-40)
-- [ ] O valor devolvido continua o valor cru da coluna: nenhuma tradução ou capitalização aqui (a capitalização do tipo é da view, T4)
-- [ ] Gate quick passa
+- [x] Cores: Red, Green, Blue, Purple, Black, Yellow (`Desktop-Catalogo.dc.html:32-37`), só as presentes no catálogo
+- [x] Raridades: C, UC, R, SR, SEC, L, depois as demais em ordem alfabética; uma raridade fora da lista (ex.: `"X"`) aparece no fim, sem erro (CNF-40)
+- [x] O valor devolvido continua o valor cru da coluna: nenhuma tradução ou capitalização aqui (a capitalização do tipo é da view, T4)
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick

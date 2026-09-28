@@ -181,4 +181,106 @@ class CatalogFilterOptionsTest < ActiveSupport::TestCase
 
     CatalogQuery.filter_options.each_key { |key| assert_includes filtered, key }
   end
+
+  # CNF-11: cores na ordem Red, Green, Blue, Purple, Black, Yellow
+  test "cores ordenadas como Red, Green, Blue, Purple, Black, Yellow" do
+    # Criar cartas com cores diferentes
+    create_card(card_number: "T1", name: "Red Card", card_type: "character",
+                colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    create_card(card_number: "T2", name: "Green Card", card_type: "character",
+                colors: [ "Green" ], cost: 1, power: 1000, traits: [])
+    create_card(card_number: "T3", name: "Blue Card", card_type: "character",
+                colors: [ "Blue" ], cost: 1, power: 1000, traits: [])
+    create_card(card_number: "T4", name: "Purple Card", card_type: "character",
+                colors: [ "Purple" ], cost: 1, power: 1000, traits: [])
+    create_card(card_number: "T5", name: "Black Card", card_type: "character",
+                colors: [ "Black" ], cost: 1, power: 1000, traits: [])
+    create_card(card_number: "T6", name: "Yellow Card", card_type: "character",
+                colors: [ "Yellow" ], cost: 1, power: 1000, traits: [])
+
+    result = CatalogQuery.filter_options
+    expected_order = [ "Red", "Green", "Blue", "Purple", "Black", "Yellow" ]
+
+    assert_equal expected_order, result[:colors]
+  end
+
+  # CNF-11: cores só as presentes no catálogo, na ordem especificada
+  test "cores: só as presentes, na ordem do canvas" do
+    # Limpar dados anteriores
+    CardVariant.destroy_all
+    Card.destroy_all
+
+    # Criar apenas Blue e Red
+    create_card(card_number: "B1", name: "Blue", card_type: "character",
+                colors: [ "Blue" ], cost: 1, power: 1000, traits: [])
+    create_card(card_number: "R1", name: "Red", card_type: "character",
+                colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+
+    result = CatalogQuery.filter_options
+
+    # Devem estar em ordem Red, Green, Blue, Purple, Black, Yellow
+    # Mas só Blue e Red presentes
+    assert_equal [ "Red", "Blue" ], result[:colors]
+  end
+
+  # CNF-11: raridades na ordem C, UC, R, SR, SEC, L, depois demais alfabeticamente
+  test "raridades ordenadas como C, UC, R, SR, SEC, L, depois demais" do
+    CardVariant.destroy_all
+    Card.destroy_all
+
+    card_c = create_card(card_number: "C1", name: "C Card", card_type: "character",
+                         colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    card_uc = create_card(card_number: "UC1", name: "UC Card", card_type: "character",
+                          colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    card_r = create_card(card_number: "R1", name: "R Card", card_type: "character",
+                         colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    card_sr = create_card(card_number: "SR1", name: "SR Card", card_type: "character",
+                          colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    card_sec = create_card(card_number: "SEC1", name: "SEC Card", card_type: "character",
+                           colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    card_l = create_card(card_number: "L1", name: "L Card", card_type: "character",
+                         colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+
+    create_variant(card_c, "C1", rarity: "C", card_set: @op01)
+    create_variant(card_uc, "UC1", rarity: "UC", card_set: @op01)
+    create_variant(card_r, "R1", rarity: "R", card_set: @op01)
+    create_variant(card_sr, "SR1", rarity: "SR", card_set: @op01)
+    create_variant(card_sec, "SEC1", rarity: "SEC", card_set: @op01)
+    create_variant(card_l, "L1", rarity: "L", card_set: @op01)
+
+    result = CatalogQuery.filter_options
+    expected_order = [ "C", "UC", "R", "SR", "SEC", "L" ]
+
+    assert_equal expected_order, result[:rarities]
+  end
+
+  # CNF-40: raridade desconhecida aparece no fim, sem erro
+  test "raridade desconhecida aparece no fim em ordem alfabética" do
+    CardVariant.destroy_all
+    Card.destroy_all
+
+    card_c = create_card(card_number: "C1", name: "C Card", card_type: "character",
+                         colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    card_x = create_card(card_number: "X1", name: "X Card", card_type: "character",
+                         colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+    card_z = create_card(card_number: "Z1", name: "Z Card", card_type: "character",
+                         colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+
+    create_variant(card_c, "C1", rarity: "C", card_set: @op01)
+    # Raridades desconhecidas
+    create_variant(card_x, "X1", rarity: "X", card_set: @op01)
+    create_variant(card_z, "Z1", rarity: "Z", card_set: @op01)
+
+    assert_equal [ "C", "X", "Z" ], CatalogQuery.filter_options[:rarities]
+  end
+
+  # CNF-11 com valor fora da lista: a cor não some, vai para o fim
+  test "cor desconhecida aparece depois das do canvas" do
+    CardVariant.destroy_all
+    Card.destroy_all
+    create_card(card_number: "W1", name: "White", card_type: "character",
+                colors: [ "White", "Red" ], cost: 1, power: 1000, traits: [])
+
+    assert_equal [ "Red", "White" ], CatalogQuery.filter_options[:colors]
+  end
 end
