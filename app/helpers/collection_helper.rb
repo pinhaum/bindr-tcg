@@ -38,4 +38,12 @@ module CollectionHelper
 
     (@wishlist_targets || {})[variant.id]
   end
+
+  # Total de cópias da carta, somando todas as variantes (selo do tile da
+  # grade — CNF-02). Soma em Ruby sobre `card.card_variants`, já preloadado
+  # pelo controller: uma consulta agregada por carta seria N+1 de novo, o
+  # mesmo problema que `owned_quantity` resolve para uma variante só.
+  def owned_quantity_for_card(card)
+    card.card_variants.sum { |variant| owned_quantity(variant) }
+  end
 end

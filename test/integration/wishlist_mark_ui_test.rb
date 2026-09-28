@@ -124,16 +124,18 @@ class WishlistMarkUiTest < ActionDispatch::IntegrationTest
     assert_select ".wishlist-mark", 0
   end
 
-  # Req. 2.5 — a decisão de layout, travada por teste. O tile da grade já
-  # carrega o controle de posse em colunas abaixo de 180px; acrescentar ali um
-  # campo numérico e um botão espremeria o caminho principal do produto.
+  # Req. 2.5 — a decisão de layout, travada por teste. O tile não comporta um
+  # controle de desejo: desde a T3 (conformidade, CNF-01) ele também não
+  # comporta mais o de posse, e o que este teste protege é o tile continuar
+  # sem **nenhum** controle, nem de posse nem de desejo.
   test "a grade não recebe controle de desejo, nem em carta de variante única" do
     sign_in
     get catalog_path
 
     assert_response :success
-    assert_select ".card-tile .ownership", minimum: 1,
-      message: "o controle de posse continua na grade"
+    assert_select ".card-tile form", 0,
+      "a grade ganhou algum controle — nem posse (CNF-01) nem desejo pertencem ao tile"
+    assert_select ".card-tile .ownership", 0
     assert_select ".card-tile .wishlist-mark", 0,
       "marcar desejo fica no detalhe: o tile não comporta um segundo controle em 360px"
   end

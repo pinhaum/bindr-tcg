@@ -88,45 +88,22 @@ class CollectionOwnershipUiTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # Na grade o controle direto só existe quando a carta tem **uma** variante:
-  # aí há exatamente uma variante a incrementar e nenhuma ambiguidade.
-  test "a grade traz o controle direto na carta de variante única" do
+  # A grade nunca oferece controle direto, nem para carta de variante única: a
+  # T3 da `conformidade` (CNF-01) tirou o controle do tile inteiro — registrar
+  # posse é sempre no detalhe. `catalog_tile_test.rb` prova a ausência para
+  # todo tile; o que sobra de específico deste arquivo é o detalhe continuar
+  # oferecendo o controle para cada variante, provado acima.
+
+  # A carta de várias variantes leva ao detalhe informando quantas impressões
+  # tem — só que agora ao lado do código, não mais como link separado (T3): o
+  # tile inteiro já é um único link, e a T3 tirou o link duplicado de dentro
+  # dele.
+  test "a carta de várias variantes mostra quantas impressões tem, ao lado do código" do
     sign_in
 
     get catalog_path
 
-    assert_response :success
-    assert_select "##{ownership_id(@variante_unica)}", 1
-    assert_select "form[action=?]",
-      increment_collection_item_path(card_variant_id: @variante_unica.id)
-  end
-
-  # O critério que impede a saída errada. Um controle único no tile de uma carta
-  # com três variantes **agregaria a posse na carta** — o Req. 5.3 de
-  # `.context/requirements.md` diz que o registro é por variante, nunca agregado.
-  # Em 40,1% do catálogo real (1129 de 2815 cartas) é esse o caso.
-  test "a grade não oferece controle direto para carta com mais de uma variante" do
-    sign_in
-
-    get catalog_path
-
-    @variantes_multiplas.each do |variant|
-      assert_select "##{ownership_id(variant)}", 0,
-        "a grade ofereceu controle para #{variant.variant_code} sem o usuário escolher a impressão"
-      assert_select "form[action=?]",
-        increment_collection_item_path(card_variant_id: variant.id), 0
-    end
-  end
-
-  # A alternativa ao controle: o tile diz quantas impressões existem e leva ao
-  # detalhe, onde a escolha é explícita. Sem isto o tile pareceria só incompleto.
-  test "a carta de várias variantes leva ao detalhe informando quantas impressões tem" do
-    sign_in
-
-    get catalog_path
-
-    assert_select ".card-tile__variants-link", text: /3 impressões/
-    assert_select ".card-tile__variants-link[href=?]", card_path(@multipla.card_number)
+    assert_select ".card-tile__rarity", text: "3 impressões"
   end
 
   # --- "Atualização por Turbo Stream, sem recarregar a página inteira" ---
@@ -376,7 +353,10 @@ class CollectionOwnershipUiTest < ActionDispatch::IntegrationTest
     get catalog_path
     assert_response :success
     assert_select ".ownership__button", 0
-    assert_select ".ownership__sign-in", 1
+    # A T3 (conformidade, CNF-01) tirou o convite "Entrar para registrar
+    # posse" do tile: a grade não tem mais controle de posse nenhum, nem o
+    # convite que o substituía.
+    assert_select ".ownership__sign-in", 0
 
     get card_path(@multipla.card_number)
     assert_response :success

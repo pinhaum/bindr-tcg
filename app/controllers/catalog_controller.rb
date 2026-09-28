@@ -70,8 +70,9 @@ class CatalogController < ApplicationController
     end
 
     # Um hash `card_variant_id => quantity` para as variantes desta página, em
-    # **uma** consulta (Req. 5.3 / COL-18: o controle aparece por variante, na
-    # grade e no detalhe — perguntar a posse variante a variante seria N+1).
+    # **uma** consulta. A grade soma este hash por carta para o selo (CNF-02);
+    # o detalhe usa o mesmo hash para o controle por variante (Req. 5.3 /
+    # COL-18) — perguntar a posse variante a variante seria N+1 nos dois casos.
     #
     # A consulta parte de `CollectionItem.for_user(Current.user)` e de mais
     # nada: o usuário vem da sessão, nunca do request (Req. 6.5). Para o

@@ -260,6 +260,10 @@ class CollectionTotalTest < ActionDispatch::IntegrationTest
   # controle da variante ("Nico Robin OP01-t11a, 3 cópias"). Uma segunda região
   # viva faria cada incremento produzir duas falas, e quem registra uma caixa de
   # boosters aperta o botão dezenas de vezes.
+  # A T3 (conformidade, CNF-01) tirou o controle de posse — e a região viva que
+  # o acompanhava — do tile da grade; a garantia de não duplicar o anúncio
+  # continua válida no detalhe, onde `.ownership[aria-live=polite]` segue
+  # existindo por variante.
   test "o total não é uma região viva, para não duplicar o anúncio da variante" do
     CollectionItem.create!(user: @user, card_variant: @variante_robin, quantity: 2)
 
@@ -268,6 +272,10 @@ class CollectionTotalTest < ActionDispatch::IntegrationTest
 
     assert_select "#catalog_owned_total[aria-live]", 0
     assert_select "#catalog_owned_total[role=status]", 0
+
+    get card_path(@robin.card_number)
+
+    assert_response :success
     assert_select ".ownership[aria-live=polite]",
       { minimum: 1 }, "o anúncio continua sendo o da variante"
   end

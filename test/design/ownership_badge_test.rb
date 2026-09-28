@@ -4,10 +4,13 @@ require_relative "support/stylesheet"
 # INT-07 (Req. 12.6; `.context/design.md` §11.5–§11.6): posse não é cor.
 #
 # A variante possuída ganha badge `radius-full` em `accent` com a quantidade.
-# `radius-full` é exclusivo desse badge, e não existe segundo nível de âmbar
-# para indicar posse.
+# Dois lugares mostram esse mesmo badge — o detalhe (`.ownership__count--owned`,
+# por variante) e o selo da grade (`.card-tile__badge`, por carta — CNF-02,
+# T3 da `conformidade`) — e `radius-full` é exclusivo dos dois: não existe
+# segundo nível de âmbar para indicar posse.
 class OwnershipBadgeTest < ActiveSupport::TestCase
   BADGE = ".ownership__count--owned".freeze
+  GRID_BADGE = ".card-tile__badge".freeze
   AMBER_HUE = 66.0
   HUE_TOLERANCE = 6.0
   # Abaixo deste croma a matiz é instável e a cor é lida como cinza, não âmbar.
@@ -37,8 +40,17 @@ class OwnershipBadgeTest < ActiveSupport::TestCase
     assert_match(/(?<![-\w])color:\s*var\(--on-accent\)/, body)
   end
 
-  test "radius-full só aparece no badge de quantidade" do
-    assert_equal [ BADGE ], self.class.radius_full_users(@rules)
+  test "o selo da grade é radius-full, fundo accent e texto on-accent" do
+    body = @rules.find { |selector, _| selector == GRID_BADGE }&.last
+
+    assert body, "regra #{GRID_BADGE} sumiu da folha"
+    assert_match(/border-radius:\s*var\(--radius-full\)/, body)
+    assert_match(/background-color:\s*var\(--accent\)/, body)
+    assert_match(/(?<![-\w])color:\s*var\(--on-accent\)/, body)
+  end
+
+  test "radius-full só aparece nos dois badges de quantidade" do
+    assert_equal [ BADGE, GRID_BADGE ].sort, self.class.radius_full_users(@rules).sort
   end
 
   test "a guarda de radius-full acusa um segundo uso" do

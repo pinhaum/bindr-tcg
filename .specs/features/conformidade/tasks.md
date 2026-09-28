@@ -169,19 +169,19 @@ T11 → T12
 
 **Checklist do artboard** (`Main.dc.html` 390px, `Desktop-Catalogo.dc.html` 1280px):
 
-- [ ] Selo absoluto no canto superior direito da arte, `top: 8px; right: 8px`, `min-width: 24px`, altura 24px, padding `0 8px`, raio 999px, fundo accent, texto on-accent, peso 600 (Main:61, D:83)
-- [ ] Selo só quando há posse: Nami e Yamato do artboard sem selo (Main:61, D:83)
-- [ ] Nome 15px peso 600, com reticências (Main:65)
-- [ ] Linha do código: código em mono 13px e raridade 13px, `gap: 8px` (Main:65-66, D:144)
+- [x] Selo absoluto no canto superior direito da arte, `top: 8px; right: 8px`, `min-width: 24px`, altura 24px, padding `0 8px`, raio 999px, fundo accent, texto on-accent, peso 600 (Main:61, D:83)
+- [x] Selo só quando há posse: Nami e Yamato do artboard sem selo (Main:61, D:83)
+- [x] Nome 15px peso 600, com reticências (Main:65)
+- [x] Linha do código: código em mono 13px e raridade 13px, `gap: 8px` (Main:65-66, D:144)
 
 **Done when**:
 
-- [ ] Nenhum tile tem `form`, `button` de posse ou link "Entrar para registrar posse", com ou sem sessão (CNF-01)
-- [ ] Com sessão, carta de três variantes com 2 + 1 + 0 cópias mostra o selo "3" e nome acessível "3 cópias"; com uma cópia, "1 cópia" (CNF-02)
-- [ ] Anônimo e usuário sem cópia: nenhum selo (CNF-03)
-- [ ] Carta de uma variante: raridade ao lado do código; de três: "3 impressões" (CNF-04)
-- [ ] Os testes de posse na grade de `collection_ownership_ui_test.rb` e `ownership_badge_ui_test.rb` passam a exercer o detalhe ou saem; o commit lista cada teste removido e o motivo (Req. 7.5 emendado). Os testes do controller de posse (`collection_items_test.rb`) ficam intactos
-- [ ] Gate full passa
+- [x] Nenhum tile tem `form`, `button` de posse ou link "Entrar para registrar posse", com ou sem sessão (CNF-01)
+- [x] Com sessão, carta de três variantes com 2 + 1 + 0 cópias mostra o selo "3" e nome acessível "3 cópias"; com uma cópia, "1 cópia" (CNF-02)
+- [x] Anônimo e usuário sem cópia: nenhum selo (CNF-03)
+- [x] Carta de uma variante: raridade ao lado do código; de três: "3 impressões" (CNF-04)
+- [x] Os testes de posse na grade de `collection_ownership_ui_test.rb` e `ownership_badge_ui_test.rb` passam a exercer o detalhe ou saem; o commit lista cada teste removido e o motivo (Req. 7.5 emendado). Os testes do controller de posse (`collection_items_test.rb`) ficam intactos
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

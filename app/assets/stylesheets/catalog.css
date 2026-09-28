@@ -289,13 +289,52 @@ body {
 .card-tile__placeholder-name { font-weight: var(--body-strong-weight); overflow-wrap: anywhere; }
 
 .card-tile__name {
+  display: block;
   font-size: var(--body-strong-size);
   line-height: var(--body-strong-line-height);
   font-weight: var(--body-strong-weight);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .card-tile__number {
   color: var(--ink-muted);
+}
+
+.card-tile__number-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.card-tile__rarity {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
+
+/*
+ * O selo de posse (CNF-02): só existe com sessão e alguma cópia (view), e
+ * `radius-full` é exclusivo dele na folha — não existe segundo selo em
+ * `accent` fora deste (`ownership_badge_test.rb`).
+ */
+.card-tile__badge {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  min-width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  font-weight: var(--body-strong-weight);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pagination {
@@ -783,7 +822,6 @@ textarea:focus-visible,
 summary:focus-visible,
 .ownership__button:focus-visible,
 .ownership__sign-in:focus-visible,
-.card-tile__variants-link:focus-visible,
 .wishlist-item__remove:focus-visible,
 .wishlist-item__link:focus-visible,
 .wishlist-mark__input:focus-visible,
@@ -801,19 +839,6 @@ summary:focus-visible,
 .ownership__signed-out { margin: 0; }
 
 .ownership__sign-in {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  min-width: 24px;
-}
-
-.card-tile__variants {
-  margin: var(--space-1) 0 0;
-  font-size: var(--caption-size);
-  line-height: var(--caption-line-height);
-}
-
-.card-tile__variants-link {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
