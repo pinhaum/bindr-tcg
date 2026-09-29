@@ -10,7 +10,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Spec**: `.specs/features/fechamento/spec.md` (FEC-01..FEC-24)
 **Design**: inline (sem `design.md`: a feature só escreve documentos; nenhum padrão novo)
-**Status**: In Progress (Phase 5: correções do ciclo 1 da validação; T1–T6 Done)
+**Status**: In Progress (extensão da Phase 5: correções do ciclo 2 da validação; T1–T13 Done)
 
 Todas as tasks escrevem **só documentos**. Regras que valem para todas:
 
@@ -29,7 +29,7 @@ Todas as tasks escrevem **só documentos**. Regras que valem para todas:
 
 | Camada | Tipo de teste | Cobertura esperada | Onde | Comando |
 |---|---|---|---|---|
-| Documentação (README, `requirements.md`, `design.md`, planos, STATE, `roteiro-7-1.md`, `decisoes-do-dono.md`; T1–T13) | none (evidência por `grep` e `ls`) | Cada critério da task é conferido por comando de leitura registrado no commit; o gate full prova que nenhum código mudou | `README.md`, `.context/*.md`, `.specs/**` | `grep`, `ls`, `validate_*.py` |
+| Documentação (README, `requirements.md`, `design.md`, planos, STATE, `roteiro-7-1.md`, `decisoes-do-dono.md`, `spec.md`; T1–T17) | none (evidência por `grep` e `ls`) | Cada critério da task é conferido por comando de leitura registrado no commit; o gate full prova que nenhum código mudou | `README.md`, `.context/*.md`, `.specs/**` | `grep`, `ls`, `validate_*.py` |
 | Aplicação Rails (regressão) | integration + unit (suíte existente) | A suíte inteira continua verde e a contagem de runs não muda | `test/**` | `docker compose exec -T app bin/rails test` |
 
 ## Gate Check Commands
@@ -94,6 +94,19 @@ T6 → T10
 T6 → T11
 T6 → T12
 T6 → T13
+```
+
+### Extensão da Phase 5: correções da validação (ciclo 2)
+
+Fonte: `validation.md`, seção "Fix Plans" (Fix 1 a Fix 3) do ciclo 2. As quatro
+tasks têm `Where` disjuntos e dependem só de T13: rodam em paralelo. Um `blocked`
+numa não trava as outras.
+
+```
+T13 → T14
+T13 → T15
+T13 → T16
+T13 → T17
 ```
 
 ---
@@ -472,6 +485,121 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 ---
 
+## Extensão da Phase 5: correções da validação (ciclo 2)
+
+Mesmas regras do topo do arquivo. Toda task confere a linha citada em
+`validation.md` contra o arquivo real antes de editar (a numeração de linhas pode
+ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Where`.
+
+### T14: Roteiro da 7.1 sem o total antigo e com o texto que a tela renderiza
+
+**What**: O `roteiro-7-1.md` troca o total 48 pelo `baseSetSize` real do OP01 (121), substitui "N% concluído" pelo texto que a view produz e cita a classe certa do filtro.
+**Where**: `.specs/features/fechamento/roteiro-7-1.md`
+**Depends on**: T13
+**Reuses**: `roteiro-7-1.md` (critério de sucesso, hoje "o total (48)"; passo 3 e bloco "Resposta esperada", hoje "15 de 121 do set base, 12% concluído"; nota do filtro de set); `app/views/progress/index.html.erb` (`.progress-set__owned-line` renderiza `owned / total · percentual`; `.progress-set__percent-basis` renderiza "N de M do set base"; `.progress-set__parallels` renderiza "N de M parallels"); `app/views/catalog/index.html.erb` (`<details class="catalog__filters-toggle">`); `spec/fixtures/optcgjson-subset.json` (`baseSetSize` do OP01); `validation.md` Fix 1 do ciclo 2
+**Requirement**: FEC-05 (Fix 1 do ciclo 2)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] O `baseSetSize` do OP01 (121) é conferido na fixture nesta task e o total citado no critério de sucesso do roteiro passa de 48 para 121; `grep -n "48" roteiro-7-1.md` sai vazio (ou só com ocorrência justificada e registrada)
+- [ ] O texto do passo 3 e do bloco "Resposta esperada" é o que a view renderiza: a linha do set `15 / 154 · 12%` (`.progress-set__owned-line`, `index.html.erb`, as linhas do `owned_variants`, `total_variants` e `completion_percent`) e a legenda `15 de 121 do set base · 2 de 33 parallels` (`.progress-set__percent-basis` e `.progress-set__parallels`); cada frase é conferida por `grep` na view e o comando fica no commit
+- [ ] "concluído" não aparece como texto de tela: `grep -n "concluído" roteiro-7-1.md` sai vazio (ou só numa frase que descreve a métrica, sem aspas de texto de tela)
+- [ ] O passo do roteiro que cita o botão de abrir o filtro usa a classe `catalog__filters-toggle` (o `<details>`), conferida em `app/views/catalog/index.html.erb`; `catalog__filters` só aparece para o painel interno
+- [ ] Nenhum passo afirma comportamento que o código não tem
+- [ ] Gate full passa e a contagem de runs não muda (1350)
+
+**Tests**: none
+**Gate**: full
+**Commit**: `docs(fechamento): corrigir o total e os textos de tela do roteiro da 7.1`
+
+---
+
+### T15: Rastreamento de pendências sem o texto-guia velho
+
+**What**: A subseção "Em aberto" do Rastreamento perde a frase "bloqueiam o início da implementação", a linha P8 termina com `(emenda de 2026-09-29)` e a linha P4 cita a task 0.3.
+**Where**: `.context/requirements.md`
+**Depends on**: T13
+**Reuses**: `.context/requirements.md` "Rastreamento de pendências" (tabela "Resolvidas" e "Em aberto"); `.context/tasks.md` (task 0.3 decidiu P3, P4 e P6; task 0.1 decidiu P1); `.context/design.md` §9 (linha P8: chips neutros enquanto isso); `validation.md` Fix 2 do ciclo 2
+**Requirement**: FEC-06, FEC-07 (Fix 2 do ciclo 2)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Conferido em `.context/tasks.md` que P4 foi decidida na 0.3 (e P1 na 0.1); a linha P4 da tabela "Resolvidas" cita "task 0.3" no lugar de "task 0.1"; `grep -n "^| P4" .context/requirements.md | grep -c "task 0.3"` → 1
+- [ ] O texto "Itens que **bloqueiam** o início da implementação" é reescrito: P8 não bloqueia (os chips de cor ficam neutros enquanto isso, conferido em `design.md` §9); `grep -n "bloqueiam" .context/requirements.md` não devolve mais a frase antiga do Rastreamento
+- [ ] A linha P8 termina com `(emenda de 2026-09-29)`; `grep -n "^| P8" .context/requirements.md | grep -c "emenda de 2026-09-29"` → 1
+- [ ] Só a seção de rastreamento muda: nenhum requisito numerado (Req. 1..13) é alterado; `grep -c "⚠️ VERIFICAR" .context/requirements.md` continua 0
+- [ ] Gate full passa e a contagem de runs não muda (1350)
+
+**Tests**: none
+**Gate**: full
+**Commit**: `docs(fechamento): corrigir o texto-guia e a linha p8 do rastreamento`
+
+---
+
+### T16: `design.md` §9 com a fonte das decisões P1–P7 e da P8
+
+**What**: A frase de abertura da §9 cita a fonte de P1–P7 e a pendência P8 (FEC-07).
+**Where**: `.context/design.md`
+**Depends on**: T13
+**Reuses**: `.context/design.md` §9 (frase "**Uma aberta (P8).** P1–P7 estão todas decididas (tasks 0.1, 0.2 e 0.3, em 2026-09-19)"); `.specs/STATE.md` AD-001..AD-004 (AD-012 revisa a P6); `.context/tasks.md` 0.1–0.3; `validation.md` Fix 3 do ciclo 2
+**Requirement**: FEC-07 (Fix 3 do ciclo 2)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Conferido em `.specs/STATE.md` que AD-001..AD-004 são as decisões de P1, P3 e P4 e da hospedagem de imagem (P6 revista depois pela AD-012), e em `.context/tasks.md` que as tasks 0.1–0.3 as resolveram; se a correspondência não fechar, a task devolve `blocked` com a evidência
+- [ ] A frase de abertura da §9 recebe a citação `(AD-001..AD-004; tasks 0.1–0.3)` após "P1–P7 estão todas decididas" e `(emenda de 2026-09-29)` depois de "Uma aberta (P8)"; `sed -n` da §9 registrado no commit
+- [ ] Nenhuma outra linha de `design.md` muda: `git diff --stat` mostra só esse arquivo e ≤ 3 linhas alteradas; a tabela de P1–P8 fica como está
+- [ ] `grep -c "⚠️ VERIFICAR" .context/design.md` não muda
+- [ ] Gate full passa e a contagem de runs não muda (1350)
+
+**Tests**: none
+**Gate**: full
+**Commit**: `docs(fechamento): citar a fonte das decisões p1 a p7 na seção 9`
+
+---
+
+### T17: `spec.md` sem números de linha de `design.md`
+
+**What**: As linhas da spec que citam `design.md:330/355/506/516/579` passam a apontar o título da seção, que não envelhece.
+**Where**: `.specs/features/fechamento/spec.md`
+**Depends on**: T13
+**Reuses**: `spec.md` (linha "Estado dos cinco marcadores de `design.md`" e as tabelas "`⚠️ VERIFICAR` que esta spec acredita abertos" e "Resolvidos"); `.context/design.md` (`grep -n "VERIFICAR"`: §7 "Pendência aberta — Req. 5.1" e §10, regras de deck); `verificar-resolvidos.md`; `validation.md` Fix 3 do ciclo 2
+**Requirement**: FEC-13 (Fix 3 do ciclo 2)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `grep -n "VERIFICAR" .context/design.md` reexecutado nesta task e o título da seção de cada marcador aberto conferido (Req. 5.1 em §7; regras de deck em §10)
+- [ ] `grep -n "design.md:[0-9]" .specs/features/fechamento/spec.md` sai vazio: `:330`/`:355` viram "menção histórica e conferência de índices, já removidas (ver `verificar-resolvidos.md`)"; `:506`/`:516` viram "`design.md` §7, pendência do Req. 5.1"; `:579` vira "`design.md` §10, regras de deck"
+- [ ] O sentido de cada linha não muda (mesmos marcadores, mesmo motivo de estarem abertos ou resolvidos); a tabela de rastreabilidade FEC-01..24 fica intacta
+- [ ] `validate_spec.py` desta feature sai com 0
+- [ ] Gate full passa e a contagem de runs não muda (1350)
+
+**Tests**: none
+**Gate**: full
+**Commit**: `docs(fechamento): trocar números de linha do design por títulos de seção`
+
+---
+
 ## Plano de delegação
 
 | Task | Worker | Revisão |
@@ -488,10 +616,15 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 | T11 | Sonnet (decide a redação de duas afirmações e não pode tocar T7..T13) | o orquestrador lê o `git diff` só das linhas de T6 e da linha da spec |
 | T12 | Haiku, com leitura obrigatória das views e do banco | o orquestrador reabre cada frase na view |
 | T13 | Haiku (formato fechado) | o orquestrador lê as duas correções |
+| T14 | Haiku, com leitura obrigatória da view e da fixture (troca de textos conferidos por `grep`) | o orquestrador reabre cada frase na view |
+| T15 | Haiku (reescrita curta de uma subseção e duas linhas de tabela) | o orquestrador lê o `git diff` só do Rastreamento |
+| T16 | Haiku (acrescenta duas citações a uma frase conferida) | o orquestrador lê o `git diff` (≤ 3 linhas) |
+| T17 | Haiku (troca de referências por títulos, com `grep` obrigatório) | o orquestrador lê o `git diff` da spec |
 
 As tasks T7..T13 têm `Where` disjuntos e podem rodar em paralelo (um worker por
 task, sem `git add -A`, sem `git stash`). Quem escreve T7..T13 é o worker de
-planejamento; o worker de execução de T11 não as edita.
+planejamento; o worker de execução de T11 não as edita. T14..T17 também têm
+`Where` disjuntos e rodam em paralelo; nenhuma toca `tasks.md`.
 
 Regras que todo prompt de worker repete: não usar `git add -A` nem `git add .`
 (o index é compartilhado); não marcar checkbox em `tasks.md`; não editar arquivo
@@ -514,6 +647,10 @@ fora do `Where`; não inventar fato; parar com `blocked` diante de decisão de d
 | T11 | duas linhas de `spec.md` e `tasks.md` (mesma natureza: afirmação sem fonte) | ⚠️ 2 arquivos afins; cohesivo |
 | T12 | um roteiro | ✅ |
 | T13 | um arquivo de registro, duas correções cosméticas | ✅ |
+| T14 | um roteiro, três correções de texto | ✅ |
+| T15 | uma subseção de `requirements.md` (Rastreamento), três linhas | ✅ |
+| T16 | uma frase de `design.md` §9 | ✅ |
+| T17 | duas linhas e duas tabelas de `spec.md`, mesma natureza (referência de linha) | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -532,6 +669,10 @@ fora do `Where`; não inventar fato; parar com `blocked` diante de decisão de d
 | T11 | T6 | Phase 5: `T6 → T11` | ✅ |
 | T12 | T6 | Phase 5: `T6 → T12` | ✅ |
 | T13 | T6 | Phase 5: `T6 → T13` | ✅ |
+| T14 | T13 | Phase 5 (extensão): `T13 → T14` | ✅ |
+| T15 | T13 | Phase 5 (extensão): `T13 → T15` | ✅ |
+| T16 | T13 | Phase 5 (extensão): `T13 → T16` | ✅ |
+| T17 | T13 | Phase 5 (extensão): `T13 → T17` | ✅ |
 
 ## Test Co-location Validation
 
@@ -550,3 +691,7 @@ fora do `Where`; não inventar fato; parar com `blocked` diante de decisão de d
 | T11 | documentação (`spec.md`, `tasks.md`) | none | none | ✅ |
 | T12 | documentação (`roteiro-7-1.md`) | none | none | ✅ |
 | T13 | documentação (`decisoes-do-dono.md`) | none | none | ✅ |
+| T14 | documentação (`roteiro-7-1.md`) | none | none | ✅ |
+| T15 | documentação (`requirements.md`) | none | none | ✅ |
+| T16 | documentação (`design.md`) | none | none | ✅ |
+| T17 | documentação (`spec.md`) | none | none | ✅ |
