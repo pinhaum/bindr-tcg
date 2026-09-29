@@ -324,11 +324,11 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] Conferido em `.context/requirements.md` que o critério das seis cores é o Req. 12.11 antes de editar; se não for, a task devolve `blocked` com a evidência
-- [ ] `grep -n "^| P8" .context/design.md | grep -c "12.11"` → 1 e `grep -n "^| P8" .context/design.md | grep -c "13.7"` → 0
-- [ ] A linha P8 (e a frase de §9 logo acima, se repetir a referência) termina com `(AD-NNN)` ou `(emenda de 2026-09-29)`, conforme FEC-07; a AD citada foi aberta em `.specs/STATE.md` e trata do assunto, senão usa a emenda
-- [ ] Nenhuma outra linha de `design.md` muda: `git diff --stat` mostra só esse arquivo e ≤ 3 linhas alteradas
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] Conferido em `.context/requirements.md` que o critério das seis cores é o Req. 12.11 antes de editar; se não for, a task devolve `blocked` com a evidência
+- [x] `grep -n "^| P8" .context/design.md | grep -c "12.11"` → 1 e `grep -n "^| P8" .context/design.md | grep -c "13.7"` → 0
+- [x] A linha P8 (e a frase de §9 logo acima, se repetir a referência) termina com `(AD-NNN)` ou `(emenda de 2026-09-29)`, conforme FEC-07; a AD citada foi aberta em `.specs/STATE.md` e trata do assunto, senão usa a emenda
+- [x] Nenhuma outra linha de `design.md` muda: `git diff --stat` mostra só esse arquivo e ≤ 3 linhas alteradas
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full

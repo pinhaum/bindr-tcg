@@ -599,7 +599,7 @@ ambientais que invalidam mecanismos simples:
 | P5  | `variant_code` estável                             | ✅ | **Sem hash derivado.** A fonte fornece `id` estável (`OP01-001_p1`). Usar direto. |
 | P6  | Cache de imagens na Fase 1                         | ✅ | ~~Não; hotlink.~~ **Revista em 2026-09-22 (AD-012):** hotlink bloqueado por CORP `same-site`; a aplicação serve a imagem com cache em disco sob demanda. §7. |
 | P7  | `DON!!` entra no catálogo?                         | ✅ | Não. A fonte não traz cartas DON!!, então não há decisão a tomar na Fase 1. |
-| P8  | Cores do jogo — hexadecimais das seis cores       | ⏳ | Aberta. O design system proíbe estimá-las; amostrar JPEG hotlinkado de terceiro não reproduz cor de marca — enquanto isso os chips de cor ficam neutros. Req. 13.7. |
+| P8  | Cores do jogo — hexadecimais das seis cores       | ⏳ | Aberta. O design system proíbe estimá-las; amostrar JPEG hotlinkado de terceiro não reproduz cor de marca — enquanto isso os chips de cor ficam neutros. Req. 12.11 (emenda de 2026-09-29). |
 
 ### Consequências para a ingestão (achadas na amostra)
 
