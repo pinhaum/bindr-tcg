@@ -561,11 +561,11 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] Conferido em `.specs/STATE.md` que AD-001..AD-004 são as decisões de P1, P3 e P4 e da hospedagem de imagem (P6 revista depois pela AD-012), e em `.context/tasks.md` que as tasks 0.1–0.3 as resolveram; se a correspondência não fechar, a task devolve `blocked` com a evidência
-- [ ] A frase de abertura da §9 recebe a citação `(AD-001..AD-004; tasks 0.1–0.3)` após "P1–P7 estão todas decididas" e `(emenda de 2026-09-29)` depois de "Uma aberta (P8)"; `sed -n` da §9 registrado no commit
-- [ ] Nenhuma outra linha de `design.md` muda: `git diff --stat` mostra só esse arquivo e ≤ 3 linhas alteradas; a tabela de P1–P8 fica como está
-- [ ] `grep -c "⚠️ VERIFICAR" .context/design.md` não muda
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] Conferido em `.specs/STATE.md` que AD-001..AD-004 são as decisões de P1, P3 e P4 e da hospedagem de imagem (P6 revista depois pela AD-012), e em `.context/tasks.md` que as tasks 0.1–0.3 as resolveram; se a correspondência não fechar, a task devolve `blocked` com a evidência
+- [x] A frase de abertura da §9 recebe a citação `(AD-001..AD-004; tasks 0.1–0.3)` após "P1–P7 estão todas decididas" e `(emenda de 2026-09-29)` depois de "Uma aberta (P8)"; `sed -n` da §9 registrado no commit
+- [x] Nenhuma outra linha de `design.md` muda: `git diff --stat` mostra só esse arquivo e ≤ 3 linhas alteradas; a tabela de P1–P8 fica como está
+- [x] `grep -c "⚠️ VERIFICAR" .context/design.md` não muda
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full
