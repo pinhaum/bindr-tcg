@@ -11,10 +11,12 @@ require_relative "support/stylesheet"
 class OwnershipBadgeTest < ActiveSupport::TestCase
   BADGE = ".ownership__count--owned".freeze
   GRID_BADGE = ".card-tile__badge".freeze
+  DETAIL_BADGE = ".card-detail__badge".freeze
   AMBER_HUE = 66.0
   HUE_TOLERANCE = 6.0
   # Abaixo deste croma a matiz é instável e a cor é lida como cinza, não âmbar.
   MIN_CHROMA = 0.05
+  WIDE = /@media\s*\(min-width:\s*64rem\)\s*\{/
 
   def self.amber_tokens(tokens)
     tokens.select do |_, value|
@@ -30,7 +32,25 @@ class OwnershipBadgeTest < ActiveSupport::TestCase
          .flat_map { |selector, _| selector.split(",").map(&:strip) }
   end
 
-  setup { @rules = Stylesheet.rules }
+  def self.wide_block(css = Stylesheet.content_without_comments)
+    start = css.index(WIDE) or return ""
+    open = css.index("{", start)
+    depth = 0
+    css.each_char.with_index.drop(open).each do |char, index|
+      depth += 1 if char == "{"
+      depth -= 1 if char == "}"
+      return css[(open + 1)...index] if depth.zero?
+    end
+    ""
+  end
+
+  setup do
+    css = Stylesheet.content_without_comments
+    @wide = self.class.wide_block(css)
+    @rules = Stylesheet.rules
+    @narrow_rules = Stylesheet.rules(css.sub(@wide, ""))
+    @wide_rules = Stylesheet.rules(@wide)
+  end
 
   test "o badge de posse é radius-full, fundo accent e texto on-accent" do
     body = @rules.find { |selector, _| selector == BADGE }&.last
@@ -40,8 +60,6 @@ class OwnershipBadgeTest < ActiveSupport::TestCase
     assert_match(/background-color:\s*var\(--accent\)/, body)
     assert_match(/(?<![-\w])color:\s*var\(--on-accent\)/, body)
   end
-
-  DETAIL_BADGE = ".card-detail__badge".freeze
 
   test "os selos da grade e do detalhe são radius-full, fundo accent e texto on-accent" do
     [ GRID_BADGE, DETAIL_BADGE ].each do |selector|
@@ -71,5 +89,28 @@ class OwnershipBadgeTest < ActiveSupport::TestCase
     tokens = { "--accent" => "#ff9e14", "--accent-soft" => "#b36e0e", "--ink" => "#e9f0f3" }
 
     assert_equal %w[--accent --accent-soft], self.class.amber_tokens(tokens)
+  end
+
+  test "o selo está posicionado no canto superior direito (CNF-02, CNF-16)" do
+    rule = Stylesheet.resolved(GRID_BADGE.delete_prefix("."), @narrow_rules)
+
+    assert_equal "absolute", rule["position"], GRID_BADGE
+    assert_equal "var(--space-2)", rule["top"], "#{GRID_BADGE} no viewport estreito"
+    assert_equal "var(--space-2)", rule["right"], "#{GRID_BADGE} no viewport estreito"
+    assert_nil rule["bottom"], "#{GRID_BADGE} não deve ter bottom"
+    assert_nil rule["left"], "#{GRID_BADGE} não deve ter left"
+
+    rule = Stylesheet.resolved(DETAIL_BADGE.delete_prefix("."), @narrow_rules)
+
+    assert_equal "absolute", rule["position"], DETAIL_BADGE
+    assert_equal "var(--space-2)", rule["top"], "#{DETAIL_BADGE} no viewport estreito"
+    assert_equal "var(--space-2)", rule["right"], "#{DETAIL_BADGE} no viewport estreito"
+    assert_nil rule["bottom"], "#{DETAIL_BADGE} não deve ter bottom"
+    assert_nil rule["left"], "#{DETAIL_BADGE} não deve ter left"
+
+    rule = Stylesheet.resolved(DETAIL_BADGE.delete_prefix("."), @wide_rules)
+
+    assert_equal "var(--space-3)", rule["top"], "#{DETAIL_BADGE} em ≥1024px"
+    assert_equal "var(--space-3)", rule["right"], "#{DETAIL_BADGE} em ≥1024px"
   end
 end

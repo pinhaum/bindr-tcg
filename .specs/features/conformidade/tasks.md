@@ -887,12 +887,12 @@ Revisão de a11y, achado 5 (`show.html.erb:33` e `:84`): com o `<details>` abert
 
 **Done when**:
 
-- [ ] `.catalog__empty-reset` resolve `min-height: 44px` em `catalog.css`
-- [ ] `catalog_status_line_test.rb`: `Stylesheet.resolved("catalog__empty-reset")` com `to_pixels(min-height) >= 44`, depois de `get catalog_path` com filtro sem resultado (o link existe em `.catalog__empty`)
-- [ ] O teste novo falha com `min-height: 24px` e com a declaração ausente (0), conferido a mão antes do commit
-- [ ] Comentários de CSS novos sem sintaxe de media query e sem chaves
-- [ ] Nenhum arquivo fora do `Where` editado
-- [ ] Gate full passa
+- [x] `.catalog__empty-reset` resolve `min-height: 44px` em `catalog.css`
+- [x] `catalog_status_line_test.rb`: `Stylesheet.resolved("catalog__empty-reset")` com `to_pixels(min-height) >= 44`, depois de `get catalog_path` com filtro sem resultado (o link existe em `.catalog__empty`)
+- [x] O teste novo falha com `min-height: 24px` e com a declaração ausente (0), conferido a mão antes do commit
+- [x] Comentários de CSS novos sem sintaxe de media query e sem chaves
+- [x] Nenhum arquivo fora do `Where` editado
+- [x] Gate full passa
 
 **Tests**: unit (folha), integration
 **Gate**: full
@@ -917,11 +917,11 @@ Revisão de a11y, achado 5 (`show.html.erb:33` e `:84`): com o `<details>` abert
 
 **Done when**:
 
-- [ ] Para cada seletor de `[GRID_BADGE, DETAIL_BADGE]`: `position` é `absolute`, `top` e `right` são `var(--space-2)`
-- [ ] Para os mesmos seletores: `bottom` e `left` não são declarados (`assert_nil`)
-- [ ] O teste falha se `top`/`right` forem removidos e se forem trocados por `bottom`/`left`, conferido a mão antes do commit
-- [ ] Nenhum arquivo de código nem outro teste editado
-- [ ] Gate full passa
+- [x] Para cada seletor de `[GRID_BADGE, DETAIL_BADGE]`: `position` é `absolute`, `top` e `right` são `var(--space-2)`
+- [x] Para os mesmos seletores: `bottom` e `left` não são declarados (`assert_nil`)
+- [x] O teste falha se `top`/`right` forem removidos e se forem trocados por `bottom`/`left`, conferido a mão antes do commit
+- [x] Nenhum arquivo de código nem outro teste editado
+- [x] Gate full passa
 
 **Tests**: unit (folha)
 **Gate**: full
