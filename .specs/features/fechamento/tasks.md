@@ -433,11 +433,11 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] O total do OP01 vem de fonte aberta nesta task (fixture ou `docker compose exec -T app bin/rails runner` de leitura); o roteiro usa esse número, ou marca o exemplo como "ilustrativo" em todas as linhas onde aparece (98, 107, 115, 155 na numeração atual); `grep -n "48" roteiro-7-1.md` sem ocorrência não justificada
-- [ ] Os textos de tela do roteiro são copiados de `app/views/progress/*.erb` (frases como "N de M variantes", "N% concluído", "N de M parallels"), e `grep` de cada frase na view é registrado; formato "15 / 48" que a view não produz sai
-- [ ] O roteiro diz que abaixo de 1024px o filtro do catálogo é um `<details>` fechado por padrão e o usuário o abre com um toque em "Filtros"; a frase "não colapsado" some; conferido no HTML/ERB do catálogo e no CSS do breakpoint de 1024px
-- [ ] Nenhum passo do roteiro afirma comportamento que o código não tem
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] O total do OP01 vem de fonte aberta nesta task (fixture ou `docker compose exec -T app bin/rails runner` de leitura); o roteiro usa esse número, ou marca o exemplo como "ilustrativo" em todas as linhas onde aparece (98, 107, 115, 155 na numeração atual); `grep -n "48" roteiro-7-1.md` sem ocorrência não justificada
+- [x] Os textos de tela do roteiro são copiados de `app/views/progress/*.erb` (frases como "N de M variantes", "N% concluído", "N de M parallels"), e `grep` de cada frase na view é registrado; formato "15 / 48" que a view não produz sai
+- [x] O roteiro diz que abaixo de 1024px o filtro do catálogo é um `<details>` fechado por padrão e o usuário o abre com um toque em "Filtros"; a frase "não colapsado" some; conferido no HTML/ERB do catálogo e no CSS do breakpoint de 1024px
+- [x] Nenhum passo do roteiro afirma comportamento que o código não tem
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full

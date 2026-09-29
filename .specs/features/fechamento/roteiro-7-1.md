@@ -51,9 +51,9 @@ Procedimento: abrir um set, encontrar as cartas e incrementar cada uma com quant
 #### **Exemplo: Set OP01**
 
 1. Procurar ou filtrar para **OP01**:
-   - Em celular (<1024px): tocar na seção de filtros (expansível por padrão acima da grade).
+   - Em celular (<1024px): tocar em "Filtros" (seção fechada acima da grade) para abrir.
    - Selecionar "Set" e escolher **OP01**.
-   - Toques para entrada do set: 2–3 (busca + seleção ou scroll + toque).
+   - Toques para entrada do set: 2–3 (toque para expandir + seleção ou scroll + toque).
 
 2. Para cada carta da caixa que saiu:
    - Tocar na carta (abre o detalhe com `.card-detail`).
@@ -69,7 +69,7 @@ Com 24 boosters de um set, a composição típica é:
 - 1–2 cartas rares (R): aparecem 1–2× cada.
 - 1 carta especial (SR, SEC, L, P, etc.): 1× cada (raríssima).
 
-Nem toda variante única será registrada — o roteiro quer demonstrar fluidez com um recorte realista (15 cartas distintas incrementadas múltiplas vezes).
+Nem toda variante única será registrada — o roteiro quer demonstrar fluidez com um recorte realista (15 variantes distintas incrementadas múltiplas vezes, de um total de 121).
 
 **Toques esperados para registrar ~15 variantes distintas (com múltiplos incrementos cada):**
 - 2 toques: filtrar OP01.
@@ -95,7 +95,7 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 1. Tocar em **"Minha pasta"** (barra inferior em celular, coluna lateral em desktop).
 2. Procurar **OP01** na lista de sets. Se a lista for longa e OP01 não estiver visível, scroll (1 toque adicional, mas ainda dentro de 3).
-3. Ler a resposta na linha do set: **"N de M variantes"** (ex.: "15 de 48 variantes, 31% concluído").
+3. Ler a resposta na linha do set: o número de variantes possuídas e o total (ex.: "15 de 121 do set base, 12% concluído").
 
 **Toques concretos:**
 - Toque 1: "Minha pasta".
@@ -104,8 +104,8 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 **Resposta esperada (exemplo realista):**
 ```
-OP01 · 15 / 48 · 31% concluído
-       ·  2 de 14 parallels
+15 de 121 do set base, 12% concluído
+ 2 de 33 parallels
 ```
 
 (A barra de progresso visual é complementar, não substitui o número.)
@@ -148,9 +148,9 @@ Marque **SIM** ou **NÃO** (e descreva o bloqueio se NÃO):
 ## Notas Técnicas (Uso Interno)
 
 - **Catálogo público:** Anônimo consegue procurar, filtrar e ver detalhe sem entrar. O botão **"+"** aparece apenas após `authenticated?` ser verdadeiro (concern `Authentication`).
-- **Filtro de set:** Classe `catalog__filters`, entrada via `sets[]` na query string. Em celular, expansível por padrão (não colapsado).
+- **Filtro de set:** Elemento `<details>` com classe `catalog__filters`, entrada via `sets[]` na query string. Em celular, fechado por padrão; usuário abre tocando "Filtros".
 - **Página de detalhe:** Rota `/cards/:id` (onde `:id` é `card_number`). Variantes aparecem em `.card-detail__variants` com controles de posse por variante.
 - **Ownership (posse):** Partial `collection_items/_ownership.html.erb`. Botões "+"/`-` submetem formulário via Turbo (Req. 7.5 / COL-10). Resposta é HTML renderizado, substitui o contêiner via `turbo_stream.update`.
-- **Minha pasta:** Rota `/progress`. Exibe sets com posse em `.progress__list`. Cada set é `<li class="progress-set">` com métrica na `.progress-set__owned-line` (ex.: "15 de 48").
-- **Contagem de cópias vs. variantes:** "15 de 48 variantes" = 15 variantes distintas possuídas de 48 variantes base do set OP01 (Req. 9.1 / AD-003).
+- **Minha pasta:** Rota `/progress`. Exibe sets com posse em `.progress__list`. Cada set é `<li class="progress-set">` com métrica na `.progress-set__owned-line` (ex.: "15 de 121 do set base").
+- **Contagem de cópias vs. variantes:** "15 de 121 do set base" = 15 variantes distintas possuídas de 121 variantes base do set OP01 (Req. 9.1 / AD-003).
 - **Sem planilha:** O roteiro **não depende** do import CSV (Fase 5). Cada incremento é entrada manual.
