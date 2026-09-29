@@ -118,6 +118,14 @@ class ProgressAddCardsTest < ActiveSupport::TestCase
     assert_equal 8.0, px(add["border-radius"])
   end
 
+  test "na coluna lateral o botão ocupa a largura e diz só Adicionar cartas" do
+    add = desktop("progress__add-cards")
+    assert_equal "stretch", add["align-self"]
+    assert_equal "center", add["justify-content"]
+    assert_equal "none", desktop("progress__add-cards-suffix")["display"]
+    assert_nil base("progress__add-cards-suffix")["display"], "abaixo de 1024px o rótulo é o do canvas móvel, com 'à pasta'"
+  end
+
   test "divisor de 1px entre a navegação e a coluna lateral" do
     assert_equal "1px solid var(--border)", desktop("site-header__aside")["border-top"]
   end

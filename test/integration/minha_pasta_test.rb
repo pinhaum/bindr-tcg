@@ -378,6 +378,17 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
 
   # --- T11: NAV-39 link "Adicionar cartas" via sidebar_actions ---
 
+  test "o sufixo à pasta do botão é um span próprio, que a coluna lateral esconde" do
+    sign_in(@user)
+    get progress_path
+
+    # O sufixo está numa tag span, descendente direto do link
+    assert_select ".progress__add-cards > span.progress__add-cards-suffix", count: 1
+    assert_select ".progress__add-cards > span.progress__add-cards-suffix" do |elements|
+      assert_match /\s+à pasta/, elements.first.text
+    end
+  end
+
   test "exibe link Adicionar cartas à pasta apontando para o catálogo" do
     sign_in(@user)
     get progress_path

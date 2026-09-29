@@ -2330,10 +2330,15 @@ summary:focus-visible,
    */
   .progress__add-cards {
     position: static;
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
+    align-self: stretch;
     padding: 0 var(--space-3);
     border: 0;
   }
+
+  /* D:27: na coluna lateral o rótulo é "Adicionar cartas" (CNF-32). */
+  .progress__add-cards-suffix { display: none; }
 
   /* T11 — layout em duas colunas (CNF-30): sets à esquerda (cresce), ações à direita (420px) */
   .progress__content {

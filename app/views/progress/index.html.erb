@@ -9,7 +9,7 @@
   `catalog_path`, a mesma que o link já usava antes desta task.
 %>
 <% content_for :sidebar_actions do %>
-  <%= link_to "Adicionar cartas à pasta", catalog_path, class: "progress__add-cards" %>
+  <%= link_to catalog_path, class: "progress__add-cards" do %>Adicionar cartas<span class="progress__add-cards-suffix"> à pasta</span><% end %>
 <% end %>
 
 <%#

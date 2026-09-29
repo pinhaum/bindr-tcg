@@ -95,13 +95,13 @@ checklists T3–T11 mostraram itens fora do artboard sem CNF nem Out of Scope, o
 reprovaria o CNF-35. Cada um volta como correção.
 
 ```
-T11 → T13 → T14 → T15 → T16
+T11 → T13 → T14 → T15 → T16 → T17
 ```
 
 ### Phase 6: Fechamento
 
 ```
-T16 → T12
+T17 → T12
 ```
 
 ---
@@ -619,11 +619,44 @@ Medido em Chromium depois da T15: `/progress` com 618px de `scrollWidth` em 390p
 
 ---
 
+### T17: "Adicionar cartas" na coluna lateral como o artboard
+
+**What**: Em ≥1024px o botão da coluna lateral diz "Adicionar cartas", numa linha, com a largura da coluna; abaixo de 1024px continua "Adicionar cartas à pasta". Um único link no DOM.
+**Where**: `app/views/progress/index.html.erb`, `app/assets/stylesheets/catalog.css`, `test/design/progress_add_cards_test.rb`, `test/integration/minha_pasta_test.rb`
+**Depends on**: T16
+**Reuses**: o `@media (min-width: 64rem)` da T11
+**Requirement**: CNF-32
+
+Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar cartas à pasta" quebrava em duas linhas num botão estreito; o artboard desenha "Adicionar cartas" em accent com a largura da coluna.
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Checklist do artboard**:
+
+- [x] 1280px: "Adicionar cartas" numa linha, accent, 44px, largura da coluna lateral (D:27)
+- [x] 390px: "Adicionar cartas à pasta" fixo acima da barra inferior (Mobile:115)
+
+**Done when**:
+
+- [x] O link tem o sufixo " à pasta" num `span` próprio, escondido só em ≥1024px
+- [x] Em ≥1024px o link resolve `align-self: stretch` e texto centrado
+- [x] Os testes que exigem o texto "Adicionar cartas à pasta" continuam valendo abaixo de 1024px
+- [x] Gate full passa
+
+**Tests**: unit (folha), integration
+**Gate**: full
+**Commit**: `fix(conformidade): botão de adicionar cartas na coluna lateral como o canvas`
+
+---
+
 ### T12: Captura conferida contra o artboard e fechamento
 
 **What**: Capturas das três telas em 390px e 1280px, com e sem sessão, comparadas com o artboard item a item das checklists T3–T11; rastreabilidade, `.context/tasks.md` §6.7, gate build e aprovação do dono.
 **Where**: `.specs/features/conformidade/canvas-conformance.md` (novo), `.specs/features/conformidade/spec.md`, `.specs/features/conformidade/tasks.md`, `.context/tasks.md`, `.specs/STATE.md`
-**Depends on**: T16
+**Depends on**: T17
 **Reuses**: `spec/visual/capture.cjs`; o formato do `canvas-conformance.md` da `navegacao`
 **Requirement**: CNF-34, CNF-35
 
@@ -682,6 +715,7 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T14 | imagem e linha da variante do detalhe | ✅ |
 | T15 | linha de set, chips de ordem, uma ação | ✅ |
 | T16 | duas trilhas de grade | ✅ |
+| T17 | um rótulo e uma regra | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -698,11 +732,12 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T9 | T8 | Phase 3: `T8 → T9` | ✅ |
 | T10 | T1, T9 | Phase 4: `T9 → T10`, `T1 → T10` | ✅ |
 | T11 | T10 | Phase 4: `T10 → T11` | ✅ |
-| T12 | T16 | Phase 6: `T16 → T12` | ✅ |
+| T12 | T17 | Phase 6: `T17 → T12` | ✅ |
 | T13 | T11 | Phase 5: `T11 → T13` | ✅ |
 | T14 | T13 | Phase 5: `T13 → T14` | ✅ |
 | T15 | T14 | Phase 5: `T14 → T15` | ✅ |
 | T16 | T15 | Phase 5: `T15 → T16` | ✅ |
+| T17 | T16 | Phase 5: `T16 → T17` | ✅ |
 
 ## Test Co-location Validation
 
@@ -724,3 +759,4 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T14 | folha, views | integration, unit (folha) | integration, unit (folha) | ✅ |
 | T15 | folha, view | integration, unit (folha) | integration, unit (folha) | ✅ |
 | T16 | folha | unit (folha) | unit (folha) | ✅ |
+| T17 | view, folha | unit (folha), integration | unit (folha), integration | ✅ |
