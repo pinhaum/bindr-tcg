@@ -13,7 +13,6 @@ Pré-requisitos: Docker e Docker Compose. Nada mais — Ruby e PostgreSQL rodam
 dentro dos containers.
 
 ```bash
-cp .env.example .env
 docker compose up
 ```
 
@@ -21,18 +20,73 @@ A aplicação fica em <http://localhost:3000>. A primeira subida constrói a ima
 e cria o banco; as seguintes só aplicam migrações pendentes, porque o container
 roda `db:prepare`, que é idempotente.
 
+**A primeira subida entrega o catálogo vazio.** Para carregá-lo com o catálogo
+real, rode o próximo passo.
+
 Para parar: `docker compose down`. Para descartar também o banco:
 `docker compose down -v`.
 
-## Testes e verificações
+### Configuração local (opcional)
+
+O arquivo `.env.example` tem defaults que funcionam localmente sem personalização.
+Se precisar mudar credenciais ou nomes do banco, copie o arquivo e edite:
 
 ```bash
-docker compose exec app bin/rails test    # suíte completa
-docker compose exec app bin/rubocop       # rubocop-rails-omakase
-docker compose exec app bin/brakeman      # análise de segurança
+cp .env.example .env
 ```
 
-A verificação da fixture de ingestão roda offline, sem Docker e sem Ruby:
+Então `docker compose up` vai usar os valores de `.env`.
+
+## Ingestão do catálogo
+
+A revisão do catálogo é fixada em `config/ingestion.yml` e é imutável — referência
+móvel (`main`, `HEAD`, `latest`) é rejeitada na carga. Isso evita que mudanças
+upstream na fonte entrem silenciosamente na ingestão.
+
+```bash
+docker compose exec app bin/rails ingestion:import
+```
+
+A saída mostra a revisão, status (`succeeded` ou `failed`), contagem de cartas
+criadas/atualizadas/falhadas e o total de registros no banco:
+
+```
+revisão: 5669eab51096629faf90dbf0dc903128cff80a98
+status: succeeded
+criados: 4933 | atualizados: 0 | falhados: 0
+cartas: 1234 | variantes: 4933 | sets: 10
+```
+
+Se a fonte não estiver disponível, o processo aborta antes de escrever no banco,
+sem deixar registros parciais. Para reprocessar o payload já salvo em disco (útil
+offline):
+
+```bash
+REUSE_PAYLOAD=1 docker compose exec app bin/rails ingestion:import
+```
+
+## Testes e verificações
+
+Os três gates de verificação local:
+
+```bash
+# quick: testes de modelos e queries
+docker compose exec app bin/rails test test/models test/queries
+
+# full: suíte completa de testes + lint
+docker compose exec app bin/rails test && docker compose exec app bin/rubocop
+
+# build: construir a imagem de produção
+docker compose build
+```
+
+Análise de segurança:
+
+```bash
+docker compose exec app bin/brakeman
+```
+
+Verificação da fixture de ingestão (roda offline, sem Docker e sem Ruby):
 
 ```bash
 python3 spec/verify_fixture.py
