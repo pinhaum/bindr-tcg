@@ -110,9 +110,10 @@ desenha, para ver de relance o que tenho sem controles espalhados por cada carta
 3. IF o usuário não tiver sessão ou a quantidade for zero THEN the system SHALL NOT renderizar o selo no tile. <!-- CNF-03 -->
 4. WHEN a carta tiver uma única variante THEN the system SHALL exibir no tile a raridade dessa variante ao lado do código; WHEN tiver mais de uma THEN the system SHALL exibir "N impressões" no lugar da raridade. <!-- CNF-04 -->
 5. The system SHALL exibir a linha de status como uma frase única "N cartas", acrescida de " · M filtros ativos" (ou "1 filtro ativo") quando houver filtro, contando o total do resultado e não o da página. <!-- CNF-05 -->
-6. WHILE houver filtro ativo, the system SHALL exibir na linha de status o botão "Limpar filtros", bordado, com altura mínima de 44px, que leva ao catálogo sem filtros e preserva `sort` e `dir`. <!-- CNF-06 -->
+6. WHILE houver filtro ativo E ao menos um resultado, the system SHALL exibir na linha de status o botão "Limpar filtros", bordado, com altura mínima de 44px, que leva ao catálogo sem filtros e preserva `sort` e `dir` (decisão T17). <!-- CNF-06 -->
+41. WHEN o filtro ativo não retornar resultado THEN the system SHALL exibir "Limpar filtros" no estado vazio (`.catalog__empty`), com altura mínima de 44px, e nenhum link na linha de status (`.catalog__status`). <!-- CNF-41 -->
 7. WHILE o usuário não tiver sessão, the system SHALL exibir uma única vez, na linha de status, o convite "Entrar para registrar posse" apontando para a página de entrada, e nenhum convite nos tiles. <!-- CNF-07 -->
-8. WHILE a largura da viewport for de 1024px ou mais, the system SHALL exibir a linha de status na mesma linha do campo de busca, com "Limpar filtros" à direita, e alinhar a borda esquerda da busca à borda esquerda da grade (mesmo recuo resolvido em `.catalog__head` e `.catalog__body`). <!-- CNF-08 -->
+8. WHILE a largura da viewport for de 1024px ou mais, the system SHALL exibir a linha de status na mesma linha do campo de busca, com "Limpar filtros" à direita, e alinhar a borda esquerda da busca à borda esquerda da grade (mesmo recuo resolvido em `.catalog__head` e `.catalog__body`); o campo de busca SHALL ter 480px (`30rem`) de largura, como em `Desktop-Catalogo.dc.html:69`. <!-- CNF-08 -->
 9. The system SHALL rotular o campo de busca "Buscar por nome ou card_number" e usar um código de carta (ex.: "OP01-024") como placeholder. <!-- CNF-09 -->
 10. The system SHALL NOT exibir no catálogo o total de cópias da coleção ("Sua coleção: N cópias"). <!-- CNF-10 -->
 11. The system SHALL ordenar os chips de cor como Red, Green, Blue, Purple, Black, Yellow, os de raridade como C, UC, R, SR, SEC, L seguidos dos demais em ordem alfabética, e exibir o tipo com inicial maiúscula, sem alterar o valor enviado na URL. <!-- CNF-11 -->
@@ -200,7 +201,7 @@ feature, com a imagem da comparação de cada tela.
 
 ## Edge Cases
 
-- IF a carta não tiver imagem THEN the system SHALL exibir o placeholder do Req. 2.3 na miniatura, na imagem do `<details>` e na coluna de 320px, na mesma medida da imagem. <!-- CNF-36 -->
+- IF a carta não tiver imagem THEN the system SHALL exibir o placeholder do Req. 2.3 na miniatura, na imagem do `<details>` e na coluna de 320px, na mesma medida da imagem: 155×217px na miniatura (`Mobile-Carta.dc.html:24`) e 320px de largura por 448px de altura na coluna (`Desktop-Carta.dc.html:32-33`). <!-- CNF-36 -->
 - IF a variante não tiver ilustrador THEN the system SHALL omitir a legenda "Ilustração". <!-- CNF-37 -->
 - WHEN a coleção do usuário estiver vazia THEN the system SHALL listar todos os sets por código, com "Recentes" ainda marcado como ordem atual. <!-- CNF-38 -->
 - WHEN a carta tiver mais de uma cor THEN the system SHALL exibir um chip por cor no cabeçalho do detalhe. <!-- CNF-39 -->
@@ -213,28 +214,28 @@ feature, com a imagem da comparação de cada tela.
 | Requirement ID | Story | Origem | Task | Status |
 |---|---|---|---|---|
 | CNF-01 | P1: Catálogo | Req. 7.5, 13.22 | T3 | Implemented |
-| CNF-02 | P1: Catálogo | Req. 13.22, 12.6 | T3 | Implemented |
+| CNF-02 | P1: Catálogo | Req. 13.22, 12.6 | T3, T19 | Implemented |
 | CNF-03 | P1: Catálogo | Req. 13.22, 6.3 | T3 | Implemented |
-| CNF-04 | P1: Catálogo | Req. 13.24 (D6) | T3, T13 | Implemented |
+| CNF-04 | P1: Catálogo | Req. 13.24 (D6) | T3, T13, T19 | Implemented |
 | CNF-05 | P1: Catálogo | Req. 13.26, 13.12 | T4 | Implemented |
-| CNF-06 | P1: Catálogo | Req. 13.26, 3.6 | T4 | Implemented |
+| CNF-06 | P1: Catálogo | Req. 13.26, 3.6 | T4, T21 | Implemented |
 | CNF-07 | P1: Catálogo | Req. 13.23 (D5) | T4 | Implemented |
-| CNF-08 | P1: Catálogo | Req. 13.26, 13.18 (NAV-47) | T4 | Implemented |
+| CNF-08 | P1: Catálogo | Req. 13.26, 13.18 (NAV-47) | T4, T20, T21 | Implemented |
 | CNF-09 | P1: Catálogo | Req. 13.27 | T4, T13 | Implemented |
 | CNF-10 | P1: Catálogo | Req. 13.28 | T4 | Implemented |
 | CNF-11 | P1: Catálogo | Req. 13.29 | T2 | Implemented |
-| CNF-12 | P1: Catálogo | Req. 13.25 (D7), 2.5 | T5, T16 | Implemented |
+| CNF-12 | P1: Catálogo | Req. 13.25 (D7), 2.5 | T5, T16, T18 | Implemented |
 | CNF-13 | P1: Catálogo | Req. 13.21 | T5, T13 | Implemented |
-| CNF-14 | P1: Detalhe | Req. 13.30 (D8), 5.1 | T6 | Implemented |
+| CNF-14 | P1: Detalhe | Req. 13.30 (D8), 5.1 | T6, T22 | Implemented |
 | CNF-15 | P1: Detalhe | Req. 13.19 | T6, T14 | Implemented |
-| CNF-16 | P1: Detalhe | Req. 13.35 | T6 | Implemented |
-| CNF-17 | P1: Detalhe | Req. 13.31, 5.1, 5.5 | T7 | Implemented |
-| CNF-18 | P1: Detalhe | Req. 13.32, 5.4 | T7 | Implemented |
+| CNF-16 | P1: Detalhe | Req. 13.35 | T6, T19, T22 | Implemented |
+| CNF-17 | P1: Detalhe | Req. 13.31, 5.1, 5.5 | T7, T21 | Implemented |
+| CNF-18 | P1: Detalhe | Req. 13.32, 5.4 | T7, T20 | Implemented |
 | CNF-19 | P1: Detalhe | Req. 13.33 | T8 | Implemented |
 | CNF-20 | P1: Detalhe | Req. 13.33, 5.2 (D9, NAV-49) | T8, T14 | Implemented |
 | CNF-21 | P1: Detalhe | Req. 13.33 (D10), 7.2, 7.4 | T8, T14 | Implemented |
 | CNF-22 | P1: Detalhe | Req. 7.5 | T8 | Implemented |
-| CNF-23 | P1: Detalhe | Req. 13.34 | T9 | Implemented |
+| CNF-23 | P1: Detalhe | Req. 13.34 | T9, T20 | Implemented |
 | CNF-24 | P1: Detalhe | Req. 13.21 | T9 | Implemented |
 | CNF-25 | P1: Pasta | Req. 13.36, 9.3 | T10, T15, T16 | Implemented |
 | CNF-26 | P1: Pasta | Req. 13.36, 9.2, 9.6 | T10, T15 | Implemented |
@@ -247,13 +248,14 @@ feature, com a imagem da comparação de cada tela.
 | CNF-33 | P1: Pasta | Req. 13.21 | T11, T16 | Implemented |
 | CNF-34 | P1: Captura | Req. 13.21 (AD-016) | T12 | Implemented (aprovação do dono pendente) |
 | CNF-35 | P1: Captura | Req. 13.21 (AD-016) | T12 | Implemented (aprovação do dono pendente) |
-| CNF-36 | Edge case | Req. 2.3 | T6 | Implemented |
+| CNF-36 | Edge case | Req. 2.3 | T6, T21 | Implemented |
 | CNF-37 | Edge case | Req. 13.35 | T6 | Implemented |
 | CNF-38 | Edge case | Req. 9.7 | T1 | Implemented |
 | CNF-39 | Edge case | Req. 13.31 | T7 | Implemented |
 | CNF-40 | Edge case | Req. 13.29, `rarity` como texto | T2 | Implemented |
+| CNF-41 | P1: Catálogo | Req. 13.26, 3.6 (decisão T17) | T17, T21 | Implemented |
 
-**Coverage:** 40 total, 40 mapped to tasks (T1–T17); T13–T17 são as correções da conferência com o canvas de 2026-09-28.
+**Coverage:** 41 total, 41 mapped to tasks (T1–T22); T13–T17 são as correções da conferência com o canvas de 2026-09-28; T18–T22 são as correções do ciclo 1.
 
 ---
 

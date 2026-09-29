@@ -8,7 +8,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 ---
 
-**Spec**: `.specs/features/conformidade/spec.md` (CNF-01..CNF-40)
+**Spec**: `.specs/features/conformidade/spec.md` (CNF-01..CNF-41)
 **Design**: inline (sem `design.md`: a feature muda apresentação e uma ordenação de leitura; nenhum padrão novo)
 **Status**: Draft
 
@@ -688,7 +688,7 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 
 - [x] Capturas de catálogo, detalhe e pasta, anônimo e com sessão, em 390px e 1280px, lado a lado com o artboard em `tmp/comparacao/` (CNF-34)
 - [x] `canvas-conformance.md` com uma tabela por tela: cada item das checklists T3–T11 com resultado (conforme / CNF que justifica / Out of Scope) e nenhum item sem os três (CNF-35)
-- [x] Traceability da spec com CNF-01..40 apontando para as tasks
+- [x] Traceability da spec com CNF-01..41 apontando para as tasks
 - [x] §6.7 do `.context/tasks.md` marcada
 - [x] Gate build passa
 - [ ] O dono comparou as capturas com os artboards e aprovou
@@ -794,7 +794,7 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 **Where**: `.specs/features/conformidade/spec.md`
 **Depends on**: T17
 **Reuses**: `canvas-conformance.md`; os artboards de `.specs/features/navegacao/canvas/` (`Desktop-Catalogo.dc.html`, `Main.dc.html`, `Mobile-Carta.dc.html`, `Desktop-Carta.dc.html`); `validation.md` (CNF-17, CNF-36, CNF-08)
-**Requirement**: CNF-06, CNF-08, CNF-17, CNF-36
+**Requirement**: CNF-06, CNF-41, CNF-08, CNF-17, CNF-36
 
 Só a spec muda; nenhum teste ou código. Regra de decisão: cada emenda usa o valor que o artboard desenha, citando o arquivo e a linha. **Onde o artboard não desenha, o texto não é inventado**: a task devolve `blocked` com a pergunta ao orquestrador e registra o item como DECISÃO-DO-DONO. Itens:
 
@@ -809,12 +809,12 @@ Só a spec muda; nenhum teste ou código. Regra de decisão: cada emenda usa o v
 
 **Done when**:
 
-- [ ] CNF-06 emendado para casar com o canvas, ou a task devolveu `blocked` com a pergunta
-- [ ] CNF-08 traz a largura da busca com a referência do artboard
-- [ ] CNF-17 e CNF-36 trazem a medida do artboard, ou a task lista o que ficou em aberto por omissão do canvas
-- [ ] A Traceability e o "Coverage" da spec continuam coerentes (T18–T22 acrescentadas às linhas dos CNF corrigidos)
-- [ ] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_spec.py .specs/features/conformidade/spec.md` sai com 0
-- [ ] Gate full passa
+- [x] CNF-06 emendado para casar com o canvas, ou a task devolveu `blocked` com a pergunta
+- [x] CNF-08 traz a largura da busca com a referência do artboard
+- [x] CNF-17 e CNF-36 trazem a medida do artboard, ou a task lista o que ficou em aberto por omissão do canvas
+- [x] A Traceability e o "Coverage" da spec continuam coerentes (T18–T22 acrescentadas às linhas dos CNF corrigidos)
+- [x] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_spec.py .specs/features/conformidade/spec.md` sai com 0
+- [x] Gate full passa
 
 **Tests**: none (só documento; a matriz não exige teste para `spec.md`)
 **Gate**: full
