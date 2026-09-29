@@ -211,6 +211,18 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Limpar filtros", count: 1
   end
 
+  # --- CNF-41: "Limpar filtros" do estado vazio com altura mínima de 44px ---
+
+  test "'Limpar filtros' no estado vazio resolve min-height ≥ 44px (CNF-41)" do
+    get catalog_path(colors: [ "Purple" ])
+
+    assert_response :success
+    assert_select ".catalog__empty a.catalog__empty-reset", text: "Limpar filtros"
+
+    rule = Stylesheet.resolved("catalog__empty-reset")
+    assert_operator Stylesheet.to_pixels(rule.fetch("min-height")), :>=, 44
+  end
+
   # --- NAV-36: Com paginação, contagem é o total, não o tamanho da página ---
 
   test "a contagem mostra o total de cartas, não o tamanho da página" do

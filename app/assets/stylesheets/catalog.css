@@ -362,7 +362,7 @@ body {
 .catalog__empty-reset {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 44px;
 }
 
 /* Detalhe da carta (Req. 5). Mesmas regras de 360px da grade. */
