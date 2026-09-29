@@ -95,7 +95,7 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 1. Tocar em **"Minha pasta"** (barra inferior em celular, coluna lateral em desktop).
 2. Procurar **OP01** na lista de sets. Se a lista for longa e OP01 não estiver visível, scroll (1 toque adicional, mas ainda dentro de 3).
-3. Ler a resposta na linha do set: o número de variantes possuídas e o total (ex.: "17 / 154 · 11%").
+3. Ler a resposta na linha do set: o número de variantes possuídas e o total (ex.: "17 / 154 · 12%").
 
 **Toques concretos:**
 - Toque 1: "Minha pasta".
@@ -104,7 +104,7 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 **Resposta esperada (exemplo ilustrativo):**
 ```
-17 / 154 · 11%
+17 / 154 · 12%
 15 de 121 do set base · 2 de 33 parallels
 ```
 

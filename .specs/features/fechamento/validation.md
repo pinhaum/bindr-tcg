@@ -195,3 +195,15 @@ Feature de documentos: o sensor mede se as **verificações dos Done-when** dete
 **Issues found**: Fix 1 (`verificar-resolvidos.md:21,27`, linha 628 → 627) bloqueia; Fix 2 (exemplo do roteiro) e os três Nits não bloqueiam sozinhos.
 
 **Next steps**: corrigir o Fix 1 (troca de dois números, ou citar a seção), opcionalmente o exemplo do roteiro; o supervisor marca `tasks.md:279` após o PASS. Como este foi o 3º ciclo, **escalar ao usuário**: aceitar a correção de dois números sem um 4º ciclo completo, ou reexecutar o Verifier só sobre o Fix 1.
+
+---
+
+## Aceite do dono (2026-09-29, sem 4º ciclo)
+
+O dono aceitou a `fechamento` sem reexecutar o Verifier, já no limite de 3 ciclos. Estado das pendências do ciclo 3:
+
+- **Fix 1** (T18): `verificar-resolvidos.md:21` passou a citar `.context/design.md:627`; o `grep` confirma o marcador em 527, 537 e 627.
+- **Fix 2**: o exemplo do roteiro (`roteiro-7-1.md:98,107`) estava com `11%`, que não sai da fórmula. O percentual é `base_owned_variants / base_size` (`app/queries/set_progress_query.rb:142`), então 15/121 = 12,4%, e a view com `precision: 0` mostra `12%`. Corrigido para `17 / 154 · 12%`.
+- **Nits**: ficam como estão, não bloqueiam.
+
+**Veredito final**: ✅ aceita pelo dono. FEC-13 e FEC-20 passam para ✅ Verified por aceite, não por um novo ciclo do Verifier.
