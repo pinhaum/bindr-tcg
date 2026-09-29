@@ -534,11 +534,11 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] Conferido em `.context/tasks.md` que P4 foi decidida na 0.3 (e P1 na 0.1); a linha P4 da tabela "Resolvidas" cita "task 0.3" no lugar de "task 0.1"; `grep -n "^| P4" .context/requirements.md | grep -c "task 0.3"` → 1
-- [ ] O texto "Itens que **bloqueiam** o início da implementação" é reescrito: P8 não bloqueia (os chips de cor ficam neutros enquanto isso, conferido em `design.md` §9); `grep -n "bloqueiam" .context/requirements.md` não devolve mais a frase antiga do Rastreamento
-- [ ] A linha P8 termina com `(emenda de 2026-09-29)`; `grep -n "^| P8" .context/requirements.md | grep -c "emenda de 2026-09-29"` → 1
-- [ ] Só a seção de rastreamento muda: nenhum requisito numerado (Req. 1..13) é alterado; `grep -c "⚠️ VERIFICAR" .context/requirements.md` continua 0
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] Conferido em `.context/tasks.md` que P4 foi decidida na 0.3 (e P1 na 0.1); a linha P4 da tabela "Resolvidas" cita "task 0.3" no lugar de "task 0.1"; `grep -n "^| P4" .context/requirements.md | grep -c "task 0.3"` → 1
+- [x] O texto "Itens que **bloqueiam** o início da implementação" é reescrito: P8 não bloqueia (os chips de cor ficam neutros enquanto isso, conferido em `design.md` §9); `grep -n "bloqueiam" .context/requirements.md` não devolve mais a frase antiga do Rastreamento
+- [x] A linha P8 termina com `(emenda de 2026-09-29)`; `grep -n "^| P8" .context/requirements.md | grep -c "emenda de 2026-09-29"` → 1
+- [x] Só a seção de rastreamento muda: nenhum requisito numerado (Req. 1..13) é alterado; `grep -c "⚠️ VERIFICAR" .context/requirements.md` continua 0
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full
