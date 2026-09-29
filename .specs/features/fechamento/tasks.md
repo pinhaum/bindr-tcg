@@ -460,11 +460,11 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] A evidência 1 diz que as 4933 variantes com `image_url_large` NULL vêm do banco de dev (`CardVariant.count` ou `psql`, registrado no commit) e que a fixture não traz o campo; a frase que atribui a contagem à fixture some
-- [ ] A linha `design.md §9 (P8 como aberta)` da tabela "Corrigidos por AD" cita uma AD real (aberta em `STATE.md`) ou sai da tabela e vira nota abaixo dela, sem a coluna AD; nenhuma célula fica com "(contexto)"
-- [ ] `grep -n "(contexto)" decisoes-do-dono.md` sai vazio
-- [ ] O texto do Req. 5.1 e a pergunta ao dono não mudam de sentido
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] A evidência 1 diz que as 4933 variantes com `image_url_large` NULL vêm do banco de dev (`CardVariant.count` ou `psql`, registrado no commit) e que a fixture não traz o campo; a frase que atribui a contagem à fixture some
+- [x] A linha `design.md §9 (P8 como aberta)` da tabela "Corrigidos por AD" cita uma AD real (aberta em `STATE.md`) ou sai da tabela e vira nota abaixo dela, sem a coluna AD; nenhuma célula fica com "(contexto)"
+- [x] `grep -n "(contexto)" decisoes-do-dono.md` sai vazio
+- [x] O texto do Req. 5.1 e a pergunta ao dono não mudam de sentido
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full
