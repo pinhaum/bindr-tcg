@@ -253,13 +253,20 @@ não ficar preso à aplicação e poder migrar de uma planilha existente.
 
 1. O sistema DEVE exportar a coleção em CSV contendo, no mínimo: `card_number`,
    identificador da variante, nome da carta e quantidade.
-2. O sistema DEVE importar um CSV no mesmo formato do export.
+2. O sistema DEVE importar um CSV no mesmo formato do export. QUANDO uma linha
+   referenciar uma variante já possuída ENTÃO o sistema DEVE **substituir** a
+   quantidade existente pelo valor do arquivo, sem somar (AD-006).
 3. QUANDO uma linha do CSV referenciar uma variante inexistente ENTÃO o sistema
    DEVE reportar essa linha como erro e continuar importando as demais.
 4. AO final da importação o sistema DEVE apresentar um resumo com linhas
    importadas, atualizadas e rejeitadas, com o motivo de cada rejeição.
 5. O sistema DEVE exibir uma pré-visualização e exigir confirmação antes de
-   gravar alterações vindas de CSV.
+   gravar alterações vindas de CSV. Entre a pré-visualização e a confirmação, o
+   arquivo DEVE viver numa tabela `collection_imports` no banco, dona do usuário
+   que o enviou, com expiração (AD-007).
+6. O sistema DEVE rejeitar o arquivo inteiro se ele contiver mais de 10.000
+   linhas de dado (sem contar o cabeçalho), com mensagem em português que diz o
+   limite (AD-008).
 
 ---
 

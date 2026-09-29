@@ -99,14 +99,14 @@ T5 → T6
 
 **Done when**:
 
-- [ ] "Subir o projeto" abre com `docker compose up` como o único comando; `cp .env.example .env` aparece como opcional e só para personalizar (FEC-01). Conferido: `docker-compose.yml` usa `${VAR:-default}` e não tem `env_file`
-- [ ] O README diz que a primeira subida entrega o catálogo vazio e mostra, na ordem, `docker compose exec app bin/rails ingestion:import` (FEC-02, FEC-21). Conferido: `db/seeds.rb` só tem comentário e a tarefa existe em `lib/tasks/ingestion.rake`
-- [ ] Seção "Ingestão do catálogo": a revisão vem de `config/ingestion.yml`, é imutável e referência móvel é rejeitada na carga (AD-001); o hash não é copiado; o payload bruto vai para `storage/ingestion/` (ignorado pelo git); `REUSE_PAYLOAD=1` reprocessa sem rede; a saída resume revisão, status, criados/atualizados/falhados e sai com código 1 se o status não for `succeeded` (FEC-03)
-- [ ] Fonte indisponível: o README diz que o processo aborta antes de escrever no banco (Req. 1.8) e cita `REUSE_PAYLOAD=1` quando já houver payload (FEC-22)
-- [ ] "Testes e verificações" lista quick, full e build do `CLAUDE.md`, mais `bin/brakeman` e `python3 spec/verify_fixture.py`, cada um com comando exato (FEC-04)
-- [ ] O contorno de `docker-credential-desktop.exe` fica como está (FEC-23)
-- [ ] Todo comando, arquivo e tarefa citados existem: `ls`/`grep` de cada um registrado no commit; um que não exista sai do README (FEC-05)
-- [ ] Gate full passa e a contagem de runs não muda
+- [x] "Subir o projeto" abre com `docker compose up` como o único comando; `cp .env.example .env` aparece como opcional e só para personalizar (FEC-01). Conferido: `docker-compose.yml` usa `${VAR:-default}` e não tem `env_file`
+- [x] O README diz que a primeira subida entrega o catálogo vazio e mostra, na ordem, `docker compose exec app bin/rails ingestion:import` (FEC-02, FEC-21). Conferido: `db/seeds.rb` só tem comentário e a tarefa existe em `lib/tasks/ingestion.rake`
+- [x] Seção "Ingestão do catálogo": a revisão vem de `config/ingestion.yml`, é imutável e referência móvel é rejeitada na carga (AD-001); o hash não é copiado; o payload bruto vai para `storage/ingestion/` (ignorado pelo git); `REUSE_PAYLOAD=1` reprocessa sem rede; a saída resume revisão, status, criados/atualizados/falhados e sai com código 1 se o status não for `succeeded` (FEC-03)
+- [x] Fonte indisponível: o README diz que o processo aborta antes de escrever no banco (Req. 1.8) e cita `REUSE_PAYLOAD=1` quando já houver payload (FEC-22)
+- [x] "Testes e verificações" lista quick, full e build do `CLAUDE.md`, mais `bin/brakeman` e `python3 spec/verify_fixture.py`, cada um com comando exato (FEC-04)
+- [x] O contorno de `docker-credential-desktop.exe` fica como está (FEC-23)
+- [x] Todo comando, arquivo e tarefa citados existem: `ls`/`grep` de cada um registrado no commit; um que não exista sai do README (FEC-05)
+- [x] Gate full passa e a contagem de runs não muda
 
 **Tests**: none
 **Gate**: full
@@ -129,13 +129,13 @@ T5 → T6
 
 **Done when**:
 
-- [ ] Req. 10 acrescenta critérios ou notas, cada um com `(AD-NNN)` na linha: linha cuja variante já é possuída substitui a quantidade, sem somar (AD-006); arquivo entre pré-visualização e confirmação vive em staging dono do usuário, com expiração (AD-007); mais de 10.000 linhas de dado, sem contar o cabeçalho, recusa o arquivo inteiro, com mensagem em português que diz o limite (AD-008)
-- [ ] Antes de escrever cada nota: nome da tabela de staging, mensagem e constante do limite conferidos por `grep` em `app/`, `db/structure.sql` e `test/`; o que não existir não entra
-- [ ] Conferidas e, se coerentes, deixadas como estão (FEC-08): AD-001 (fonte, Req. 1), AD-003 (Req. 9), AD-005, AD-011/012/013/015/016 (Req. 11.7, 12, 13). Uma incoerente é corrigida se a AD for inequívoca, senão devolve `blocked` com o requisito
-- [ ] AD-009, AD-010, AD-014, AD-017 e AD-018 não entram em `requirements.md` (são método ou teste; vão para `design.md` na T3 ou não entram)
-- [ ] "Rastreamento de pendências" segue coerente: P8 aberto; nenhuma pendência que a execução já resolveu fica como aberta
-- [ ] `grep -c "⚠️ VERIFICAR" .context/requirements.md` continua 0; `grep -c "AD-00[678]"` ≥ 3
-- [ ] Gate full passa e a contagem de runs não muda
+- [x] Req. 10 acrescenta critérios ou notas, cada um com `(AD-NNN)` na linha: linha cuja variante já é possuída substitui a quantidade, sem somar (AD-006); arquivo entre pré-visualização e confirmação vive em staging dono do usuário, com expiração (AD-007); mais de 10.000 linhas de dado, sem contar o cabeçalho, recusa o arquivo inteiro, com mensagem em português que diz o limite (AD-008)
+- [x] Antes de escrever cada nota: nome da tabela de staging, mensagem e constante do limite conferidos por `grep` em `app/`, `db/structure.sql` e `test/`; o que não existir não entra
+- [x] Conferidas e, se coerentes, deixadas como estão (FEC-08): AD-001 (fonte, Req. 1), AD-003 (Req. 9), AD-005, AD-011/012/013/015/016 (Req. 11.7, 12, 13). Uma incoerente é corrigida se a AD for inequívoca, senão devolve `blocked` com o requisito
+- [x] AD-009, AD-010, AD-014, AD-017 e AD-018 não entram em `requirements.md` (são método ou teste; vão para `design.md` na T3 ou não entram)
+- [x] "Rastreamento de pendências" segue coerente: P8 aberto; nenhuma pendência que a execução já resolveu fica como aberta
+- [x] `grep -c "⚠️ VERIFICAR" .context/requirements.md` continua 0; `grep -c "AD-00[678]"` ≥ 3
+- [x] Gate full passa e a contagem de runs não muda
 
 **Tests**: none
 **Gate**: full
