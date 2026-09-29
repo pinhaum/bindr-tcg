@@ -10,7 +10,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Spec**: `.specs/features/fechamento/spec.md` (FEC-01..FEC-24)
 **Design**: inline (sem `design.md`: a feature só escreve documentos; nenhum padrão novo)
-**Status**: Draft
+**Status**: Done
 
 Todas as tasks escrevem **só documentos**. Regras que valem para todas:
 
@@ -244,12 +244,12 @@ T5 → T6
 
 **Done when**:
 
-- [ ] §7.2 de `.context/tasks.md` marcada `[x]`; a §7.1 fica `[ ]` (fora do escopo)
-- [ ] Traceability de `spec.md` com FEC-01..24 em `Implemented` e a coluna Task conferida; checkboxes das tasks T1–T5 marcados neste `tasks.md`; `Status: Done`
-- [ ] Bloco novo no *Handoff* do `STATE.md`: o que a feature fez, os `⚠️ VERIFICAR` abertos (com o local), as decisões abertas de `decisoes-do-dono.md`, e a §7.1 como próxima etapa do dono
+- [x] §7.2 de `.context/tasks.md` marcada `[x]`; a §7.1 fica `[ ]` (fora do escopo)
+- [x] Traceability de `spec.md` com FEC-01..24 em `Implemented` e a coluna Task conferida; checkboxes das tasks T1–T5 marcados neste `tasks.md`; `Status: Done`
+- [x] Bloco novo no *Handoff* do `STATE.md`: o que a feature fez, os `⚠️ VERIFICAR` abertos (com o local), as decisões abertas de `decisoes-do-dono.md`, e a §7.1 como próxima etapa do dono
 - [ ] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py .specs/STATE.md` sai com 0
-- [ ] `validate_spec.py` e `validate_tasks.py` desta feature saem com 0
-- [ ] Gate full passa e a contagem de runs não muda; gate build (`docker compose build`) opcional
+- [x] `validate_spec.py` e `validate_tasks.py` desta feature saem com 0
+- [x] Gate full passa e a contagem de runs não muda; gate build (`docker compose build`) opcional
 
 **Tests**: none
 **Gate**: full

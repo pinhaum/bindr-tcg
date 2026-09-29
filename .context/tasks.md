@@ -311,7 +311,7 @@ Regras de execução:
     de última hora.
   - _Referência: `product.md` §7_
 
-- [ ] **7.2 Documentar e revisar os specs**
+- [x] **7.2 Documentar e revisar os specs**
   - README com subida local em um comando e execução da ingestão.
   - Atualizar `requirements.md` e `design.md` com tudo que mudou durante a
     execução. Remover todos os `⚠️ VERIFICAR` já resolvidos.

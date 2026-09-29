@@ -191,30 +191,30 @@ fechados, para retomar sem reler o histórico.
 
 | Requirement ID | Story | Origem | Task | Status |
 |---|---|---|---|---|
-| FEC-01 | P1: README | Req. 11.6, `docker-compose.yml` | T1 | Pending |
-| FEC-02 | P1: README | Req. 11.6, `db/seeds.rb`, `lib/tasks/ingestion.rake` | T1 | Pending |
-| FEC-03 | P1: README | Req. 1.1, 1.9, AD-001 | T1 | Pending |
-| FEC-04 | P1: README | `CLAUDE.md` (gates), Req. 11.5 | T1 | Pending |
-| FEC-05 | P1: README | §7.2 | T1 | Pending |
-| FEC-06 | P1: Documentos | §7.2, AD-005 | T2 | Pending |
-| FEC-07 | P1: Documentos | §7.2, AD-005 | T3 | Pending |
-| FEC-08 | P1: Documentos | §7.2 | T2, T3 | Pending |
-| FEC-09 | P1: Documentos | Req. 10, AD-006, AD-007, AD-008 | T2 | Pending |
-| FEC-10 | P1: Documentos | `design.md` §3, §6, §8, AD-007, AD-009, AD-010, AD-017, AD-018 | T3 | Pending |
-| FEC-11 | P1: Documentos | `design.md` §9, AD-012, P8 | T3 | Pending |
-| FEC-12 | P1: VERIFICAR | §7.2 | T4 | Pending |
-| FEC-13 | P1: VERIFICAR | §7.2 | T4 | Pending |
-| FEC-14 | P1: VERIFICAR | §7.2 | T4 | Pending |
-| FEC-15 | P1: VERIFICAR | §7.2 | T4 | Pending |
-| FEC-16 | P2: Decisão do dono | `CLAUDE.md` (método) | T5 | Pending |
-| FEC-17 | P2: Decisão do dono | `CLAUDE.md` (método) | T5 | Pending |
-| FEC-18 | P2: Decisão do dono | Req. 5.1, `design.md` §7 | T5 | Pending |
-| FEC-19 | P2: Fechamento | §7.2 | T6 | Pending |
-| FEC-20 | P2: Fechamento | §7.2 | T6 | Pending |
-| FEC-21 | Edge case | Req. 11.6 | T1 | Pending |
-| FEC-22 | Edge case | Req. 1.8 | T1 | Pending |
-| FEC-23 | Edge case | README existente | T1 | Pending |
-| FEC-24 | Edge case | método (`Where`) | T1..T6 | Pending |
+| FEC-01 | P1: README | Req. 11.6, `docker-compose.yml` | T1 | Done |
+| FEC-02 | P1: README | Req. 11.6, `db/seeds.rb`, `lib/tasks/ingestion.rake` | T1 | Done |
+| FEC-03 | P1: README | Req. 1.1, 1.9, AD-001 | T1 | Done |
+| FEC-04 | P1: README | `CLAUDE.md` (gates), Req. 11.5 | T1 | Done |
+| FEC-05 | P1: README | §7.2 | T1 | Done |
+| FEC-06 | P1: Documentos | §7.2, AD-005 | T2 | Done |
+| FEC-07 | P1: Documentos | §7.2, AD-005 | T3 | Done |
+| FEC-08 | P1: Documentos | §7.2 | T2, T3 | Done |
+| FEC-09 | P1: Documentos | Req. 10, AD-006, AD-007, AD-008 | T2 | Done |
+| FEC-10 | P1: Documentos | `design.md` §3, §6, §8, AD-007, AD-009, AD-010, AD-017, AD-018 | T3 | Done |
+| FEC-11 | P1: Documentos | `design.md` §9, AD-012, P8 | T3 | Done |
+| FEC-12 | P1: VERIFICAR | §7.2 | T4 | Done |
+| FEC-13 | P1: VERIFICAR | §7.2 | T4 | Done |
+| FEC-14 | P1: VERIFICAR | §7.2 | T4 | Done |
+| FEC-15 | P1: VERIFICAR | §7.2 | T4 | Done |
+| FEC-16 | P2: Decisão do dono | `CLAUDE.md` (método) | T5 | Done |
+| FEC-17 | P2: Decisão do dono | `CLAUDE.md` (método) | T5 | Done |
+| FEC-18 | P2: Decisão do dono | Req. 5.1, `design.md` §7 | T5 | Done |
+| FEC-19 | P2: Fechamento | §7.2 | T6 | Done |
+| FEC-20 | P2: Fechamento | §7.2 | T6 | Done |
+| FEC-21 | Edge case | Req. 11.6 | T1 | Done |
+| FEC-22 | Edge case | Req. 1.8 | T1 | Done |
+| FEC-23 | Edge case | README existente | T1 | Done |
+| FEC-24 | Edge case | método (`Where`) | T1..T6 | Done |
 
 **Coverage:** 24 total, 24 mapped to tasks (T1–T6), 0 unmapped.
 
