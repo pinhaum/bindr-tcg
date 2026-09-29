@@ -496,16 +496,16 @@ T15 → T12
 
 **Checklist do artboard**:
 
-- [ ] Linha do código numa linha só: código mono 13px e raridade 13px com `gap: 8px`; o código nunca quebra no hífen; "N impressões" não quebra (Main:65-66, D:144)
-- [ ] Rótulo "Buscar por nome ou card_number" 13/18, `--ink-muted`, peso regular (Main:24, D:68)
-- [ ] Em 1280px o h1 "Catálogo" fica no topo do conteúdo, só com o padding de 24px (D:62-64)
+- [x] Linha do código numa linha só: código mono 13px e raridade 13px com `gap: 8px`; o código nunca quebra no hífen; "N impressões" não quebra (Main:65-66, D:144)
+- [x] Rótulo "Buscar por nome ou card_number" 13/18, `--ink-muted`, peso regular (Main:24, D:68)
+- [x] Em 1280px o h1 "Catálogo" fica no topo do conteúdo, só com o padding de 24px (D:62-64)
 
 **Done when**:
 
-- [ ] `.card-tile__number` (ou o elemento do código) resolve `white-space: nowrap`; a linha resolve `display: flex`, `gap: 8px`, sem quebra entre os dois, e com o texto que excede em reticências
-- [ ] O rótulo da busca resolve tamanho e altura da legenda (`--caption-size`/`--caption-line-height`), cor `var(--ink-muted)` e peso regular
-- [ ] Em ≥1024px nenhuma regra do cabeçalho do catálogo cria margem ou linha de grade vazia acima do h1 (o teste prova a regra que causava o vão, achada na folha resolvida)
-- [ ] Gate full passa
+- [x] `.card-tile__number` (ou o elemento do código) resolve `white-space: nowrap`; a linha resolve `display: flex`, `gap: 8px`, sem quebra entre os dois, e com o texto que excede em reticências
+- [x] O rótulo da busca resolve tamanho e altura da legenda (`--caption-size`/`--caption-line-height`), cor `var(--ink-muted)` e peso regular
+- [x] Em ≥1024px nenhuma regra do cabeçalho do catálogo cria margem ou linha de grade vazia acima do h1 (o teste prova a regra que causava o vão, achada na folha resolvida)
+- [x] Gate full passa
 
 **Tests**: unit (folha), integration
 **Gate**: full

@@ -146,4 +146,28 @@ class CatalogTileTest < ActionDispatch::IntegrationTest
     tile = tile_for(card)
     assert_equal "3 impressões", tile.at_css(".card-tile__rarity").text.strip
   end
+
+  # T13 (conformidade) — Main:65-66: código e raridade (ou "N impressões") são
+  # irmãos na mesma linha do tile.
+  test "código e raridade estão na mesma linha do tile" do
+    card = create_card(number: "OP01-ct13a", name: "Usopp")
+    create_variant(card, "OP01-ct13a", rarity: "SR")
+
+    get catalog_path
+
+    line = tile_for(card).at_css(".card-tile__number-line")
+    assert_equal [ "OP01-ct13a", "SR" ], line.css("span").map { |node| node.text.strip }
+  end
+
+  test "com mais de uma variante a linha traz o código e 'N impressões'" do
+    card = create_card(number: "OP01-ct13b", name: "Brook")
+    create_variant(card, "OP01-ct13b")
+    create_variant(card, "OP01-ct13b_p1")
+    create_variant(card, "OP01-ct13b_p2")
+
+    get catalog_path
+
+    line = tile_for(card).at_css(".card-tile__number-line")
+    assert_equal [ "OP01-ct13b", "3 impressões" ], line.css("span").map { |node| node.text.strip }
+  end
 end

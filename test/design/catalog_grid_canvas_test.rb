@@ -73,4 +73,64 @@ class CatalogGridCanvasTest < ActiveSupport::TestCase
     assert_equal '""', divider["content"]
     assert_equal "1px solid var(--border)", divider["border-top"]
   end
+
+  # T13 (conformidade) — linha do código do tile (Main:65-66, D:144), rótulo da
+  # busca (Main:24, D:68) e topo do catálogo em 1280px (D:62-64).
+  test "a linha do código é flex numa linha só, com gap de 8px (Main:65)" do
+    line = Stylesheet.resolved("card-tile__number-line")
+
+    assert_equal "flex", line["display"]
+    assert_equal "nowrap", line["flex-wrap"]
+    assert_equal "center", line["align-items"]
+    assert_equal 8.0, Stylesheet.to_pixels(line["gap"])
+  end
+
+  test "o código não quebra no hífen e continua no estilo code de 13px (Main:65)" do
+    assert_equal "nowrap", Stylesheet.resolved("card-tile__number")["white-space"]
+    assert Stylesheet.code_styled?("card-tile__number")
+    assert_equal 13.0, Stylesheet.to_pixels(Stylesheet.resolved("card-tile__number")["font-size"])
+  end
+
+  test "raridade e \"N impressões\" não quebram e o excesso vira reticências (Main:66)" do
+    rarity = Stylesheet.resolved("card-tile__rarity")
+
+    assert_equal "nowrap", rarity["white-space"]
+    assert_equal "hidden", rarity["overflow"]
+    assert_equal "ellipsis", rarity["text-overflow"]
+    assert_equal "0", rarity["min-width"], "sem min-width: 0 o flex item não encolhe e o texto vaza"
+    assert_equal 13.0, Stylesheet.to_pixels(rarity["font-size"])
+    assert_equal 18.0, Stylesheet.to_pixels(rarity["line-height"])
+    assert_equal "var(--ink-muted)", rarity["color"]
+  end
+
+  test "o rótulo da busca é legenda 13/18 em ink-muted e peso regular (Main:24)" do
+    label = Stylesheet.resolved("catalog__search-label")
+
+    assert_equal 13.0, Stylesheet.to_pixels(label["font-size"])
+    assert_equal 18.0, Stylesheet.to_pixels(label["line-height"])
+    assert_equal "var(--ink-muted)", label["color"]
+    assert_equal "var(--caption-weight)", label["font-weight"]
+    assert_equal "400", Stylesheet.read_root_tokens["--caption-weight"]
+  end
+
+  # Causa do vão: o cabeçalho cobre as linhas 1–3 e o grid divide a altura dele
+  # entre as linhas `auto`, então as duas linhas de flash vazias mediam ~80px.
+  test "em ≥1024px sem flash as duas linhas acima do cabeçalho do catálogo medem 0 (D:62-64)" do
+    rule = @wide_rules.find { |selector, _| selector == "body:has(> main.catalog):not(:has(.flash))" }
+
+    assert rule, "falta a regra que zera as linhas de flash quando não há flash"
+    assert_equal "0 0 auto 1fr", Stylesheet.declarations(rule[1]).to_h["grid-template-rows"]
+  end
+
+  test "em ≥1024px o título fica no topo do conteúdo só com o recuo de 24px (D:62-64)" do
+    head = Stylesheet.resolved("catalog__head", @wide_rules)
+    title = Stylesheet.resolved("catalog__title")
+
+    top, *_ = head["padding"].split
+    assert_equal 24.0, Stylesheet.to_pixels(top)
+    assert_nil head["margin"]
+    assert_nil head["margin-top"]
+    assert_equal "0", title["margin"].split.first, "margem acima do h1 somaria ao recuo"
+    assert_nil title["margin-top"]
+  end
 end

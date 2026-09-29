@@ -135,9 +135,10 @@ body {
 
 .catalog__search-label {
   flex-basis: 100%;
-  font-size: var(--body-strong-size);
-  line-height: var(--body-strong-line-height);
-  font-weight: var(--body-strong-weight);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  font-weight: var(--caption-weight);
+  color: var(--ink-muted);
 }
 
 .catalog__search input[type="search"] {
@@ -291,10 +292,12 @@ body {
 }
 .card-tile__number {
   color: var(--ink-muted);
+  white-space: nowrap; /* o código nunca quebra no hífen (Main:65) */
 }
 
 .card-tile__number-line {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-2);
 }
@@ -303,6 +306,10 @@ body {
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
   color: var(--ink-muted);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /*
@@ -2094,6 +2101,15 @@ summary:focus-visible,
   body:has(> main.catalog) {
     grid-template-rows: auto auto auto 1fr;
     min-height: 100vh;
+  }
+
+  /*
+   * O cabeçalho cobre as linhas 1–3 e o grid reparte a altura dele igualmente
+   * entre as linhas `auto`: as duas de flash, mesmo vazias, ficavam com ~80px
+   * e empurravam o título para baixo (D:62-64). Sem flash elas medem 0.
+   */
+  body:has(> main.catalog):not(:has(.flash)) {
+    grid-template-rows: 0 0 auto 1fr;
   }
 
   body:has(> main.catalog) > .site-header {
