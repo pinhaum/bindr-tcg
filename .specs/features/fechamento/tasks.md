@@ -379,10 +379,10 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] A frase é reescrita: os dois marcadores resolvidos saem de `design.md`, e o Req. 5.1 continua aberto (`verificar-resolvidos.md`, "Permanecem abertos", e `decisoes-do-dono.md`); `grep -n "confirmado fora de spec" .specs/STATE.md` sai vazio
-- [ ] Sensor: cada número do bloco (1350 runs, 0 falhas, RuboCop limpo, 10 mutações injetadas/10 mortas, contagem de tasks T1–T6) é comparado com o gate de `validation.md` ("1350 runs, 5656 assertions, 0 failures") e com `conformidade/validation.md`; a comparação fica no commit e número divergente é corrigido
-- [ ] Nenhum bloco anterior do Handoff é reescrito; só o de 2026-09-29
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] A frase é reescrita: os dois marcadores resolvidos saem de `design.md`, e o Req. 5.1 continua aberto (`verificar-resolvidos.md`, "Permanecem abertos", e `decisoes-do-dono.md`); `grep -n "confirmado fora de spec" .specs/STATE.md` sai vazio
+- [x] Sensor: cada número do bloco (1350 runs, 0 falhas, RuboCop limpo, 10 mutações injetadas/10 mortas, contagem de tasks T1–T6) é comparado com o gate de `validation.md` ("1350 runs, 5656 assertions, 0 failures") e com `conformidade/validation.md`; a comparação fica no commit e número divergente é corrigido
+- [x] Nenhum bloco anterior do Handoff é reescrito; só o de 2026-09-29
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full
