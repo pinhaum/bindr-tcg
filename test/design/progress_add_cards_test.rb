@@ -106,16 +106,16 @@ class ProgressAddCardsTest < ActiveSupport::TestCase
     assert_equal "var(--body-padding-bottom)", scroll_padding.call(DESKTOP_RULES)
   end
 
-  test "Adicionar cartas em 1024px ou mais: sai do fixo e vira o botão bordado da coluna lateral" do
-    add = desktop("progress__add-cards")
-    back = base("site-header__back")
+  # D:27 (Desktop-Pasta): na coluna lateral o botão segue em accent, raio 8,
+  # 44px; só sai do fixo. Não herda mais o desenho bordado de `.site-header__back`.
+  test "Adicionar cartas em 1024px ou mais: sai do fixo e segue em accent, 44px, raio 8, sem posição fixa" do
+    add = Stylesheet.resolved("progress__add-cards", BASE + DESKTOP_RULES)
 
     assert_equal "static", add["position"]
-    refute_equal "var(--accent)", add["background-color"]
-    %w[color border border-radius].each do |property|
-      assert_equal back[property], add[property], property
-    end
-    assert_operator px(base("progress__add-cards")["min-height"]), :>=, 44.0
+    assert_equal "var(--accent)", add["background-color"]
+    assert_equal "var(--on-accent)", add["color"]
+    assert_operator px(add["min-height"]), :>=, 44.0
+    assert_equal 8.0, px(add["border-radius"])
   end
 
   test "divisor de 1px entre a navegação e a coluna lateral" do

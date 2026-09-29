@@ -526,7 +526,10 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   # é o único mecanismo pelo qual a página cabe em 360px. Em elemento curto
   # (um código de set, um número) ele é legítimo — por isso a asserção mira os
   # blocos **largos**, os que carregam as frases: o item do set, as linhas de
-  # métrica, o nome e a lista.
+  # métrica, o nome e a lista. Exceção (T15, conformidade): o nome do set no
+  # artboard (Mobile:47) é `nowrap` **com** `overflow: hidden` e
+  # `text-overflow: ellipsis` — o excesso é cortado dentro do próprio link, que
+  # por isso não empurra a página para fora de 360px.
   BLOCOS_LARGOS = %w[
     .progress
     .progress__list
@@ -542,6 +545,7 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   test "nenhum bloco largo do progresso impede a quebra de linha" do
     infratoras = regras_do_bloco_de_progresso.filter_map do |seletor, corpo|
       next unless corpo.match?(/white-space\s*:\s*nowrap/i)
+      next if corpo.match?(/(?<![-\w])overflow\s*:\s*hidden/i) && corpo.match?(/text-overflow\s*:\s*ellipsis/i)
 
       alvos = BLOCOS_LARGOS.select { |bloco| seletor.include?(bloco) }
       "#{seletor.squish} { ... } atinge #{alvos.join(", ")}" if alvos.any?

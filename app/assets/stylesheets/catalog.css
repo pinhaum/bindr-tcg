@@ -1224,7 +1224,7 @@ summary:focus-visible,
 .progress__heading-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
   margin: 0 0 var(--space-2);
@@ -1235,24 +1235,19 @@ summary:focus-visible,
   margin: 0;
   padding: 0;
   display: flex;
-  gap: var(--space-3);
+  gap: var(--gap);
 }
 
-.progress__order-link {
-  display: inline-block;
-  min-height: 24px;
-  padding: var(--space-1) 0;
-  font-size: var(--body-size);
-  line-height: var(--body-line-height);
-  color: var(--ink-muted);
-  text-decoration: none;
-}
-
+/*
+ * T15 — os chips de ordem são `.catalog__chip` (44px, borda border-strong,
+ * CNF-29); aqui só o estado da ordem aplicada, marcada por `aria-current` e
+ * não por uma classe `--active` paralela: fundo accent como o chip ativo do
+ * catálogo.
+ */
 .progress__order-link[aria-current="page"] {
-  color: var(--ink);
-  font-weight: var(--nav-current-weight);
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: var(--body-strong-weight);
 }
 
 /*
@@ -1419,14 +1414,10 @@ summary:focus-visible,
  * T10 — o nome do set é o link para o catálogo (CNF-25) e assume a
  * tipografia `caption` muted do artboard (Mobile:46-47).
  *
- * O artboard mostra o nome truncado em reticências, mas `set_progress_plan_test.rb`
- * (AD-017, protegido) proíbe `white-space: nowrap` em todo bloco largo do
- * progresso — `.progress-set__catalog-link` está na lista — porque é a quebra
- * de linha que mantém a página sem scroll horizontal em 360px (Req. 2.5). As
- * duas exigências colidem para um nome comprido; a decisão desta task foi
- * priorizar Req. 2.5 e o teste protegido, e deixar o nome **quebrar** em vez
- * de truncar. `overflow-wrap: anywhere` é o mesmo mecanismo que
- * `.progress-set__name` já usava antes da T10.
+ * Uma linha só, truncada em reticências como no artboard: `nowrap` com
+ * `overflow: hidden` corta o excesso dentro do link (`min-width: 0`), então não
+ * há como estourar 360px (Req. 2.5) — `set_progress_plan_test.rb` reconhece
+ * essa combinação como a exceção ao `nowrap` em bloco largo.
  */
 .progress-set__catalog-link {
   display: block;
@@ -1435,7 +1426,10 @@ summary:focus-visible,
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
   color: var(--ink-muted);
-  overflow-wrap: anywhere;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /*
@@ -1488,11 +1482,23 @@ summary:focus-visible,
   gap: var(--space-1);
 }
 
+/*
+ * T15 — legenda única sob a barra (CNF-26, Req. 9.6): base e parallels na
+ * mesma linha de 13px muted, quebrando só se a frase não couber.
+ */
+.progress-set__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
+
 .progress-set__percent,
 .progress-set__parallels {
   margin: 0;
-  font-size: var(--body-size);
-  line-height: var(--body-line-height);
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
@@ -1503,13 +1509,10 @@ summary:focus-visible,
 .progress-set__total,
 .progress-set__percent-value,
 .progress-set__parallel-owned,
-.progress-set__parallel-total {
-  font-weight: var(--display-weight);
+.progress-set__parallel-total,
+.progress-set__percent-basis {
   font-variant-numeric: tabular-nums;
 }
-
-.progress-set__percent-basis,
-.progress-set__parallels-note { font-size: var(--caption-size); line-height: var(--caption-line-height); }
 
 /*
  * Percentual indisponível (PRG-10). O contorno é **reforço**, nunca o sinal:
@@ -2315,18 +2318,16 @@ summary:focus-visible,
     border-top: 1px solid var(--border);
   }
 
-  /* Na coluna lateral o link é o mesmo botão bordado de `.site-header__back`. */
+  /*
+   * Na coluna lateral o link segue accent (D:27), a única ação em accent da
+   * tela; só sai do fixo e da largura total. Fundo, cor, raio e 44px vêm da
+   * regra base.
+   */
   .progress__add-cards {
     position: static;
     display: inline-flex;
     padding: 0 var(--space-3);
-    background-color: var(--transparent);
-    color: var(--ink);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    font-size: var(--caption-size);
-    line-height: var(--caption-line-height);
-    font-weight: var(--caption-weight);
+    border: 0;
   }
 
   /* T11 — layout em duas colunas (CNF-30): sets à esquerda (cresce), ações à direita (420px) */

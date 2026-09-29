@@ -111,21 +111,19 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     assert_select "#progress_set_OPp5a .progress-set__total", text: "7"
   end
 
-  # Os rótulos não são ornamento: em leitura linear de leitor de tela, "3 7 60 1"
-  # não diz o que é cada número. Esta asserção trava que cada número chega
-  # acompanhado da palavra que o identifica.
-  test "os números são identificáveis em leitura linear, sem depender de layout" do
+  # CNF-25/CNF-26 (Mobile:49): a linha é "possuídas / total · percentual" e a
+  # legenda única diz de que é cada número da base e dos parallels.
+  test "a linha do set traz 'N / M · P%' e a legenda única traz base e parallels" do
     sign_in(@luffy)
 
     get progress_path
 
-    texto = texto_do_set(@set_a)
-    assert_match(/4 de 7 variantes/, texto,
-                 "possuídas e total precisam vir numa frase, não como números soltos")
-    assert_match(/60% concluído/, texto,
-                 "o percentual sozinho não diz do que é o percentual")
-    assert_match(/1 de 2 parallels/, texto,
-                 "a contagem de parallels precisa se identificar como tal")
+    linha = css_select("#progress_set_OPp5a .progress-set__owned-line").first.text.squish
+    assert_equal "4 / 7 · 60%", linha
+
+    legenda = css_select("#progress_set_OPp5a .progress-set__legend").first.text.squish
+    assert_equal "3 de 5 do set base · 1 de 2 parallels", legenda
+    assert_select "#progress_set_OPp5a .progress-set__legend", 1
   end
 
   # PRG-04 exercido pela apresentação: `a_par.first` tem 2 cópias e conta 1.
@@ -163,7 +161,8 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     assert_select "#progress_set_OPp5b .progress-set__owned-line .progress-set__percent-value", text: /0%/
     # 0 possuídas de 2 impressões, e o denominador do percentual é 4 — os dois
     # números convivem na mesma linha sem se confundirem.
-    assert_match(/0 de 2 variantes/, texto_do_set(@set_b))
+    assert_equal "0 / 2 · 0%",
+                 css_select("#progress_set_OPp5b .progress-set__owned-line").first.text.squish
     assert_match(/0 de 4 do set base/, texto_do_set(@set_b))
   end
 
@@ -199,8 +198,9 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
     assert_select "#progress_set_OPp5c .progress-set__percent-value", false,
                   "sem denominador não há percentual a renderizar, nem mesmo vazio"
-    assert_no_match(/concluído/, texto_do_set(@set_c),
-                    "sem denominador conhecido nada foi concluído")
+    assert_equal "1 / 2",
+                 css_select("#progress_set_OPp5c .progress-set__owned-line").first.text.squish,
+                 "sem denominador a linha mostra só 'N / M', sem percentual"
   end
 
   # A asserção que torna as duas anteriores discriminantes: um `0%` vazando

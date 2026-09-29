@@ -432,7 +432,7 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
     assert_match(/Romance Dawn/, nome, "nome do set deve estar no header")
 
     contagem = header.css(".progress-set__owned-line").text.squish
-    assert_match(/\d+ de \d+ variantes/, contagem, "contagem deve estar no header junto ao nome")
+    assert_match(/\A\d+ \/ \d+/, contagem, "contagem deve estar no header junto ao nome")
   end
 
   test "barra de progresso está abaixo da linha de nome e contagem" do

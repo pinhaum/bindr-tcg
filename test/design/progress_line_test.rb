@@ -50,17 +50,26 @@ class ProgressLineTest < ActiveSupport::TestCase
            "o código do set precisa do estilo code inteiro de §11.4"
   end
 
-  # O artboard mostra o nome truncado em reticências; `set_progress_plan_test.rb`
-  # (AD-017, protegido) proíbe `white-space: nowrap` em `.progress-set__catalog-link`
-  # por ser bloco largo do progresso (Req. 2.5, 360px sem scroll horizontal) — a
-  # decisão desta task foi priorizar o teste protegido e deixar o nome quebrar.
-  test "o nome do set (link) resolve caption muted, sem nowrap" do
-    nome = declarations(".progress-set__catalog-link")
+  # Mobile:47 — o nome numa linha só, truncado em reticências. `overflow: hidden`
+  # com `text-overflow: ellipsis` corta o excesso dentro do próprio link (que tem
+  # `min-width: 0`), então não há como estourar 360px (Req. 2.5).
+  test "o nome do set (link) resolve caption muted, numa linha com reticências e sem sublinhado" do
+    nome = Stylesheet.resolved("progress-set__catalog-link")
     assert_equal "var(--caption-size)", nome["font-size"]
     assert_equal "var(--caption-line-height)", nome["line-height"]
     assert_equal "var(--ink-muted)", nome["color"]
-    assert_nil nome["white-space"],
-               "nowrap num bloco largo do progresso impede a quebra exigida por Req. 2.5 (AD-017)"
+    assert_equal "nowrap", nome["white-space"]
+    assert_equal "hidden", nome["overflow"]
+    assert_equal "ellipsis", nome["text-overflow"]
+    assert_equal "none", nome["text-decoration"]
+    assert_equal "0", nome["min-width"]
+  end
+
+  test "a legenda de base e parallels é uma só, 13px muted" do
+    legenda = Stylesheet.resolved("progress-set__legend")
+    assert_equal "var(--caption-size)", legenda["font-size"]
+    assert_equal "var(--caption-line-height)", legenda["line-height"]
+    assert_equal "var(--ink-muted)", legenda["color"]
   end
 
   test "possuídas / total resolve caption muted, à direita e sem quebrar" do
@@ -90,5 +99,17 @@ class ProgressLineTest < ActiveSupport::TestCase
 
     ativo = declarations('.progress__order-link[aria-current="page"]')
     assert_not_nil ativo["font-weight"], "o chip ativo precisa se distinguir do inativo"
+  end
+
+  # CNF-29: o desenho do chip vem de `.catalog__chip` (44px, borda border-strong)
+  # e o da ordem aplicada leva o fundo do chip ativo do catálogo.
+  test "os chips de ordem têm 44px e a borda do chip do catálogo; o atual leva fundo accent" do
+    chip = Stylesheet.resolved("catalog__chip")
+    assert_equal 44.0, Stylesheet.to_pixels(chip["min-height"])
+    assert_equal "1px solid var(--border-strong)", chip["border"]
+
+    ativo = declarations('.progress__order-link[aria-current="page"]')
+    assert_equal "var(--accent)", ativo["background-color"]
+    assert_equal "var(--on-accent)", ativo["color"]
   end
 end

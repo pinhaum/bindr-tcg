@@ -565,20 +565,20 @@ T15 → T12
 
 **Checklist do artboard**:
 
-- [ ] Código mono 13 500 `--ink` e nome 13 `--ink-muted` numa linha só, com reticências, sem sublinhado nem caixa alta própria (Mobile:46-47)
-- [ ] À direita, "142 / 254" 13 muted (Mobile:49), com o percentual junto (CNF-26)
-- [ ] Barra abaixo (Mobile:51); parallels e o total base numa legenda única de 13px muted
-- [ ] Chips "Recentes" e "Por código" com o desenho de `.catalog__chip` (44px, borda border-strong; o atual com fundo accent) — o canvas não desenha, vale o design system (CNF-29)
-- [ ] 1280px: "Adicionar cartas" na coluna lateral com fundo accent e texto on-accent, raio 8, 44px (D:27) — é a única ação em accent da tela
+- [x] Código mono 13 500 `--ink` e nome 13 `--ink-muted` numa linha só, com reticências, sem sublinhado nem caixa alta própria (Mobile:46-47)
+- [x] À direita, "142 / 254" 13 muted (Mobile:49), com o percentual junto (CNF-26)
+- [x] Barra abaixo (Mobile:51); parallels e o total base numa legenda única de 13px muted
+- [x] Chips "Recentes" e "Por código" com o desenho de `.catalog__chip` (44px, borda border-strong; o atual com fundo accent) — o canvas não desenha, vale o design system (CNF-29)
+- [x] 1280px: "Adicionar cartas" na coluna lateral com fundo accent e texto on-accent, raio 8, 44px (D:27) — é a única ação em accent da tela
 
 **Done when**:
 
-- [ ] Em 390px o nome do set não quebra: resolve `white-space: nowrap`, `overflow: hidden`, `text-overflow: ellipsis`, cor `var(--ink-muted)`, tipografia de legenda e `text-decoration: none`; continua sendo o link para o catálogo filtrado (CNF-25)
-- [ ] A contagem visível da linha é "N / M · P%" (M = variantes do set, P = percentual do Req. 9.5) numa linha à direita; o set com `base_set_size: nil` mostra "N / M" e "Percentual indisponível" (NAV-38)
-- [ ] Base e parallels numa só legenda de 13px muted (ex.: "1 de 121 do set base · 0 de 33 parallels"), sem somar parallels ao percentual (Req. 9.6)
-- [ ] Os chips de ordem resolvem `min-height: 44px` e a borda do chip; o da ordem aplicada tem `aria-current` e o fundo do chip ativo
-- [ ] Em ≥1024px `.progress__add-cards` resolve fundo `var(--accent)`, cor `var(--on-accent)`, `min-height` ≥ 44px e continua sem `position: fixed`; `.site-header__aside` continua sem accent (o teste da tela de autenticação passa sem edição)
-- [ ] Gate full passa
+- [x] Em 390px o nome do set não quebra: resolve `white-space: nowrap`, `overflow: hidden`, `text-overflow: ellipsis`, cor `var(--ink-muted)`, tipografia de legenda e `text-decoration: none`; continua sendo o link para o catálogo filtrado (CNF-25)
+- [x] A contagem visível da linha é "N / M · P%" (M = variantes do set, P = percentual do Req. 9.5) numa linha à direita; o set com `base_set_size: nil` mostra "N / M" e "Percentual indisponível" (NAV-38)
+- [x] Base e parallels numa só legenda de 13px muted (ex.: "1 de 121 do set base · 0 de 33 parallels"), sem somar parallels ao percentual (Req. 9.6)
+- [x] Os chips de ordem resolvem `min-height: 44px` e a borda do chip; o da ordem aplicada tem `aria-current` e o fundo do chip ativo
+- [x] Em ≥1024px `.progress__add-cards` resolve fundo `var(--accent)`, cor `var(--on-accent)`, `min-height` ≥ 44px e continua sem `position: fixed`; `.site-header__aside` continua sem accent (o teste da tela de autenticação passa sem edição)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

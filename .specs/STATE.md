@@ -138,6 +138,14 @@
 - **Date**: 2026-09-27
 - **Status**: active
 
+### AD-018
+- **Decision**: O guarda de 360px do teste protegido `test/queries/set_progress_plan_test.rb` ("nenhum bloco largo do progresso impede a quebra de linha") passa a aceitar `white-space: nowrap` numa regra que também declara `overflow: hidden` e `text-overflow: ellipsis`. A edição veio na T15 da `conformidade`.
+- **Reason**: O artboard (`Mobile-Pasta.dc.html:47`) desenha o nome do set numa linha só, com reticências; sem isso, em 390px o nome quebrava uma palavra por linha. Texto cortado dentro do próprio elemento não empurra a página para fora de 360px, que é o que o guarda existe para impedir. Decisão do dono em 2026-09-28.
+- **Trade-off**: O guarda confere a combinação de declarações, não a largura renderizada: uma regra com as três declarações e um `min-width` grande passaria. O guarda de `catalog_grid_test.rb` (px acima de 360 fora de media query de largura mínima) continua cobrindo esse caso.
+- **Scope**: `conformidade` T15; `test/queries/set_progress_plan_test.rb`.
+- **Date**: 2026-09-28
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-09-27, tarde — este bloco vence os de baixo.** A

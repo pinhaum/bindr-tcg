@@ -219,7 +219,7 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
 
     assert_select "#progress_set_OPp7x .progress-set__percent-value", text: "50%"
     assert_select "#progress_set_OPp7x .progress-set__percent-basis",
-                  text: /\(3 de 6 do set base\)/,
+                  text: /\A3 de 6 do set base\z/,
                   message: "o numerador é o de `@zoro` (3), não a soma com o de `@nami` (4)"
   end
 
@@ -239,7 +239,7 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
     assert_equal({ owned: "0", total: "9", percent: "0%",
                    parallel_owned: "0", parallel_total: "3" }, numeros_exibidos)
     assert_select "#progress_set_OPp7x .progress-set__percent-basis",
-                  text: /\(0 de 6 do set base\)/
+                  text: /\A0 de 6 do set base\z/
   end
 
   # Trocar de sessão na mesma conexão troca o dono do cálculo. Um controller ou

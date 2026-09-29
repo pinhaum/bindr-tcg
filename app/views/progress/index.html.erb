@@ -124,11 +124,11 @@
     <ul class="progress__order" aria-label="Ordenar sets">
       <li>
         <%= nav_link_to "Recentes", progress_path(order: "recent"),
-                        current: @order == "recent", class: "progress__order-link" %>
+                        current: @order == "recent", class: "catalog__chip progress__order-link" %>
       </li>
       <li>
         <%= nav_link_to "Por código", progress_path(order: "code"),
-                        current: @order == "code", class: "progress__order-link" %>
+                        current: @order == "code", class: "catalog__chip progress__order-link" %>
       </li>
     </ul>
   </div>
@@ -203,11 +203,10 @@
           %>
           <p class="progress-set__owned-line">
             <span class="progress-set__owned"><%= row.owned_variants %></span>
-            de
+            /
             <span class="progress-set__total"><%= row.total_variants %></span>
-            <%= row.total_variants == 1 ? "variante" : "variantes" %>
             <% if row.completion_percent_known? %>
-              · <span class="progress-set__percent-value"><%= number_to_percentage(row.completion_percent, precision: 0) %></span> concluído
+              · <span class="progress-set__percent-value"><%= number_to_percentage(row.completion_percent, precision: 0) %></span>
             <% end %>
           </p>
         </div>
@@ -220,29 +219,28 @@
         <% end %>
 
         <%#
-          Legenda da linha (CNF-26): parallels sempre, e o aviso de
-          indisponibilidade quando não há denominador — os dois cabem na mesma
-          frase porque nenhum dos dois é o percentual em si (PRG-06, PRG-10).
+          Legenda única da linha (CNF-26, Req. 9.6): base e parallels na mesma
+          linha de 13px muted. Os dois `<p>` seguem irmãos — o percentual nunca
+          contém a contagem de parallels — e o aviso de indisponibilidade
+          (PRG-10) ocupa o lugar da base quando não há denominador.
         %>
-        <p class="progress-set__percent <%= "progress-set__percent--unknown" unless row.completion_percent_known? %>">
-          <% if row.completion_percent_known? %>
-            <span class="progress-set__percent-basis">
-              (<%= row.base_owned_variants %> de <%= row.base_size %> do set base)
-            </span>
-          <% else %>
-            Percentual indisponível: este set não informa o tamanho do set base.
-          <% end %>
-        </p>
+        <div class="progress-set__legend">
+          <p class="progress-set__percent <%= "progress-set__percent--unknown" unless row.completion_percent_known? %>">
+            <% if row.completion_percent_known? %>
+              <span class="progress-set__percent-basis"><%= row.base_owned_variants %> de <%= row.base_size %> do set base</span>
+            <% else %>
+              Percentual indisponível: este set não informa o tamanho do set base.
+            <% end %>
+          </p>
+          <span aria-hidden="true">·</span>
 
-        <p class="progress-set__parallels">
-          <span class="progress-set__parallel-owned"><%= row.parallel_owned_variants %></span>
-          de
-          <span class="progress-set__parallel-total"><%= row.parallel_variants %></span>
-          <%= row.parallel_variants == 1 ? "parallel" : "parallels" %>
-          <%# Req. 9.6: a métrica é separada, e o texto diz isso em vez de
-              deixar a separação a cargo do layout. %>
-          <span class="progress-set__parallels-note">(não entra no percentual)</span>
-        </p>
+          <p class="progress-set__parallels">
+            <span class="progress-set__parallel-owned"><%= row.parallel_owned_variants %></span>
+            de
+            <span class="progress-set__parallel-total"><%= row.parallel_variants %></span>
+            <%= row.parallel_variants == 1 ? "parallel" : "parallels" %>
+          </p>
+        </div>
       </li>
     <% end %>
     </ul>
