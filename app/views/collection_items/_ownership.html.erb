@@ -52,7 +52,7 @@
       <span class="ownership__unit<%= " ownership__unit--empty" if quantity.zero? %>"><%= quantity == 1 ? "cópia" : "cópias" %></span>
       <%#
         Nome da carta **e** código da variante dentro da região viva. Sem eles
-        o anúncio é "3 cópias", que numa grade de 24 tiles não identifica nada;
+        o anúncio é "3 cópias", que numa grade de 25 tiles não identifica nada;
         só com o código, quem não decora códigos de set fica na mesma. O
         `aria-label` do botão que originou a ação já dá os dois — a região que
         anuncia o resultado não pode dar menos (achado MEDIUM da revisão de
@@ -108,7 +108,7 @@
 
       <%#
         O rótulo acessível cita nome da carta e código da variante. Numa grade
-        com 24 tiles, ou num detalhe com seis impressões, "Adicionar" sozinho
+        com 25 tiles, ou num detalhe com seis impressões, "Adicionar" sozinho
         se repete idêntico e quem navega por lista de botões não distingue um
         do outro (SC 2.4.6 / 4.1.2). O texto visível continua curto porque o
         alvo precisa caber em 360px; o rótulo acessível carrega o contexto que

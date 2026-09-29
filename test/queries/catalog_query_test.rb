@@ -196,6 +196,10 @@ class CatalogQueryTest < ActiveSupport::TestCase
     assert_equal 4, resultado.records.size
   end
 
+  test "sem per_page, a página tem 25 cartas" do
+    assert_equal 25, CatalogQuery.new.call.per_page
+  end
+
   # --- Req. 4.8 e 4.6: total_count e filtros ativos normalizados ---
 
   test "total_count conta o conjunto filtrado inteiro, não a página" do

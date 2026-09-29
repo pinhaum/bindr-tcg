@@ -19,7 +19,7 @@
 # match **exato** de `card_number` é uma consulta separada cujo resultado é
 # prependido (Req. 3.4). Ver `#search_scope` e `#call`.
 class CatalogQuery
-  DEFAULT_PER_PAGE = 24
+  DEFAULT_PER_PAGE = 25
   MAX_PER_PAGE = 100
 
   # Colunas de array no Postgres. `&&` ("tem elemento em comum") é o que faz o

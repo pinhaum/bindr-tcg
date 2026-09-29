@@ -1,7 +1,7 @@
 # Quantidade possuída por variante, para a view, **sem uma consulta por tile**.
 #
 # O problema que este helper existe para resolver é N+1. A grade renderiza até
-# 24 cartas por página e o detalhe lista todas as impressões de uma carta;
+# 25 cartas por página e o detalhe lista todas as impressões de uma carta;
 # perguntar a posse variante a variante (`CollectionItem.find_by(...)` dentro
 # do loop) seria uma ida ao banco por controle renderizado. O controller
 # carrega **um** hash `card_variant_id => quantity` antes de renderizar
