@@ -88,10 +88,20 @@ T9 → T10 → T11
 T1 → T10
 ```
 
-### Phase 5: Fechamento
+### Phase 5: Correções da conferência
+
+As capturas de 2026-09-28 (`tmp/capturas/top-*.png`, `tmp/comparacao/`) contra as
+checklists T3–T11 mostraram itens fora do artboard sem CNF nem Out of Scope, o que
+reprovaria o CNF-35. Cada um volta como correção.
 
 ```
-T11 → T12
+T11 → T13 → T14 → T15
+```
+
+### Phase 6: Fechamento
+
+```
+T15 → T12
 ```
 
 ---
@@ -471,11 +481,116 @@ T11 → T12
 
 ---
 
+### T13: Catálogo — linha do código, rótulo da busca e topo em 1280px
+
+**What**: Código e raridade (ou "N impressões") numa linha só do tile, rótulo da busca no estilo de legenda e o título sem vão acima em ≥1024px.
+**Where**: `app/assets/stylesheets/catalog.css`, `app/views/catalog/_card_tile.html.erb`, `app/views/catalog/index.html.erb`, `test/design/catalog_grid_canvas_test.rb`, `test/integration/catalog_tile_test.rb`
+**Depends on**: T11
+**Reuses**: `Stylesheet.resolved`
+**Requirement**: CNF-04, CNF-09, CNF-13
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Checklist do artboard**:
+
+- [ ] Linha do código numa linha só: código mono 13px e raridade 13px com `gap: 8px`; o código nunca quebra no hífen; "N impressões" não quebra (Main:65-66, D:144)
+- [ ] Rótulo "Buscar por nome ou card_number" 13/18, `--ink-muted`, peso regular (Main:24, D:68)
+- [ ] Em 1280px o h1 "Catálogo" fica no topo do conteúdo, só com o padding de 24px (D:62-64)
+
+**Done when**:
+
+- [ ] `.card-tile__number` (ou o elemento do código) resolve `white-space: nowrap`; a linha resolve `display: flex`, `gap: 8px`, sem quebra entre os dois, e com o texto que excede em reticências
+- [ ] O rótulo da busca resolve tamanho e altura da legenda (`--caption-size`/`--caption-line-height`), cor `var(--ink-muted)` e peso regular
+- [ ] Em ≥1024px nenhuma regra do cabeçalho do catálogo cria margem ou linha de grade vazia acima do h1 (o teste prova a regra que causava o vão, achada na folha resolvida)
+- [ ] Gate full passa
+
+**Tests**: unit (folha), integration
+**Gate**: full
+**Commit**: `fix(conformidade): linha do código, rótulo da busca e topo do catálogo como o canvas`
+
+---
+
+### T14: Detalhe — imagem no topo e linha da variante do canvas
+
+**What**: Imagem principal alinhada ao topo em ≥1024px; linha da variante com "raridade · tipo" em legenda, "não tenho", `[n]` de 44px e, em ≥1024px, numa linha só.
+**Where**: `app/assets/stylesheets/catalog.css`, `app/views/catalog/show.html.erb`, `app/views/collection_items/_ownership.html.erb`, `test/integration/card_detail_variants_test.rb`, `test/design/card_detail_ownership_buttons_test.rb`, `test/design/card_detail_media_test.rb`
+**Depends on**: T13
+**Reuses**: `Stylesheet.resolved`
+**Requirement**: CNF-15, CNF-20, CNF-21
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Checklist do artboard**:
+
+- [ ] 1280px: imagem 320×448 alinhada ao topo da coluna, na altura do título (D:32-37)
+- [ ] "SR · arte base" / "SP CARD · alternativa" 13px, `--ink-muted`, peso regular (Mobile:57, :72)
+- [ ] "não tenho" 13px muted com zero cópias (Mobile:74)
+- [ ] `[n]` com 44px de largura e altura, sunken, border-strong, 15px 600 (Mobile:63)
+- [ ] 1280px: linha da variante em linha, `align-items: center`, `gap: 16px` — miniatura, identificação, quantidade e stepper lado a lado (D:69)
+
+**Done when**:
+
+- [ ] Em ≥1024px a coluna da imagem resolve `align-self: start` (ou o contêiner `align-items: start`), sem centralização vertical
+- [ ] A linha "raridade · tipo de arte" resolve a tipografia de legenda, `var(--ink-muted)` e peso regular
+- [ ] Com zero cópias o texto visível é exatamente "não tenho" (não "não tenho cópias"); com N cópias continua o selo com o número
+- [ ] `[n]` resolve `min-width: 44px` e `min-height: 44px`
+- [ ] Em ≥1024px a linha da variante resolve `display: flex` (ou grid numa linha), `align-items: center` e gap 16px; em <1024px continua empilhada
+- [ ] Marca de wishlist por variante continua na linha (Req. 8.1)
+- [ ] Gate full passa
+
+**Tests**: integration, unit (folha)
+**Gate**: full
+**Commit**: `fix(conformidade): imagem no topo e linha da variante como o canvas`
+
+---
+
+### T15: Pasta — linha de set, chips de ordem e "Adicionar cartas" em accent
+
+**What**: Linha de set no desenho do canvas (nome em legenda numa linha, "possuídas / total · N%" à direita, uma legenda só para base e parallels), chips de ordem no estilo dos chips do catálogo e "Adicionar cartas" em accent também na coluna lateral.
+**Where**: `app/assets/stylesheets/catalog.css`, `app/views/progress/index.html.erb`, `test/integration/progress_ui_test.rb`, `test/integration/minha_pasta_test.rb`, `test/design/progress_line_test.rb`, `test/design/progress_add_cards_test.rb`
+**Depends on**: T14
+**Reuses**: `.catalog__chip` e `nav_link_to`; `Stylesheet.resolved`
+**Requirement**: CNF-25, CNF-26, CNF-29, CNF-32
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Checklist do artboard**:
+
+- [ ] Código mono 13 500 `--ink` e nome 13 `--ink-muted` numa linha só, com reticências, sem sublinhado nem caixa alta própria (Mobile:46-47)
+- [ ] À direita, "142 / 254" 13 muted (Mobile:49), com o percentual junto (CNF-26)
+- [ ] Barra abaixo (Mobile:51); parallels e o total base numa legenda única de 13px muted
+- [ ] Chips "Recentes" e "Por código" com o desenho de `.catalog__chip` (44px, borda border-strong; o atual com fundo accent) — o canvas não desenha, vale o design system (CNF-29)
+- [ ] 1280px: "Adicionar cartas" na coluna lateral com fundo accent e texto on-accent, raio 8, 44px (D:27) — é a única ação em accent da tela
+
+**Done when**:
+
+- [ ] Em 390px o nome do set não quebra: resolve `white-space: nowrap`, `overflow: hidden`, `text-overflow: ellipsis`, cor `var(--ink-muted)`, tipografia de legenda e `text-decoration: none`; continua sendo o link para o catálogo filtrado (CNF-25)
+- [ ] A contagem visível da linha é "N / M · P%" (M = variantes do set, P = percentual do Req. 9.5) numa linha à direita; o set com `base_set_size: nil` mostra "N / M" e "Percentual indisponível" (NAV-38)
+- [ ] Base e parallels numa só legenda de 13px muted (ex.: "1 de 121 do set base · 0 de 33 parallels"), sem somar parallels ao percentual (Req. 9.6)
+- [ ] Os chips de ordem resolvem `min-height: 44px` e a borda do chip; o da ordem aplicada tem `aria-current` e o fundo do chip ativo
+- [ ] Em ≥1024px `.progress__add-cards` resolve fundo `var(--accent)`, cor `var(--on-accent)`, `min-height` ≥ 44px e continua sem `position: fixed`; `.site-header__aside` continua sem accent (o teste da tela de autenticação passa sem edição)
+- [ ] Gate full passa
+
+**Tests**: integration, unit (folha)
+**Gate**: full
+**Commit**: `fix(conformidade): linha de set, chips de ordem e ação em accent na pasta`
+
+---
+
 ### T12: Captura conferida contra o artboard e fechamento
 
 **What**: Capturas das três telas em 390px e 1280px, com e sem sessão, comparadas com o artboard item a item das checklists T3–T11; rastreabilidade, `.context/tasks.md` §6.7, gate build e aprovação do dono.
 **Where**: `.specs/features/conformidade/canvas-conformance.md` (novo), `.specs/features/conformidade/spec.md`, `.specs/features/conformidade/tasks.md`, `.context/tasks.md`, `.specs/STATE.md`
-**Depends on**: T11
+**Depends on**: T15
 **Reuses**: `spec/visual/capture.cjs`; o formato do `canvas-conformance.md` da `navegacao`
 **Requirement**: CNF-34, CNF-35
 
@@ -530,6 +645,9 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T10 | a linha de set e os chips de ordem | ✅ |
 | T11 | o layout da pasta e uma ação | ✅ |
 | T12 | conferência e documentação | ✅ |
+| T13 | uma linha do tile, um rótulo, o topo do catálogo | ✅ |
+| T14 | imagem e linha da variante do detalhe | ✅ |
+| T15 | linha de set, chips de ordem, uma ação | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -546,7 +664,10 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T9 | T8 | Phase 3: `T8 → T9` | ✅ |
 | T10 | T1, T9 | Phase 4: `T9 → T10`, `T1 → T10` | ✅ |
 | T11 | T10 | Phase 4: `T10 → T11` | ✅ |
-| T12 | T11 | Phase 5: `T11 → T12` | ✅ |
+| T12 | T15 | Phase 6: `T15 → T12` | ✅ |
+| T13 | T11 | Phase 5: `T11 → T13` | ✅ |
+| T14 | T13 | Phase 5: `T13 → T14` | ✅ |
+| T15 | T14 | Phase 5: `T14 → T15` | ✅ |
 
 ## Test Co-location Validation
 
@@ -564,3 +685,6 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T10 | view, folha | integration, unit (folha) | integration, unit (folha) | ✅ |
 | T11 | views, layout, folha | unit (folha), integration | unit (folha), integration | ✅ |
 | T12 | documentação | none | none | ✅ |
+| T13 | folha, views | unit (folha), integration | unit (folha), integration | ✅ |
+| T14 | folha, views | integration, unit (folha) | integration, unit (folha) | ✅ |
+| T15 | folha, view | integration, unit (folha) | integration, unit (folha) | ✅ |
