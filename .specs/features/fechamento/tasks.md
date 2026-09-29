@@ -588,11 +588,11 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] `grep -n "VERIFICAR" .context/design.md` reexecutado nesta task e o título da seção de cada marcador aberto conferido (Req. 5.1 em §7; regras de deck em §10)
-- [ ] `grep -n "design.md:[0-9]" .specs/features/fechamento/spec.md` sai vazio: `:330`/`:355` viram "menção histórica e conferência de índices, já removidas (ver `verificar-resolvidos.md`)"; `:506`/`:516` viram "`design.md` §7, pendência do Req. 5.1"; `:579` vira "`design.md` §10, regras de deck"
-- [ ] O sentido de cada linha não muda (mesmos marcadores, mesmo motivo de estarem abertos ou resolvidos); a tabela de rastreabilidade FEC-01..24 fica intacta
-- [ ] `validate_spec.py` desta feature sai com 0
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] `grep -n "VERIFICAR" .context/design.md` reexecutado nesta task e o título da seção de cada marcador aberto conferido (Req. 5.1 em §7; regras de deck em §10)
+- [x] `grep -n "design.md:[0-9]" .specs/features/fechamento/spec.md` sai vazio: `:330`/`:355` viram "menção histórica e conferência de índices, já removidas (ver `verificar-resolvidos.md`)"; `:506`/`:516` viram "`design.md` §7, pendência do Req. 5.1"; `:579` vira "`design.md` §10, regras de deck"
+- [x] O sentido de cada linha não muda (mesmos marcadores, mesmo motivo de estarem abertos ou resolvidos); a tabela de rastreabilidade FEC-01..24 fica intacta
+- [x] `validate_spec.py` desta feature sai com 0
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full

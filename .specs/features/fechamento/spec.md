@@ -46,7 +46,7 @@ Explicitamente excluído. Documentado para evitar scope creep.
 | Revisão fixada | O README cita `config/ingestion.yml` e a regra de que `main`/`HEAD`/`latest` são rejeitados na carga (AD-001, Req. 1.9), sem copiar o hash | Não envelhece quando a revisão subir | y |
 | Gates de teste no README | Os do `CLAUDE.md` (quick, full, build) mais `python3 spec/verify_fixture.py` | Uma fonte só de comandos | y |
 | `requirements.md` não tem `⚠️ VERIFICAR` | Confirmado por `grep`: zero ocorrências | O único texto com o marcador está em `design.md` | y (medido em 2026-09-28) |
-| Estado dos cinco marcadores de `design.md` | Resolvidos: `:330` (menção histórica a um marcador que a T4 do `catalogo` refutou) e `:355` (conferência de `gin_trgm_ops` e de `to_tsvector` de dois argumentos). Abertos: `:506`/`:516` (Req. 5.1, mesmo item) e `:579` (regras de deck) | `:330`/`:355`: §4.1.1 registra a verificação no PostgreSQL 17.11; a migração `20260919120100` e `test/models/catalog_indexes_test.rb` a provam. `:506`: `image_url_large` vazio e nada grava a coluna. `:579`: nenhum regulamento no repositório nem AD que confirme | y (a T4 reconfere cada fonte antes de remover) |
+| Estado dos cinco marcadores de `design.md` | Resolvidos: `design.md` §4.1.1 (menção histórica a um marcador que a T4 do `catalogo` refutou) e confirmação de `gin_trgm_ops` e `to_tsvector` de dois argumentos. Abertos: `design.md` §7 (Req. 5.1) e `design.md` §10 (regras de deck) | §4.1.1 registra a verificação no PostgreSQL 17.11; a migração `20260919120100` e `test/models/catalog_indexes_test.rb` a provam. §7: `image_url_large` vazio e nada grava a coluna. §10: nenhum regulamento no repositório nem AD que confirme | y (a T4 reconfere cada fonte antes de remover) |
 | Req. 5.1 ("imagem em resolução maior") | Continua aberto; o detalhe serve a mesma imagem da grade | Não há URL de resolução maior na fonte; não se deriva URL | y — relaxar o Req. 5.1 ou buscar outra fonte é do dono; a T5 registra DECISÃO-DO-DONO |
 | O que AD-006, AD-007 e AD-008 mudam em `requirements.md` | Req. 10 ganha a substituição da quantidade (AD-006), o staging com expiração dono do usuário (AD-007) e o limite de 10.000 linhas de dado (AD-008) | STATE.md as marca `active`; `requirements.md` não cita nenhuma (`grep` = 0) | y |
 | O que a AD-007 muda em `design.md` | §3 e §6 descrevem a tabela de staging do import, dona do usuário | Toda leitura parte de `Current.user`; a T3 confere o nome da tabela em `db/structure.sql` | y |
@@ -63,10 +63,10 @@ Explicitamente excluído. Documentado para evitar scope creep.
 
 | Onde | Assunto | Por que continua aberto |
 |---|---|---|
-| `design.md:506`/`:516` | Req. 5.1, URL de imagem em resolução maior | `image_url_large` vazio nas 4933 variantes; a fixture só traz `imageUrl` |
-| `design.md:579` | Regras de deck (1 Leader, 50 cartas, 4 cópias, cores) | Fase 2; exige regulamento oficial |
+| `design.md` §7 "Imagens" | Req. 5.1, URL de imagem em resolução maior | `image_url_large` vazio nas 4933 variantes; a fixture só traz `imageUrl` |
+| `design.md` §10 "O que a Fase 1 deixa preparado" | Regras de deck (1 Leader, 50 cartas, 4 cópias, cores) | Fase 2; exige regulamento oficial |
 
-**Resolvidos (removidos, FEC-12):** `design.md:330` e `design.md:355`.
+**Resolvidos (removidos, FEC-12):** `design.md` §4.1.1 (menção histórica) e confirmação de `gin_trgm_ops` e `to_tsvector` de dois argumentos (ver `verificar-resolvidos.md`).
 
 **Varredura de dimensões implícitas:** integridade de estado → FEC-14 e FEC-16
 (remoção só com fonte; correção só quando inequívoca); validação → FEC-24 (nada
