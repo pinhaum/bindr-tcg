@@ -217,11 +217,11 @@ T5 → T6
 
 **Done when**:
 
-- [ ] Seção "Decisões abertas" com a entrada do Req. 5.1: texto do requisito, evidência (`image_url_large` vazio nas 4933 variantes, fixture só com `imageUrl`, `design.md` §7), duas opções (relaxar o requisito para "imagem maior de layout", ou procurar fonte com resolução maior) e a pergunta ao dono (FEC-18)
-- [ ] Uma entrada para cada requisito devolvido `blocked` pelas T2 e T3, com requisito, evidência e pergunta; nenhum desses requisitos foi alterado (FEC-16)
-- [ ] Seção "Corrigidos por AD" lista cada correção inequívoca feita em T2 ou T3, com o commit e a AD citada na linha alterada (FEC-17); vazia se não houve
-- [ ] Verificado por `git diff` dos commits de T2 e T3 que nenhum requisito mudou de sentido sem AD na linha
-- [ ] Gate full passa e a contagem de runs não muda
+- [x] Seção "Decisões abertas" com a entrada do Req. 5.1: texto do requisito, evidência (`image_url_large` vazio nas 4933 variantes, fixture só com `imageUrl`, `design.md` §7), duas opções (relaxar o requisito para "imagem maior de layout", ou procurar fonte com resolução maior) e a pergunta ao dono (FEC-18)
+- [x] Uma entrada para cada requisito devolvido `blocked` pelas T2 e T3, com requisito, evidência e pergunta; nenhum desses requisitos foi alterado (FEC-16)
+- [x] Seção "Corrigidos por AD" lista cada correção inequívoca feita em T2 ou T3, com o commit e a AD citada na linha alterada (FEC-17); vazia se não houve
+- [x] Verificado por `git diff` dos commits de T2 e T3 que nenhum requisito mudou de sentido sem AD na linha
+- [x] Gate full passa e a contagem de runs não muda
 
 **Tests**: none
 **Gate**: full
