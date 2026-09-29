@@ -148,7 +148,9 @@
 
 ## Handoff
 
-> **Estado em 2026-09-27, tarde — este bloco vence os de baixo.** A
+> **Estado em 2026-09-28 — este bloco vence os de baixo.** A **`conformidade` tem T1–T17 feitas e commitadas** e a T12 fechada, exceto a aprovação do dono, adiada para o fim da sessão (capturas em `tmp/comparacao/`, fora do git). `canvas-conformance.md` e a traceability CNF-01..40 estão escritos. Gate full: 1343 runs, 0 falhas, RuboCop limpo; gate build verde. **Ainda NÃO verificada:** falta o Verifier (autor ≠ verificador) e o `validate_state.py conformidade`. **Próximo passo:** Verifier da conformidade; depois a §7 do `.context/tasks.md` (7.1 é teste manual do dono; 7.2 documenta e revisa os specs).
+
+> **Estado em 2026-09-27, tarde — superado pelo bloco acima.** A
 > **`navegacao` está fechada e verificada**: o Verifier deu FAIL na primeira
 > passada, o loop de correção fez T34–T42 e a re-verificação deu **PASS**
 > (`validation.md`; `validate_state.py navegacao` sai com 0; gate full 1214

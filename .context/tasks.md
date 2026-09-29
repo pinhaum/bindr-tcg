@@ -284,7 +284,7 @@ Regras de execução:
     Req. 13 com critérios por tela tirados dos artboards.
   - _Requisitos: 4.9, 13.1–13.20_
 
-- [ ] **6.7 Conformidade com o canvas**
+- [x] **6.7 Conformidade com o canvas**
   - Cada artboard versionado é critério de aceite da sua tela (AD-016); toda
     divergência vira requisito ou exclusão registrada.
   - Grade só com o selo de quantidade; registro de posse só no detalhe
@@ -295,8 +295,8 @@ Regras de execução:
     dentro do efeito, "Variantes na pasta".
   - Pasta ordenada por "Recentes" ou "Por código" (Req. 9.7), nome do set como
     link, "Adicionar cartas à pasta" fixo no celular.
-  - Fecha com as capturas conferidas contra a checklist de cada artboard e a
-    aprovação do dono. Plano: `.specs/features/conformidade/tasks.md` (T1–T12);
+  - Fechada em 2026-09-28 com a `conformidade` (T1–T17); a aprovação das
+    capturas pelo dono foi adiada para o fim da sessão. Plano: `.specs/features/conformidade/tasks.md` (T1–T17);
     a seção fecha na T12.
   - _Requisitos: 7.5, 9.7, 13.19, 13.21–13.39_
 

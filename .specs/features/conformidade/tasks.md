@@ -667,13 +667,13 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 
 **Done when**:
 
-- [ ] Capturas de catálogo, detalhe e pasta, anônimo e com sessão, em 390px e 1280px, lado a lado com o artboard em `tmp/comparacao/` (CNF-34)
-- [ ] `canvas-conformance.md` com uma tabela por tela: cada item das checklists T3–T11 com resultado (conforme / CNF que justifica / Out of Scope) e nenhum item sem os três (CNF-35)
-- [ ] Traceability da spec com CNF-01..40 apontando para as tasks
-- [ ] §6.7 do `.context/tasks.md` marcada
-- [ ] Gate build passa
+- [x] Capturas de catálogo, detalhe e pasta, anônimo e com sessão, em 390px e 1280px, lado a lado com o artboard em `tmp/comparacao/` (CNF-34)
+- [x] `canvas-conformance.md` com uma tabela por tela: cada item das checklists T3–T11 com resultado (conforme / CNF que justifica / Out of Scope) e nenhum item sem os três (CNF-35)
+- [x] Traceability da spec com CNF-01..40 apontando para as tasks
+- [x] §6.7 do `.context/tasks.md` marcada
+- [x] Gate build passa
 - [ ] O dono comparou as capturas com os artboards e aprovou
-- [ ] Bloco novo no *Handoff* do `STATE.md`
+- [x] Bloco novo no *Handoff* do `STATE.md`
 
 **Tests**: none
 **Gate**: build

@@ -210,50 +210,50 @@ feature, com a imagem da comparação de cada tela.
 
 ## Requirement Traceability
 
-| Requirement ID | Story | Origem | Status |
-|---|---|---|---|
-| CNF-01 | P1: Catálogo | Req. 7.5, 13.22 | Pending |
-| CNF-02 | P1: Catálogo | Req. 13.22, 12.6 | Pending |
-| CNF-03 | P1: Catálogo | Req. 13.22, 6.3 | Pending |
-| CNF-04 | P1: Catálogo | Req. 13.24 (D6) | Pending |
-| CNF-05 | P1: Catálogo | Req. 13.26, 13.12 | Pending |
-| CNF-06 | P1: Catálogo | Req. 13.26, 3.6 | Pending |
-| CNF-07 | P1: Catálogo | Req. 13.23 (D5) | Pending |
-| CNF-08 | P1: Catálogo | Req. 13.26, 13.18 (NAV-47) | Pending |
-| CNF-09 | P1: Catálogo | Req. 13.27 | Pending |
-| CNF-10 | P1: Catálogo | Req. 13.28 | Pending |
-| CNF-11 | P1: Catálogo | Req. 13.29 | Pending |
-| CNF-12 | P1: Catálogo | Req. 13.25 (D7), 2.5 | Pending |
-| CNF-13 | P1: Catálogo | Req. 13.21 | Pending |
-| CNF-14 | P1: Detalhe | Req. 13.30 (D8), 5.1 | Pending |
-| CNF-15 | P1: Detalhe | Req. 13.19 | Pending |
-| CNF-16 | P1: Detalhe | Req. 13.35 | Pending |
-| CNF-17 | P1: Detalhe | Req. 13.31, 5.1, 5.5 | Pending |
-| CNF-18 | P1: Detalhe | Req. 13.32, 5.4 | Pending |
-| CNF-19 | P1: Detalhe | Req. 13.33 | Pending |
-| CNF-20 | P1: Detalhe | Req. 13.33, 5.2 (D9, NAV-49) | Pending |
-| CNF-21 | P1: Detalhe | Req. 13.33 (D10), 7.2, 7.4 | Pending |
-| CNF-22 | P1: Detalhe | Req. 7.5 | Pending |
-| CNF-23 | P1: Detalhe | Req. 13.34 | Pending |
-| CNF-24 | P1: Detalhe | Req. 13.21 | Pending |
-| CNF-25 | P1: Pasta | Req. 13.36, 9.3 | Pending |
-| CNF-26 | P1: Pasta | Req. 13.36, 9.2, 9.6 | Pending |
-| CNF-27 | P1: Pasta | Req. 9.7 (D11), 6.5 | Pending |
-| CNF-28 | P1: Pasta | Req. 9.7 | Pending |
-| CNF-29 | P1: Pasta | Req. 13.37 | Pending |
-| CNF-30 | P1: Pasta | Req. 13.39, 13.21 | Pending |
-| CNF-31 | P1: Catálogo | Req. 13.11 (lacuna da validação da `navegacao`) | Pending |
-| CNF-32 | P1: Pasta | Req. 13.38, 13.3 | Pending |
-| CNF-33 | P1: Pasta | Req. 13.21 | Pending |
-| CNF-34 | P1: Captura | Req. 13.21 (AD-016) | Pending |
-| CNF-35 | P1: Captura | Req. 13.21 (AD-016) | Pending |
-| CNF-36 | Edge case | Req. 2.3 | Pending |
-| CNF-37 | Edge case | Req. 13.35 | Pending |
-| CNF-38 | Edge case | Req. 9.7 | Pending |
-| CNF-39 | Edge case | Req. 13.31 | Pending |
-| CNF-40 | Edge case | Req. 13.29, `rarity` como texto | Pending |
+| Requirement ID | Story | Origem | Task | Status |
+|---|---|---|---|---|
+| CNF-01 | P1: Catálogo | Req. 7.5, 13.22 | T3 | Implemented |
+| CNF-02 | P1: Catálogo | Req. 13.22, 12.6 | T3 | Implemented |
+| CNF-03 | P1: Catálogo | Req. 13.22, 6.3 | T3 | Implemented |
+| CNF-04 | P1: Catálogo | Req. 13.24 (D6) | T3, T13 | Implemented |
+| CNF-05 | P1: Catálogo | Req. 13.26, 13.12 | T4 | Implemented |
+| CNF-06 | P1: Catálogo | Req. 13.26, 3.6 | T4 | Implemented |
+| CNF-07 | P1: Catálogo | Req. 13.23 (D5) | T4 | Implemented |
+| CNF-08 | P1: Catálogo | Req. 13.26, 13.18 (NAV-47) | T4 | Implemented |
+| CNF-09 | P1: Catálogo | Req. 13.27 | T4, T13 | Implemented |
+| CNF-10 | P1: Catálogo | Req. 13.28 | T4 | Implemented |
+| CNF-11 | P1: Catálogo | Req. 13.29 | T2 | Implemented |
+| CNF-12 | P1: Catálogo | Req. 13.25 (D7), 2.5 | T5, T16 | Implemented |
+| CNF-13 | P1: Catálogo | Req. 13.21 | T5, T13 | Implemented |
+| CNF-14 | P1: Detalhe | Req. 13.30 (D8), 5.1 | T6 | Implemented |
+| CNF-15 | P1: Detalhe | Req. 13.19 | T6, T14 | Implemented |
+| CNF-16 | P1: Detalhe | Req. 13.35 | T6 | Implemented |
+| CNF-17 | P1: Detalhe | Req. 13.31, 5.1, 5.5 | T7 | Implemented |
+| CNF-18 | P1: Detalhe | Req. 13.32, 5.4 | T7 | Implemented |
+| CNF-19 | P1: Detalhe | Req. 13.33 | T8 | Implemented |
+| CNF-20 | P1: Detalhe | Req. 13.33, 5.2 (D9, NAV-49) | T8, T14 | Implemented |
+| CNF-21 | P1: Detalhe | Req. 13.33 (D10), 7.2, 7.4 | T8, T14 | Implemented |
+| CNF-22 | P1: Detalhe | Req. 7.5 | T8 | Implemented |
+| CNF-23 | P1: Detalhe | Req. 13.34 | T9 | Implemented |
+| CNF-24 | P1: Detalhe | Req. 13.21 | T9 | Implemented |
+| CNF-25 | P1: Pasta | Req. 13.36, 9.3 | T10, T15, T16 | Implemented |
+| CNF-26 | P1: Pasta | Req. 13.36, 9.2, 9.6 | T10, T15 | Implemented |
+| CNF-27 | P1: Pasta | Req. 9.7 (D11), 6.5 | T1 | Implemented |
+| CNF-28 | P1: Pasta | Req. 9.7 | T1 | Implemented |
+| CNF-29 | P1: Pasta | Req. 13.37 | T10, T15 | Implemented |
+| CNF-30 | P1: Pasta | Req. 13.39, 13.21 | T11 | Implemented |
+| CNF-31 | P1: Catálogo | Req. 13.11 (lacuna da validação da `navegacao`) | T4 | Implemented |
+| CNF-32 | P1: Pasta | Req. 13.38, 13.3 | T11, T15, T17 | Implemented |
+| CNF-33 | P1: Pasta | Req. 13.21 | T11, T16 | Implemented |
+| CNF-34 | P1: Captura | Req. 13.21 (AD-016) | T12 | Implemented (aprovação do dono pendente) |
+| CNF-35 | P1: Captura | Req. 13.21 (AD-016) | T12 | Implemented (aprovação do dono pendente) |
+| CNF-36 | Edge case | Req. 2.3 | T6 | Implemented |
+| CNF-37 | Edge case | Req. 13.35 | T6 | Implemented |
+| CNF-38 | Edge case | Req. 9.7 | T1 | Implemented |
+| CNF-39 | Edge case | Req. 13.31 | T7 | Implemented |
+| CNF-40 | Edge case | Req. 13.29, `rarity` como texto | T2 | Implemented |
 
-**Coverage:** 40 total, 0 mapped to tasks (tasks.md ainda não escrito).
+**Coverage:** 40 total, 40 mapped to tasks (T1–T17); T13–T17 são as correções da conferência com o canvas de 2026-09-28.
 
 ---
 
