@@ -125,6 +125,32 @@ class CatalogTileTest < ActionDispatch::IntegrationTest
     assert_nil tile.at_css(".card-tile__badge")
   end
 
+  test "isolamento: outro usuário possui cópias e usuário logado vê 0 selos" do
+    card = create_card(number: "OP01-ct3j", name: "Momonosuke")
+    variant = create_variant(card, "OP01-ct3j")
+    other = User.create!(email: "outro-ct3j@example.com", password: PASSWORD)
+    CollectionItem.create!(user: other, card_variant: variant, quantity: 5)
+    sign_in
+
+    get catalog_path
+
+    tile = tile_for(card)
+    assert_nil tile.at_css(".card-tile__badge"), "usuário logado sem posse não deve ver selo de outro usuário"
+  end
+
+  test "isolamento: alteração de user_id na query não muda o resultado" do
+    card = create_card(number: "OP01-ct3k", name: "Momo")
+    variant = create_variant(card, "OP01-ct3k")
+    other = User.create!(email: "outro-ct3k@example.com", password: PASSWORD)
+    CollectionItem.create!(user: other, card_variant: variant, quantity: 3)
+    sign_in
+
+    get catalog_path(user_id: other.id)
+
+    tile = tile_for(card)
+    assert_nil tile.at_css(".card-tile__badge"), "Current.user é a única fonte de autorização (Req. 6.5)"
+  end
+
   # --- CNF-04: raridade de variante única, ou "N impressões" ---
 
   test "carta de uma variante mostra a raridade ao lado do código" do
@@ -135,6 +161,17 @@ class CatalogTileTest < ActionDispatch::IntegrationTest
 
     tile = tile_for(card)
     assert_equal "SR", tile.at_css(".card-tile__rarity").text.strip
+  end
+
+  test "carta de duas variantes mostra 2 impressões no lugar da raridade" do
+    card = create_card(number: "OP01-ct3i-twoi", name: "Usopp")
+    create_variant(card, "OP01-ct3i-twoi", rarity: "R")
+    create_variant(card, "OP01-ct3i-twoi_p1", rarity: "UC")
+
+    get catalog_path
+
+    tile = tile_for(card)
+    assert_equal "2 impressões", tile.at_css(".card-tile__rarity").text.strip
   end
 
   test "carta de três variantes mostra N impressões no lugar da raridade" do

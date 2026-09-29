@@ -746,11 +746,11 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 
 **Done when**:
 
-- [ ] `catalog_tile_test.rb`: carta com duas variantes mostra "2 impressões" em `.card-tile__rarity` e nenhuma raridade (`"C"`) no tile; com `variants.size < 3` o teste falha
-- [ ] `catalog_tile_test.rb`: outro usuário possui cópias e `@user` logado, sem cópias, vê 0 `.card-tile__badge`; anônimo continua sem selo; `catalog_path(user_id: outro.id)` não muda o resultado (`Current.user` é a única fonte, Req. 6.5)
-- [ ] `card_detail_image_test.rb`: carta com duas variantes, a primeira com 1 cópia e a segunda com 3, mostra o selo "1" (`aria-label` "1 cópia") na miniatura e na imagem maior, nunca "4"
-- [ ] Cada teste novo falha se a implementação for trocada pelo mutante correspondente (ex.: `owned_quantity(hero)` → `owned_quantity_for_card(@card)`), conferido a mão antes do commit
-- [ ] Gate full passa
+- [x] `catalog_tile_test.rb`: carta com duas variantes mostra "2 impressões" em `.card-tile__rarity` e nenhuma raridade (`"C"`) no tile; com `variants.size < 3` o teste falha
+- [x] `catalog_tile_test.rb`: outro usuário possui cópias e `@user` logado, sem cópias, vê 0 `.card-tile__badge`; anônimo continua sem selo; `catalog_path(user_id: outro.id)` não muda o resultado (`Current.user` é a única fonte, Req. 6.5)
+- [x] `card_detail_image_test.rb`: carta com duas variantes, a primeira com 1 cópia e a segunda com 3, mostra o selo "1" (`aria-label` "1 cópia") na miniatura e na imagem maior, nunca "4"
+- [x] Cada teste novo falha se a implementação for trocada pelo mutante correspondente (ex.: `owned_quantity(hero)` → `owned_quantity_for_card(@card)`), conferido a mão antes do commit
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

@@ -54,6 +54,22 @@ class CardDetailImageTest < ActionDispatch::IntegrationTest
     assert_select ".card-detail__badge", count: 0
   end
 
+  test "carta com duas variantes mostra o selo da primeira variante (1 cópia), não a soma (1+3=4)" do
+    sign_in
+    second = CardVariant.create!(card: @card, card_set: @set, variant_code: "OP01-t6_p1",
+      rarity: "SR", art_kind: "parallel", illustrator: "Oda",
+      image_url: "https://example.test/OP01-t6_p1.png")
+    CollectionItem.create!(user: @user, card_variant: @variant, quantity: 1)
+    CollectionItem.create!(user: @user, card_variant: second, quantity: 3)
+
+    get card_path(@card.card_number)
+    assert_response :success
+
+    assert_select ".card-detail__thumb .card-detail__badge", text: "1"
+    assert_select ".card-detail__expand .card-detail__badge", text: "1"
+    assert_select ".card-detail__badge[role=img][aria-label=?]", "1 cópia", count: 2
+  end
+
   # --- CNF-16 / CNF-37: legenda do ilustrador ---
 
   test "variante com ilustrador mostra a legenda abaixo da imagem" do
