@@ -304,12 +304,14 @@ Regras de execução:
 
 ## 7 — Fechamento do MVP
 
-- [ ] **7.1 Verificação do critério de sucesso**
+- [x] **7.1 Verificação do critério de sucesso**
   - Registrar uma caixa de boosters inteira pelo celular, sem planilha.
   - Responder "quanto falta do set X?" em no máximo três toques.
   - Anotar todo atrito encontrado — isso vira o backlog da Fase 2, não correção
     de última hora.
   - _Referência: `product.md` §7_
+  - Executada pelo dono em 2026-09-29: critério atendido (`roteiro-7-1.md`,
+    "Sim"). A tabela de atritos ficou vazia.
 
 - [x] **7.2 Documentar e revisar os specs**
   - README com subida local em um comando e execução da ingestão.
