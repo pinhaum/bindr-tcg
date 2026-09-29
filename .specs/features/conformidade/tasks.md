@@ -123,6 +123,24 @@ T21 → T20
 T19 → T22
 ```
 
+### Phase 8: Correções da validação (ciclo 2)
+
+O Verifier do ciclo 2 (`validation.md`, seções G1 e G2) reprovou por CNF-41
+(`.catalog__empty-reset` com `min-height: 24px`, a spec pede 44px) e apontou a
+posição do selo (CNF-02, CNF-16) sem asserção. As duas dependem da T21 (a spec
+que criou CNF-41) e da T20 (mesmo `catalog_status_line_test.rb` que a T23 edita).
+T23 (`catalog.css` + `catalog_status_line_test.rb`) e T24
+(`ownership_badge_test.rb`) têm `Where` disjuntos e rodam em paralelo. A T22
+continua descartada e a T12 não muda.
+
+```
+T21 → T23
+T20 → T23
+T21 → T24
+T20 → T24
+T23 ∥ T24
+```
+
 ---
 
 ## Task Breakdown
@@ -852,6 +870,65 @@ Revisão de a11y, achado 5 (`show.html.erb:33` e `:84`): com o `<details>` abert
 
 ---
 
+### T23: "Limpar filtros" do estado vazio com 44px (CNF-41)
+
+**What**: `.catalog__empty-reset` passa de `min-height: 24px` para `min-height: 44px` (mesma forma do `.catalog__clear-filters`), e um teste afirma o valor resolvido.
+**Where**: `app/assets/stylesheets/catalog.css`, `test/integration/catalog_status_line_test.rb`
+**Depends on**: T21, T20
+**Reuses**: o teste "'Limpar filtros' resolve min-height e borda ≥ 44px (CNF-06)" de `catalog_status_line_test.rb` (mesmo `Stylesheet.resolved` e `Stylesheet.to_pixels`); a regra `.catalog__clear-filters` (`min-height: 44px`, `catalog.css` ~l.2454-2466)
+**Requirement**: CNF-41
+
+`validation.md` G1: `catalog.css:362-366` ainda tem a altura herdada da `navegacao` (`min-height: 24px`) e nenhum teste lê a regra do irmão do estado vazio (mutante h sobrevive). Mudar só a altura mínima; borda e demais propriedades ficam como estão. O comentário de CSS que a task escrever **não cita a sintaxe de media query nem chaves**: isso quebra o parser dos testes de design (`Stylesheet`).
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `.catalog__empty-reset` resolve `min-height: 44px` em `catalog.css`
+- [ ] `catalog_status_line_test.rb`: `Stylesheet.resolved("catalog__empty-reset")` com `to_pixels(min-height) >= 44`, depois de `get catalog_path` com filtro sem resultado (o link existe em `.catalog__empty`)
+- [ ] O teste novo falha com `min-height: 24px` e com a declaração ausente (0), conferido a mão antes do commit
+- [ ] Comentários de CSS novos sem sintaxe de media query e sem chaves
+- [ ] Nenhum arquivo fora do `Where` editado
+- [ ] Gate full passa
+
+**Tests**: unit (folha), integration
+**Gate**: full
+**Commit**: `fix(conformidade): limpar filtros do estado vazio com altura mínima de 44px`
+
+---
+
+### T24: Posição do selo afirmada no canto superior direito (CNF-02, CNF-16)
+
+**What**: Um teste em `ownership_badge_test.rb` lê a regra dos dois selos e afirma `position: absolute`, `top` e `right` em `var(--space-2)` e a ausência de `bottom` e `left`.
+**Where**: `test/design/ownership_badge_test.rb`
+**Depends on**: T21, T20
+**Reuses**: `GRID_BADGE`, `DETAIL_BADGE` e o `@rules` do `setup` do arquivo; `Stylesheet.resolved(selector.delete_prefix("."), @rules)` como no teste dos selos radius-full
+**Requirement**: CNF-02, CNF-16
+
+`validation.md` G2: `catalog.css` ~l.318-327 declara `position: absolute; top/right: var(--space-2)` para `.card-tile__badge, .card-detail__badge`, mas só cor e raio têm asserção. Só teste; nenhum código muda. O valor `var(--space-2)` é o que a folha declara (8px); o teste afirma o token, não o pixel.
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Para cada seletor de `[GRID_BADGE, DETAIL_BADGE]`: `position` é `absolute`, `top` e `right` são `var(--space-2)`
+- [ ] Para os mesmos seletores: `bottom` e `left` não são declarados (`assert_nil`)
+- [ ] O teste falha se `top`/`right` forem removidos e se forem trocados por `bottom`/`left`, conferido a mão antes do commit
+- [ ] Nenhum arquivo de código nem outro teste editado
+- [ ] Gate full passa
+
+**Tests**: unit (folha)
+**Gate**: full
+**Commit**: `test(conformidade): afirmar posição do selo no canto superior direito`
+
+---
+
 ## Plano de delegação
 
 | Task | Worker | Revisão |
@@ -863,6 +940,7 @@ Revisão de a11y, achado 5 (`show.html.erb:33` e `:84`): com o `<details>` abert
 | T18, T22 | Sonnet (T18 muda a regra da grade; T22 muda a árvore de acessibilidade) | T22: `ecc:a11y-architect` antes do ciclo 2 do Verifier |
 | T19, T20 | Sonnet (testes que afirmam o valor da spec, com conferência do mutante correspondente) | `ecc:pr-test-analyzer` sobre T19 e T20 antes do ciclo 2 |
 | T21 | Sonnet (lê os artboards e emenda a spec); `blocked` se o canvas for omisso | O orquestrador lê a emenda contra o artboard; o dono decide o que ficar em aberto |
+| T23, T24 | Sonnet (T23 muda a folha e afirma o valor da spec; T24 só teste, com conferência do mutante) | `ecc:pr-test-analyzer` sobre T23 e T24 antes do ciclo 3 do Verifier |
 
 Regras que todo prompt de worker repete: não usar `git add -A` nem `git add .`
 (o index é compartilhado); não marcar checkbox em `tasks.md` (o orquestrador marca
@@ -895,6 +973,8 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T20 | três asserções trocadas em três arquivos de teste | ⚠️ 2-3 coisas coesas (só teste) |
 | T21 | quatro emendas de texto em um arquivo | ✅ |
 | T22 | um atributo no selo e um `alt` no mesmo bloco da view | ✅ |
+| T23 | uma declaração da folha e o teste dela | ✅ |
+| T24 | um teste sobre uma regra da folha | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -922,6 +1002,8 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T20 | T21 | Phase 7: `T21 → T20` (a T17 chega por T21) | ✅ |
 | T21 | T17 | Phase 7: `T17 → T21` | ✅ |
 | T22 | T19 | Phase 7: `T19 → T22` | ✅ |
+| T23 | T21, T20 | Phase 8: `T21 → T23`, `T20 → T23` | ✅ |
+| T24 | T21, T20 | Phase 8: `T21 → T24`, `T20 → T24`; `T23 ∥ T24` (Where disjuntos) | ✅ |
 
 ## Test Co-location Validation
 
@@ -949,3 +1031,5 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T20 | testes de integração e de folha (sem código de app) | integration, unit (folha) | integration, unit (folha) | ✅ |
 | T21 | documentação (`spec.md`) | none | none | ✅ |
 | T22 | view | integration | integration | ✅ |
+| T23 | folha, teste de integração | unit (folha), integration | unit (folha), integration | ✅ |
+| T24 | teste de folha (sem código de app) | unit (folha) | unit (folha) | ✅ |
