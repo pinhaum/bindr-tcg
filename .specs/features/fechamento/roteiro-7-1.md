@@ -95,16 +95,16 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 1. Tocar em **"Minha pasta"** (barra inferior em celular, coluna lateral em desktop).
 2. Procurar **OP01** na lista de sets. Se a lista for longa e OP01 não estiver visível, scroll (1 toque adicional, mas ainda dentro de 3).
-3. Ler a resposta na linha do set: o número de variantes possuídas e o total (ex.: "15 / 154 · 12%").
+3. Ler a resposta na linha do set: o número de variantes possuídas e o total (ex.: "17 / 154 · 11%").
 
 **Toques concretos:**
 - Toque 1: "Minha pasta".
 - Toque 2: OP01 já visível, apenas ler. (Ou 1 toque de scroll se necessário.)
 - **Total: ≤3 toques**.
 
-**Resposta esperada (exemplo realista):**
+**Resposta esperada (exemplo ilustrativo):**
 ```
-15 / 154 · 12%
+17 / 154 · 11%
 15 de 121 do set base · 2 de 33 parallels
 ```
 
@@ -112,7 +112,7 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 **Critério de sucesso:**
 - A resposta é **legível numa linha única** ou em duas linhas (base + parallels).
-- O número de variantes possuídas (15) e o total (154) aparecem juntos, com o denominador do set base (121) na linha seguinte.
+- O número de variantes possuídas (17) e o total (154) aparecem juntos, com o denominador do set base (121) na linha seguinte.
 - O percentual aparece quando há denominador (baseSetSize conhecido).
 - **Sem necessidade de clicar em mais nada** — a informação está pronta no cartão do set.
 

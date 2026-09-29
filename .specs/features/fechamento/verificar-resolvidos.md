@@ -18,13 +18,13 @@ Executado na task T4 para remover marcadores `⚠️ VERIFICAR` resolvidos de `d
 | Local | Assunto | Por que não foi resolvido |
 |-------|---------|---|
 | `.context/design.md:527, 537` | `image_url_large` — Req. 5.1 | Coluna vazia nas 4933 variantes. Fixture não traz campo. Teste `card_detail_test.rb:21` grava a mesma URL em ambos. Exige confirmação em fonte primária (site oficial ou documentação Bandai) de que existe URL de resolução maior. Não se deriva nem se adivinha URL. |
-| `.context/design.md:628` | Regras de deck — Fase 2 | Afirmação sobre limite (1 Leader, 50 cartas, 4 cópias max por `card_number`, cores compatíveis) ainda não confirmada em regulamento oficial. Regra de jogo errada num validador é pior que nenhum validador. |
+| `.context/design.md:627` | Regras de deck — Fase 2 | Afirmação sobre limite (1 Leader, 50 cartas, 4 cópias max por `card_number`, cores compatíveis) ainda não confirmada em regulamento oficial. Regra de jogo errada num validador é pior que nenhum validador. |
 
 ---
 
 ## Contagem após task T4
 
-- **design.md**: `grep -c "⚠️ VERIFICAR" .context/design.md` → **3 ocorrências** correspondentes a **2 pendências abertas** (linhas 527, 537 — Req. 5.1; linha 628 — regras de deck)
+- **design.md**: `grep -c "⚠️ VERIFICAR" .context/design.md` → **3 ocorrências** correspondentes a **2 pendências abertas** (linhas 527, 537 — Req. 5.1; linha 627 — regras de deck)
 - **requirements.md**: `grep -c "⚠️ VERIFICAR" .context/requirements.md` → **0 marcadores**
 
 Total na codebase: 2 pendências abertas, ambas em design.md, ambas legítimas e sem data de resolução prevista.

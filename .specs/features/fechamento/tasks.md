@@ -10,7 +10,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Spec**: `.specs/features/fechamento/spec.md` (FEC-01..FEC-24)
 **Design**: inline (sem `design.md`: a feature só escreve documentos; nenhum padrão novo)
-**Status**: In Progress (extensão da Phase 5: correções do ciclo 2 da validação; T1–T13 Done)
+**Status**: In Progress (extensão da Phase 5: correções do ciclo 2 da validação + ciclo 3 bloqueante; T1–T17 Done, T18 em execução)
 
 Todas as tasks escrevem **só documentos**. Regras que valem para todas:
 
@@ -107,6 +107,14 @@ T13 → T14
 T13 → T15
 T13 → T16
 T13 → T17
+```
+
+### Extensão da Phase 5: bloqueante do ciclo 3
+
+Lacuna detectada: correção de referências e coerência de exemplo.
+
+```
+T17 → T18
 ```
 
 ---
@@ -276,7 +284,7 @@ T13 → T17
 - [x] §7.2 de `.context/tasks.md` marcada `[x]`; a §7.1 fica `[ ]` (fora do escopo)
 - [x] Traceability de `spec.md` com FEC-01..24 em `Done` e a coluna Task conferida; checkboxes das tasks T1–T5 marcados neste `tasks.md`; `Status: Done`
 - [x] Bloco novo no *Handoff* do `STATE.md`: o que a feature fez, os `⚠️ VERIFICAR` abertos (com o local), as decisões abertas de `decisoes-do-dono.md`, e a §7.1 como próxima etapa do dono
-- [ ] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py fechamento` sai com 0
+- [x] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py fechamento` sai com 0
 - [x] `validate_spec.py` e `validate_tasks.py` desta feature saem com 0
 - [x] Gate full passa e a contagem de runs não muda; gate build (`docker compose build`) opcional
 
@@ -600,6 +608,33 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 ---
 
+### T18: Lacuna bloqueante do ciclo 3 e nits
+
+**What**: Corrige os números de linha de `design.md` em `verificar-resolvidos.md` (628 → 627), ajusta o exemplo do roteiro para coerência (17/154 · 11% com 15 base + 2 parallels) e marca os itens como concluídos.
+**Where**: `.specs/features/fechamento/verificar-resolvidos.md`, `.specs/features/fechamento/roteiro-7-1.md`, `.specs/features/fechamento/decisoes-do-dono.md`, `.specs/features/fechamento/tasks.md`
+**Depends on**: T17
+**Reuses**: `verificar-resolvidos.md` (linhas 21, 27 com citação 628), `roteiro-7-1.md` (linhas 98, 107, 115 com exemplo 15/154 · 12%), `design.md` (grep do marcador de deck)
+**Requirement**: (correção de bloqueante do ciclo 3 + itens T1-T3 do gate)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] `verificar-resolvidos.md` linhas 21 e 27 corrigidas: 628 → 627 (marcador de deck do `design.md`)
+- [x] `roteiro-7-1.md` linhas 98, 107, 115: exemplo coerente "17 / 154 · 11%" (17 possuídas = 15 base + 2 parallels) e marcado como ilustrativo; percentual verifica (17/154 ≈ 11%)
+- [x] `decisoes-do-dono.md` linha ~20 confere linha 527 real do `design.md`; nenhuma alteração necessária
+- [x] `tasks.md` desta feature: Status em "In Progress" (T18 adicionada, T14-T17 Done); T18 aparece no Task Breakdown, no Plano de delegação e nas matrizes Granularity/Cross-Check/Co-location
+- [x] Gate full passa e `git diff --stat` mostra só esses 4 arquivos
+
+**Tests**: none
+**Gate**: full
+**Commit**: `docs(fechamento): corrigir a referência do marcador de deck e o exemplo do roteiro`
+
+---
+
 ## Plano de delegação
 
 | Task | Worker | Revisão |
@@ -620,6 +655,7 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 | T15 | Haiku (reescrita curta de uma subseção e duas linhas de tabela) | o orquestrador lê o `git diff` só do Rastreamento |
 | T16 | Haiku (acrescenta duas citações a uma frase conferida) | o orquestrador lê o `git diff` (≤ 3 linhas) |
 | T17 | Haiku (troca de referências por títulos, com `grep` obrigatório) | o orquestrador lê o `git diff` da spec |
+| T18 | Haiku (correção de números e coerência de exemplo, com `grep` obrigatório) | o orquestrador lê o `git diff` dos quatro arquivos |
 
 As tasks T7..T13 têm `Where` disjuntos e podem rodar em paralelo (um worker por
 task, sem `git add -A`, sem `git stash`). Quem escreve T7..T13 é o worker de
@@ -651,6 +687,7 @@ fora do `Where`; não inventar fato; parar com `blocked` diante de decisão de d
 | T15 | uma subseção de `requirements.md` (Rastreamento), três linhas | ✅ |
 | T16 | uma frase de `design.md` §9 | ✅ |
 | T17 | duas linhas e duas tabelas de `spec.md`, mesma natureza (referência de linha) | ✅ |
+| T18 | quatro arquivos, três correções de número/coerência, mesma natureza (bloqueante do ciclo) | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -673,6 +710,7 @@ fora do `Where`; não inventar fato; parar com `blocked` diante de decisão de d
 | T15 | T13 | Phase 5 (extensão): `T13 → T15` | ✅ |
 | T16 | T13 | Phase 5 (extensão): `T13 → T16` | ✅ |
 | T17 | T13 | Phase 5 (extensão): `T13 → T17` | ✅ |
+| T18 | T17 | Phase 5 (ciclo 3 bloqueante): `T17 → T18` | ✅ |
 
 ## Test Co-location Validation
 
@@ -695,3 +733,4 @@ fora do `Where`; não inventar fato; parar com `blocked` diante de decisão de d
 | T15 | documentação (`requirements.md`) | none | none | ✅ |
 | T16 | documentação (`design.md`) | none | none | ✅ |
 | T17 | documentação (`spec.md`) | none | none | ✅ |
+| T18 | documentação (4 arquivos: `verificar-resolvidos.md`, `roteiro-7-1.md`, `decisoes-do-dono.md`, `tasks.md`) | none | none | ✅ |
