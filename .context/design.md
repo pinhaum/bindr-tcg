@@ -345,9 +345,7 @@ continua usando o índice GIN trigram.
 
 ### 4.1.1 `unaccent` não é indexável sem wrapper
 
-Verificado na T4 contra o PostgreSQL 17.11 — este parágrafo substitui um
-`⚠️ VERIFICAR` que a verificação **refutou**, e a suposição original estava
-errada:
+Verificado na T4 contra o PostgreSQL 17.11. A suposição original estava errada:
 
 ```sql
 SELECT proname, provolatile FROM pg_proc WHERE proname = 'unaccent';
@@ -371,11 +369,9 @@ CREATE INDEX index_cards_on_unaccent_name_trgm
 A consulta precisa chamar `immutable_unaccent(name)`, e não `unaccent(name)`,
 senão o índice não é usado. Isso vale para a T11 (busca textual).
 
-> ⚠️ VERIFICAR — `gin_trgm_ops` e a forma de dois argumentos de `to_tsvector`
-> foram conferidos na documentação do PostgreSQL 17 na T4 (só a forma de dois
-> argumentos de `to_tsvector` é `IMMUTABLE`, portanto indexável). O restante da
-> sintaxe continua valendo a regra: **não escreva de memória** — confira na
-> documentação da versão em uso.
+`gin_trgm_ops` e a forma de dois argumentos de `to_tsvector` foram conferidos
+na documentação do PostgreSQL 17 na T4 — só a forma de dois argumentos de
+`to_tsvector` é `IMMUTABLE`, portanto indexável.
 
 **Por que não Elasticsearch/Meilisearch/OpenSearch:** o dataset é pequeno e as
 consultas são estruturadas, não linguagem natural. Um serviço de busca

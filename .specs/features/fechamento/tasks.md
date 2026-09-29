@@ -188,13 +188,13 @@ T5 → T6
 
 **Done when**:
 
-- [ ] Marcadores achados por `grep -n "VERIFICAR" .context/design.md .context/requirements.md` e classificados um a um, sem usar a lista da spec como prova (a spec prevê `:330` e `:355` resolvidos, `:506`/`:516` e `:579` abertos)
-- [ ] Para cada remoção, a fonte foi aberta nesta task: `:330` (menção histórica) pela §4.1.1 e por `pg_proc` na migração `20260919120100`; `:355` (`gin_trgm_ops`, `to_tsvector` de dois argumentos) pela migração e por `test/models/catalog_indexes_test.rb`. O texto verificado permanece; sai só o marcador (FEC-12, FEC-14)
-- [ ] Marcador cuja fonte não fecha (regra de deck; Req. 5.1 com `image_url_large` vazio) permanece no documento, sem alteração de significado (FEC-13)
-- [ ] `verificar-resolvidos.md` tem: tabela "Resolvidos" (local original, texto resumido, fonte com arquivo e linha, data), tabela "Permanecem abertos" (local, assunto, por que segue aberto) e a contagem de marcadores de `requirements.md` depois da task (FEC-15)
-- [ ] `grep -c "⚠️ VERIFICAR" .context/design.md` igual ao número de marcadores abertos registrados no arquivo; `requirements.md` com 0
-- [ ] Nenhuma linha de `design.md` fora dos marcadores muda nesta task
-- [ ] Gate full passa e a contagem de runs não muda
+- [x] Marcadores achados por `grep -n "VERIFICAR" .context/design.md .context/requirements.md` e classificados um a um, sem usar a lista da spec como prova (a spec prevê `:330` e `:355` resolvidos, `:506`/`:516` e `:579` abertos)
+- [x] Para cada remoção, a fonte foi aberta nesta task: `:330` (menção histórica) pela §4.1.1 e por `pg_proc` na migração `20260919120100`; `:355` (`gin_trgm_ops`, `to_tsvector` de dois argumentos) pela migração e por `test/models/catalog_indexes_test.rb`. O texto verificado permanece; sai só o marcador (FEC-12, FEC-14)
+- [x] Marcador cuja fonte não fecha (regra de deck; Req. 5.1 com `image_url_large` vazio) permanece no documento, sem alteração de significado (FEC-13)
+- [x] `verificar-resolvidos.md` tem: tabela "Resolvidos" (local original, texto resumido, fonte com arquivo e linha, data), tabela "Permanecem abertos" (local, assunto, por que segue aberto) e a contagem de marcadores de `requirements.md` depois da task (FEC-15)
+- [x] `grep -c "⚠️ VERIFICAR" .context/design.md` igual ao número de marcadores abertos registrados no arquivo; `requirements.md` com 0
+- [x] Nenhuma linha de `design.md` fora dos marcadores muda nesta task
+- [x] Gate full passa e a contagem de runs não muda
 
 **Tests**: none
 **Gate**: full
