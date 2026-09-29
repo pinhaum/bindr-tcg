@@ -506,12 +506,12 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] O `baseSetSize` do OP01 (121) é conferido na fixture nesta task e o total citado no critério de sucesso do roteiro passa de 48 para 121; `grep -n "48" roteiro-7-1.md` sai vazio (ou só com ocorrência justificada e registrada)
-- [ ] O texto do passo 3 e do bloco "Resposta esperada" é o que a view renderiza: a linha do set `15 / 154 · 12%` (`.progress-set__owned-line`, `index.html.erb`, as linhas do `owned_variants`, `total_variants` e `completion_percent`) e a legenda `15 de 121 do set base · 2 de 33 parallels` (`.progress-set__percent-basis` e `.progress-set__parallels`); cada frase é conferida por `grep` na view e o comando fica no commit
-- [ ] "concluído" não aparece como texto de tela: `grep -n "concluído" roteiro-7-1.md` sai vazio (ou só numa frase que descreve a métrica, sem aspas de texto de tela)
-- [ ] O passo do roteiro que cita o botão de abrir o filtro usa a classe `catalog__filters-toggle` (o `<details>`), conferida em `app/views/catalog/index.html.erb`; `catalog__filters` só aparece para o painel interno
-- [ ] Nenhum passo afirma comportamento que o código não tem
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] O `baseSetSize` do OP01 (121) é conferido na fixture nesta task e o total citado no critério de sucesso do roteiro passa de 48 para 121; `grep -n "48" roteiro-7-1.md` sai vazio (ou só com ocorrência justificada e registrada)
+- [x] O texto do passo 3 e do bloco "Resposta esperada" é o que a view renderiza: a linha do set `15 / 154 · 12%` (`.progress-set__owned-line`, `index.html.erb`, as linhas do `owned_variants`, `total_variants` e `completion_percent`) e a legenda `15 de 121 do set base · 2 de 33 parallels` (`.progress-set__percent-basis` e `.progress-set__parallels`); cada frase é conferida por `grep` na view e o comando fica no commit
+- [x] "concluído" não aparece como texto de tela: `grep -n "concluído" roteiro-7-1.md` sai vazio (ou só numa frase que descreve a métrica, sem aspas de texto de tela)
+- [x] O passo do roteiro que cita o botão de abrir o filtro usa a classe `catalog__filters-toggle` (o `<details>`), conferida em `app/views/catalog/index.html.erb`; `catalog__filters` só aparece para o painel interno
+- [x] Nenhum passo afirma comportamento que o código não tem
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full

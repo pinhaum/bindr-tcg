@@ -95,7 +95,7 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 1. Tocar em **"Minha pasta"** (barra inferior em celular, coluna lateral em desktop).
 2. Procurar **OP01** na lista de sets. Se a lista for longa e OP01 não estiver visível, scroll (1 toque adicional, mas ainda dentro de 3).
-3. Ler a resposta na linha do set: o número de variantes possuídas e o total (ex.: "15 de 121 do set base, 12% concluído").
+3. Ler a resposta na linha do set: o número de variantes possuídas e o total (ex.: "15 / 154 · 12%").
 
 **Toques concretos:**
 - Toque 1: "Minha pasta".
@@ -104,15 +104,15 @@ Nem toda variante única será registrada — o roteiro quer demonstrar fluidez 
 
 **Resposta esperada (exemplo realista):**
 ```
-15 de 121 do set base, 12% concluído
- 2 de 33 parallels
+15 / 154 · 12%
+15 de 121 do set base · 2 de 33 parallels
 ```
 
 (A barra de progresso visual é complementar, não substitui o número.)
 
 **Critério de sucesso:**
 - A resposta é **legível numa linha única** ou em duas linhas (base + parallels).
-- O número de variantes possuídas (15) e o total (48) aparecem juntos.
+- O número de variantes possuídas (15) e o total (154) aparecem juntos, com o denominador do set base (121) na linha seguinte.
 - O percentual aparece quando há denominador (baseSetSize conhecido).
 - **Sem necessidade de clicar em mais nada** — a informação está pronta no cartão do set.
 
@@ -148,7 +148,7 @@ Marque **SIM** ou **NÃO** (e descreva o bloqueio se NÃO):
 ## Notas Técnicas (Uso Interno)
 
 - **Catálogo público:** Anônimo consegue procurar, filtrar e ver detalhe sem entrar. O botão **"+"** aparece apenas após `authenticated?` ser verdadeiro (concern `Authentication`).
-- **Filtro de set:** Elemento `<details>` com classe `catalog__filters`, entrada via `sets[]` na query string. Em celular, fechado por padrão; usuário abre tocando "Filtros".
+- **Filtro de set:** Elemento `<details>` com classe `catalog__filters-toggle`, entrada via `sets[]` na query string. Em celular, fechado por padrão; usuário abre tocando "Filtros".
 - **Página de detalhe:** Rota `/cards/:id` (onde `:id` é `card_number`). Variantes aparecem em `.card-detail__variants` com controles de posse por variante.
 - **Ownership (posse):** Partial `collection_items/_ownership.html.erb`. Botões "+"/`-` submetem formulário via Turbo (Req. 7.5 / COL-10). Resposta é HTML renderizado, substitui o contêiner via `turbo_stream.update`.
 - **Minha pasta:** Rota `/progress`. Exibe sets com posse em `.progress__list`. Cada set é `<li class="progress-set">` com métrica na `.progress-set__owned-line` (ex.: "15 de 121 do set base").
