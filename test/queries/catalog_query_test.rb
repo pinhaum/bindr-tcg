@@ -235,6 +235,36 @@ class CatalogQueryTest < ActiveSupport::TestCase
     assert_equal asc.reverse, desc
   end
 
+  test "sem sort, as cartas do set lançado mais recentemente vêm primeiro" do
+    @op01.update!(released_on: Date.new(2022, 12, 2))
+    op02 = CardSet.create!(code: "OP02", name: "Paramount War", kind: "booster",
+                           released_on: Date.new(2023, 3, 10))
+    create_card(card_number: "OP02-002", name: "Ace", card_type: "character", set_id: op02.id)
+    create_card(card_number: "OP02-001", name: "Whitebeard", card_type: "leader", set_id: op02.id)
+    sem_data = CardSet.create!(code: "PRB01", name: "Premium Booster", kind: "booster")
+    create_card(card_number: "PRB01-001", name: "Sanji", card_type: "character", set_id: sem_data.id)
+
+    resultado = CatalogQuery.new.call
+
+    assert_equal %w[OP02-001 OP02-002 OP01-001 OP01-002 OP01-003 OP01-004 PRB01-001],
+                 resultado.records.map(&:card_number)
+    refute resultado.active_filters.key?(:sort), "ordem padrão não pode virar chip"
+    refute resultado.active_filters.key?(:dir), "ordem padrão não pode virar chip"
+  end
+
+  test "sort=card_number sem dir volta à ordem numérica crescente" do
+    op02 = CardSet.create!(code: "OP02", name: "Paramount War", kind: "booster",
+                           released_on: Date.new(2023, 3, 10))
+    create_card(card_number: "OP02-001", name: "Whitebeard", card_type: "leader", set_id: op02.id)
+
+    resultado = CatalogQuery.new(sort: "card_number").call
+
+    assert_equal %w[OP01-001 OP01-002 OP01-003 OP01-004 OP02-001],
+                 resultado.records.map(&:card_number)
+    assert_equal "card_number", resultado.active_filters[:sort]
+    assert_equal "asc", resultado.active_filters[:dir]
+  end
+
   test "ordenação por coluna anulável mantém todas as cartas no resultado" do
     resultado = CatalogQuery.new(sort: "power").call
 

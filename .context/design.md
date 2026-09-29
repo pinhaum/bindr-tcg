@@ -398,8 +398,8 @@ cost_min, cost_max
 power_min, power_max
 counter_min, counter_max
 owned              all | owned | missing        (Req. 7.6, exige sessão)
-sort               card_number | name | cost | power
-dir                asc | desc
+sort               recent | card_number | name | cost | power   (padrão: recent)
+dir                asc | desc          (padrão: desc em recent, asc nos demais)
 page, per_page
 ```
 

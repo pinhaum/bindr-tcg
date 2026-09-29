@@ -62,7 +62,10 @@ visual, para reconhecer cartas pela arte.
    incremental).
 3. QUANDO a imagem de uma carta não carregar ENTÃO o sistema DEVE exibir um
    placeholder com o nome e o `card_number`, sem quebrar o layout.
-4. O sistema DEVE permitir ordenar por: `card_number`, nome, custo e power.
+4. O sistema DEVE permitir ordenar por: lançamento, `card_number`, nome, custo e
+   power. Na ausência de escolha, o sistema DEVE exibir primeiro as cartas mais
+   recentes — data de lançamento do set de estreia da carta, decrescente, com
+   set sem data ao final e desempate por `card_number` crescente.
 5. O sistema DEVE ser utilizável em viewport de 360px de largura sem scroll
    horizontal.
 

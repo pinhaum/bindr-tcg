@@ -63,7 +63,18 @@ class CatalogQuery
   # e é a que o índice `index_cards_on_effect_text_tsvector` usa.
   TEXT_SEARCH_CONFIG = "english".freeze
 
-  SORTABLE = %w[card_number name cost power].freeze
+  # Req. 2.4 — `recent` é o padrão: lançamento do set de estreia (`cards.set_id`),
+  # mais novo primeiro. Cada ordenação traz a própria direção padrão.
+  SORT_EXPRESSIONS = {
+    "recent" => "(SELECT sets.released_on FROM sets WHERE sets.id = cards.set_id)",
+    "card_number" => "cards.card_number",
+    "name" => "cards.name",
+    "cost" => "cards.cost",
+    "power" => "cards.power"
+  }.freeze
+  SORTABLE = SORT_EXPRESSIONS.keys.freeze
+  DEFAULT_SORT = "recent".freeze
+  DEFAULT_DIRECTIONS = Hash.new("asc").merge("recent" => "desc").freeze
   DIRECTIONS = %w[asc desc].freeze
 
   # Contrato de `design.md` §4.2: `owned` aceita exatamente estes três valores.
@@ -448,17 +459,22 @@ class CatalogQuery
     end
   end
 
+  # `recent` ordena por subconsulta correlata, e não por `joins(:card_set)`: o
+  # join traria `sets.name` para o escopo e deixaria ambíguo todo `name` não
+  # qualificado da busca (`SEARCH_MATCH_SQL`).
   def ordered(scope)
-    column = SORTABLE.include?(@params[:sort].to_s) ? @params[:sort].to_s : "card_number"
-    direction = DIRECTIONS.include?(@params[:dir].to_s) ? @params[:dir].to_s : "asc"
+    column = SORTABLE.include?(@params[:sort].to_s) ? @params[:sort].to_s : DEFAULT_SORT
+    direction = DIRECTIONS.include?(@params[:dir].to_s) ? @params[:dir].to_s : DEFAULT_DIRECTIONS[column]
 
-    @active_filters[:sort] = column unless column == "card_number" && direction == "asc"
-    @active_filters[:dir] = direction unless column == "card_number" && direction == "asc"
+    unless column == DEFAULT_SORT && direction == DEFAULT_DIRECTIONS[column]
+      @active_filters[:sort] = column
+      @active_filters[:dir] = direction
+    end
 
     # `card_number` como desempate deixa a paginação determinística: sem ele,
     # ordenar por uma coluna com repetição (ou anulável) pode devolver a mesma
     # carta em duas páginas.
-    scope.order(Arel.sql("#{column} #{direction} NULLS LAST"), card_number: :asc)
+    scope.order(Arel.sql("#{SORT_EXPRESSIONS.fetch(column)} #{direction} NULLS LAST"), card_number: :asc)
   end
 
   def paginate(scope, page, per_page)
