@@ -586,8 +586,7 @@ ambientais que invalidam mecanismos simples:
 
 ## 9. Decisões pendentes
 
-**Uma aberta (P8).** P1–P7 estão todas decididas (tasks 0.1, 0.2 e 0.3, em
-2026-09-19). Ver `docs/adr/001-fonte-de-dados-do-catalogo.md` e
+**Uma aberta (P8) (emenda de 2026-09-29).** P1–P7 estão todas decididas (AD-001..AD-004; tasks 0.1–0.3). Ver `docs/adr/001-fonte-de-dados-do-catalogo.md` e
 `docs/adr/002-stack-set-completo-e-imagens.md`.
 
 | #   | Decisão                                            | Status | Resolução                                                  |
