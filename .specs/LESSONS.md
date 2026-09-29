@@ -194,6 +194,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M08 / navegacao_principal_test.rb:289,299 (test/integration, rotas com find_by! por campo não-id)
 - last seen: 2026-09-27T23:07:57Z
 
+### L-031 - Test each side of a count threshold, including the smallest value past it, not only the extremes
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `views` · harmful: 0
+- features: conformidade
+- evidence: M4 app/views/catalog/_card_tile.html.erb:54 (views)
+- last seen: 2026-09-29T01:52:39Z
+
+### L-032 - Assert the value the spec defines, not the value the current implementation happens to use
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `design` · harmful: 0
+- features: conformidade
+- evidence: CNF-12 test/design/catalog_grid_canvas_test.rb:43 (design)
+- last seen: 2026-09-29T01:52:39Z
+
+### L-033 - When a criterion names where an element lives, assert its container, not only that it exists
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `views` · harmful: 0
+- features: conformidade
+- evidence: CNF-23 test/integration/card_detail_layout_test.rb:66 (views)
+- last seen: 2026-09-29T01:52:39Z
+
+### L-034 - Give every visual criterion a measurable outcome instead of an adjective such as compact or same size
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: conformidade
+- evidence: CNF-17 spec.md 'forma compacta' (spec)
+- last seen: 2026-09-29T01:52:39Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

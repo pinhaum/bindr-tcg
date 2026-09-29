@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 31,
+  "next_id": 35,
   "lessons": [
     {
       "id": "L-001",
@@ -544,6 +544,78 @@
       ],
       "created": "2026-09-27T23:07:57Z",
       "last_seen": "2026-09-27T23:07:57Z"
+    },
+    {
+      "id": "L-031",
+      "key": "surviving_mutant::test each side of a count threshold including the smallest value past it not only the extremes",
+      "text": "Test each side of a count threshold, including the smallest value past it, not only the extremes",
+      "signal": "surviving_mutant",
+      "scope": "views",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M4 app/views/catalog/_card_tile.html.erb:54 (views)"
+      ],
+      "created": "2026-09-29T01:52:39Z",
+      "last_seen": "2026-09-29T01:52:39Z"
+    },
+    {
+      "id": "L-032",
+      "key": "ac_gap::assert the value the spec defines not the value the current implementation happens to use",
+      "text": "Assert the value the spec defines, not the value the current implementation happens to use",
+      "signal": "ac_gap",
+      "scope": "design",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CNF-12 test/design/catalog_grid_canvas_test.rb:43 (design)"
+      ],
+      "created": "2026-09-29T01:52:39Z",
+      "last_seen": "2026-09-29T01:52:39Z"
+    },
+    {
+      "id": "L-033",
+      "key": "ac_gap::when a criterion names where an element lives assert its container not only that it exists",
+      "text": "When a criterion names where an element lives, assert its container, not only that it exists",
+      "signal": "ac_gap",
+      "scope": "views",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CNF-23 test/integration/card_detail_layout_test.rb:66 (views)"
+      ],
+      "created": "2026-09-29T01:52:39Z",
+      "last_seen": "2026-09-29T01:52:39Z"
+    },
+    {
+      "id": "L-034",
+      "key": "spec_precision_gap::give every visual criterion a measurable outcome instead of an adjective such as compact or same size",
+      "text": "Give every visual criterion a measurable outcome instead of an adjective such as compact or same size",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CNF-17 spec.md 'forma compacta' (spec)"
+      ],
+      "created": "2026-09-29T01:52:39Z",
+      "last_seen": "2026-09-29T01:52:39Z"
     }
   ]
 }
