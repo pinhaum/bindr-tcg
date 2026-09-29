@@ -67,7 +67,7 @@
   /* Fim da pasta: botão fixo "Adicionar cartas" (alvo + padding vertical) mais a barra inferior. */
   --progress-reserve: calc(var(--space-4) + var(--touch-target) + var(--space-3) + var(--space-3) + var(--nav-height));
   --sidebar-width: 280px;
-  --body-grid-columns: 1fr;
+  --body-grid-columns: minmax(0, 1fr);
   --body-padding-bottom: var(--nav-height);
   scroll-padding-bottom: var(--body-padding-bottom);
 
@@ -1371,6 +1371,9 @@ summary:focus-visible,
  */
 .progress-set {
   display: grid;
+  /* Sem trilha explícita, a coluna cresce até o nome inteiro em `nowrap` e o
+     `ellipsis` nunca corta: a página passava de 390px para 618px (Req. 2.5). */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
   min-width: 0;
 }
@@ -1380,6 +1383,7 @@ summary:focus-visible,
   justify-content: space-between;
   align-items: baseline;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 /* Nome longo quebra dentro da própria coluna; a contagem fica à direita (NAV-51, T10). */
@@ -1425,6 +1429,7 @@ summary:focus-visible,
   min-height: 24px;
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
+  font-weight: var(--caption-weight);
   color: var(--ink-muted);
   text-decoration: none;
   white-space: nowrap;

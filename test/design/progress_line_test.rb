@@ -63,6 +63,14 @@ class ProgressLineTest < ActiveSupport::TestCase
     assert_equal "ellipsis", nome["text-overflow"]
     assert_equal "none", nome["text-decoration"]
     assert_equal "0", nome["min-width"]
+    assert_equal "var(--caption-weight)", nome["font-weight"]
+  end
+
+  # Req. 2.5: sem trilha que admita encolher, a coluna do set cresce até o nome
+  # inteiro em `nowrap` e empurra a contagem para fora de 360px.
+  test "a linha do set encolhe até a coluna, e o nome é que corta" do
+    assert_equal "minmax(0, 1fr)", Stylesheet.resolved("progress-set")["grid-template-columns"]
+    assert_equal "0", Stylesheet.resolved("progress-set__header")["min-width"]
   end
 
   test "a legenda de base e parallels é uma só, 13px muted" do

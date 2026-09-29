@@ -95,13 +95,13 @@ checklists T3–T11 mostraram itens fora do artboard sem CNF nem Out of Scope, o
 reprovaria o CNF-35. Cada um volta como correção.
 
 ```
-T11 → T13 → T14 → T15
+T11 → T13 → T14 → T15 → T16
 ```
 
 ### Phase 6: Fechamento
 
 ```
-T15 → T12
+T16 → T12
 ```
 
 ---
@@ -586,11 +586,44 @@ T15 → T12
 
 ---
 
+### T16: Nada passa de 360px na pasta e no import
+
+**What**: A linha de set encolhe até a coluna para o nome cortar em reticências, e a coluna única do `body` no celular pode encolher até a viewport.
+**Where**: `app/assets/stylesheets/catalog.css`, `test/design/progress_line_test.rb`, `test/design/navigation_canvas_test.rb`
+**Depends on**: T15
+**Reuses**: `Stylesheet.resolved`, `Stylesheet.read_root_tokens`
+**Requirement**: CNF-12, CNF-25, CNF-33
+
+Medido em Chromium depois da T15: `/progress` com 618px de `scrollWidth` em 390px (a grade da `.progress-set` sem trilha explícita crescia até o nome inteiro em `nowrap`) e `/collection/import` com 384px em 360px (o conteúdo mínimo do campo de arquivo alargava a coluna `1fr` do `body`). O guarda estático de 360px não vê nenhum dos dois.
+
+**Tools**:
+
+- MCP: `playwright` (medição de `scrollWidth` no host)
+- Skill: NONE
+
+**Checklist do artboard**:
+
+- [x] Nome do set numa linha com reticências e contagem à direita visível em 390px (Mobile:46-49)
+- [x] Nome do set em legenda de peso regular, não o 700 herdado do `h3` (Mobile:47)
+
+**Done when**:
+
+- [x] `.progress-set` resolve `grid-template-columns: minmax(0, 1fr)` e `.progress-set__header` `min-width: 0`; o link resolve `font-weight: var(--caption-weight)`
+- [x] `:root` resolve `--body-grid-columns: minmax(0, 1fr)` (o desktop já usava `minmax(0, 1fr)`)
+- [x] `scrollWidth` igual à viewport em 360px em catálogo, detalhe, pasta (as duas ordens), import e wishlist, anônimo e com sessão
+- [x] Gate full passa
+
+**Tests**: unit (folha)
+**Gate**: full
+**Commit**: `fix(conformidade): pasta e import sem passar de 360px`
+
+---
+
 ### T12: Captura conferida contra o artboard e fechamento
 
 **What**: Capturas das três telas em 390px e 1280px, com e sem sessão, comparadas com o artboard item a item das checklists T3–T11; rastreabilidade, `.context/tasks.md` §6.7, gate build e aprovação do dono.
 **Where**: `.specs/features/conformidade/canvas-conformance.md` (novo), `.specs/features/conformidade/spec.md`, `.specs/features/conformidade/tasks.md`, `.context/tasks.md`, `.specs/STATE.md`
-**Depends on**: T15
+**Depends on**: T16
 **Reuses**: `spec/visual/capture.cjs`; o formato do `canvas-conformance.md` da `navegacao`
 **Requirement**: CNF-34, CNF-35
 
@@ -648,6 +681,7 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T13 | uma linha do tile, um rótulo, o topo do catálogo | ✅ |
 | T14 | imagem e linha da variante do detalhe | ✅ |
 | T15 | linha de set, chips de ordem, uma ação | ✅ |
+| T16 | duas trilhas de grade | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -664,10 +698,11 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T9 | T8 | Phase 3: `T8 → T9` | ✅ |
 | T10 | T1, T9 | Phase 4: `T9 → T10`, `T1 → T10` | ✅ |
 | T11 | T10 | Phase 4: `T10 → T11` | ✅ |
-| T12 | T15 | Phase 6: `T15 → T12` | ✅ |
+| T12 | T16 | Phase 6: `T16 → T12` | ✅ |
 | T13 | T11 | Phase 5: `T11 → T13` | ✅ |
 | T14 | T13 | Phase 5: `T13 → T14` | ✅ |
 | T15 | T14 | Phase 5: `T14 → T15` | ✅ |
+| T16 | T15 | Phase 5: `T15 → T16` | ✅ |
 
 ## Test Co-location Validation
 
@@ -688,3 +723,4 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T13 | folha, views | unit (folha), integration | unit (folha), integration | ✅ |
 | T14 | folha, views | integration, unit (folha) | integration, unit (folha) | ✅ |
 | T15 | folha, view | integration, unit (folha) | integration, unit (folha) | ✅ |
+| T16 | folha | unit (folha) | unit (folha) | ✅ |

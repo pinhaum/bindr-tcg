@@ -82,6 +82,13 @@ class NavigationCanvasTest < Minitest::Test
       ":root deve ter --sidebar-width: 280px"
   end
 
+  # Req. 2.5: a coluna única do celular encolhe até a viewport; com `1fr` o
+  # conteúdo mínimo de um filho (o campo de arquivo do import) alargava a página
+  # para 384px em 360px.
+  def test_mobile_body_grid_column_can_shrink
+    assert_equal "minmax(0, 1fr)", @tokens["--body-grid-columns"]
+  end
+
   # AC 3: Token body-grid-columns em ≥ 64rem muda para var(--sidebar-width) minmax(0, 1fr)
   def test_desktop_body_grid_columns
     rule = find_media_rule("(min-width: 64rem)", ":root")
