@@ -294,14 +294,14 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] O comando de reuso é `docker compose exec -e REUSE_PAYLOAD=1 app bin/rails ingestion:import`; a forma antiga (variável antes de `docker compose`) não existe mais: `grep -n "REUSE_PAYLOAD=1 docker" README.md` sai vazio (Fix 1)
-- [ ] O README diz que o payload bruto fica em `storage/ingestion/` e que o diretório é ignorado pelo git, conferido em `.gitignore` (Fix 2)
-- [ ] O README diz que a tarefa sai com código 1 quando o status não é `succeeded`, conferido em `lib/tasks/ingestion.rake` (Fix 2)
-- [ ] A revisão imutável de `config/ingestion.yml` é citada com `(AD-001)`; o hash não é copiado (Fix 2)
-- [ ] `grep -n "storage/ingestion\|código 1\|AD-001" README.md` devolve ≥ 3 linhas
-- [ ] Verificação inversa (sensor): cada gate do `CLAUDE.md` (quick, full, build, `bin/brakeman`, `python3 spec/verify_fixture.py`) aparece no README com o comando exato, comparado um a um e registrado no commit
-- [ ] Todo comando, arquivo e tarefa citados existem (`ls`/`grep` registrados); o contorno `DOCKER_CONFIG` continua como está (FEC-23)
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] O comando de reuso é `docker compose exec -e REUSE_PAYLOAD=1 app bin/rails ingestion:import`; a forma antiga (variável antes de `docker compose`) não existe mais: `grep -n "REUSE_PAYLOAD=1 docker" README.md` sai vazio (Fix 1)
+- [x] O README diz que o payload bruto fica em `storage/ingestion/` e que o diretório é ignorado pelo git, conferido em `.gitignore` (Fix 2)
+- [x] O README diz que a tarefa sai com código 1 quando o status não é `succeeded`, conferido em `lib/tasks/ingestion.rake` (Fix 2)
+- [x] A revisão imutável de `config/ingestion.yml` é citada com `(AD-001)`; o hash não é copiado (Fix 2)
+- [x] `grep -n "storage/ingestion\|código 1\|AD-001" README.md` devolve ≥ 3 linhas
+- [x] Verificação inversa (sensor): cada gate do `CLAUDE.md` (quick, full, build, `bin/brakeman`, `python3 spec/verify_fixture.py`) aparece no README com o comando exato, comparado um a um e registrado no commit
+- [x] Todo comando, arquivo e tarefa citados existem (`ls`/`grep` registrados); o contorno `DOCKER_CONFIG` continua como está (FEC-23)
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full

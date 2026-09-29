@@ -62,8 +62,12 @@ sem deixar registros parciais. Para reprocessar o payload já salvo em disco (ú
 offline):
 
 ```bash
-REUSE_PAYLOAD=1 docker compose exec app bin/rails ingestion:import
+docker compose exec -e REUSE_PAYLOAD=1 app bin/rails ingestion:import
 ```
+
+O payload bruto fica em `storage/ingestion/` — diretório ignorado pelo git. A tarefa
+sai com código 1 se o status não for `succeeded`. A revisão é fixada em `config/ingestion.yml`
+e imutável (AD-001).
 
 ## Testes e verificações
 
