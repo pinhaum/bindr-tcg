@@ -508,12 +508,19 @@ critério. A partir daqui o artboard é critério de aceite (AD-016).
 
 ## Rastreamento de pendências
 
+### Resolvidas
+
+| # | Pendência | Decisão | Onde |
+|---|---|---|---|
+| P1 | Escolha e validação da fonte de dados do catálogo | (AD-001) | task 0.1, `.specs/STATE.md`, `docs/adr/001-fonte-de-dados-do-catalogo.md` |
+| P2 | Confirmação dos campos, raridades, sets e attributes reais | (task 0.2) | `.context/tasks.md`, fixture validada |
+| P3 | Definição de "set completo" (Req. 9) | (AD-003) | task 0.3, `.specs/STATE.md`, `docs/adr/002-stack-set-completo-e-imagens.md` |
+| P4 | Escolha de stack | (AD-002) | task 0.1, `.specs/STATE.md`, `docs/adr/002-stack-set-completo-e-imagens.md` |
+
+### Em aberto
+
 Itens que **bloqueiam** o início da implementação:
 
 | # | Pendência | Onde |
 |---|---|---|
-| P1 | Escolha e validação da fonte de dados do catálogo | `product.md` §5.2 |
-| P2 | Confirmação dos campos, raridades, sets e attributes reais | `product.md` §6 |
-| P3 | Definição de "set completo" (Req. 9) | Req. 9 |
-| P4 | Escolha de stack | `design.md` §2 |
 | P8 | Hexadecimais das seis cores do jogo (Req. 12.11) | Req. 12 |

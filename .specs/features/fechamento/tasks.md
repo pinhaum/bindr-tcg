@@ -351,12 +351,12 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] Cada decisão é conferida na fonte aberta nesta task: P1 (AD-001, task 0.1), P2 (task 0.2), P3 (AD-003, task 0.3, `docs/adr/002-…`), P4 (AD-002); `ls docs/adr` registrado
-- [ ] P1–P4 saem do texto "bloqueiam o início da implementação": ficam como resolvidas (tabela ou nota separada) com a referência `(AD-NNN)` na linha; P8 continua como a única aberta, com `(AD-NNN)` ou `(emenda de 2026-09-29)` (FEC-07/FEC-06)
-- [ ] Se a redação certa exigir decisão do dono (ex.: a AD não cobre a pendência), a task não altera o trecho e devolve `blocked` com a pendência, a evidência e a pergunta; o orquestrador a registra em `decisoes-do-dono.md`
-- [ ] `grep -c "⚠️ VERIFICAR" .context/requirements.md` continua 0
-- [ ] Nenhum requisito numerado (Req. 1..13) muda; só a seção de rastreamento
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] Cada decisão é conferida na fonte aberta nesta task: P1 (AD-001, task 0.1), P2 (task 0.2), P3 (AD-003, task 0.3, `docs/adr/002-…`), P4 (AD-002); `ls docs/adr` registrado
+- [x] P1–P4 saem do texto "bloqueiam o início da implementação": ficam como resolvidas (tabela ou nota separada) com a referência `(AD-NNN)` na linha; P8 continua como a única aberta, com `(AD-NNN)` ou `(emenda de 2026-09-29)` (FEC-07/FEC-06)
+- [x] Se a redação certa exigir decisão do dono (ex.: a AD não cobre a pendência), a task não altera o trecho e devolve `blocked` com a pendência, a evidência e a pergunta; o orquestrador a registra em `decisoes-do-dono.md`
+- [x] `grep -c "⚠️ VERIFICAR" .context/requirements.md` continua 0
+- [x] Nenhum requisito numerado (Req. 1..13) muda; só a seção de rastreamento
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full
