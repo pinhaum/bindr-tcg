@@ -1,5 +1,6 @@
 require "test_helper"
 require_relative "../design/support/stylesheet"
+require_relative "../design/catalog_grid_canvas_test"
 
 # T17 — Linha de status do catálogo (NAV-36, NAV-27).
 # T4 (conformidade) — CNF-05..CNF-09: frase única "N cartas" (+ "· M filtros
@@ -278,23 +279,61 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
 
   # --- CNF-08: busca e status na mesma linha em ≥1024px, recuo igual ao corpo ---
 
-  test "em ≥1024px, o wrapper de busca+status vira flex row e a busca não estica" do
-    rule = Stylesheet.resolved("catalog__head-row")
+  test "em ≥1024px, o wrapper de busca+status vira flex row e a busca tem 480px (CNF-08)" do
+    css = Stylesheet.content_without_comments
+    wide = CatalogGridCanvasTest.wide_block(css)
+    wide_rules = Stylesheet.rules(wide)
+
+    rule = Stylesheet.resolved("catalog__head-row", wide_rules)
     assert_equal "flex", rule.fetch("display")
 
-    search_rule = Stylesheet.resolved("catalog__search")
-    assert search_rule.fetch("width").present?,
-      "a busca precisa de uma largura própria para não ocupar a linha inteira ao lado do status"
+    search_rule = Stylesheet.resolved("catalog__search", wide_rules)
+    assert_equal "30rem", search_rule.fetch("width"),
+      "a busca deve ter 480px (30rem) em ≥1024px conforme CNF-08"
   end
 
-  test "o recuo lateral de .catalog__head e .catalog__body é o mesmo token, em ≥1024px" do
-    head_rule = Stylesheet.resolved("catalog__head")
-    body_rule = Stylesheet.resolved("catalog__body")
+  test "o recuo lateral de .catalog__head e .catalog__body é o mesmo, em ≥1024px (CNF-08)" do
+    css = Stylesheet.content_without_comments
+    wide = CatalogGridCanvasTest.wide_block(css)
+    wide_rules = Stylesheet.rules(wide)
+    tokens = Stylesheet.read_root_tokens
 
-    # `padding` na forma "topo direita/esquerda baixo" — direita e esquerda
-    # precisam citar o mesmo token nos dois seletores.
-    assert_includes head_rule.fetch("padding"), "var(--space-4)"
-    assert_includes body_rule.fetch("padding"), "var(--space-4)"
+    head_rule = Stylesheet.resolved("catalog__head", wide_rules)
+    body_rule = Stylesheet.resolved("catalog__body", wide_rules)
+
+    # padding na forma "topo direita/esquerda baixo"
+    head_padding = head_rule.fetch("padding", "")
+    body_padding = body_rule.fetch("padding", "")
+
+    # CSS padding: 4 valores = top right bottom left; 3 valores = top right+left bottom
+    # Extrai esquerda e direita com parsing correto
+    def extract_horizontal_padding(padding_str)
+      parts = padding_str.split(/\s+/)
+      case parts.length
+      when 4
+        { left: parts[3], right: parts[1] }
+      when 3
+        { left: parts[1], right: parts[1] }
+      when 2
+        { left: parts[1], right: parts[1] }
+      else
+        { left: parts[0], right: parts[0] }
+      end
+    end
+
+    head_h = extract_horizontal_padding(head_padding)
+    body_h = extract_horizontal_padding(body_padding)
+
+    # Resolve para pixels
+    head_left_px = Stylesheet.to_pixels(head_h[:left], tokens)
+    head_right_px = Stylesheet.to_pixels(head_h[:right], tokens)
+    body_left_px = Stylesheet.to_pixels(body_h[:left], tokens)
+    body_right_px = Stylesheet.to_pixels(body_h[:right], tokens)
+
+    assert_equal head_left_px, body_left_px,
+                 "recuo esquerdo (left) deve ser igual entre .catalog__head e .catalog__body"
+    assert_equal head_right_px, body_right_px,
+                 "recuo direito (right) deve ser igual entre .catalog__head e .catalog__body"
   end
 
   # --- CNF-10: "Sua coleção" não aparece mais no catálogo ---

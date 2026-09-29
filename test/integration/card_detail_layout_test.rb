@@ -58,13 +58,19 @@ class CardDetailLayoutTest < ActionDispatch::IntegrationTest
                     ".card-detail__data must appear before .card-detail__variants"
   end
 
-  # T9 (conformidade), CNF-23 — "Voltar ao catálogo" existe uma vez, sem "←"
-  test "back to catalog link exists once without arrow" do
+  # T20 (conformidade), CNF-23 — "Voltar ao catálogo" existe uma vez em
+  # `.site-header__aside`, sem "←". O link deve estar dentro do aside da
+  # navegação, não no `<main>`, para ser focado antes do conteúdo
+  # (Android/iOS: eixo de navegação à esquerda, detalhe à direita).
+  test "back to catalog link exists once in site-header__aside without arrow" do
     get card_path(@card.card_number)
     assert_response :success
 
-    assert_select "a.site-header__back", count: 1
-    assert_select "a.site-header__back", text: "Voltar ao catálogo"
-    assert_select "a.site-header__back", text: /←/, count: 0
+    assert_select ".site-header__aside a.site-header__back", count: 1
+    assert_select ".site-header__aside a.site-header__back", text: "Voltar ao catálogo"
+    assert_select ".site-header__aside a.site-header__back", text: /←/, count: 0
+    # CNF-23: link deve estar **dentro** de .site-header__aside, não no <main>
+    assert_select "main.card-detail a.site-header__back", 0,
+                  "Voltar ao catálogo deve estar no aside de navegação, não dentro de <main>"
   end
 end

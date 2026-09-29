@@ -775,12 +775,12 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 
 **Done when**:
 
-- [ ] `card_detail_layout_test.rb`: `assert_select ".site-header__aside a.site-header__back", count: 1`; mover o link para o `<main>` faz o teste falhar (CNF-23)
-- [ ] `card_detail_header_test.rb`: `.card-detail__trigger-label` resolve `font-weight: var(--body-strong-weight)` e `--body-strong-weight` resolve `600` (`Stylesheet.read_root_tokens`); o rótulo "Trigger" vem depois do texto do efeito no HTML (posição do `.card-detail__trigger-label` maior que a do texto em `.card-detail__effect`) (CNF-18)
-- [ ] `catalog_status_line_test.rb`: o padding lateral de `.catalog__head` e `.catalog__body` é lido no bloco largo (`wide_block`) e comparado com `assert_equal` (direita e esquerda resolvidas), no lugar dos dois `assert_includes ... "var(--space-4)"` (CNF-08)
-- [ ] `catalog_status_line_test.rb`: `search_rule.fetch("width").present?` vira `assert_equal` com o valor que a T21 registrou em CNF-08, lido no bloco largo; se a T21 não o registrou, a asserção fica como está e a task diz isso
-- [ ] Nenhum arquivo fora do `Where` editado; testes de CSS que só espelham declaração ficam como estão (fora do escopo)
-- [ ] Gate full passa
+- [x] `card_detail_layout_test.rb`: `assert_select ".site-header__aside a.site-header__back", count: 1`; mover o link para o `<main>` faz o teste falhar (CNF-23)
+- [x] `card_detail_header_test.rb`: `.card-detail__trigger-label` resolve `font-weight: var(--body-strong-weight)` e `--body-strong-weight` resolve `600` (`Stylesheet.read_root_tokens`); o rótulo "Trigger" vem depois do texto do efeito no HTML (posição do `.card-detail__trigger-label` maior que a do texto em `.card-detail__effect`) (CNF-18)
+- [x] `catalog_status_line_test.rb`: o padding lateral de `.catalog__head` e `.catalog__body` é lido no bloco largo (`wide_block`) e comparado com `assert_equal` (direita e esquerda resolvidas), no lugar dos dois `assert_includes ... "var(--space-4)"` (CNF-08)
+- [x] `catalog_status_line_test.rb`: `search_rule.fetch("width").present?` vira `assert_equal` com o valor que a T21 registrou em CNF-08, lido no bloco largo; se a T21 não o registrou, a asserção fica como está e a task diz isso
+- [x] Nenhum arquivo fora do `Where` editado; testes de CSS que só espelham declaração ficam como estão (fora do escopo)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

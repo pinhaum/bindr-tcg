@@ -101,7 +101,7 @@ class CardDetailHeaderTest < ActionDispatch::IntegrationTest
     assert_select ".card-detail__set", text: "Romance Dawn · OP01"
   end
 
-  # --- CNF-18: trigger dentro da seção "Efeito", sem seção própria ---
+  # --- CNF-18: trigger dentro da seção "Efeito", peso 600, ordem depois do efeito ---
 
   test "trigger aparece dentro da seção Efeito, depois do efeito, com rótulo Trigger" do
     com_trigger = create_card(card_number: "OP01-021", name: "Com Trigger",
@@ -117,6 +117,40 @@ class CardDetailHeaderTest < ActionDispatch::IntegrationTest
     end
     assert_select ".card-detail__trigger", 0,
                   "não pode existir mais seção própria de trigger (CNF-18)"
+  end
+
+  test "rótulo Trigger tem peso 600 e vem depois do texto do efeito (CNF-18)" do
+    com_trigger = create_card(card_number: "OP01-021", name: "Com Trigger",
+                              card_type: "event", colors: [ "Red" ], cost: 1,
+                              effect_text: "Main effect text.",
+                              trigger_text: "Play this card.")
+    add_variant(com_trigger, "OP01-021", rarity: "C")
+
+    get card_path("OP01-021")
+
+    # Peso 600 vem do token --body-strong-weight
+    tokens = Stylesheet.read_root_tokens
+    rules = Stylesheet.rules(Stylesheet.content_without_comments)
+    trigger_label_rule = Stylesheet.resolved("card-detail__trigger-label", rules)
+
+    font_weight = trigger_label_rule.fetch("font-weight")
+    # Se for um token, resolve; senão usa direto
+    resolved_weight = if font_weight.start_with?("var(--")
+      token_name = font_weight[/\(([^)]+)\)/, 1]
+      tokens.fetch(token_name, font_weight)
+    else
+      font_weight
+    end
+    assert_equal "600", resolved_weight,
+                 "Trigger deve ter font-weight: var(--body-strong-weight) que resolve a 600"
+
+    # Ordem: trigger-label vem depois do texto do efeito no HTML
+    html = response.body
+    effect_text_pos = html.index("Main effect text")
+    trigger_label_pos = html.index('class="card-detail__trigger-label"')
+
+    assert_operator trigger_label_pos, :>, effect_text_pos,
+                    "Trigger label deve vir depois do texto do efeito"
   end
 
   test "carta sem trigger não exibe o rótulo Trigger" do
