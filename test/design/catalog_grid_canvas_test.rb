@@ -38,10 +38,10 @@ class CatalogGridCanvasTest < ActiveSupport::TestCase
                ".pagination só é declarada fora da media query"
   end
 
-  test "fora do bloco largo a grade mantém o reflow com gap de 8px (D7, Req. 2.5)" do
+  test "fora do bloco largo a grade tem duas colunas com gap de 8px (CNF-12, Req. 2.5)" do
     grid = Stylesheet.resolved("catalog__grid", @narrow_rules)
 
-    assert_match(/\Arepeat\(auto-fill,/, grid["grid-template-columns"])
+    assert_equal "repeat(2, minmax(0, 1fr))", grid["grid-template-columns"]
     assert_equal 8.0, Stylesheet.to_pixels(grid["gap"])
   end
 

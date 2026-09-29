@@ -1,10 +1,9 @@
 /*
  * Grade do catálogo.
  *
- * Req. 2.5 — utilizável em 360px sem scroll horizontal. A regra que sustenta
- * isso é não haver nenhuma largura fixa maior que a viewport: a grade usa
- * `auto-fill` com `minmax`, e o mínimo da coluna é menor que 360px menos o
- * respiro lateral. Toda imagem é limitada a `max-width: 100%`.
+ * Req. 2.5 — utilizável em 360px sem scroll horizontal. Fora de ≥1024px (bloco
+ * largo), duas colunas mantêm a proporção do canvas (CNF-12) dentro de 360px.
+ * Toda imagem é limitada a `max-width: 100%`.
  */
 
 :root {
@@ -207,12 +206,13 @@ body {
 }
 
 /*
- * `auto-fill` + `minmax` faz a contagem de colunas derivar da largura
- * disponível. Em 360px cabem duas colunas; nada precisa de media query.
+ * Duas colunas (CNF-12) com 8px de espaço entre tiles (var(--space-2)), dentro
+ * de 360px e sem scroll horizontal (Req. 2.5). Em bloco largo (1024px+),
+ * redefinido para cinco colunas e gap 16px.
  */
 .catalog__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
   list-style: none;
   margin: 0;

@@ -717,11 +717,11 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 
 **Done when**:
 
-- [ ] O teste "fora do bloco largo" afirma `repeat(2, minmax(0, 1fr))` e gap de 8px em `@narrow_rules`, e falha se a regra voltar a `auto-fill` (o mutante do `validation.md` F1 morre)
-- [ ] O teste do bloco largo (`repeat(5, minmax(0, 1fr))`, gap 16px) passa sem edição
-- [ ] `test/integration/catalog_grid_test.rb` e `test/design/layout_test.rb` (guardas de 360px) passam sem edição
-- [ ] Comentários da folha coerentes com a nova regra
-- [ ] Gate full passa
+- [x] O teste "fora do bloco largo" afirma `repeat(2, minmax(0, 1fr))` e gap de 8px em `@narrow_rules`, e falha se a regra voltar a `auto-fill` (o mutante do `validation.md` F1 morre)
+- [x] O teste do bloco largo (`repeat(5, minmax(0, 1fr))`, gap 16px) passa sem edição
+- [x] `test/integration/catalog_grid_test.rb` e `test/design/layout_test.rb` (guardas de 360px) passam sem edição
+- [x] Comentários da folha coerentes com a nova regra
+- [x] Gate full passa
 
 **Tests**: unit (folha)
 **Gate**: full
