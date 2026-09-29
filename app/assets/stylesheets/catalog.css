@@ -631,7 +631,12 @@ body {
 }
 .variant__meta dd { margin: 0; overflow-wrap: anywhere; }
 .variant__code { font-variant-numeric: tabular-nums; }
-.variant__rarity { font-weight: var(--body-strong-weight); }
+.variant__rarity {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  font-weight: var(--caption-weight);
+  color: var(--ink-muted);
+}
 .variant__set { overflow-wrap: anywhere; }
 
 /*
@@ -834,7 +839,12 @@ body {
 .ownership__count { font-weight: var(--display-weight); font-variant-numeric: tabular-nums; }
 
 /* CNF-21 — "não tenho" no lugar visível da contagem, em zero (Mobile-Carta.dc.html:74). */
-.ownership__empty { color: var(--ink-muted); }
+.ownership__empty {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  font-weight: var(--caption-weight);
+  color: var(--ink-muted);
+}
 
 /*
  * Posse não é cor (§11.6): a variante possuída ganha badge com a quantidade; a
@@ -919,7 +929,10 @@ body {
   border-radius: var(--radius-sm);
 }
 
-.card-detail .ownership__step { min-height: 44px; }
+.card-detail .ownership__step {
+  min-height: 44px;
+  min-width: 44px;
+}
 
 /*
  * CNF-21 — em zero, "não tenho" é o texto visível no lugar da contagem; o
@@ -927,7 +940,8 @@ body {
  * testes de badge fora desta task) e some da tela pelo mesmo recorte de
  * `.ownership__variant`, não por `display: none`.
  */
-.ownership__count--empty {
+.ownership__count--empty,
+.ownership__unit--empty {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -2234,8 +2248,11 @@ summary:focus-visible,
    */
   .card-detail__media {
     grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: start;
     max-width: none;
     width: 320px;
+    margin-top: 0;
     padding: var(--space-3);
   }
 
@@ -2253,6 +2270,12 @@ summary:focus-visible,
    * passa a caber tudo); posse e wishlist não precisam mais de `flex-basis:
    * 100%` para cada uma ganhar linha própria.
    */
+  .variant {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
   .variant > .ownership,
   .variant > .wishlist-mark { flex-basis: auto; }
 

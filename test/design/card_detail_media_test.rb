@@ -92,4 +92,14 @@ class CardDetailMediaTest < ActiveSupport::TestCase
 
     assert_equal "2", data["grid-column"]
   end
+
+  # Desktop-Carta.dc.html:32-37 — a imagem de 320×448 abre a coluna, na altura do
+  # título; sem `align-self: start` ela era centralizada na linha alta dos dados.
+  test "dentro de @media (min-width: 64rem), a imagem alinha ao topo, na altura do título (D:32-37)" do
+    media = Stylesheet.resolved("card-detail__media", @wide_rules)
+
+    assert_equal "start", media["align-self"]
+    assert_equal "1 / span 2", media["grid-row"]
+    assert_equal 0.0, Stylesheet.to_pixels(media["margin-top"])
+  end
 end

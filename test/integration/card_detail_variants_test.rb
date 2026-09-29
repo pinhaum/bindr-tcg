@@ -112,6 +112,24 @@ class CardDetailVariantsTest < ActionDispatch::IntegrationTest
     assert_select "##{ownership_id(@base)} .ownership__button--decrement[aria-disabled=?]", "true"
   end
 
+  test "em zero o rótulo cópias não fica visível ao lado do não tenho" do
+    sign_in
+
+    get card_path(@card.card_number)
+
+    assert_select "##{ownership_id(@base)} .ownership__unit.ownership__unit--empty", text: "cópias"
+  end
+
+  test "com posse o rótulo da unidade continua visível" do
+    sign_in
+    CollectionItem.create!(user: @user, card_variant: @base, quantity: 2)
+
+    get card_path(@card.card_number)
+
+    assert_select "##{ownership_id(@base)} .ownership__unit", text: "cópias"
+    assert_select "##{ownership_id(@base)} .ownership__unit--empty", 0
+  end
+
   test "com posse o não tenho desaparece" do
     sign_in
     CollectionItem.create!(user: @user, card_variant: @base, quantity: 1)

@@ -528,21 +528,21 @@ T15 → T12
 
 **Checklist do artboard**:
 
-- [ ] 1280px: imagem 320×448 alinhada ao topo da coluna, na altura do título (D:32-37)
-- [ ] "SR · arte base" / "SP CARD · alternativa" 13px, `--ink-muted`, peso regular (Mobile:57, :72)
-- [ ] "não tenho" 13px muted com zero cópias (Mobile:74)
-- [ ] `[n]` com 44px de largura e altura, sunken, border-strong, 15px 600 (Mobile:63)
-- [ ] 1280px: linha da variante em linha, `align-items: center`, `gap: 16px` — miniatura, identificação, quantidade e stepper lado a lado (D:69)
+- [x] 1280px: imagem 320×448 alinhada ao topo da coluna, na altura do título (D:32-37)
+- [x] "SR · arte base" / "SP CARD · alternativa" 13px, `--ink-muted`, peso regular (Mobile:57, :72)
+- [x] "não tenho" 13px muted com zero cópias (Mobile:74)
+- [x] `[n]` com 44px de largura e altura, sunken, border-strong, 15px 600 (Mobile:63)
+- [x] 1280px: linha da variante em linha, `align-items: center`, `gap: 16px` — miniatura, identificação, quantidade e stepper lado a lado (D:69)
 
 **Done when**:
 
-- [ ] Em ≥1024px a coluna da imagem resolve `align-self: start` (ou o contêiner `align-items: start`), sem centralização vertical
-- [ ] A linha "raridade · tipo de arte" resolve a tipografia de legenda, `var(--ink-muted)` e peso regular
-- [ ] Com zero cópias o texto visível é exatamente "não tenho" (não "não tenho cópias"); com N cópias continua o selo com o número
-- [ ] `[n]` resolve `min-width: 44px` e `min-height: 44px`
-- [ ] Em ≥1024px a linha da variante resolve `display: flex` (ou grid numa linha), `align-items: center` e gap 16px; em <1024px continua empilhada
-- [ ] Marca de wishlist por variante continua na linha (Req. 8.1)
-- [ ] Gate full passa
+- [x] Em ≥1024px a coluna da imagem resolve `align-self: start` (ou o contêiner `align-items: start`), sem centralização vertical
+- [x] A linha "raridade · tipo de arte" resolve a tipografia de legenda, `var(--ink-muted)` e peso regular
+- [x] Com zero cópias o texto visível é exatamente "não tenho" (não "não tenho cópias"); com N cópias continua o selo com o número
+- [x] `[n]` resolve `min-width: 44px` e `min-height: 44px`
+- [x] Em ≥1024px a linha da variante resolve `display: flex` (ou grid numa linha), `align-items: center` e gap 16px; em <1024px continua empilhada
+- [x] Marca de wishlist por variante continua na linha (Req. 8.1)
+- [x] Gate full passa
 
 **Tests**: integration, unit (folha)
 **Gate**: full

@@ -49,7 +49,7 @@
         resolveria isso para o app inteiro, mas é mudança de configuração
         global, não desta task.
       %>
-      <span class="ownership__unit"><%= quantity == 1 ? "cópia" : "cópias" %></span>
+      <span class="ownership__unit<%= " ownership__unit--empty" if quantity.zero? %>"><%= quantity == 1 ? "cópia" : "cópias" %></span>
       <%#
         Nome da carta **e** código da variante dentro da região viva. Sem eles
         o anúncio é "3 cópias", que numa grade de 24 tiles não identifica nada;

@@ -35,4 +35,39 @@ class CardDetailOwnershipButtonsTest < ActiveSupport::TestCase
     decls = Stylesheet.declarations(scoped_rule).to_h
     assert_equal 2, decls.size, "regra escopada deve ter exatamente min-height e min-width"
   end
+
+  # Mobile-Carta.dc.html:63 — `[n]` de 44×44px, sunken, borda forte, 15px 600.
+  test "o [n] do stepper tem 44px de largura e altura no detalhe" do
+    step = Stylesheet.declarations(@rules.find { |selector, _| selector == ".card-detail .ownership__step" }&.last.to_s).to_h
+
+    assert_equal "44px", step["min-width"]
+    assert_equal "44px", step["min-height"]
+  end
+
+  test "o [n] é sunken, com borda forte e texto 15px peso 600" do
+    step = Stylesheet.resolved("ownership__step", @rules)
+
+    assert_equal "var(--surface-sunken)", step["background-color"]
+    assert_equal "1px solid var(--border-strong)", step["border"]
+    assert_equal "var(--body-strong-weight)", step["font-weight"]
+    assert_equal 600, Stylesheet.read_root_tokens["--body-strong-weight"].to_i
+  end
+
+  # Mobile-Carta.dc.html:74 — "não tenho" é 13px, muted, peso regular.
+  test "o não tenho é legenda 13px muted de peso regular" do
+    empty = Stylesheet.resolved("ownership__empty", @rules)
+    tokens = Stylesheet.read_root_tokens
+
+    assert_equal "var(--ink-muted)", empty["color"]
+    assert_equal 13.0, Stylesheet.to_pixels(empty["font-size"])
+    assert_equal 400, tokens[empty["font-weight"][/var\((--[a-z-]+)\)/, 1]].to_i
+  end
+
+  test "o rótulo da unidade sai da vista em zero, sem display none" do
+    unit = Stylesheet.resolved("ownership__unit--empty", @rules)
+
+    assert_equal "absolute", unit["position"]
+    assert_equal "inset(50%)", unit["clip-path"]
+    assert_nil unit["display"]
+  end
 end

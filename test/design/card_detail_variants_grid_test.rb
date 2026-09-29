@@ -89,4 +89,31 @@ class CardDetailVariantsGridTest < ActiveSupport::TestCase
     assert_equal '""', divider["content"]
     assert_equal "1px solid var(--border)", divider["border-top"]
   end
+
+  # Mobile-Carta.dc.html:57, :72 — "SR · arte base" é legenda 13px, muted, regular.
+  test "a raridade e o tipo de arte são legenda muted de peso regular" do
+    rarity = base(".variant__rarity")
+    tokens = Stylesheet.read_root_tokens
+
+    assert_equal "var(--ink-muted)", rarity["color"]
+    assert_equal 13.0, Stylesheet.to_pixels(rarity["font-size"])
+    assert_equal 400, tokens[rarity["font-weight"][/var\((--[a-z-]+)\)/, 1]].to_i
+  end
+
+  # D:69 — em 1024px ou mais: linha única, centralizada, gap 16px; abaixo disso
+  # continua empilhada (`flex-wrap: wrap`, gap 8px).
+  test "em 1024px ou mais a variante é uma linha só com gap 16px" do
+    variant = wide(".variant")
+
+    assert_equal "nowrap", variant["flex-wrap"]
+    assert_equal "center", variant["align-items"]
+    assert_equal 16.0, Stylesheet.to_pixels(variant["gap"])
+  end
+
+  test "abaixo de 1024px a variante continua empilhada" do
+    variant = base(".variant")
+
+    assert_equal "wrap", variant["flex-wrap"]
+    assert_equal 8.0, Stylesheet.to_pixels(variant["gap"])
+  end
 end
