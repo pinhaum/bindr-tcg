@@ -104,6 +104,25 @@ T11 → T13 → T14 → T15 → T16 → T17
 T17 → T12
 ```
 
+### Phase 7: Correções da validação (ciclo 1)
+
+O Verifier do ciclo 1 (`validation.md`, 2026-09-28) reprovou por CNF-12 e CNF-04
+e apontou CNF-23, CNF-18 e CNF-08 com evidência frouxa; as revisões de a11y e de
+testes acrescentaram o isolamento do selo (CNF-02), o selo do detalhe por
+variante (CNF-16) e a divergência CNF-06 × teste. Todas dependem da T17 (código
+estável). T18, T19 e T21 têm `Where` disjuntos e rodam em paralelo; a T20 espera
+a T21 (o valor de CNF-08 sai da spec emendada) e a T22 espera a T19 (mesmo
+arquivo de teste). A T12 não muda: o checkbox do dono e o ciclo 2 do Verifier
+vêm depois desta fase.
+
+```
+T17 → T18
+T17 → T19
+T17 → T21
+T21 → T20
+T19 → T22
+```
+
 ---
 
 ## Task Breakdown
@@ -681,6 +700,157 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 
 ---
 
+### T18: Grade abaixo de 1024px com duas colunas (CNF-12)
+
+**What**: A grade fora do bloco largo passa de `repeat(auto-fill, minmax(var(--tile-min), 1fr))` para `repeat(2, minmax(0, 1fr))` com gap de 8px, e o teste afirma esse valor no trecho de fora do `@media (min-width: 64rem)`.
+**Where**: `app/assets/stylesheets/catalog.css`, `test/design/catalog_grid_canvas_test.rb`
+**Depends on**: T17
+**Reuses**: `CatalogGridCanvasTest.wide_block` e o `@narrow_rules` do `setup` (o recorte sem o bloco largo, que `Stylesheet.resolved` sozinho não faz: ele achata `@media`)
+**Requirement**: CNF-12
+
+`validation.md` F1: `catalog.css:215` mantém `auto-fill` (três ou mais colunas entre ~480 e 1023px) e o teste `catalog_grid_canvas_test.rb:43-44` foi escrito contra a implementação. A spec revoga o "número fixo de colunas" só para ≥1024px e pede "duas colunas com 8px" abaixo disso. Os comentários da folha (`catalog.css:5-6` e `:209-212`) hoje justificam o `auto-fill`; reescrevê-los. O token `--tile-min` continua: `test/design/layout_test.rb` o usa na conta de 360px e o detalhe também.
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] O teste "fora do bloco largo" afirma `repeat(2, minmax(0, 1fr))` e gap de 8px em `@narrow_rules`, e falha se a regra voltar a `auto-fill` (o mutante do `validation.md` F1 morre)
+- [ ] O teste do bloco largo (`repeat(5, minmax(0, 1fr))`, gap 16px) passa sem edição
+- [ ] `test/integration/catalog_grid_test.rb` e `test/design/layout_test.rb` (guardas de 360px) passam sem edição
+- [ ] Comentários da folha coerentes com a nova regra
+- [ ] Gate full passa
+
+**Tests**: unit (folha)
+**Gate**: full
+**Commit**: `fix(conformidade): grade do catálogo com duas colunas abaixo de 1024px`
+
+---
+
+### T19: Testes de CNF-04, CNF-02 e CNF-16 que faltavam
+
+**What**: Três lacunas de teste: tile com duas variantes (limite de "N impressões"), isolamento entre usuários no selo do tile, e selo do detalhe com a quantidade da variante e não a soma da carta.
+**Where**: `test/integration/catalog_tile_test.rb`, `test/integration/card_detail_image_test.rb`
+**Depends on**: T17
+**Reuses**: `create_card`, `create_variant`, `sign_in` e `tile_for` do `CatalogTileTest`; o `setup` do `CardDetailImageTest`
+**Requirement**: CNF-04, CNF-02, CNF-16
+
+`validation.md` F2 (mutante `variants.size < 3` em `_card_tile.html.erb:54` sobrevive: só há casos de 1 e 3 variantes) e as revisões de testes: o único caso de posse alheia no tile é o do anônimo, e o detalhe só tem carta de variante única (a soma `owned_quantity_for_card` não é distinguida de `owned_quantity(hero)`).
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `catalog_tile_test.rb`: carta com duas variantes mostra "2 impressões" em `.card-tile__rarity` e nenhuma raridade (`"C"`) no tile; com `variants.size < 3` o teste falha
+- [ ] `catalog_tile_test.rb`: outro usuário possui cópias e `@user` logado, sem cópias, vê 0 `.card-tile__badge`; anônimo continua sem selo; `catalog_path(user_id: outro.id)` não muda o resultado (`Current.user` é a única fonte, Req. 6.5)
+- [ ] `card_detail_image_test.rb`: carta com duas variantes, a primeira com 1 cópia e a segunda com 3, mostra o selo "1" (`aria-label` "1 cópia") na miniatura e na imagem maior, nunca "4"
+- [ ] Cada teste novo falha se a implementação for trocada pelo mutante correspondente (ex.: `owned_quantity(hero)` → `owned_quantity_for_card(@card)`), conferido a mão antes do commit
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test(conformidade): cobrir duas impressões, isolamento do selo e selo por variante`
+
+---
+
+### T20: Evidência de CNF-23, CNF-18 e CNF-08 sem asserção frouxa
+
+**What**: Três testes passam a afirmar o valor da spec: "Voltar ao catálogo" dentro de `.site-header__aside`; peso 600 e ordem do trigger; recuo e largura da busca lidos no bloco largo, com `assert_equal`.
+**Where**: `test/integration/card_detail_layout_test.rb`, `test/integration/card_detail_header_test.rb`, `test/integration/catalog_status_line_test.rb`
+**Depends on**: T21
+**Reuses**: `CatalogGridCanvasTest.wide_block` (já requerido por `card_detail_header_test.rb`); `Stylesheet.resolved(seletor, regras)` com as regras do bloco largo
+**Requirement**: CNF-23, CNF-18, CNF-08
+
+`validation.md` F3, F4, F5 e revisão de testes (`Stylesheet.resolved` sem recorte achata `@media`, então `catalog_status_line_test.rb:281-298` não distingue largura). O valor da largura da busca só entra depois de a T21 fixar CNF-08 na spec; onde a T21 devolver que o canvas é omisso, esta task mantém a asserção atual e registra o resíduo na própria task, sem inventar número.
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `card_detail_layout_test.rb`: `assert_select ".site-header__aside a.site-header__back", count: 1`; mover o link para o `<main>` faz o teste falhar (CNF-23)
+- [ ] `card_detail_header_test.rb`: `.card-detail__trigger-label` resolve `font-weight: var(--body-strong-weight)` e `--body-strong-weight` resolve `600` (`Stylesheet.read_root_tokens`); o rótulo "Trigger" vem depois do texto do efeito no HTML (posição do `.card-detail__trigger-label` maior que a do texto em `.card-detail__effect`) (CNF-18)
+- [ ] `catalog_status_line_test.rb`: o padding lateral de `.catalog__head` e `.catalog__body` é lido no bloco largo (`wide_block`) e comparado com `assert_equal` (direita e esquerda resolvidas), no lugar dos dois `assert_includes ... "var(--space-4)"` (CNF-08)
+- [ ] `catalog_status_line_test.rb`: `search_rule.fetch("width").present?` vira `assert_equal` com o valor que a T21 registrou em CNF-08, lido no bloco largo; se a T21 não o registrou, a asserção fica como está e a task diz isso
+- [ ] Nenhum arquivo fora do `Where` editado; testes de CSS que só espelham declaração ficam como estão (fora do escopo)
+- [ ] Gate full passa
+
+**Tests**: integration, unit (folha)
+**Gate**: full
+**Commit**: `test(conformidade): afirmar posição do voltar, peso do trigger e recuo da busca`
+
+---
+
+### T21: Emendas de precisão na spec (CNF-06, CNF-08, CNF-17, CNF-36)
+
+**What**: `spec.md` passa a dizer o que o canvas desenha onde o texto era omisso ou divergia do teste: CNF-06 com filtro e zero resultados, largura da busca em CNF-08, forma compacta em CNF-17 e a medida do placeholder em CNF-36.
+**Where**: `.specs/features/conformidade/spec.md`
+**Depends on**: T17
+**Reuses**: `canvas-conformance.md`; os artboards de `.specs/features/navegacao/canvas/` (`Desktop-Catalogo.dc.html`, `Main.dc.html`, `Mobile-Carta.dc.html`, `Desktop-Carta.dc.html`); `validation.md` (CNF-17, CNF-36, CNF-08)
+**Requirement**: CNF-06, CNF-08, CNF-17, CNF-36
+
+Só a spec muda; nenhum teste ou código. Regra de decisão: cada emenda usa o valor que o artboard desenha, citando o arquivo e a linha. **Onde o artboard não desenha, o texto não é inventado**: a task devolve `blocked` com a pergunta ao orquestrador e registra o item como DECISÃO-DO-DONO. Itens:
+
+(a) CNF-06 × `catalog_status_line_test.rb:148-158`: o teste exige 0 links em `.catalog__status` com filtro e zero resultados, porque a T17 moveu o "Limpar filtros" para `.catalog__empty`. Ler o canvas: se ele desenha o botão só no estado vazio, emendar o texto de CNF-06 para "WHILE houver filtro ativo e ao menos um resultado, na linha de status; com zero resultados, no estado vazio"; se o canvas desenha o botão na linha de status também sem resultado, devolver `blocked` (o teste e a T17 é que estariam errados).
+(b) CNF-08: a largura da busca ao lado do status (`Desktop-Catalogo.dc.html:69`, 480px = `30rem`, `catalog.css:2167`) entra no texto.
+(c) CNF-17 e (d) CNF-36: acrescentar o valor que o canvas define para "forma compacta" (custo, power, life, attribute, traits, block) e para "na mesma medida" do placeholder (miniatura 155×217px e coluna de 320px, hoje em `card_detail_media_test.rb`); `canvas-conformance.md` registra que o canvas não desenha os campos de CNF-17, e nesse caso o item fica como DECISÃO-DO-DONO sem edição.
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `tlc-spec-driven` (validador de spec)
+
+**Done when**:
+
+- [ ] CNF-06 emendado para casar com o canvas, ou a task devolveu `blocked` com a pergunta
+- [ ] CNF-08 traz a largura da busca com a referência do artboard
+- [ ] CNF-17 e CNF-36 trazem a medida do artboard, ou a task lista o que ficou em aberto por omissão do canvas
+- [ ] A Traceability e o "Coverage" da spec continuam coerentes (T18–T22 acrescentadas às linhas dos CNF corrigidos)
+- [ ] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_spec.py .specs/features/conformidade/spec.md` sai com 0
+- [ ] Gate full passa
+
+**Tests**: none (só documento; a matriz não exige teste para `spec.md`)
+**Gate**: full
+**Commit**: `docs(conformidade): precisar CNF-06, CNF-08, CNF-17 e CNF-36 na spec`
+
+---
+
+### T22: Selo e imagem da miniatura fora da árvore de acessibilidade (CNF-14, CNF-16)
+
+**What**: Abaixo de 1024px, a miniatura do detalhe deixa de repetir o selo e o `alt` da imagem maior: o selo da miniatura ganha `aria-hidden="true"` e a imagem da miniatura `alt=""`.
+**Where**: `app/views/catalog/show.html.erb`, `test/integration/card_detail_image_test.rb`
+**Depends on**: T19
+**Reuses**: o padrão do tile (`alt: ""` em `_card_tile.html.erb:36`, imagem decorativa dentro de link com nome)
+**Requirement**: CNF-14, CNF-16
+
+Revisão de a11y, achado 5 (`show.html.erb:33` e `:84`): com o `<details>` aberto, o leitor anuncia "N cópias" e o `alt` duas vezes. A imagem maior (`.card-detail__expand`) mantém `role="img"`, `aria-label` e `alt` (é a única referência quando a miniatura some em ≥1024px, CNF-15). O tile não muda: nele o selo aparece uma vez. A quantidade continua anunciada por variante em `.ownership` (CNF-21).
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `.card-detail__thumb .card-detail__badge` tem `aria-hidden="true"` e não tem `role`/`aria-label`; `.card-detail__expand .card-detail__badge` mantém `role="img"` e `aria-label` "N cópia(s)"
+- [ ] A imagem dentro de `.card-detail__thumb` tem `alt=""`; a de `.card-detail__expand` mantém `alt` "{nome} {código}"
+- [ ] O teste de `card_detail_image_test.rb` que exige `.card-detail__badge[role=img][aria-label]` com `count: 2` é reescrito para `count: 1` mais o selo da miniatura oculto, com motivo registrado no commit (a expectativa antiga era a duplicação que esta task remove)
+- [ ] O teste novo falha antes da mudança na view e passa depois
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(conformidade): miniatura do detalhe sem selo e alt repetidos para leitor de tela`
+
+---
+
 ## Plano de delegação
 
 | Task | Worker | Revisão |
@@ -689,6 +859,9 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 | T2, T5, T9 | Haiku (mecânicas) | o orquestrador lê os testes contra a checklist |
 | T3, T4, T6, T7, T8, T10, T11 | Sonnet (mudam comportamento ou reescrevem testes de outra feature) | `ecc:a11y-architect` sobre T3, T4, T8 e T11 antes da T12; `ecc:pr-test-analyzer` sobre os testes reescritos antes do Verifier |
 | T12 | Orquestrador (captura e triagem); Haiku só para gerar as capturas | Dono |
+| T18, T22 | Sonnet (T18 muda a regra da grade; T22 muda a árvore de acessibilidade) | T22: `ecc:a11y-architect` antes do ciclo 2 do Verifier |
+| T19, T20 | Sonnet (testes que afirmam o valor da spec, com conferência do mutante correspondente) | `ecc:pr-test-analyzer` sobre T19 e T20 antes do ciclo 2 |
+| T21 | Sonnet (lê os artboards e emenda a spec); `blocked` se o canvas for omisso | O orquestrador lê a emenda contra o artboard; o dono decide o que ficar em aberto |
 
 Regras que todo prompt de worker repete: não usar `git add -A` nem `git add .`
 (o index é compartilhado); não marcar checkbox em `tasks.md` (o orquestrador marca
@@ -716,6 +889,11 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T15 | linha de set, chips de ordem, uma ação | ✅ |
 | T16 | duas trilhas de grade | ✅ |
 | T17 | um rótulo e uma regra | ✅ |
+| T18 | uma regra da folha e o teste dela | ✅ |
+| T19 | três casos de teste em dois arquivos de integração | ⚠️ 2-3 coisas coesas (só teste) |
+| T20 | três asserções trocadas em três arquivos de teste | ⚠️ 2-3 coisas coesas (só teste) |
+| T21 | quatro emendas de texto em um arquivo | ✅ |
+| T22 | um atributo no selo e um `alt` no mesmo bloco da view | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -738,6 +916,11 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T15 | T14 | Phase 5: `T14 → T15` | ✅ |
 | T16 | T15 | Phase 5: `T15 → T16` | ✅ |
 | T17 | T16 | Phase 5: `T16 → T17` | ✅ |
+| T18 | T17 | Phase 7: `T17 → T18` | ✅ |
+| T19 | T17 | Phase 7: `T17 → T19` | ✅ |
+| T20 | T21 | Phase 7: `T21 → T20` (a T17 chega por T21) | ✅ |
+| T21 | T17 | Phase 7: `T17 → T21` | ✅ |
+| T22 | T19 | Phase 7: `T19 → T22` | ✅ |
 
 ## Test Co-location Validation
 
@@ -760,3 +943,8 @@ o da implementação; parar com `blocked` diante de decisão de design.
 | T15 | folha, view | integration, unit (folha) | integration, unit (folha) | ✅ |
 | T16 | folha | unit (folha) | unit (folha) | ✅ |
 | T17 | view, folha | unit (folha), integration | unit (folha), integration | ✅ |
+| T18 | folha | unit (folha) | unit (folha) | ✅ |
+| T19 | testes de integração (sem código de app) | integration | integration | ✅ |
+| T20 | testes de integração e de folha (sem código de app) | integration, unit (folha) | integration, unit (folha) | ✅ |
+| T21 | documentação (`spec.md`) | none | none | ✅ |
+| T22 | view | integration | integration | ✅ |
