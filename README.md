@@ -51,10 +51,10 @@ A saída mostra a revisão, status (`succeeded` ou `failed`), contagem de cartas
 criadas/atualizadas/falhadas e o total de registros no banco:
 
 ```
-revisão: 5669eab51096629faf90dbf0dc903128cff80a98
+revisão: <sha da config/ingestion.yml>
 status: succeeded
-criados: 4933 | atualizados: 0 | falhados: 0
-cartas: 1234 | variantes: 4933 | sets: 10
+criados: <n> | atualizados: <n> | falhados: <n>
+cartas: <n> | variantes: <n> | sets: <n>
 ```
 
 Se a fonte não estiver disponível, o processo aborta antes de escrever no banco,
