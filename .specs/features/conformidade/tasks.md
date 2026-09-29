@@ -848,6 +848,7 @@ Revisão de a11y, achado 5 (`show.html.erb:33` e `:84`): com o `<details>` abert
 **Tests**: integration
 **Gate**: full
 **Commit**: `fix(conformidade): miniatura do detalhe sem selo e alt repetidos para leitor de tela`
+**Status**: descartada em 2026-09-29 (decisão do supervisor, sinalizada como DECISÃO-DO-DONO). Motivo: o `<details>` do detalhe abre fechado no celular, então `alt=""` na miniatura deixaria a imagem da carta sem nome acessível; além disso o teste da T6 em test/integration/card_detail_hero_image_test.rb:26 exige o alt que nomeia carta e variante, e nenhum CNF pede a mudança.
 
 ---
 
