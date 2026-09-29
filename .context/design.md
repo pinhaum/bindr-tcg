@@ -211,10 +211,29 @@ import_runs
   updated_count       integer  DEFAULT 0
   failed_count        integer  DEFAULT 0
   error_log           jsonb    NULL       -- Requisito 1.5
+
+collection_imports
+  id
+  user_id             FK users NOT NULL  -- dono do staging; ON DELETE RESTRICT
+  token               varchar NOT NULL   -- identifica a pré-visualização; UNIQUE
+  filename            varchar NOT NULL   -- nome exibido na pré-visualização
+  linhas              jsonb    NOT NULL DEFAULT '[]'  -- linhas já resolvidas e mostradas
+  status              varchar  NOT NULL DEFAULT 'pendente'
+                               CHECK (status IN ('pendente', 'confirmado'))
+  expires_at          datetime NOT NULL  -- expiração do staging (AD-007)
+  created_at          datetime
+  updated_at          datetime
+  INDEX (expires_at); UNIQUE INDEX (token); INDEX (user_id, token)
 ```
 
 ### 3.3 Notas de modelagem
 
+- **`collection_imports` é staging, não coleção (AD-007).** Guarda o CSV já
+  parseado (`linhas`) entre a pré-visualização e a confirmação, para que a
+  confirmação grave **o que a pré-visualização mostrou** (Req. 10.5). Não cabe em
+  sessão (cookie tem teto de 4KB) e o reenvio permitiria o arquivo mudar entre as
+  duas etapas. É dono do usuário (`user_id`) e expira em `expires_at`; a limpeza
+  dos expirados é `CollectionImport.limpar_expiradas`.
 - **`counter` nulo vs zero.** Semanticamente diferentes: "não tem counter" não é
   "counter de 0". Manter `NULL` e nunca usar `0` como sentinela.
 - **`colors` como array.** Postgres `text[]` + índice GIN resolve o Requisito 4.5
@@ -454,6 +473,12 @@ rastreável.
   ID vindo do request. Isso satisfaz o Req. 6.5 por construção, em vez de por
   verificação.
 - Catálogo é público (Req. 6.3). Mutação exige sessão (Req. 6.4).
+- **Staging do import (AD-007):** a leitura da pré-visualização parte de
+  `Current.user`: `CollectionImport.find_by_token_for(Current.user, token)` filtra
+  por dono **antes** de carregar o registro. Token alheio e token inexistente
+  devolvem `nil` indistintamente, e o controller traduz os dois no mesmo `404`
+  (`ActiveRecord::RecordNotFound`). Uma pré-visualização alheia **não é
+  confirmável** e a tabela não vira oráculo de tokens válidos.
 
 ---
 
@@ -534,12 +559,39 @@ Teste que eu destacaria como o mais valioso do projeto: **rodar a ingestão duas
 vezes com um item de coleção existente e verificar que a quantidade continua
 intacta.** É o teste que protege o único dado insubstituível do sistema.
 
+### 8.1 Regras de teste para ambientes instáveis
+
+Asserções sobre ordem de marca de tempo e plano de execução enfrentam condições
+ambientais que invalidam mecanismos simples:
+
+- **Relógio monotônico injetado (AD-009):** Teste que assevera ordem entre marcas
+  de tempo injeta um relógio controlado via parâmetro `clock:` em
+  `Ingestion::Upsert` — não se confia em `Time.now` do host, que pode andar para
+  trás (medido: até ±11s em 2000 leituras neste ambiente).
+- **Drenagem de pending list GIN antes de `ANALYZE` (AD-009):** Teste que assevera
+  plano de execução sobre índice GIN chama `gin_clean_pending_list` (uma chamada
+  por índice) antes de `ANALYZE`, drenando a lista de atualizações pendentes que
+  pode variar o custo estimado e fazer o planejador oscilar entre planos.
+- **Execução em série, não sobreposição (AD-010):** Suítes de query não rodam
+  sobrepostas — há um único teste não-transacional (`SemTransacaoTest` em
+  `test/queries/catalog_search_test.rb`) cuja limpeza fora de transação causa
+  deadlock pré-existente com qualquer escrita concorrente.
+- **Edição aceita em `set_progress_plan_test.rb` (AD-017):** A T3 da `navegacao`
+  editou um dos sete testes protegidos; a edição é mantida porque a consulta nova
+  que a página ganhou (indicadores de pasta) é legítima e a contagem de consultas
+  segue exata.
+- **Guarda de `nowrap` com reticências (AD-018):** O teste que guarda "nenhum
+  bloco largo do progresso impede a quebra de linha em 360px" agora aceita
+  `white-space: nowrap` acompanhado de `overflow: hidden` e `text-overflow:
+  ellipsis` — texto cortado dentro do próprio elemento não empurra a página para
+  fora de 360px.
+
 ---
 
 ## 9. Decisões pendentes
 
-**Nenhuma. P1–P7 estão todas decididas** (tasks 0.1, 0.2 e 0.3, em 2026-09-19).
-Ver `docs/adr/001-fonte-de-dados-do-catalogo.md` e
+**Uma aberta (P8).** P1–P7 estão todas decididas (tasks 0.1, 0.2 e 0.3, em
+2026-09-19). Ver `docs/adr/001-fonte-de-dados-do-catalogo.md` e
 `docs/adr/002-stack-set-completo-e-imagens.md`.
 
 | #   | Decisão                                            | Status | Resolução                                                  |
@@ -551,6 +603,7 @@ Ver `docs/adr/001-fonte-de-dados-do-catalogo.md` e
 | P5  | `variant_code` estável                             | ✅ | **Sem hash derivado.** A fonte fornece `id` estável (`OP01-001_p1`). Usar direto. |
 | P6  | Cache de imagens na Fase 1                         | ✅ | ~~Não; hotlink.~~ **Revista em 2026-09-22 (AD-012):** hotlink bloqueado por CORP `same-site`; a aplicação serve a imagem com cache em disco sob demanda. §7. |
 | P7  | `DON!!` entra no catálogo?                         | ✅ | Não. A fonte não traz cartas DON!!, então não há decisão a tomar na Fase 1. |
+| P8  | Cores do jogo — hexadecimais das seis cores       | ⏳ | Aberta. O design system proíbe estimá-las; amostrar JPEG hotlinkado de terceiro não reproduz cor de marca — enquanto isso os chips de cor ficam neutros. Req. 13.7. |
 
 ### Consequências para a ingestão (achadas na amostra)
 

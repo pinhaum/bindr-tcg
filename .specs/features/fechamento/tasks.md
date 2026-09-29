@@ -158,14 +158,14 @@ T5 → T6
 
 **Done when**:
 
-- [ ] §3 (modelo de dados) descreve a tabela de staging do import: dono, expiração e por que existe (AD-007), com o nome real conferido em `db/structure.sql`
-- [ ] §6 (autorização) diz que a leitura do staging parte de `Current.user` e que uma pré-visualização alheia não é confirmável (AD-007)
-- [ ] §8 (estratégia de testes) ganha uma linha por regra, cada uma com `(AD-NNN)`: relógio monotônico injetado para asserção de ordem entre marcas de tempo e drenagem da pending list GIN antes de `ANALYZE` para asserção de plano (AD-009); execução de suíte em série por causa do único teste não-transacional (AD-010); guardas protegidos `set_progress_plan_test.rb` e a edição aceita (AD-017) e a regra de `nowrap` com reticências (AD-018)
-- [ ] Nomes de arquivo, método e parâmetro (`clock:`, `gin_clean_pending_list`) conferidos por `grep` antes de citados
-- [ ] §9: P6 continua marcada como revista pela AD-012; P8 (cores do jogo) aparece como pendência aberta, coerente com `requirements.md`; a frase "Nenhuma [decisão pendente]. P1–P7…" segue verdadeira
-- [ ] AD-011, AD-012 e AD-016 conferidas em §7 e §11 e deixadas como estão se coerentes (FEC-08)
-- [ ] Os `⚠️ VERIFICAR` não são tocados nesta task (são da T4)
-- [ ] Gate full passa e a contagem de runs não muda
+- [x] §3 (modelo de dados) descreve a tabela de staging do import: dono, expiração e por que existe (AD-007), com o nome real conferido em `db/structure.sql`
+- [x] §6 (autorização) diz que a leitura do staging parte de `Current.user` e que uma pré-visualização alheia não é confirmável (AD-007)
+- [x] §8 (estratégia de testes) ganha uma linha por regra, cada uma com `(AD-NNN)`: relógio monotônico injetado para asserção de ordem entre marcas de tempo e drenagem da pending list GIN antes de `ANALYZE` para asserção de plano (AD-009); execução de suíte em série por causa do único teste não-transacional (AD-010); guardas protegidos `set_progress_plan_test.rb` e a edição aceita (AD-017) e a regra de `nowrap` com reticências (AD-018)
+- [x] Nomes de arquivo, método e parâmetro (`clock:`, `gin_clean_pending_list`) conferidos por `grep` antes de citados
+- [x] §9: P6 continua marcada como revista pela AD-012; P8 (cores do jogo) aparece como pendência aberta, coerente com `requirements.md`; a frase "Nenhuma [decisão pendente]. P1–P7…" segue verdadeira
+- [x] AD-011, AD-012 e AD-016 conferidas em §7 e §11 e deixadas como estão se coerentes (FEC-08)
+- [x] Os `⚠️ VERIFICAR` não são tocados nesta task (são da T4)
+- [x] Gate full passa e a contagem de runs não muda
 
 **Tests**: none
 **Gate**: full
