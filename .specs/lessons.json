@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 35,
+  "next_id": 39,
   "lessons": [
     {
       "id": "L-001",
@@ -616,6 +616,78 @@
       ],
       "created": "2026-09-29T01:52:39Z",
       "last_seen": "2026-09-29T01:52:39Z"
+    },
+    {
+      "id": "L-035",
+      "key": "surviving_mutant::assert the resolved min height of every control the spec sizes including the empty state variant not only the sibling control",
+      "text": "Assert the resolved min-height of every control the spec sizes, including the empty-state variant, not only the sibling control",
+      "signal": "surviving_mutant",
+      "scope": "css",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "catalog.css:362-366 mutante h (validation.md) (css)"
+      ],
+      "created": "2026-09-29T02:43:20Z",
+      "last_seen": "2026-09-29T02:43:20Z"
+    },
+    {
+      "id": "L-036",
+      "key": "ac_gap::when a spec amendment adds a measured criterion change the code and add its test in the same task not only the spec text",
+      "text": "When a spec amendment adds a measured criterion, change the code and add its test in the same task, not only the spec text",
+      "signal": "ac_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CNF-41 (validation.md G1) (spec)"
+      ],
+      "created": "2026-09-29T02:43:20Z",
+      "last_seen": "2026-09-29T02:43:20Z"
+    },
+    {
+      "id": "L-037",
+      "key": "ac_gap::assert positioning clauses such as top and right of an overlay not only its colors and radius",
+      "text": "Assert positioning clauses such as top and right of an overlay, not only its colors and radius",
+      "signal": "ac_gap",
+      "scope": "css",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CNF-02 posição do selo (validation.md G2) (css)"
+      ],
+      "created": "2026-09-29T02:43:20Z",
+      "last_seen": "2026-09-29T02:43:20Z"
+    },
+    {
+      "id": "L-038",
+      "key": "spec_precision_gap::give every layout adjective in a spec a measurable value or mark it as an owner decision before tasks start",
+      "text": "Give every layout adjective in a spec a measurable value or mark it as an owner decision before tasks start",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "conformidade"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CNF-17 forma compacta (validation.md) (spec)"
+      ],
+      "created": "2026-09-29T02:43:20Z",
+      "last_seen": "2026-09-29T02:43:20Z"
     }
   ]
 }

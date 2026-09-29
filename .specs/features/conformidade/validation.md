@@ -1,11 +1,25 @@
 # Conformidade com o canvas — Validation
 
-**Date**: 2026-09-28
-**Spec**: `.specs/features/conformidade/spec.md`
-**Diff range**: `61a0e03^..dca1413` (26 commits, 56 arquivos, +4765 −1270; testes +2215 −555)
-**Verifier**: sub-agente independente (autor ≠ verificador), Sonnet, ciclo 1
+**Date**: 2026-09-29
+**Spec**: `.specs/features/conformidade/spec.md` (CNF-01..CNF-41)
+**Diff range**: `61a0e03^..c78fd80` (HEAD = `c78fd80`; 41 commits, 64 arquivos, +6314 −1294; testes: 32 arquivos, +2347 −555)
+**Verifier**: sub-agente independente (autor ≠ verificador), Sonnet, **ciclo 2** — novo, não fez o ciclo 1 nem escreveu a feature. Checagem re-derivada do zero a partir de `spec.md`, `tasks.md` e `canvas-conformance.md`; o relatório do ciclo 1 foi comparado só depois.
 
-**Veredito: FAIL ❌** — duas lacunas reais de critério (CNF-12 abaixo de 1024px e CNF-04 no limite de duas impressões, esta provada por mutante sobrevivente) e uma de evidência (CNF-23). O gate está verde e 15 dos 17 mutantes morreram.
+**Veredito: FAIL ❌** — uma lacuna real de critério: **CNF-41** exige "Limpar filtros" do estado vazio com altura mínima de 44px, e `.catalog__empty-reset` resolve `min-height: 24px` (`app/assets/stylesheets/catalog.css:362-366`), sem teste que o cubra (o mutante h sobreviveu à suíte inteira). As lacunas do ciclo 1 (CNF-12, CNF-04, CNF-23, CNF-18, CNF-08) estão fechadas e os mutantes correspondentes agora morrem. Gate verde (1348 runs, 0 falhas, RuboCop limpo).
+
+## Histórico: ciclo 1 = FAIL, ver git a5dd965
+
+`git show a5dd965:.specs/features/conformidade/validation.md`. Range `61a0e03^..dca1413`, 17 mutantes (15 mortos, M3 equivalente, M4 real). Lacunas: F1 CNF-12 (`auto-fill` abaixo de 1024px), F2 CNF-04 (limite de duas impressões), F3 CNF-23 (posição de "Voltar"), F4 CNF-18 (peso 600 e ordem do trigger), F5 CNF-08 (recuo por `include?`), spec-precision CNF-17 e CNF-36. A Phase 7 (T18–T21) as tratou; T22 foi descartada de propósito (`tasks.md:851`) e **não é lacuna**.
+
+| Lacuna do ciclo 1 | Fechada? | Evidência do ciclo 2 |
+|---|---|---|
+| F1 CNF-12 | ✅ | `catalog.css:215` agora `repeat(2, minmax(0, 1fr))`; `test/design/catalog_grid_canvas_test.rb:44` `assert_equal "repeat(2, minmax(0, 1fr))", grid["grid-template-columns"]` sobre `@narrow_rules`; mutante (a) morre |
+| F2 CNF-04 | ✅ | `test/integration/catalog_tile_test.rb:174` `assert_equal "2 impressões", …`; mutante (b) morre |
+| F3 CNF-23 | ✅ | `test/integration/card_detail_layout_test.rb:69` `assert_select ".site-header__aside a.site-header__back", count: 1` e `:73`; mutante (d) morre |
+| F4 CNF-18 | ✅ | `test/integration/card_detail_header_test.rb:144-145` (peso resolve `"600"`) e `:152` (rótulo depois do texto) |
+| F5 CNF-08 | ✅ | `test/integration/catalog_status_line_test.rb:291` `assert_equal "30rem", search_rule.fetch("width")` e `:333-336` `assert_equal` do recuo; mutante (e) morre |
+| spec-precision CNF-36 | ✅ | spec emendada (`spec.md:204`, 155×217 e 320×448); `test/design/card_detail_media_test.rb:19-20`, `:69` e `:74` (`5 / 7` ⇒ 448) |
+| spec-precision CNF-17 | ⚠️ aberto | "forma compacta" segue sem medida em `spec.md:143`; o canvas não desenha os campos (`canvas-conformance.md:48`). **DECISÃO-DO-DONO já sinalizada; não reprova** |
 
 ---
 
@@ -13,105 +27,98 @@
 
 | Task | Status | Notes |
 | ---- | ------ | ----- |
-| T1 | ✅ Done | Ordem `recent`/`code`; `set_progress_plan_test.rb` só com a edição aceita na AD-017/AD-018 |
-| T2 | ✅ Done | — |
-| T3 | ✅ Done | Testes de posse na grade migraram para o detalhe (`collection_ownership_ui_test.rb`) |
-| T4 | ✅ Done | `collection_total_test.rb` removido (287 linhas): "Sua coleção" sai do catálogo (CNF-10); o total na pasta segue coberto em `minha_pasta_test.rb:89-114` |
-| T5 | ⚠️ Partial | Done-when "fora [de 1024px], duas colunas" não cumprido literalmente — ver CNF-12 |
-| T6 | ✅ Done | — |
-| T7 | ✅ Done | Peso 600 do rótulo "Trigger" sem asserção (ver CNF-18) |
-| T8 | ✅ Done | — |
-| T9 | ⚠️ Partial | "Voltar ao catálogo" na coluna lateral sem teste de posição (ver CNF-23) |
-| T10 | ✅ Done | — |
-| T11 | ✅ Done | — |
-| T12 | ⚠️ Partial | Único item aberto no `tasks.md:675`: "O dono comparou as capturas ... e aprovou". Capturas existem em `tmp/comparacao/` (6 PNGs) e `canvas-conformance.md` cobre as 3 telas |
-| T13 | ✅ Done | — |
-| T14 | ✅ Done | — |
-| T15 | ✅ Done | Edição do guarda de 360px registrada na AD-018 |
-| T16 | ✅ Done | — |
-| T17 | ✅ Done | — |
+| T1–T11, T13–T17 | ✅ Done | Todos os "Done when" marcados em `tasks.md`; re-derivados abaixo pelos CNF |
+| T12 | ⚠️ Partial (por decisão do dono) | Único item aberto: `tasks.md:694` "O dono comparou as capturas … e aprovou". **Pendência adiada pelo dono; não reprova.** Capturas e `canvas-conformance.md` existem (CNF-34/35) |
+| T18 | ✅ Done | Ver CNF-12 |
+| T19 | ✅ Done | Ver CNF-04, CNF-02 (isolamento), CNF-16 |
+| T20 | ✅ Done | Ver CNF-23, CNF-18, CNF-08 |
+| T21 | ⚠️ Partial | CNF-06, 08, 36 emendados e CNF-41 criado; CNF-17 fica DECISÃO-DO-DONO. O CNF-41 criado aqui ficou sem implementação do 44px (G1) |
+| T22 | ⏭️ Descartada | `tasks.md:851`: descartada em 2026-09-29, motivo registrado; não é lacuna |
 
 ---
 
 ## Spec-Anchored Acceptance Criteria
 
-Evidência lida nos testes, não nas mensagens de commit. Todos os arquivos em `test/`.
+Evidência lida nos testes e na folha, não nas mensagens de commit. Caminhos de teste relativos a `test/`; `catalog.css` = `app/assets/stylesheets/catalog.css`.
 
 | CNF | Spec-defined outcome | `file:line` + assertion | Result |
 | --- | -------------------- | ----------------------- | ------ |
-| 01 | Sem controle de posse no tile | `integration/catalog_tile_test.rb:41` `assert_select ".card-tile form", 0`; `:42` `button`; `:54` anônimo | ✅ PASS |
-| 02 | Selo com total das variantes, "N cópias"/"1 cópia", accent/on-accent | `integration/catalog_tile_test.rb:74-76` texto "3", `aria-label` "3 cópias", `role=img`; `:90` "1 cópia"; `design/ownership_badge_test.rb:40-41` accent/on-accent | ✅ PASS |
-| 03 | Sem selo anônimo ou com zero | `integration/catalog_tile_test.rb:102` (anônimo com posse alheia), `:113`, `:125` `assert_nil ...badge` | ✅ PASS |
-| 04 | 1 variante → raridade; >1 → "N impressões" | `integration/catalog_tile_test.rb:137` "SR", `:147` "3 impressões" — **só 1 e 3 variantes; duas nunca testadas** (mutante M4 sobreviveu) | ❌ GAP |
-| 05 | "N cartas [· M filtros ativos]", total do resultado | `integration/catalog_status_line_test.rb:61`, `:188` `/^\s*·\s*2 filtros ativos\s*$/`, `:196`, `:231` "36 cartas · 1 filtro ativo" | ✅ PASS |
-| 06 | "Limpar filtros" ≥44px, bordado, preserva sort/dir | `integration/catalog_status_line_test.rb:135-136`, `:249` `assert_operator ..., :>=, 44`, `:250` borda | ✅ PASS |
-| 07 | Convite anônimo uma vez, na linha de status | `integration/catalog_status_line_test.rb:258` `count: 1`, `:259` href `new_session_path`, `:267` com sessão `count: 0` | ✅ PASS |
-| 08 | Busca e status na mesma linha; recuo igual | `integration/catalog_status_line_test.rb:283` `flex`; `:296-297` `assert_includes ...padding, "var(--space-4)"` — compara por `include?`, não o recuo resolvido igual | ⚠️ PASS fraco (asserção frouxa) |
-| 09 | Rótulo e placeholder do canvas | `integration/catalog_status_line_test.rb:275-276` | ✅ PASS |
-| 10 | Sem "Sua coleção" | `integration/catalog_status_line_test.rb:306` `"#catalog_owned_total", 0`; `:326` sem stream | ✅ PASS |
-| 11 | Cores e raridades na ordem; tipo capitalizado, URL crua | `queries/catalog_filter_options_test.rb:204`, `:254`; `integration/catalog_filter_controls_test.rb:373-376` | ✅ PASS |
-| 12 | ≥1024px: 5 colunas/16px; <1024px: **duas colunas/8px** | `design/catalog_grid_canvas_test.rb:51-52` `"repeat(5, minmax(0, 1fr))"`, gap 16 ✅; `:43-44` afirma `\Arepeat\(auto-fill,` — não "duas colunas". `catalog.css:215` usa `auto-fill, minmax(150px, 1fr)`: 3+ colunas entre ~480 e 1023px | ❌ GAP |
-| 13 | Tile 16px, arte sunken 8px, divisor 1px | `design/catalog_grid_canvas_test.rb:60-62`, `:67-68`, `:76-77` | ✅ PASS |
-| 14 | <1024px miniatura + `<details>` sem JS | `integration/card_detail_hero_image_test.rb:23-28`, `:42-51` (sem `<script>` novo); `design/card_detail_media_test.rb:19-21` 155×217 | ✅ PASS |
-| 15 | ≥1024px coluna de 320px sempre visível | `design/card_detail_media_test.rb:52`, `:58-62` `content-visibility: visible`, `:69` 320px, `:87` | ✅ PASS |
-| 16 | Selo da 1ª variante; legenda "Ilustração: {nome}" | `integration/card_detail_image_test.rb:32-34`, `:44`, `:54`, `:63`, `:72` | ✅ PASS |
-| 17 | Chips tipo/raridade(1ª)/cor(es)/counter; "set · código"; demais campos "compactos" | `integration/card_detail_header_test.rb:32-34`, `:48-49`, `:76`, `:87`, `:101`, `:150-156`; `integration/card_detail_test.rb:123-124` | ⚠️ spec-precision gap ("forma compacta" sem medida) |
-| 18 | Trigger em "Efeito", depois do efeito, rótulo peso 600, quebras | `integration/card_detail_header_test.rb:116-119`; `integration/card_detail_test.rb:284-286` `<br`. `catalog.css:443` declara `var(--body-strong-weight)` (600) mas **nenhum teste asserta peso nem ordem "depois do efeito"** | ⚠️ PASS parcial |
-| 19 | Título "Variantes na pasta" + divisor 1px | `integration/card_detail_variants_test.rb:37`; `design/card_detail_variants_grid_test.rb:89-90` | ✅ PASS |
-| 20 | Código, "{raridade} · {arte}", set, miniatura menor, rótulos fora da vista | `integration/card_detail_variants_test.rb:45-50`, `:56-58`; `design/card_detail_variants_grid_test.rb:57-58` 80×112, `:77-83` recorte | ✅ PASS |
-| 21 | `−` `[n]` `+`; 44×44; "não tenho" + `aria-disabled` em zero | `integration/card_detail_variants_test.rb:79-83` ordem, `:92-93`, `:102-103`, `:111-112`; `design/card_detail_ownership_buttons_test.rb:27-28`, `:43-44` | ✅ PASS |
-| 22 | +/− atualiza sem recarregar (Turbo Stream) | `integration/card_detail_variants_test.rb:164-165` `turbo-stream[action=update][target=...]`, `.ownership__step` "1" | ✅ PASS |
-| 23 | "Voltar ao catálogo": bordado ≥44px, sem seta; ≥1024px na coluna lateral abaixo de divisor | `integration/card_detail_layout_test.rb:66-68`; `design/navigation_canvas_test.rb:141-145`, `:173`. **Sem teste de que o link está dentro de `.site-header__aside`** (só o botão da pasta tem, `integration/minha_pasta_test.rb:421`) | ⚠️ sem evidência da posição |
-| 24 | Marca 28/32/700 em ≥1024px | `design/navigation_canvas_test.rb:157-162` (regra resolvida dentro do bloco largo) | ✅ PASS |
-| 25 | Código + nome-link (`sets: [código]`), contagem à direita, barra abaixo | `integration/progress_ui_test.rb:360`, `:447-448`; `design/progress_line_test.rb:22-24`, `:61-66`, `:93-98` | ✅ PASS |
-| 26 | Percentual junto da contagem; parallels como legenda; sem "Ver no catálogo"/"N sets" | `integration/progress_ui_test.rb:122` "4 / 7 · 60%", `:125`, `:456`, `:465-466` | ✅ PASS |
-| 27 | `recent` por `updated_at` do usuário; `code`; sem posse no fim; isolamento | `integration/progress_order_test.rb:65-66`, `:86-88`, `:147`; `queries/set_progress_query_test.rb:776` | ✅ PASS (mutantes M1, M2, M13 mortos) |
-| 28 | Ordem inválida → recent e 200 | `integration/progress_order_test.rb:96-99` (xyz), `:106-109` (vazio), `:116-119` (array) | ✅ PASS (M11 morto) |
+| 01 | Sem form/botão/incremento de posse em tile | `integration/catalog_tile_test.rb:41` `assert_select ".card-tile form", 0`; `:42` `button`; `:43` `.ownership`; `:54-55` anônimo | ✅ PASS |
+| 02 | Selo com total das variantes, "N cópias"/"1 cópia", accent/on-accent, sobre o canto superior direito | `integration/catalog_tile_test.rb:74-76` `"3"`, `"3 cópias"`, `role=img`; `:90` `"1 cópia"`; `:138` e `:151` `assert_nil …badge` (isolamento); `design/ownership_badge_test.rb:51-52` `var(--accent)` / `var(--on-accent)`. **Posição (`top/right`, `catalog.css:321-325`) sem nenhuma asserção** | ⚠️ PASS parcial (posição sem evidência, G2) |
+| 03 | Sem selo anônimo, sem cópia ou com zero | `integration/catalog_tile_test.rb:102` `assert_select ".card-tile__badge", 0`; `:113`; `:125` `assert_nil` | ✅ PASS |
+| 04 | 1 variante → raridade; >1 → "N impressões" (2 e 3) | `integration/catalog_tile_test.rb:163` `"SR"`; `:174` `"2 impressões"`; `:184` `"3 impressões"`; `:208` | ✅ PASS (mutante b morto) |
+| 05 | "N cartas [· M filtros ativos]", total do resultado | `integration/catalog_status_line_test.rb:240` `/^3 cartas$/`; `:231` `/^\s*36 cartas\s*·\s*1 filtro ativo\s*$/`; `:122`; `:196` | ✅ PASS |
+| 06 | Com filtro e ≥1 resultado: "Limpar filtros" bordado, ≥44px, preserva sort/dir | `integration/catalog_status_line_test.rb:135-137` `include?("sort=name")`, `include?("dir=desc")`, `refute colors`; `:249` `assert_operator …min-height, :>=, 44`; `:250` borda | ✅ PASS |
+| 07 | Convite anônimo uma vez, na linha de status | `integration/catalog_status_line_test.rb:259` `count: 1`; `:260-261` `a[href=new_session_path]`; `:267` com sessão `count: 0` | ✅ PASS |
+| 08 | ≥1024px: busca+status na mesma linha; recuo igual; busca `30rem` | `integration/catalog_status_line_test.rb:288` `assert_equal "flex"`; `:291` `assert_equal "30rem", search_rule.fetch("width")`; `:333` e `:335` `assert_equal head_*_px, body_*_px` | ✅ PASS (mutante e morto) |
+| 09 | Rótulo e placeholder do canvas | `integration/catalog_status_line_test.rb:275` `label[for=catalog-q]` "Buscar por nome ou card_number"; `:276` placeholder `OP01-024` | ✅ PASS |
+| 10 | Sem "Sua coleção" | `integration/catalog_status_line_test.rb:341-349`; `:352` sem stream `catalog_owned_total` | ✅ PASS |
+| 11 | Cores e raridades na ordem; tipo capitalizado, URL crua | `queries/catalog_filter_options_test.rb:186` (`assert_equal expected_order, result[:colors]`), `:227` (raridades), `:254`; `integration/catalog_filter_controls_test.rb:373-376` `"Character"`, `href*='card_types%5B%5D=character'` | ✅ PASS (mutante i morto) |
+| 12 | ≥1024px: 5 colunas/16px; <1024px: duas colunas/8px | `design/catalog_grid_canvas_test.rb:44` `assert_equal "repeat(2, minmax(0, 1fr))"`, `:45` `8.0`; `:51` `"repeat(5, minmax(0, 1fr))"`, `:52` `16.0`. Guardas de 360px `integration/catalog_grid_test.rb` e `design/layout_test.rb` verdes | ✅ PASS (mutante a morto) |
+| 13 | Tile 16px, arte sunken 8px, divisor 1px `--border` | `design/catalog_grid_canvas_test.rb:55-62`, `:63-68`, `:70-77` | ✅ PASS |
+| 14 | <1024px: miniatura ao lado do título + `<details>` sem JS | `integration/card_detail_hero_image_test.rb:25-26`, `:33` `assert_operator head_pos, :<, data_pos`, `:42-45`, `:51` (`scripts_before` igual); `design/card_detail_media_test.rb:19-20` 155×217 | ✅ PASS |
+| 15 | ≥1024px: coluna de 320px sempre visível | `design/card_detail_media_test.rb:52` `"none"` (miniatura), `:58` `"contents"`, `:62` `content-visibility: visible`, `:68-69` `grid-column "1"` e `320.0`, `:101` `align-self "start"` | ✅ PASS |
+| 16 | Selo da 1ª variante (não a soma); legenda "Ilustração: {nome}" | `integration/card_detail_image_test.rb:32-34` (`"2"`, `"2 cópias"`), `:68-70` (1 cópia, nunca 4), `:79` `"Ilustração: Eiichiro Oda"` | ✅ PASS (mutante c morto) |
+| 17 | Chips tipo/raridade(1ª)/cor(es)/counter; "set · código"; demais campos "compactos" | `integration/card_detail_header_test.rb:32-34`, `:48-49`, `:62-63`, `:76`, `:87`, `:101` `"Romance Dawn · OP01"`; `integration/card_detail_test.rb:122`, `:137` (Req. 5.5). "Forma compacta" sem medida na spec | ⚠️ Spec-precision gap (DECISÃO-DO-DONO, não reprova) |
+| 18 | Trigger em "Efeito", depois do efeito, rótulo peso 600, quebras | `integration/card_detail_header_test.rb:115-118`, `:144-145` `assert_equal "600", resolved_weight`, `:152` `assert_operator trigger_label_pos, :>, effect_text_pos`; `integration/card_detail_test.rb` `assert_match(/<br/, html…)` | ✅ PASS |
+| 19 | Título "Variantes na pasta" + divisor 1px `--border` | `integration/card_detail_variants_test.rb:37`; `design/card_detail_variants_grid_test.rb:89-90` | ✅ PASS |
+| 20 | Código, "{raridade} · {arte}", set, miniatura menor, rótulos fora da vista | `integration/card_detail_variants_test.rb:45-50`, `:56-58`; `design/card_detail_variants_grid_test.rb:57-58` 80×112 (< 320×448), `:77-83` recorte sem `display` | ✅ PASS |
+| 21 | `−` `[n]` `+`, 44×44, "não tenho" + `aria-disabled` em zero | `integration/card_detail_variants_test.rb:79`, `:92-93`, `:102-103`, `:111-112`; `design/card_detail_ownership_buttons_test.rb:27-28`, `:43-44` | ✅ PASS |
+| 22 | +/− atualiza sem recarregar (Turbo Stream) | `integration/card_detail_variants_test.rb:164-165` `turbo-stream[action=update][target=…]`, `.ownership__step` "1" | ✅ PASS |
+| 23 | "Voltar": bordado ≥44px, sem seta; ≥1024px na coluna lateral abaixo de divisor 1px | `integration/card_detail_layout_test.rb:69` `.site-header__aside a.site-header__back` `count: 1`, `:71` sem "←", `:73` `main.card-detail a.site-header__back` `0`; `design/navigation_canvas_test.rb:141` `"44px"`, `:143` borda, `:173` `"1px solid var(--border)"` | ✅ PASS (mutante d morto) |
+| 24 | Marca 28/32/700 em ≥1024px | `design/navigation_canvas_test.rb:157-161` `var(--display-size)`, `-line-height`, `-weight` no bloco largo | ✅ PASS |
+| 25 | Código + nome-link (`sets: [código]`), contagem à direita, barra abaixo | `integration/progress_ui_test.rb:442-448`; `design/progress_line_test.rb:56-70` (nowrap, ellipsis, sem sublinhado), `:83-90`, `:91-101` | ✅ PASS |
+| 26 | Percentual junto da contagem; parallels em legenda; sem "Ver no catálogo"/"N sets" | `integration/progress_ui_test.rb:122` `"4 / 7 · 60%"`, `:125` `"3 de 5 do set base · 1 de 2 parallels"`, `:451-452`, `:460-465` | ✅ PASS |
+| 27 | `recent` por `updated_at` do usuário; `code`; sem posse no fim; isolamento | `integration/progress_order_test.rb:65-66`, `:86-88`, `:147`; `queries/set_progress_query_test.rb:742`, `:760`, `:770`, `:806` (quantity 0), `:827` | ✅ PASS (mutantes f1, f2 mortos) |
+| 28 | Ordem inválida → recent e 200 | `integration/progress_order_test.rb:96-99` (xyz), `:106-109`, `:116-119`; `queries/set_progress_query_test.rb:780`, `:786` | ✅ PASS |
 | 29 | Chips "Recentes"/"Por código" com `aria-current` | `integration/progress_order_test.rb:167-168`, `:175-176`, `:183-184`, `:195-196` | ✅ PASS |
-| 30 | ≥1024px: 4 colunas/16px; sets + coluna de 420px | `design/progress_add_cards_test.rb:52-53`, `:62-64`, `:68-71` | ✅ PASS |
-| 31 | "Todas" atual, sem "×" nem nome de remoção | `integration/catalog_filter_controls_test.rb:405-406`, `:417` | ✅ PASS |
-| 32 | <1024px fixo, accent, ≥44px; ≥1024px na coluna lateral | `design/progress_add_cards_test.rb:78-85`, `:97`, `:114-118`, `:123-126`, `:130`; `integration/minha_pasta_test.rb:421` | ✅ PASS |
+| 30 | ≥1024px: 4 colunas/16px; sets + coluna de 420px | `design/progress_add_cards_test.rb:52-53`, `:62-64` `"minmax(0, 1fr) 420px"`, `:68-71` | ✅ PASS |
+| 31 | "Todas" atual, sem "×" nem nome de remoção | `integration/catalog_filter_controls_test.rb:405-406`, `:407` `assert_nil todas_chip["aria-label"]` | ✅ PASS |
+| 32 | <1024px fixo, accent, ≥44px; ≥1024px na coluna lateral abaixo de divisor | `design/progress_add_cards_test.rb:78-82`, `:85`, `:114-118`, `:123-126`, `:130` | ✅ PASS |
 | 33 | Campo de arquivo: surface, borda, ≥44px | `design/progress_add_cards_test.rb:147-149` | ✅ PASS |
-| 34 | Capturas 390/1280, com e sem sessão | `canvas-conformance.md:3-6`; `tmp/comparacao/{catalogo,detalhe,pasta}-{390,1280}.png` existem. Evidência de revisão (AD-015), aprovação do dono pendente | ⚠️ PASS (dono pendente) |
-| 35 | Cada item da checklist com resultado | `canvas-conformance.md:17-74` (três tabelas, sem item órfão) | ⚠️ PASS (dono pendente) |
-| 36 | Placeholder "na mesma medida" da imagem | `integration/card_detail_image_test.rb:83-86`; medida só via `position:absolute; inset:0` (`design/card_detail_media_test.rb:43-45`) | ⚠️ spec-precision gap ("mesma medida") |
-| 37 | Sem ilustrador → sem legenda | `integration/card_detail_image_test.rb:72` | ✅ PASS (M16 morto) |
+| 34 | Capturas 390/1280, com e sem sessão, lado a lado | `canvas-conformance.md:3-6`; PNGs em `tmp/comparacao/` (fora do git, AD-015). Aprovação do dono **pendente por decisão dele** | ⚠️ PASS (dono pendente, não reprova) |
+| 35 | Cada item da checklist com resultado, sem órfão | `canvas-conformance.md:17-74` (três tabelas; cada linha = conforme / CNF / Out of Scope) | ⚠️ PASS (dono pendente, não reprova) |
+| 36 | Placeholder na mesma medida: 155×217 e 320×448 | `design/card_detail_media_test.rb:19-20` (155/217), `:69` (320), `:74` `"5 / 7"` (⇒448), `:43-45` placeholder `position:absolute; inset:0`; `integration/card_detail_image_test.rb:99-102` | ✅ PASS |
+| 37 | Sem ilustrador → sem legenda | `integration/card_detail_image_test.rb:88` `assert_select ".card-detail__illustrator", count: 0` | ✅ PASS |
 | 38 | Coleção vazia: por código, "Recentes" atual | `integration/progress_order_test.rb:130-132`, `:175` | ✅ PASS |
 | 39 | Um chip por cor | `integration/card_detail_header_test.rb:62-63` | ✅ PASS |
-| 40 | Raridade fora da lista depois das conhecidas | `queries/catalog_filter_options_test.rb:274` `["C","X","Z"]` | ✅ PASS |
+| 40 | Raridade fora da lista depois das conhecidas | `queries/catalog_filter_options_test.rb:258` `assert_equal [ "C", "X", "Z" ]` | ✅ PASS |
+| 41 | Zero resultados: "Limpar filtros" em `.catalog__empty`, **altura mínima 44px**, nenhum link em `.catalog__status` | Presença e posição: `integration/catalog_status_line_test.rb:155` `assert_select ".catalog__status a", count: 0`, `:156` `".catalog__empty a", text: "Limpar filtros", count: 1`, `:178-180` sort/dir. **44px: `catalog.css:362-366` `.catalog__empty-reset { min-height: 24px }`; nenhum teste toca `catalog__empty-reset`** (`grep -rn empty-reset test` = vazio) | ❌ GAP (G1) |
 
-**Status**: ❌ Gaps presentes — 2 ❌ GAP (CNF-04, CNF-12), 1 ⚠️ sem evidência da posição (CNF-23), 2 spec-precision gaps (CNF-17, CNF-36), 3 PASS parciais (CNF-08, CNF-18, CNF-34/35 com dono pendente); os demais CNF casam com a spec.
+**Status**: ❌ Gaps presentes — 36 ✅ PASS, 4 ⚠️ (CNF-02 posição sem evidência; CNF-17 spec-precision; CNF-34 e CNF-35 com dono pendente), 1 ❌ GAP (CNF-41, 44px). Total 41.
 
 ---
 
 ## Discrimination Sensor
 
-Cópia em `/tmp/claude-1000/bindr-verify` (projeto Docker `bindr-verify`, portas 3100/5433), mutação por substituição exata com restauração e `diff` contra a árvore real após cada rodada.
+Cópia em `/tmp/claude-1000/bindr-verify` (rsync sem `.git`, `tmp`, `log`, `node_modules`, `.playwright-mcp`), projeto Docker `bindr-verify` sem portas publicadas, banco de teste próprio, gems pelo volume externo `bindr-tcg_bundle`. Mutação por substituição exata do trecho, testes em escopo, restauração e conferência de igualdade byte a byte após cada rodada (`restored True` nas 11).
 
 | Mutation | File:line | Description | Killed? |
 | -------- | --------- | ----------- | ------- |
-| M1 | `app/queries/set_progress_query.rb:211` | `recent`: `DESC` → `ASC` (ordem da pasta, CNF-27) | ✅ Killed (7 falhas) |
-| M2 | `app/queries/set_progress_query.rb:209` | `code`: remove `IS NULL` (sem posse deixa de ir ao fim) | ✅ Killed (2) |
-| M3 | `app/views/catalog/_card_tile.html.erb:42` | Remove `authenticated? &&` do selo (CNF-03) | ❌ Survived — **equivalente**: `owned_quantities` é vazio para o anônimo, o guard é redundante |
-| M4 | `app/views/catalog/_card_tile.html.erb:54` | `variants.one?` → `variants.size < 3` (duas variantes mostrariam raridade) | ❌ Survived → fix task F2 |
-| M5 | `app/helpers/collection_helper.rb:47` | Selo soma só a 1ª variante (CNF-02) | ✅ Killed (`catalog_tile_test.rb:74`) |
-| M6 | `app/views/catalog/_card_tile.html.erb:49` | Renderiza o stepper de posse no tile (T8, posse só no detalhe) | ✅ Killed (2) |
-| M7 | `app/assets/stylesheets/catalog.css:70` | `--body-grid-columns: minmax(0,1fr)` → `1fr` (regra de 360px, T16) | ✅ Killed (`navigation_canvas_test.rb:89`) |
-| M8 | `app/views/progress/index.html.erb:187` | Link do nome do set perde `sets: [código]` (T10) | ✅ Killed (4) |
-| M9 | `app/assets/stylesheets/catalog.css:2210` | `repeat(5,…)` → `repeat(4,…)` (CNF-12) | ✅ Killed (`catalog_grid_canvas_test.rb:51`) |
-| M10 | `app/queries/catalog_query.rb:172` | `KNOWN_RARITIES` troca `C`/`UC` (CNF-11) | ✅ Killed (`:254`) |
-| M11 | `app/queries/set_progress_query.rb:163` | Ordem inválida cai em `code` em vez de `recent` (CNF-28) | ✅ Killed (8) |
-| M12 | `app/views/collection_items/_ownership.html.erb:103` | `aria-disabled` sempre falso em zero (CNF-21) | ✅ Killed (2) |
-| M13 | `app/queries/set_progress_query.rb:240` | Junta a coleção sem `.owned` (quantidade 0 conta) | ✅ Killed (10) |
-| M14 | `app/views/catalog/show.html.erb:9` | `hero` = última variante em vez da primeira (CNF-16/17) | ✅ Killed (4) |
-| M15 | `app/views/catalog/index.html.erb:28` | "N cartas" usa o tamanho da página, não o total (CNF-05) | ✅ Killed (`:231`) |
-| M16 | `app/views/catalog/show.html.erb:88` | Legenda de ilustrador sempre renderizada (CNF-37) | ✅ Killed (`:72`) |
-| M17 | `app/assets/stylesheets/catalog.css:1428` | Remove `min-width: 0` do link do set (T16, 360px) | ✅ Killed (`progress_line_test.rb:65`) |
+| a | `catalog.css:215` | Grade fora do bloco largo volta a `repeat(auto-fill, minmax(var(--tile-min), 1fr))` (CNF-12) | ✅ Killed — `catalog_grid_canvas_test.rb:44` |
+| b | `app/views/catalog/_card_tile.html.erb:54` | `variants.one?` → `variants.size < 3` (duas variantes mostrariam raridade, CNF-04) | ✅ Killed — `catalog_tile_test.rb:174` |
+| c | `app/views/catalog/show.html.erb:10` | Selo do detalhe usa `owned_quantity_for_card(@card)` (soma) em vez da variante (CNF-16) | ✅ Killed — `card_detail_image_test.rb:68` |
+| d | `app/views/catalog/show.html.erb:2-4` | "Voltar ao catálogo" sai de `content_for :sidebar_actions`, fora de `.site-header__aside` (CNF-23) | ✅ Killed — `card_detail_layout_test.rb:69` (+2 erros em `navigation_canvas_test.rb`) |
+| e | `catalog.css:2167` | Largura da busca `30rem` → `28rem` (CNF-08) | ✅ Killed — `catalog_status_line_test.rb:291` |
+| f1 | `app/queries/set_progress_query.rb:211` | `recent`: `DESC` → `ASC` (ordem da pasta, T1/CNF-27) | ✅ Killed — `progress_order_test.rb:76`, `:109` e outros |
+| f2 | `app/queries/set_progress_query.rb:209` | `code`: sem posse deixa de ir ao fim, `IS NULL` removido (T1/CNF-27) | ✅ Killed — `set_progress_query_test.rb:776` (2 falhas) |
+| g | `app/views/catalog/index.html.erb:261` | Remove "Limpar filtros" de `.catalog__empty` (CNF-41) | ✅ Killed — `catalog_status_line_test.rb:156` (5 falhas) |
+| h | `catalog.css:362-366` | `.catalog__empty-reset` `min-height: 24px` → `0` (CNF-41, 44px) | ❌ **Survived** — suíte inteira, 1348 runs, 0 falhas → G1 |
+| i | `app/queries/catalog_query.rb:172` | `KNOWN_RARITIES` troca `C` e `UC` (T2/CNF-11) | ✅ Killed — `catalog_filter_options_test.rb:254` |
+| j | `app/helpers/collection_helper.rb:47` | Selo do tile soma só a 1ª variante (CNF-02) | ✅ Killed — `catalog_tile_test.rb:74` |
 
-**Sensor depth**: P0-full manual (≥5; cobre os cinco obrigatórios: ordem da pasta M1/M2, selo M3/M5, stepper só no detalhe M6, 360px M7/M17, link do set M8)
-**Result**: 17 injetadas, 15 mortas, 2 sobreviventes (1 equivalente, 1 real) — ❌ FAIL por M4
+**Sensor depth**: lightweight ampliado — 11 mutações (as 7 pedidas, com (f) em f1/f2, mais g, h, i, j), cobrindo grade, tile, selo, voltar, busca, ordem da pasta, estado vazio e ordem dos chips.
+**Result**: 11 injetadas, **10 mortas, 1 sobrevivente real (h)** — ❌ FAIL por h.
 
-Isolamento: o `git status --porcelain` da árvore real **não é idêntico** ao baseline, por causa de `?? .specs/features/fechamento/spec.md`, criado às 22:48:43 por outro agente enquanto o sensor rodava. Nenhuma mutação tocou a árvore real (todas em `/tmp/claude-1000/bindr-verify`, já removido com `down -v`). Diferença fora do meu controle, mas registrada.
+Os mutantes que o ciclo 1 deixou vivos (a e b) e os de evidência frouxa (d, e) agora morrem. O mutante h é novo e vem do CNF-41, criado na T21.
+
+**Isolamento**: `git status --porcelain` da árvore real igual ao baseline (`?? .playwright-mcp/`) antes e depois. Nenhuma mutação tocou a árvore real. `docker compose -p bindr-verify down -v` executado e a cópia apagada (os arquivos de cache do `bootsnap` pertenciam ao root do contêiner e foram removidos com um contêiner descartável). Nenhum volume `bindr-verify*` restou.
+
+---
+
+## Interactive UAT Results
+
+Não realizado: a aprovação do dono das capturas (T12, `tasks.md:694`) foi adiada por decisão dele. Registrada como pendência.
 
 ---
 
@@ -120,72 +127,58 @@ Isolamento: o `git status --porcelain` da árvore real **não é idêntico** ao 
 | Principle | Status |
 | --------- | ------ |
 | Minimum code | ✅ — sem abstração nova além de `owned_quantity_for_card` e `in_known_order` |
-| Surgical changes | ✅ — os 56 arquivos do diff estão nos `Where` das tasks |
+| Surgical changes | ✅ — os 64 arquivos do diff caem nos `Where` das tasks |
 | No scope creep | ✅ |
-| Matches patterns | ✅ — `Stylesheet.resolved`, lista fechada como em `CatalogQuery`, `nav_link_to` reaproveitado |
-| Spec-anchored outcome check | ❌ — CNF-12 (`:43-44` afirma `auto-fill`, a spec pede duas colunas) e CNF-04 (só 1 e 3 variantes) |
-| Per-layer Coverage Expectation | ⚠️ — query 1:1 com CNF-11/27/28/38/40; views cobrem com e sem sessão; faltam CNF-04 (2 variantes) e a posição de CNF-23 |
-| Every test maps to a spec requirement | ✅ — spot-check da história "Minha pasta": cada teste de `progress_order_test.rb`, `progress_line_test.rb` e `progress_add_cards_test.rb` aponta um CNF ou Done-when; `minha_pasta_test.rb:276-302` ("remover o link ... faria o teste falhar") repete asserções sem afirmar nada novo (ruído, não bloqueia) |
-| Documented guidelines followed | ✅ — `CLAUDE.md` do projeto: rota `card_path(card_number)`, `assert_response :success` no detalhe, sem fixtures YAML |
+| Matches patterns | ✅ — `Stylesheet.resolved`, `wide_block` reaproveitado (`catalog_status_line_test.rb:284`), lista fechada como em `CatalogQuery` |
+| Spec-anchored outcome check | ❌ — CNF-41: a spec pede 44px e a folha entrega 24px (`catalog.css:365`); ⚠️ CNF-02: posição do selo sem asserção |
+| Per-layer Coverage Expectation | ⚠️ — query 1:1 com CNF-11/27/28/38/40; views cobrem com e sem sessão; faltam a medida de CNF-41 e a posição de CNF-02 |
+| Every test in scope maps to an AC, edge case or Done-when — spot-check da história "Minha pasta" | ✅ — `progress_order_test.rb`, `progress_line_test.rb` e `progress_add_cards_test.rb` apontam cada teste a CNF-25..33 ou a um Done-when de T10/T11/T15–T17; `catalog_status_line_test.rb:161` (≥24px) é o NAV-27 mantido. Ruído sem assertar nada novo em `minha_pasta_test.rb` (já apontado no ciclo 1), não bloqueia |
+| Test integrity | ✅ — `collection_total_test.rb` (−287) removido por CNF-10 com motivo; sem queda líquida (ver Gate) |
+| Documented guidelines followed | ✅ — `CLAUDE.md` do projeto: `card_path(card_number)`, `assert_response :success` no detalhe, sem fixtures YAML |
 
 ---
 
 ## Edge Cases
 
-- [x] CNF-36 placeholder sem `image_url` — `integration/card_detail_image_test.rb:83-86`
-- [x] CNF-37 sem ilustrador — `:72`
-- [x] CNF-38 coleção vazia — `integration/progress_order_test.rb:130-132`
+- [x] CNF-36 placeholder sem `image_url` — `integration/card_detail_image_test.rb:99-102`; medida em `design/card_detail_media_test.rb:19-20`, `:69`, `:74`
+- [x] CNF-37 sem ilustrador — `integration/card_detail_image_test.rb:88`
+- [x] CNF-38 coleção vazia — `integration/progress_order_test.rb:130-132`, `:175`
 - [x] CNF-39 mais de uma cor — `integration/card_detail_header_test.rb:62-63`
-- [x] CNF-40 raridade desconhecida — `queries/catalog_filter_options_test.rb:274`
+- [x] CNF-40 raridade desconhecida — `queries/catalog_filter_options_test.rb:258`
 
 ---
 
 ## Gate Check
 
-- **Gate command**: `docker compose exec -T app bin/rails test && docker compose exec -T app bin/rubocop`
-- **Result**: 1343 runs, 5629 assertions, 0 failures, 0 errors, 0 skips; RuboCop: 163 files, no offenses (ambos `exit 0`)
-- **Test count before feature**: 1214 (base declarada em `tasks.md:55`); contagem estática de blocos `test "..."` em `test/`: 1199 em `61a0e03^` → 1324 em `dca1413`
-- **Test count after feature**: 1343
-- **Delta**: +129 runs (+125 blocos estáticos; a diferença são testes `def test_` que o grep não vê)
+- **Gate command**: `docker compose exec -T app bin/rails test && docker compose exec -T app bin/rubocop` (árvore real)
+- **Result**: **1348 runs, 5639 assertions, 0 failures, 0 errors, 0 skips**; RuboCop: 163 files inspected, no offenses (ambos `exit=0`)
+- **Test count before feature**: 1214 (base declarada em `tasks.md:55`)
+- **Test count after feature**: 1348
+- **Delta**: +134 runs (o ciclo 1 tinha 1343; T19/T20 acrescentaram 5)
 - **Skipped tests**: nenhum
 - **Failures**: nenhuma
-- **Remoções**: `test/integration/collection_total_test.rb` (287 linhas) por CNF-10, mais testes de posse na grade migrados por CNF-01/T3; sem queda líquida
+- **Remoções**: `test/integration/collection_total_test.rb` (287 linhas, CNF-10) e os testes de posse na grade migrados para o detalhe (T3); sem queda líquida
 
 ---
 
 ## Fix Plans
 
-### F1: Grade abaixo de 1024px não tem duas colunas (CNF-12) — Major
+### G1: "Limpar filtros" do estado vazio com 24px, não 44px (CNF-41) — Major
 
-- **Root cause**: `catalog.css:215` mantém `repeat(auto-fill, minmax(var(--tile-min), 1fr))`; a spec revoga "número fixo de colunas" (D7) e a checklist da T5 pede `repeat(2, minmax(0, 1fr))`. O teste `catalog_grid_canvas_test.rb:43-44` foi escrito contra a implementação (`auto-fill`), não contra a spec. Em 360/390px dá duas colunas por coincidência; entre ~480 e 1023px dá três ou mais.
-- **Fix task**: **Where** `app/assets/stylesheets/catalog.css`, `test/design/catalog_grid_canvas_test.rb`. **Verify** o teste `:43` passa a afirmar `repeat(2, minmax(0, 1fr))` e gap 8px fora do bloco largo, e o guarda de 360px continua verde. **Done when** o mutante "voltar a `auto-fill`" morre. Se o dono preferir manter o reflow, corrigir a spec (CNF-12, T5) antes.
+- **Root cause**: a T21 criou CNF-41 em `spec.md:114` ("com altura mínima de 44px"), mas a regra do link do estado vazio continua a herdada da `navegacao`, `min-height: 24px` (`catalog.css:362-366`, classe `catalog__empty-reset`, view `app/views/catalog/index.html.erb:261`). O irmão da linha de status (`.catalog__clear-filters`, `catalog.css:2454-2466`) tem 44px e teste (`catalog_status_line_test.rb:249`); o do estado vazio não tem nem um nem outro. O mutante h prova a falta de discriminação.
+- **Fix task**: **Where** `app/assets/stylesheets/catalog.css`, `test/integration/catalog_status_line_test.rb`. **What** dar ao `.catalog__empty-reset` altura mínima de 44px e a borda de botão, no desenho do `.catalog__clear-filters` (ou reaproveitar a classe). **Verify** teste novo: `Stylesheet.resolved("catalog__empty-reset")` com `min-height` ≥ 44px. **Done when** o mutante h morre e o gate full passa.
 - **Priority**: Major
 
-### F2: Limite de duas impressões sem teste (CNF-04) — Major
+### G2: Posição do selo sem asserção (CNF-02, CNF-16) — Minor
 
-- **Root cause**: `catalog_tile_test.rb:130-171` só cobre 1 e 3 variantes; `variants.size < 3` passa.
-- **Fix task**: **Where** `test/integration/catalog_tile_test.rb`. **Verify** novo caso com duas variantes assertando "2 impressões" e ausência da raridade. **Done when** M4 morre.
-- **Priority**: Major
-
-### F3: Posição do "Voltar ao catálogo" sem asserção (CNF-23) — Minor
-
-- **Root cause**: `card_detail_layout_test.rb:66-68` conta o link em qualquer lugar; nada exige `.site-header__aside .site-header__back`. Mover o link para o `<main>` passaria os testes (raciocínio, não medido no sensor).
-- **Fix task**: **Where** `test/integration/card_detail_layout_test.rb`. **Done when** `assert_select ".site-header__aside a.site-header__back", count: 1`.
+- **Root cause**: `catalog.css:321-325` posiciona `.card-tile__badge` e `.card-detail__badge` em `top/right: var(--space-2)`, mas nenhum teste lê a posição; só cor e raio (`design/ownership_badge_test.rb:51-52`). Não medi mutante porque a cópia já estava desmontada; é raciocínio, não medição.
+- **Fix task**: **Where** `test/design/ownership_badge_test.rb`. Afirmar `position: absolute`, `top` e `right` resolvidos em 8px para os dois selos.
 - **Priority**: Minor
 
-### F4: Peso 600 e ordem do trigger sem asserção (CNF-18) — Minor
+### Fora de código (não reprovam)
 
-- **Fix task**: **Where** `test/design/` e `test/integration/card_detail_header_test.rb`. Afirmar `font-weight: var(--body-strong-weight)` em `.card-detail__trigger-label` e que o rótulo vem depois do texto do efeito.
-- **Priority**: Minor
-
-### F5: Recuo de `.catalog__head` × `.catalog__body` por `include?` (CNF-08) — Cosmetic
-
-- **Fix task**: **Where** `test/integration/catalog_status_line_test.rb:290-297`. Comparar o padding lateral resolvido das duas regras com `assert_equal`.
-- **Priority**: Cosmetic
-
-### Fora de código
-
-- Aprovação do dono das capturas (`tasks.md:675`): pendente por definição; não é lacuna de implementação.
+- Aprovação do dono das capturas: `tasks.md:694`, adiada por decisão dele.
+- CNF-17 "forma compacta" sem medida: DECISÃO-DO-DONO; o canvas não desenha os campos (`canvas-conformance.md:48`).
 
 ---
 
@@ -193,13 +186,13 @@ Isolamento: o `git status --porcelain` da árvore real **não é idêntico** ao 
 
 | Requirement | Previous Status | New Status |
 | ----------- | --------------- | ---------- |
-| CNF-01..03, 05..07, 09..11, 13..16, 19..22, 24..33, 37..40 | Implemented | ✅ Verified |
-| CNF-08, 17, 18, 34, 35, 36 | Implemented | ⚠️ Verified com ressalva (asserção frouxa, spec-precision ou dono pendente) |
-| CNF-23 | Implemented | ⚠️ Posição sem evidência |
-| CNF-04 | Implemented | ❌ Needs Fix (F2) |
-| CNF-12 | Implemented | ❌ Needs Fix (F1) |
+| CNF-01, 03–16, 18–33, 36–40 | Implemented | ✅ Verified |
+| CNF-02 | Implemented | ⚠️ Verified com ressalva (posição do selo sem asserção, G2) |
+| CNF-17 | Implemented | ⚠️ Spec-precision (DECISÃO-DO-DONO) |
+| CNF-34, CNF-35 | Implemented (dono pendente) | ⚠️ Verified, aprovação do dono pendente |
+| CNF-41 | Implemented | ❌ Needs Fix (G1) |
 
-(`spec.md` não foi editado: o Verifier não grava fora de `validation.md` e das lições.)
+(`spec.md` não foi editado: o Verifier só grava `validation.md` e as lições.)
 
 ---
 
@@ -207,12 +200,12 @@ Isolamento: o `git status --porcelain` da árvore real **não é idêntico** ao 
 
 **Overall**: ❌ Not Ready
 
-**Spec-anchored check**: 2 ❌ GAP (CNF-04, CNF-12); 1 sem evidência de posição (CNF-23); 2 spec-precision gaps (CNF-17, CNF-36); 3 PASS parciais (CNF-08, CNF-18, CNF-34/35); os demais casam com a spec
-**Sensor**: 15/17 mutações mortas (1 sobrevivente equivalente, 1 real)
-**Gate**: 1343 passed, 0 failed, RuboCop limpo
+**Spec-anchored check**: 36 ✅ PASS de 41; 1 ❌ (CNF-41, 44px); 4 ⚠️ (CNF-02 posição, CNF-17 spec-precision do dono, CNF-34/35 dono pendente)
+**Sensor**: 10/11 mutações mortas (1 sobrevivente real: h)
+**Gate**: 1348 passed, 0 failed, RuboCop limpo
 
-**What works**: ordem da pasta e isolamento entre usuários, selo e ausência de controle no tile, stepper e Turbo Stream no detalhe, regra de 360px, link do set, ordem de chips e a suíte inteira verde.
+**What works**: grade de duas colunas abaixo de 1024px e cinco acima; "N impressões" no limite de duas; selo por variante no detalhe; "Voltar" dentro de `.site-header__aside`; peso e ordem do trigger; recuo e largura da busca; ordem da pasta e isolamento entre usuários; stepper e Turbo Stream; regra de 360px; suíte inteira verde. As cinco lacunas do ciclo 1 estão fechadas.
 
-**Issues found**: F1 (colunas <1024px), F2 (duas impressões), F3, F4, F5.
+**Issues found**: G1 (44px do "Limpar filtros" do estado vazio), G2 (posição do selo).
 
-**Next steps**: implementar F1 e F2 (ou emendar CNF-12 se o dono quiser o reflow), F3 e F4 no mesmo lote; re-verificar (ciclo 2 de no máximo 3); depois a aprovação do dono das capturas.
+**Next steps**: uma task de correção para G1 (folha + teste) e, se o dono quiser, G2 (só teste); depois o ciclo 3 (de no máximo 3) e, por fim, a aprovação das capturas pelo dono.

@@ -218,6 +218,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: CNF-17 spec.md 'forma compacta' (spec)
 - last seen: 2026-09-29T01:52:39Z
 
+### L-035 - Assert the resolved min-height of every control the spec sizes, including the empty-state variant, not only the sibling control
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `css` · harmful: 0
+- features: conformidade
+- evidence: catalog.css:362-366 mutante h (validation.md) (css)
+- last seen: 2026-09-29T02:43:20Z
+
+### L-036 - When a spec amendment adds a measured criterion, change the code and add its test in the same task, not only the spec text
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: conformidade
+- evidence: CNF-41 (validation.md G1) (spec)
+- last seen: 2026-09-29T02:43:20Z
+
+### L-037 - Assert positioning clauses such as top and right of an overlay, not only its colors and radius
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `css` · harmful: 0
+- features: conformidade
+- evidence: CNF-02 posição do selo (validation.md G2) (css)
+- last seen: 2026-09-29T02:43:20Z
+
+### L-038 - Give every layout adjective in a spec a measurable value or mark it as an owner decision before tasks start
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: conformidade
+- evidence: CNF-17 forma compacta (validation.md) (spec)
+- last seen: 2026-09-29T02:43:20Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
