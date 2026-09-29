@@ -14,7 +14,7 @@ Requisitos e achados que exigem confirmação ou decisão do dono do produto, po
 
 **Evidência de que não está sendo cumprido:**
 
-1. **Coluna do banco vazia:** A migração `20260919120000_create_catalog_tables.rb` define a coluna `image_url_large` em `card_variants`, mas `spec/fixtures/optcgjson-subset.json` (fixture de ingestão) não traz o campo — todas as 4933 variantes têm `image_url_large = NULL`.
+1. **Coluna do banco vazia:** A migração `20260919120000_create_catalog_tables.rb` define a coluna `image_url_large` em `card_variants`, mas os 4933 registros carregados no banco de desenvolvimento têm `image_url_large = NULL`. A fixture `spec/fixtures/optcgjson-subset.json` não traz o campo `image_url_large` — possui apenas `imageUrl`.
 2. **Sem geração de valor:** Nenhum código em `app/services/ingestion/normalize.rb` ou `app/` escreve na coluna.
 3. **Teste passa com valores iguais:** `test/integration/card_detail_test.rb:21` grava a mesma URL em `image_url` e `image_url_large` no fixture de teste, logo não prova comportamento de imagem maior.
 4. **Referência em `design.md`:** A seção §7 ("Imagens") registra na linha 527 com `⚠️ VERIFICAR`: "Não é atendido hoje e fica fora do escopo da AD-012."
@@ -53,6 +53,7 @@ Nenhum requisito foi **alterado** em T2 e T3. Os commits `051d06a` (T2) e `0dd8b
 | Acrescentar | `design.md` §3 (tabela `collection_imports`) | 0dd8b31 | AD-007 |
 | Acrescentar | `design.md` §6 (autorização do staging) | 0dd8b31 | AD-007 |
 | Acrescentar | `design.md` §8.1 (regras de teste com relógio e GIN) | 0dd8b31 | AD-009, AD-010, AD-017, AD-018 |
-| Acrescentar | `design.md` §9 (P8 como aberta) | 0dd8b31 | (contexto) |
+
+**Nota:** `design.md` §9 inclui P8 (cores do jogo) como pendência aberta, não como mudança decorrente de uma AD. P8 é uma restrição técnica do design system, registrada em AD-011.
 
 Nenhuma **mudança** (remoção ou substituição de texto existente) foi feita sem AD citada.
