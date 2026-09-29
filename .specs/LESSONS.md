@@ -290,6 +290,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: FEC-08 spec.md:54 (docs)
 - last seen: 2026-09-29T03:07:21Z
 
+### L-047 - Copy on-screen strings for a manual test script from the rendered template output, never from code comments that describe the screen.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: .specs/features/fechamento/roteiro-7-1.md:98,107 (docs)
+- last seen: 2026-09-29T03:42:34Z
+
+### L-048 - After correcting a wrong figure in a document, grep the whole document for the old value before ticking the fix.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: .specs/features/fechamento/roteiro-7-1.md:115 (docs)
+- last seen: 2026-09-29T03:42:34Z
+
+### L-049 - Cite lines of a document that sibling tasks are editing by heading or literal text, not by line number.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: .specs/features/fechamento/spec.md:66-67 (docs)
+- last seen: 2026-09-29T03:42:34Z
+
+### L-050 - When items move from open to resolved in a tracking section, rewrite the section heading and lead-in sentence that described the old state.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: .context/requirements.md:522-526 (docs)
+- last seen: 2026-09-29T03:42:34Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

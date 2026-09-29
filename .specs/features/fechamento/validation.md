@@ -2,11 +2,13 @@
 
 **Date**: 2026-09-29
 **Spec**: `.specs/features/fechamento/spec.md`
-**Diff range**: `de99cab^..HEAD` (`de99cab` = `docs(fechamento): escrever o roteiro do teste manual da §7.1`, primeiro commit da feature; HEAD = `830b8ad`). Commits da feature nesse intervalo: `de99cab`, `f6a2a23`, `f216901`, `051d06a`, `130a667`, `0dd8b31`, `ad7c2a0`, `c78fd80`, `830b8ad`. Os commits `conformidade` intercalados não são desta feature.
-**Verifier**: independente (autor ≠ verificador; não escreveu nada desta feature)
-**Veredito**: ❌ **FAIL** (ciclo 1)
+**Diff range**: `de99cab^..HEAD` (`de99cab` = `docs(fechamento): escrever o roteiro do teste manual da §7.1`, primeiro commit da feature; HEAD = `37d2050`). Commits da feature: `de99cab`, `f6a2a23`, `f216901`, `051d06a`, `130a667`, `0dd8b31`, `ad7c2a0`, `c78fd80`, `830b8ad`, `eebced8` (relatório do ciclo 1), `b9b6f6f`, `0ea612d`, `a33a7d1`, `3b61fe9`, `40e9485`, `9800d85`, `f6b958f`, `9fc7419`, `37d2050`. Os commits `conformidade` intercalados (`cead276`, `4ca730a`, `c1ebaf1`, `1085994`, `dec1dd9` etc.) não são desta feature.
+**Verifier**: independente, novo (autor ≠ verificador; não escreveu a feature nem fez o ciclo 1), Sonnet, **ciclo 2 de no máximo 3**
+**Veredito**: ❌ **FAIL** (ciclo 2) — os 4 Major do ciclo 1 estão fechados; sobram 2 Done-when não cumpridos (T12 e T9) e 1 lacuna cosmética.
+**Result**: ❌ FAIL (ciclo 2)
+**Histórico**: ciclo 1 = FAIL, git `eebced8`.
 
-Feature só de documentos: a "evidência" é `arquivo:linha` ou saída de `grep`/`ls`/`git`/comando real. Nada foi editado fora de `validation.md` e das lições.
+Feature só de documentos: a evidência é `arquivo:linha` ou saída de `grep`/`ls`/`git`/comando real, re-derivada do zero. Nada foi editado fora de `validation.md`, `.specs/LESSONS.md` e `.specs/lessons.json` (este só via `lessons.py`).
 
 ---
 
@@ -14,12 +16,19 @@ Feature só de documentos: a "evidência" é `arquivo:linha` ou saída de `grep`
 
 | Task | Status | Notas |
 | ---- | ------ | ----- |
-| T1 README | ⚠️ Partial | Falham: `storage/ingestion/` ausente do README e `sai com código 1` ausente (`README.md:42-66`; `grep -n "storage\|código 1" README.md` → 0 linhas); o comando `REUSE_PAYLOAD=1 docker compose exec …` (`README.md:65`) não repassa a variável ao container. O checkbox `[x]` do item 3 está marcado sem o texto (`tasks.md:104`) |
-| T2 requirements.md | ⚠️ Partial | Req. 10 correto (`requirements.md:257-269`, três `AD-00[678]`). O item "Rastreamento de pendências segue coerente" (`tasks.md:136`) não se sustenta: `requirements.md:513-519` ainda lista P1–P4 como bloqueadoras, decididas desde 2026-09-19 (`design.md:589`) |
-| T3 design.md | ⚠️ Partial | §3, §6, §8.1 conferidos contra o repositório. Falha: P8 cita "Req. 13.7" (`design.md:602`), que trata de 360px; o Req. correto é 12.11 (`requirements.md:519`, `:338`) |
-| T4 VERIFICAR | ✅ Done | 2 resolvidos com fonte aberta e conferida; 3 linhas abertas (`design.md:527, 537, 628`) = "3 ocorrências / 2 pendências" de `verificar-resolvidos.md:27` |
-| T5 decisões | ✅ Done | Req. 5.1 com evidência conferida; ressalvas de forma em Fix 8 |
-| T6 fechamento | ⚠️ Partial | §7.2 `[x]` e §7.1 `[ ]` (`.context/tasks.md:314,307`); Handoff escrito sem "concluída" indevido. `tasks.md:250` continua `[ ]` (o Done-when cita `validate_state.py .specs/STATE.md`, mal redigido) e o Handoff contém uma frase enganosa (Fix 5) |
+| T1 README | ✅ Done | `README.md:16` (`docker compose up`), `:35` (`.env` opcional), `:23` (catálogo vazio), `:47`, `:60-70` (ingestão, `storage/ingestion/`, código 1, `(AD-001)`), `:78-96` (gates) |
+| T2 requirements.md | ✅ Done | Req. 10: `requirements.md:258` (AD-006), `:266` (AD-007), `:269` (AD-008); `grep -c "AD-00[678]"` → 3; `grep -c VERIFICAR` → 0 |
+| T3 design.md | ✅ Done | `design.md:215-231` (staging, AD-007), `:472`, `:563-579` (AD-009/010/017/018); nota de forma em `design.md:589` (FEC-07) |
+| T4 VERIFICAR | ✅ Done | `grep -n VERIFICAR` → `design.md:527,537,628` = "3 ocorrências / 2 pendências" de `verificar-resolvidos.md` |
+| T5 decisões | ✅ Done | `decisoes-do-dono.md` com Req. 5.1 |
+| T6 fechamento | ⚠️ Partial (esperado) | §7.2 `[x]` (`.context/tasks.md:314`), §7.1 `[ ]` (`:307`); o único `[ ]` restante é o `validate_state.py fechamento` (`tasks.md:266`), que só sai 0 com PASS |
+| T7 README | ✅ Done | `docker compose exec -T -e REUSE_PAYLOAD=1 app sh -c "echo $REUSE_PAYLOAD"` → `1` (sem `-e` → vazio); `grep -n "REUSE_PAYLOAD=1 docker" README.md` → 0; `grep -n "storage/ingestion\|código 1\|AD-001" README.md` → `:68,:69,:70`; os 5 gates do `CLAUDE.md` comparados um a um em `README.md:78,81,84,90,96` |
+| T8 P8 no design | ✅ Done | `design.md:602` termina em "Req. 12.11 (emenda de 2026-09-29)"; `grep -n "^| P8" design.md \| grep -c 12.11` → 1, `13.7` → 0; `git show 40e9485` altera 1 linha |
+| T9 Rastreamento | ⚠️ Partial | P1–P4 em "Resolvidas" com AD (`requirements.md:508-518`). **Falha o 2º Done-when**: P8 continua a única aberta mas sem `(AD-NNN)`/`(emenda de 2026-09-29)` (`requirements.md:526`); o texto-guia "bloqueiam o início da implementação" (`:522`) ficou valendo só para P8, que não bloqueia (`design.md:602`: chips neutros) |
+| T10 Handoff | ✅ Done | `grep -c "confirmado fora de spec" .specs/STATE.md` → 0; `STATE.md:151` diz "Req. 5.1 continua aberto"; 1350 runs, 10/10 mutações e "ciclo 3: PASS" conferem com `conformidade/validation.md:8`; `validate_state.py conformidade` → 0 |
+| T11 spec/tasks | ✅ Done | `spec.md:54` diz "sem citação nominal de AD-011/013" (`grep -c "AD-011\|AD-013"` → 0 nos dois documentos); T6 cita `validate_state.py fechamento` e `Done`; `validate_spec.py` → 0, `validate_tasks.py` → 0 |
+| T12 roteiro | ⚠️ Partial | **Falha o 1º, 2º e 4º Done-when**: `grep -n "48" roteiro-7-1.md` → `:115` "o total (48)" (121 no resto do arquivo); "12% concluído" (`:98,:107`) não é texto da tela. Acertos: 121 (`baseSetSize` do OP01 na fixture e no banco), `<details>` fechado no celular (`:151`) |
+| T13 decisões | ✅ Done | `grep -c "(contexto)" decisoes-do-dono.md` → 0; `:17` atribui as 4933 ao banco de dev (medido: `CardVariant.count` → 4933, `image_url_large` NULL → 4933) e diz que a fixture não traz o campo (chaves da fixture: sem `image_url_large`) |
 
 ---
 
@@ -27,59 +36,64 @@ Feature só de documentos: a "evidência" é `arquivo:linha` ou saída de `grep`
 
 | Critério | Resultado definido na spec | Evidência (`arquivo:linha` / comando) | Result |
 | -------- | -------------------------- | ------------------------------------- | ------ |
-| FEC-01 | `docker compose up` único; `.env` opcional | `README.md:15-17` (comando), `:29-38` (opcional). `docker-compose.yml:5-7` usa `${VAR:-default}`; `grep -c env_file docker-compose.yml` → 0 | ✅ PASS |
-| FEC-02 | catálogo vazio; próximo passo `ingestion:import` | `README.md:23-24`, `:47`. `db/seeds.rb` só tem comentário; `lib/tasks/ingestion.rake:2-3` define `ingestion:import` | ✅ PASS |
-| FEC-03 | revisão de `config/ingestion.yml` imutável (AD-001); payload em `storage/ingestion/` ignorado pelo git; `REUSE_PAYLOAD=1` reprocessa sem rede | Revisão: `README.md:42-44` ✓ (`app/services/ingestion/source_config.rb:8` rejeita `main/head/latest`). **`grep -n "storage\|ignorad" README.md` → nenhuma linha**. `README.md:65` `REUSE_PAYLOAD=1 docker compose exec app …`: medido, `REUSE_PAYLOAD=1 docker compose exec -T app sh -c 'echo [${REUSE_PAYLOAD}]'` → `REUSE_PAYLOAD=[]`; só com `-e REUSE_PAYLOAD=1` → `[1]`. `docker-compose.yml` não declara a variável. O comando documentado não ativa o reuso | ❌ GAP |
-| FEC-04 | quick, full, build e `verify_fixture.py`, comando exato | `README.md:73-81`, `:86` (brakeman), `:92`. `CLAUDE.md` traz os mesmos; `python3 spec/verify_fixture.py` → exit 0 | ✅ PASS |
-| FEC-05 | comando citado inexistente é corrigido | `ls spec/verify_fixture.py .env.example .github/workflows/ci.yml config/brakeman.ignore config/ingestion.yml docs/adr docs/pesquisa` → todos existem; `lib/tasks/ingestion.rake:3`. Existência ✓ (mas ver FEC-03: existe e não funciona) | ✅ PASS |
-| FEC-06 | AD ativa que altera requisito → `(AD-NNN)` na linha | `requirements.md:258` (AD-006), `:266` (AD-007), `:269` (AD-008). Valores casam o código: `app/services/collection_csv/parser.rb:28` (`MAX_LINHAS = 10_000`), `:150-154` (mensagem em português com o limite; contagem sem cabeçalho, `headers: true` `:107`) | ✅ PASS |
-| FEC-07 | idem em design.md | `design.md:223, 231, 472` (AD-007), `:563, 567` (AD-009), `:571` (AD-010), `:575` (AD-017), `:579` (AD-018). `db/structure.sql:156-166,675,682,689,760` casam colunas, índices, CHECK e `ON DELETE RESTRICT`; `app/models/collection_import.rb:94` `limpar_expiradas`; `app/controllers/collection_imports_controller.rb:102-104` `find_by_token_for` + `RecordNotFound`; `app/services/ingestion/upsert.rb:16` `clock:`; `test/queries/catalog_search_test.rb:109` `gin_clean_pending_list`, `:408` `SemTransacaoTest`. **Exceção**: §9 mudou de "Nenhuma." para "Uma aberta (P8)." (`design.md:589`) e a linha P8 (`:602`) sem `(AD-NNN)` nem emenda | ⚠️ Spec-precision gap (forma da citação; Fix 3) |
-| FEC-08 | AD já refletida não se reescreve | `git show 051d06a 0dd8b31 ad7c2a0` só acrescentam/removem marcadores; nenhuma linha refletida foi reescrita. **Mas** `spec.md:54` diz que "`grep` mostra as citações" de AD-011/012/013/015/016: `grep -c "AD-011\|AD-013"` em `requirements.md` e `design.md` → 0 e 0 (AD-012 tem citações; AD-015/016 só em `requirements.md:410,360,439`). O conteúdo está refletido (`design.md:639` §11; `requirements.md:349` Req. 13), sem a citação que a definição de FEC-08 exige ("citada e coerente") | ⚠️ Spec-precision gap (Fix 7) |
-| FEC-09 | Req. 10: substituição, staging com expiração, 10.000 linhas | `requirements.md:257-259, 264-267, 268-270`; `git show 051d06a` só acrescenta | ✅ PASS |
-| FEC-10 | §3/§6 staging e §8 regras AD-009/010/017/018 | `design.md:214-227` (§3.2), `:231-236` (§3.3), `:472-477` (§6), `:562-585` (§8.1). Todos os nomes conferidos (linha FEC-07) | ✅ PASS |
-| FEC-11 | §9 mantém P6 revista (AD-012) e lista P8 coerente com "Rastreamento" de requirements.md | P6: `design.md:600` ✓ (AD-012). P8 listado: `design.md:602`, **mas cita "Req. 13.7"** (o Req. 13.7 trata das verificações de 360px), enquanto o Rastreamento cita "Req. 12.11" (`requirements.md:519`, `:338`). Além disso o Rastreamento (`requirements.md:511-519`) mantém P1–P4 como "bloqueiam o início", contradizendo `design.md:589` | ❌ GAP |
-| FEC-12 | remoção registrada com local, texto e fonte | `verificar-resolvidos.md:9-13` (2 linhas com fonte e data). `git show ad7c2a0 -- .context/design.md` remove só os 2 marcadores (`design.md:346-374`) | ✅ PASS |
-| FEC-13 | não resolvidos permanecem, listados | `grep -n VERIFICAR .context/design.md` → `:527`, `:537`, `:628`; `verificar-resolvidos.md:17-21` lista os 2 assuntos; ambos sem fonte primária (nenhum regulamento no repositório; `image_url_large` só em `db/migrate/20260919120000_create_catalog_tables.rb:65`, nenhum `app/` escreve) | ✅ PASS |
-| FEC-14 | remoção só com fonte conferida | Reabri as fontes: `db/migrate/20260919120100_add_catalog_indexes.rb:4-19` (unaccent STABLE, `to_tsvector` 2 args IMMUTABLE), `:6-12`; `test/models/catalog_indexes_test.rb:127`, `:160` (`gin_trgm_ops`). Casam `verificar-resolvidos.md:11-12` | ✅ PASS |
-| FEC-15 | contagem em requirements.md depois da task | `verificar-resolvidos.md:28`; `grep -c "VERIFICAR" .context/requirements.md` → 0 | ✅ PASS |
-| FEC-16 | requisito errado → decisão do dono, sem alterar | `decisoes-do-dono.md:38-40` ("Nenhum"). **Contradição**: os achados de FEC-11 (P8 com Req. errado; P1–P4 no Rastreamento) são incoerências que a task devia ter devolvido ou corrigido | ⚠️ Spec-precision gap (Fix 3, 4) |
-| FEC-17 | correção inequívoca registrada | `decisoes-do-dono.md:44-58`; a linha `(contexto)` de `:56` contradiz a frase de `:46` ("cada adição citando a AD") | ⚠️ Spec-precision gap (Fix 8) |
-| FEC-18 | Req. 5.1 aberto com evidência de §7 | `decisoes-do-dono.md:9-34`. Conferido: `requirements.md:132-133`, `design.md:527-539` (4933 vem do banco de dev, `.specs/features/imagens/spec.md:69`; a fixture tem 5 sets — `decisoes-do-dono.md:17` redige de forma ambígua), `test/integration/card_detail_test.rb:19-21`, `db/migrate/20260919120000_create_catalog_tables.rb:65`, `requirements.md:425` (Req. 13.19) | ✅ PASS |
-| FEC-19 | §7.2 marcada; Handoff | `.context/tasks.md:314` `[x]`, `:307` `[ ]`; `.specs/STATE.md:151` novo bloco, "Verifier pendente", sem "concluída". Mas traz "(Req. 5.1 confirmado fora de spec, em `verificar-resolvidos.md`)" junto dos marcadores **resolvidos**; o Req. 5.1 está aberto — frase enganosa | ⚠️ Spec-precision gap (Fix 5) |
-| FEC-20 | `validate_state.py` sai 0 sobre o STATE | Não verificável como redigido: o script recebe o nome da feature (`validate_state.py fechamento`), não o caminho | ⚠️ Spec-precision gap (Fix 8) |
-| FEC-21 | ordem subida → ingestão | `README.md:15-24` antes de `:40-47` | ✅ PASS |
-| FEC-22 | aborta antes de escrever; aponta `REUSE_PAYLOAD=1` | Texto: `README.md:60-62`; código: `app/services/ingestion/fetch.rb:67,74` lança `SourceUnavailable` antes do `Upsert` (`run.rb:14-20`). O comando apontado em `:65` não funciona (medição em FEC-03) | ❌ GAP |
-| FEC-23 | contorno `DOCKER_CONFIG` intacto | `git show f216901 -- README.md` não toca `README.md:116-125` | ✅ PASS |
-| FEC-24 | nada fora do `Where` | `git show --stat` de cada commit: só `README.md`, `.context/*.md`, `.specs/**` (ver Code Quality) | ✅ PASS |
+| FEC-01 | `docker compose up` único; `.env` opcional | `README.md:16`, `:35`; `docker-compose.yml` usa `${VAR:-default}`; `grep -c env_file docker-compose.yml` → 0 | ✅ PASS |
+| FEC-02 | catálogo vazio; passo seguinte `ingestion:import` | `README.md:23`, `:47`; `lib/tasks/ingestion.rake:2-3` (`namespace :ingestion` / `task import`) | ✅ PASS |
+| FEC-03 | revisão imutável de `config/ingestion.yml` (AD-001); payload em `storage/ingestion/` ignorado pelo git; `REUSE_PAYLOAD=1` sem rede | `README.md:42` e `:69-70` (AD-001); `:68`; `.gitignore:20` (`/storage/ingestion/`); `:65` executável — `docker compose exec -T -e REUSE_PAYLOAD=1 app sh -c "echo $REUSE_PAYLOAD"` → `1`; o hash de `config/ingestion.yml` não está copiado no README | ✅ PASS |
+| FEC-04 | quick, full, build e `verify_fixture.py`, comando exato | `README.md:78` (quick), `:81` (full), `:84` (build), `:90` (brakeman), `:96` (`python3 spec/verify_fixture.py` → exit 0) | ✅ PASS |
+| FEC-05 | comando citado inexistente é corrigido | `ls .env.example .github/workflows/ci.yml config/brakeman.ignore spec/verify_fixture.py config/ingestion.yml docs/adr docs/pesquisa` → todos existem; tarefa `ingestion:import` existe | ✅ PASS (README). Roteiro: ver seção abaixo |
+| FEC-06 | AD ativa que altera requisito → `(AD-NNN)` na linha | `requirements.md:258`, `:266`, `:269`; valores casam o código: `app/services/collection_csv/parser.rb:28` (`MAX_LINHAS = 10_000`) | ✅ PASS |
+| FEC-07 | idem em design.md | `design.md:223,231,472` (AD-007), `:563,567` (AD-009), `:571` (AD-010), `:575` (AD-017), `:579` (AD-018); `db/structure.sql:156` (`CREATE TABLE public.collection_imports`); `collection_imports_controller.rb:102` (`find_by_token_for`); `upsert.rb:16` (`clock:`); `catalog_search_test.rb:77` (`gin_clean_pending_list`), `:408` (`SemTransacaoTest`). Nota de forma: a frase "Uma aberta (P8)." (`design.md:589`) mudou em `0dd8b31` sem `(AD-NNN)`/emenda; a linha P8 (`:602`) traz a emenda e a T8 dispensa a frase | ⚠️ Spec-precision gap (baixo) |
+| FEC-08 | AD já refletida não se reescreve | `git show 051d06a 0dd8b31 ad7c2a0` só acrescentam/removem; `spec.md:54` corrigido: `grep -c "AD-011\|AD-013" .context/requirements.md .context/design.md` → 0 e 0 | ✅ PASS |
+| FEC-09 | Req. 10: substituição, staging com expiração, 10.000 linhas | `requirements.md:257-259` (AD-006), `:264-267` (AD-007), `:268-270` (AD-008) | ✅ PASS |
+| FEC-10 | §3/§6 staging; §8 regras AD-009/010/017/018 | `design.md:215-236`, `:472-477`, `:563-583`; `grep -c "AD-009\|AD-010\|AD-017\|AD-018" design.md` → 5 (≥ 4) | ✅ PASS |
+| FEC-11 | §9 mantém P6 revista (AD-012) e lista P8 coerente com o Rastreamento | `design.md:600` (P6, AD-012); `:602` P8 "Req. 12.11"; `requirements.md:526` P8 "Req. 12.11"; `requirements.md:338` é o critério 11 do Req. 12 (chips das seis cores); Rastreamento sem P1–P4 bloqueadoras (`:508-518`, cada uma com AD-001/AD-002/AD-003; `ls docs/adr` → 001 e 002) | ✅ PASS |
+| FEC-12 | remoção registrada com local, texto e fonte | `verificar-resolvidos.md` tabela "Resolvidos" (2 linhas com fonte e data); `git show ad7c2a0` remove só os 2 marcadores | ✅ PASS |
+| FEC-13 | não resolvidos permanecem, listados | `grep -n VERIFICAR .context/design.md` → `:527,:537,:628`; `verificar-resolvidos.md` "Permanecem abertos" (Req. 5.1; regras de deck) coerente com as 3 linhas / 2 pendências | ✅ PASS |
+| FEC-14 | remoção só com fonte conferida | reaberto: `db/migrate/20260919120100_add_catalog_indexes.rb:6-12`, `test/models/catalog_indexes_test.rb:127,160` | ✅ PASS |
+| FEC-15 | contagem em requirements.md depois da task | `verificar-resolvidos.md` "Contagem após task T4"; `grep -c "VERIFICAR" .context/requirements.md` → 0 | ✅ PASS |
+| FEC-16 | requisito errado → decisão do dono, sem alterar | `decisoes-do-dono.md` seção "devolvidos como `blocked`": Nenhum; nenhum Req. numerado mudou de sentido nos commits da fase 5 (`9800d85` só mexe no Rastreamento) | ✅ PASS |
+| FEC-17 | correção inequívoca registrada sob "Corrigidos por AD" | `decisoes-do-dono.md` tabela sem `(contexto)`; a nota sobre P8 cita AD-011, que trata de P8 (`STATE.md:88`, "pendência **P8**") | ✅ PASS |
+| FEC-18 | Req. 5.1 aberto com evidência de `design.md` §7 | `decisoes-do-dono.md:9-34`; `design.md:527-539`; `db/migrate/20260919120000_create_catalog_tables.rb:65` (única menção a `image_url_large` fora de teste; `grep -rn image_url_large app lib` → 0); `test/integration/card_detail_test.rb:19-21` | ✅ PASS |
+| FEC-19 | §7.2 marcada; Handoff sem "concluída" indevido, Req. 5.1 aberto | `.context/tasks.md:314` `[x]`, `:307` `[ ]`; `STATE.md:151` ("Verifier pendente"; "Req. 5.1 continua aberto") | ✅ PASS |
+| FEC-20 | `validate_state.py` sai 0 | Comando agora certo (`tasks.md:266`, `validate_state.py fechamento`); sai ≠ 0 enquanto este relatório for FAIL — fecha com o PASS | ⏳ Pendente (portão de fechamento) |
+| FEC-21 | ordem subida → ingestão | `README.md:16` antes de `:47` | ✅ PASS |
+| FEC-22 | aborta antes de escrever; aponta `REUSE_PAYLOAD=1` | `README.md:60-65`; `app/services/ingestion/fetch.rb` lança `SourceUnavailable` antes do `Upsert`; comando de `:65` executável (medido, FEC-03) | ✅ PASS |
+| FEC-23 | contorno `DOCKER_CONFIG` intacto | `git diff de99cab^..HEAD -- README.md \| grep -c "DOCKER_CONFIG\|credential"` → 0; bloco em `README.md:121-129` | ✅ PASS |
+| FEC-24 | nada fora do `Where` | `git show --stat` por commit (ver Code Quality); nenhum commit `(fechamento)` toca `app lib db test config spec` (`git log --grep='(fechamento)' -- app lib db test config spec` → 0) | ✅ PASS |
 
-**Status**: ❌ Gaps present. **Spec-anchored: 15/24 PASS**; 3 GAP (FEC-03, FEC-11, FEC-22); 6 spec-precision gaps (FEC-07, 08, 16, 17, 19, 20).
+**Status**: ⚠️ Spec-anchored **22/24 PASS**, 1 spec-precision gap baixo (FEC-07), 1 pendente por construção (FEC-20). Nenhum GAP de FEC. O FAIL vem de Done-when de tasks (T9, T12), abaixo.
 
-Conferências extras de fatos citados (verdadeiras salvo o listado): `docker-compose.yml` (`db:prepare` no `command`, `:26`), `lib/tasks/ingestion.rake`, `config/ingestion.yml`, `spec/verify_fixture.py`, `.gitignore:20` (`/storage/ingestion/`), `.github/workflows/ci.yml:22,29,35-36,58`, `db/structure.sql` (`collection_imports`), `MAX_LINHAS`, `CollectionImport.find_by_token_for`, `clock:`, `gin_clean_pending_list`, AD-001..AD-018 e Handoff contra STATE. `grep -n VERIFICAR`: `design.md` 3 linhas, `requirements.md` 0.
+### Roteiro `roteiro-7-1.md` contra o repositório (T12)
 
-Roteiro (`roteiro-7-1.md`) contra as views: os botões e classes existem (`app/views/catalog/show.html.erb:3,193`, `app/views/collection_items/_ownership.html.erb:126`, `app/views/layouts/application.html.erb:31-37`, `app/views/sessions/new.html.erb:23`, `app/views/progress/index.html.erb`). Falhas: `roteiro-7-1.md:98,107,115,155` usam denominador **48** para o OP01, mas `baseSetSize` do OP01 é **121** (`spec/fixtures/optcgjson-subset.json`); `:107` mostra "OP01 · 15 / 48", formato que a view não gera (a view escreve "N de M variantes"); `:151` diz "não colapsado" mas `<details class="catalog__filters-toggle">` não tem `open` (`app/views/catalog/index.html.erb:70`; só fica aberto por CSS a partir de 1024px, `catalog.css:2193-2204`).
+Confere: OP01 `baseSetSize` = **121**, `totalSetSize` 154 (`spec/fixtures/optcgjson-subset.json`; banco: `[121, 154]`); botões e rótulos existem — "Entrar para registrar posse" (`app/views/catalog/index.html.erb:49`, `_ownership.html.erb:126`), "Criar conta" (`sessions/new.html.erb:23`, `registrations/new.html.erb:35`), "Voltar ao catálogo" (`catalog/show.html.erb:3`), "Minha pasta"/"Catálogo" (`layouts/application.html.erb:31-32`), `ownership__button--increment` (`_ownership.html.erb:118`), `<details class="catalog__filters-toggle">` sem `open` (`catalog/index.html.erb:70`), rota `/cards/:id` (`config/routes.rb:15`), "15 de 121 do set base" e "2 de 33 parallels" no formato da view (`progress/index.html.erb:230,238-241`).
+
+Falhas:
+1. `roteiro-7-1.md:115` — "o total (**48**)": sobra do número antigo; contradiz o 121 de `:98,:107`. T12 Done-when 1 (`grep -n "48"` sem ocorrência injustificada) não cumprido.
+2. `roteiro-7-1.md:98,107` — "**12% concluído**" não é texto que a tela produz. A view escreve o percentual na linha do set como `15 / 154 · 12%` (`progress/index.html.erb:204-212`, `number_to_percentage`) e a legenda `15 de 121 do set base · 2 de 33 parallels` (`:230,:238-241`); "N% concluído" só existe num comentário ERB (`:36`). T12 Done-when 2 e 4 não cumpridos.
+3. (baixo) `roteiro-7-1.md:151` diz `<details>` "com classe `catalog__filters`"; a classe do `<details>` é `catalog__filters-toggle` (`catalog/index.html.erb:70`); `catalog__filters` é o `<div>` interno (`:81`).
 
 ---
 
 ## Discrimination Sensor
 
-Feature só de documentos: o sensor mede se as **verificações da própria feature** (grep/ls/validadores dos Done-when e do Independent Test) detectam a falta. Cópia em `/tmp/claude-1000/bindr-verify/` (rsync sem `.git`), restaurada após cada mutação e apagada no fim.
+Feature só de documentos: o sensor mede se as **verificações dos Done-when** detectam a falta. Cópia em `/tmp/claude-1000/bindr-verify/` (rsync sem `.git`, `tmp`, `log`, `node_modules`, `.playwright-mcp`); cada arquivo restaurado da árvore real após a mutação; cópia apagada no fim.
 
-| # | Arquivo:linha | Falta injetada | Verificação testada | Killed? |
-| - | ------------- | -------------- | ------------------- | ------- |
-| a | `README.md:47,65` | `ingestion:import` → `ingestion:carregar` | T1: cada `bin/rails X` do README existe em `lib/tasks/*.rake` | ✅ Killed |
-| b | `design.md:~369` | reinserir `⚠️ VERIFICAR` resolvido (`grep -c` 3 → 4) | T4: `grep -c "⚠️ VERIFICAR" design.md` = nº de abertos (3) | ✅ Killed |
-| c | `requirements.md:266` | remover `(AD-007)` | T2: `grep -c "AD-00[678]"` ≥ 3 (3 → 2) | ✅ Killed |
-| d | `design.md:214,231,472` | `collection_imports` → `collection_stagings` | T3: nome de tabela citado existe em `db/structure.sql` | ✅ Killed |
-| e | `README.md:76-77` | apagar o gate full | (e1) Done-when T1: lista quick/full/build com comando exato; (e2) Independent Test da spec: cada comando do README aparece nas fontes | e1 ✅ Killed · e2 ❌ **Survived** (a checagem só vai README→fontes; apagar comando não a quebra) |
-| f | `STATE.md:151` | `1350 runs` → `1349 runs` | verificações da feature (Done-when T6 + `validate_state.py fechamento`): o script só acusou a falta de `validation.md`, idêntico ao baseline; nenhum Done-when compara os números com o gate | ❌ **Survived** |
-| g | `README.md:42` | `config/ingestion.yml` → `config/ingest.yml` | T1/FEC-05: `ls` de cada arquivo citado | ✅ Killed |
+| # | Arquivo | Falta injetada | Verificação testada | Killed? |
+| - | ------- | -------------- | ------------------- | ------- |
+| a | `README.md:47` | `ingestion:import` → `ingestion:carregar` | T1/FEC-05: cada `bin/rails ns:task` do README existe em `lib/tasks/*.rake` → `['ingestion:carregar']` | ✅ Killed |
+| b | `.context/design.md` | reinserir um `⚠️ VERIFICAR` resolvido | T4: nº de marcadores × contagem de `verificar-resolvidos.md` → `design=4 declarado=3` | ✅ Killed |
+| c | `.context/requirements.md:266` | remover `(AD-007)` | T2: `grep -c "AD-00[678]"` ≥ 3 → 2 | ✅ Killed |
+| d | `.context/design.md:215,231` | `collection_imports` → `collection_stagings` | T3: tabela citada existe em `db/structure.sql` (`CREATE TABLE public.collection_imports`, `:156`) → `['collection_stagings']` | ✅ Killed |
+| e | `README.md:80-81` | apagar o gate full | T7 (verificação inversa): cada gate do `CLAUDE.md` no README → faltam `bin/rubocop` e "full" | ✅ Killed (e1) · ❌ **Survived** (e2: Independent Test da spec vai README→fontes; apagar comando não a quebra) |
+| f | `STATE.md:151` | `gate full 1350 runs` → `1349` | T10: comparar com o gate medido (1350) → `handoff=1349 gate=1350` | ✅ Killed pela comparação · ❌ **Survived** no validador automático (`validate_state.py fechamento` dá a mesma saída antes e depois: não compara números) |
+| g | `README.md:65` | remover `-e` de `REUSE_PAYLOAD` | T7: `grep "REUSE_PAYLOAD=1 docker"` e presença de `exec -e`; execução real: `REUSE_PAYLOAD=1 docker compose exec -T app sh -c 'echo [${REUSE_PAYLOAD}]'` → `[]`, com `-e` → `[1]` | ✅ Killed |
 
 **Sensor depth**: lightweight (7 faltas; feature de documentos)
-**Result**: **6/7 mortas**, 1 sobreviveu (f) e uma verificação (e2, Independent Test) é fraca — ❌ FAIL.
+**Result**: **7/7 faltas mortas** pelas verificações dos Done-when; 2 verificações persistentes são fracas (e2 na spec; validador automático em f): lacuna baixa, porque o Done-when de T7/T10 as cobre quando executado.
 
-Observação: nenhuma dessas verificações detectou os defeitos reais achados acima (comando `REUSE_PAYLOAD` ineficaz, "Req. 13.7", P1–P4 no Rastreamento). Elas checam **existência** de nomes, não **comportamento** nem **coerência entre documentos**.
+Observação: o sensor não pega o defeito real que sobrou (`roteiro-7-1.md:115`), porque o Done-when de T12 (`grep -n "48"`) foi marcado `[x]` sem ser reexecutado — falha de execução do Done-when, não de desenho.
 
-Isolamento: `git status --porcelain` da árvore real antes e depois → `?? .playwright-mcp/` (igual ao baseline); cópia removida (`ls /tmp/claude-1000/bindr-verify` → inexistente).
+Isolamento: `git status --porcelain` da árvore real antes e depois → `?? .playwright-mcp/` nos dois (igual ao baseline); `ls /tmp/claude-1000/bindr-verify` → inexistente.
 
 ---
 
@@ -87,20 +101,20 @@ Isolamento: `git status --porcelain` da árvore real antes e depois → `?? .pla
 
 | Princípio | Status |
 | --------- | ------ |
-| Só arquivos do `Where` tocados | ✅ `git show --stat`: `f216901`, `130a667` só `README.md`; `051d06a` `requirements.md` (+ `tasks.md` só com checkboxes, permitido pelo protocolo "o orquestrador marca"); `0dd8b31` `design.md` (+ `tasks.md`); `ad7c2a0` `design.md`, `verificar-resolvidos.md` (+ `tasks.md`); `c78fd80` `decisoes-do-dono.md` (+ `tasks.md`); `830b8ad` `.context/tasks.md`, `STATE.md`, `spec.md`, `tasks.md`. Nenhum código, teste, migração ou folha |
-| Sem escopo extra | ✅ nenhum arquivo fora do `Where`; `roteiro-7-1.md` (`de99cab`) é a §7.1, fora da spec (`spec.md:30`), mas versionado como apoio |
-| Mudança mínima | ✅ diffs de `requirements.md` (+11/−2) e `design.md` só acrescentam/removem marcadores |
-| Nenhum fato sem fonte | ❌ ver FEC-03, FEC-11, roteiro (48 vs 121) |
-| Casa com o estilo existente | ✅ citações `(AD-NNN)` no estilo do documento |
-| Tests mapeiam para AC | N/A — nenhum teste novo (Test Coverage Matrix: none); gate full prova que o código não mudou |
-| Diretrizes documentadas seguidas | `CLAUDE.md` (gates) e `.context/README.md` (convenção de `⚠️ VERIFICAR`); "none - strong defaults applied" nas demais |
+| Só arquivos do `Where` tocados | ✅ `git show --stat` por commit: `f216901`, `130a667`, `3b61fe9` só `README.md`; `051d06a`, `9800d85` `requirements.md`; `0dd8b31`, `ad7c2a0`, `40e9485` `design.md`; `ad7c2a0` + `verificar-resolvidos.md`; `c78fd80`, `0ea612d` `decisoes-do-dono.md`; `830b8ad` `.context/tasks.md`, `STATE.md`, `spec.md`, `tasks.md`; `f6b958f` `STATE.md`; `a33a7d1` `spec.md`, `tasks.md`; `9fc7419` `roteiro-7-1.md`. Os `tasks.md` que acompanham são só checkboxes (protocolo: o orquestrador marca). Nenhum código, teste, migração ou folha |
+| Sem escopo extra | ✅ `roteiro-7-1.md` (§7.1) fora da spec (`spec.md:30`), mas é o Where da T12 |
+| Mudança mínima | ✅ `40e9485` altera 1 linha de `design.md`; `9800d85` só o Rastreamento |
+| Nenhum fato sem fonte | ⚠️ ver roteiro `:115`, `:98,:107` |
+| Casa com o estilo existente | ✅ `(AD-NNN)` e `(emenda de …)` no estilo do documento |
+| Tests mapeiam para AC | N/A — nenhum teste novo (matriz: none); gate full prova que o código não mudou |
+| Diretrizes documentadas | `CLAUDE.md` (gates) e `.context/README.md` (convenção `⚠️ VERIFICAR`) |
 
 ---
 
 ## Edge Cases
 
-- [x] FEC-21 — ordem subida → ingestão (`README.md:15-47`)
-- [ ] FEC-22 — fonte indisponível: texto ok (`README.md:60-62`), mas o comando de reuso (`:65`) não funciona
+- [x] FEC-21 — ordem subida → ingestão (`README.md:16` → `:47`)
+- [x] FEC-22 — fonte indisponível (`README.md:60-65`, comando executável)
 - [x] FEC-23 — contorno `DOCKER_CONFIG` intacto
 - [x] FEC-24 — nada fora do `Where`
 
@@ -110,54 +124,33 @@ Isolamento: `git status --porcelain` da árvore real antes e depois → `?? .pla
 
 - **Gate command**: `DOCKER_CONFIG=/tmp/claude-1000/bindr-dockercfg docker compose exec -T app bin/rails test && docker compose exec -T app bin/rubocop`
 - **Result**: `1350 runs, 5656 assertions, 0 failures, 0 errors, 0 skips`; RuboCop `163 files inspected, no offenses detected`
-- **Test count before feature**: 1350 (Handoff de `conformidade`, `STATE.md:151`)
-- **Test count after feature**: 1350 — **Delta**: 0 (nenhum código mudou)
+- **Test count before feature**: 1350 — **after**: 1350 — **Delta**: 0 (nenhum código mudou pela feature)
 - **Skipped**: 0
 - **`python3 spec/verify_fixture.py`**: exit 0 ("Todas as verificações passaram")
-- **`validate_spec.py fechamento/spec.md`**: exit 0 (0 erros, 0 avisos)
-- **`validate_tasks.py fechamento/tasks.md`**: exit 0 (0 erros, 8 avisos: "Tests: none" e `Where` com vários arquivos em T4/T6)
+- **`validate_spec.py fechamento/spec.md`**: exit 0; **`validate_tasks.py fechamento/tasks.md`**: exit 0
+- **`validate_state.py conformidade`**: exit 0
 
 ### Saída do validate_state
 
-`python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py fechamento` roda depois deste relatório; o resultado vai no chat. Com veredito FAIL ele sai ≠ 0, como deve. O Done-when de `tasks.md:250` cita `validate_state.py .specs/STATE.md`, mas o script recebe o **nome da feature**: **spec-precision gap**, registrado sem reprovar por isso.
+`python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py fechamento` roda depois deste relatório; com veredito FAIL sai ≠ 0 (esperado). O resultado está no chat.
 
 ---
 
 ## Fix Plans
 
-### Fix 1 (Major): README — comando de reuso do payload não funciona
-- **Root cause**: `README.md:65` escreve `REUSE_PAYLOAD=1 docker compose exec app bin/rails ingestion:import`; a variável fica no processo do `docker compose` e não entra no container (medido: `REUSE_PAYLOAD=[]`).
-- **Fix task**: trocar por `docker compose exec -e REUSE_PAYLOAD=1 app bin/rails ingestion:import`.
-- **Where**: `README.md`. **Verify**: `docker compose exec -T -e REUSE_PAYLOAD=1 app sh -c 'echo $REUSE_PAYLOAD'` → `1`. **Done when**: FEC-03 e FEC-22 com o comando executável.
+### Fix 1 (Minor): roteiro — número antigo e texto que a tela não produz
+- **Root cause**: T12 marcada `[x]` sem reexecutar `grep -n "48"`; "N% concluído" copiado de comentário ERB (`progress/index.html.erb:36`), não da renderização.
+- **Fix task**: `roteiro-7-1.md:115` → total 121; `:98,:107` → texto real: linha do set `15 / 154 · 12%` (`progress/index.html.erb:204-212`) e legenda `15 de 121 do set base · 2 de 33 parallels` (`:230,:238-241`); `:151` → classe `catalog__filters-toggle`.
+- **Where**: `.specs/features/fechamento/roteiro-7-1.md`. **Verify**: `grep -n "48\|concluído" roteiro-7-1.md` → vazio (ou só justificado).
 
-### Fix 2 (Major): README — faltam `storage/ingestion/`, "ignorado pelo git" e o código de saída
-- **Root cause**: T1 marcada `[x]` sem o texto exigido (`tasks.md:104`; `spec.md:93`).
-- **Fix task**: acrescentar onde o payload fica (`storage/ingestion/`, `.gitignore:20`), que a tarefa sai com código 1 se o status não for `succeeded` (`lib/tasks/ingestion.rake:9`) e a citação `(AD-001)` da revisão imutável.
-- **Where**: `README.md`. **Verify**: `grep -n "storage/ingestion\|código 1\|AD-001" README.md` ≥ 3 linhas.
+### Fix 2 (Minor): Rastreamento — P8 sem citação e texto-guia velho
+- **Root cause**: T9 deixou a linha P8 e o "bloqueiam o início da implementação" como estavam (`requirements.md:522-526`).
+- **Fix task**: reescrever o texto-guia (P8 não bloqueia; chips neutros, `design.md:602`) e terminar a linha P8 com `(emenda de 2026-09-29)`; opcional: P4 "task 0.3" em vez de "task 0.1" (`requirements.md:518`; `.context/tasks.md:35` decide P4 na 0.3).
+- **Where**: `.context/requirements.md`. **Verify**: `sed -n 520,526p .context/requirements.md`; `grep -c "⚠️ VERIFICAR"` segue 0.
 
-### Fix 3 (Major): design.md — P8 cita o requisito errado
-- **Root cause**: `design.md:602` termina em "Req. 13.7"; a pendência é o Req. 12.11 (`requirements.md:519`). A linha nova também não traz `(AD-NNN)` ou emenda (FEC-07; `design.md:589` idem).
-- **Fix task**: corrigir para "Req. 12.11" e citar a fonte da mudança. **Where**: `.context/design.md`. **Verify**: `grep -n "^| P8" .context/design.md | grep -c "12.11"` → 1.
-
-### Fix 4 (Major): requirements.md — Rastreamento lista P1–P4 como bloqueadoras
-- **Root cause**: `requirements.md:511-519` ("Itens que bloqueiam o início da implementação") mantém P1–P4, todas decididas (`design.md:589`, tasks 0.1–0.3). T2 marcou a coerência sem conferir.
-- **Fix task**: marcar P1–P4 como resolvidas (com ADR/AD) e manter só P8 aberta, com `(AD-NNN)`/emenda; se a redação exigir decisão do dono, registrar em `decisoes-do-dono.md`. **Where**: `.context/requirements.md`, `decisoes-do-dono.md`.
-
-### Fix 5 (Minor): Handoff enganoso
-- **Root cause**: `STATE.md:151` "(Req. 5.1 confirmado fora de spec, em `verificar-resolvidos.md`)" aparece junto dos marcadores **resolvidos**; o Req. 5.1 está **aberto** (`verificar-resolvidos.md:19`).
-- **Fix task**: reescrever a frase ("Req. 5.1 continua aberto"). **Where**: `.specs/STATE.md`.
-
-### Fix 6 (Minor): roteiro com fatos não fundamentados
-- **Root cause**: `roteiro-7-1.md:98,107,115,155` (48 em vez de 121 do OP01; "15 / 48" não é o formato da view); `:151` ("não colapsado").
-- **Fix task**: usar `baseSetSize` real ou marcar o número como ilustrativo, copiar o texto real da tela (`progress/index.html.erb`) e dizer que em <1024px o usuário abre "Filtros" com um toque. **Where**: `roteiro-7-1.md`.
-
-### Fix 7 (Minor): spec.md com afirmação sem fonte
-- **Root cause**: `spec.md:54` diz que `grep` mostra as citações de AD-011/013; `grep -c` → 0 em ambos os documentos.
-- **Fix task**: corrigir a linha (reflete o conteúdo, sem citação) ou citar as AD em `design.md` §11 / `requirements.md` Req. 13, coerente com FEC-08. **Where**: `spec.md` ou os documentos-fonte.
-
-### Fix 8 (Cosmetic): forma e precisão
-- `tasks.md:250` cita `validate_state.py .specs/STATE.md`; o script recebe o nome da feature — corrigir a redação. `tasks.md:248` pede `Implemented` e `spec.md:194-217` usa `Done`. `decisoes-do-dono.md:17` atribui as 4933 variantes à fixture (são do banco de dev) e `:56` traz "(contexto)" onde a tabela promete AD.
-- Sensor: acrescentar ao Done-when de T1 a verificação inversa (cada gate do `CLAUDE.md` aparece no README) e a T6 uma comparação dos números do Handoff com o gate.
+### Fix 3 (Cosmetic): referências de linha velhas na spec e frase sem citação
+- `spec.md:49,66-67,69` citam `design.md:330/355/506/516/579`; hoje os abertos estão em `:527/:537/:628` (usar o texto/título em vez do número). `design.md:589` ("Uma aberta (P8).") sem `(AD-NNN)`/emenda (FEC-07).
+- **Where**: `spec.md`, `.context/design.md`.
 
 ---
 
@@ -165,25 +158,39 @@ Isolamento: `git status --porcelain` da árvore real antes e depois → `?? .pla
 
 | Requirement | Previous Status | New Status |
 | ----------- | --------------- | ---------- |
-| FEC-01, 02, 04, 05, 06, 09, 10, 12, 13, 14, 15, 18, 21, 23, 24 | Done | ✅ Verified |
-| FEC-03, FEC-22 | Done | ❌ Needs Fix (Fix 1, Fix 2) |
-| FEC-11 | Done | ❌ Needs Fix (Fix 3, Fix 4) |
-| FEC-07, 08, 16, 17, 19, 20 | Done | ⚠️ Spec-precision (Fix 3, 5, 7, 8) |
+| FEC-01..06, 08..19, 21..24 | Done | ✅ Verified |
+| FEC-07 | Done | ⚠️ Spec-precision (Fix 3, baixo) |
+| FEC-20 | Done | ⏳ Pendente do PASS (validate_state) |
 
 (A spec não foi editada por este relatório.)
 
 ---
 
+## Fechamento dos 8 Fix do ciclo 1 (`git show eebced8:.specs/features/fechamento/validation.md`)
+
+| Fix ciclo 1 | Estado | Evidência |
+| ----------- | ------ | --------- |
+| 1 (Major) reuso do payload | ✅ Fechado | `README.md:65` com `-e`; execução → `1` |
+| 2 (Major) `storage/ingestion/`, código 1, AD-001 | ✅ Fechado | `README.md:68-70` |
+| 3 (Major) P8 "Req. 13.7" | ✅ Fechado | `design.md:602` "Req. 12.11 (emenda de 2026-09-29)" |
+| 4 (Major) Rastreamento P1–P4 | ✅ Fechado (com resíduo, Fix 2 acima) | `requirements.md:508-518` |
+| 5 (Minor) frase do Handoff | ✅ Fechado | `STATE.md:151`; `grep -c "confirmado fora de spec"` → 0 |
+| 6 (Minor) roteiro | ⚠️ Parcial | 121 e `<details>` corrigidos; sobram `:115` (48) e "12% concluído" (Fix 1 acima). Nota: a afirmação do ciclo 1 de que a view não gera "15 / 48" era imprecisa — a view gera `N / M · P%` (`progress/index.html.erb:204-212`); o defeito real era o número e o rótulo "concluído" |
+| 7 (Minor) `spec.md:54` | ✅ Fechado | `spec.md:54` |
+| 8 (Cosmetic) redação/origem | ✅ Fechado | `tasks.md:266` (`validate_state.py fechamento`), `Done` nos dois arquivos, `decisoes-do-dono.md:17`, `(contexto)` → 0; verificação inversa de gates e comparação de números do Handoff feitas (sensor e, f) |
+
+---
+
 ## Summary
 
-**Overall**: ❌ **Not Ready** (FAIL, ciclo 1 de no máximo 3)
+**Overall**: ❌ **Not Ready** (FAIL, ciclo 2 de no máximo 3) — resíduos menores, nenhum Major.
 
-**Spec-anchored check**: 15/24 FEC com evidência que casa; 3 GAP (FEC-03, FEC-11, FEC-22) e 6 spec-precision gaps
-**Sensor**: 6/7 mutações mortas (1 sobreviveu; 1 verificação fraca)
-**Gate**: 1350 passed, 0 failed, RuboCop limpo, `verify_fixture.py` 0, validadores da feature 0
+**Spec-anchored check**: 22/24 FEC com evidência que casa; 1 spec-precision gap (FEC-07), 1 pendente por construção (FEC-20)
+**Sensor**: 7/7 faltas mortas (2 verificações persistentes fracas: e2, validador automático em f)
+**Gate**: 1350 runs, 0 falhas, RuboCop limpo; `verify_fixture.py` 0; `validate_spec.py` 0; `validate_tasks.py` 0
 
-**What works**: subida em um comando e ingestão descritas na ordem certa; Req. 10 fiel ao código (AD-006/007/008); `design.md` §3/§6/§8.1 conferem com `db/structure.sql`, model, controller e testes; os dois `⚠️ VERIFICAR` removidos têm fonte aberta e conferida, e os três abertos permanecem; nenhum arquivo fora do `Where`; nenhum código mudou (1350 runs).
+**What works**: subida em um comando e ingestão executáveis e completas; Req. 10 e `design.md` §3/§6/§8.1 fiéis ao código; P8 e Rastreamento coerentes com `requirements.md:338`; marcadores `⚠️ VERIFICAR` (3 linhas / 2 pendências) coerentes com `verificar-resolvidos.md`; Handoff honesto e numericamente igual ao gate; origem das 4933 variantes correta; nenhum código mudou pela feature.
 
-**Issues found**: ver Fix 1–8. Os quatro primeiros bloqueiam o PASS: comando de reuso do payload ineficaz, README sem `storage/ingestion/`/código de saída, "Req. 13.7" errado em P8 e Rastreamento com P1–P4 como bloqueadoras.
+**Issues found**: Fix 1 (`roteiro-7-1.md:115,:98,:107`), Fix 2 (`requirements.md:522-526`), Fix 3 (`spec.md:49,66-69`; `design.md:589`).
 
-**Next steps**: rotear Fix 1–4 (e 5–7) a um implementador; reexecutar o Verifier.
+**Next steps**: rotear Fix 1 e Fix 2 a um implementador (Fix 3 opcional) e reexecutar o Verifier (ciclo 3, último).

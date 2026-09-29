@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 47,
+  "next_id": 51,
   "lessons": [
     {
       "id": "L-001",
@@ -832,6 +832,78 @@
       ],
       "created": "2026-09-29T03:07:21Z",
       "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-047",
+      "key": "ac_gap::copy on screen strings for a manual test script from the rendered template output never from code comments that describe the screen",
+      "text": "Copy on-screen strings for a manual test script from the rendered template output, never from code comments that describe the screen.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        ".specs/features/fechamento/roteiro-7-1.md:98,107 (docs)"
+      ],
+      "created": "2026-09-29T03:42:34Z",
+      "last_seen": "2026-09-29T03:42:34Z"
+    },
+    {
+      "id": "L-048",
+      "key": "ac_gap::after correcting a wrong figure in a document grep the whole document for the old value before ticking the fix",
+      "text": "After correcting a wrong figure in a document, grep the whole document for the old value before ticking the fix.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        ".specs/features/fechamento/roteiro-7-1.md:115 (docs)"
+      ],
+      "created": "2026-09-29T03:42:34Z",
+      "last_seen": "2026-09-29T03:42:34Z"
+    },
+    {
+      "id": "L-049",
+      "key": "spec_precision_gap::cite lines of a document that sibling tasks are editing by heading or literal text not by line number",
+      "text": "Cite lines of a document that sibling tasks are editing by heading or literal text, not by line number.",
+      "signal": "spec_precision_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        ".specs/features/fechamento/spec.md:66-67 (docs)"
+      ],
+      "created": "2026-09-29T03:42:34Z",
+      "last_seen": "2026-09-29T03:42:34Z"
+    },
+    {
+      "id": "L-050",
+      "key": "ac_gap::when items move from open to resolved in a tracking section rewrite the section heading and lead in sentence that described the old state",
+      "text": "When items move from open to resolved in a tracking section, rewrite the section heading and lead-in sentence that described the old state.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        ".context/requirements.md:522-526 (docs)"
+      ],
+      "created": "2026-09-29T03:42:34Z",
+      "last_seen": "2026-09-29T03:42:34Z"
     }
   ]
 }
