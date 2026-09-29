@@ -314,6 +314,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: .context/requirements.md:522-526 (docs)
 - last seen: 2026-09-29T03:42:34Z
 
+### L-051 - Recompute with grep every line number quoted in a log document at commit time, or cite the section title instead.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: FEC-13 verificar-resolvidos.md:21 (docs)
+- last seen: 2026-09-29T04:01:35Z
+
+### L-052 - Name in the Done-when the command that recomputes each figure copied from a live source, such as a database count.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: mutant h roteiro-7-1.md:98 (docs)
+- last seen: 2026-09-29T04:01:35Z
+
+### L-053 - Make each worked numeric example in a manual-test script obey the formulas the screen uses.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: roteiro-7-1.md:98,107 (docs)
+- last seen: 2026-09-29T04:01:35Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

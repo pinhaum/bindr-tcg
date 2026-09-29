@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 51,
+  "next_id": 54,
   "lessons": [
     {
       "id": "L-001",
@@ -904,6 +904,60 @@
       ],
       "created": "2026-09-29T03:42:34Z",
       "last_seen": "2026-09-29T03:42:34Z"
+    },
+    {
+      "id": "L-051",
+      "key": "ac_gap::recompute with grep every line number quoted in a log document at commit time or cite the section title instead",
+      "text": "Recompute with grep every line number quoted in a log document at commit time, or cite the section title instead.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FEC-13 verificar-resolvidos.md:21 (docs)"
+      ],
+      "created": "2026-09-29T04:01:35Z",
+      "last_seen": "2026-09-29T04:01:35Z"
+    },
+    {
+      "id": "L-052",
+      "key": "surviving_mutant::name in the done when the command that recomputes each figure copied from a live source such as a database count",
+      "text": "Name in the Done-when the command that recomputes each figure copied from a live source, such as a database count.",
+      "signal": "surviving_mutant",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant h roteiro-7-1.md:98 (docs)"
+      ],
+      "created": "2026-09-29T04:01:35Z",
+      "last_seen": "2026-09-29T04:01:35Z"
+    },
+    {
+      "id": "L-053",
+      "key": "ac_gap::make each worked numeric example in a manual test script obey the formulas the screen uses",
+      "text": "Make each worked numeric example in a manual-test script obey the formulas the screen uses.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "roteiro-7-1.md:98,107 (docs)"
+      ],
+      "created": "2026-09-29T04:01:35Z",
+      "last_seen": "2026-09-29T04:01:35Z"
     }
   ]
 }
