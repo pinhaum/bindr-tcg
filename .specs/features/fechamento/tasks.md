@@ -261,9 +261,9 @@ T6 → T13
 **Done when**:
 
 - [x] §7.2 de `.context/tasks.md` marcada `[x]`; a §7.1 fica `[ ]` (fora do escopo)
-- [x] Traceability de `spec.md` com FEC-01..24 em `Implemented` e a coluna Task conferida; checkboxes das tasks T1–T5 marcados neste `tasks.md`; `Status: Done`
+- [x] Traceability de `spec.md` com FEC-01..24 em `Done` e a coluna Task conferida; checkboxes das tasks T1–T5 marcados neste `tasks.md`; `Status: Done`
 - [x] Bloco novo no *Handoff* do `STATE.md`: o que a feature fez, os `⚠️ VERIFICAR` abertos (com o local), as decisões abertas de `decisoes-do-dono.md`, e a §7.1 como próxima etapa do dono
-- [ ] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py .specs/STATE.md` sai com 0
+- [ ] `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py fechamento` sai com 0
 - [x] `validate_spec.py` e `validate_tasks.py` desta feature saem com 0
 - [x] Gate full passa e a contagem de runs não muda; gate build (`docker compose build`) opcional
 
@@ -405,12 +405,12 @@ ter mudado) e registra o `grep` de prova no commit. Proibido editar fora do `Whe
 
 **Done when**:
 
-- [ ] `grep -c "AD-011" .context/design.md .context/requirements.md` e o mesmo para `AD-013` reexecutados e registrados; a linha de `spec.md` deixa de dizer que o `grep` mostra as citações e passa a dizer o que é verdade (as AD estão refletidas no conteúdo, sem citação nominal), sem editar `design.md` nem `requirements.md` (fora do `Where`)
-- [ ] O Done-when da T6 em `tasks.md` cita `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py fechamento` (nome da feature, não `.specs/STATE.md`); conferido em `validate_state.py --help` ou no `argparse` do script
-- [ ] O rótulo da rastreabilidade é o mesmo nos dois arquivos: o Done-when da T6 cita o status que `spec.md` usa (`Done`) e a legenda de `spec.md` o confirma; `grep -n "Implemented" .specs/features/fechamento/tasks.md .specs/features/fechamento/spec.md` sem contradição
-- [ ] As tasks T7..T13 e a Phase 5 deste arquivo ficam intactas: `git diff` de `tasks.md` só toca as linhas de T6 (e o `Status`, se necessário)
-- [ ] `validate_spec.py` e `validate_tasks.py` desta feature saem com 0
-- [ ] Gate full passa e a contagem de runs não muda (1350)
+- [x] `grep -c "AD-011" .context/design.md .context/requirements.md` e o mesmo para `AD-013` reexecutados e registrados; a linha de `spec.md` deixa de dizer que o `grep` mostra as citações e passa a dizer o que é verdade (as AD estão refletidas no conteúdo, sem citação nominal), sem editar `design.md` nem `requirements.md` (fora do `Where`)
+- [x] O Done-when da T6 em `tasks.md` cita `python3 ~/.claude/skills/tlc-spec-driven/scripts/validate_state.py fechamento` (nome da feature, não `.specs/STATE.md`); conferido em `validate_state.py --help` ou no `argparse` do script
+- [x] O rótulo da rastreabilidade é o mesmo nos dois arquivos: o Done-when da T6 cita o status que `spec.md` usa (`Done`) e a legenda de `spec.md` o confirma; `grep -n "Implemented" .specs/features/fechamento/tasks.md .specs/features/fechamento/spec.md` sem contradição
+- [x] As tasks T7..T13 e a Phase 5 deste arquivo ficam intactas: `git diff` de `tasks.md` só toca as linhas de T6 (e o `Status`, se necessário)
+- [x] `validate_spec.py` e `validate_tasks.py` desta feature saem com 0
+- [x] Gate full passa e a contagem de runs não muda (1350)
 
 **Tests**: none
 **Gate**: full
