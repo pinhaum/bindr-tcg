@@ -242,6 +242,54 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: CNF-17 forma compacta (validation.md) (spec)
 - last seen: 2026-09-29T02:43:20Z
 
+### L-039 - Run every documented shell command and observe its effect; checking that the files it names exist does not prove it works.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: FEC-03 README.md:65 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
+### L-040 - Tick a Done-when item only after grepping the deliverable for each literal thing the item lists.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: FEC-03 tasks.md:104 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
+### L-041 - Check every requirement number cited in a document against the requirements file it points to.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: FEC-11 design.md:602 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
+### L-042 - When a document keeps a pending-items table, mark the items already decided as resolved.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: FEC-11 requirements.md:511-519 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
+### L-043 - Pair each existence check with its inverse so that deleting a required item is also detected.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: mutant e2 README.md:76-77 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
+### L-044 - Back numbers quoted in a handoff with a check that compares them with the measured gate output.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: mutant f STATE.md:151 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
+### L-045 - Write validator commands in a spec with the argument form the script really takes.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: FEC-20 tasks.md:250 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
+### L-046 - Run a grep before writing in a spec that it shows something; never assert grep results unrun.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `docs` · harmful: 0
+- features: fechamento
+- evidence: FEC-08 spec.md:54 (docs)
+- last seen: 2026-09-29T03:07:21Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

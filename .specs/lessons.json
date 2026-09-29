@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 39,
+  "next_id": 47,
   "lessons": [
     {
       "id": "L-001",
@@ -688,6 +688,150 @@
       ],
       "created": "2026-09-29T02:43:20Z",
       "last_seen": "2026-09-29T02:43:20Z"
+    },
+    {
+      "id": "L-039",
+      "key": "ac_gap::run every documented shell command and observe its effect checking that the files it names exist does not prove it works",
+      "text": "Run every documented shell command and observe its effect; checking that the files it names exist does not prove it works.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FEC-03 README.md:65 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-040",
+      "key": "ac_gap::tick a done when item only after grepping the deliverable for each literal thing the item lists",
+      "text": "Tick a Done-when item only after grepping the deliverable for each literal thing the item lists.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FEC-03 tasks.md:104 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-041",
+      "key": "ac_gap::check every requirement number cited in a document against the requirements file it points to",
+      "text": "Check every requirement number cited in a document against the requirements file it points to.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FEC-11 design.md:602 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-042",
+      "key": "ac_gap::when a document keeps a pending items table mark the items already decided as resolved",
+      "text": "When a document keeps a pending-items table, mark the items already decided as resolved.",
+      "signal": "ac_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FEC-11 requirements.md:511-519 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-043",
+      "key": "surviving_mutant::pair each existence check with its inverse so that deleting a required item is also detected",
+      "text": "Pair each existence check with its inverse so that deleting a required item is also detected.",
+      "signal": "surviving_mutant",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant e2 README.md:76-77 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-044",
+      "key": "surviving_mutant::back numbers quoted in a handoff with a check that compares them with the measured gate output",
+      "text": "Back numbers quoted in a handoff with a check that compares them with the measured gate output.",
+      "signal": "surviving_mutant",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant f STATE.md:151 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-045",
+      "key": "spec_precision_gap::write validator commands in a spec with the argument form the script really takes",
+      "text": "Write validator commands in a spec with the argument form the script really takes.",
+      "signal": "spec_precision_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FEC-20 tasks.md:250 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
+    },
+    {
+      "id": "L-046",
+      "key": "spec_precision_gap::run a grep before writing in a spec that it shows something never assert grep results unrun",
+      "text": "Run a grep before writing in a spec that it shows something; never assert grep results unrun.",
+      "signal": "spec_precision_gap",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "fechamento"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FEC-08 spec.md:54 (docs)"
+      ],
+      "created": "2026-09-29T03:07:21Z",
+      "last_seen": "2026-09-29T03:07:21Z"
     }
   ]
 }
