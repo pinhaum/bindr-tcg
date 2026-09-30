@@ -117,9 +117,9 @@ T14 → T16 → T17
 
 **Done when**:
 
-- [ ] `CardVariant.present` devolve só as variantes vistas no último run `succeeded`
-- [ ] Testes: sem nenhum run `succeeded` → vazio; variante vista no último `succeeded` → presente; variante vista só num run anterior → ausente; run `failed` depois do `succeeded` não altera a presença
-- [ ] Gate quick passa; contagem de runs registrada
+- [x] `CardVariant.present` devolve só as variantes vistas no último run `succeeded`
+- [x] Testes: sem nenhum run `succeeded` → vazio; variante vista no último `succeeded` → presente; variante vista só num run anterior → ausente; run `failed` depois do `succeeded` não altera a presença
+- [x] Gate quick passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: quick
