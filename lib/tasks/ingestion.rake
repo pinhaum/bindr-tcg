@@ -9,4 +9,18 @@ namespace :ingestion do
     puts "cartas: #{Card.count} | variantes: #{CardVariant.count} | sets: #{CardSet.count}"
     exit(1) unless run.status == "succeeded"
   end
+
+  desc "Aponta coleção e wishlist para as variantes da fonte atual (SRC-19..SRC-23)"
+  task remap: :environment do
+    report = Ingestion::Remap.call
+
+    # Só `card_number`, `variant_code` e motivo: nada que identifique o usuário.
+    puts "movidos: #{report.moved.size} | pulados: #{report.skipped.size}"
+    report.skipped.each do |entry|
+      puts "pulado: #{entry[:card_number]} | #{entry[:old_variant_code]} | #{entry[:reason]}"
+    end
+  rescue Ingestion::Remap::NoSucceededRun => e
+    warn e.message
+    exit(1)
+  end
 end

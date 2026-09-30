@@ -262,10 +262,10 @@ T14 → T16 → T17
 
 **Done when**:
 
-- [ ] A saída lista os pulados com os três campos e nenhum dado do usuário (e-mail, id)
-- [ ] Sem run `succeeded`, a saída traz a mensagem de SRC-23 e o código de saída é 1
-- [ ] Teste em `test/lib/` carrega a task e confere saída e código de saída nos dois casos
-- [ ] Gate full passa; contagem de runs registrada
+- [x] A saída lista os pulados com os três campos e nenhum dado do usuário (e-mail, id)
+- [x] Sem run `succeeded`, a saída traz a mensagem de SRC-23 e o código de saída é 1
+- [x] Teste em `test/lib/` carrega a task e confere saída e código de saída nos dois casos
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full

@@ -330,7 +330,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
   - Catálogo, detalhe e progresso leem só variantes presentes no último run
     `succeeded`; progresso conta números de carta distintos.
   - _Requisitos: 1.7, 5.1, 5.4, 5.5_
-- [ ] **8.2 Remapeamento da coleção** — T5–T6
+- [x] **8.2 Remapeamento da coleção** — T5–T6
   - _Requisitos: 1.7, 6.5_
 - [ ] **8.3 Imagens do tcgplayer** — T7
 - [ ] **8.4 Busca e snapshot da apitcg** — T8–T10
