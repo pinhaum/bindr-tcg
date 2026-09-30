@@ -138,6 +138,7 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   setup do
     @user = User.create!(email: "plano-t8@example.com", password: PASSWORD)
     @connection = ActiveRecord::Base.connection
+    mark_catalog_present!
   end
 
   # --- Done when 1 e 2: o número de consultas não varia com a quantidade de
@@ -677,9 +678,9 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   #
   # Os dois `Seq Scan` do catálogo (`sets` e `card_variants`) **não** são
   # assertados como ausentes, e isso é deliberado: eles são corretos e não
-  # evitáveis. `total_variants` e `parallel_variants` exigem todas as variantes
-  # de todos os sets, então não há predicado seletivo a explorar e um índice não
-  # teria o que fazer. Exigir sua ausência reprovaria o plano certo e empurraria
+  # evitáveis. Os números distintos e `parallel_variants` exigem todas as
+  # variantes presentes de todos os sets, então não há predicado seletivo a
+  # explorar e um índice não teria o que fazer. Exigir sua ausência reprovaria o plano certo e empurraria
   # para um índice que só serviria para satisfazer a asserção.
   ACESSO_INDEXADO_A_COLECAO = /
     (?:Index|Index\ Only|Bitmap\ Index)\ Scan[^\n]*
@@ -728,7 +729,7 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
   def criar_variante(set, sufixo, art_kind)
     card = Card.create!(card_set: set, card_number: "T8-#{sufixo}", name: "Carta #{sufixo}",
                         card_type: "character", colors: [ "Red" ])
-    CardVariant.create!(card: card, card_set: set, variant_code: "t8#{sufixo}",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: "t8#{sufixo}",
                         rarity: "C", art_kind: art_kind)
   end
 
@@ -763,10 +764,11 @@ class SetProgressPlanTest < ActionDispatch::IntegrationTest
     # Um terço `parallel`, para que a coluna `FILTER` da métrica separada tenha
     # linhas de fato e não seja otimizada sobre um conjunto vazio.
     @connection.execute(<<~SQL)
-      INSERT INTO card_variants (card_id, set_id, variant_code, art_kind, rarity, created_at, updated_at)
+      INSERT INTO card_variants (card_id, set_id, variant_code, art_kind, rarity, last_seen_at,
+                                 created_at, updated_at)
       SELECT c.id, c.set_id, c.card_number || '_v',
              CASE WHEN c.id % 3 = 0 THEN 'parallel' ELSE 'base' END,
-             'C', now(), now()
+             'C', '#{CATALOG_SEEN_AT.to_fs(:db)}', now(), now()
       FROM cards c JOIN sets s ON s.id = c.set_id
       WHERE s.code LIKE 'T8V%'
     SQL

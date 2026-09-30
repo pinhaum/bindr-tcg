@@ -190,10 +190,10 @@
           </h3>
 
           <%#
-            Possuídas, total e percentual na mesma linha (CNF-25, CNF-26). O
-            total é o de **impressões** do set e sai do catálogo — não depende
-            de quem olha. Plural explícito, não `pluralize`: o inflector do
-            Rails é inglês e não sabe português.
+            Numerador, denominador e percentual na mesma linha (CNF-25, CNF-26;
+            Req. 9.1 emendado, fonte-apitcg): números de carta distintos
+            possuídos sobre `base_set_size`, os mesmos dois números do
+            percentual. Sem denominador, a linha mostra só a posse.
 
             O percentual (PRG-02/PRG-10) segue na mesma frase quando conhecido;
             "indisponível" some da linha em vez de aparecer como "—", que um
@@ -202,19 +202,20 @@
             legenda, abaixo, junto dos parallels — não duplicado aqui.
           %>
           <p class="progress-set__owned-line">
-            <span class="progress-set__owned"><%= row.owned_variants %></span>
-            /
-            <span class="progress-set__total"><%= row.total_variants %></span>
+            <span class="progress-set__owned"><%= row.owned_numbers %></span>
             <% if row.completion_percent_known? %>
+              /
+              <span class="progress-set__total"><%= row.base_size %></span>
               · <span class="progress-set__percent-value"><%= number_to_percentage(row.completion_percent, precision: 0) %></span>
             <% end %>
           </p>
         </div>
 
+        <%# `value` limitado ao `max`: o percentual tem teto de 100% (SRC-26), a barra também. %>
         <% if row.completion_percent_known? %>
           <progress class="progress-set__bar"
-                    value="<%= row.owned_variants %>"
-                    max="<%= row.total_variants %>"
+                    value="<%= [ row.owned_numbers, row.base_size ].min %>"
+                    max="<%= row.base_size %>"
                     aria-hidden="true"></progress>
         <% end %>
 
@@ -227,7 +228,7 @@
         <div class="progress-set__legend">
           <p class="progress-set__percent <%= "progress-set__percent--unknown" unless row.completion_percent_known? %>">
             <% if row.completion_percent_known? %>
-              <span class="progress-set__percent-basis"><%= row.base_owned_variants %> de <%= row.base_size %> do set base</span>
+              <span class="progress-set__percent-basis"><%= row.owned_numbers %> de <%= row.base_size %> do set base</span>
             <% else %>
               Percentual indisponível: este set não informa o tamanho do set base.
             <% end %>

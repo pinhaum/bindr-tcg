@@ -34,13 +34,15 @@ require "ripper"
 #
 # | Métrica                   | `@nami` | `@zoro` |
 # |---------------------------|---------|---------|
-# | `owned_variants`          | 2       | 5       |
-# | `base_owned_variants`     | 1       | 3       |
+# | `owned_numbers`           | 1       | 3       |
 # | `completion_percent`      | ~16,7%  | 50%     |
 # | `parallel_owned_variants` | 1       | 2       |
-# | `total_variants`          | 9       | 9       |
+# | `base_size`               | 6       | 6       |
 #
-# `total_variants` é a única coincidência, e é **obrigatória**: o total sai do
+# (fonte-apitcg: a linha passou a mostrar números distintos sobre
+# `base_set_size`, Req. 9.1 emendado.)
+#
+# `base_size` é a única coincidência, e é **obrigatória**: o total sai do
 # catálogo e não depende de quem olha. Há teste explícito exigindo que ele
 # **não** varie entre os usuários, justamente porque a assimetria entre o que é
 # do catálogo e o que é da coleção é o que a T1 e a T3 deixaram registrada.
@@ -61,8 +63,8 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
     @zoro = User.create!(email: "zoro-prg7@example.com", password: PASSWORD)
     @usopp = User.create!(email: "usopp-prg7@example.com", password: PASSWORD)
 
-    # Denominador 6 contra nove impressões de propósito: `base_set_size`,
-    # `total_variants` e os numeradores de cada usuário são todos números
+    # Denominador 6 contra nove impressões de propósito: `base_set_size` e
+    # os numeradores de cada usuário são todos números
     # distintos, então trocar um pelo outro na marcação derruba asserção.
     @set_x = CardSet.create!(code: "OPp7x", name: "Romance Dawn", kind: "booster",
                              base_set_size: 6, total_set_size: 9)
@@ -90,15 +92,16 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
     # registro sobre uma variante que `@zoro` possui, e mesmo assim não vê
     # número nenhum de `@zoro`.
     own(@usopp, @base[1], 0)
+    mark_catalog_present!
   end
 
   # A suíte roda em paralelo e o projeto não usa fixtures YAML: cada teste cria
   # os próprios registros, com chaves naturais distintas por arquivo para não
   # colidir entre workers.
   def variant(set, suffix, art_kind)
-    card = Card.create!(card_set: set, card_number: "OP07-#{suffix}", name: "Carta #{suffix}",
+    card = Card.create!(card_set: set, card_number: "#{set.code}-#{suffix}", name: "Carta #{suffix}",
                         card_type: "character", colors: [ "Red" ])
-    CardVariant.create!(card: card, card_set: set, variant_code: suffix,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: suffix,
                         rarity: "C", art_kind: art_kind)
   end
 
@@ -156,9 +159,9 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
     assert_response :success
     de_zoro = numeros_exibidos
 
-    assert_equal({ owned: "2", total: "9", percent: "17%",
+    assert_equal({ owned: "1", total: "6", percent: "17%",
                    parallel_owned: "1", parallel_total: "3" }, de_nami)
-    assert_equal({ owned: "5", total: "9", percent: "50%",
+    assert_equal({ owned: "3", total: "6", percent: "50%",
                    parallel_owned: "2", parallel_total: "3" }, de_zoro)
 
     # A asserção que torna as duas anteriores discriminantes de fato: se um dia
@@ -236,7 +239,7 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".progress-set", 1, "a página é informativa, não vazia"
-    assert_equal({ owned: "0", total: "9", percent: "0%",
+    assert_equal({ owned: "0", total: "6", percent: "0%",
                    parallel_owned: "0", parallel_total: "3" }, numeros_exibidos)
     assert_select "#progress_set_OPp7x .progress-set__percent-basis",
                   text: /\A0 de 6 do set base\z/
@@ -249,14 +252,14 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
   test "trocar de sessão na mesma conexão troca o dono do cálculo" do
     sign_in(@zoro)
     get progress_path
-    assert_equal "5", numeros_exibidos[:owned]
+    assert_equal "3", numeros_exibidos[:owned]
 
     sign_out
 
     sign_in(@nami)
     get progress_path
 
-    assert_equal "2", numeros_exibidos[:owned],
+    assert_equal "1", numeros_exibidos[:owned],
                  "a segunda requisição tem que recalcular a partir da sessão nova"
   end
 
@@ -268,7 +271,7 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
     get progress_path(user_id: @zoro.id)
 
     assert_response :success
-    assert_equal({ owned: "2", total: "9", percent: "17%",
+    assert_equal({ owned: "1", total: "6", percent: "17%",
                    parallel_owned: "1", parallel_total: "3" }, numeros_exibidos,
                  "o número exibido é o do usuário da sessão, não o do parâmetro")
   end
@@ -282,7 +285,7 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
 
     get progress_path(user_id: @nami.id)
 
-    assert_equal "2", numeros_exibidos[:owned]
+    assert_equal "1", numeros_exibidos[:owned]
   end
 
   # As outras formas de enfiar um identificador na requisição, cada uma pela
@@ -304,7 +307,7 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
       get progress_path, params: params
 
       assert_response :success, "#{params.inspect} não pode quebrar a página"
-      assert_equal "2", numeros_exibidos[:owned],
+      assert_equal "1", numeros_exibidos[:owned],
                    "#{params.inspect} deslocou o cálculo para outro usuário"
       assert_equal "17%", numeros_exibidos[:percent], "#{params.inspect} alterou o percentual"
     end
@@ -319,7 +322,7 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
     get progress_path, headers: { "X-User-Id" => @zoro.id.to_s, "X-User" => @zoro.email }
 
     assert_response :success
-    assert_equal "2", numeros_exibidos[:owned]
+    assert_equal "1", numeros_exibidos[:owned]
   end
 
   # --- Provas estruturais: o caminho errado não existe, em vez de não ser usado ---
@@ -335,8 +338,8 @@ class ProgressAuthorizationTest < ActionDispatch::IntegrationTest
     # `nil` não é caso de erro: é numerador vazio, e o denominador continua
     # intacto. É o que separa "anônimo" de "id inválido".
     linha = SetProgressQuery.new(nil).call.find { |row| row.set_code == @set_x.code }
-    assert_equal 0, linha.owned_variants
-    assert_equal 9, linha.total_variants
+    assert_equal 0, linha.owned_numbers
+    assert_equal 6, linha.base_size
   end
 
   # Nenhum identificador de usuário cabe na URL do progresso — é o que torna

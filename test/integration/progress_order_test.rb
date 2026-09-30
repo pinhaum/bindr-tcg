@@ -37,12 +37,13 @@ class ProgressOrderTest < ActionDispatch::IntegrationTest
     travel_to 1.day.ago do
       CollectionItem.create!(user: @user, card_variant: v_recente, quantity: 1)
     end
+    mark_catalog_present!
   end
 
   def create_variant(set, suffix)
     card = Card.create!(card_set: set, card_number: "OP01-#{suffix}", name: "Carta #{suffix}",
                         card_type: "character", colors: [ "Red" ])
-    CardVariant.create!(card: card, card_set: set, variant_code: suffix,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: suffix,
                         rarity: "C", art_kind: "base")
   end
 

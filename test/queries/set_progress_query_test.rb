@@ -51,12 +51,12 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     @user = User.create!(email: "nami-prg1@example.com", password: "log-pose-77")
     @outro = User.create!(email: "usopp-prg1@example.com", password: "log-pose-77")
 
-    @set_a = CardSet.create!(code: "OPp1a", name: "Romance Dawn", kind: "booster",
+    @set_a = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster",
                              base_set_size: 3, total_set_size: 5)
-    @set_b = CardSet.create!(code: "OPp1b", name: "Paramount War", kind: "booster",
+    @set_b = CardSet.create!(code: "OP02", name: "Paramount War", kind: "booster",
                              base_set_size: 2, total_set_size: 3)
     # Set sem nenhuma posse: tem que aparecer no resultado com numerador zero.
-    @set_c = CardSet.create!(code: "OPp1c", name: "Pillars of Strength", kind: "booster",
+    @set_c = CardSet.create!(code: "OP03", name: "Pillars of Strength", kind: "booster",
                              base_set_size: 1, total_set_size: 1)
 
     # --- @set_a ---------------------------------------------------------
@@ -105,7 +105,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     # `base_set_size = 4` com uma só variante `base` e três `other`. É o caso
     # medido em 21 dos 62 sets reais, e o único cenário em que o denominador
     # da fonte e a contagem local dão números diferentes.
-    @set_d = CardSet.create!(code: "OPp2d", name: "Kingdoms of Intrigue", kind: "booster",
+    @set_d = CardSet.create!(code: "OP04", name: "Kingdoms of Intrigue", kind: "booster",
                              base_set_size: 4, total_set_size: 6)
     @v_d_base = create_variant(create_card(@set_d, "OP04-p2a", "Crocodile"), @set_d, "OP04-p2a")
     @v_d_other1 = create_variant(create_card(@set_d, "OP04-p2b", "Nico Robin"), @set_d,
@@ -123,7 +123,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     own(@user, @v_d_other1, 3)
 
     # --- @set_e: posse apenas de parallel --------------------------------
-    @set_e = CardSet.create!(code: "OPp2e", name: "Awakening of the New Era", kind: "booster",
+    @set_e = CardSet.create!(code: "OP05", name: "Awakening of the New Era", kind: "booster",
                              base_set_size: 2, total_set_size: 4)
     @v_e_base = create_variant(create_card(@set_e, "OP05-p2a", "Sabo"), @set_e, "OP05-p2a")
     @v_e_par = create_variant(create_card(@set_e, "OP05-p2b", "Koala"), @set_e,
@@ -143,6 +143,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
                              base_set_size: 0, total_set_size: 2)
     @v_g = create_variant(create_card(@set_g, "PR-p2g01", "Denominador zero"), @set_g, "PR-p2g01")
     own(@user, @v_g, 1)
+    mark_catalog_present!
   end
 
   def create_card(set, number, name)
@@ -151,7 +152,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   end
 
   def create_variant(card, set, code, art_kind: "base")
-    CardVariant.create!(card: card, set_id: set.id, variant_code: code,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, set_id: set.id, variant_code: code,
                         rarity: "C", art_kind: art_kind)
   end
 
@@ -167,38 +168,40 @@ class SetProgressQueryTest < ActiveSupport::TestCase
 
   # --- PRG-01: possuídas e total por set --------------------------------
 
-  test "devolve, por set, as variantes distintas possuídas e o total do set" do
+  # Req. 9.1 emendado (fonte-apitcg): números de carta distintos possuídos e o
+  # denominador `base_set_size`, não mais variantes sobre o total de impressões.
+  test "devolve, por set, os números distintos possuídos e o denominador do set" do
     resultado = progress
 
-    a = resultado["OPp1a"]
-    assert_equal 2, a.owned_variants, "possui @v_cinco e @v_uma em OPp1a"
-    assert_equal 5, a.total_variants, "OPp1a tem 5 impressões: cinco, uma, zerada, intocada, alheia"
+    a = resultado["OP01"]
+    assert_equal 2, a.owned_numbers, "possui @v_cinco e @v_uma em OP01"
+    assert_equal 3, a.base_size
 
-    b = resultado["OPp1b"]
-    assert_equal 2, b.owned_variants, "possui @v_b e a reimpressão @v_reimpressao"
-    assert_equal 2, b.total_variants
+    b = resultado["OP02"]
+    assert_equal 2, b.owned_numbers, "possui @v_b e a reimpressão @v_reimpressao"
+    assert_equal 2, b.base_size
   end
 
   test "set sem nenhuma posse aparece com numerador zero, e não some" do
-    c = progress["OPp1c"]
+    c = progress["OP03"]
 
     assert_not_nil c, "set sem posse continua no resultado"
-    assert_equal 0, c.owned_variants
-    assert_equal 1, c.total_variants
+    assert_equal 0, c.owned_numbers
+    assert_equal 1, c.base_size
   end
 
   test "todo set do catálogo aparece no resultado" do
     codigos = progress.keys
 
-    assert_includes codigos, "OPp1a"
-    assert_includes codigos, "OPp1b"
-    assert_includes codigos, "OPp1c"
+    assert_includes codigos, "OP01"
+    assert_includes codigos, "OP02"
+    assert_includes codigos, "OP03"
   end
 
   test "o set é identificado por código e nome, sem consulta extra pelo chamador" do
-    a = progress["OPp1a"]
+    a = progress["OP01"]
 
-    assert_equal "OPp1a", a.set_code
+    assert_equal "OP01", a.set_code
     assert_equal "Romance Dawn", a.set_name
     assert_equal @set_a.id, a.set_id
   end
@@ -209,10 +212,10 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # métricas são medidas **no mesmo cenário**, lado a lado. Uma agregação que
   # trocasse `count` por `sum(:quantity)` daria 6 aqui e passaria em tudo mais.
   test "uma variante com quantidade 5 conta 1 no progresso e 5 no total de cópias" do
-    a = progress["OPp1a"]
+    a = progress["OP01"]
 
-    # Progresso: duas variantes distintas possuídas em OPp1a (a de 5 e a de 1).
-    assert_equal 2, a.owned_variants
+    # Progresso: duas variantes distintas possuídas em OP01 (a de 5 e a de 1).
+    assert_equal 2, a.owned_numbers
 
     # Req. 7.7, mesma coleção, outra pergunta. O total é somatório de cópias e
     # cresce quando o cenário cresce, então a asserção mede a **diferença** que
@@ -237,12 +240,12 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   end
 
   test "aumentar a quantidade de uma variante possuída não altera o progresso" do
-    antes = progress["OPp1a"].owned_variants
+    antes = progress["OP01"].owned_numbers
     copias_antes = CollectionItem.total_copies_for(@user)
 
     CollectionItem.find_by!(user: @user, card_variant: @v_cinco).update!(quantity: 99)
 
-    assert_equal antes, progress["OPp1a"].owned_variants,
+    assert_equal antes, progress["OP01"].owned_numbers,
                  "progresso conta variantes distintas; cópias são o Req. 7.7"
     assert_equal copias_antes + 94, CollectionItem.total_copies_for(@user),
                  "o total de cópias, esse sim, acompanha a quantidade: 5 viraram 99"
@@ -251,28 +254,28 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # --- PRG-07: quantidade zero não é posse ------------------------------
 
   test "variante com quantidade zero não entra no numerador" do
-    a = progress["OPp1a"]
+    a = progress["OP01"]
 
-    assert_equal 2, a.owned_variants,
+    assert_equal 2, a.owned_numbers,
                  "@v_zerada tem registro com quantity = 0 e não pode contar"
   end
 
   test "quantidade zero dá o mesmo resultado de não haver registro" do
-    com_zerada = progress["OPp1a"].owned_variants
+    com_zerada = progress["OP01"].owned_numbers
 
     # Apagar a linha zerada não pode mudar nada: zero e ausência são a mesma
     # não-posse para o progresso.
     CollectionItem.find_by!(user: @user, card_variant: @v_zerada).destroy!
 
-    assert_equal com_zerada, progress["OPp1a"].owned_variants
+    assert_equal com_zerada, progress["OP01"].owned_numbers
   end
 
   test "zerar a quantidade de uma variante possuída diminui o numerador" do
-    assert_equal 2, progress["OPp1a"].owned_variants
+    assert_equal 2, progress["OP01"].owned_numbers
 
     CollectionItem.find_by!(user: @user, card_variant: @v_uma).update!(quantity: 0)
 
-    assert_equal 1, progress["OPp1a"].owned_variants,
+    assert_equal 1, progress["OP01"].owned_numbers,
                  "`owned` filtra por quantidade, não por existência do registro"
   end
 
@@ -285,34 +288,39 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   test "variante impressa em set diferente do set de estreia conta no set da impressão" do
     resultado = progress
 
-    assert_equal @set_a.id, @carta_reimpressa.set_id, "a carta estreou em OPp1a"
-    assert_equal @set_b.id, @v_reimpressao.set_id, "a variante foi impressa em OPp1b"
+    assert_equal @set_a.id, @carta_reimpressa.set_id, "a carta estreou em OP01"
+    assert_equal @set_b.id, @v_reimpressao.set_id, "a variante foi impressa em OP02"
 
-    assert_equal 2, resultado["OPp1b"].owned_variants,
-                 "a reimpressão conta em OPp1b, o set da impressão"
-    assert_equal 2, resultado["OPp1a"].owned_variants,
-                 "e não em OPp1a, o set de estreia da carta"
+    assert_equal 2, resultado["OP02"].owned_numbers,
+                 "a reimpressão conta em OP02, o set da impressão"
+    assert_equal 2, resultado["OP01"].owned_numbers,
+                 "e não em OP01, o set de estreia da carta"
   end
 
-  test "o total de variantes do set também sai do set da impressão" do
-    resultado = progress
+  # OP02 tem `base_set_size = 2` e dois números impressos nele: `OP02-p1a` e a
+  # reimpressão `OP01-p1f`. Os dois coincidem, logo o universo do numerador é o
+  # set inteiro e a reimpressão conta em OP02. Agregar por `cards.set_id`
+  # deixaria OP02 com um número só, e a reimpressão cairia fora do universo.
+  test "o universo do numerador também sai do set da impressão" do
+    sozinho = User.create!(email: "robin-prg1@example.com", password: "log-pose-77")
+    own(sozinho, @v_reimpressao, 1)
 
-    # OPp1a tem 6 cartas de estreia mas só 5 impressões suas: a sexta foi
-    # impressa em OPp1b. Agregar por `cards.set_id` daria 6 e 1.
-    assert_equal 5, resultado["OPp1a"].total_variants
-    assert_equal 2, resultado["OPp1b"].total_variants
+    resultado = progress(sozinho)
+
+    assert_equal 1, resultado["OP02"].owned_numbers
+    assert_equal 0, resultado["OP01"].owned_numbers
   end
 
   # --- PRG-08: o progresso parte do usuário da sessão -------------------
 
   test "posse de outro usuário não entra no progresso do alvo" do
-    assert_equal 2, progress["OPp1a"].owned_variants,
+    assert_equal 2, progress["OP01"].owned_numbers,
                  "@v_alheia é do @outro e está no mesmo set"
   end
 
   test "cada usuário vê o próprio progresso no mesmo set" do
-    assert_equal 2, progress(@user)["OPp1a"].owned_variants
-    assert_equal 1, progress(@outro)["OPp1a"].owned_variants
+    assert_equal 2, progress(@user)["OP01"].owned_numbers
+    assert_equal 1, progress(@outro)["OP01"].owned_numbers
   end
 
   test "usuário sem posse alguma vê todos os sets com numerador zero" do
@@ -320,22 +328,22 @@ class SetProgressQueryTest < ActiveSupport::TestCase
 
     resultado = progress(sozinho)
 
-    assert_equal 0, resultado["OPp1a"].owned_variants
-    assert_equal 0, resultado["OPp1b"].owned_variants
-    assert_equal 5, resultado["OPp1a"].total_variants,
+    assert_equal 0, resultado["OP01"].owned_numbers
+    assert_equal 0, resultado["OP02"].owned_numbers
+    assert_equal 3, resultado["OP01"].base_size,
                  "o denominador é do catálogo e não depende de quem olha"
   end
 
   test "nil devolve todos os sets com numerador zero, sem erro" do
     resultado = progress(nil)
 
-    assert_includes resultado.keys, "OPp1a"
-    assert_includes resultado.keys, "OPp1b"
-    assert_includes resultado.keys, "OPp1c"
+    assert_includes resultado.keys, "OP01"
+    assert_includes resultado.keys, "OP02"
+    assert_includes resultado.keys, "OP03"
 
-    assert_equal 0, resultado["OPp1a"].owned_variants
-    assert_equal 0, resultado["OPp1b"].owned_variants
-    assert_equal 5, resultado["OPp1a"].total_variants
+    assert_equal 0, resultado["OP01"].owned_numbers
+    assert_equal 0, resultado["OP02"].owned_numbers
+    assert_equal 3, resultado["OP01"].base_size
   end
 
   # A barreira que a T5 da `colecao` desenhou: um id vindo do request não chega
@@ -359,11 +367,13 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # --- PRG-05: o denominador é `sets.base_set_size` ---------------------
 
   test "o denominador do percentual é base_set_size, e não o total de impressões do set" do
-    d = progress["OPp2d"]
+    d = progress["OP04"]
+
+    impressoes = CardVariant.where(set_id: @set_d.id).count
 
     assert_equal 4, d.base_size, "o denominador vem de sets.base_set_size"
-    assert_equal 6, d.total_variants, "o set tem 6 impressões, que não são o denominador"
-    assert_not_equal d.total_variants, d.base_size,
+    assert_equal 6, impressoes, "o set tem 6 impressões, que não são o denominador"
+    assert_not_equal impressoes, d.base_size,
                      "se as duas coincidissem, nenhuma asserção distinguiria os denominadores"
   end
 
@@ -374,7 +384,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     base_locais = CardVariant.where(set_id: @set_d.id, art_kind: "base").count
     assert_equal 1, base_locais, "o cenário reproduz a divergência medida no banco real"
 
-    d = progress["OPp2d"]
+    d = progress["OP04"]
 
     assert_equal 4, d.base_size
     assert_not_equal base_locais, d.base_size,
@@ -385,26 +395,26 @@ class SetProgressQueryTest < ActiveSupport::TestCase
 
   test "percentual com denominador e numerador conhecidos" do
     # `@set_d`: possui `@v_d_base` (base) e `@v_d_other1` (other) de 4.
-    d = progress["OPp2d"]
+    d = progress["OP04"]
 
-    assert_equal 2, d.base_owned_variants
+    assert_equal 2, d.owned_numbers
     assert_equal 4, d.base_size
     assert_equal 50.0, d.completion_percent
   end
 
   test "percentual de set com posse parcial nos sets em que as duas fontes coincidem" do
     # `@set_a`: `base_set_size = 3`, possui `@v_cinco` e `@v_uma`.
-    a = progress["OPp1a"]
+    a = progress["OP01"]
 
-    assert_equal 2, a.base_owned_variants
+    assert_equal 2, a.owned_numbers
     assert_equal 3, a.base_size
     assert_in_delta 66.67, a.completion_percent, 0.01
   end
 
   test "set sem nenhuma posse tem percentual zero, que é um número e não indisponibilidade" do
-    c = progress["OPp1c"]
+    c = progress["OP03"]
 
-    assert_equal 0, c.base_owned_variants
+    assert_equal 0, c.owned_numbers
     assert_equal 0.0, c.completion_percent
     assert c.completion_percent_known?,
            "zero por cento é informação; indisponível é a ausência dela"
@@ -413,37 +423,37 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # --- PRG-02: o numerador conta `base` e `other`, e exclui `parallel` ---
 
   test "o numerador do percentual conta variantes other além das base" do
-    d = progress["OPp2d"]
+    d = progress["OP04"]
 
     # `@v_d_base` é `base` e `@v_d_other1` é `other`: um numerador restrito a
     # `'base'` daria 1 e exibiria 25% para quem tem metade do set.
     assert_equal "base", @v_d_base.art_kind
     assert_equal "other", @v_d_other1.art_kind
-    assert_equal 2, d.base_owned_variants,
+    assert_equal 2, d.owned_numbers,
                  "numerador e denominador precisam contar o mesmo universo"
   end
 
   test "o numerador do percentual exclui variantes parallel" do
     # `@set_e`: a única posse é `@v_e_par`, que é `parallel`.
-    e = progress["OPp2e"]
+    e = progress["OP05"]
 
     assert_equal "parallel", @v_e_par.art_kind
-    assert_equal 1, e.owned_variants, "a posse existe e aparece no numerador do Req. 9.1"
-    assert_equal 0, e.base_owned_variants, "mas não no numerador do percentual"
+    assert_equal 1, e.parallel_owned_variants, "a posse existe e aparece na métrica de parallels"
+    assert_equal 0, e.owned_numbers, "mas não no numerador do percentual"
     assert_equal 0.0, e.completion_percent
   end
 
   test "possuir um parallel a mais não altera o percentual de conclusão do set" do
-    antes = progress["OPp2d"].completion_percent
+    antes = progress["OP04"].completion_percent
 
     own(@user, @v_d_par2, 1)
 
-    assert_equal antes, progress["OPp2d"].completion_percent,
+    assert_equal antes, progress["OP04"].completion_percent,
                  "parallel é métrica separada e nunca entra no percentual (AD-003)"
   end
 
   test "variantes parallel do set não inflam o denominador" do
-    d = progress["OPp2d"]
+    d = progress["OP04"]
 
     # O set tem 2 parallels entre as 6 impressões; o denominador continua 4.
     assert_equal 2, CardVariant.where(set_id: @set_d.id, art_kind: "parallel").count
@@ -456,8 +466,8 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     f = progress["OPp2f"]
 
     assert_not_nil f, "o set não pode sumir: o usuário tem posse nele"
-    assert_equal 1, f.owned_variants, "a posse real é exibida"
-    assert_equal 1, f.base_owned_variants
+    assert_equal 1, f.owned_numbers, "a posse real é exibida"
+    assert_equal 1, f.owned_numbers
 
     assert_nil f.base_size, "o set não tem denominador conhecido"
     assert_nil f.completion_percent, "percentual indisponível"
@@ -480,7 +490,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # API — a view da T5 não pode confundir "indisponível" com "não comecei".
   test "indisponível e zero por cento são distinguíveis pelo chamador" do
     indisponivel = progress["OPp2f"]
-    zerado = progress["OPp1c"]
+    zerado = progress["OP03"]
 
     assert_nil indisponivel.completion_percent
     assert_equal 0.0, zerado.completion_percent
@@ -495,7 +505,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     f = progress["OPp2f"]
 
     assert_equal 0, @set_g.base_set_size, "o cenário é denominador zero, não nulo"
-    assert_equal 1, g.owned_variants, "a posse continua exibida"
+    assert_equal 1, g.owned_numbers, "a posse continua exibida"
 
     assert_nil g.completion_percent, "nenhuma divisão é executada"
     assert_not g.completion_percent_known?
@@ -517,7 +527,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # a divergência de classificação pode inverter o sinal em outro set após uma
   # reingestão. `@set_h` reproduz o caso.
   test "numerador maior que o denominador é limitado a cem por cento, sem erro" do
-    set_h = CardSet.create!(code: "OPp2h", name: "Excedente", kind: "booster",
+    set_h = CardSet.create!(code: "OP06", name: "Excedente", kind: "booster",
                             base_set_size: 1, total_set_size: 3)
     tres = 3.times.map do |i|
       variante = create_variant(create_card(set_h, "OP06-p2#{i}", "Excedente #{i}"),
@@ -526,10 +536,10 @@ class SetProgressQueryTest < ActiveSupport::TestCase
       variante
     end
 
-    h = progress["OPp2h"]
+    h = progress["OP06"]
 
     assert_equal 3, tres.size
-    assert_equal 3, h.base_owned_variants, "o numerador real é 3"
+    assert_equal 3, h.owned_numbers, "o numerador real é 3"
     assert_equal 1, h.base_size, "contra um denominador de 1"
     assert_equal 100.0, h.completion_percent,
                  "apresentado limitado a cem por cento, nunca 300%"
@@ -540,9 +550,9 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     own(@user, @v_d_other2, 1)
     own(@user, @v_d_other3, 1)
 
-    d = progress["OPp2d"]
+    d = progress["OP04"]
 
-    assert_equal 4, d.base_owned_variants
+    assert_equal 4, d.owned_numbers
     assert_equal 4, d.base_size
     assert_equal 100.0, d.completion_percent
   end
@@ -551,12 +561,12 @@ class SetProgressQueryTest < ActiveSupport::TestCase
 
   test "cada set traz a contagem de parallels possuídos e o total de parallels do set" do
     # `@set_d`: 2 parallels impressos, nenhum possuído ainda.
-    d = progress["OPp2d"]
+    d = progress["OP04"]
     assert_equal 0, d.parallel_owned_variants
     assert_equal 2, d.parallel_variants
 
     # `@set_e`: 1 parallel impresso e possuído.
-    e = progress["OPp2e"]
+    e = progress["OP05"]
     assert_equal 1, e.parallel_owned_variants
     assert_equal 1, e.parallel_variants
   end
@@ -567,17 +577,17 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # parallels **um** — os dois números diferentes, senão nenhuma asserção
   # distinguiria "não somou" de "somou".
   test "posse apenas de parallels mantém o percentual em zero e a contagem refletindo a posse" do
-    e = progress["OPp2e"]
+    e = progress["OP05"]
 
     assert_equal "parallel", @v_e_par.art_kind
     assert_equal 1, CollectionItem.for_user(@user).owned
                                   .joins(:card_variant)
                                   .where(card_variants: { set_id: @set_e.id }).count,
-                 "a única posse do usuário em OPp2e é o parallel"
+                 "a única posse do usuário em OP05 é o parallel"
 
     assert_equal 0.0, e.completion_percent,
                  "parallel nunca entra no numerador do percentual (AD-003, Req. 9.6)"
-    assert_equal 0, e.base_owned_variants
+    assert_equal 0, e.owned_numbers
 
     assert_equal 1, e.parallel_owned_variants,
                  "e a métrica separada reflete a posse"
@@ -586,11 +596,11 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   end
 
   test "parallels não entram no denominador do percentual" do
-    e = progress["OPp2e"]
+    e = progress["OP05"]
 
     # O set tem 2 impressões (1 base, 1 parallel) e `base_set_size = 2`. O
     # denominador vem da fonte e não soma o parallel impresso.
-    assert_equal 2, e.total_variants
+    assert_equal 2, CardVariant.where(set_id: @set_e.id).count
     assert_equal 1, e.parallel_variants
     assert_equal 2, e.base_size,
                  "o denominador é base_set_size, e o parallel não o infla"
@@ -600,17 +610,17 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # move só o percentual. Se os parallels vazassem para o numerador, a contagem
   # de parallels e o percentual andariam juntos e este teste não discriminaria.
   test "acrescentar uma variante base altera só o percentual, deixando os parallels intactos" do
-    antes = progress["OPp2e"]
+    antes = progress["OP05"]
     assert_equal 0.0, antes.completion_percent
     assert_equal 1, antes.parallel_owned_variants
 
     own(@user, @v_e_base, 1)
 
-    depois = progress["OPp2e"]
+    depois = progress["OP05"]
 
     assert_equal 50.0, depois.completion_percent,
                  "uma base de duas: o percentual muda"
-    assert_equal 1, depois.base_owned_variants
+    assert_equal 1, depois.owned_numbers
 
     assert_equal antes.parallel_owned_variants, depois.parallel_owned_variants,
                  "a contagem de parallels fica intacta: a base não é parallel"
@@ -618,22 +628,22 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   end
 
   test "possuir um parallel a mais altera só a contagem de parallels, não o percentual" do
-    antes = progress["OPp2d"]
+    antes = progress["OP04"]
 
     own(@user, @v_d_par1, 1)
 
-    depois = progress["OPp2d"]
+    depois = progress["OP04"]
 
     assert_equal antes.completion_percent, depois.completion_percent,
                  "o percentual não se mexe (AD-003)"
-    assert_equal antes.base_owned_variants, depois.base_owned_variants
+    assert_equal antes.owned_numbers, depois.owned_numbers
     assert_equal antes.parallel_owned_variants + 1, depois.parallel_owned_variants,
                  "só a métrica separada acompanha"
   end
 
   test "set sem nenhuma variante parallel apresenta a métrica como zero, sem ocultá-la" do
     # `@set_c` tem uma única impressão, `base`. A métrica existe e vale zero.
-    c = progress["OPp1c"]
+    c = progress["OP03"]
 
     assert_equal 0, CardVariant.where(set_id: @set_c.id, art_kind: "parallel").count,
                  "o cenário é um set sem parallel nenhum"
@@ -647,22 +657,22 @@ class SetProgressQueryTest < ActiveSupport::TestCase
     # `@v_e_par` tem 2 cópias e conta **1**, pela mesma regra do Req. 9.4.
     assert_equal 2, CollectionItem.find_by!(user: @user, card_variant: @v_e_par).quantity
 
-    assert_equal 1, progress["OPp2e"].parallel_owned_variants
+    assert_equal 1, progress["OP05"].parallel_owned_variants
   end
 
   test "parallel com quantidade zero não conta como possuído" do
     own(@user, @v_d_par1, 0)
 
-    assert_equal 0, progress["OPp2d"].parallel_owned_variants,
+    assert_equal 0, progress["OP04"].parallel_owned_variants,
                  "`owned` filtra por quantidade, também na métrica separada"
   end
 
   test "parallel de outro usuário não entra na contagem do alvo" do
     own(@outro, @v_d_par1, 3)
 
-    assert_equal 0, progress(@user)["OPp2d"].parallel_owned_variants
-    assert_equal 1, progress(@outro)["OPp2d"].parallel_owned_variants
-    assert_equal 2, progress(@outro)["OPp2d"].parallel_variants,
+    assert_equal 0, progress(@user)["OP04"].parallel_owned_variants
+    assert_equal 1, progress(@outro)["OP04"].parallel_owned_variants
+    assert_equal 2, progress(@outro)["OP04"].parallel_variants,
                    "o total de parallels é do catálogo e não depende de quem olha"
   end
 
@@ -706,7 +716,7 @@ class SetProgressQueryTest < ActiveSupport::TestCase
   # --- T1: ordem da pasta por atividade do usuário (CNF-27, CNF-28, CNF-38) --
 
   # O cenário próprio da ordem: três sets, dois com posse em instantes
-  # diferentes e um sem posse nenhuma. `OPp1a`, `OPp1b` e `OPp1c` do `setup`
+  # diferentes e um sem posse nenhuma. `OP01`, `OP02` e `OP03` do `setup`
   # já existem para outro fim (PRG-01) e ficariam todos com o mesmo
   # `updated_at` se reaproveitados aqui — por isso um cenário à parte, com
   # `travel_to` controlando exatamente qual posse é "mais recente".

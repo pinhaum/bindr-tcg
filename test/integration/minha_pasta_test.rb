@@ -26,12 +26,13 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
 
     CollectionItem.create!(user: @user, card_variant: v1, quantity: 3)
     CollectionItem.create!(user: @user, card_variant: v2, quantity: 1)
+    mark_catalog_present!
   end
 
   def create_variant(set, suffix, art_kind)
     card = Card.create!(card_set: set, card_number: "OP01-#{suffix}", name: "Card #{suffix}",
                         card_type: "character", colors: [ "Red" ])
-    CardVariant.create!(card: card, card_set: set, variant_code: suffix,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: suffix,
                         rarity: "C", art_kind: art_kind)
   end
 

@@ -71,7 +71,7 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
   end
 
   def variant(set, suffix, art_kind)
-    card = Card.create!(card_set: set, card_number: "OP05-#{suffix}", name: "Carta #{suffix}",
+    card = Card.create!(card_set: set, card_number: "#{set.code}-#{suffix}", name: "Carta #{suffix}",
                         card_type: "character", colors: [ "Red" ])
     CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: suffix,
                         rarity: "C", art_kind: art_kind)
@@ -96,7 +96,10 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
   # --- PRG-01: nome, possuídas e total por set ---
 
-  test "cada set exibe nome, possuídas e total de variantes" do
+  # Req. 9.1 emendado (fonte-apitcg): a linha traz os números distintos
+  # possuídos (3, sem o parallel) e o denominador `base_set_size` (5), não mais
+  # variantes possuídas (4) sobre impressões (7).
+  test "cada set exibe nome, números possuídos e denominador" do
     sign_in(@luffy)
 
     get progress_path
@@ -104,12 +107,8 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     texto = texto_do_set(@set_a)
     assert_match(/Romance Dawn/, texto)
-    # 4 possuídas: as 3 de base/other mais o parallel. `owned_variants` é a
-    # posse **do set inteiro** (Req. 9.1); o numerador do percentual é outro
-    # número (`base_owned_variants`, 3) e aparece separado — é justamente por
-    # serem diferentes que uma troca entre eles é detectável.
-    assert_select "#progress_set_OPp5a .progress-set__owned", text: "4"
-    assert_select "#progress_set_OPp5a .progress-set__total", text: "7"
+    assert_select "#progress_set_OPp5a .progress-set__owned", text: "3"
+    assert_select "#progress_set_OPp5a .progress-set__total", text: "5"
   end
 
   # CNF-25/CNF-26 (Mobile:49): a linha é "possuídas / total · percentual" e a
@@ -120,7 +119,7 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     get progress_path
 
     linha = css_select("#progress_set_OPp5a .progress-set__owned-line").first.text.squish
-    assert_equal "4 / 7 · 60%", linha
+    assert_equal "3 / 5 · 60%", linha
 
     legenda = css_select("#progress_set_OPp5a .progress-set__legend").first.text.squish
     assert_equal "3 de 5 do set base · 1 de 2 parallels", legenda
@@ -160,9 +159,8 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     get progress_path
 
     assert_select "#progress_set_OPp5b .progress-set__owned-line .progress-set__percent-value", text: /0%/
-    # 0 possuídas de 2 impressões, e o denominador do percentual é 4 — os dois
-    # números convivem na mesma linha sem se confundirem.
-    assert_equal "0 / 2 · 0%",
+    # 0 números possuídos sobre o denominador 4, e não sobre as 2 impressões.
+    assert_equal "0 / 4 · 0%",
                  css_select("#progress_set_OPp5b .progress-set__owned-line").first.text.squish
     assert_match(/0 de 4 do set base/, texto_do_set(@set_b))
   end
@@ -199,9 +197,9 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
     assert_select "#progress_set_OPp5c .progress-set__percent-value", false,
                   "sem denominador não há percentual a renderizar, nem mesmo vazio"
-    assert_equal "1 / 2",
+    assert_equal "1",
                  css_select("#progress_set_OPp5c .progress-set__owned-line").first.text.squish,
-                 "sem denominador a linha mostra só 'N / M', sem percentual"
+                 "sem denominador a linha mostra só a posse, sem denominador nem percentual"
   end
 
   # A asserção que torna as duas anteriores discriminantes: um `0%` vazando
@@ -282,7 +280,7 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".progress-set", 3, "a página é informativa, não vazia"
     assert_select "#progress_set_OPp5a .progress-set__owned", text: "0"
-    assert_select "#progress_set_OPp5a .progress-set__total", text: "7",
+    assert_select "#progress_set_OPp5a .progress-set__total", text: "5",
                   message: "o denominador é do catálogo e não depende de quem olha"
     assert_select "#progress_set_OPp5c .progress-set__percent--unknown"
   end
@@ -385,9 +383,9 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
     get href
 
-    assert_select "a[href=?]", card_path("OP05-p5a1"),
+    assert_select "a[href=?]", card_path("OPp5a-p5a1"),
                   { count: 1 }, "uma carta do set filtrado precisa aparecer"
-    assert_select "a[href=?]", card_path("OP05-p5b1"),
+    assert_select "a[href=?]", card_path("OPp5b-p5b1"),
                   { count: 0 }, "nenhuma carta de outro set pode aparecer"
   end
 
@@ -401,9 +399,9 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
 
     get href
 
-    assert_select "a[href=?]", card_path("OP05-p5b1"),
+    assert_select "a[href=?]", card_path("OPp5b-p5b1"),
                   { count: 1 }, "uma carta do set B precisa aparecer no recorte do set B"
-    assert_select "a[href=?]", card_path("OP05-p5a1"),
+    assert_select "a[href=?]", card_path("OPp5a-p5a1"),
                   { count: 0 }, "o recorte do set B não contém cartas do set A"
   end
 

@@ -326,7 +326,7 @@ Regras de execução:
 Plano da feature em `.specs/features/fonte-apitcg/tasks.md` (T1–T17, numeração
 própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
 
-- [ ] **8.1 Presença na fonte e leitura** — T1–T4 da `fonte-apitcg`
+- [x] **8.1 Presença na fonte e leitura** — T1–T4 da `fonte-apitcg`
   - Catálogo, detalhe e progresso leem só variantes presentes no último run
     `succeeded`; progresso conta números de carta distintos.
   - _Requisitos: 1.7, 5.1, 5.4, 5.5_

@@ -10,7 +10,10 @@ class CardVariant < ApplicationRecord
   # "Presente na fonte" (SRC-16): vista pela última ingestão `succeeded`. O
   # Upsert grava em `last_seen_at` o `started_at` do run que viu a variante.
   # Sem run `succeeded`, a subconsulta dá NULL e nada é presente.
-  scope :present, lambda {
-    where("card_variants.last_seen_at >= (SELECT max(started_at) FROM import_runs WHERE status = 'succeeded')")
-  }
+  # O predicado fica exposto em `PRESENT_SQL` para a agregação de progresso,
+  # que o aplica no `ON` de um join em vez de num `where`.
+  PRESENT_SQL = "card_variants.last_seen_at >= " \
+                "(SELECT max(started_at) FROM import_runs WHERE status = 'succeeded')".freeze
+
+  scope :present, -> { where(PRESENT_SQL) }
 end

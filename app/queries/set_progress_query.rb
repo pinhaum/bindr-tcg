@@ -4,8 +4,8 @@
 # da que `CollectionItem.total_copies_for` responde. As duas coexistem e medem
 # coisas distintas:
 #
-# - **aqui**: `COUNT(DISTINCT ...)` de variantes possuídas — quem tem cinco
-#   cópias de uma variante fechou **uma** casa do set;
+# - **aqui**: `COUNT(DISTINCT ...)` de números de carta possuídos — quem tem
+#   cinco cópias de uma variante fechou **uma** casa do set;
 # - **Req. 7.7**: `SUM(quantity)` de cópias — o mesmo colecionador tem cinco
 #   cartas na caixa.
 #
@@ -14,8 +14,8 @@
 #
 # ## Uma consulta, não uma por set
 #
-# A agregação inteira é **um** `GROUP BY sets.id` sobre um `LEFT JOIN` de
-# `sets` para `card_variants`. Não é otimização prematura: um `count` por set é
+# A agregação inteira é **um** `GROUP BY sets.id` sobre o join de `sets` com
+# as variantes presentes. Não é otimização prematura: um `count` por set é
 # N+1 e foi medido — 63 consultas a ~213ms contra ~8ms de uma agregação única,
 # ambos com coleção vazia, logo o número mede estrutura e não seletividade
 # (spec.md, "Forma da consulta"). O alvo do Req. 11.1 é que o custo **não cresça
@@ -46,42 +46,33 @@
 # `WHERE`. Com a condição no `WHERE`, o set em que o usuário não possui nada
 # perderia todas as linhas e **sumiria do resultado** — a página exibiria só os
 # sets já iniciados, que é o oposto do que o Edge Case pede ("todos os sets
-# aparecem com numerador zero; a página é informativa, não vazia"). O mesmo vale
-# para o `LEFT JOIN` de `sets` para `card_variants`: set sem nenhuma variante
-# continua listado, com total zero.
+# aparecem com numerador zero; a página é informativa, não vazia"). Já o join de
+# `sets` com `card_variants` é `INNER`: set sem variante presente na fonte não
+# aparece (SRC-16).
 #
-# ## O percentual: denominador `sets.base_set_size`, numerador `base` + `other`
+# ## O percentual: números de carta distintos sobre `sets.base_set_size`
 #
-# (PRG-02, PRG-05, PRG-10.) A escolha **não é arbitrária** e não é a leitura
-# ingênua do Req. 9.5; ela é uma decisão do dono do produto, registrada na spec
-# (`.specs/features/progresso/spec.md`, "Conflito com `.context/requirements.md`")
-# e medida no banco de desenvolvimento antes de virar código:
+# (Req. 9.1, 9.4 e 9.5 emendados; SRC-24..SRC-28, fonte-apitcg.) Na apitcg um
+# mesmo número tem mais de uma impressão não-parallel no mesmo set (base e Box
+# Topper, por exemplo), então contar variantes passaria de 100%. A unidade é o
+# **número de carta distinto**:
 #
-# | Comparação | Divergências |
-# |---|---|
-# | `base_set_size` vs. `count(art_kind = 'base')`            | **21 de 62 sets** |
-# | `base_set_size` vs. `count(art_kind IN ('base','other'))` | **1 de 62 sets** (ST16: 7 contra 6) |
-#
-# O Req. 9.5 trata "variantes base do set" e `baseSetSize` da fonte como
-# sinônimos. **No banco real não são**, porque a ingestão classifica como
-# `other` reimpressões que a fonte conta dentro de `baseSetSize`. Por isso:
-#
-# - **Denominador = `sets.base_set_size`**, o campo da fonte externa, nunca uma
-#   contagem local de `art_kind = 'base'` e nunca o total de impressões do set.
-#   Contar localmente seria catastrófico em dois casos medidos: `FamilyDeckSet`
-#   daria denominador **0** (49 variantes, todas `other`) — divisão por zero e
-#   set invisível; `PRB01` daria **1** em vez de 113, exibindo 100% para quem
-#   possui uma única carta de 113.
-# - **Numerador = variantes possuídas com `art_kind IN ('base','other')`**, o
-#   **mesmo universo** do denominador. Com numerador só `'base'`, o percentual
-#   seria aritmeticamente incoerente com o seu próprio denominador, e
-#   `FamilyDeckSet` exibiria 0/49 para quem possui o set inteiro.
+# - **Denominador = `sets.base_set_size`**, derivado na ingestão (SRC-24).
+# - **Universo do numerador**, deduzido do valor gravado em vez de refazer a
+#   regra de maioria em SQL: se `base_set_size` é igual ao número de
+#   `card_number` distintos presentes no set, a ingestão contou o set inteiro
+#   (reimpressão) e o universo é o set inteiro; senão, contou só os números com
+#   o prefixo do set (`<código>-`) e o universo é esse. Sem denominador (nulo
+#   ou zero), o universo é o set inteiro, só para exibir a posse (PRG-10).
+# - **Numerador = números distintos do universo** com ao menos uma variante
+#   presente do set, possuída e com `art_kind <> 'parallel'` (SRC-25, SRC-28):
+#   `alternate_art`, `manga`, `promo` e `other` entram; duas impressões do
+#   mesmo número contam uma vez.
 # - **`parallel` fica fora dos dois** — é a métrica separada de AD-003 e do
-#   Req. 9.6, e entra na T3.
+#   Req. 9.6.
 #
-# Corrigir a classificação de `art_kind` na ingestão está em Out of Scope: é
-# defeito do subsistema de ingestão, e misturá-lo aqui violaria a separação que
-# é o eixo do `design.md`.
+# Só entram variantes presentes na fonte (SRC-16); set sem nenhuma variante
+# presente não aparece.
 #
 # ## Parallels: contagem absoluta, fora dos dois lados da divisão
 #
@@ -99,12 +90,10 @@
 # divergente em 21 dos 62 sets. Exibir um percentual sobre um denominador que
 # sabemos suspeito é o erro que esta feature inteira existe para não cometer.
 #
-# **`other` não é `parallel`.** O filtro aqui é `art_kind = 'parallel'` e mais
-# nada. `other` já entra no numerador **e** no universo do denominador do
-# percentual principal (ver acima); movê-lo para cá o tiraria do percentual e
-# reintroduziria a incoerência aritmética que a decisão de numerador resolveu.
-# São dois conjuntos disjuntos por construção: nenhuma variante conta nas duas
-# métricas, e é isso que o Req. 9.6 quer dizer com "nunca somada ao percentual".
+# **Só `parallel` é parallel.** O filtro aqui é `art_kind = 'parallel'` e mais
+# nada; todo outro `art_kind` entra no numerador principal. São dois conjuntos
+# disjuntos por construção: nenhuma variante conta nas duas métricas, e é isso
+# que o Req. 9.6 quer dizer com "nunca somada ao percentual".
 #
 # ## Indisponível é `nil`, e `nil` nunca é `0`
 #
@@ -129,8 +118,7 @@ class SetProgressQuery
   # de registro. O recorte sai de `CollectionItem.owned` (`quantity >= 1`) e
   # não da existência da linha: quem zerou a quantidade mantém a linha e tem de
   # dar exatamente o mesmo resultado de quem nunca registrou nada.
-  Row = Struct.new(:set_id, :set_code, :set_name, :owned_variants, :total_variants,
-                   :base_owned_variants, :base_size,
+  Row = Struct.new(:set_id, :set_code, :set_name, :owned_numbers, :base_size,
                    :parallel_owned_variants, :parallel_variants,
                    keyword_init: true) do
     # `nil` quando não há denominador conhecido — ausente ou zero, o mesmo
@@ -139,7 +127,7 @@ class SetProgressQuery
     def completion_percent
       return nil unless completion_percent_known?
 
-      [ base_owned_variants.to_f / base_size * 100, 100.0 ].min
+      [ owned_numbers.to_f / base_size * 100, 100.0 ].min
     end
 
     # O predicado que a view usa em vez de testar `nil?`, para que
@@ -169,9 +157,7 @@ class SetProgressQuery
         set_id: record.id,
         set_code: record.code,
         set_name: record.name,
-        owned_variants: record.owned_variants.to_i,
-        total_variants: record.total_variants.to_i,
-        base_owned_variants: record.base_owned_variants.to_i,
+        owned_numbers: record.owned_numbers.to_i,
         # `to_i` aqui apagaria a distinção entre "sem denominador" e "zero",
         # que é justamente o que PRG-10 exige preservar até o `Row`.
         base_size: record.base_size,
@@ -200,8 +186,9 @@ class SetProgressQuery
     CardSet
       .select(AGGREGATE_COLUMNS)
       .joins(variants_join)
+      .joins(set_numbers_join)
       .joins(owned_join)
-      .group("sets.id")
+      .group("sets.id, set_numbers.distinct_numbers")
       .order(order_clause)
   end
 
@@ -211,14 +198,25 @@ class SetProgressQuery
     "last_activity_at DESC NULLS LAST, sets.code ASC"
   end
 
+  # O universo do numerador (ver o cabeçalho): o set inteiro quando não há
+  # denominador (nulo ou zero, PRG-10) ou quando ele é igual aos números
+  # distintos presentes; senão, só os
+  # números com o prefixo `<código>-`. `left(...) =` em vez de `LIKE`, para
+  # que `_` e `%` num código de set não virem curinga.
+  UNIVERSE_SQL = <<~SQL.squish.freeze
+    (COALESCE(sets.base_set_size, 0) = 0
+      OR sets.base_set_size = set_numbers.distinct_numbers
+      OR left(cards.card_number, length(sets.code) + 1) = sets.code || '-')
+  SQL
+
   AGGREGATE_COLUMNS = <<~SQL.squish.freeze
     sets.id,
     sets.code,
     sets.name,
-    COUNT(DISTINCT card_variants.id) AS total_variants,
-    COUNT(DISTINCT owned_items.card_variant_id) AS owned_variants,
-    COUNT(DISTINCT owned_items.card_variant_id)
-      FILTER (WHERE card_variants.art_kind IN ('base', 'other')) AS base_owned_variants,
+    COUNT(DISTINCT cards.card_number)
+      FILTER (WHERE owned_items.card_variant_id IS NOT NULL
+                AND card_variants.art_kind <> 'parallel'
+                AND #{UNIVERSE_SQL}) AS owned_numbers,
     sets.base_set_size AS base_size,
     COUNT(DISTINCT owned_items.card_variant_id)
       FILTER (WHERE card_variants.art_kind = 'parallel') AS parallel_owned_variants,
@@ -227,8 +225,21 @@ class SetProgressQuery
     MAX(owned_items.updated_at) AS last_activity_at
   SQL
 
+  # `INNER`: set sem variante presente na fonte sai da lista (SRC-16). A
+  # presença entra no `ON` com o mesmo predicado de `CardVariant.present`.
   def variants_join
-    "LEFT JOIN card_variants ON card_variants.set_id = sets.id"
+    "INNER JOIN card_variants ON card_variants.set_id = sets.id AND #{CardVariant::PRESENT_SQL} " \
+      "INNER JOIN cards ON cards.id = card_variants.card_id"
+  end
+
+  # Números de carta distintos presentes por set: é contra eles que o
+  # `base_set_size` gravado diz qual universo a ingestão contou.
+  def set_numbers_join
+    subquery = CardVariant.present.joins(:card).group(:set_id)
+                          .select("card_variants.set_id, COUNT(DISTINCT cards.card_number) AS distinct_numbers")
+                          .to_sql
+
+    "INNER JOIN (#{subquery}) set_numbers ON set_numbers.set_id = sets.id"
   end
 
   # A subconsulta parte de `CollectionItem.for_user(@user).owned`, que já resolve

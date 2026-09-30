@@ -200,15 +200,15 @@ T14 → T16 → T17
 
 **Done when**:
 
-- [ ] Set com numeração própria (`base_set_size` < números distintos presentes): o numerador conta só os números com o prefixo do set
-- [ ] Set de reimpressão (`base_set_size` = números distintos presentes): o numerador conta todos os números do set
-- [ ] Base e Box Topper do mesmo número contam uma vez (SRC-28); `alternate_art`, `manga` e `promo` entram no numerador; `parallel` não entra
-- [ ] Nenhum set passa de 100% (SRC-26), inclusive com mais variantes possuídas que o denominador
-- [ ] Parallels possuídos continuam como métrica separada (SRC-27); set sem denominador continua sem percentual (PRG-10)
-- [ ] Set sem variante presente não aparece na lista
-- [ ] A linha do set e a barra usam numerador e denominador do percentual, não mais variantes
-- [ ] Testes de `test/queries/set_progress_*` e `test/design/progress_*` atualizados para a unidade nova, sem remover nenhum caso de teto, parallel ou ordem
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Set com numeração própria (`base_set_size` < números distintos presentes): o numerador conta só os números com o prefixo do set
+- [x] Set de reimpressão (`base_set_size` = números distintos presentes): o numerador conta todos os números do set
+- [x] Base e Box Topper do mesmo número contam uma vez (SRC-28); `alternate_art`, `manga` e `promo` entram no numerador; `parallel` não entra
+- [x] Nenhum set passa de 100% (SRC-26), inclusive com mais variantes possuídas que o denominador
+- [x] Parallels possuídos continuam como métrica separada (SRC-27); set sem denominador continua sem percentual (PRG-10)
+- [x] Set sem variante presente não aparece na lista
+- [x] A linha do set e a barra usam numerador e denominador do percentual, não mais variantes
+- [x] Testes de `test/queries/set_progress_*` e `test/design/progress_*` atualizados para a unidade nova, sem remover nenhum caso de teto, parallel ou ordem
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full

@@ -56,14 +56,15 @@ class ProgressTest < ActionDispatch::IntegrationTest
     CollectionItem.create!(user: @nami, card_variant: @v1, quantity: 1)
     CollectionItem.create!(user: @zoro, card_variant: @v2, quantity: 1)
     CollectionItem.create!(user: @zoro, card_variant: @v3, quantity: 1)
+    mark_catalog_present!
   end
 
   # A suíte roda em paralelo e o projeto não usa fixtures YAML: cada teste cria
   # os próprios registros, com chaves naturais distintas por arquivo.
   def create_variant(suffix)
-    card = Card.create!(card_set: @set, card_number: "OP01-#{suffix}", name: "Carta #{suffix}",
+    card = Card.create!(card_set: @set, card_number: "#{@set.code}-#{suffix}", name: "Carta #{suffix}",
                         card_type: "character", colors: [ "Red" ])
-    CardVariant.create!(card: card, card_set: @set, variant_code: suffix,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: @set, variant_code: suffix,
                         rarity: "C", art_kind: "base")
   end
 
@@ -151,14 +152,14 @@ class ProgressTest < ActionDispatch::IntegrationTest
     get progress_path
 
     linha = assigns_progress.find { |row| row.set_code == @set.code }
-    assert_equal linha_do_set(@nami).owned_variants, linha.owned_variants
-    assert_equal 1, linha.owned_variants
+    assert_equal linha_do_set(@nami).owned_numbers, linha.owned_numbers
+    assert_equal 1, linha.owned_numbers
   end
 
   # A discriminação depende de `@zoro` ter número diferente do de `@nami`: com
   # posses iguais, obedecer ao parâmetro e ignorá-lo dariam o mesmo resultado.
   test "?user_id= de outro usuário é ignorado e vale o usuário da sessão" do
-    assert_equal 2, linha_do_set(@zoro).owned_variants,
+    assert_equal 2, linha_do_set(@zoro).owned_numbers,
                  "o cenário precisa de números diferentes, senão nada discrimina"
 
     sign_in(@nami)
@@ -167,7 +168,7 @@ class ProgressTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     linha = assigns_progress.find { |row| row.set_code == @set.code }
-    assert_equal 1, linha.owned_variants,
+    assert_equal 1, linha.owned_numbers,
                  "o número exibido tem que ser o do usuário da sessão, não o do parâmetro"
   end
 

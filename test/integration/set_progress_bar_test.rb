@@ -3,11 +3,12 @@ require "test_helper"
 # T37 — Barra do set provada por valor (NAV-38).
 #
 # Testa que a barra <progress> renderiza com value e max corretos, correspondendo
-# aos números da contagem "possuídas / total" da mesma linha, e que a barra não
-# aparece em set sem total base conhecido (base_set_size: nil).
+# aos números da contagem "possuídos / denominador" da mesma linha, e que a barra
+# não aparece em set sem total base conhecido (base_set_size: nil).
 #
-# Mata os mutantes M12 (`max` trocado por `base_size`) e M13 (barra renderizada
-# sem total conhecido).
+# fonte-apitcg (Req. 9.1 emendado): `value` é o número de cartas distintas
+# possuídas e `max` é `base_set_size`, os dois números do percentual. Mata M13
+# (barra renderizada sem total conhecido).
 class SetProgressBarTest < ActionDispatch::IntegrationTest
   PASSWORD = "log-pose-77".freeze
 
@@ -43,13 +44,14 @@ class SetProgressBarTest < ActionDispatch::IntegrationTest
     CollectionItem.create!(user: @user, card_variant: @v1, quantity: 3)
     CollectionItem.create!(user: @user, card_variant: @v2, quantity: 2)
     CollectionItem.create!(user: @user, card_variant: @w1, quantity: 1)
+    mark_catalog_present!
   end
 
   def create_variant(set, suffix, art_kind)
     card = Card.create!(card_set: set, card_number: "#{set.code}-#{suffix}",
                         name: "Card #{suffix}",
                         card_type: "character", colors: [ "Red" ])
-    CardVariant.create!(card: card, card_set: set, variant_code: suffix,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: suffix,
                         rarity: "C", art_kind: art_kind)
   end
 
@@ -67,20 +69,20 @@ class SetProgressBarTest < ActionDispatch::IntegrationTest
       fail_message: "barra deve ser renderizada para set com base_set_size conhecido"
   end
 
-  test "barra tem value igual às variantes possuídas e max igual ao total" do
+  test "barra tem value igual aos números possuídos e max igual ao denominador" do
     sign_in(@user)
     get progress_path
 
-    # Set OP01: possuídas = 2, total = 7
+    # Set OP01: 2 números possuídos, base_set_size = 5 (7 impressões)
     bars = css_select(".progress-set__bar")
     assert bars.present?, "deve haver barra de progresso"
 
     # Pega a primeira barra (OP01)
     bar = bars.first
     assert_equal "2", bar["value"],
-      "barra deve ter value = 2 (variantes possuídas de OP01)"
-    assert_equal "7", bar["max"],
-      "barra deve ter max = 7 (total de variantes de OP01)"
+      "barra deve ter value = 2 (números possuídos de OP01)"
+    assert_equal "5", bar["max"],
+      "barra deve ter max = 5 (base_set_size de OP01, não as 7 impressões)"
   end
 
   test "barra value e max coincidem com a contagem textual da mesma linha" do
@@ -138,11 +140,11 @@ class SetProgressBarTest < ActionDispatch::IntegrationTest
 
     op02_li = css_select("li#progress_set_OP02").first
 
-    # A contagem "1 de 10 variantes" deve estar presente mesmo sem barra
+    # A posse continua presente mesmo sem barra; sem denominador conhecido, a
+    # linha não inventa um total (PRG-10).
     owned = op02_li.css(".progress-set__owned").text.to_i
-    total = op02_li.css(".progress-set__total").text.to_i
 
-    assert_equal 1, owned, "OP02 deve ter 1 variante possuída"
-    assert_equal 10, total, "OP02 deve ter 10 variantes totais"
+    assert_equal 1, owned, "OP02 deve ter 1 número possuído"
+    assert_empty op02_li.css(".progress-set__total"), "sem base_set_size não há denominador a exibir"
   end
 end
