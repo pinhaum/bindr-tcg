@@ -288,12 +288,12 @@ T14 → T16 → T17
 
 **Done when**:
 
-- [ ] URL em `tcgplayer-cdn.tcgplayer.com` com https é aceita; o host antigo e qualquer outro são recusados
-- [ ] `tcgplayer:123` e `apitcg:abc123` são aceitos; `tcgplayer:../x`, `tcgplayer:` e códigos com `/` são recusados
-- [ ] O arquivo em cache de `tcgplayer:123` é `tcgplayer-123.<ext>`, dentro de `storage/card_images/`
-- [ ] Os códigos antigos (`OP01-001_p1`) continuam aceitos e o cache deles continua sendo lido
-- [ ] `GET /card_images/tcgplayer:123` responde como hoje responde um código antigo (teste de integração)
-- [ ] Gate full passa; contagem de runs registrada
+- [x] URL em `tcgplayer-cdn.tcgplayer.com` com https é aceita; o host antigo e qualquer outro são recusados
+- [x] `tcgplayer:123` e `apitcg:abc123` são aceitos; `tcgplayer:../x`, `tcgplayer:` e códigos com `/` são recusados
+- [x] O arquivo em cache de `tcgplayer:123` é `tcgplayer-123.<ext>`, dentro de `storage/card_images/`
+- [x] Os códigos antigos (`OP01-001_p1`) continuam aceitos e o cache deles continua sendo lido
+- [x] `GET /card_images/tcgplayer:123` responde como hoje responde um código antigo (teste de integração)
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full

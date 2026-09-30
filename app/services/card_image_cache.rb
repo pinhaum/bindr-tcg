@@ -12,9 +12,14 @@ require "net/http"
 #
 # **Invariantes de segurança (AD-012):**
 # - A URL de saída sempre vem de `card_variants.image_url`, nunca do request.
-# - Host, esquema e porta são validados contra `ALLOWED_HOST` e https:443.
+# - Host, esquema e porta são validados contra `ALLOWED_HOST` e https:443
+#   antes de qualquer requisição de saída.
 # - `variant_code` é validado contra o padrão esperado antes de virar nome de
-#   arquivo, prevenindo path traversal.
+#   arquivo, prevenindo path traversal. O `:` dos códigos da apitcg vira `-` no
+#   nome do arquivo (`tcgplayer:123` → `tcgplayer-123.jpg`).
+# - Arquivo já em cache é servido sem rede e, por isso, sem a checagem de
+#   host: as variantes da optcgjson continuam no banco apontando para o host
+#   antigo, e o cache delas em disco continua valendo (fonte-apitcg).
 # - Extensão está em lista fechada (`.png`, `.jpg`, `.jpeg`, `.webp`),
 #   prevenindo SSRF via sufixo arbitrário.
 # - Escrita atômica (temporário + rename) previne arquivo pela metade em
@@ -27,8 +32,11 @@ class CardImageCache
   class NotFound < StandardError; end
   class Unavailable < StandardError; end
 
-  ALLOWED_HOST = "asia-en.onepiece-cardgame.com".freeze
-  VARIANT_CODE_FORMAT = /\A[A-Za-z0-9]+(-[A-Za-z0-9]+)*(_[a-z0-9]+)?\z/.freeze
+  # AD-019: a arte da apitcg vem do CDN do tcgplayer.
+  ALLOWED_HOST = "tcgplayer-cdn.tcgplayer.com".freeze
+  # Formato da optcgjson (`OP01-001_p1`) ou da apitcg (`tcgplayer:<id>`,
+  # `apitcg:<id>`). Nenhum dos dois admite `/` nem `.`.
+  VARIANT_CODE_FORMAT = /\A(?:[A-Za-z0-9]+(-[A-Za-z0-9]+)*(_[a-z0-9]+)?|(?:tcgplayer|apitcg):[A-Za-z0-9]+)\z/.freeze
   ALLOWED_EXTENSIONS = %w[.png .jpg .jpeg .webp].freeze
   MAX_BODY_BYTES = 5 * 1024 * 1024
 
@@ -70,14 +78,16 @@ class CardImageCache
 
     validate_variant_code(variant.variant_code)
     url = variant.image_url
-    validate_url(url)
+    uri = parse_url(url)
+    validate_extension(uri)
 
     final_path = final_path_for(variant.variant_code, url)
 
     # Se o arquivo já existe, devolve sem chamar o cliente.
     return Result.new(path: final_path, content_type: content_type_for(final_path)) if final_path.exist?
 
-    # Busca e grava.
+    # Busca e grava, só a partir do host permitido.
+    validate_origin(uri)
     fetch_and_store(url, final_path)
   rescue SystemCallError, Net::OpenTimeout, Net::ReadTimeout, IOError, SocketError, OpenSSL::SSL::SSLError => e
     raise Unavailable, "erro ao buscar ou gravar: #{e.class} - #{e.message}"
@@ -93,7 +103,7 @@ class CardImageCache
     # Por defesa: o caminho final precisa ficar dentro de storage_dir.
     # (Impossível em produção porque variant_code vem do banco, mas o teste
     # pode tentar truques.)
-    final_path = @storage_dir.join("#{variant_code}.png")
+    final_path = @storage_dir.join("#{file_stem(variant_code)}.png")
     expanded_final = final_path.expand_path
     expanded_storage = @storage_dir.expand_path
 
@@ -102,13 +112,15 @@ class CardImageCache
     end
   end
 
-  def validate_url(url)
-    uri = begin
-      URI.parse(url)
-    rescue URI::InvalidURIError
-      raise Unavailable, "URL malformada"
-    end
+  def file_stem(variant_code) = variant_code.tr(":", "-")
 
+  def parse_url(url)
+    URI.parse(url)
+  rescue URI::InvalidURIError
+    raise Unavailable, "URL malformada"
+  end
+
+  def validate_origin(uri)
     if uri.scheme != "https"
       raise Unavailable, "esquema deve ser https"
     end
@@ -120,8 +132,10 @@ class CardImageCache
     if uri.port && uri.port != 443
       raise Unavailable, "porta deve ser 443"
     end
+  end
 
-    ext = File.extname(uri.path).downcase
+  def validate_extension(uri)
+    ext = File.extname(uri.path.to_s).downcase
     if ext.blank? || !ALLOWED_EXTENSIONS.include?(ext)
       raise Unavailable, "extensão #{ext.inspect} não permitida"
     end
@@ -129,7 +143,7 @@ class CardImageCache
 
   def final_path_for(variant_code, url)
     ext = File.extname(url).downcase
-    @storage_dir.join("#{variant_code}#{ext}")
+    @storage_dir.join("#{file_stem(variant_code)}#{ext}")
   end
 
   def content_type_for(path)
