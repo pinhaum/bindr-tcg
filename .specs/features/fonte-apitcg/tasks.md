@@ -1,0 +1,657 @@
+# Troca da fonte do catálogo para a apitcg — Tasks
+
+## Execution Protocol (MANDATORY -- do not skip)
+
+Implement these tasks with the `tlc-spec-driven` skill: **activate it by name and follow its Execute flow and Critical Rules.** Do not search for skill files by filesystem path. The skill is the source of truth for the full flow (per-task cycle, sub-agent delegation, adequacy review, Verifier, discrimination sensor).
+
+**If the skill cannot be activated, STOP and tell the user - do not proceed without it.**
+
+---
+
+**Spec**: `.specs/features/fonte-apitcg/spec.md` (SRC-01..SRC-35)
+**Design**: `.specs/features/fonte-apitcg/design.md`
+**Status**: Draft
+
+Regras que valem para todas as tasks:
+
+- A numeração T1–T17 é **desta feature**, sem relação com as de `catalogo`, `colecao` e demais.
+- A ingestão continua sem delete, e nenhum `collection_item` nem `wishlist_item` é apagado ou tem quantidade alterada por teste nenhum desta feature (Req. 1.7).
+- `APITCG_API_KEY` nunca aparece em código, teste, fixture, log, commit ou saída de comando. Teste que precise de chave usa um valor sintético (`"chave-de-teste"`).
+- **Requisição à apitcg real só na T10 e na T17**, e cada uma exige o aval explícito do dono no momento da execução (blast radius). Todas as outras tasks usam cliente HTTP falso injetado, como faz `fetch_test.rb` hoje.
+- Proibido `git add -A`, `git add .`, `git stash`, `reset`, `rebase`, `checkout` e worktree. O worker não marca checkbox; o orquestrador marca neste arquivo e em `.context/tasks.md` §8 no commit da task.
+
+---
+
+## Test Coverage Matrix
+
+> Generated from codebase, project guidelines, and spec. Guidelines found: `CLAUDE.md` (gates quick/full/build, `verify_fixture.py`, sem system test), `.github/workflows/ci.yml` (rubocop, brakeman, `bin/rails test`). Sem limiar de cobertura configurado; aplicados os defaults fortes.
+
+| Camada | Tipo de teste | Cobertura esperada | Onde | Comando |
+|---|---|---|---|---|
+| Model (scope de presença) | unit (Minitest com banco) | Cada ramo: sem run `succeeded`, run `succeeded` mais recente, run `failed` depois de um `succeeded` | `test/models/*_test.rb` | `bin/rails test test/models` |
+| Query object (`CatalogQuery`, `SetProgressQuery`) | unit (Minitest com banco) | 1:1 com os SRC da task, mais os edge cases listados; plano de execução quando a task mexe em consulta do catálogo (Req. 11.3) | `test/queries/*_test.rb` | `bin/rails test test/queries` |
+| Serviço de ingestão e remapeamento | unit (Minitest com banco, HTTP falso) | Todos os ramos; 1:1 com os SRC; todo edge case (SRC-32..35) | `test/services/ingestion/*_test.rb` | `bin/rails test test/services` |
+| `CardImageCache` | unit | Host, formato do código, nome saneado, path traversal | `test/services/card_image_cache_test.rb` | `bin/rails test test/services` |
+| Controller + view | integration (HTML renderizado; sem navegador, `SPEC_DEVIATION` do projeto) | Caminho feliz, com e sem sessão, e o caso de erro da task | `test/integration/*_test.rb`, `test/design/*_test.rb` | `bin/rails test test/integration test/design` |
+| Rake task | integration (carrega a task e verifica saída e código de saída) | Caminho feliz e cada saída de erro do spec | `test/lib/*_test.rb` | `bin/rails test test/lib` |
+| Fixture | script offline | Um check por caso de SRC-29 | `spec/verify_fixture.py` | `python3 spec/verify_fixture.py` |
+| Documentação (`CLAUDE.md`, `.context/`) | none | Conferência por `grep` registrada no commit | — | gate full |
+
+## Gate Check Commands
+
+Todos rodam com `DOCKER_CONFIG=/tmp/claude-1000/bindr-dockercfg` na frente (diretório com `config.json` contendo `{}`) e o container `app` no ar (`docker compose up -d`).
+
+| Gate | Quando | Comando |
+|---|---|---|
+| quick | Tasks só de model ou query | `docker compose exec -T app bin/rails test test/models test/queries` |
+| full | Qualquer task com serviço, controller, view, rake ou fixture | `docker compose exec -T app bin/rails test && docker compose exec -T app bin/rubocop && docker compose exec -T app bin/brakeman --no-pager && python3 spec/verify_fixture.py` |
+| build | Fim da Phase 5 e T17 | `docker compose build` + gate full |
+
+Toda task registra no commit a contagem de runs do gate. A contagem só cai onde
+a task remove testes de código removido (T14), e a queda é justificada no commit.
+
+---
+
+## Execution Plan
+
+As fases rodam em sequência, e as tasks dentro de cada fase também. As Phases 1–3
+não dependem do snapshot da apitcg e podem ser executadas enquanto a API estiver
+fora do ar. A Phase 5 depende da T10, que depende da API.
+
+### Phase 1: Presença na fonte e leitura
+
+```
+T1 → T2
+T1 → T3
+T1 → T4
+```
+
+### Phase 2: Remapeamento da coleção
+
+```
+T1 → T5 → T6
+```
+
+### Phase 3: Imagens do tcgplayer
+
+```
+T7
+```
+
+### Phase 4: Busca e snapshot
+
+```
+T8 → T9 → T10
+```
+
+### Phase 5: Normalize e Upsert sobre a fixture nova
+
+```
+T10 → T11 → T12 → T13 → T14
+T9 → T13
+T10 → T15
+```
+
+### Phase 6: Fechamento
+
+```
+T14 → T16 → T17
+```
+
+---
+
+## Task Breakdown
+
+### T1: Scope `CardVariant.present`
+
+**What**: Scope que define "presente na fonte": `last_seen_at >= max(started_at)` dos `import_runs` com status `succeeded`; sem run `succeeded`, nada é presente.
+**Where**: `app/models/card_variant.rb`
+**Depends on**: None
+**Reuses**: `last_seen_at` gravado por `upsert.rb:77,93`
+**Requirement**: SRC-16
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `CardVariant.present` devolve só as variantes vistas no último run `succeeded`
+- [ ] Testes: sem nenhum run `succeeded` → vazio; variante vista no último `succeeded` → presente; variante vista só num run anterior → ausente; run `failed` depois do `succeeded` não altera a presença
+- [ ] Gate quick passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `feat(fonte-apitcg): definir a presença da variante na fonte`
+
+---
+
+### T2: `CatalogQuery` só com o que está presente
+
+**What**: Escopo base, filtros de set e raridade, EXISTS de posse e `filter_options` passam a considerar só variantes presentes; a ordem padrão "mais recentes" continua por `released_on` do set da carta.
+**Where**: `app/queries/catalog_query.rb`
+**Depends on**: T1
+**Reuses**: `VARIANT_FILTERS` (`catalog_query.rb:41,345-358`), ordem padrão (`:66-77`)
+**Requirement**: SRC-15, SRC-16
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:database-reviewer` no plano de execução)
+
+**Done when**:
+
+- [ ] Carta cuja única variante está ausente não aparece na grade, na busca nem em nenhum filtro
+- [ ] Carta com variante presente num set e ausente em outro só casa o filtro do set presente
+- [ ] `filter_options` não lista set sem variante presente
+- [ ] Sem parâmetros, a primeira carta é do set presente com `released_on` mais recente (SRC-15)
+- [ ] `EXPLAIN` das consultas de filtro sem full table scan (Req. 11.3); se precisar, migração só de índice (`import_runs(status, started_at)`, `card_variants(last_seen_at)`) com `db:migrate` e `db/structure.sql` regenerado
+- [ ] Os testes existentes de `test/queries/catalog_*` continuam passando, com fixtures ajustadas para ter um run `succeeded`
+- [ ] Gate quick passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `feat(fonte-apitcg): restringir o catálogo às variantes presentes na fonte`
+
+---
+
+### T3: Detalhe da carta com a variante "fora da fonte"
+
+**What**: `CatalogController#index` pré-carrega só variantes presentes para o tile; `#show` lista as presentes e, com sessão, as ausentes que o usuário tem na coleção ou na wishlist, rotuladas "fora da fonte" na view.
+**Where**: `app/controllers/catalog_controller.rb` (e `app/views/catalog/show.html.erb`, linha da raridade)
+**Depends on**: T1
+**Reuses**: `owned_quantities` / `wishlist_targets` (`catalog_controller.rb:69-106`); `authenticated?` antes de ler `Current.user`
+**Requirement**: SRC-16, SRC-17, SRC-18
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:a11y-architect` no rótulo)
+
+**Done when**:
+
+- [ ] Sem sessão, a variante ausente não aparece no detalhe
+- [ ] Com sessão, e o usuário sem item nela, a variante ausente não aparece
+- [ ] Com sessão, e o usuário com item de coleção ou de wishlist nela, a variante aparece com o texto visível "fora da fonte" e a quantidade intacta
+- [ ] Carta que só tem variantes ausentes, aberta por URL direta, responde 200 para o dono do item e 404 para os demais (o catálogo não a lista)
+- [ ] O tile da grade usa a primeira variante presente
+- [ ] Os testes de `test/integration/card_detail_*` e `test/design/card_detail_*` continuam passando
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): mostrar ao dono a variante fora da fonte no detalhe`
+
+---
+
+### T4: Progresso por números de carta distintos
+
+**What**: `SetProgressQuery` passa a contar números de carta distintos sobre variantes presentes, com o universo do numerador deduzido de `base_set_size`; a view de progresso exibe numerador e denominador (Req. 9.1 emendado).
+**Where**: `app/queries/set_progress_query.rb` (e `app/views/progress/index.html.erb:205-217`)
+**Depends on**: T1
+**Reuses**: `Row#completion_percent` com teto (`set_progress_query.rb:139-150`); contagem de parallels existente
+**Requirement**: SRC-25, SRC-26, SRC-27, SRC-28, SRC-35
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:database-reviewer`)
+
+**Done when**:
+
+- [ ] Set com numeração própria (`base_set_size` < números distintos presentes): o numerador conta só os números com o prefixo do set
+- [ ] Set de reimpressão (`base_set_size` = números distintos presentes): o numerador conta todos os números do set
+- [ ] Base e Box Topper do mesmo número contam uma vez (SRC-28); `alternate_art`, `manga` e `promo` entram no numerador; `parallel` não entra
+- [ ] Nenhum set passa de 100% (SRC-26), inclusive com mais variantes possuídas que o denominador
+- [ ] Parallels possuídos continuam como métrica separada (SRC-27); set sem denominador continua sem percentual (PRG-10)
+- [ ] Set sem variante presente não aparece na lista
+- [ ] A linha do set e a barra usam numerador e denominador do percentual, não mais variantes
+- [ ] Testes de `test/queries/set_progress_*` e `test/design/progress_*` atualizados para a unidade nova, sem remover nenhum caso de teto, parallel ou ordem
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): contar o progresso por números de carta distintos`
+
+---
+
+### T5: Serviço `Ingestion::Remap`
+
+**What**: Serviço que move `collection_items` e `wishlist_items` de variantes ausentes para o candidato único presente (mesma carta, mesmo código de set, mesma classe de arte), numa transação única, e devolve o relatório dos pulados.
+**Where**: `app/services/ingestion/remap.rb`
+**Depends on**: T1
+**Reuses**: `CardVariant.present`; índice único `(user_id, card_variant_id)` como barreira
+**Requirement**: SRC-19, SRC-20, SRC-21, SRC-22, SRC-23
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:database-reviewer` e `ecc:pr-test-analyzer`)
+
+**Done when**:
+
+- [ ] Item com candidato único é movido, com `quantity` / `target_quantity` iguais aos de antes
+- [ ] Item `base` não casa com candidato não-base, e vice-versa; um não-base antigo casa com qualquer não-base novo
+- [ ] Zero candidatos → "sem candidato"; mais de um → "ambíguo"; dois itens do mesmo usuário no mesmo candidato, ou item já existente do usuário no candidato → "colisão" para todos os envolvidos; nenhum destes é movido
+- [ ] Itens de usuários diferentes no mesmo candidato são movidos (a colisão é por usuário)
+- [ ] Segunda execução seguida não move nada (SRC-22)
+- [ ] Sem run `succeeded`, levanta erro com "nenhuma ingestão concluída; rode ingestion:import antes" e nada é movido (SRC-23)
+- [ ] Falha forçada no meio da aplicação faz rollback de todos os movimentos
+- [ ] Contagem de `collection_items`, `wishlist_items` e soma de quantidades idênticas antes e depois
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): remapear coleção e wishlist para as variantes novas`
+
+---
+
+### T6: Rake `ingestion:remap`
+
+**What**: Task rake que chama `Ingestion::Remap`, imprime o total movido e uma linha por item pulado (`card_number`, `variant_code` antigo, motivo) e sai com código 1 no erro de SRC-23.
+**Where**: `lib/tasks/ingestion.rake`
+**Depends on**: T5
+**Reuses**: estilo de saída de `ingestion:import`
+**Requirement**: SRC-19, SRC-21, SRC-23
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] A saída lista os pulados com os três campos e nenhum dado do usuário (e-mail, id)
+- [ ] Sem run `succeeded`, a saída traz a mensagem de SRC-23 e o código de saída é 1
+- [ ] Teste em `test/lib/` carrega a task e confere saída e código de saída nos dois casos
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): expor o remapeamento como ingestion:remap`
+
+---
+
+### T7: `CardImageCache` com o host e os códigos do tcgplayer
+
+**What**: `ALLOWED_HOST` passa a `tcgplayer-cdn.tcgplayer.com`; `VARIANT_CODE_FORMAT` aceita também `tcgplayer:<id>` e `apitcg:<id>`; o nome do arquivo em cache troca `:` por `-`.
+**Where**: `app/services/card_image_cache.rb`
+**Depends on**: None
+**Reuses**: validação de https/porta/extensão existente; checagem de path traversal (`card_image_cache.rb:96`)
+**Requirement**: Req. 11.7 (emendado), AD-012, AD-019
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:security-reviewer`)
+
+**Done when**:
+
+- [ ] URL em `tcgplayer-cdn.tcgplayer.com` com https é aceita; o host antigo e qualquer outro são recusados
+- [ ] `tcgplayer:123` e `apitcg:abc123` são aceitos; `tcgplayer:../x`, `tcgplayer:` e códigos com `/` são recusados
+- [ ] O arquivo em cache de `tcgplayer:123` é `tcgplayer-123.<ext>`, dentro de `storage/card_images/`
+- [ ] Os códigos antigos (`OP01-001_p1`) continuam aceitos e o cache deles continua sendo lido
+- [ ] `GET /card_images/tcgplayer:123` responde como hoje responde um código antigo (teste de integração)
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): servir as imagens do tcgplayer`
+
+---
+
+### T8: `SourceConfig` da apitcg
+
+**What**: `SourceConfig` e `config/ingestion.yml` passam a descrever a apitcg (`base_url`, `page_size` 100, `timeout` 30, `attempts` 3) e a ler `APITCG_API_KEY` do ambiente, levantando erro com "APITCG_API_KEY não configurada" quando ausente ou vazia.
+**Where**: `app/services/ingestion/source_config.rb` (e `config/ingestion.yml`)
+**Depends on**: None
+**Reuses**: `MissingSetting` existente
+**Requirement**: SRC-02, SRC-05
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:security-reviewer`)
+
+**Done when**:
+
+- [ ] Chave ausente e chave vazia levantam o erro com a mensagem de SRC-02
+- [ ] `inspect`, `to_s` e a mensagem de qualquer erro não contêm o valor da chave
+- [ ] As regras de revisão imutável (SHA, tag, referência móvel) e seus testes saem; o teste que exigia `optcgjson` no `config/ingestion.yml` passa a exigir `apitcg`
+- [ ] `.env.example` ganha `APITCG_API_KEY=` vazio
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): configurar a apitcg como fonte e exigir a chave`
+
+---
+
+### T9: `Ingestion::Apitcg::Fetch`
+
+**What**: Busca `/sets` e todas as páginas de `/cards` com `x-api-key`, em sequência, com timeout, 3 tentativas e espera crescente, deduplica por `_id` e grava `storage/ingestion/apitcg-<UTC>.json` atomicamente.
+**Where**: `app/services/ingestion/apitcg/fetch.rb`
+**Depends on**: T8
+**Reuses**: `.part` + `rename` e cliente injetável de `app/services/ingestion/fetch.rb`
+**Requirement**: SRC-01, SRC-03, SRC-04, SRC-05, SRC-32, SRC-33
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:security-reviewer` e `ecc:silent-failure-hunter`)
+
+**Done when**:
+
+- [ ] Com cliente falso de 3 páginas, o snapshot tem `fetched_at`, `sets` e a união dos produtos, e toda requisição levou o header `x-api-key`
+- [ ] Produto repetido entre páginas aparece uma vez (SRC-33)
+- [ ] Timeout ou não-2xx repete até 3 tentativas, com esperas 2s e 4s no `sleeper` falso; a terceira falha levanta `SourceUnavailable` e nenhum arquivo final é gravado (SRC-04)
+- [ ] 401 levanta `KeyRejected` com "chave da apitcg recusada (401)" na primeira resposta, sem nova tentativa (SRC-32)
+- [ ] O valor da chave não aparece no arquivo gravado nem na mensagem de nenhum erro (SRC-05)
+- [ ] Arquivo com o mesmo nome já existente não é sobrescrito
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): buscar a apitcg paginada e gravar o snapshot`
+
+---
+
+### T10: Snapshot real e fixture `apitcg-subset.json`
+
+**What**: Com aval do dono, captura um snapshot real pela T9, recorta dele `spec/fixtures/apitcg-subset.json` com cada caso de SRC-29 e reescreve `spec/verify_fixture.py` para a forma nova.
+**Where**: `spec/fixtures/apitcg-subset.json` (e `spec/verify_fixture.py`)
+**Depends on**: T9
+**Reuses**: verificações atuais de `verify_fixture.py` que continuam válidas (`counter` nulo ≠ 0, só líder tem `life`, líder sem custo, multicor, mais de um atributo)
+**Requirement**: SRC-29, SRC-30
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] **Aval do dono** para a requisição real registrado no commit; a API precisa estar respondendo (AD-019, trade-off 6)
+- [ ] Snapshot completo em `storage/ingestion/` (fora do git), com o `grep` da chave sobre ele dando 0 ocorrências
+- [ ] Fixture versionada com cada caso de SRC-29, recortada por script no scratchpad, sem a chave
+- [ ] `python3 spec/verify_fixture.py` passa, com um check nomeado por caso de SRC-29
+- [ ] Os `⚠️ VERIFICAR` do design resolvidos sobre o snapshot e anotados no commit: forma de `images`, extensão da imagem `large`, separador de `[Trigger]`
+- [ ] Gate full passa (a fixture antiga continua no repositório até a T14); contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test(fonte-apitcg): versionar o recorte do snapshot da apitcg`
+
+---
+
+### T11: `Ingestion::Apitcg::Normalize`
+
+**What**: Normalizador da apitcg que devolve os structs `Normalized*` e a lista de descartes, aplicando as regras de Assumptions para `variant_code`, `art_kind`, código do set, impressão que define a carta, limpeza do efeito, `trigger_text` e `base_set_size`.
+**Where**: `app/services/ingestion/apitcg/normalize.rb`
+**Depends on**: T10
+**Reuses**: structs `NormalizedSet/Card/Variant` (`normalize.rb:27-37`), `CARD_TYPES`, deduplicação de traits
+**Requirement**: SRC-09, SRC-10, SRC-11, SRC-12, SRC-13, SRC-14, SRC-24, SRC-34, SRC-35
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Sobre a fixture: contagens de sets, cartas e variantes batem com as do recorte menos os descartes
+- [ ] `variant_code` `tcgplayer:<id>` e, num produto sem `tcgplayer.id` montado no teste, `apitcg:<_id>` (SRC-09)
+- [ ] `DON!!` não aparece em nenhuma lista, nem nos descartes (SRC-10); produto sem `code` aparece nos descartes com o `_id` (SRC-11)
+- [ ] Um `art_kind` de cada valor da tabela de Assumptions, incluindo sufixo numérico e sufixo igual a um `card_number` → `base` (SRC-13)
+- [ ] Carta com errata entre impressões recebe os dados da impressão base do set de estreia; sem ela, do set mais recente; empate pelo menor `variant_code` (SRC-12)
+- [ ] Efeito sem HTML, `<br>` como `\n`, `trigger_text` preenchido e ausente do efeito; `block_icon` nil
+- [ ] Código do set: `ST-01` → `ST01`, `OP07 PRE` → `OP07-PRE`, `code` nulo com maioria estrita → prefixo, com colisão → slug sem `one-piece-` (SRC-14); `released_on` preenchido
+- [ ] `base_set_size` pelo prefixo num set de numeração própria, por todos os números num set de reimpressão e num set sem nenhum número com o prefixo (SRC-24, SRC-35)
+- [ ] Variante em dois sets fica no primeiro (SRC-34)
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): normalizar o snapshot da apitcg`
+
+---
+
+### T12: Upsert com descartes e origem do snapshot
+
+**What**: `Ingestion::Upsert` recebe os descartes, grava-os em `error_log` como `"discarded"` sem contá-los em `failed_count` nem mudar o status, e grava em `source_revision` o nome do snapshot e o SHA-256.
+**Where**: `app/services/ingestion/upsert.rb`
+**Depends on**: T11
+**Reuses**: `apply`, `finish` e `MAX_LOGGED_ERRORS` existentes
+**Requirement**: SRC-06, SRC-11
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Run só com descartes termina `succeeded`, com `failed_count` 0 e os descartes no `error_log`
+- [ ] Um erro real num registro continua levando a `failed` e ao `error_log` como hoje
+- [ ] `source_revision` é `"<arquivo> sha256:<hex>"`, com o hex conferido contra o arquivo
+- [ ] `upsert_test.rb` passa a usar a fixture nova e os nomes de campo da apitcg
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): registrar descartes e a origem do snapshot no upsert`
+
+---
+
+### T13: `Ingestion::Run` e `ingestion:import SNAPSHOT=`
+
+**What**: `Run.call(snapshot:)` reprocessa um snapshot sem construir o Fetch; sem `snapshot`, busca pela T9; falha na busca gera `ImportRun` `failed` sem escrita no catálogo; o rake lê `SNAPSHOT=` e perde `REUSE_PAYLOAD`.
+**Where**: `app/services/ingestion/run.rb` (e `lib/tasks/ingestion.rake`)
+**Depends on**: T9, T12
+**Reuses**: fluxo atual de `Run.call`
+**Requirement**: SRC-02, SRC-04, SRC-06, SRC-07, SRC-08, SRC-32
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:silent-failure-hunter`)
+
+**Done when**:
+
+- [ ] Com `SNAPSHOT`, a ingestão roda sem `APITCG_API_KEY` no ambiente e sem nenhuma chamada ao cliente HTTP (cliente falso que falha se chamado)
+- [ ] O mesmo snapshot processado duas vezes deixa contagens de cartas, variantes e sets idênticas (SRC-08)
+- [ ] Falha de busca (3 tentativas esgotadas, ou 401) grava `ImportRun` `failed` com o erro e sem nenhuma carta, variante ou set novos (SRC-04, SRC-32)
+- [ ] Chave ausente sem `SNAPSHOT` aborta antes de qualquer requisição e antes de escrever no banco, com a mensagem de SRC-02
+- [ ] Teste em `test/lib/` confere o rake com `SNAPSHOT` (sucesso, código 0) e sem chave (mensagem, código 1)
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): reprocessar snapshot com ingestion:import SNAPSHOT`
+
+---
+
+### T14: Remover a optcgjson e migrar as garantias
+
+**What**: Remove o normalizador, o Fetch e a fixture da optcgjson, e reescreve `guarantees_test.rb` sobre a fixture nova, incluindo o teste de duas ingestões com `collection_item` existente (task 2.6 do `catalogo`).
+**Where**: `test/services/ingestion/guarantees_test.rb` (e remoção de `app/services/ingestion/normalize.rb`, `app/services/ingestion/fetch.rb`, `spec/fixtures/optcgjson-subset.json`)
+**Depends on**: T13
+**Reuses**: casos atuais de `guarantees_test.rb`
+**Requirement**: SRC-08, SRC-18
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE (revisão por `ecc:pr-test-analyzer`)
+
+**Done when**:
+
+- [ ] `grep -rn "optcgjson\|raw.githubusercontent\|5669eab" app lib config test spec` sem ocorrência de código (comentário histórico só com AD)
+- [ ] Duas ingestões seguidas da fixture nova com um `collection_item` e um `wishlist_item` existentes deixam ambos com a mesma quantidade (SRC-18)
+- [ ] Variante presente antes e ausente no snapshot seguinte continua no banco, ausente, com o item de coleção intacto
+- [ ] Nenhum caso de garantia foi removido sem equivalente; a queda da contagem de runs corresponde só aos testes do código removido, listados no commit
+- [ ] Gate build passa (fim da Phase 5 do lado do código de ingestão); contagem de runs registrada
+
+**Tests**: unit
+**Gate**: build
+**Commit**: `refactor(fonte-apitcg): remover a optcgjson e migrar as garantias da ingestão`
+
+---
+
+### T15: `ingestion:compare_snapshots`
+
+**What**: Serviço e rake que cruzam dois snapshots pelo `_id` e informam quantos produtos comuns mudaram de `markets.tcgplayer.id`, sem banco e sem rede.
+**Where**: `app/services/ingestion/apitcg/compare_snapshots.rb` (e `lib/tasks/ingestion.rake`)
+**Depends on**: T10
+**Reuses**: formato do snapshot da T9
+**Requirement**: SRC-31
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Dois snapshots sintéticos com um id trocado → `changed` = 1, com o `_id` e os dois ids
+- [ ] Produto presente só num dos lados não conta como mudança
+- [ ] Teste em `test/lib/` confere o rake com `A=` e `B=` (comuns e mudados na saída) e sem um dos argumentos (código 1 com mensagem)
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(fonte-apitcg): comparar snapshots para medir a estabilidade do tcgplayer.id`
+
+---
+
+### T16: Documentação da troca de fonte
+
+**What**: `CLAUDE.md` e `README.md` passam a descrever a apitcg: tabela P1–P7 (P1, P5, P6 apontando para a AD-019), fixture nova, `APITCG_API_KEY`, `SNAPSHOT=`, `ingestion:remap` e `ingestion:compare_snapshots`.
+**Where**: `CLAUDE.md` (e `README.md`)
+**Depends on**: T14
+**Reuses**: texto atual das seções "Decisões já tomadas" e "Comandos"
+**Requirement**: AD-019
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Cada comando e arquivo citado conferido por `grep` ou `ls` na mesma task
+- [ ] Nenhuma menção à optcgjson como fonte vigente; a AD-001 aparece só como histórico
+- [ ] Gate full passa; contagem de runs igual à da T15
+
+**Tests**: none
+**Gate**: full
+**Commit**: `docs(fonte-apitcg): documentar a apitcg como fonte do catálogo`
+
+---
+
+### T17: Troca real no banco de desenvolvimento
+
+**What**: Com aval do dono, roda `ingestion:import` com a chave real no banco de desenvolvimento (depois de um dump dele), depois `ingestion:remap`, confere os Success Criteria do spec e, com um segundo snapshot 24h ou mais depois do primeiro, roda `ingestion:compare_snapshots`.
+**Where**: `.specs/features/fonte-apitcg/spec.md` (Success Criteria e traceability)
+**Depends on**: T16
+**Reuses**: T6, T13, T15
+**Requirement**: SRC-15, SRC-26, SRC-31
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] **Aval do dono** para a requisição real e para escrever no banco de desenvolvimento, com dump feito antes (`pg_dump` dentro do container), e o caminho do dump registrado
+- [ ] Contagem de `collection_items` e soma de `quantity` idênticas antes e depois de import + remap; relatório do remap registrado sem dado de usuário
+- [ ] Os 85 sets com carta têm `released_on`; a grade abre pelo set lançado por último; nenhum set acima de 100%
+- [ ] `compare_snapshots` entre os dois snapshots registrado; se `changed > 0`, parar e reabrir o SRC-31 com o dono antes do Verifier
+- [ ] Success Criteria do spec marcados com a evidência
+- [ ] Gate build passa; contagem de runs registrada
+
+**Tests**: none
+**Gate**: build
+**Commit**: `docs(fonte-apitcg): registrar a troca real da fonte no banco de desenvolvimento`
+
+---
+
+## Plano de delegação
+
+17 tasks, em três lotes de fases inteiras: **Lote A** = Phases 1–3 (T1–T7), que
+não dependem da API; **Lote B** = Phase 4 (T8–T10), em que a T10 para no aval do
+dono; **Lote C** = Phases 5–6 (T11–T17), em que a T17 para no aval do dono.
+Revisões por agente agnóstico de linguagem, já que não há revisor Ruby:
+`ecc:database-reviewer` em T2, T4 e T5; `ecc:a11y-architect` em T3;
+`ecc:security-reviewer` em T7, T8 e T9; `ecc:silent-failure-hunter` em T9 e T13;
+`ecc:pr-test-analyzer` em T5 e T14. O Verifier roda depois da T17.
+
+---
+
+## Task Granularity Check
+
+| Task | Escopo | Status |
+|---|---|---|
+| T1 | 1 scope | ✅ |
+| T2 | 1 query object | ✅ |
+| T3 | 1 controller + a linha da view que ele alimenta | ⚠️ coeso |
+| T4 | 1 query object + a linha da view que exibe o resultado | ⚠️ coeso (a view quebra se a query mudar sozinha) |
+| T5 | 1 serviço | ✅ |
+| T6 | 1 rake task | ✅ |
+| T7 | 1 serviço | ✅ |
+| T8 | 1 classe + o YAML que ela lê | ⚠️ coeso |
+| T9 | 1 serviço | ✅ |
+| T10 | 1 fixture + o script que a verifica | ⚠️ coeso |
+| T11 | 1 serviço | ✅ |
+| T12 | 1 serviço | ✅ |
+| T13 | 1 serviço + o rake que o chama | ⚠️ coeso |
+| T14 | remoção + 1 arquivo de teste | ⚠️ coeso (a remoção só passa com a migração do teste) |
+| T15 | 1 serviço + o rake que o chama | ⚠️ coeso |
+| T16 | documentação | ✅ |
+| T17 | execução + registro | ✅ |
+
+## Diagram-Definition Cross-Check
+
+| Task | Depends On (task body) | Diagram Shows | Status |
+|---|---|---|---|
+| T1 | None | — | ✅ |
+| T2 | T1 | T1 → T2 | ✅ |
+| T3 | T1 | T1 → T3 | ✅ |
+| T4 | T1 | T1 → T4 | ✅ |
+| T5 | T1 (Phase 1) | fase anterior | ✅ |
+| T6 | T5 | T5 → T6 | ✅ |
+| T7 | None | — | ✅ |
+| T8 | None | — | ✅ |
+| T9 | T8 | T8 → T9 | ✅ |
+| T10 | T9 | T9 → T10 | ✅ |
+| T11 | T10 (Phase 4) | fase anterior | ✅ |
+| T12 | T11 | T11 → T12 | ✅ |
+| T13 | T9 (Phase 4), T12 | T12 → T13 | ✅ |
+| T14 | T13 | T13 → T14 | ✅ |
+| T15 | T10 (Phase 4) | fase anterior | ✅ |
+| T16 | T14 (Phase 5) | fase anterior | ✅ |
+| T17 | T16 | T16 → T17 | ✅ |
+
+## Test Co-location Validation
+
+| Task | Camada | Matriz exige | Task diz | Status |
+|---|---|---|---|---|
+| T1 | Model | unit | unit | ✅ |
+| T2 | Query | unit | unit | ✅ |
+| T3 | Controller + view | integration | integration | ✅ |
+| T4 | Query + view | integration (maior das duas) | integration | ✅ |
+| T5 | Serviço | unit | unit | ✅ |
+| T6 | Rake | integration | integration | ✅ |
+| T7 | Serviço + rota existente | integration (maior das duas) | integration | ✅ |
+| T8 | Serviço de config | unit | unit | ✅ |
+| T9 | Serviço | unit | unit | ✅ |
+| T10 | Fixture | script offline | integration | ✅ (`verify_fixture.py` + gate full) |
+| T11 | Serviço | unit | unit | ✅ |
+| T12 | Serviço | unit | unit | ✅ |
+| T13 | Serviço + rake | integration | integration | ✅ |
+| T14 | Testes de garantia | unit | unit | ✅ |
+| T15 | Serviço + rake | integration | integration | ✅ |
+| T16 | Documentação | none | none | ✅ |
+| T17 | Execução real | none | none | ✅ |

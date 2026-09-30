@@ -228,14 +228,27 @@ decidir o que caçar.
 
 ### Critérios de aceitação
 
-1. O sistema DEVE exibir, para cada set, a quantidade de variantes distintas
-   possuídas e o total de variantes do set.
+1. O sistema DEVE exibir, para cada set, a quantidade de **números de carta
+   distintos** possuídos (o numerador do critério 5) e o denominador do critério 5.
+   *(emendado em 2026-09-30, fonte-apitcg; o texto anterior contava variantes
+   distintas possuídas sobre o total de variantes do set)*
 2. O sistema DEVE exibir o percentual de conclusão por set.
 3. O sistema DEVE permitir navegar de um set para o catálogo já filtrado por
    aquele set.
-4. O cálculo de progresso DEVE contar variantes distintas, não cópias.
-5. O percentual de conclusão de um set DEVE usar como denominador as **variantes
-   base** do set (`baseSetSize` da fonte), não o total de impressões.
+4. O cálculo de progresso DEVE contar **números de carta distintos**, não cópias
+   nem impressões: duas impressões não-parallel do mesmo `card_number` no mesmo
+   set contam uma vez. Só entram variantes presentes na fonte (Req. 1.7).
+   *(emendado em 2026-09-30, fonte-apitcg; na apitcg um mesmo número tem mais de
+   uma impressão não-parallel no set, e contar variantes passaria de 100%)*
+5. O percentual de conclusão de um set DEVE usar como denominador
+   `sets.base_set_size`, derivado na ingestão: os `card_number` distintos do set
+   cujo prefixo é o código do set, quando eles forem maioria estrita entre os
+   números distintos do set; senão, todos os números distintos do set. O
+   numerador conta, do mesmo universo, os números para os quais o usuário possui
+   ao menos uma variante presente do set que não seja parallel. O percentual
+   NUNCA DEVE passar de 100%.
+   *(emendado em 2026-09-30, fonte-apitcg; o texto anterior usava o
+   `baseSetSize` da optcgjson, que a apitcg não publica)*
 6. O sistema DEVE exibir a contagem de parallels possuídos como **métrica
    separada**, nunca somada ao percentual de conclusão.
 7. O sistema DEVE ordenar a lista de sets por uma de duas ordens, escolhida por
