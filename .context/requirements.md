@@ -23,6 +23,11 @@ automaticamente de uma fonte externa, para não digitar milhares de cartas à m�
 
 1. O sistema DEVE oferecer um processo de importação executável sob demanda que
    popule cartas, variantes e sets a partir de uma fonte externa configurável.
+   A fonte vigente é a apitcg (`GET /api/one-piece/cards` e `/sets`), autenticada
+   pelo header `x-api-key` com a chave lida de `APITCG_API_KEY`. SE a chave
+   estiver ausente ENTÃO o processo DEVE abortar antes de qualquer requisição. A
+   chave NUNCA DEVE aparecer em snapshot, log, `error_log` ou saída do processo.
+   *(emendado em 2026-09-29, fonte-apitcg)*
 2. QUANDO a importação encontrar um `card_number` que já existe ENTÃO o sistema
    DEVE atualizar os campos da carta existente em vez de criar duplicata.
 3. QUANDO a importação encontrar uma variante já existente (mesma carta + mesmo
@@ -39,13 +44,21 @@ automaticamente de uma fonte externa, para não digitar milhares de cartas à m�
    que uma carta desapareça da fonte externa.
 8. SE a fonte externa estiver indisponível ENTÃO o sistema DEVE falhar de forma
    explícita, sem deixar o catálogo em estado parcialmente sobrescrito.
-9. A configuração da fonte DEVE fixar uma **revisão imutável** do dataset (commit
-   ou tag), nunca uma referência móvel como `main`. QUANDO a importação for
-   executada ENTÃO o sistema DEVE buscar exatamente a revisão configurada.
-10. O resumo de execução do critério 6 DEVE registrar a revisão utilizada, de modo
-    que seja possível identificar de qual versão da fonte veio cada importação.
-11. A atualização da revisão fixada DEVE ser um ato explícito de quem mantém o
-    sistema, nunca efeito colateral de executar a importação.
+9. A apitcg não publica revisão imutável. QUANDO a importação buscar a fonte ENTÃO
+   o sistema DEVE gravar o payload bruto em `storage/ingestion/apitcg-<UTC>.json`
+   antes de normalizar qualquer registro, e esse **snapshot** cumpre o papel da
+   revisão fixada. A importação executada com `SNAPSHOT=<arquivo>` DEVE
+   reprocessar esse arquivo sem nenhuma requisição de rede.
+   *(emendado em 2026-09-29, fonte-apitcg; o texto anterior exigia uma revisão
+   imutável — commit ou tag — do dataset da optcgjson, AD-001)*
+10. O resumo de execução do critério 6 DEVE registrar a origem utilizada em
+    `import_runs.source_revision`: o nome do arquivo do snapshot e o SHA-256 do
+    conteúdo dele, de modo que seja possível identificar de qual busca veio cada
+    importação. *(emendado em 2026-09-29, fonte-apitcg)*
+11. Buscar uma fonte nova DEVE ser um ato explícito de quem mantém o sistema
+    (`ingestion:import` sem `SNAPSHOT`); reprocessar um snapshot existente NÃO
+    DEVE tocar a rede. Nenhum snapshot é substituído nem apagado pela importação.
+    *(emendado em 2026-09-29, fonte-apitcg)*
 
 ---
 
@@ -285,12 +298,19 @@ não ficar preso à aplicação e poder migrar de uma planilha existente.
    varredura completa de tabela — verificável por plano de execução.
 4. Toda alteração de coleção e wishlist DEVE ter teste automatizado.
 5. O pipeline de ingestão DEVE ter teste automatizado com dados de exemplo
-   fixos (fixture), sem depender de rede.
+   fixos (fixture), sem depender de rede e sem `APITCG_API_KEY`. A fixture é
+   `spec/fixtures/apitcg-subset.json`, recortada de um snapshot real da apitcg e
+   verificada por `python3 spec/verify_fixture.py`.
+   *(emendado em 2026-09-29, fonte-apitcg; substitui
+   `spec/fixtures/optcgjson-subset.json`)*
 6. O sistema DEVE ser executável localmente com um único comando documentado.
 7. As imagens das cartas DEVEM ser entregues ao navegador pela origem da própria
    aplicação. A fonte responde `Cross-Origin-Resource-Policy: same-site`, que faz
    o navegador descartar a imagem em qualquer página fora do domínio dela — um
    `<img>` apontando para a URL original nunca exibe arte (AD-012).
+   Com a apitcg, a arte vem do host `tcgplayer-cdn.tcgplayer.com` e `image_url`
+   usa a imagem `large`; a restrição de host contra SSRF continua, apontada
+   para esse host. *(emendado em 2026-09-29, fonte-apitcg)*
 
 ---
 

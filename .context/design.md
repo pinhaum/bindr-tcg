@@ -422,14 +422,24 @@ Fetch → Normalize → Upsert
 
 Cada estágio isolado, porque cada um falha de forma diferente:
 
-1. **Fetch** — única parte que toca a rede. Busca uma **revisão imutável** da
-   fonte (commit ou tag, nunca `main` — Req. 1.9) e salva o payload bruto em
-   disco antes de processar. Isso permite reprocessar sem refazer a chamada e é
-   o que torna possível o Req. 11.5 (teste sem rede: o payload salvo vira
-   fixture).
+1. **Fetch** — única parte que toca a rede. Busca todas as páginas de
+   `GET /api/one-piece/cards` e `/sets` da apitcg (header `x-api-key`, chave em
+   `APITCG_API_KEY`) e salva o payload bruto em `storage/ingestion/apitcg-<UTC>.json`
+   antes de processar. Esse **snapshot** substitui a revisão imutável (Req. 1.9):
+   `SNAPSHOT=<arquivo>` reprocessa sem rede e o payload salvo vira fixture
+   (Req. 11.5). A variante é identificada por `variant_code = "tcgplayer:<id>"`
+   (`markets.tcgplayer.id`) ou, sem esse id, `"apitcg:<_id>"`. A estabilidade do
+   `tcgplayer.id` entre buscas é `⚠️ VERIFICAR` (AD-019, SRC-31).
+   *(emendado em 2026-09-29, fonte-apitcg; o texto anterior fixava um commit ou
+   tag da optcgjson)*
 2. **Normalize** — mapeia o formato externo para o modelo interno. Todo
    conhecimento sobre o formato da fonte vive **aqui e só aqui**. Trocar de fonte
    de dados deve significar escrever um normalizador novo, nada mais.
+   Fatos do Normalize já confirmados no spec `fonte-apitcg`: `art_kind` sai do
+   último sufixo entre parênteses do nome; o trecho após `[Trigger]` vai para
+   `trigger_text`; `block_icon` é NULL (a fonte não traz); produtos `DON!!` são
+   descartados; os dados da carta vêm de uma única impressão escolhida por regra
+   determinística; o efeito é gravado sem HTML. Os detalhes ficam no spec.
 3. **Upsert** — grava com idempotência por chave natural (`card_number` para
    cartas, `card_id + variant_code` para variantes).
 
@@ -441,8 +451,8 @@ Cada estágio isolado, porque cada um falha de forma diferente:
 | 1.5 erro isolado        | Cada registro em transação própria; falha registrada em `import_runs.error_log` e o loop continua |
 | 1.7 não destrói coleção | A ingestão **não tem operação de delete.** Carta ausente da fonte é marcada, nunca removida       |
 | 1.8 falha explícita     | Se o Fetch falhar, o processo aborta antes de qualquer escrita no banco                           |
-| 1.9 revisão fixada      | Fetch resolve a revisão configurada (commit/tag); referência móvel é rejeitada na configuração    |
-| 1.10 revisão auditável  | A revisão usada é gravada em `import_runs.source_revision` junto ao resumo da execução            |
+| 1.9 snapshot em disco   | Fetch grava `storage/ingestion/apitcg-<UTC>.json`; `SNAPSHOT=<arquivo>` reprocessa sem rede       |
+| 1.10 origem auditável   | Nome do arquivo e SHA-256 são gravados em `import_runs.source_revision` junto ao resumo           |
 
 Sobre 1.7: se uma carta sai da fonte externa, o correto é adicionar um campo de
 "visto na última execução" e sinalizar na UI, não deletar. Deletar uma variante
@@ -450,14 +460,13 @@ apagaria em cascata o registro de coleção do usuário — perda de dado
 irrecuperável a partir de um erro da fonte externa. **Nenhuma foreign key da
 coleção deve usar delete em cascata.**
 
-Sobre 1.9 e 1.10: a fonte é um scraper de terceiro com CI semanal que commita em
-`main` (ADR 001). Puxar `main` significa que uma mudança de formato upstream
-entra na ingestão sem aviso, no meio de uma execução. Fixar commit ou tag torna
-a atualização da fonte uma decisão datada e revisável: quando o pin sobe, o
-diff do payload bruto é inspecionável antes de qualquer escrita. Registrar a
-revisão em `import_runs` é o que permite responder "de qual versão veio este
-dado" depois do fato — sem isso, uma carta errada no catálogo não tem origem
-rastreável.
+Sobre 1.9 e 1.10: a apitcg é uma API viva, sem commit nem tag. O que fixa a
+entrada é o snapshot em disco: buscar é ato explícito, e o arquivo gravado antes
+de qualquer escrita no banco pode ser inspecionado e reprocessado. O nome do
+arquivo e o SHA-256 em `import_runs.source_revision` respondem "de qual busca
+veio este dado" depois do fato. *(emendado em 2026-09-29, fonte-apitcg; o
+raciocínio anterior, sobre fixar commit ou tag da optcgjson, está em AD-001,
+superada pela AD-019)*
 
 ---
 
@@ -486,6 +495,16 @@ Restrição de origem: ver `product.md` §5.1.
 > funcionou em navegador: a fonte responde `Cross-Origin-Resource-Policy:
 > same-site` em toda imagem, e o navegador descarta a resposta fora de
 > `*.onepiece-cardgame.com`. O texto abaixo é o desenho vigente.
+
+> **Emendado em 2026-09-29 (feature `fonte-apitcg`, AD-019).** Com a apitcg, as
+> imagens vêm todas de `tcgplayer-cdn.tcgplayer.com`: `CardImageCache::ALLOWED_HOST`
+> passa a ser esse host, e `image_url` usa a imagem `large`. A restrição de host
+> contra SSRF do parágrafo de invariantes continua, apontada para o novo host.
+> Onde o texto abaixo diz "o da fonte" ou cita `onepiece-cardgame.com`, leia-se
+> esse host. O cache em disco existente, indexado pelo `variant_code` antigo,
+> não é apagado. Se a nova origem também responder com CORP restritivo, o desenho
+> não muda: o fetch continua servidor-a-servidor. `⚠️ VERIFICAR` o cabeçalho de
+> CORP desse host antes de fechar a feature.
 
 **A aplicação serve as imagens, sob demanda, com cache em disco.**
 

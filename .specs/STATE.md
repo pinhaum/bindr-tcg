@@ -8,7 +8,7 @@
 - **Trade-off**: Abre mão de preços (que apitcg tem e optcgjson não) e depende de um scraper de mantenedor único, sem licença declarada. Mitigado pelo estágio Fetch salvar o payload bruto em disco: o catálogo é reconstruível sem rede, e trocar de fonte significa reescrever só o Normalize.
 - **Scope**: Todo o subsistema de ingestão; modelo de `cards` e `card_variants`; Fase 3 (preços) precisará de outra fonte.
 - **Date**: 2026-09-19
-- **Status**: active
+- **Status**: superseded by AD-019 (2026-09-29)
 
 ### AD-002
 - **Decision**: Stack Rails 8 + Hotwire + PostgreSQL.
@@ -144,6 +144,14 @@
 - **Trade-off**: O guarda confere a combinação de declarações, não a largura renderizada: uma regra com as três declarações e um `min-width` grande passaria. O guarda de `catalog_grid_test.rb` (px acima de 360 fora de media query de largura mínima) continua cobrindo esse caso.
 - **Scope**: `conformidade` T15; `test/queries/set_progress_plan_test.rb`.
 - **Date**: 2026-09-28
+- **Status**: active
+
+### AD-019
+- **Decision**: O catálogo passa a ser carregado **só da apitcg** (`GET /api/one-piece/cards` e `/sets`, header `x-api-key`, chave em `APITCG_API_KEY`), em troca completa; a optcgjson deixa de ser fonte. A entrada é fixada por **snapshot em disco** (`storage/ingestion/apitcg-<UTC>.json`), não por revisão imutável: `import_runs.source_revision` guarda o nome do arquivo e o SHA-256, e `SNAPSHOT=<arquivo>` reprocessa sem rede. `variant_code = "tcgplayer:<markets.tcgplayer.id>"`, ou `"apitcg:<_id>"` sem esse id. Imagens vêm de `tcgplayer-cdn.tcgplayer.com` (imagem `large`). Supersede a AD-001 e, com ela, as linhas P1, P5 e P6 (host) da tabela P1–P7.
+- **Reason**: A optcgjson não informa data de lançamento (62 sets com `releaseDate: null`), o que degenera a ordem "mais recentes" do Req. 2.4 em ordem por `card_number`; cobre menos produtos (4.915 variantes contra 7.247) e não traz preço, que a Fase 3 precisará. A apitcg resolve os três pontos. Decisão do dono em 2026-09-29.
+- **Trade-off**: (1) Perde o que a AD-001 protegia: não há `id` de variante estável no formato `OP01-001_p1`, o tipo de arte só existe como sufixo do nome, os dados da carta divergem entre impressões e não há `baseSetSize` (derivado por regra própria no spec). (2) A apitcg não tem revisão imutável; o snapshot em disco a substitui, mas a fonte viva pode mudar entre buscas. (3) As variantes da optcgjson não casam uma a uma com as da apitcg; a coleção existente aponta para elas e a migração tem tratamento próprio no spec. (4) `⚠️ VERIFICAR` (SRC-31): a **estabilidade do `tcgplayer.id` entre buscas** não está provada, um único snapshot não basta. Se o id mudar, a idempotência (Req. 1.4) quebra e o usuário perde o vínculo com a coleção. Comparar dois snapshots com ao menos 24h de diferença antes de fechar a feature. (5) Limite de requisições da apitcg `⚠️ VERIFICAR`; uma rajada de 3 requisições já recebeu 429. (6) **Disponibilidade**: em 2026-09-29, horas depois das medições do spec, `GET /cards` respondeu 500 e `GET /sets` 404 por ao menos 15 minutos, com a chave aceita. A fonte viva é instável; o snapshot em disco (SRC-07) é o único ponto de reprodutibilidade, e a ingestão não pode depender de a API estar no ar para reprocessar.
+- **Scope**: `.specs/features/fonte-apitcg/`, `.context/requirements.md` Req. 1.1, 1.9–1.11, 11.5 e 11.7, `.context/design.md` §5 (Fetch) e §7, todo o subsistema de ingestão e a fixture de teste. Preço continua fora (Fase 3).
+- **Date**: 2026-09-29
 - **Status**: active
 
 ## Handoff
