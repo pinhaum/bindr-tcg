@@ -321,6 +321,26 @@ Regras de execução:
 
 ---
 
+## 8 — Troca da fonte para a apitcg
+
+Plano da feature em `.specs/features/fonte-apitcg/tasks.md` (T1–T17, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [ ] **8.1 Presença na fonte e leitura** — T1–T4 da `fonte-apitcg`
+  - Catálogo, detalhe e progresso leem só variantes presentes no último run
+    `succeeded`; progresso conta números de carta distintos.
+  - _Requisitos: 1.7, 5.1, 5.4, 5.5_
+- [ ] **8.2 Remapeamento da coleção** — T5–T6
+  - _Requisitos: 1.7, 6.5_
+- [ ] **8.3 Imagens do tcgplayer** — T7
+- [ ] **8.4 Busca e snapshot da apitcg** — T8–T10
+  - _Requisitos: 1.1, 11.5_
+- [ ] **8.5 Normalize e Upsert sobre a fixture nova** — T11–T15
+  - _Requisitos: 1.9–1.11, 11.5, 11.7_
+- [ ] **8.6 Fechamento da troca** — T16–T17
+
+---
+
 ## Fora do escopo da Fase 1
 
 Não implemente, mesmo que pareça rápido — cada um destes precisa passar por
