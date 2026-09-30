@@ -480,7 +480,7 @@ class CatalogQuery
     # `card_number` como desempate deixa a paginação determinística: sem ele,
     # ordenar por uma coluna com repetição (ou anulável) pode devolver a mesma
     # carta em duas páginas.
-    scope.order(Arel.sql("#{SORT_EXPRESSIONS.fetch(column)} #{direction} NULLS LAST"), card_number: :asc)
+    scope.order(Arel.sql(SORT_EXPRESSIONS.fetch(column)).public_send(direction).nulls_last, card_number: :asc)
   end
 
   def paginate(scope, page, per_page)
