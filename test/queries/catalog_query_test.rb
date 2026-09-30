@@ -42,6 +42,7 @@ class CatalogQueryTest < ActiveSupport::TestCase
     # ST01 mesmo o `set_id` da carta apontando para OP01 (1402 casos no
     # catálogo real).
     create_variant(@event, "ST01-004", rarity: "UC", card_set: @st01)
+    mark_catalog_present!
   end
 
   def create_card(**attrs)
@@ -49,7 +50,7 @@ class CatalogQueryTest < ActiveSupport::TestCase
   end
 
   def create_variant(card, variant_code, rarity:, card_set:)
-    CardVariant.create!(card: card, set_id: card_set.id, variant_code: variant_code,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, set_id: card_set.id, variant_code: variant_code,
                         rarity: rarity, art_kind: "base")
   end
 
@@ -239,10 +240,13 @@ class CatalogQueryTest < ActiveSupport::TestCase
     @op01.update!(released_on: Date.new(2022, 12, 2))
     op02 = CardSet.create!(code: "OP02", name: "Paramount War", kind: "booster",
                            released_on: Date.new(2023, 3, 10))
-    create_card(card_number: "OP02-002", name: "Ace", card_type: "character", set_id: op02.id)
-    create_card(card_number: "OP02-001", name: "Whitebeard", card_type: "leader", set_id: op02.id)
+    ace = create_card(card_number: "OP02-002", name: "Ace", card_type: "character", set_id: op02.id)
+    whitebeard = create_card(card_number: "OP02-001", name: "Whitebeard", card_type: "leader", set_id: op02.id)
     sem_data = CardSet.create!(code: "PRB01", name: "Premium Booster", kind: "booster")
-    create_card(card_number: "PRB01-001", name: "Sanji", card_type: "character", set_id: sem_data.id)
+    sanji = create_card(card_number: "PRB01-001", name: "Sanji", card_type: "character", set_id: sem_data.id)
+    create_variant(ace, "OP02-002", rarity: "C", card_set: op02)
+    create_variant(whitebeard, "OP02-001", rarity: "L", card_set: op02)
+    create_variant(sanji, "PRB01-001", rarity: "C", card_set: sem_data)
 
     resultado = CatalogQuery.new.call
 
@@ -255,7 +259,8 @@ class CatalogQueryTest < ActiveSupport::TestCase
   test "sort=card_number sem dir volta à ordem numérica crescente" do
     op02 = CardSet.create!(code: "OP02", name: "Paramount War", kind: "booster",
                            released_on: Date.new(2023, 3, 10))
-    create_card(card_number: "OP02-001", name: "Whitebeard", card_type: "leader", set_id: op02.id)
+    whitebeard = create_card(card_number: "OP02-001", name: "Whitebeard", card_type: "leader", set_id: op02.id)
+    create_variant(whitebeard, "OP02-001", rarity: "L", card_set: op02)
 
     resultado = CatalogQuery.new(sort: "card_number").call
 

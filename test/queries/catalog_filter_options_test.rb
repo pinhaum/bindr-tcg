@@ -42,6 +42,7 @@ class CatalogFilterOptionsTest < ActiveSupport::TestCase
 
     # Reimpressão da mesma carta em ST01
     create_variant(@event, "ST01-004", rarity: "R", card_set: @st01)
+    mark_catalog_present!
   end
 
   def create_card(**attrs)
@@ -49,7 +50,7 @@ class CatalogFilterOptionsTest < ActiveSupport::TestCase
   end
 
   def create_variant(card, variant_code, rarity:, card_set:)
-    CardVariant.create!(card: card, set_id: card_set.id, variant_code: variant_code,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, set_id: card_set.id, variant_code: variant_code,
                         rarity: rarity, art_kind: "base")
   end
 
@@ -198,6 +199,9 @@ class CatalogFilterOptionsTest < ActiveSupport::TestCase
     create_card(card_number: "T6", name: "Yellow Card", card_type: "character",
                 colors: [ "Yellow" ], cost: 1, power: 1000, traits: [])
 
+    # SRC-16: carta sem variante presente não aparece; cada uma ganha a sua.
+    Card.where.missing(:card_variants).find_each { |card| create_variant(card, card.card_number, rarity: "C", card_set: @op01) }
+
     result = CatalogQuery.filter_options
     expected_order = [ "Red", "Green", "Blue", "Purple", "Black", "Yellow" ]
 
@@ -215,6 +219,9 @@ class CatalogFilterOptionsTest < ActiveSupport::TestCase
                 colors: [ "Blue" ], cost: 1, power: 1000, traits: [])
     create_card(card_number: "R1", name: "Red", card_type: "character",
                 colors: [ "Red" ], cost: 1, power: 1000, traits: [])
+
+    # SRC-16: carta sem variante presente não aparece; cada uma ganha a sua.
+    Card.where.missing(:card_variants).find_each { |card| create_variant(card, card.card_number, rarity: "C", card_set: @op01) }
 
     result = CatalogQuery.filter_options
 
@@ -280,6 +287,9 @@ class CatalogFilterOptionsTest < ActiveSupport::TestCase
     Card.destroy_all
     create_card(card_number: "W1", name: "White", card_type: "character",
                 colors: [ "White", "Red" ], cost: 1, power: 1000, traits: [])
+
+    # SRC-16: carta sem variante presente não aparece; cada uma ganha a sua.
+    Card.where.missing(:card_variants).find_each { |card| create_variant(card, card.card_number, rarity: "C", card_set: @op01) }
 
     assert_equal [ "Red", "White" ], CatalogQuery.filter_options[:colors]
   end

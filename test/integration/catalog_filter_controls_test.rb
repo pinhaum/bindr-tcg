@@ -16,7 +16,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
       card_number: "OP01-001", name: "Roronoa Zoro",
       card_type: "leader", colors: [ "Red" ], cost: 3, power: 5000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @zoro, set_id: @op01.id, variant_code: "OP01-001",
       rarity: "L", art_kind: "base", image_url: "https://example.test/OP01-001.png"
     )
@@ -26,7 +26,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
       card_number: "OP01-002", name: "Nami",
       card_type: "character", colors: [ "Green" ], cost: 1, power: 1000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @nami, set_id: @op01.id, variant_code: "OP01-002",
       rarity: "C", art_kind: "base", image_url: "https://example.test/OP01-002.png"
     )
@@ -36,7 +36,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
       card_number: "OP02-001", name: "Trafalgar Law",
       card_type: "leader", colors: [ "Red", "Blue" ], cost: 4
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @law, set_id: @op02.id, variant_code: "OP02-001",
       rarity: "SR", art_kind: "base", image_url: "https://example.test/OP02-001.png"
     )
@@ -46,7 +46,7 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
       card_number: "OP02-002", name: "Monkey D. Luffy",
       card_type: "leader", colors: [ "Red" ], cost: 5
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @luffy, set_id: @op02.id, variant_code: "OP02-002",
       rarity: "UC", art_kind: "base", image_url: "https://example.test/OP02-002.png"
     )
@@ -56,10 +56,11 @@ class CatalogFilterControlsTest < ActionDispatch::IntegrationTest
       card_number: "OP02-003", name: "Nico Robin",
       card_type: "character", colors: [ "Purple" ], cost: 2
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @robin, set_id: @op02.id, variant_code: "OP02-003",
       rarity: "SP CARD", art_kind: "base", image_url: "https://example.test/OP02-003.png"
     )
+    mark_catalog_present!
   end
 
   def create_card(**attrs)

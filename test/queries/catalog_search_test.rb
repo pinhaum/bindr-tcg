@@ -38,9 +38,10 @@ class CatalogSearchTest < ActiveSupport::TestCase
     )
 
     [ @zoro, @bellmere, @nami, @homenagem ].each do |card|
-      CardVariant.create!(card: card, set_id: @op01.id,
+      CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, set_id: @op01.id,
                           variant_code: card.card_number, rarity: "C", art_kind: "base")
     end
+    mark_catalog_present!
   end
 
   def create_card(**attrs)
@@ -226,7 +227,7 @@ class CatalogSearchTest < ActiveSupport::TestCase
                   card_type: "event", colors: [ "Red" ], cost: 1)
     end
     demais.each do |c|
-      CardVariant.create!(card: c, set_id: @op01.id, variant_code: c.card_number,
+      CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: c, set_id: @op01.id, variant_code: c.card_number,
                           rarity: "C", art_kind: "base")
     end
 
@@ -244,7 +245,7 @@ class CatalogSearchTest < ActiveSupport::TestCase
                   card_type: "event", colors: [ "Red" ], cost: 1)
     end
     demais.each do |c|
-      CardVariant.create!(card: c, set_id: @op01.id, variant_code: c.card_number,
+      CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: c, set_id: @op01.id, variant_code: c.card_number,
                           rarity: "C", art_kind: "base")
     end
 
@@ -275,7 +276,7 @@ class CatalogSearchTest < ActiveSupport::TestCase
   test "o limiar corta nome que apenas se parece de longe com o termo" do
     parecida = create_card(card_number: "OP01-900", name: "Zoan Morgan",
                            card_type: "character", colors: [ "Red" ], cost: 2)
-    CardVariant.create!(card: parecida, set_id: @op01.id, variant_code: "OP01-900",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: parecida, set_id: @op01.id, variant_code: "OP01-900",
                         rarity: "C", art_kind: "base")
 
     resultado = numbers(search("Zoro"))
@@ -412,9 +413,15 @@ class CatalogSearchTest < ActiveSupport::TestCase
       @set = CardSet.create!(code: "TXN", name: "Sem transação", kind: "booster")
       @card = Card.create!(set_id: @set.id, card_number: "TXN-001",
                            name: "Roronoa Zoro", card_type: "leader", colors: [ "Red" ])
+      # SRC-16: a carta só aparece com variante vista pelo último run succeeded.
+      @run = ImportRun.create!(source: "teste", source_revision: "teste", status: "succeeded",
+                               started_at: CATALOG_SEEN_AT)
+      CardVariant.create!(card: @card, set_id: @set.id, variant_code: "TXN-001", art_kind: "base",
+                          last_seen_at: CATALOG_SEEN_AT)
     end
 
     teardown do
+      ImportRun.where(id: @run.id).delete_all
       CardVariant.where(card_id: @card.id).delete_all
       Card.where(id: @card.id).delete_all
       CardSet.where(id: @set.id).delete_all

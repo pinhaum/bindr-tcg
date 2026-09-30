@@ -146,7 +146,7 @@ class CatalogQuery
   def active_filters = @active_filters
 
   # NAV-08 — valores distintos de cor, tipo de carta, raridade e set presentes
-  # no banco, ordenados, para o formulário de filtro da grade.
+  # na fonte (SRC-16), ordenados, para o formulário de filtro da grade.
   #
   # As chaves e as colunas saem das mesmas constantes que `call` usa para
   # filtrar: um filtro renomeado ou apontado para outra coluna muda aqui junto,
@@ -160,19 +160,21 @@ class CatalogQuery
     rarity_column = VARIANT_FILTERS.fetch(:rarities)
     set_column = VARIANT_FILTERS.fetch(:sets)
 
+    present_cards = Card.where(id: CardVariant.present.select(:card_id))
+
     {
       colors: in_known_order(
         Card.connection.select_values(
-          "SELECT DISTINCT unnest(cards.#{color_column}) AS value FROM cards"
+          present_cards.select(Arel.sql("DISTINCT unnest(cards.#{color_column}) AS value")).to_sql
         ),
         KNOWN_COLORS
       ),
-      card_types: Card.distinct.order(type_column).pluck(type_column),
+      card_types: present_cards.distinct.order(type_column).pluck(type_column),
       rarities: in_known_order(
-        CardVariant.where.not(rarity_column => nil).distinct.pluck(rarity_column),
+        CardVariant.present.where.not(rarity_column => nil).distinct.pluck(rarity_column),
         KNOWN_RARITIES
       ),
-      sets: CardSet.joins(:card_variants).distinct.order(set_column).pluck(set_column, :name)
+      sets: CardSet.where(id: CardVariant.present.select(:set_id)).order(set_column).pluck(set_column, :name)
                    .map { |code, name| { code: code, name: name } }
     }
   end
@@ -226,7 +228,8 @@ class CatalogQuery
     )
   end
 
-  def base_scope = Card.all
+  # SRC-16: só entra a carta com ao menos uma variante presente na fonte.
+  def base_scope = Card.where(id: CardVariant.present.select(:card_id))
 
   # O exato vai à frente da página 1 e **só dela**: da página 2 em diante ele
   # já foi consumido, e reprependê-lo repetiria a mesma carta em toda página
@@ -352,8 +355,10 @@ class CatalogQuery
     end
   end
 
+  # Só variantes presentes (SRC-16): a carta com variante presente em ST01 e
+  # ausente em OP01 casa o filtro de ST01 e não o de OP01.
   def variant_card_ids(column, values)
-    relation = CardVariant.select(:card_id)
+    relation = CardVariant.present.select(:card_id)
     column == :code ? relation.joins(:card_set).where(sets: { code: values }) : relation.where(column => values)
   end
 
@@ -435,6 +440,7 @@ class CatalogQuery
     variants = CardVariant.arel_table
 
     CardVariant
+      .present
       .where(variants[:card_id].eq(Card.arel_table[:id]))
       .where(id: CollectionItem.for_user(@user).owned.select(:card_variant_id))
       .select(1)

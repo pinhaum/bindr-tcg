@@ -142,13 +142,13 @@ T14 → T16 → T17
 
 **Done when**:
 
-- [ ] Carta cuja única variante está ausente não aparece na grade, na busca nem em nenhum filtro
-- [ ] Carta com variante presente num set e ausente em outro só casa o filtro do set presente
-- [ ] `filter_options` não lista set sem variante presente
-- [ ] Sem parâmetros, a primeira carta é do set presente com `released_on` mais recente (SRC-15)
-- [ ] `EXPLAIN` das consultas de filtro sem full table scan (Req. 11.3); se precisar, migração só de índice (`import_runs(status, started_at)`, `card_variants(last_seen_at)`) com `db:migrate` e `db/structure.sql` regenerado
-- [ ] Os testes existentes de `test/queries/catalog_*` continuam passando, com fixtures ajustadas para ter um run `succeeded`
-- [ ] Gate quick passa; contagem de runs registrada
+- [x] Carta cuja única variante está ausente não aparece na grade, na busca nem em nenhum filtro
+- [x] Carta com variante presente num set e ausente em outro só casa o filtro do set presente
+- [x] `filter_options` não lista set sem variante presente
+- [x] Sem parâmetros, a primeira carta é do set presente com `released_on` mais recente (SRC-15)
+- [x] `EXPLAIN` das consultas de filtro sem full table scan (Req. 11.3); se precisar, migração só de índice (`import_runs(status, started_at)`, `card_variants(last_seen_at)`) com `db:migrate` e `db/structure.sql` regenerado
+- [x] Os testes existentes de `test/queries/catalog_*` continuam passando, com fixtures ajustadas para ter um run `succeeded`
+- [x] Gate quick passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: quick

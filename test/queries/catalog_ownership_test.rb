@@ -46,6 +46,7 @@ class CatalogOwnershipTest < ActiveSupport::TestCase
     @alheia = create_card("OP01-t9e", "Bell-mère", colors: [ "Green" ], cost: 2)
     @v_alheia = create_variant(@alheia, "OP01-t9e")
     own(@outro, @v_alheia, 5)
+    mark_catalog_present!
   end
 
   def create_card(number, name, **attrs)
@@ -54,7 +55,7 @@ class CatalogOwnershipTest < ActiveSupport::TestCase
   end
 
   def create_variant(card, code)
-    CardVariant.create!(card: card, set_id: @set.id, variant_code: code,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, set_id: @set.id, variant_code: code,
                         rarity: "C", art_kind: "base")
   end
 

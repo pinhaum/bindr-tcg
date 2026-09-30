@@ -9,6 +9,7 @@ class CatalogTileTest < ActionDispatch::IntegrationTest
   setup do
     @user = User.create!(email: "conformidade-t3@example.com", password: PASSWORD)
     @set = CardSet.create!(code: "OPct3", name: "Romance Dawn", kind: "booster")
+    mark_catalog_present!
   end
 
   def create_card(number:, name:)
@@ -17,7 +18,7 @@ class CatalogTileTest < ActionDispatch::IntegrationTest
   end
 
   def create_variant(card, code, rarity: "C")
-    CardVariant.create!(card: card, card_set: @set, variant_code: code, rarity: rarity, art_kind: "base")
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: @set, variant_code: code, rarity: rarity, art_kind: "base")
   end
 
   def sign_in(user = @user)

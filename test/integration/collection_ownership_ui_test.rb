@@ -50,6 +50,7 @@ class CollectionOwnershipUiTest < ActionDispatch::IntegrationTest
     @variantes_multiplas = [ "OP01-t8b", "OP01-t8b_p1", "OP01-t8b_p2" ].map do |code|
       create_variant(@multipla, code)
     end
+    mark_catalog_present!
   end
 
   def create_card(number:, name:)
@@ -58,7 +59,7 @@ class CollectionOwnershipUiTest < ActionDispatch::IntegrationTest
   end
 
   def create_variant(card, code)
-    CardVariant.create!(card: card, card_set: @set, variant_code: code,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: @set, variant_code: code,
       rarity: "C", art_kind: "base")
   end
 

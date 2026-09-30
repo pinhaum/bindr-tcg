@@ -67,12 +67,13 @@ class ProgressUiTest < ActionDispatch::IntegrationTest
     c1 = variant(@set_c, "p5c1", "base")
     variant(@set_c, "p5c2", "base")
     CollectionItem.create!(user: @luffy, card_variant: c1, quantity: 1)
+    mark_catalog_present!
   end
 
   def variant(set, suffix, art_kind)
     card = Card.create!(card_set: set, card_number: "OP05-#{suffix}", name: "Carta #{suffix}",
                         card_type: "character", colors: [ "Red" ])
-    CardVariant.create!(card: card, card_set: set, variant_code: suffix,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: suffix,
                         rarity: "C", art_kind: art_kind)
   end
 

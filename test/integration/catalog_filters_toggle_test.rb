@@ -12,7 +12,7 @@ class CatalogFiltersToggleTest < ActionDispatch::IntegrationTest
       card_number: "OP01-001", name: "Roronoa Zoro",
       card_type: "leader", colors: [ "Red" ], cost: 3, power: 5000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @zoro, set_id: @op01.id, variant_code: "OP01-001",
       rarity: "L", art_kind: "base", image_url: "https://example.test/OP01-001.png"
     )
@@ -21,7 +21,7 @@ class CatalogFiltersToggleTest < ActionDispatch::IntegrationTest
       card_number: "OP01-002", name: "Nami",
       card_type: "character", colors: [ "Green" ], cost: 1, power: 1000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @nami, set_id: @op01.id, variant_code: "OP01-002",
       rarity: "C", art_kind: "base", image_url: "https://example.test/OP01-002.png"
     )
@@ -30,10 +30,11 @@ class CatalogFiltersToggleTest < ActionDispatch::IntegrationTest
       card_number: "OP01-003", name: "Sanji",
       card_type: "leader", colors: [ "Blue" ], cost: 2, power: 2000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @sanji, set_id: @op01.id, variant_code: "OP01-003",
       rarity: "SR", art_kind: "base", image_url: "https://example.test/OP01-003.png"
     )
+    mark_catalog_present!
   end
 
   def create_card(**attrs)

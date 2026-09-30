@@ -22,7 +22,7 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
       card_number: "OP01-001", name: "Roronoa Zoro",
       card_type: "leader", colors: [ "Red" ], cost: 3, power: 5000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @zoro, set_id: @op01.id, variant_code: "OP01-001",
       rarity: "L", art_kind: "base", image_url: "https://example.test/OP01-001.png"
     )
@@ -31,7 +31,7 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
       card_number: "OP01-002", name: "Nami",
       card_type: "character", colors: [ "Green" ], cost: 1, power: 1000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @nami, set_id: @op01.id, variant_code: "OP01-002",
       rarity: "C", art_kind: "base", image_url: "https://example.test/OP01-002.png"
     )
@@ -40,10 +40,11 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
       card_number: "OP01-003", name: "Sanji",
       card_type: "leader", colors: [ "Blue" ], cost: 2, power: 2000
     )
-    CardVariant.create!(
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @sanji, set_id: @op01.id, variant_code: "OP01-003",
       rarity: "SR", art_kind: "base", image_url: "https://example.test/OP01-003.png"
     )
+    mark_catalog_present!
   end
 
   def create_card(**attrs)
@@ -229,10 +230,12 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
     # Cria 35 cartas para ultrapassar uma página (padrão 30 por página)
     @op01.update(name: "Page Test")
     35.times do |i|
-      create_card(
+      card = create_card(
         card_number: "OP01-#{'%03d' % (i + 100)}", name: "Card #{i}",
         card_type: "character", colors: [ "Red" ], cost: 1, power: 1000
       )
+      CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, set_id: @op01.id,
+                          variant_code: card.card_number, rarity: "C", art_kind: "base")
     end
 
     # Primeira página tem 30 cartas, mas o total de "Red" é 35 + 1 (Zoro) = 36
@@ -366,7 +369,7 @@ class CatalogStatusLineTest < ActionDispatch::IntegrationTest
     set = CardSet.create!(code: "OPcnf10", name: "Romance Dawn", kind: "booster")
     card = Card.create!(card_set: set, card_number: "OPcnf10-001", name: "Nami",
       card_type: "character", colors: [ "Green" ], cost: 1, power: 1000)
-    variant = CardVariant.create!(card: card, card_set: set, variant_code: "OPcnf10-001",
+    variant = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: "OPcnf10-001",
       rarity: "C", art_kind: "base")
 
     post session_path, params: { email: user.email, password: PASSWORD }

@@ -24,20 +24,21 @@ class CatalogGridTest < ActionDispatch::IntegrationTest
     @law = create_card(card_number: "OP01-003", name: "Trafalgar Law",
                        card_type: "leader", colors: [ "Red", "Blue" ], cost: 4)
 
-    @com_imagem = CardVariant.create!(
+    @com_imagem = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @zoro, set_id: @op01.id, variant_code: "OP01-001", rarity: "L",
       art_kind: "base", image_url: "https://example.test/OP01-001.png"
     )
     # Variante sem `image_url`: é o caso em que o placeholder do Req. 2.3 é a
     # única coisa que o usuário vê. AD-004 depende disso — a arte é hotlink de
     # terceiro e pode sumir sem aviso.
-    @sem_imagem = CardVariant.create!(
+    @sem_imagem = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @nami, set_id: @op01.id, variant_code: "OP01-002", rarity: "C",
       art_kind: "base", image_url: nil
     )
-    CardVariant.create!(card: @law, set_id: @op01.id, variant_code: "OP01-003",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @law, set_id: @op01.id, variant_code: "OP01-003",
                         rarity: "L", art_kind: "base",
                         image_url: "https://example.test/OP01-003.png")
+    mark_catalog_present!
   end
 
   def create_card(**attrs) = Card.create!(set_id: @op01.id, **attrs)

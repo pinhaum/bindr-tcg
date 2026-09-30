@@ -12,9 +12,10 @@ class CodeIdentifiersUiTest < ActionDispatch::IntegrationTest
     @set = CardSet.create!(code: "OPcd", name: "Romance Dawn", kind: "booster")
     @card = Card.create!(card_set: @set, card_number: "OP01-cd1", name: "Nami",
                          card_type: "character", colors: [ "Blue" ], cost: 1, power: 2000)
-    @variant = CardVariant.create!(card: @card, card_set: @set, variant_code: "OP01-cd1_p1",
+    @variant = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "OP01-cd1_p1",
                                    rarity: "C", art_kind: "base")
     @rules = Stylesheet.rules
+    mark_catalog_present!
   end
 
   def sign_in = post(session_path, params: { email: @user.email, password: PASSWORD })

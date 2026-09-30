@@ -14,7 +14,7 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
       card_number: "OP01-001", name: "Roronoa Zoro",
       card_type: "leader", colors: [ "Red" ], cost: 3, power: 5000, set_id: @op01.id
     )
-    @zoro_variant = CardVariant.create!(
+    @zoro_variant = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @zoro, set_id: @op01.id, variant_code: "OP01-001",
       rarity: "L", art_kind: "base", image_url: "https://example.test/OP01-001.png"
     )
@@ -24,7 +24,7 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
       card_number: "OP01-002", name: "Nami",
       card_type: "character", colors: [ "Green" ], cost: 1, power: 1000, set_id: @op01.id
     )
-    @nami_variant = CardVariant.create!(
+    @nami_variant = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @nami, set_id: @op01.id, variant_code: "OP01-002",
       rarity: "C", art_kind: "base", image_url: "https://example.test/OP01-002.png"
     )
@@ -34,7 +34,7 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
       card_number: "OP01-003", name: "Trafalgar Law",
       card_type: "leader", colors: [ "Blue" ], cost: 4, power: 0, set_id: @op01.id
     )
-    @law_variant = CardVariant.create!(
+    @law_variant = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT,
       card: @law, set_id: @op01.id, variant_code: "OP01-003",
       rarity: "SR", art_kind: "base", image_url: "https://example.test/OP01-003.png"
     )
@@ -44,6 +44,7 @@ class CatalogOwnershipFilterTest < ActionDispatch::IntegrationTest
 
     # Usuário sem nenhuma cópia (para isolamento)
     @other_user = User.create!(email: "law@example.com", password: "password")
+    mark_catalog_present!
   end
 
   # --- NAV-12: Chips com sessão ---
