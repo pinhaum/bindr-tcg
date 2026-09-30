@@ -231,15 +231,15 @@ T14 → T16 → T17
 
 **Done when**:
 
-- [ ] Item com candidato único é movido, com `quantity` / `target_quantity` iguais aos de antes
-- [ ] Item `base` não casa com candidato não-base, e vice-versa; um não-base antigo casa com qualquer não-base novo
-- [ ] Zero candidatos → "sem candidato"; mais de um → "ambíguo"; dois itens do mesmo usuário no mesmo candidato, ou item já existente do usuário no candidato → "colisão" para todos os envolvidos; nenhum destes é movido
-- [ ] Itens de usuários diferentes no mesmo candidato são movidos (a colisão é por usuário)
-- [ ] Segunda execução seguida não move nada (SRC-22)
-- [ ] Sem run `succeeded`, levanta erro com "nenhuma ingestão concluída; rode ingestion:import antes" e nada é movido (SRC-23)
-- [ ] Falha forçada no meio da aplicação faz rollback de todos os movimentos
-- [ ] Contagem de `collection_items`, `wishlist_items` e soma de quantidades idênticas antes e depois
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Item com candidato único é movido, com `quantity` / `target_quantity` iguais aos de antes
+- [x] Item `base` não casa com candidato não-base, e vice-versa; um não-base antigo casa com qualquer não-base novo
+- [x] Zero candidatos → "sem candidato"; mais de um → "ambíguo"; dois itens do mesmo usuário no mesmo candidato, ou item já existente do usuário no candidato → "colisão" para todos os envolvidos; nenhum destes é movido
+- [x] Itens de usuários diferentes no mesmo candidato são movidos (a colisão é por usuário)
+- [x] Segunda execução seguida não move nada (SRC-22)
+- [x] Sem run `succeeded`, levanta erro com "nenhuma ingestão concluída; rode ingestion:import antes" e nada é movido (SRC-23)
+- [x] Falha forçada no meio da aplicação faz rollback de todos os movimentos
+- [x] Contagem de `collection_items`, `wishlist_items` e soma de quantidades idênticas antes e depois
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
