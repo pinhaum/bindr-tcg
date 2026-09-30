@@ -53,6 +53,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
       instance_eval(File.read(Rails.root.join("config/routes.rb"))
                         .sub(/\ARails\.application\.routes\.draw do\n/, "").sub(/end\n\z/, ""))
     end
+    mark_catalog_present!
   end
 
   teardown do
@@ -63,7 +64,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     set = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")
     card = Card.create!(card_set: set, card_number: "OP01-001", name: "Roronoa Zoro",
                         card_type: "leader", colors: [ "Red" ], cost: 3, power: 5000)
-    CardVariant.create!(card: card, card_set: set, variant_code: "OP01-001",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, card_set: set, variant_code: "OP01-001",
                         rarity: "L", art_kind: "base")
     card
   end

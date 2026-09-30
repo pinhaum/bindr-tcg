@@ -8,10 +8,11 @@ class CardDetailLayoutTest < ActionDispatch::IntegrationTest
                          card_type: "character", colors: [ "Red" ], power: 5000,
                          effect_text: "Quando entra em jogo, este personagem ganha +1/+1.",
                          trigger_text: "Ao atacar, você pode sacrificar outro personagem.")
-    CardVariant.create!(card: @card, set_id: @set.id, variant_code: "OP01-001",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, set_id: @set.id, variant_code: "OP01-001",
                         rarity: "R", art_kind: "base")
-    CardVariant.create!(card: @card, set_id: @set.id, variant_code: "OP01-001_p1",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, set_id: @set.id, variant_code: "OP01-001_p1",
                         rarity: "SEC", art_kind: "alternate_art")
+    mark_catalog_present!
   end
 
   # T6 (conformidade), CNF-14: name e number saíram de `.card-detail__data`

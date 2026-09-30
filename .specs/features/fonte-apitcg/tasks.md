@@ -171,13 +171,13 @@ T14 → T16 → T17
 
 **Done when**:
 
-- [ ] Sem sessão, a variante ausente não aparece no detalhe
-- [ ] Com sessão, e o usuário sem item nela, a variante ausente não aparece
-- [ ] Com sessão, e o usuário com item de coleção ou de wishlist nela, a variante aparece com o texto visível "fora da fonte" e a quantidade intacta
-- [ ] Carta que só tem variantes ausentes, aberta por URL direta, responde 200 para o dono do item e 404 para os demais (o catálogo não a lista)
-- [ ] O tile da grade usa a primeira variante presente
-- [ ] Os testes de `test/integration/card_detail_*` e `test/design/card_detail_*` continuam passando
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Sem sessão, a variante ausente não aparece no detalhe
+- [x] Com sessão, e o usuário sem item nela, a variante ausente não aparece
+- [x] Com sessão, e o usuário com item de coleção ou de wishlist nela, a variante aparece com o texto visível "fora da fonte" e a quantidade intacta
+- [x] Carta que só tem variantes ausentes, aberta por URL direta, responde 200 para o dono do item e 404 para os demais (o catálogo não a lista)
+- [x] O tile da grade usa a primeira variante presente
+- [x] Os testes de `test/integration/card_detail_*` e `test/design/card_detail_*` continuam passando
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full

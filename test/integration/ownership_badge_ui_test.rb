@@ -12,10 +12,11 @@ class OwnershipBadgeUiTest < ActionDispatch::IntegrationTest
     @card = Card.create!(card_set: set, card_number: "OP01-bg1", name: "Nami",
                          card_type: "character", colors: [ "Blue" ], cost: 1, power: 2000)
     @duas, @zerada, @sem_registro = %w[OP01-bg1 OP01-bg1_p1 OP01-bg1_p2].map do |code|
-      CardVariant.create!(card: @card, card_set: set, variant_code: code, rarity: "C", art_kind: "base")
+      CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: set, variant_code: code, rarity: "C", art_kind: "base")
     end
 
     post session_path, params: { email: @user.email, password: PASSWORD }
+    mark_catalog_present!
   end
 
   def control(variant) = "#ownership_card_variant_#{variant.id}"

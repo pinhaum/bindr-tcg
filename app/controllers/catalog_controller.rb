@@ -30,16 +30,32 @@ class CatalogController < ApplicationController
     # de `Card`, não uma relação. `preload` aceita o array e resolve as
     # variantes em **uma** consulta. Sem isto, o tile dispararia uma consulta
     # por carta só para descobrir quantas impressões ela tem.
+    #
+    # Só as variantes presentes na fonte (SRC-16): o tile mostra a primeira
+    # delas, e o selo soma a posse só sobre elas.
     ActiveRecord::Associations::Preloader.new(
-      records: @result.records, associations: :card_variants
+      records: @result.records, associations: :card_variants, scope: CardVariant.present
     ).call
 
     @owned_quantities = owned_quantities(@result.records.flat_map(&:card_variants))
   end
 
+  # SRC-16/SRC-17 — o detalhe lista as variantes presentes na fonte e, para o
+  # usuário da sessão, as ausentes que ele tem na coleção ou na wishlist, que a
+  # view rotula "fora da fonte". Carta cujas variantes ficaram todas ocultas é
+  # 404: o catálogo não a lista, e o detalhe não a revela a quem não tem item.
+  # Carta sem variante nenhuma continua abrindo o detalhe, como antes.
   def show
     @card = Card.includes(card_variants: :card_set).find_by!(card_number: params[:id])
-    @variants = @card.card_variants.sort_by { |variant| variant.variant_code }
+    present_ids = @card.card_variants.present.pluck(:id).to_set
+    absent = @card.card_variants.reject { |variant| present_ids.include?(variant.id) }
+    @absent_variant_ids = held_variant_ids(absent)
+
+    @variants = @card.card_variants
+                     .select { |variant| present_ids.include?(variant.id) || @absent_variant_ids.include?(variant.id) }
+                     .sort_by { |variant| variant.variant_code }
+    raise ActiveRecord::RecordNotFound if @variants.empty? && @card.card_variants.any?
+
     @owned_quantities = owned_quantities(@variants)
     @wishlist_targets = wishlist_targets(@variants)
   end
@@ -96,6 +112,19 @@ class CatalogController < ApplicationController
     # dizer "Quero esta" para uma impressão que já está na lista do usuário, com
     # a página em 200, e um teste morre. A redundância existe para que uma
     # reordenação futura de `#show` não reintroduza o defeito silencioso.
+    # Os ids, entre `variants`, em que o usuário da sessão tem item de coleção
+    # ou de wishlist. `authenticated?` antes de ler `Current.user`, pelo mesmo
+    # motivo de `#owned_quantities`; para o anônimo, `for_user(nil)` é `none`.
+    # Item de coleção com quantidade zero conta: continua sendo registro do
+    # usuário sobre aquela impressão.
+    def held_variant_ids(variants)
+      authenticated?
+      ids = variants.map(&:id)
+
+      (CollectionItem.for_user(Current.user).where(card_variant_id: ids).pluck(:card_variant_id) +
+        WishlistItem.for_user(Current.user).where(card_variant_id: ids).pluck(:card_variant_id)).to_set
+    end
+
     def wishlist_targets(variants)
       authenticated?
 

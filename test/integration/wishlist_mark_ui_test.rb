@@ -26,16 +26,17 @@ class WishlistMarkUiTest < ActionDispatch::IntegrationTest
 
     @card = Card.create!(card_set: @set, card_number: "WU13-a", name: "Roronoa Zoro",
       card_type: "character", colors: [ "Green" ], cost: 3, power: 5000)
-    @base = CardVariant.create!(card: @card, card_set: @set, variant_code: "WU13-a",
+    @base = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "WU13-a",
       rarity: "C", art_kind: "base")
-    @parallel = CardVariant.create!(card: @card, card_set: @set, variant_code: "WU13-a_p1",
+    @parallel = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "WU13-a_p1",
       rarity: "SR", art_kind: "parallel")
 
     # Carta de variante única, para a asserção sobre a grade.
     @solo_card = Card.create!(card_set: @set, card_number: "WU13-b", name: "Nami",
       card_type: "character", colors: [ "Blue" ], cost: 1, power: 1000)
-    @solo = CardVariant.create!(card: @solo_card, card_set: @set, variant_code: "WU13-b",
+    @solo = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @solo_card, card_set: @set, variant_code: "WU13-b",
       rarity: "C", art_kind: "base")
+    mark_catalog_present!
   end
 
   def sign_in(user = @user)

@@ -8,12 +8,13 @@ class CardDetailHeroImageTest < ActionDispatch::IntegrationTest
     @card = Card.create!(set_id: @set.id, card_number: "OP01-001", name: "Roronoa Zoro",
                          card_type: "character", colors: [ "Red" ], power: 5000)
     # O detalhe lista as variantes por variant_code: "OP01-001" vem antes de "OP01-001_p1".
-    CardVariant.create!(card: @card, set_id: @set.id, variant_code: "OP01-001_p1",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, set_id: @set.id, variant_code: "OP01-001_p1",
                         rarity: "SEC", art_kind: "alternate_art",
                         image_url: "https://example.com/OP01-001_p1.png")
-    CardVariant.create!(card: @card, set_id: @set.id, variant_code: "OP01-001",
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, set_id: @set.id, variant_code: "OP01-001",
                         rarity: "R", art_kind: "base",
                         image_url: "https://example.com/OP01-001.png")
+    mark_catalog_present!
   end
 
   test "a miniatura da primeira variante listada fica ao lado do título, com alt que nomeia carta e variante" do

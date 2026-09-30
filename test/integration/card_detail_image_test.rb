@@ -11,9 +11,10 @@ class CardDetailImageTest < ActionDispatch::IntegrationTest
     @set = CardSet.create!(code: "OPt6", name: "Romance Dawn", kind: "booster")
     @card = Card.create!(card_set: @set, card_number: "OP01-t6", name: "Nami",
       card_type: "character", colors: [ "Blue" ], cost: 1, power: 1000)
-    @variant = CardVariant.create!(card: @card, card_set: @set, variant_code: "OP01-t6",
+    @variant = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "OP01-t6",
       rarity: "R", art_kind: "base", illustrator: "Eiichiro Oda",
       image_url: "https://example.test/OP01-t6.png")
+    mark_catalog_present!
   end
 
   def sign_in(user = @user)
@@ -56,7 +57,7 @@ class CardDetailImageTest < ActionDispatch::IntegrationTest
 
   test "carta com duas variantes mostra o selo da primeira variante (1 cópia), não a soma (1+3=4)" do
     sign_in
-    second = CardVariant.create!(card: @card, card_set: @set, variant_code: "OP01-t6_p1",
+    second = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "OP01-t6_p1",
       rarity: "SR", art_kind: "parallel", illustrator: "Oda",
       image_url: "https://example.test/OP01-t6_p1.png")
     CollectionItem.create!(user: @user, card_variant: @variant, quantity: 1)

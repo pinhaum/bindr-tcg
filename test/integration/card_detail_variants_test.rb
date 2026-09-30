@@ -16,12 +16,13 @@ class CardDetailVariantsTest < ActionDispatch::IntegrationTest
     @card = Card.create!(card_set: @set, card_number: "OP01-t8v", name: "Nami",
                          card_type: "character", colors: [ "Blue" ], cost: 1, power: 2000)
 
-    @base = CardVariant.create!(card: @card, card_set: @set, variant_code: "OP01-t8v",
+    @base = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "OP01-t8v",
                                 rarity: "SR", art_kind: "base")
-    @parallel = CardVariant.create!(card: @card, card_set: @set, variant_code: "OP01-t8v_p1",
+    @parallel = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "OP01-t8v_p1",
                                     rarity: "SEC", art_kind: "parallel")
-    @promo = CardVariant.create!(card: @card, card_set: @set, variant_code: "OP01-t8v_p2",
+    @promo = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "OP01-t8v_p2",
                                  rarity: "SP CARD", art_kind: "promo")
+    mark_catalog_present!
   end
 
   def sign_in = post(session_path, params: { email: @user.email, password: PASSWORD })

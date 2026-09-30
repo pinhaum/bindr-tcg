@@ -9,12 +9,13 @@ require_relative "../design/catalog_grid_canvas_test"
 class CardDetailHeaderTest < ActionDispatch::IntegrationTest
   setup do
     @op01 = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")
+    mark_catalog_present!
   end
 
   def create_card(**attrs) = Card.create!(set_id: @op01.id, **attrs)
 
   def add_variant(card, code, rarity:, card_set: @op01)
-    CardVariant.create!(card: card, set_id: card_set.id, variant_code: code,
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: card, set_id: card_set.id, variant_code: code,
                         rarity: rarity, art_kind: "base")
   end
 

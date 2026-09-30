@@ -27,8 +27,9 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
     # Criar uma variante para usar em detalhe
     @card = Card.create!(card_set: @set, card_number: "OP01-001", name: "Luffy",
                          card_type: "character", colors: [ "Red" ])
-    @variant = CardVariant.create!(card: @card, card_set: @set, variant_code: "base",
+    @variant = CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: @card, card_set: @set, variant_code: "base",
                                    rarity: "C", art_kind: "base")
+    mark_catalog_present!
   end
 
   def sign_in(user = nil)

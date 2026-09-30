@@ -235,6 +235,13 @@
                 </dd>
               </div>
             <% end %>
+            <%# SRC-17 — ausente da fonte, visível só ao dono do item. Texto, não só cor. %>
+            <% if @absent_variant_ids.include?(variant.id) %>
+              <div>
+                <dt>Fonte</dt>
+                <dd>fora da fonte</dd>
+              </div>
+            <% end %>
             <div>
               <dt>Set</dt>
               <dd class="variant__set">
