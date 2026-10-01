@@ -24,7 +24,7 @@ module Ingestion
 
     def initialize(source:, base_url:, page_size:, timeout:, attempts:, api_key: nil)
       @source = presence!(source, "source")
-      @base_url = presence!(base_url, "base_url")
+      @base_url = https!(presence!(base_url, "base_url"))
       @page_size = positive_integer!(page_size, "page_size")
       @timeout = positive_integer!(timeout, "timeout")
       @attempts = positive_integer!(attempts, "attempts")
@@ -57,6 +57,14 @@ module Ingestion
       raise MissingSetting, "configuração da fonte sem `#{name}`" if normalized.empty?
 
       normalized
+    end
+
+    # A chave vai no header de toda requisição; por http ela trafegaria em
+    # texto claro.
+    def https!(url)
+      raise MissingSetting, "configuração da fonte com `base_url` sem https" unless url.start_with?("https://")
+
+      url
     end
 
     def positive_integer!(value, name)

@@ -85,6 +85,15 @@ module Ingestion
       assert_match(/base_url/, erro.message)
     end
 
+    test "base_url sem https é recusada, porque a chave vai em todo header" do
+      erro = assert_raises(SourceConfig::MissingSetting) do
+        SourceConfig.new(source: "apitcg", base_url: "http://apitcg.com/api/one-piece", page_size: 100,
+                         timeout: 30, attempts: 3)
+      end
+
+      assert_match(/https/, erro.message)
+    end
+
     test "limite que não é inteiro positivo é recusado" do
       [ 0, -1, "trinta", nil ].each do |invalido|
         assert_raises(SourceConfig::MissingSetting, "aceitou timeout #{invalido.inspect}") do

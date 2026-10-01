@@ -360,13 +360,13 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Com cliente falso de 3 páginas, o snapshot tem `fetched_at`, `sets` e a união dos produtos, e toda requisição levou o header `x-api-key`
-- [ ] Produto repetido entre páginas aparece uma vez (SRC-33)
-- [ ] Timeout ou não-2xx repete até 3 tentativas, com esperas 2s e 4s no `sleeper` falso; a terceira falha levanta `SourceUnavailable` e nenhum arquivo final é gravado (SRC-04)
-- [ ] 401 levanta `KeyRejected` com "chave da apitcg recusada (401)" na primeira resposta, sem nova tentativa (SRC-32)
-- [ ] O valor da chave não aparece no arquivo gravado nem na mensagem de nenhum erro (SRC-05)
-- [ ] Arquivo com o mesmo nome já existente não é sobrescrito
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Com cliente falso de 3 páginas, o snapshot tem `fetched_at`, `sets` e a união dos produtos, e toda requisição levou o header `x-api-key`
+- [x] Produto repetido entre páginas aparece uma vez (SRC-33)
+- [x] Timeout ou não-2xx repete até 3 tentativas, com esperas 2s e 4s no `sleeper` falso; a terceira falha levanta `SourceUnavailable` e nenhum arquivo final é gravado (SRC-04)
+- [x] 401 levanta `KeyRejected` com "chave da apitcg recusada (401)" na primeira resposta, sem nova tentativa (SRC-32)
+- [x] O valor da chave não aparece no arquivo gravado nem na mensagem de nenhum erro (SRC-05)
+- [x] Arquivo com o mesmo nome já existente não é sobrescrito
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
