@@ -70,4 +70,19 @@ class IngestionRemapTaskTest < ActiveSupport::TestCase
     assert_includes out + err, "nenhuma ingestão concluída; rode ingestion:import antes"
     assert_equal @luffy_old.id, item.reload.card_variant_id
   end
+
+  test "coleção alterada durante o remap: mensagem no stderr e código 1" do
+    remap = Ingestion::Remap
+    remap.singleton_class.alias_method(:call_original, :call)
+    remap.define_singleton_method(:call) { raise Ingestion::Remap::ConcurrentChange, Ingestion::Remap::CONCURRENT_CHANGE_MESSAGE }
+
+    out, err, status = run_task
+
+    assert_equal 1, status
+    assert_empty out
+    assert_equal "a coleção mudou durante o remapeamento; rode ingestion:remap de novo\n", err
+  ensure
+    remap.singleton_class.alias_method(:call, :call_original)
+    remap.singleton_class.remove_method(:call_original)
+  end
 end

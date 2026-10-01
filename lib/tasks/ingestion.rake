@@ -19,7 +19,7 @@ namespace :ingestion do
     report.skipped.each do |entry|
       puts "pulado: #{entry[:card_number]} | #{entry[:old_variant_code]} | #{entry[:reason]}"
     end
-  rescue Ingestion::Remap::NoSucceededRun => e
+  rescue Ingestion::Remap::NoSucceededRun, Ingestion::Remap::ConcurrentChange => e
     warn e.message
     exit(1)
   end

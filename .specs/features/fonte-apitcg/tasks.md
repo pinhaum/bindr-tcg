@@ -615,13 +615,13 @@ T4 → T23
 
 **Done when**:
 
-- [ ] A leitura dos itens elegíveis acontece dentro da transação do movimento e com `FOR UPDATE`, ordenada por `id` (conferido no SQL capturado do teste)
-- [ ] `ImportRun.lock_presence!` é chamado dentro da transação, antes do plano
-- [ ] `RecordNotUnique` durante a aplicação levanta `Remap::ConcurrentChange` com "a coleção mudou durante o remapeamento; rode ingestion:remap de novo", e nenhum item fica movido
-- [ ] O rake imprime essa mensagem no stderr e sai com código 1
-- [ ] `moved` lista só os movimentos aplicados
-- [ ] Os testes de `remap_test.rb` e `ingestion_remap_task_test.rb` continuam passando sem afrouxar asserção
-- [ ] Gate full passa; contagem de runs registrada
+- [x] A leitura dos itens elegíveis acontece dentro da transação do movimento e com `FOR UPDATE`, ordenada por `id` (conferido no SQL capturado do teste)
+- [x] `ImportRun.lock_presence!` é chamado dentro da transação, antes do plano
+- [x] `RecordNotUnique` durante a aplicação levanta `Remap::ConcurrentChange` com "a coleção mudou durante o remapeamento; rode ingestion:remap de novo", e nenhum item fica movido
+- [x] O rake imprime essa mensagem no stderr e sai com código 1
+- [x] `moved` lista só os movimentos aplicados
+- [x] Os testes de `remap_test.rb` e `ingestion_remap_task_test.rb` continuam passando sem afrouxar asserção
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full

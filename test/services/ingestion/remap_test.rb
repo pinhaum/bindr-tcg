@@ -253,6 +253,64 @@ module Ingestion
       assert_equal @luffy_old_base.id, segundo.reload.card_variant_id
     end
 
+    # --- T18: plano dentro da transação ---
+
+    def captured_sql
+      queries = []
+      assinante = ActiveSupport::Notifications.subscribe("sql.active_record") { |*, payload| queries << payload[:sql] }
+      yield
+      queries
+    ensure
+      ActiveSupport::Notifications.unsubscribe(assinante)
+    end
+
+    test "os itens elegíveis são lidos com FOR UPDATE em ordem de id, depois do lock de presença" do
+      own(@nami, @luffy_old_base, 1)
+      want(@nami, @luffy_old_base, 1)
+
+      queries = captured_sql { Remap.call }
+
+      lock = queries.index { |sql| sql.include?("pg_advisory_xact_lock(#{ImportRun::PRESENCE_LOCK_KEY})") }
+      %w[collection_items wishlist_items].each do |table|
+        leitura = queries.index { |sql| sql.match?(/FROM "#{table}".*ORDER BY "#{table}"."id" ASC.*FOR UPDATE\z/m) }
+        refute_nil leitura, "#{table} precisa ser lido com FOR UPDATE em ordem de id"
+        refute_nil lock, "o lock de presença precisa ser tomado"
+        assert_operator lock, :<, leitura, "o lock de presença vem antes do plano"
+      end
+    end
+
+    test "item criado no candidato depois do plano: ConcurrentChange, e nada fica movido" do
+      primeiro = own(@zoro, @luffy_old_base, 1)
+      segundo = own(@nami, @luffy_old_base, 2)
+      remap = Remap.new
+      original = remap.method(:move)
+      remap.define_singleton_method(:move) do |item, target|
+        # O usuário cria, por fora do plano, um item na variante de destino.
+        CollectionItem.create!(user_id: item.user_id, card_variant_id: target.id, quantity: 9) if item.user_id == segundo.user_id
+        original.call(item, target)
+      end
+
+      erro = assert_raises(Remap::ConcurrentChange) { remap.call }
+
+      assert_equal "a coleção mudou durante o remapeamento; rode ingestion:remap de novo", erro.message
+      assert_equal @luffy_old_base.id, primeiro.reload.card_variant_id
+      assert_equal @luffy_old_base.id, segundo.reload.card_variant_id
+      assert_equal 2, CollectionItem.count, "o rollback desfaz também o item criado dentro da transação"
+    end
+
+    # Fora de transação o `pg_advisory_xact_lock` soltaria na hora, sem proteger
+    # nada. O teste sempre roda dentro de uma, daí o `transaction_open?` falso.
+    test "lock_presence! fora de transação é recusado" do
+      conexao = ImportRun.connection
+      conexao.define_singleton_method(:transaction_open?) { false }
+
+      erro = assert_raises(ArgumentError) { ImportRun.lock_presence! }
+
+      assert_equal "lock_presence! exige transação aberta", erro.message
+    ensure
+      conexao.singleton_class.remove_method(:transaction_open?)
+    end
+
     # --- Req. 1.7: nada apagado, nenhuma quantidade alterada ---
 
     test "contagens e somas de coleção e wishlist são idênticas antes e depois" do

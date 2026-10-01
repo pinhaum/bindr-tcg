@@ -14,15 +14,22 @@ module Ingestion
   #   usuário nunca registrou.
   # - Coleção e wishlist são conjuntos separados: a colisão é por usuário
   #   dentro de cada um.
-  # - Todos os movimentos numa única transação, e só `card_variant_id` muda.
-  #   O índice único `(user_id, card_variant_id)` é a última barreira.
+  # - Plano e movimentos numa única transação, e só `card_variant_id` muda.
+  #   O lock consultivo de presença impede que uma ingestão mude o que está
+  #   presente no meio do caminho, e o `FOR UPDATE` impede que o usuário altere
+  #   ou apague um item planejado antes do commit.
+  # - O índice único `(user_id, card_variant_id)` é a última barreira: um item
+  #   criado no candidato depois do plano vira `ConcurrentChange`, com rollback
+  #   total. Rodar de novo é seguro.
   #
   # Idempotente por construção: o item movido aponta para variante presente e
   # sai do universo da passada seguinte.
   class Remap
     class NoSucceededRun < StandardError; end
+    class ConcurrentChange < StandardError; end
 
     NO_SUCCEEDED_RUN_MESSAGE = "nenhuma ingestão concluída; rode ingestion:import antes".freeze
+    CONCURRENT_CHANGE_MESSAGE = "a coleção mudou durante o remapeamento; rode ingestion:remap de novo".freeze
 
     REASONS = { none: "sem candidato", ambiguous: "ambíguo", collision: "colisão" }.freeze
 
@@ -30,20 +37,19 @@ module Ingestion
 
     def self.call = new.call
 
+    # `requires_new`: dentro de outra transação (o teste), vira savepoint, e o
+    # rollback de uma violação do índice não envenena a transação de fora.
     def call
-      raise NoSucceededRun, NO_SUCCEEDED_RUN_MESSAGE unless ImportRun.exists?(status: "succeeded")
+      ActiveRecord::Base.transaction(requires_new: true) do
+        ImportRun.lock_presence!
+        raise NoSucceededRun, NO_SUCCEEDED_RUN_MESSAGE unless ImportRun.exists?(status: "succeeded")
 
-      skipped = []
-      moves = [ CollectionItem, WishlistItem ].flat_map { |model| plan(model, skipped) }
-      # Antes de mover: trocado o `card_variant_id`, a associação do item passa
-      # a apontar para a variante nova.
-      moved = moves.map { |item, target| moved_entry(item, target) }
-
-      ActiveRecord::Base.transaction do
-        moves.each { |item, target| move(item, target) }
+        skipped = []
+        moves = [ CollectionItem, WishlistItem ].flat_map { |model| plan(model, skipped) }
+        Report.new(moved: moves.map { |item, target| apply(item, target) }, skipped: skipped)
       end
-
-      Report.new(moved: moved, skipped: skipped)
+    rescue ActiveRecord::RecordNotUnique
+      raise ConcurrentChange, CONCURRENT_CHANGE_MESSAGE
     end
 
     private
@@ -51,8 +57,10 @@ module Ingestion
     # Devolve os pares `[item, variante nova]` a mover e acrescenta a
     # `skipped` os que ficam. Nada é escrito aqui.
     def plan(model, skipped)
+      # Ordem fixa por `id` no `FOR UPDATE`: duas execuções concorrentes travam
+      # na mesma sequência e não entram em deadlock.
       items = model.where.not(card_variant_id: CardVariant.present.select(:id))
-                   .includes(card_variant: [ :card, :card_set ]).to_a
+                   .order(:id).lock.includes(card_variant: [ :card, :card_set ]).to_a
       return [] if items.empty?
 
       candidates = candidates_for(items)
@@ -85,6 +93,14 @@ module Ingestion
 
       key = [ item.user_id, found.first.id ]
       :collision if targets.fetch(key).size > 1 || occupied.include?(key)
+    end
+
+    # A entrada sai antes do movimento: trocado o `card_variant_id`, a
+    # associação do item passa a apontar para a variante nova.
+    def apply(item, target)
+      entry = moved_entry(item, target)
+      move(item, target)
+      entry
     end
 
     def move(item, target)
