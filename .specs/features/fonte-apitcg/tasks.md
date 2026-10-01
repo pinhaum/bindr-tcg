@@ -417,13 +417,13 @@ T14 → T16 → T17
 
 ---
 
-### T12: Upsert com descartes e origem do snapshot
+### T12: Upsert com descartes, origem do snapshot e presença no fechamento
 
-**What**: `Ingestion::Upsert` recebe os descartes, grava-os em `error_log` como `"discarded"` sem contá-los em `failed_count` nem mudar o status, e grava em `source_revision` o nome do snapshot e o SHA-256.
+**What**: `Ingestion::Upsert` recebe os descartes, grava-os em `error_log` como `"discarded"` sem contá-los em `failed_count` nem mudar o status, grava em `source_revision` o nome do snapshot e o SHA-256, e passa a gravar `last_seen_at` só no `finish` de um run `succeeded`, a partir dos ids acumulados em memória (design, `Ingestion::Upsert`).
 **Where**: `app/services/ingestion/upsert.rb`
 **Depends on**: T11
 **Reuses**: `apply`, `finish` e `MAX_LOGGED_ERRORS` existentes
-**Requirement**: SRC-06, SRC-11
+**Requirement**: SRC-06, SRC-11, SRC-16
 
 **Tools**:
 
@@ -436,11 +436,15 @@ T14 → T16 → T17
 - [ ] Um erro real num registro continua levando a `failed` e ao `error_log` como hoje
 - [ ] `source_revision` é `"<arquivo> sha256:<hex>"`, com o hex conferido contra o arquivo
 - [ ] `upsert_test.rb` passa a usar a fixture nova e os nomes de campo da apitcg
+- [ ] Run `succeeded` grava `last_seen_at = started_at` em toda carta e variante que ele aplicou
+- [ ] Run `failed` depois de um `succeeded`: variante criada nele fica com `last_seen_at` nulo e fora de `CardVariant.present`; variante já existente que ele reaplicou mantém o `last_seen_at` do `succeeded`; o conjunto de `CardVariant.present` é idêntico antes e depois do run
+- [ ] Falha forçada ao gravar o status no `finish` não deixa `last_seen_at` avançado (status e presença na mesma transação)
+- [ ] `upsert_test.rb:158-159` e `guarantees_test.rb:252-260` continuam passando sem afrouxar asserção
 - [ ] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
-**Commit**: `feat(fonte-apitcg): registrar descartes e a origem do snapshot no upsert`
+**Commit**: `feat(fonte-apitcg): registrar descartes, a origem do snapshot e a presença no fechamento do upsert`
 
 ---
 

@@ -23,7 +23,7 @@ graph TD
     F[Apitcg::Fetch<br/>pagina /sets e /cards] -->|grava antes de normalizar| S[(storage/ingestion/<br/>apitcg-UTC.json)]
     S -->|SNAPSHOT=arquivo| N[Apitcg::Normalize]
     F --> N
-    N --> U[Upsert<br/>last_seen_at = started_at]
+    N --> U[Upsert<br/>last_seen_at = started_at<br/>só quando o run fecha succeeded]
     U --> R[(import_runs<br/>source_revision = arquivo + SHA-256)]
     U --> DB[(cards / card_variants / sets)]
     DB --> P[CardVariant.present<br/>last_seen_at >= último run succeeded]
@@ -46,7 +46,7 @@ graph TD
 | Structs `NormalizedSet/Card/Variant` | `app/services/ingestion/normalize.rb:27-37` | Continuam sendo o contrato Normalize → Upsert. Saem para um arquivo próprio, porque o normalizador da optcgjson é removido |
 | Escrita atômica do payload | `app/services/ingestion/fetch.rb:67-74` (`.part` + `rename`) | Mesmo padrão para o snapshot |
 | Cliente HTTP injetável | `fetch.rb:11-20`, `fetch_test.rb:81-87` | Mesmo padrão de fake injetado; o cliente ganha headers e timeout configurável. Sem WebMock |
-| `last_seen_at` | `upsert.rb:77,93` | É a base da presença; nenhuma coluna nova |
+| `last_seen_at` | `upsert.rb:77,93` | É a base da presença; nenhuma coluna nova. Deixa de ser gravado registro a registro e passa a ser gravado no fechamento do run (ver `Ingestion::Upsert`) |
 | `Row#completion_percent` com teto de 100% | `app/queries/set_progress_query.rb:139-150` | Mantido; mudam os agregados |
 | Relatório no rake | `lib/tasks/ingestion.rake:3` | Mesmo estilo para `ingestion:remap` e `ingestion:compare_snapshots` |
 
@@ -113,6 +113,12 @@ graph TD
 
 - `#call` passa a receber `discarded`. Eles entram em `error_log` com `"error" => "discarded"`, não contam em `failed_count` e não mudam o status (SRC-11).
 - `source_revision` recebe `"#{File.basename(path)} sha256:#{hex}"` (SRC-06).
+- **Invariante da presença: `last_seen_at` só avança em run que termina `succeeded`.** Hoje o Upsert grava `last_seen_at: @started_at` em cada registro, dentro da transação do registro. Num run `failed`, isso faz a variante nova (ou a que voltou) ter `last_seen_at` maior que o `started_at` do último run `succeeded`, e `CardVariant.present` a publica, contra a definição de presença de Assumptions. O ajuste:
+  - `upsert_card` e `upsert_variant` param de escrever `last_seen_at`. Os demais atributos continuam gravados registro a registro, como hoje.
+  - O Upsert acumula em memória os `id` de cartas e variantes cuja transação de registro fechou sem erro.
+  - `finish` roda numa transação só: grava o status do run e, **só se ele for `succeeded`**, faz `Card.where(id: ids).update_all(last_seen_at: started_at)` e o mesmo em `CardVariant`. Status e presença mudam juntos, ou nenhum dos dois.
+  - Num run `failed`, nenhum `last_seen_at` muda. A variante criada nesse run fica com `last_seen_at` nulo e não é presente (a coluna já é nula). A que já existia mantém a marca do último `succeeded`.
+  - Com ~7.200 variantes, a lista de ids em memória e o `update_all` por `IN` cabem sem lote. Se o volume crescer uma ordem de grandeza, o `update_all` passa a ser feito em fatias, sem mudar a regra.
 - A execução que falha na busca (SRC-04, SRC-32) também gera um `ImportRun`: `status: failed`, `source_revision: "(busca não concluída)"` e o erro no `error_log`, sem nenhuma escrita em catálogo. Assim o status `failed` fica visível no banco, como o Req. 1.6 pede.
 
 ### `Ingestion::Run` e `ingestion:import` (ajuste)
@@ -192,6 +198,7 @@ admite os seis valores), `last_seen_at` em cartas e variantes, `import_runs.erro
 | Coleção nunca apagada na troca | Ingestão sem delete; FKs `RESTRICT` (`structure.sql:776,800`) |
 | Um item por usuário e variante | UNIQUE `(user_id, card_variant_id)` (`:710,752`) + detecção de colisão no Remap |
 | Presença sem coluna nova | `CardVariant.present` sobre `last_seen_at` e `import_runs` |
+| `last_seen_at` só avança em run `succeeded` | `Upsert#finish`, na mesma transação que grava o status |
 
 ---
 
@@ -203,7 +210,7 @@ admite os seis valores), `last_seen_at` em cartas e variantes, `import_runs.erro
 | 401 | `KeyRejected`, sem repetição, `ImportRun` failed | "chave da apitcg recusada (401)" |
 | Timeout / 5xx / 404 | 3 tentativas com espera; depois `ImportRun` failed, catálogo intacto | Mensagem com a página que falhou, sem a chave |
 | Produto sem `code` | Descarte em `error_log`, fora de `failed_count` | Nenhum; run pode terminar `succeeded` |
-| Erro num registro | Transação própria, `error_log`, run `failed` (comportamento atual) | Presença não avança; catálogo continua no run anterior |
+| Erro num registro | Transação própria, `error_log`, run `failed` (comportamento atual) | Presença não avança, porque nenhum `last_seen_at` é gravado; os atributos dos registros aplicados mudam, a lista do que é publicado não |
 | Remap sem run `succeeded` | `NoSucceededRun` | Mensagem de SRC-23 |
 | Remap com falha no meio | Transação única, rollback | Nenhum item movido; rodar de novo |
 
@@ -230,6 +237,7 @@ admite os seis valores), `last_seen_at` em cartas e variantes, `import_runs.erro
 |---|---|---|
 | Normalizador | Novo em `Ingestion::Apitcg::`; o da optcgjson é removido | Troca completa (AD-019). Manter os dois seria código morto com teste próprio |
 | Presença | Scope sobre `last_seen_at` e o último run `succeeded` | Aceito no spec ("sem coluna nova"). Alternativa rejeitada: coluna booleana atualizada no fim do run, que duplica estado e precisa de backfill |
+| Quando gravar `last_seen_at` | Ids acumulados em memória e gravados no `finish`, só em run `succeeded` (dono, 2026-09-30) | Faz o código cumprir a definição de presença sem migração. Alternativa rejeitada: coluna de staging (`seen_in_run_id`) promovida no fim do run, que dá o mesmo resultado com uma coluna e um backfill a mais |
 | Universo do numerador no progresso | Deduzido de `base_set_size` gravado vs. números distintos presentes | Evita reimplementar a regra de maioria em SQL |
 | Transação do Remap | Uma única para todos os itens | Dado insubstituível: tudo ou nada, e rodar de novo é seguro |
 | Falha na busca | Gera `ImportRun` failed | Req. 1.6 pede o status registrado; o Fetch atual falha sem registro |
