@@ -5,7 +5,7 @@ require "test_helper"
 #
 # A arte da apitcg vem de `tcgplayer-cdn.tcgplayer.com`, e o `variant_code`
 # passa a ser `tcgplayer:<id>` ou `apitcg:<id>`. O `:` não vai para o nome do
-# arquivo (vira `-`), e a restrição de host contra SSRF continua. As variantes
+# arquivo (vira `__`, T21), e a restrição de host contra SSRF continua. As variantes
 # da optcgjson ficam no banco com o cache em disco, que continua sendo lido.
 class CardImageCacheTcgplayerTest < ActiveSupport::TestCase
   TCGPLAYER_URL = "https://tcgplayer-cdn.tcgplayer.com/product/453505_in_1000x1000.jpg".freeze
@@ -78,12 +78,36 @@ class CardImageCacheTcgplayerTest < ActiveSupport::TestCase
 
   # --- Nome do arquivo ---
 
-  test "o cache de tcgplayer:123 é tcgplayer-123.<ext> dentro do diretório de imagens" do
+  test "o cache de tcgplayer:123 é tcgplayer__123.<ext> dentro do diretório de imagens" do
     result = cache.fetch(variant("tcgplayer:123", TCGPLAYER_URL))
 
-    assert_equal @storage.join("tcgplayer-123.jpg"), result.path
+    assert_equal @storage.join("tcgplayer__123.jpg"), result.path
     assert result.path.exist?
-    assert_equal [ "tcgplayer-123.jpg" ], Dir.children(@storage)
+    assert_equal [ "tcgplayer__123.jpg" ], Dir.children(@storage)
+  end
+
+  # T21 — com `-` no lugar de `:`, os dois códigos dividiriam o arquivo.
+  test "gravado tcgplayer:1, o código antigo tcgplayer-1 não é servido com o mesmo arquivo" do
+    cache.fetch(variant("tcgplayer:1", TCGPLAYER_URL))
+    @http = Responder.new(200, "OUTRA-ARTE")
+
+    result = cache.fetch(variant("tcgplayer-1", TCGPLAYER_URL))
+
+    assert_equal "OUTRA-ARTE", result.path.binread
+    assert_equal [ TCGPLAYER_URL ], @http.calls
+    assert_equal [ "tcgplayer-1.jpg", "tcgplayer__1.jpg" ], Dir.children(@storage).sort
+  end
+
+  test "a query da URL não muda a extensão gravada nem gera arquivo duplicado" do
+    base = "https://tcgplayer-cdn.tcgplayer.com/product/1_in_1000x1000.png"
+    primeira = cache.fetch(variant("tcgplayer:7", "#{base}?v=1.bar"))
+    segunda = cache.fetch(variant("tcgplayer:7", "#{base}?v=2.jpg"))
+
+    assert_equal @storage.join("tcgplayer__7.png"), primeira.path
+    assert_equal "image/png", primeira.content_type
+    assert_equal primeira.path, segunda.path
+    assert_equal [ "tcgplayer__7.png" ], Dir.children(@storage)
+    assert_equal 1, @http.calls.size
   end
 
   test "o diretório padrão continua sendo storage/card_images" do
@@ -94,6 +118,12 @@ class CardImageCacheTcgplayerTest < ActiveSupport::TestCase
 
   test "o código antigo continua aceito" do
     assert_match CardImageCache::VARIANT_CODE_FORMAT, "OP01-001_p1"
+  end
+
+  test "o código antigo continua com o mesmo nome de arquivo" do
+    result = cache.fetch(variant("OP01-001_p1", "https://tcgplayer-cdn.tcgplayer.com/x/OP01-001_p1.png"))
+
+    assert_equal @storage.join("OP01-001_p1.png"), result.path
   end
 
   test "o cache em disco de um código antigo continua sendo lido, sem rede" do

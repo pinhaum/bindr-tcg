@@ -50,7 +50,7 @@ class CardImagesTcgplayerTest < ActionDispatch::IntegrationTest
     assert_equal antigo, [ status, response.media_type, response.headers["Cache-Control"],
                            response.headers["Content-Disposition"].split(";").first ]
     assert_match(/public/, response.headers["Cache-Control"])
-    assert_includes Dir.children(@dir), "tcgplayer-123.jpg"
+    assert_includes Dir.children(@dir), "tcgplayer__123.jpg"
   end
 
   test "a segunda requisição serve do disco, sem chamar a fonte" do

@@ -15,13 +15,16 @@ require "net/http"
 # - Host, esquema e porta são validados contra `ALLOWED_HOST` e https:443
 #   antes de qualquer requisição de saída.
 # - `variant_code` é validado contra o padrão esperado antes de virar nome de
-#   arquivo, prevenindo path traversal. O `:` dos códigos da apitcg vira `-` no
-#   nome do arquivo (`tcgplayer:123` → `tcgplayer-123.jpg`).
+#   arquivo, prevenindo path traversal. O `:` dos códigos da apitcg vira `__` no
+#   nome do arquivo (`tcgplayer:123` → `tcgplayer__123.jpg`). O formato antigo
+#   não admite `__`, então código antigo e novo nunca dividem arquivo; com `-`,
+#   `tcgplayer:123` e um `tcgplayer-123` cairiam no mesmo.
 # - Arquivo já em cache é servido sem rede e, por isso, sem a checagem de
 #   host: as variantes da optcgjson continuam no banco apontando para o host
 #   antigo, e o cache delas em disco continua valendo (fonte-apitcg).
 # - Extensão está em lista fechada (`.png`, `.jpg`, `.jpeg`, `.webp`),
-#   prevenindo SSRF via sufixo arbitrário.
+#   prevenindo SSRF via sufixo arbitrário. Ela sai só do caminho da URL, uma
+#   vez, e serve à validação e ao nome: a query não muda a extensão gravada.
 # - Escrita atômica (temporário + rename) previne arquivo pela metade em
 #   concorrência.
 # - Falha não deixa arquivo em disco; a próxima requisição tenta de novo.
@@ -79,9 +82,7 @@ class CardImageCache
     validate_variant_code(variant.variant_code)
     url = variant.image_url
     uri = parse_url(url)
-    validate_extension(uri)
-
-    final_path = final_path_for(variant.variant_code, url)
+    final_path = @storage_dir.join("#{file_stem(variant.variant_code)}#{extension_of(uri)}")
 
     # Se o arquivo já existe, devolve sem chamar o cliente.
     return Result.new(path: final_path, content_type: content_type_for(final_path)) if final_path.exist?
@@ -112,7 +113,7 @@ class CardImageCache
     end
   end
 
-  def file_stem(variant_code) = variant_code.tr(":", "-")
+  def file_stem(variant_code) = variant_code.sub(":", "__")
 
   def parse_url(url)
     URI.parse(url)
@@ -134,16 +135,13 @@ class CardImageCache
     end
   end
 
-  def validate_extension(uri)
+  def extension_of(uri)
     ext = File.extname(uri.path.to_s).downcase
     if ext.blank? || !ALLOWED_EXTENSIONS.include?(ext)
       raise Unavailable, "extensão #{ext.inspect} não permitida"
     end
-  end
 
-  def final_path_for(variant_code, url)
-    ext = File.extname(url).downcase
-    @storage_dir.join("#{file_stem(variant_code)}#{ext}")
+    ext
   end
 
   def content_type_for(path)

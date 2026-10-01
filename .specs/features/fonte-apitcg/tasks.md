@@ -307,7 +307,7 @@ T4 → T23
 
 - [x] URL em `tcgplayer-cdn.tcgplayer.com` com https é aceita; o host antigo e qualquer outro são recusados
 - [x] `tcgplayer:123` e `apitcg:abc123` são aceitos; `tcgplayer:../x`, `tcgplayer:` e códigos com `/` são recusados
-- [x] O arquivo em cache de `tcgplayer:123` é `tcgplayer-123.<ext>`, dentro de `storage/card_images/`
+- [x] O arquivo em cache de `tcgplayer:123` é `tcgplayer-123.<ext>`, dentro de `storage/card_images/` — nome substituído pela T21 (`tcgplayer__123.<ext>`)
 - [x] Os códigos antigos (`OP01-001_p1`) continuam aceitos e o cache deles continua sendo lido
 - [x] `GET /card_images/tcgplayer:123` responde como hoje responde um código antigo (teste de integração)
 - [x] Gate full passa; contagem de runs registrada
@@ -703,11 +703,11 @@ T4 → T23
 
 **Done when**:
 
-- [ ] O arquivo em cache de `tcgplayer:123` é `tcgplayer__123.<ext>`, dentro de `storage/card_images/`
-- [ ] Gravado `tcgplayer:1`, a variante de código `tcgplayer-1` não é servida com o mesmo arquivo
-- [ ] URL `https://tcgplayer-cdn.tcgplayer.com/a.png?v=1.bar` grava `.png`; a query não muda a extensão nem gera arquivo duplicado
-- [ ] Os códigos antigos continuam com o mesmo nome de arquivo e o cache deles continua sendo lido
-- [ ] Gate full passa; contagem de runs registrada
+- [x] O arquivo em cache de `tcgplayer:123` é `tcgplayer__123.<ext>`, dentro de `storage/card_images/`
+- [x] Gravado `tcgplayer:1`, a variante de código `tcgplayer-1` não é servida com o mesmo arquivo
+- [x] URL `https://tcgplayer-cdn.tcgplayer.com/a.png?v=1.bar` grava `.png`; a query não muda a extensão nem gera arquivo duplicado
+- [x] Os códigos antigos continuam com o mesmo nome de arquivo e o cache deles continua sendo lido
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
