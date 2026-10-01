@@ -587,12 +587,12 @@ T4 → T23
 
 **Done when**:
 
-- [ ] **Aval do dono** para a requisição real e para escrever no banco de desenvolvimento, com dump feito antes (`pg_dump` dentro do container), e o caminho do dump registrado
-- [ ] Contagem de `collection_items` e soma de `quantity` idênticas antes e depois de import + remap; relatório do remap registrado sem dado de usuário
-- [ ] Os 85 sets com carta têm `released_on`; a grade abre pelo set lançado por último; nenhum set acima de 100%
-- [ ] `compare_snapshots` entre os dois snapshots registrado; se `changed > 0`, parar e reabrir o SRC-31 com o dono antes do Verifier
-- [ ] Success Criteria do spec marcados com a evidência
-- [ ] Gate build passa; contagem de runs registrada
+- [x] **Aval do dono** para a requisição real e para escrever no banco de desenvolvimento, com dump feito antes (`pg_dump` dentro do container), e o caminho do dump registrado
+- [x] Contagem de `collection_items` e soma de `quantity` idênticas antes e depois de import + remap; relatório do remap registrado sem dado de usuário
+- [x] Os 85 sets com carta têm `released_on`; a grade abre pelo set lançado por último; nenhum set acima de 100%
+- [ ] **BLOQUEADO (D-04, precisa de 24h):** `compare_snapshots` entre os dois snapshots registrado; os snapshots do run têm 45 min de diferença (7.252 comuns, 0 mudados, só informativo); se `changed > 0`, parar e reabrir o SRC-31 com o dono antes do Verifier
+- [x] Success Criteria do spec marcados com a evidência
+- [x] Gate build passa; contagem de runs registrada
 
 **Tests**: none
 **Gate**: build
