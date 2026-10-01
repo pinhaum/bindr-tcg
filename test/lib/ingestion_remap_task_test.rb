@@ -18,9 +18,9 @@ class IngestionRemapTaskTest < ActiveSupport::TestCase
     @user = User.create!(email: "dona-da-pasta@example.com", password: "log-pose-77")
     @set = CardSet.create!(code: "OP01", name: "Romance Dawn", kind: "booster")
 
-    luffy = card("OP01-001")
-    @luffy_old = variant(luffy, "OP01-001", OLD_RUN_AT)
-    variant(luffy, "tcgplayer:11", NEW_RUN_AT)
+    @luffy = card("OP01-001")
+    @luffy_old = variant(@luffy, "OP01-001", OLD_RUN_AT)
+    @luffy_new = variant(@luffy, "tcgplayer:11", NEW_RUN_AT)
     usopp = card("OP01-004")
     @usopp_old = variant(usopp, "OP01-004", OLD_RUN_AT)
   end
@@ -55,9 +55,46 @@ class IngestionRemapTaskTest < ActiveSupport::TestCase
     assert_equal 0, status
     assert_empty err
     assert_equal [ "movidos: 1 | pulados: 1", "pulado: OP01-004 | OP01-004 | sem candidato" ], out.lines.map(&:chomp)
-    [ @user.email, @user.id, moved.id, skipped.id ].each do |dado|
-      refute_match(/\b#{Regexp.escape(dado.to_s)}\b/, out, "a saída não pode expor dado do usuário")
-    end
+    # As linhas exatas acima já excluem qualquer id; o e-mail fica explícito.
+    refute_includes out, @user.email
+    assert_equal @luffy_new.id, moved.reload.card_variant_id
+    assert_equal @usopp_old.id, skipped.reload.card_variant_id
+  end
+
+  test "a saída traz as linhas de colisão e de ambíguo com o texto exato" do
+    CollectionItem.create!(user: @user, card_variant: @luffy_new, quantity: 1)
+    CollectionItem.create!(user: @user, card_variant: @luffy_old, quantity: 1)
+    nami = card("OP01-016")
+    nami_old = variant(nami, "OP01-016", OLD_RUN_AT)
+    variant(nami, "tcgplayer:21", NEW_RUN_AT)
+    variant(nami, "tcgplayer:22", NEW_RUN_AT)
+    CollectionItem.create!(user: @user, card_variant: nami_old, quantity: 1)
+
+    out, _err, status = run_task
+
+    assert_equal 0, status
+    assert_equal [ "movidos: 0 | pulados: 2", "pulado: OP01-001 | OP01-001 | colisão",
+                   "pulado: OP01-016 | OP01-016 | ambíguo" ], out.lines.map(&:chomp)
+  end
+
+  test "a segunda execução não move nada e repete os pulados" do
+    moved = CollectionItem.create!(user: @user, card_variant: @luffy_old, quantity: 2)
+    WishlistItem.create!(user: @user, card_variant: @usopp_old, target_quantity: 1)
+    run_task
+
+    out, _err, status = run_task
+
+    assert_equal 0, status
+    assert_equal [ "movidos: 0 | pulados: 1", "pulado: OP01-004 | OP01-004 | sem candidato" ], out.lines.map(&:chomp)
+    assert_equal @luffy_new.id, moved.reload.card_variant_id
+  end
+
+  test "sem nada a mover nem a pular, imprime os dois totais zerados" do
+    out, err, status = run_task
+
+    assert_equal 0, status
+    assert_empty err
+    assert_equal "movidos: 0 | pulados: 0\n", out
   end
 
   test "sem run succeeded, imprime a mensagem de SRC-23 e sai com código 1" do
@@ -67,7 +104,8 @@ class IngestionRemapTaskTest < ActiveSupport::TestCase
     out, err, status = run_task
 
     assert_equal 1, status
-    assert_includes out + err, "nenhuma ingestão concluída; rode ingestion:import antes"
+    assert_empty out
+    assert_equal "nenhuma ingestão concluída; rode ingestion:import antes\n", err
     assert_equal @luffy_old.id, item.reload.card_variant_id
   end
 

@@ -674,13 +674,13 @@ T4 → T23
 
 **Done when**:
 
-- [ ] No caminho de sucesso, o item movido aponta para a variante nova e o pulado continua na antiga
-- [ ] Sem run `succeeded`: stderr é exatamente a mensagem de SRC-23 com quebra de linha, e stdout fica vazio
-- [ ] A saída traz as linhas de "colisão" e "ambíguo" com o texto exato
-- [ ] Segunda execução imprime "movidos: 0 | pulados: N" com os mesmos pulados
-- [ ] Sem nada a mover, a saída é "movidos: 0 | pulados: 0"
-- [ ] A checagem de dado do usuário na saída não depende do valor do `id` (sai o `refute_match` por `\b<id>\b`, que casa com "1")
-- [ ] Gate full passa; contagem de runs registrada
+- [x] No caminho de sucesso, o item movido aponta para a variante nova e o pulado continua na antiga
+- [x] Sem run `succeeded`: stderr é exatamente a mensagem de SRC-23 com quebra de linha, e stdout fica vazio
+- [x] A saída traz as linhas de "colisão" e "ambíguo" com o texto exato
+- [x] Segunda execução imprime "movidos: 0 | pulados: N" com os mesmos pulados
+- [x] Sem nada a mover, a saída é "movidos: 0 | pulados: 0"
+- [x] A checagem de dado do usuário na saída não depende do valor do `id` (sai o `refute_match` por `\b<id>\b`, que casa com "1")
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full
