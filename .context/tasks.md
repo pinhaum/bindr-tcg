@@ -323,7 +323,7 @@ Regras de execução:
 
 ## 8 — Troca da fonte para a apitcg
 
-Plano da feature em `.specs/features/fonte-apitcg/tasks.md` (T1–T17, numeração
+Plano da feature em `.specs/features/fonte-apitcg/tasks.md` (T1–T23, numeração
 própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
 
 - [x] **8.1 Presença na fonte e leitura** — T1–T4 da `fonte-apitcg`
@@ -338,6 +338,8 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [ ] **8.5 Normalize e Upsert sobre a fixture nova** — T11–T15
   - _Requisitos: 1.9–1.11, 11.5, 11.7_
 - [ ] **8.6 Fechamento da troca** — T16–T17
+- [ ] **8.7 Correções da revisão do lote A** — T18–T23, executadas antes da 8.4
+  - _Requisitos: 1.7, 5.1, 6.5_
 
 ---
 

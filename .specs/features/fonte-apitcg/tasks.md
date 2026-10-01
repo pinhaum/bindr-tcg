@@ -14,7 +14,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 Regras que valem para todas as tasks:
 
-- A numeração T1–T17 é **desta feature**, sem relação com as de `catalogo`, `colecao` e demais.
+- A numeração T1–T23 é **desta feature**, sem relação com as de `catalogo`, `colecao` e demais.
 - A ingestão continua sem delete, e nenhum `collection_item` nem `wishlist_item` é apagado ou tem quantidade alterada por teste nenhum desta feature (Req. 1.7).
 - `APITCG_API_KEY` nunca aparece em código, teste, fixture, log, commit ou saída de comando. Teste que precise de chave usa um valor sintético (`"chave-de-teste"`).
 - **Requisição à apitcg real só na T10 e na T17**, e cada uma exige o aval explícito do dono no momento da execução (blast radius). Todas as outras tasks usam cliente HTTP falso injetado, como faz `fetch_test.rb` hoje.
@@ -96,6 +96,23 @@ T10 → T15
 
 ```
 T14 → T16 → T17
+```
+
+### Phase 7: Correções da revisão do lote A
+
+Roda **antes da Phase 4**, por exceção à ordem numérica: corrige código e testes
+já commitados das Phases 1–3, e nenhuma task daqui depende das Phases 4–6. Sai
+das revisões de banco, testes, segurança e a11y do lote A (F1–F5); não emenda o
+spec.
+
+```
+T5 → T18
+T6 → T18
+T18 → T19
+T18 → T20
+T7 → T21
+T3 → T22
+T4 → T23
 ```
 
 ---
@@ -422,7 +439,7 @@ T14 → T16 → T17
 **What**: `Ingestion::Upsert` recebe os descartes, grava-os em `error_log` como `"discarded"` sem contá-los em `failed_count` nem mudar o status, grava em `source_revision` o nome do snapshot e o SHA-256, e passa a gravar `last_seen_at` só no `finish` de um run `succeeded`, a partir dos ids acumulados em memória (design, `Ingestion::Upsert`).
 **Where**: `app/services/ingestion/upsert.rb`
 **Depends on**: T11
-**Reuses**: `apply`, `finish` e `MAX_LOGGED_ERRORS` existentes
+**Reuses**: `apply`, `finish` e `MAX_LOGGED_ERRORS` existentes; `ImportRun.lock_presence!` da T18 (Phase 7, que roda antes da Phase 4)
 **Requirement**: SRC-06, SRC-11, SRC-16
 
 **Tools**:
@@ -439,6 +456,7 @@ T14 → T16 → T17
 - [ ] Run `succeeded` grava `last_seen_at = started_at` em toda carta e variante que ele aplicou
 - [ ] Run `failed` depois de um `succeeded`: variante criada nele fica com `last_seen_at` nulo e fora de `CardVariant.present`; variante já existente que ele reaplicou mantém o `last_seen_at` do `succeeded`; o conjunto de `CardVariant.present` é idêntico antes e depois do run
 - [ ] Falha forçada ao gravar o status no `finish` não deixa `last_seen_at` avançado (status e presença na mesma transação)
+- [ ] `finish` toma `ImportRun.lock_presence!` (da T18) dentro da transação
 - [ ] `upsert_test.rb:158-159` e `guarantees_test.rb:252-260` continuam passando sem afrouxar asserção
 - [ ] Gate full passa; contagem de runs registrada
 
@@ -582,6 +600,174 @@ T14 → T16 → T17
 
 ---
 
+### T18: `Ingestion::Remap` com o plano dentro da transação
+
+**What**: O plano passa a ser montado dentro da transação, com os itens elegíveis travados por `FOR UPDATE` em ordem de `id` e um lock consultivo de presença (`ImportRun.lock_presence!`, `pg_advisory_xact_lock`) que o `Upsert#finish` também vai tomar na T12. `moved` sai do que a transação aplicou. Uma violação do índice único durante a aplicação vira `Remap::ConcurrentChange`, com rollback total, e o rake a imprime no stderr e sai com 1.
+**Where**: `app/services/ingestion/remap.rb` (e `app/models/import_run.rb`, `lib/tasks/ingestion.rake`)
+**Depends on**: T5, T6
+**Reuses**: `plan`, `move` e `Report` existentes
+**Requirement**: SRC-19, SRC-20, SRC-21
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] A leitura dos itens elegíveis acontece dentro da transação do movimento e com `FOR UPDATE`, ordenada por `id` (conferido no SQL capturado do teste)
+- [ ] `ImportRun.lock_presence!` é chamado dentro da transação, antes do plano
+- [ ] `RecordNotUnique` durante a aplicação levanta `Remap::ConcurrentChange` com "a coleção mudou durante o remapeamento; rode ingestion:remap de novo", e nenhum item fica movido
+- [ ] O rake imprime essa mensagem no stderr e sai com código 1
+- [ ] `moved` lista só os movimentos aplicados
+- [ ] Os testes de `remap_test.rb` e `ingestion_remap_task_test.rb` continuam passando sem afrouxar asserção
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `fix(fonte-apitcg): montar o plano do remap dentro da transação`
+
+---
+
+### T19: Lacunas de teste do `Ingestion::Remap`
+
+**What**: Testes que faltam em `remap_test.rb`, apontados pela análise de testes do lote A.
+**Where**: `test/services/ingestion/remap_test.rb`
+**Depends on**: T18
+**Reuses**: helpers `own`, `want`, `variant`, `skipped_reasons`, `totals`
+**Requirement**: SRC-19, SRC-20, SRC-21, SRC-22, SRC-23
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Outro usuário já com item no candidato não gera colisão: o item é movido para o candidato e `skipped` fica vazio (SRC-21)
+- [ ] Falha forçada no movimento da wishlist desfaz também o movimento de coleção já aplicado
+- [ ] Um run `succeeded` antigo seguido de um `failed` mais recente: o remap prossegue e move o item (SRC-23)
+- [ ] Colisão entre dois itens de wishlist do mesmo usuário e com item de wishlist já existente no candidato
+- [ ] "Ambíguo" com dois candidatos não-base
+- [ ] Idempotência com item pulado: a segunda execução repete o mesmo `skipped`, não move nada e o item movido continua na variante nova (SRC-22)
+- [ ] Item cuja variante está presente fica intocado, e o item movido não muda nenhum atributo além de `card_variant_id`, `updated_at` incluído (SRC-20)
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `test(fonte-apitcg): cobrir colisão, rollback e idempotência do remap`
+
+---
+
+### T20: Lacunas de teste do rake `ingestion:remap`
+
+**What**: Testes que faltam em `ingestion_remap_task_test.rb`, apontados pela análise de testes do lote A.
+**Where**: `test/lib/ingestion_remap_task_test.rb`
+**Depends on**: T18
+**Reuses**: `run_task` existente
+**Requirement**: SRC-19, SRC-21, SRC-22, SRC-23
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] No caminho de sucesso, o item movido aponta para a variante nova e o pulado continua na antiga
+- [ ] Sem run `succeeded`: stderr é exatamente a mensagem de SRC-23 com quebra de linha, e stdout fica vazio
+- [ ] A saída traz as linhas de "colisão" e "ambíguo" com o texto exato
+- [ ] Segunda execução imprime "movidos: 0 | pulados: N" com os mesmos pulados
+- [ ] Sem nada a mover, a saída é "movidos: 0 | pulados: 0"
+- [ ] A checagem de dado do usuário na saída não depende do valor do `id` (sai o `refute_match` por `\b<id>\b`, que casa com "1")
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test(fonte-apitcg): conferir efeito e saída do ingestion:remap`
+
+---
+
+### T21: Nome de cache sem colisão e extensão só do caminho
+
+**What**: O `:` dos códigos da apitcg vira `__` no nome do arquivo (o formato antigo não admite `__`, logo `tcgplayer:123` e um eventual `tcgplayer-123` não dividem arquivo), e a extensão sai uma vez só de `uri.path`, usada na validação e no nome.
+**Where**: `app/services/card_image_cache.rb`
+**Depends on**: T7
+**Reuses**: `file_stem`, `validate_extension`, `final_path_for`
+**Requirement**: SRC-08
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] O arquivo em cache de `tcgplayer:123` é `tcgplayer__123.<ext>`, dentro de `storage/card_images/`
+- [ ] Gravado `tcgplayer:1`, a variante de código `tcgplayer-1` não é servida com o mesmo arquivo
+- [ ] URL `https://tcgplayer-cdn.tcgplayer.com/a.png?v=1.bar` grava `.png`; a query não muda a extensão nem gera arquivo duplicado
+- [ ] Os códigos antigos continuam com o mesmo nome de arquivo e o cache deles continua sendo lido
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `fix(fonte-apitcg): separar o nome de cache dos códigos antigos`
+
+---
+
+### T22: Topo do detalhe com a variante presente
+
+**What**: O topo do detalhe usa a primeira variante presente; só quando todas são ausentes usa a primeira e mostra "Variante fora da fonte" no cabeçalho. Na lista, o par vira `Situação` / `Fora da fonte`.
+**Where**: `app/views/catalog/show.html.erb`
+**Depends on**: T3
+**Reuses**: `@absent_variant_ids`
+**Requirement**: SRC-17
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Carta com variante ausente de `variant_code` menor que a presente: imagem, raridade e set do topo são os da presente
+- [ ] Carta com todas as variantes ausentes, aberta pelo dono: o cabeçalho mostra o texto visível "Variante fora da fonte"
+- [ ] Na lista, a variante ausente tem `dt` "Situação" e `dd` "Fora da fonte"
+- [ ] Os testes de `test/integration/card_detail_*` e `test/design/card_detail_*` continuam passando
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(fonte-apitcg): mostrar a variante presente no topo do detalhe`
+
+---
+
+### T23: Numerador do progresso limitado ao denominador no texto
+
+**What**: `Row#displayed_owned_numbers` devolve `[owned_numbers, base_size].min` quando há denominador, e a view usa esse valor no texto, no rótulo "N de M do set base" e na barra.
+**Where**: `app/queries/set_progress_query.rb` (e `app/views/progress/index.html.erb`)
+**Depends on**: T4
+**Reuses**: `completion_percent_known?`
+**Requirement**: SRC-26
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Set com `base_set_size` 7 e 8 números possuídos mostra "7 / 7 · 100%" e "7 de 7 do set base"
+- [ ] Set sem denominador mostra o numerador sem limite, como hoje (PRG-10)
+- [ ] Os testes de `test/queries/set_progress_*` e `test/design/progress_*` continuam passando
+- [ ] Gate full passa; contagem de runs registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(fonte-apitcg): limitar o numerador do progresso ao denominador`
+
+---
+
 ## Plano de delegação
 
 17 tasks, em três lotes de fases inteiras: **Lote A** = Phases 1–3 (T1–T7), que
@@ -615,6 +801,12 @@ Revisões por agente agnóstico de linguagem, já que não há revisor Ruby:
 | T15 | 1 serviço + o rake que o chama | ⚠️ coeso |
 | T16 | documentação | ✅ |
 | T17 | execução + registro | ✅ |
+| T18 | 1 serviço + o lock no model + o rescue no rake | ⚠️ coeso (a exceção nova só existe com quem a trata) |
+| T19 | 1 arquivo de teste | ✅ |
+| T20 | 1 arquivo de teste | ✅ |
+| T21 | 1 serviço | ✅ |
+| T22 | 1 view | ✅ |
+| T23 | 1 query object + a linha da view que exibe o resultado | ⚠️ coeso |
 
 ## Diagram-Definition Cross-Check
 
@@ -637,6 +829,12 @@ Revisões por agente agnóstico de linguagem, já que não há revisor Ruby:
 | T15 | T10 (Phase 4) | fase anterior | ✅ |
 | T16 | T14 (Phase 5) | fase anterior | ✅ |
 | T17 | T16 | T16 → T17 | ✅ |
+| T18 | T5, T6 (Phase 2) | fase anterior | ✅ |
+| T19 | T18 | T18 → T19 | ✅ |
+| T20 | T18 | T18 → T20 | ✅ |
+| T21 | T7 (Phase 3) | fase anterior | ✅ |
+| T22 | T3 (Phase 1) | fase anterior | ✅ |
+| T23 | T4 (Phase 1) | fase anterior | ✅ |
 
 ## Test Co-location Validation
 
@@ -659,3 +857,9 @@ Revisões por agente agnóstico de linguagem, já que não há revisor Ruby:
 | T15 | Serviço + rake | integration | integration | ✅ |
 | T16 | Documentação | none | none | ✅ |
 | T17 | Execução real | none | none | ✅ |
+| T18 | Serviço + rake | unit (o rake só repassa a mensagem; coberto pelos testes de T20) | unit | ✅ |
+| T19 | Serviço | unit | unit | ✅ |
+| T20 | Rake | integration | integration | ✅ |
+| T21 | Serviço | unit | unit | ✅ |
+| T22 | View | integration | integration | ✅ |
+| T23 | Query + view | integration | integration | ✅ |

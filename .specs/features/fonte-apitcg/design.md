@@ -116,7 +116,7 @@ graph TD
 - **Invariante da presença: `last_seen_at` só avança em run que termina `succeeded`.** Hoje o Upsert grava `last_seen_at: @started_at` em cada registro, dentro da transação do registro. Num run `failed`, isso faz a variante nova (ou a que voltou) ter `last_seen_at` maior que o `started_at` do último run `succeeded`, e `CardVariant.present` a publica, contra a definição de presença de Assumptions. O ajuste:
   - `upsert_card` e `upsert_variant` param de escrever `last_seen_at`. Os demais atributos continuam gravados registro a registro, como hoje.
   - O Upsert acumula em memória os `id` de cartas e variantes cuja transação de registro fechou sem erro.
-  - `finish` roda numa transação só: grava o status do run e, **só se ele for `succeeded`**, faz `Card.where(id: ids).update_all(last_seen_at: started_at)` e o mesmo em `CardVariant`. Status e presença mudam juntos, ou nenhum dos dois.
+  - `finish` roda numa transação só, sob o lock consultivo de presença (`ImportRun.lock_presence!`, o mesmo do Remap): grava o status do run e, **só se ele for `succeeded`**, faz `Card.where(id: ids).update_all(last_seen_at: started_at)` e o mesmo em `CardVariant`. Status e presença mudam juntos, ou nenhum dos dois.
   - Num run `failed`, nenhum `last_seen_at` muda. A variante criada nesse run fica com `last_seen_at` nulo e não é presente (a coluna já é nula). A que já existia mantém a marca do último `succeeded`.
   - Com ~7.200 variantes, a lista de ids em memória e o `update_all` por `IN` cabem sem lote. Se o volume crescer uma ordem de grandeza, o `update_all` passa a ser feito em fatias, sem mudar a regra.
 - A execução que falha na busca (SRC-04, SRC-32) também gera um `ImportRun`: `status: failed`, `source_revision: "(busca não concluída)"` e o erro no `error_log`, sem nenhuma escrita em catálogo. Assim o status `failed` fica visível no banco, como o Req. 1.6 pede.
@@ -161,7 +161,8 @@ graph TD
   1. Sem nenhum run `succeeded`, levanta `NoSucceededRun` com a mensagem de SRC-23.
   2. Para cada item (coleção e wishlist, em conjuntos separados) cuja variante não está presente, calcula os candidatos: variantes presentes da mesma `card_id`, do mesmo `sets.code` e da mesma classe de arte (`art_kind = 'base'` casa com `'base'`; `<> 'base'` casa com `<> 'base'`).
   3. Classifica: 0 candidatos é "sem candidato"; mais de 1, "ambíguo". Quando mais de um item do mesmo usuário cai no mesmo candidato, ou quando o usuário já tem item nele, é "colisão" para todos os envolvidos.
-  4. Aplica todos os movimentos numa **única transação**: `update_columns(card_variant_id:)`, sem tocar `quantity` nem `target_quantity` (SRC-20). Se algo falhar, nada se move. O índice único `(user_id, card_variant_id)` é a última barreira contra uma colisão não detectada.
+  4. Os passos 2 a 4 rodam numa **única transação**: ela toma o lock consultivo de presença (`ImportRun.lock_presence!`, `pg_advisory_xact_lock`), lê os itens elegíveis com `FOR UPDATE` em ordem de `id`, monta o plano e aplica `update_columns(card_variant_id:)`, sem tocar `quantity` nem `target_quantity` (SRC-20). Se algo falhar, nada se move. O lock consultivo é o mesmo que o `Upsert#finish` toma, então a presença não muda entre o plano e o movimento. O `FOR UPDATE` impede que o usuário altere ou apague um item planejado antes do commit. `moved` sai do que a transação aplicou.
+     - O índice único `(user_id, card_variant_id)` é a última barreira: um item criado pelo usuário no candidato depois do plano faz a aplicação levantar `RecordNotUnique`, que vira `Remap::ConcurrentChange` ("a coleção mudou durante o remapeamento; rode ingestion:remap de novo"), com rollback total. Rodar de novo é seguro pelo passo 5.
   5. Idempotente por construção: o item movido aponta para uma variante presente e sai do universo da passada seguinte (SRC-22).
 - O rake imprime o total movido e uma linha por item pulado. O relatório só leva `card_number`, `variant_code` e motivo, nada do usuário.
 
@@ -173,7 +174,7 @@ graph TD
 
 - `ALLOWED_HOST = "tcgplayer-cdn.tcgplayer.com"`.
 - `VARIANT_CODE_FORMAT` passa a aceitar também `\A(tcgplayer|apitcg):[A-Za-z0-9]+\z`. O formato antigo continua aceito, porque as variantes da optcgjson seguem no banco e o cache delas fica em disco.
-- O nome do arquivo em cache troca `:` por `-`, e o teste de path traversal (`:96`) é refeito sobre o nome saneado.
+- O nome do arquivo em cache troca `:` por `__` (`tcgplayer:123` → `tcgplayer__123.jpg`). O formato antigo não admite `__`, então um código antigo nunca divide arquivo com um novo; com `-`, `tcgplayer:123` e um eventual `tcgplayer-123` cairiam no mesmo arquivo. A extensão sai uma vez só de `uri.path`, para a validação e para o nome. O teste de path traversal (`:96`) é refeito sobre o nome saneado.
 - A extensão da imagem `large` do tcgplayer é `⚠️ VERIFICAR` no snapshot. Se não vier `.jpg`/`.png`/`.webp`, a lista de extensões precisa de emenda.
 
 ### Fixture e `verify_fixture.py`
