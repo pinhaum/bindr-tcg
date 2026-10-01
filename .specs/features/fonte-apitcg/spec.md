@@ -12,7 +12,7 @@ degenera em ordem por `card_number`. Ela também não cobre os sets mais novos c
 a mesma amplitude (4.915 variantes contra 7.247 produtos na apitcg) e não traz
 preço, que a Fase 3 vai precisar.
 
-A apitcg (`GET /api/one-piece/cards`, `GET /api/one-piece/sets`, header
+A apitcg (`GET /api/products?tcg=one-piece&type=card`, `GET /api/one-piece/sets`, header
 `x-api-key`) resolve os três pontos, mas custa o que a AD-001 protegia: não há
 `id` de variante no formato `OP01-001_p1`, o tipo de arte só aparece como sufixo
 do nome, os dados da carta divergem entre impressões e não existe `baseSetSize`.
@@ -89,7 +89,7 @@ registrado, fora de `failed_count` (SRC-11).
 
 **Acceptance Criteria**:
 
-1. WHEN o mantenedor executa `ingestion:import` THEN the system SHALL buscar todas as páginas de `GET /api/one-piece/cards` e `GET /api/one-piece/sets` com o header `x-api-key` lido de `APITCG_API_KEY`. <!-- SRC-01 -->
+1. WHEN o mantenedor executa `ingestion:import` THEN the system SHALL buscar todas as páginas de `GET /api/products?tcg=one-piece&type=card` e `GET /api/one-piece/sets` com o header `x-api-key` lido de `APITCG_API_KEY`. <!-- SRC-01 -->
 2. IF `APITCG_API_KEY` estiver ausente ou vazia THEN the system SHALL abortar antes de qualquer requisição, com a mensagem "APITCG_API_KEY não configurada", sem escrever no banco. <!-- SRC-02 -->
 3. WHEN todas as páginas forem recebidas THEN the system SHALL gravar o payload bruto em `storage/ingestion/apitcg-<UTC>.json` antes de normalizar qualquer registro. <!-- SRC-03 -->
 4. IF uma requisição não responder em 30s ou responder com status diferente de 2xx THEN the system SHALL repeti-la até 3 tentativas no total, e SE a terceira falhar ENTÃO SHALL encerrar a execução com status `failed` sem ter gravado nenhuma carta, variante ou set. <!-- SRC-04 -->

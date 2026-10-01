@@ -17,8 +17,10 @@ module Ingestion
     # gravado nem em mensagem de erro (SRC-05): o arquivo gravado contém só os
     # corpos das respostas.
     #
-    # ⚠️ VERIFICAR na T10: a forma da página de `/cards` (`data` e
-    # `totalPages`) e a de `/sets` (lista em `data` ou na raiz).
+    # Formato confirmado na T10 (2026-10-01): `/api/one-piece/sets` devolve
+    # `{success, data: [...]}`; as cartas vêm de `/api/products?tcg=one-piece&
+    # type=card&page=N&limit=N` (não existe `/cards`), que devolve
+    # `{success, data: [...], total}` com `total` em produtos, não em páginas.
     class Fetch
       class SourceUnavailable < StandardError; end
       class KeyRejected < SourceUnavailable; end
@@ -29,9 +31,11 @@ module Ingestion
       # Esperas antes da 2ª e da 3ª tentativa.
       BACKOFF_SECONDS = [ 2, 4 ].freeze
 
-      # Teto de páginas de `/cards`. A medição de 2026-09-29 deu ~73 páginas
+      TCG = "one-piece".freeze
+
+      # Teto de páginas de cartas. A medição de 2026-09-29 deu ~73 páginas
       # de 100; o teto só existe para que uma API que ignore `page` e não
-      # mande `totalPages` não prenda a busca num laço sem fim.
+      # mande `total` não prenda a busca num laço sem fim.
       MAX_PAGES = 500
 
       TRANSIENT_ERRORS = [
@@ -91,7 +95,7 @@ module Ingestion
       end
 
       def fetch_sets
-        sets = records(get_json("#{@config.base_url}/sets"))
+        sets = records(get_json("#{@config.base_url}/#{TCG}/sets"))
         raise SourceUnavailable, "apitcg respondeu sem nenhum set" if sets.empty?
 
         sets
@@ -104,13 +108,13 @@ module Ingestion
       # Um snapshot incompleto é pior que nenhum: gravado como run
       # `succeeded`, ele marcaria como ausente tudo o que faltou. Por isso
       # toda forma de parar cedo que não seja o fim declarado é erro: página
-      # vazia antes de `totalPages`, `totalPages` ilegível e o teto de páginas.
-      # Sem `totalPages`, o fim é a primeira página vazia.
+      # vazia antes do fim declarado, `total` ilegível e o teto de páginas.
+      # Sem `total`, o fim é a primeira página vazia.
       def fetch_cards
         cards = {}
 
         (1..MAX_PAGES).each do |page|
-          payload = get_json("#{@config.base_url}/cards?page=#{page}&limit=#{@config.page_size}")
+          payload = get_json("#{@config.base_url}/products?tcg=#{TCG}&type=card&page=#{page}&limit=#{@config.page_size}")
           batch = records(payload)
           total_pages = total_pages(payload)
 
@@ -135,13 +139,14 @@ module Ingestion
         raise SourceUnavailable, "apitcg respondeu sem lista de registros"
       end
 
+      # A API informa `total` em produtos; o número de páginas sai dele.
       def total_pages(payload)
-        return nil unless payload.is_a?(Hash) && payload.key?("totalPages") && !payload["totalPages"].nil?
+        return nil unless payload.is_a?(Hash) && !payload["total"].nil?
 
-        total = Integer(payload["totalPages"], exception: false)
-        raise SourceUnavailable, "apitcg respondeu totalPages inválido" unless total&.positive?
+        total = Integer(payload["total"], exception: false)
+        raise SourceUnavailable, "apitcg respondeu total inválido" unless total&.positive?
 
-        total
+        (total.to_f / @config.page_size).ceil
       end
 
       # Sem `_id`, dois produtos colapsariam numa só chave e um sumiria.

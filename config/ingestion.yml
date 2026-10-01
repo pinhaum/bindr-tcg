@@ -4,10 +4,9 @@
 # fora do git). Os limites foram escolhidos pelo dono em 2026-09-29 sobre uma
 # medição da API (~73 páginas, ~10s cada, uma página pendurada sem timeout).
 #
-# ⚠️ VERIFICAR: o host de `base_url` é confirmado na T10, na primeira
-# requisição real.
+# O host é `api.apitcg.com` (servidor do OpenAPI): o apex responde 308 para `www`, que dá 404 (confirmado na T10).
 source: apitcg
-base_url: https://apitcg.com/api/one-piece
+base_url: https://api.apitcg.com/api
 page_size: 100
 timeout: 30
 attempts: 3

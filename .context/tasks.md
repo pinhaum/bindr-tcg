@@ -333,7 +333,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [x] **8.2 Remapeamento da coleção** — T5–T6
   - _Requisitos: 1.7, 6.5_
 - [x] **8.3 Imagens do tcgplayer** — T7
-- [ ] **8.4 Busca e snapshot da apitcg** — T8–T10
+- [x] **8.4 Busca e snapshot da apitcg** — T8–T10
   - _Requisitos: 1.1, 11.5_
 - [ ] **8.5 Normalize e Upsert sobre a fixture nova** — T11–T15
   - _Requisitos: 1.9–1.11, 11.5, 11.7_

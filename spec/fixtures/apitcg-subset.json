@@ -1,0 +1,1578 @@
+{
+ "fetched_at": "2026-10-01T02:49:20Z",
+ "sets": [
+  {
+   "_id": "one-piece-500-years-in-the-future",
+   "name": "500 Years in the Future",
+   "tcg": "one-piece",
+   "code": "OP07",
+   "markets": {
+    "tcgplayer": {
+     "id": "23387"
+    },
+    "tcgmatch": {
+     "id": "one-piece-500-years-in-the-future"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:54.083Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "500-years-in-the-future",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2024-06-28T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-500-years-in-the-future-pre-release-cards",
+   "name": "500 Years in the Future Pre-Release Cards",
+   "tcg": "one-piece",
+   "code": "OP07 PRE",
+   "markets": {
+    "tcgplayer": {
+     "id": "23512"
+    },
+    "tcgmatch": {
+     "id": "one-piece-500-years-in-the-future-pre-release-cards"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:54.101Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "500-years-in-the-future-pre-release-cards",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2024-06-21T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-awakening-of-the-new-era",
+   "name": "Awakening of the New Era",
+   "tcg": "one-piece",
+   "code": "OP05",
+   "markets": {
+    "tcgplayer": {
+     "id": "23213"
+    },
+    "tcgmatch": {
+     "id": "one-piece-awakening-of-the-new-era"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:54.235Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "awakening-of-the-new-era",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2023-12-08T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-extra-booster-one-piece-heroines-edition-vol-2",
+   "name": "Extra Booster: One Piece Heroine's Edition Vol. 2",
+   "tcg": "one-piece",
+   "markets": {
+    "tcgplayer": {
+     "id": "24820"
+    }
+   },
+   "release_date": "2026-10-30T00:00:00.000Z",
+   "createdAt": "2026-08-15T00:00:03.893Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "extra-booster-one-piece-heroines-edition-vol-2",
+   "__v": 0
+  },
+  {
+   "_id": "one-piece-starter-deck-ex-gear-5",
+   "name": "ST-21: Starter Deck 21 EX Gear 5",
+   "tcg": "one-piece",
+   "code": "ST21",
+   "markets": {
+    "tcgplayer": {
+     "id": "23991"
+    },
+    "tcgmatch": {
+     "id": "one-piece-starter-deck-ex-gear-5"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:53.802Z",
+   "updatedAt": "2026-09-30T04:30:51.452Z",
+   "slug": "starter-deck-ex-gear-5",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2025-03-14T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-starter-deck-22-ace-newgate",
+   "name": "ST-22: Starter Deck 22 Ace & Newgate",
+   "tcg": "one-piece",
+   "code": "ST-22",
+   "markets": {
+    "tcgplayer": {
+     "id": "24304"
+    },
+    "tcgmatch": {
+     "id": "one-piece-starter-deck-22-ace-newgate"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:53.544Z",
+   "updatedAt": "2026-09-30T04:30:51.449Z",
+   "slug": "starter-deck-22-ace-newgate",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2025-09-05T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-starter-deck-25-blue-buggy",
+   "name": "ST-25: Starter Deck 25 BLUE Buggy",
+   "tcg": "one-piece",
+   "code": "ST-25",
+   "markets": {
+    "tcgplayer": {
+     "id": "24284"
+    },
+    "tcgmatch": {
+     "id": "one-piece-starter-deck-25-blue-buggy"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:53.652Z",
+   "updatedAt": "2026-09-30T04:30:52.252Z",
+   "slug": "starter-deck-25-blue-buggy",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2025-06-06T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-the-time-of-battle",
+   "name": "The Time of Battle",
+   "tcg": "one-piece",
+   "markets": {
+    "tcgplayer": {
+     "id": "24664"
+    },
+    "tcgmatch": {
+     "id": "one-piece-the-time-of-battle"
+    }
+   },
+   "release_date": "2026-06-12T00:00:00.000Z",
+   "createdAt": "2026-04-20T04:26:29.911Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "the-time-of-battle",
+   "__v": 0,
+   "serie": null
+  },
+  {
+   "_id": "one-piece-wings-of-the-captain",
+   "name": "Wings of the Captain",
+   "tcg": "one-piece",
+   "code": "OP06",
+   "markets": {
+    "tcgplayer": {
+     "id": "23272"
+    },
+    "tcgmatch": {
+     "id": "one-piece-wings-of-the-captain"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:54.178Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "wings-of-the-captain",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2024-03-15T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-wings-of-the-captain-pre-release-cards",
+   "name": "Wings of the Captain Pre-Release Cards",
+   "tcg": "one-piece",
+   "code": "OP06 PRE",
+   "markets": {
+    "tcgplayer": {
+     "id": "23424"
+    },
+    "tcgmatch": {
+     "id": "one-piece-wings-of-the-captain-pre-release-cards"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:54.197Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "wings-of-the-captain-pre-release-cards",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2024-03-08T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-carrying-on-his-will-3rd-anniversary-tournament-cards",
+   "name": "Carrying On His Will: 3rd Anniversary Tournament Cards",
+   "tcg": "one-piece",
+   "code": "OP13 ANN",
+   "markets": {
+    "tcgplayer": {
+     "id": "24498"
+    },
+    "tcgmatch": {
+     "id": "one-piece-carrying-on-his-will-3rd-anniversary-tournament-cards"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:53.488Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "carrying-on-his-will-3rd-anniversary-tournament-cards",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2025-10-31T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-extra-booster-memorial-collection",
+   "name": "Extra Booster: Memorial Collection",
+   "tcg": "one-piece",
+   "code": "EB-01",
+   "markets": {
+    "tcgplayer": {
+     "id": "23333"
+    },
+    "tcgmatch": {
+     "id": "one-piece-extra-booster-memorial-collection"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:54.120Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "extra-booster-memorial-collection",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2024-05-03T00:00:00.000Z"
+  },
+  {
+   "_id": "one-piece-one-piece-promotion-cards",
+   "name": "One Piece Promotion Cards",
+   "tcg": "one-piece",
+   "code": "OP-PR",
+   "markets": {
+    "tcgplayer": {
+     "id": "17675"
+    },
+    "tcgmatch": {
+     "id": "one-piece-one-piece-promotion-cards"
+    }
+   },
+   "createdAt": "2026-03-25T21:08:54.612Z",
+   "updatedAt": "2026-09-30T03:00:04.021Z",
+   "slug": "one-piece-promotion-cards",
+   "__v": 0,
+   "serie": null,
+   "release_date": "2022-09-30T00:00:00.000Z"
+  }
+ ],
+ "cards": [
+  {
+   "_id": 8963,
+   "type": "card",
+   "name": "Absalom (Alternate Art)",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-wings-of-the-captain",
+    "name": "Wings of the Captain",
+    "tcg": "one-piece",
+    "code": "OP06",
+    "markets": {
+     "tcgplayer": {
+      "id": "23272"
+     },
+     "tcgmatch": {
+      "id": "one-piece-wings-of-the-captain"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.178Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "wings-of-the-captain",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2024-03-15T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/541058_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/541058_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/541058_in_1000x1000.jpg",
+     "_id": "6abc7dd6a37834617511a5c0"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "541058",
+     "url": "https://www.tcgplayer.com/product/541058/one-piece-card-game-wings-of-the-captain-absalom-alternate-art",
+     "prices": {
+      "low": 0.5,
+      "mid": 2.55,
+      "high": 50,
+      "market": 1.7
+     },
+     "printing": "Foil",
+     "printings": [
+      {
+       "subTypeName": "Foil",
+       "prices": {
+        "low": 0.5,
+        "mid": 2.55,
+        "high": 50,
+        "market": 1.7
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP06-081",
+   "attributes": {
+    "Rarity": "R",
+    "Number": "OP06-081",
+    "Description": "[On Play] <em>You may return 2 cards from your trash to the bottom of your deck in any order:</em> K.O. up to 1 Character with a cost of 2 or less.",
+    "Color": "Black",
+    "CardType": "Character",
+    "Cost": "4",
+    "Power": "5000",
+    "Subtypes": "Thriller Bark Pirates",
+    "Counterplus": "1000",
+    "Attribute": "Ranged",
+    "Artist": "BISAI"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:05.871Z",
+   "updatedAt": "2026-09-30T04:11:52.261Z"
+  },
+  {
+   "_id": 6582,
+   "type": "card",
+   "name": "A.O.",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-starter-deck-22-ace-newgate",
+    "name": "ST-22: Starter Deck 22 Ace & Newgate",
+    "tcg": "one-piece",
+    "code": "ST-22",
+    "markets": {
+     "tcgplayer": {
+      "id": "24304"
+     },
+     "tcgmatch": {
+      "id": "one-piece-starter-deck-22-ace-newgate"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:53.544Z",
+    "updatedAt": "2026-09-30T04:30:51.449Z",
+    "slug": "starter-deck-22-ace-newgate",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2025-09-05T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/647709_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/647709_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/647709_in_1000x1000.jpg",
+     "_id": "6abc7dc1a378346175119c07"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "647709",
+     "url": "https://www.tcgplayer.com/product/647709/one-piece-card-game-st-22-starter-deck-22-ace-and-newgate-ao",
+     "prices": {
+      "low": 0.01,
+      "mid": 0.1,
+      "high": 9.54,
+      "market": 0.06
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 0.01,
+        "mid": 0.1,
+        "high": 9.54,
+        "market": 0.06
+       }
+      }
+     ]
+    }
+   },
+   "code": "ST22-014",
+   "attributes": {
+    "Rarity": "C",
+    "Number": "ST22-014",
+    "Color": "Blue",
+    "CardType": "Character",
+    "Cost": "4",
+    "Power": "6000",
+    "Subtypes": "Whitebeard Pirates Allies",
+    "Counterplus": "1000",
+    "Attribute": "Slash",
+    "Artist": "kankurou"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:36:52.879Z",
+   "updatedAt": "2026-09-30T03:10:57.786Z"
+  },
+  {
+   "_id": 6583,
+   "type": "card",
+   "name": "A.O. (Parallel)",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-starter-deck-22-ace-newgate",
+    "name": "ST-22: Starter Deck 22 Ace & Newgate",
+    "tcg": "one-piece",
+    "code": "ST-22",
+    "markets": {
+     "tcgplayer": {
+      "id": "24304"
+     },
+     "tcgmatch": {
+      "id": "one-piece-starter-deck-22-ace-newgate"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:53.544Z",
+    "updatedAt": "2026-09-30T04:30:51.449Z",
+    "slug": "starter-deck-22-ace-newgate",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2025-09-05T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/647710_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/647710_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/647710_in_1000x1000.jpg",
+     "_id": "6abc7dc1a378346175119c08"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "647710",
+     "url": "https://www.tcgplayer.com/product/647710/one-piece-card-game-st-22-starter-deck-22-ace-and-newgate-ao-parallel",
+     "prices": {
+      "low": 0.2,
+      "mid": 0.5,
+      "high": 11.46,
+      "market": 0.37
+     },
+     "printing": "Foil",
+     "printings": [
+      {
+       "subTypeName": "Foil",
+       "prices": {
+        "low": 0.2,
+        "mid": 0.5,
+        "high": 11.46,
+        "market": 0.37
+       }
+      }
+     ]
+    }
+   },
+   "code": "ST22-014",
+   "attributes": {
+    "Rarity": "C",
+    "Number": "ST22-014",
+    "Color": "Blue",
+    "CardType": "Character",
+    "Cost": "4",
+    "Power": "6000",
+    "Subtypes": "Whitebeard Pirates Allies",
+    "Counterplus": "1000",
+    "Attribute": "Slash",
+    "Artist": "kankurou"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:36:52.879Z",
+   "updatedAt": "2026-09-30T03:10:57.786Z"
+  },
+  {
+   "_id": 231920,
+   "type": "card",
+   "name": "\"Buddha\" Sengoku",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-the-time-of-battle",
+    "name": "The Time of Battle",
+    "tcg": "one-piece",
+    "markets": {
+     "tcgplayer": {
+      "id": "24664"
+     },
+     "tcgmatch": {
+      "id": "one-piece-the-time-of-battle"
+     }
+    },
+    "release_date": "2026-06-12T00:00:00.000Z",
+    "createdAt": "2026-04-20T04:26:29.911Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "the-time-of-battle",
+    "__v": 0,
+    "serie": null
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/696064_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/696064_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/696064_in_1000x1000.jpg",
+     "_id": "6abc7deaa37834617511b2bb"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "696064",
+     "url": "https://www.tcgplayer.com/product/696064/one-piece-card-game-the-time-of-battle-buddha-sengoku",
+     "prices": {
+      "low": 0.01,
+      "mid": 0.22,
+      "high": 9.54,
+      "market": 0.1
+     },
+     "printing": "Foil",
+     "printings": [
+      {
+       "subTypeName": "Foil",
+       "prices": {
+        "low": 0.01,
+        "mid": 0.22,
+        "high": 9.54,
+        "market": 0.1
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP16-077",
+   "attributes": {
+    "Rarity": "R",
+    "Number": "OP16-077",
+    "Description": "[Main] Look at 5 cards from the top of your deck; reveal up to 2 {Navy} type cards, add them to your hand and place the rest at the bottom of your deck in any order. Then, trash 1 card from your hand.",
+    "Color": "Purple",
+    "CardType": "Event",
+    "Cost": "1",
+    "Subtypes": "Navy"
+   },
+   "__v": 0,
+   "createdAt": "2026-06-01T00:11:36.572Z",
+   "updatedAt": "2026-09-30T04:12:19.747Z"
+  },
+  {
+   "_id": 7547,
+   "type": "card",
+   "name": "DON!! Card",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-starter-deck-ex-gear-5",
+    "name": "ST-21: Starter Deck 21 EX Gear 5",
+    "tcg": "one-piece",
+    "code": "ST21",
+    "markets": {
+     "tcgplayer": {
+      "id": "23991"
+     },
+     "tcgmatch": {
+      "id": "one-piece-starter-deck-ex-gear-5"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:53.802Z",
+    "updatedAt": "2026-09-30T04:30:51.452Z",
+    "slug": "starter-deck-ex-gear-5",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2025-03-14T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/624351_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/624351_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/624351_in_1000x1000.jpg",
+     "_id": "6abc7dcaa378346175119ff8"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "624351",
+     "url": "https://www.tcgplayer.com/product/624351/one-piece-card-game-st-21-starter-deck-21-ex-gear-5-don-card",
+     "prices": {
+      "low": 0.03,
+      "mid": 0.25,
+      "high": 10.14,
+      "market": 0.22
+     },
+     "printing": "Foil",
+     "printings": [
+      {
+       "subTypeName": "Foil",
+       "prices": {
+        "low": 0.03,
+        "mid": 0.25,
+        "high": 10.14,
+        "market": 0.22
+       }
+      }
+     ]
+    }
+   },
+   "attributes": {
+    "Rarity": "DON!!",
+    "Description": "<span style=\"color: red;\">Disclaimer: This card was reprinted in Starter Deck EX: Luffy & Ace</span>\r\nYour Turn +1000",
+    "CardType": "DON!!"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:36:58.284Z",
+   "updatedAt": "2026-09-30T04:11:34.490Z"
+  },
+  {
+   "_id": 8602,
+   "type": "card",
+   "name": "Boa Hancock (051) (Parallel) (Manga)",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-500-years-in-the-future",
+    "name": "500 Years in the Future",
+    "tcg": "one-piece",
+    "code": "OP07",
+    "markets": {
+     "tcgplayer": {
+      "id": "23387"
+     },
+     "tcgmatch": {
+      "id": "one-piece-500-years-in-the-future"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.083Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "500-years-in-the-future",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2024-06-28T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/545841_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/545841_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/545841_in_1000x1000.jpg",
+     "_id": "6abc7dd3a37834617511a449"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "545841",
+     "url": "https://www.tcgplayer.com/product/545841/one-piece-card-game-500-years-in-the-future-boa-hancock-051-parallel-manga",
+     "prices": {
+      "low": 1899.97,
+      "mid": 2574.99,
+      "high": 3000,
+      "market": 2150.33
+     },
+     "printing": "Foil",
+     "printings": [
+      {
+       "subTypeName": "Foil",
+       "prices": {
+        "low": 1899.97,
+        "mid": 2574.99,
+        "high": 3000,
+        "market": 2150.33
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP07-051",
+   "attributes": {
+    "Rarity": "SR",
+    "Number": "OP07-051",
+    "Description": "[On Play] Up to 1 of your opponent's Characters other than [Monkey.D.Luffy] cannot attack until the end of your opponent's next turn. Then, place up to 1 Character with a cost of 1 or less at the bottom of the owner's deck.",
+    "Color": "Blue",
+    "CardType": "Character",
+    "Cost": "6",
+    "Power": "8000",
+    "Subtypes": "Kuja Pirates;The Seven Warlords of the Sea",
+    "Attribute": "Special"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:03.922Z",
+   "updatedAt": "2026-09-30T03:11:15.380Z"
+  },
+  {
+   "_id": 9241,
+   "type": "card",
+   "name": "Baby 5 (033)",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-awakening-of-the-new-era",
+    "name": "Awakening of the New Era",
+    "tcg": "one-piece",
+    "code": "OP05",
+    "markets": {
+     "tcgplayer": {
+      "id": "23213"
+     },
+     "tcgmatch": {
+      "id": "one-piece-awakening-of-the-new-era"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.235Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "awakening-of-the-new-era",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2023-12-08T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/528579_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/528579_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/528579_in_1000x1000.jpg",
+     "_id": "6abc7dd8a37834617511a6e4"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "528579",
+     "url": "https://www.tcgplayer.com/product/528579/one-piece-card-game-awakening-of-the-new-era-baby-5-033",
+     "prices": {
+      "low": 0.01,
+      "mid": 0.15,
+      "high": 9,
+      "market": 0.07
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 0.01,
+        "mid": 0.15,
+        "high": 9,
+        "market": 0.07
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP05-033",
+   "attributes": {
+    "Rarity": "C",
+    "Number": "OP05-033",
+    "Description": "[Activate:Main] (1) <em>(You may rest the specified number of DON!! cards in your cost area.)</em> <strong>You may rest this Character</strong>: Play up to 1 [Donquixote Pirates] type Character card with a cost of 2 or less from your hand.",
+    "Color": "Green",
+    "CardType": "Character",
+    "Cost": "1",
+    "Power": "1000",
+    "Subtypes": "Donquixote Pirates",
+    "Counterplus": "1000",
+    "Attribute": "Special",
+    "Artist": "Takashi Yoshike"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:07.014Z",
+   "updatedAt": "2026-09-30T03:11:20.028Z"
+  },
+  {
+   "_id": 7034,
+   "type": "card",
+   "name": "Alvida (Reprint)",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-starter-deck-25-blue-buggy",
+    "name": "ST-25: Starter Deck 25 BLUE Buggy",
+    "tcg": "one-piece",
+    "code": "ST-25",
+    "markets": {
+     "tcgplayer": {
+      "id": "24284"
+     },
+     "tcgmatch": {
+      "id": "one-piece-starter-deck-25-blue-buggy"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:53.652Z",
+    "updatedAt": "2026-09-30T04:30:52.252Z",
+    "slug": "starter-deck-25-blue-buggy",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2025-06-06T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/634289_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/634289_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/634289_in_1000x1000.jpg",
+     "_id": "6abc7dc5a378346175119dde"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "634289",
+     "url": "https://www.tcgplayer.com/product/634289/one-piece-card-game-st-25-starter-deck-25-blue-buggy-alvida-reprint",
+     "prices": {
+      "low": 0.01,
+      "mid": 0.18,
+      "high": 9.54,
+      "market": 0.07
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 0.01,
+        "mid": 0.18,
+        "high": 9.54,
+        "market": 0.07
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP09-043",
+   "attributes": {
+    "Rarity": "UC",
+    "Number": "OP09-043",
+    "Description": "[On K.O.] If your Leader has the \"Cross Guild\" type, play up to 1 Character card with a cost of 5 or less other than [Alvida] from your hand.\r\n<br>\r\n<br><span style=\"color:red\">DISCLAIMER: This card is a reprint of the pre-existing card in the OP09 set. The main difference between this card and the original print is the inclusion of \"EN\" on the right side, by the copyright information.</span>",
+    "Color": "Blue",
+    "CardType": "Character",
+    "Cost": "5",
+    "Power": "6000",
+    "Subtypes": "Cross Guild",
+    "Counterplus": "1000",
+    "Attribute": "Strike",
+    "Artist": "Studio Vigor Co., Ltd"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:36:55.194Z",
+   "updatedAt": "2026-09-30T03:11:01.094Z"
+  },
+  {
+   "_id": 8704,
+   "type": "card",
+   "name": "Aladine",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-500-years-in-the-future-pre-release-cards",
+    "name": "500 Years in the Future Pre-Release Cards",
+    "tcg": "one-piece",
+    "code": "OP07 PRE",
+    "markets": {
+     "tcgplayer": {
+      "id": "23512"
+     },
+     "tcgmatch": {
+      "id": "one-piece-500-years-in-the-future-pre-release-cards"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.101Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "500-years-in-the-future-pre-release-cards",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2024-06-21T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/552062_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/552062_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/552062_in_1000x1000.jpg",
+     "_id": "6abc7dd3a37834617511a4b3"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "552062",
+     "url": "https://www.tcgplayer.com/product/552062/one-piece-card-game-500-years-in-the-future-pre-release-cards-aladine",
+     "prices": {
+      "low": 0.27,
+      "mid": 0.58,
+      "high": 12.42,
+      "market": 0.52
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 0.27,
+        "mid": 0.58,
+        "high": 12.42,
+        "market": 0.52
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP07-020",
+   "attributes": {
+    "Rarity": "C",
+    "Number": "OP07-020",
+    "Description": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.)\r<br>\n[On K.O.] If your Leader has the [Fish-Man] type, play up to 1 [Fish-Man] or [Merfolk] type Character card with a cost of 3 or less from your hand.",
+    "Color": "Green",
+    "CardType": "Character",
+    "Cost": "5",
+    "Power": "6000",
+    "Subtypes": "The Sun Pirates;Merfolk",
+    "Attribute": "Slash",
+    "Artist": "Aidle Co., Ltd."
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:04.319Z",
+   "updatedAt": "2026-09-30T03:11:15.898Z"
+  },
+  {
+   "_id": 9044,
+   "type": "card",
+   "name": "...Nothing...at All!!!",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-wings-of-the-captain",
+    "name": "Wings of the Captain",
+    "tcg": "one-piece",
+    "code": "OP06",
+    "markets": {
+     "tcgplayer": {
+      "id": "23272"
+     },
+     "tcgmatch": {
+      "id": "one-piece-wings-of-the-captain"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.178Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "wings-of-the-captain",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2024-03-15T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/541644_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/541644_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/541644_in_1000x1000.jpg",
+     "_id": "6abc7dd6a37834617511a611"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "541644",
+     "url": "https://www.tcgplayer.com/product/541644/one-piece-card-game-wings-of-the-captain-nothingat-all",
+     "prices": {
+      "low": 0.01,
+      "mid": 0.15,
+      "high": 20.11,
+      "market": 0.08
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 0.01,
+        "mid": 0.15,
+        "high": 20.11,
+        "market": 0.08
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP06-096",
+   "attributes": {
+    "Rarity": "C",
+    "Number": "OP06-096",
+    "Description": "[Counter] <strong>You may add 1 card from the top of your Life cards to your hand.</strong>: Your Characters with a cost of 7 or less cannot be K.O.'d in battle during this turn.\r\n<br>\r\n[Trigger] Activate this card's [Counter] effect.",
+    "Color": "Black",
+    "CardType": "Event",
+    "Cost": "3",
+    "Subtypes": "Straw Hat Crew"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:05.872Z",
+   "updatedAt": "2026-09-30T03:11:18.127Z"
+  },
+  {
+   "_id": 9111,
+   "type": "card",
+   "name": "...Nothing...at All!!!",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-wings-of-the-captain-pre-release-cards",
+    "name": "Wings of the Captain Pre-Release Cards",
+    "tcg": "one-piece",
+    "code": "OP06 PRE",
+    "markets": {
+     "tcgplayer": {
+      "id": "23424"
+     },
+     "tcgmatch": {
+      "id": "one-piece-wings-of-the-captain-pre-release-cards"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.197Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "wings-of-the-captain-pre-release-cards",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2024-03-08T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/541710_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/541710_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/541710_in_1000x1000.jpg",
+     "_id": "6abc7dd6a37834617511a659"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "541710",
+     "url": "https://www.tcgplayer.com/product/541710/one-piece-card-game-wings-of-the-captain-pre-release-cards-nothingat-all",
+     "prices": {
+      "low": 8.65,
+      "mid": 19.9,
+      "high": 89.16,
+      "market": 11.19
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 8.65,
+        "mid": 19.9,
+        "high": 89.16,
+        "market": 11.19
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP06-096",
+   "attributes": {
+    "Rarity": "C",
+    "Number": "OP06-096",
+    "Description": "[Counter] <strong>You may add 1 card from the top of your Life cards to your hand.</strong>: Your Characters with a cost of 7 or less cannot be K.O.'d in battle during this turn.\r\n<br>\r\n<br>\r\n<br>\r\n[Trigger] Activate this card's [Counter] effect.",
+    "Color": "Black",
+    "CardType": "Event",
+    "Cost": "3",
+    "Subtypes": "Straw Hat Crew"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:06.328Z",
+   "updatedAt": "2026-09-30T03:11:18.797Z"
+  },
+  {
+   "_id": 6117,
+   "type": "card",
+   "name": "Monkey.D.Luffy (3rd Anniversary Tournament 3 Brothers Pack)",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-carrying-on-his-will-3rd-anniversary-tournament-cards",
+    "name": "Carrying On His Will: 3rd Anniversary Tournament Cards",
+    "tcg": "one-piece",
+    "code": "OP13 ANN",
+    "markets": {
+     "tcgplayer": {
+      "id": "24498"
+     },
+     "tcgmatch": {
+      "id": "one-piece-carrying-on-his-will-3rd-anniversary-tournament-cards"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:53.488Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "carrying-on-his-will-3rd-anniversary-tournament-cards",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2025-10-31T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/661879_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/661879_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/661879_in_1000x1000.jpg",
+     "_id": "6abc7dbfa378346175119a2b"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "661879",
+     "url": "https://www.tcgplayer.com/product/661879/one-piece-card-game-carrying-on-his-will-3rd-anniversary-tournament-cards-monkeydluffy-3rd-anniversary-tournament-3-brothers-pack",
+     "prices": {
+      "low": 1.44,
+      "mid": 3.75,
+      "high": 37.77,
+      "market": 2.52
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 1.44,
+        "mid": 3.75,
+        "high": 37.77,
+        "market": 2.52
+       }
+      }
+     ]
+    }
+   },
+   "attributes": {
+    "Rarity": "L",
+    "Description": "This Leader can only be used in designated events according to the rules.\r\n<br>\r\nThis Leader is treated as a card with all card names, types, and attributes according to the rules.",
+    "Color": "Blue;Green;Purple;Red;Black;Yellow",
+    "CardType": "Leader",
+    "Life": "5",
+    "Power": "5000",
+    "Subtypes": "Straw Hat Crew",
+    "Attribute": "Strike",
+    "Artist": "BISAI"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:36:51.631Z",
+   "updatedAt": "2026-09-30T04:11:18.578Z"
+  },
+  {
+   "_id": 8776,
+   "type": "card",
+   "name": "Kouzuki Oden",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-extra-booster-memorial-collection",
+    "name": "Extra Booster: Memorial Collection",
+    "tcg": "one-piece",
+    "code": "EB-01",
+    "markets": {
+     "tcgplayer": {
+      "id": "23333"
+     },
+     "tcgmatch": {
+      "id": "one-piece-extra-booster-memorial-collection"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.120Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "extra-booster-memorial-collection",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2024-05-03T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/544523_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/544523_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/544523_in_1000x1000.jpg",
+     "_id": "6abc7dd4a37834617511a4fd"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "544523",
+     "url": "https://www.tcgplayer.com/product/544523/one-piece-card-game-extra-booster-memorial-collection-kouzuki-oden",
+     "prices": {
+      "low": 0.1,
+      "mid": 0.27,
+      "high": 10.14,
+      "market": 0.25
+     },
+     "printing": "Normal",
+     "printings": [
+      {
+       "subTypeName": "Normal",
+       "prices": {
+        "low": 0.1,
+        "mid": 0.27,
+        "high": 10.14,
+        "market": 0.25
+       }
+      }
+     ]
+    }
+   },
+   "code": "EB01-001",
+   "attributes": {
+    "Rarity": "L",
+    "Number": "EB01-001",
+    "Description": "All of your [Land of Wano] type Character cards without a Counter have a +1000 Counter, according to the rules.\r\n<br>\r\n[DON!! x1] [When Attacking] If you have a [Land of Wano] type Character with a cost of 5 or more, this Leader gains +1000 power until the start of your next turn.",
+    "Color": "Green;Red",
+    "CardType": "Leader",
+    "Life": "4",
+    "Power": "5000",
+    "Subtypes": "Land of Wano;Kouzuki Clan",
+    "Attribute": "Slash"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:04.783Z",
+   "updatedAt": "2026-09-30T04:11:49.952Z"
+  },
+  {
+   "_id": 7032,
+   "type": "card",
+   "name": "Crocodile & Mihawk",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-starter-deck-25-blue-buggy",
+    "name": "ST-25: Starter Deck 25 BLUE Buggy",
+    "tcg": "one-piece",
+    "code": "ST-25",
+    "markets": {
+     "tcgplayer": {
+      "id": "24284"
+     },
+     "tcgmatch": {
+      "id": "one-piece-starter-deck-25-blue-buggy"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:53.652Z",
+    "updatedAt": "2026-09-30T04:30:52.252Z",
+    "slug": "starter-deck-25-blue-buggy",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2025-06-06T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/634230_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/634230_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/634230_in_1000x1000.jpg",
+     "_id": "6abc7dc5a378346175119ddc"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "634230",
+     "url": "https://www.tcgplayer.com/product/634230/one-piece-card-game-st-25-starter-deck-25-blue-buggy-crocodile-and-mihawk",
+     "prices": {
+      "low": 0.5,
+      "mid": 1.31,
+      "high": 25,
+      "market": 1.17
+     },
+     "printing": "Foil",
+     "printings": [
+      {
+       "subTypeName": "Foil",
+       "prices": {
+        "low": 0.5,
+        "mid": 1.31,
+        "high": 25,
+        "market": 1.17
+       }
+      }
+     ]
+    }
+   },
+   "code": "ST25-003",
+   "attributes": {
+    "Rarity": "SR",
+    "Number": "ST25-003",
+    "Description": "[On Play] Draw 2 cards and trash 1 card from your hand. Then, play up to 1 \"Cross Guild\" type Character card with a cost of 4 or less from your hand.\r\n<br>[Once Per Turn] If your \"Cross Guild\" type Character would be removed from the field by your opponent's effect, you may trash 1 card from your hand instead.",
+    "Color": "Blue",
+    "CardType": "Character",
+    "Cost": "8",
+    "Power": "7000",
+    "Subtypes": "Former Baroque Works;Cross Guild",
+    "Attribute": "Slash;Special",
+    "Artist": "BISAI"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:36:55.194Z",
+   "updatedAt": "2026-09-30T04:11:27.852Z"
+  },
+  {
+   "_id": 10693,
+   "type": "card",
+   "name": "Helmeppo (Store Championship Participation Pack Vol. 2)",
+   "tcg": {
+    "_id": "one-piece",
+    "name": "One Piece",
+    "description": "One Piece Card Game",
+    "markets": {
+     "tcgplayer": {
+      "id": "68"
+     },
+     "tcgmatch": {
+      "id": "one-piece"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:50.388Z",
+    "updatedAt": "2026-03-25T23:46:15.889Z",
+    "__v": 0
+   },
+   "set": {
+    "_id": "one-piece-one-piece-promotion-cards",
+    "name": "One Piece Promotion Cards",
+    "tcg": "one-piece",
+    "code": "OP-PR",
+    "markets": {
+     "tcgplayer": {
+      "id": "17675"
+     },
+     "tcgmatch": {
+      "id": "one-piece-one-piece-promotion-cards"
+     }
+    },
+    "createdAt": "2026-03-25T21:08:54.612Z",
+    "updatedAt": "2026-09-30T03:00:04.021Z",
+    "slug": "one-piece-promotion-cards",
+    "__v": 0,
+    "serie": null,
+    "release_date": "2022-09-30T00:00:00.000Z"
+   },
+   "images": [
+    {
+     "small": "https://tcgplayer-cdn.tcgplayer.com/product/510722_200w.jpg",
+     "medium": "https://tcgplayer-cdn.tcgplayer.com/product/510722_400w.jpg",
+     "large": "https://tcgplayer-cdn.tcgplayer.com/product/510722_in_1000x1000.jpg",
+     "_id": "6abc7de6a37834617511acda"
+    }
+   ],
+   "markets": {
+    "tcgplayer": {
+     "id": "510722",
+     "url": "https://www.tcgplayer.com/product/510722/one-piece-card-game-one-piece-promotion-cards-helmeppo-store-championship-participation-pack-vol-2",
+     "prices": {
+      "low": 1.8,
+      "mid": 4.99,
+      "high": 39.99,
+      "market": 2.34
+     },
+     "printing": "Foil",
+     "printings": [
+      {
+       "subTypeName": "Foil",
+       "prices": {
+        "low": 1.8,
+        "mid": 4.99,
+        "high": 39.99,
+        "market": 2.34
+       }
+      }
+     ]
+    }
+   },
+   "code": "OP03-091",
+   "attributes": {
+    "Rarity": "PR",
+    "Number": "OP03-091",
+    "Description": "[On Play] Set the cost of up to 1 of your opponent's Characters with no base effect to 0 during this turn.",
+    "Color": "Black",
+    "CardType": "Character",
+    "Cost": "1",
+    "Power": "0",
+    "Subtypes": "Navy",
+    "Counterplus": "0",
+    "Attribute": "Wisdom",
+    "Artist": "BISAI"
+   },
+   "__v": 0,
+   "createdAt": "2026-03-25T22:37:15.313Z",
+   "updatedAt": "2026-09-30T04:12:13.482Z"
+  }
+ ]
+}

@@ -347,7 +347,7 @@ T4 → T23
 
 ### T9: `Ingestion::Apitcg::Fetch`
 
-**What**: Busca `/sets` e todas as páginas de `/cards` com `x-api-key`, em sequência, com timeout, 3 tentativas e espera crescente, deduplica por `_id` e grava `storage/ingestion/apitcg-<UTC>.json` atomicamente.
+**What**: Busca `/sets` e todas as páginas de `/products?type=card` (T10: `/cards` não existe) com `x-api-key`, em sequência, com timeout, 3 tentativas e espera crescente, deduplica por `_id` e grava `storage/ingestion/apitcg-<UTC>.json` atomicamente.
 **Where**: `app/services/ingestion/apitcg/fetch.rb`
 **Depends on**: T8
 **Reuses**: `.part` + `rename` e cliente injetável de `app/services/ingestion/fetch.rb`
@@ -389,12 +389,12 @@ T4 → T23
 
 **Done when**:
 
-- [ ] **Aval do dono** para a requisição real registrado no commit; a API precisa estar respondendo (AD-019, trade-off 6)
-- [ ] Snapshot completo em `storage/ingestion/` (fora do git), com o `grep` da chave sobre ele dando 0 ocorrências
-- [ ] Fixture versionada com cada caso de SRC-29, recortada por script no scratchpad, sem a chave
-- [ ] `python3 spec/verify_fixture.py` passa, com um check nomeado por caso de SRC-29
-- [ ] Os `⚠️ VERIFICAR` do design resolvidos sobre o snapshot e anotados no commit: forma de `images`, extensão da imagem `large`, separador de `[Trigger]`
-- [ ] Gate full passa (a fixture antiga continua no repositório até a T14); contagem de runs registrada
+- [x] **Aval do dono** para a requisição real registrado no commit; a API precisa estar respondendo (AD-019, trade-off 6)
+- [x] Snapshot completo em `storage/ingestion/` (fora do git), com o `grep` da chave sobre ele dando 0 ocorrências
+- [x] Fixture versionada com cada caso de SRC-29, recortada por script no scratchpad, sem a chave
+- [x] `python3 spec/verify_fixture.py` passa, com um check nomeado por caso de SRC-29
+- [x] Os `⚠️ VERIFICAR` do design resolvidos sobre o snapshot e anotados no commit: forma de `images`, extensão da imagem `large`, separador de `[Trigger]`
+- [x] Gate full passa (a fixture antiga continua no repositório até a T14); contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full

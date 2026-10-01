@@ -6,7 +6,7 @@ module Ingestion
     # o cliente HTTP é um dublê que responde por URL e registra cada chamada.
     class FetchTest < ActiveSupport::TestCase
       CHAVE = "chave-de-teste".freeze
-      BASE = "https://apitcg.test/api/one-piece".freeze
+      BASE = "https://apitcg.test/api".freeze
       AGORA = Time.utc(2026, 9, 30, 21, 5, 9)
 
       # Responde a cada URL com a fila de respostas configurada; a última se
@@ -48,9 +48,9 @@ module Ingestion
                   clock: Struct.new(:now).new(AGORA), sleeper: ->(seconds) { @waits << seconds })
       end
 
-      def page(number) = "#{BASE}/cards?page=#{number}&limit=2"
+      def page(number) = "#{BASE}/products?tcg=one-piece&type=card&page=#{number}&limit=2"
 
-      def ok(data, total_pages: 3) = [ 200, JSON.generate("data" => data, "totalPages" => total_pages) ]
+      def ok(data, total: 6) = [ 200, JSON.generate("data" => data, "total" => total) ]
 
       def card(id) = { "_id" => id, "code" => "OP01-#{id}" }
 
@@ -58,7 +58,7 @@ module Ingestion
 
       def three_pages
         {
-          "#{BASE}/sets" => [ [ 200, JSON.generate("data" => [ { "_id" => "one-piece-op01" } ]) ] ],
+          "#{BASE}/one-piece/sets" => [ [ 200, JSON.generate("data" => [ { "_id" => "one-piece-op01" } ]) ] ],
           page(1) => [ ok([ card("1"), card("2") ]) ],
           page(2) => [ ok([ card("3"), card("4") ]) ],
           page(3) => [ ok([ card("5") ]) ]
@@ -98,11 +98,11 @@ module Ingestion
         assert_equal %w[1 2 3 5], snapshot["cards"].pluck("_id")
       end
 
-      test "sem totalPages a paginação para na página vazia" do
+      test "sem total a paginação para na página vazia" do
         routes = {
-          "#{BASE}/sets" => three_pages["#{BASE}/sets"],
-          page(1) => [ ok([ card("1"), card("2") ], total_pages: nil) ],
-          page(2) => [ ok([], total_pages: nil) ]
+          "#{BASE}/one-piece/sets" => three_pages["#{BASE}/one-piece/sets"],
+          page(1) => [ ok([ card("1"), card("2") ], total: nil) ],
+          page(2) => [ ok([], total: nil) ]
         }
         http = FakeHttp.new(routes)
         snapshot = JSON.parse(fetch(http).call.path.read)
@@ -113,7 +113,7 @@ module Ingestion
 
       # Um snapshot incompleto gravado como completo marcaria como ausente o
       # que faltou; toda parada antes do fim declarado é erro.
-      test "página vazia antes de totalPages levanta SourceUnavailable sem arquivo" do
+      test "página vazia antes de total levanta SourceUnavailable sem arquivo" do
         routes = three_pages.merge(page(2) => [ ok([]) ])
 
         error = assert_raises(Fetch::SourceUnavailable) { fetch(FakeHttp.new(routes)).call }
@@ -122,23 +122,23 @@ module Ingestion
         assert_empty @storage.children
       end
 
-      test "totalPages ilegível ou zero levanta SourceUnavailable sem arquivo" do
+      test "total ilegível ou zero levanta SourceUnavailable sem arquivo" do
         [ "n/a", 0, -1 ].each do |invalido|
-          routes = three_pages.merge(page(1) => [ ok([ card("1"), card("2") ], total_pages: invalido) ])
+          routes = three_pages.merge(page(1) => [ ok([ card("1"), card("2") ], total: invalido) ])
 
-          assert_raises(Fetch::SourceUnavailable, "aceitou totalPages #{invalido.inspect}") do
+          assert_raises(Fetch::SourceUnavailable, "aceitou total #{invalido.inspect}") do
             fetch(FakeHttp.new(routes)).call
           end
           assert_empty @storage.children
         end
       end
 
-      test "sem totalPages uma página incompleta não encerra a busca" do
+      test "sem total uma página incompleta não encerra a busca" do
         routes = {
-          "#{BASE}/sets" => three_pages["#{BASE}/sets"],
-          page(1) => [ ok([ card("1") ], total_pages: nil) ],
-          page(2) => [ ok([ card("2") ], total_pages: nil) ],
-          page(3) => [ ok([], total_pages: nil) ]
+          "#{BASE}/one-piece/sets" => three_pages["#{BASE}/one-piece/sets"],
+          page(1) => [ ok([ card("1") ], total: nil) ],
+          page(2) => [ ok([ card("2") ], total: nil) ],
+          page(3) => [ ok([], total: nil) ]
         }
         snapshot = JSON.parse(fetch(FakeHttp.new(routes)).call.path.read)
 
@@ -161,8 +161,8 @@ module Ingestion
       end
 
       test "catálogo sem cartas ou sem sets levanta SourceUnavailable sem arquivo" do
-        sem_cartas = three_pages.merge(page(1) => [ ok([], total_pages: nil) ])
-        sem_sets = three_pages.merge("#{BASE}/sets" => [ [ 200, JSON.generate("data" => []) ] ])
+        sem_cartas = three_pages.merge(page(1) => [ ok([], total: nil) ])
+        sem_sets = three_pages.merge("#{BASE}/one-piece/sets" => [ [ 200, JSON.generate("data" => []) ] ])
 
         [ sem_cartas, sem_sets ].each do |routes|
           assert_raises(Fetch::SourceUnavailable) { fetch(FakeHttp.new(routes)).call }
@@ -208,7 +208,7 @@ module Ingestion
       end
 
       test "três respostas não-2xx levantam SourceUnavailable sem arquivo gravado" do
-        routes = three_pages.merge("#{BASE}/sets" => [ [ 500, "" ] ])
+        routes = three_pages.merge("#{BASE}/one-piece/sets" => [ [ 500, "" ] ])
 
         error = assert_raises(Fetch::SourceUnavailable) { fetch(FakeHttp.new(routes)).call }
 
@@ -217,7 +217,7 @@ module Ingestion
       end
 
       test "401 levanta KeyRejected na primeira resposta, sem nova tentativa (SRC-32)" do
-        http = FakeHttp.new(three_pages.merge("#{BASE}/sets" => [ [ 401, "" ] ]))
+        http = FakeHttp.new(three_pages.merge("#{BASE}/one-piece/sets" => [ [ 401, "" ] ]))
 
         error = assert_raises(Fetch::KeyRejected) { fetch(http).call }
 
@@ -254,8 +254,8 @@ module Ingestion
       test "o valor da chave não aparece na mensagem de nenhum erro (SRC-05)" do
         ecoa_a_chave = SocketError.new("falha ao conectar com x-api-key: #{CHAVE}")
         cenarios = [
-          three_pages.merge("#{BASE}/sets" => [ ecoa_a_chave ]),
-          three_pages.merge("#{BASE}/sets" => [ [ 401, "" ] ]),
+          three_pages.merge("#{BASE}/one-piece/sets" => [ ecoa_a_chave ]),
+          three_pages.merge("#{BASE}/one-piece/sets" => [ [ 401, "" ] ]),
           three_pages.merge(page(1) => [ [ 502, "" ] ])
         ]
 

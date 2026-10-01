@@ -20,7 +20,7 @@ decorre de uma regra só, a **presença na fonte**, e ela vive num único scope.
 graph TD
     K[ENV APITCG_API_KEY] --> F
     C[config/ingestion.yml<br/>base_url, page_size, timeout, attempts] --> F
-    F[Apitcg::Fetch<br/>pagina /sets e /cards] -->|grava antes de normalizar| S[(storage/ingestion/<br/>apitcg-UTC.json)]
+    F[Apitcg::Fetch<br/>pagina /sets e /products] -->|grava antes de normalizar| S[(storage/ingestion/<br/>apitcg-UTC.json)]
     S -->|SNAPSHOT=arquivo| N[Apitcg::Normalize]
     F --> N
     N --> U[Upsert<br/>last_seen_at = started_at<br/>só quando o run fecha succeeded]
@@ -54,7 +54,7 @@ graph TD
 
 | System | Integration Method |
 |---|---|
-| apitcg | `GET /api/one-piece/sets` e `GET /api/one-piece/cards?page=N&limit=100`, header `x-api-key` |
+| apitcg | `GET https://api.apitcg.com/api/one-piece/sets` e `GET https://api.apitcg.com/api/products?tcg=one-piece&type=card&page=N&limit=100` (confirmado na T10: `/cards` não existe; a página traz `total` em produtos), header `x-api-key` |
 | `CatalogQuery` | Escopo base passa de `Card.all` para cartas com variante presente; filtros de set e raridade (`catalog_query.rb:345-358`) passam a olhar só variantes presentes |
 | `CatalogQuery.filter_options` | `catalog_query.rb:157-178` passa a partir de variantes presentes |
 | Detalhe da carta | `catalog_controller.rb:40-45`: variantes presentes mais as ausentes que o usuário tem |
@@ -77,7 +77,7 @@ graph TD
 
 ### `Ingestion::Apitcg::Fetch`
 
-- **Purpose**: buscar `/sets` e todas as páginas de `/cards`, e gravar o snapshot antes de qualquer normalização.
+- **Purpose**: buscar `/sets` e todas as páginas de `/products?type=card`, e gravar o snapshot antes de qualquer normalização.
 - **Location**: `app/services/ingestion/apitcg/fetch.rb`
 - **Interfaces**:
   - `initialize(config:, storage_dir:, http: NetHttpClient.new(timeout: config.timeout), clock: Time, sleeper: ->(s) { sleep(s) })`
@@ -85,7 +85,7 @@ graph TD
 - **Behavior**:
   - As páginas são buscadas em sequência, sem paralelismo, por causa do limite de requisições (`⚠️ VERIFICAR`).
   - Cada requisição tem até `attempts` tentativas. A espera é de 2s e depois 4s, via `sleeper` injetável. Timeout e não-2xx contam como falha. Um 401 levanta `KeyRejected` na hora, sem repetir (SRC-32). Esgotadas as tentativas, levanta `SourceUnavailable` (SRC-04).
-  - A paginação para quando a página volta vazia ou `page >= totalPages`. Os produtos são deduplicados por `_id` antes da gravação (SRC-33).
+  - A paginação para quando a página volta vazia ou `page >= ceil(total / page_size)`. Os produtos são deduplicados por `_id` antes da gravação (SRC-33).
   - O snapshot é `{"fetched_at": ISO8601, "sets": [...], "cards": [...]}`, gravado com `.part` + `rename`. A chave nunca entra: o corpo gravado são só as respostas, nunca os headers (SRC-05).
   - O nome do arquivo é `apitcg-<UTC YYYYMMDDTHHMMSSZ>.json`. Se o arquivo já existir, a busca falha em vez de sobrescrevê-lo (Req. 1.11).
 - **Dependencies**: `SourceConfig`, `Net::HTTP`.
@@ -106,8 +106,8 @@ graph TD
   5. A impressão que define a carta é a `base` do set de estreia. Sem ela, a do set com `released_on` mais recente; empate pelo menor `variant_code` (SRC-12). O set de estreia vira o `set_id` da carta.
   6. Limpeza de texto: remove tags, converte `<br>` em `\n`, remove disclaimers e links de errata. O trecho após `[Trigger]` vai para `trigger_text` e sai do efeito. `block_icon` fica nil.
   7. `base_set_size` pela regra de SRC-24/SRC-35, calculada sobre os `card_number` distintos do set após os descartes. `total_set_size` é o número de variantes do set.
-  8. `card_type` e `traits` usam os mapeamentos atuais (`CARD_TYPES`, deduplicação case-insensitive). `attributes.Subtypes` vem como string `"A;B"` e é quebrada em `;`.
-  9. `image_url` recebe a imagem `large` (`images` pode vir como objeto ou como array; `⚠️ VERIFICAR` no snapshot qual forma vale).
+  8. `counter` vem de `attributes.Counterplus` (a chave real; não existe `Counter`), com nulo ≠ 0 (T10: há um `"0"` legítimo). `[Trigger]` vem depois do separador `\r\n<br>\r\n` (T10). `card_type` e `traits` usam os mapeamentos atuais (`CARD_TYPES`, deduplicação case-insensitive). `attributes.Subtypes` vem como string `"A;B"` e é quebrada em `;`.
+  9. `image_url` recebe a imagem `large` (confirmado na T10: `images` é lista de um objeto `{small, medium, large}`, e `large` é sempre `.jpg`).
 
 ### `Ingestion::Upsert` (ajuste)
 
@@ -175,7 +175,7 @@ graph TD
 - `ALLOWED_HOST = "tcgplayer-cdn.tcgplayer.com"`.
 - `VARIANT_CODE_FORMAT` passa a aceitar também `\A(tcgplayer|apitcg):[A-Za-z0-9]+\z`. O formato antigo continua aceito, porque as variantes da optcgjson seguem no banco e o cache delas fica em disco.
 - O nome do arquivo em cache troca `:` por `__` (`tcgplayer:123` → `tcgplayer__123.jpg`). O formato antigo não admite `__`, então um código antigo nunca divide arquivo com um novo; com `-`, `tcgplayer:123` e um eventual `tcgplayer-123` cairiam no mesmo arquivo. A extensão sai uma vez só de `uri.path`, para a validação e para o nome. O teste de path traversal (`:96`) é refeito sobre o nome saneado.
-- A extensão da imagem `large` do tcgplayer é `⚠️ VERIFICAR` no snapshot. Se não vier `.jpg`/`.png`/`.webp`, a lista de extensões precisa de emenda.
+- A extensão da imagem `large` do tcgplayer é `.jpg` nos 7.252 produtos do snapshot de 2026-10-01 (confirmado na T10); a lista de extensões não precisa de emenda.
 
 ### Fixture e `verify_fixture.py`
 
