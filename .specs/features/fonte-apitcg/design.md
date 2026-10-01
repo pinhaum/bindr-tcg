@@ -96,7 +96,7 @@ graph TD
 - **Location**: `app/services/ingestion/apitcg/normalize.rb`
 - **Interfaces**: `self.call(snapshot_hash) -> Result(sets, cards, variants, discarded)`
 - **Behavior**, pela ordem de aplicação:
-  1. Filtra `type = card`. `CardType = DON!!` é descartado em silêncio (SRC-10). Produto sem `code` vai para `discarded` com o `_id` (SRC-11).
+  1. Filtra `type = card`. `CardType = DON!!` é descartado em silêncio (SRC-10). Produto sem `code` vai para `discarded` com o `_id` (SRC-11); produto sem `CardType` também, com o motivo "sem CardType" (SRC-36); um `CardType` presente e desconhecido levanta `UnknownCardType`.
   2. `variant_code` recebe `"tcgplayer:#{markets.tcgplayer.id}"`, ou `"apitcg:#{_id}"` quando não há esse id (SRC-09). A mesma variante em dois sets fica no primeiro em que aparece (SRC-34).
   3. **Código do set**, em duas passadas (SRC-14):
      - Primeira passada: normaliza os `code` presentes (remove o hífen entre letras e dígitos, troca espaço por hífen).

@@ -223,6 +223,19 @@ module Ingestion
         assert_raises(Normalize::UnknownCardType) { normalizar(sets, cards) }
       end
 
+      test "SRC-36: produto sem CardType vai para os descartes e não derruba a ingestão" do
+        sets = [ conjunto("s", code: "OP01") ]
+        cards = [ produto(1, "OP01-001", "s", atributos: { "CardType" => "Character" }),
+                  produto(2, "OP01-002", "s", atributos: { "CardType" => nil }),
+                  produto(3, "OP01-003", "s", atributos: { "CardType" => "" }) ]
+
+        resultado = normalizar(sets, cards)
+
+        assert_equal [ "OP01-001" ], resultado.cards.map(&:card_number)
+        assert_equal [ { "_id" => 2, "reason" => "sem CardType" }, { "_id" => 3, "reason" => "sem CardType" } ],
+                     resultado.discarded
+      end
+
       test "aceita o snapshot como JSON ou como hash" do
         snapshot = JSON.parse(FIXTURE.read)
 

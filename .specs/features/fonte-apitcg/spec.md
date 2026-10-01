@@ -194,6 +194,7 @@ registrado, fora de `failed_count` (SRC-11).
 - IF o total de páginas mudar durante a busca (produto novo entre páginas) THEN the system SHALL deduplicar pelo `variant_code` antes de normalizar. <!-- SRC-33 -->
 - WHEN a mesma variante aparecer em dois sets THEN the system SHALL gravá-la uma única vez, no primeiro set em que aparecer no snapshot (regra do caso P-029_r1). <!-- SRC-34 -->
 - IF um set não tiver nenhum `card_number` com prefixo igual ao seu código THEN the system SHALL aplicar o ramo "todos os números distintos" de SRC-24, sem divisão por zero. <!-- SRC-35 -->
+- IF um produto não tiver `CardType` THEN the system SHALL registrá-lo no `error_log` como descarte, com o `_id` e o motivo "sem CardType", sem contá-lo em `failed_count` e sem alterar o status, e continuar; um `CardType` presente e desconhecido continua sendo erro. (Medido em 2026-10-01: 2 produtos, `OP18-025` Gonbe e o promo oversized `1/1000`; sem este descarte um único produto incompleto derruba a ingestão inteira.) <!-- SRC-36 -->
 
 ---
 
@@ -236,8 +237,9 @@ registrado, fora de `failed_count` (SRC-11).
 | SRC-33 | Edge case | Req. 1.4 | Pending |
 | SRC-34 | Edge case | Req. 1.3 | Pending |
 | SRC-35 | Edge case | Req. 9.5 | Pending |
+| SRC-36 | Edge case | Req. 1.5 | Pending |
 
-**Coverage:** 35 total, 0 mapped to tasks, 35 unmapped ⚠️ (tasks ainda não escritas).
+**Coverage:** 36 total, 0 mapped to tasks, 35 unmapped ⚠️ (tasks ainda não escritas).
 
 **Emendas em `.context/` que precedem o código:** Req. 1.1, 1.9, 1.10 e 1.11
 (snapshot no lugar da revisão imutável), Req. 9.1, 9.4 e 9.5 (números de carta

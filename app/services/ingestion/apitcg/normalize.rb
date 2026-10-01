@@ -61,9 +61,9 @@ module Ingestion
 
       private
 
-      # SRC-10, SRC-11 e SRC-34: DON!! sai em silêncio, produto sem `code` vai para
-      # os descartes e a mesma variante em dois sets fica no primeiro em que
-      # aparece. Roda antes de qualquer cálculo para que carta, código de set e
+      # SRC-10, SRC-11, SRC-36 e SRC-34: DON!! sai em silêncio, produto sem `code`
+      # ou sem `CardType` vai para os descartes e a mesma variante em dois sets
+      # fica no primeiro em que aparece. Roda antes de qualquer cálculo para que carta, código de set e
       # tamanho do set nunca enxerguem a ocorrência repetida.
       def select_products
         discarded = []
@@ -75,6 +75,11 @@ module Ingestion
 
           if product["code"].blank?
             discarded << { "_id" => product["_id"], "reason" => "sem code" }
+            next
+          end
+
+          if product.dig("attributes", "CardType").blank?
+            discarded << { "_id" => product["_id"], "reason" => "sem CardType" }
             next
           end
 
