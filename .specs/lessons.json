@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 54,
+  "next_id": 61,
   "lessons": [
     {
       "id": "L-001",
@@ -958,6 +958,132 @@
       ],
       "created": "2026-09-29T04:01:35Z",
       "last_seen": "2026-09-29T04:01:35Z"
+    },
+    {
+      "id": "L-054",
+      "key": "ac_gap::give each distinct discard reason its own end to end test asserting run status and failed counter not only the normalizer output",
+      "text": "Give each distinct discard reason its own end-to-end test asserting run status and failed counter, not only the normalizer output",
+      "signal": "ac_gap",
+      "scope": "ingestion",
+      "status": "candidate",
+      "features": [
+        "fonte-apitcg"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SRC-36 (ingestion)"
+      ],
+      "created": "2026-10-01T03:59:24Z",
+      "last_seen": "2026-10-01T03:59:24Z"
+    },
+    {
+      "id": "L-055",
+      "key": "ac_gap::test every output channel of a secret stdout stderr inspect logs with the secret set not only with it unset",
+      "text": "Test every output channel of a secret (stdout, stderr, inspect, logs) with the secret set, not only with it unset",
+      "signal": "ac_gap",
+      "scope": "security",
+      "status": "candidate",
+      "features": [
+        "fonte-apitcg"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SRC-05 (security)"
+      ],
+      "created": "2026-10-01T03:59:24Z",
+      "last_seen": "2026-10-01T03:59:24Z"
+    },
+    {
+      "id": "L-056",
+      "key": "ac_gap::assert that configured timeouts reach the real http client call not only that the config value exists",
+      "text": "Assert that configured timeouts reach the real HTTP client call, not only that the config value exists",
+      "signal": "ac_gap",
+      "scope": "http-client",
+      "status": "candidate",
+      "features": [
+        "fonte-apitcg"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SRC-04 (http-client)"
+      ],
+      "created": "2026-10-01T03:59:24Z",
+      "last_seen": "2026-10-01T03:59:24Z"
+    },
+    {
+      "id": "L-057",
+      "key": "spec_precision_gap::state in the criterion which entity and edge semantics a derived term such as present or owned refers to set of the card vs of the variant zero quantity wishlist vs collection",
+      "text": "State in the criterion which entity and edge semantics a derived term such as present or owned refers to (set of the card vs of the variant, zero quantity, wishlist vs collection)",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "fonte-apitcg"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SRC-15 (spec)"
+      ],
+      "created": "2026-10-01T03:59:24Z",
+      "last_seen": "2026-10-01T03:59:24Z"
+    },
+    {
+      "id": "L-058",
+      "key": "gate_fail::pin the tool version or document the outdated version flag in the gate command so an upstream release cannot turn the gate red without a code change",
+      "text": "Pin the tool version or document the outdated-version flag in the gate command so an upstream release cannot turn the gate red without a code change",
+      "signal": "gate_fail",
+      "scope": "ci",
+      "status": "candidate",
+      "features": [
+        "fonte-apitcg"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "tasks.md:47 (ci)"
+      ],
+      "created": "2026-10-01T03:59:24Z",
+      "last_seen": "2026-10-01T03:59:24Z"
+    },
+    {
+      "id": "L-059",
+      "key": "spec_precision_gap::state in the criterion at which pipeline stage and at what moment a rule applies dedup stage when a revision is recorded",
+      "text": "State in the criterion at which pipeline stage and at what moment a rule applies (dedup stage, when a revision is recorded)",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "fonte-apitcg"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SRC-33 (spec.md:194), SRC-06 (spec.md:97) (spec)"
+      ],
+      "created": "2026-10-01T04:14:32Z",
+      "last_seen": "2026-10-01T04:14:32Z"
+    },
+    {
+      "id": "L-060",
+      "key": "spec_precision_gap::fix literal reason texts log entry shape and rule precedence in the criterion when a test has to assert them",
+      "text": "Fix literal reason texts, log entry shape and rule precedence in the criterion when a test has to assert them",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "fonte-apitcg"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SRC-11 (spec.md:102), SRC-13 (spec.md:104) (spec)"
+      ],
+      "created": "2026-10-01T04:14:32Z",
+      "last_seen": "2026-10-01T04:14:32Z"
     }
   ]
 }

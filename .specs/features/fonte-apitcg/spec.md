@@ -202,44 +202,44 @@ registrado, fora de `failed_count` (SRC-11).
 
 | Requirement ID | Story | Origem | Status |
 |---|---|---|---|
-| SRC-01 | P1: Ingestão | Req. 1.1 | Pending |
-| SRC-02 | P1: Ingestão | Req. 1.8 | Pending |
-| SRC-03 | P1: Ingestão | Req. 11.5, design §5.1 | Pending |
-| SRC-04 | P1: Ingestão | Req. 1.8 | Pending |
-| SRC-05 | P1: Ingestão | CLAUDE.md (segredos) | Pending |
-| SRC-06 | P1: Ingestão | Req. 1.10 (a reescrever) | Pending |
-| SRC-07 | P1: Ingestão | Req. 1.9, 11.5 (a reescrever) | Pending |
-| SRC-08 | P1: Ingestão | Req. 1.4 | Pending |
-| SRC-09 | P1: Ingestão | Req. 1.3, AD nova | Pending |
-| SRC-10 | P1: Ingestão | P7 | Pending |
-| SRC-11 | P1: Ingestão | Req. 1.5 | Pending |
-| SRC-12 | P1: Ingestão | Req. 1.2, 5.4 | Pending |
-| SRC-13 | P1: Ingestão | design §3 (`art_kind`) | Pending |
-| SRC-14 | P1: Ingestão | Req. 2.4 | Pending |
-| SRC-15 | P1: Catálogo | Req. 2.4 | Pending |
-| SRC-16 | P1: Catálogo | Req. 1.7 | Pending |
-| SRC-17 | P1: Catálogo | Req. 1.7, 5.2 | Pending |
-| SRC-18 | P1: Catálogo | Req. 1.7 | Pending |
-| SRC-19 | P1: Remapeamento | Req. 1.7 | Pending |
-| SRC-20 | P1: Remapeamento | Req. 7 | Pending |
-| SRC-21 | P1: Remapeamento | Req. 1.7 | Pending |
-| SRC-22 | P1: Remapeamento | Req. 1.4 | Pending |
-| SRC-23 | P1: Remapeamento | — | Pending |
-| SRC-24 | P1: Progresso | Req. 9.5 (a reescrever), AD-003 | Pending |
-| SRC-25 | P1: Progresso | Req. 9.1, 9.4 (a reescrever) | Pending |
-| SRC-26 | P1: Progresso | Req. 9.2 | Pending |
-| SRC-27 | P1: Progresso | Req. 9.6 | Pending |
-| SRC-28 | P1: Progresso | Req. 9.4 | Pending |
-| SRC-29 | P1: Fixture | Req. 11.5 | Pending |
-| SRC-30 | P1: Fixture | CLAUDE.md (`verify_fixture.py`) | Pending |
-| SRC-31 | P2: Estabilidade | AD nova | Pending |
-| SRC-32 | Edge case | Req. 1.8 | Pending |
-| SRC-33 | Edge case | Req. 1.4 | Pending |
-| SRC-34 | Edge case | Req. 1.3 | Pending |
-| SRC-35 | Edge case | Req. 9.5 | Pending |
-| SRC-36 | Edge case | Req. 1.5 | Pending |
+| SRC-01 | P1: Ingestão | Req. 1.1 | ✅ Verified |
+| SRC-02 | P1: Ingestão | Req. 1.8 | ✅ Verified |
+| SRC-03 | P1: Ingestão | Req. 11.5, design §5.1 | ✅ Verified |
+| SRC-04 | P1: Ingestão | Req. 1.8 | ✅ Verified |
+| SRC-05 | P1: Ingestão | CLAUDE.md (segredos) | ✅ Verified |
+| SRC-06 | P1: Ingestão | Req. 1.10 (a reescrever) | ✅ Verified |
+| SRC-07 | P1: Ingestão | Req. 1.9, 11.5 (a reescrever) | ✅ Verified |
+| SRC-08 | P1: Ingestão | Req. 1.4 | ✅ Verified |
+| SRC-09 | P1: Ingestão | Req. 1.3, AD nova | ✅ Verified |
+| SRC-10 | P1: Ingestão | P7 | ✅ Verified |
+| SRC-11 | P1: Ingestão | Req. 1.5 | ✅ Verified |
+| SRC-12 | P1: Ingestão | Req. 1.2, 5.4 | ✅ Verified |
+| SRC-13 | P1: Ingestão | design §3 (`art_kind`) | ✅ Verified |
+| SRC-14 | P1: Ingestão | Req. 2.4 | ✅ Verified |
+| SRC-15 | P1: Catálogo | Req. 2.4 | ✅ Verified |
+| SRC-16 | P1: Catálogo | Req. 1.7 | ✅ Verified |
+| SRC-17 | P1: Catálogo | Req. 1.7, 5.2 | ✅ Verified |
+| SRC-18 | P1: Catálogo | Req. 1.7 | ✅ Verified |
+| SRC-19 | P1: Remapeamento | Req. 1.7 | ✅ Verified |
+| SRC-20 | P1: Remapeamento | Req. 7 | ✅ Verified |
+| SRC-21 | P1: Remapeamento | Req. 1.7 | ✅ Verified |
+| SRC-22 | P1: Remapeamento | Req. 1.4 | ✅ Verified |
+| SRC-23 | P1: Remapeamento | — | ✅ Verified |
+| SRC-24 | P1: Progresso | Req. 9.5 (a reescrever), AD-003 | ✅ Verified |
+| SRC-25 | P1: Progresso | Req. 9.1, 9.4 (a reescrever) | ✅ Verified |
+| SRC-26 | P1: Progresso | Req. 9.2 | ✅ Verified |
+| SRC-27 | P1: Progresso | Req. 9.6 | ✅ Verified |
+| SRC-28 | P1: Progresso | Req. 9.4 | ✅ Verified |
+| SRC-29 | P1: Fixture | Req. 11.5 | ✅ Verified |
+| SRC-30 | P1: Fixture | CLAUDE.md (`verify_fixture.py`) | ✅ Verified |
+| SRC-31 | P2: Estabilidade | AD nova | ⏳ Bloqueado por tempo (D-04): serviço e rake verificados |
+| SRC-32 | Edge case | Req. 1.8 | ✅ Verified |
+| SRC-33 | Edge case | Req. 1.4 | ✅ Verified |
+| SRC-34 | Edge case | Req. 1.3 | ✅ Verified |
+| SRC-35 | Edge case | Req. 9.5 | ✅ Verified |
+| SRC-36 | Edge case | Req. 1.5 | ✅ Verified |
 
-**Coverage:** 36 total, 0 mapped to tasks, 35 unmapped ⚠️ (tasks ainda não escritas).
+**Coverage:** 36 total, 35 ✅ Verified, 1 ⏳ (SRC-31: serviço, rake e testes verificados; a comparação real de ≥24h segue bloqueada por tempo, D-04). Re-verificação independente do ciclo 1 em 2026-10-01: `validation.md` PASS, sensor 39/39, gate 1540 runs.
 
 **Emendas em `.context/` que precedem o código:** Req. 1.1, 1.9, 1.10 e 1.11
 (snapshot no lugar da revisão imutável), Req. 9.1, 9.4 e 9.5 (números de carta

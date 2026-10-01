@@ -332,6 +332,48 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: roteiro-7-1.md:98,107 (docs)
 - last seen: 2026-09-29T04:01:35Z
 
+### L-054 - Give each distinct discard reason its own end-to-end test asserting run status and failed counter, not only the normalizer output
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `ingestion` · harmful: 0
+- features: fonte-apitcg
+- evidence: SRC-36 (ingestion)
+- last seen: 2026-10-01T03:59:24Z
+
+### L-055 - Test every output channel of a secret (stdout, stderr, inspect, logs) with the secret set, not only with it unset
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `security` · harmful: 0
+- features: fonte-apitcg
+- evidence: SRC-05 (security)
+- last seen: 2026-10-01T03:59:24Z
+
+### L-056 - Assert that configured timeouts reach the real HTTP client call, not only that the config value exists
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `http-client` · harmful: 0
+- features: fonte-apitcg
+- evidence: SRC-04 (http-client)
+- last seen: 2026-10-01T03:59:24Z
+
+### L-057 - State in the criterion which entity and edge semantics a derived term such as present or owned refers to (set of the card vs of the variant, zero quantity, wishlist vs collection)
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: fonte-apitcg
+- evidence: SRC-15 (spec)
+- last seen: 2026-10-01T03:59:24Z
+
+### L-058 - Pin the tool version or document the outdated-version flag in the gate command so an upstream release cannot turn the gate red without a code change
+- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `ci` · harmful: 0
+- features: fonte-apitcg
+- evidence: tasks.md:47 (ci)
+- last seen: 2026-10-01T03:59:24Z
+
+### L-059 - State in the criterion at which pipeline stage and at what moment a rule applies (dedup stage, when a revision is recorded)
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: fonte-apitcg
+- evidence: SRC-33 (spec.md:194), SRC-06 (spec.md:97) (spec)
+- last seen: 2026-10-01T04:14:32Z
+
+### L-060 - Fix literal reason texts, log entry shape and rule precedence in the criterion when a test has to assert them
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: fonte-apitcg
+- evidence: SRC-11 (spec.md:102), SRC-13 (spec.md:104) (spec)
+- last seen: 2026-10-01T04:14:32Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
