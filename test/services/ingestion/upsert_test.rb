@@ -214,6 +214,22 @@ module Ingestion
                    run.error_log
     end
 
+    # SRC-36: produto sem CardType é descarte, não falha.
+    test "SRC-36: produto sem CardType e produto sem code terminam succeeded com failed_count 0 e dois descartes" do
+      sem_tipo = produto(901)
+      sem_tipo["attributes"] = { "Rarity" => "C" }
+      sem_code = produto(900).merge("code" => nil)
+
+      run = ingest(normalized(snapshot(produto(1), sem_code, sem_tipo)))
+
+      assert_equal "succeeded", run.status
+      assert_equal 0, run.failed_count
+      assert_equal [ { "identifier" => "900", "error" => "discarded", "message" => "sem code" },
+                     { "identifier" => "901", "error" => "discarded", "message" => "sem CardType" } ],
+                   run.error_log.sort_by { |e| e["identifier"] }
+      assert_equal 1, CardVariant.count
+    end
+
     test "SRC-11: a fixture termina succeeded com o descarte do produto sem code" do
       run = ingest(normalized(FIXTURE.read))
 

@@ -8,13 +8,13 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 ---
 
-**Spec**: `.specs/features/fonte-apitcg/spec.md` (SRC-01..SRC-35)
+**Spec**: `.specs/features/fonte-apitcg/spec.md` (SRC-01..SRC-36)
 **Design**: `.specs/features/fonte-apitcg/design.md`
-**Status**: Draft
+**Status**: Done pending verification (SRC-31 e o ciclo de correção 1 aguardam o Verifier; item de 24h da T17 bloqueado por tempo, D-04)
 
 Regras que valem para todas as tasks:
 
-- A numeração T1–T23 é **desta feature**, sem relação com as de `catalogo`, `colecao` e demais.
+- A numeração T1–T25 é **desta feature**, sem relação com as de `catalogo`, `colecao` e demais.
 - A ingestão continua sem delete, e nenhum `collection_item` nem `wishlist_item` é apagado ou tem quantidade alterada por teste nenhum desta feature (Req. 1.7).
 - `APITCG_API_KEY` nunca aparece em código, teste, fixture, log, commit ou saída de comando. Teste que precise de chave usa um valor sintético (`"chave-de-teste"`).
 - **Requisição à apitcg real só na T10 e na T17**, e cada uma exige o aval explícito do dono no momento da execução (blast radius). Todas as outras tasks usam cliente HTTP falso injetado, como faz `fetch_test.rb` hoje.
@@ -113,6 +113,16 @@ T18 → T20
 T7 → T21
 T3 → T22
 T4 → T23
+```
+
+### Phase 8: Correções pós-verificação
+
+SRC-36 (T24) e o ciclo de correção 1 do Verifier (T25), depois da Phase 6.
+
+```
+T11 → T24
+T12 → T24
+T24 → T25
 ```
 
 ---
@@ -768,6 +778,61 @@ T4 → T23
 
 ---
 
+### T24: Descartar produto sem `CardType`
+
+**What**: Produto sem `CardType` na fonte entra nos descartes com o motivo "sem CardType", como o sem `code`, em vez de levantar `UnknownCardType` e derrubar a ingestão inteira. Um `CardType` presente e desconhecido continua sendo erro. Registrada depois do fato: o commit já existia sem T-id.
+**Where**: `app/services/ingestion/apitcg/normalize.rb`, `test/services/ingestion/apitcg/normalize_test.rb`
+**Depends on**: T11, T12
+**Reuses**: lista de descartes do `Normalize` e `Upsert#error_log`
+**Requirement**: SRC-36
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Produto sem `CardType` (ausente ou vazio) vai para os descartes com "sem CardType" e a ingestão continua (commit `64b9474`)
+- [x] `CardType` presente e desconhecido continua levantando `UnknownCardType`
+- [x] Gate full passa; 1534 runs, 0 falhas
+
+**Tests**: unit
+**Gate**: full
+**Commit**: `fix(fonte-apitcg): descartar produto sem CardType em vez de derrubar a ingestão` (`64b9474`)
+
+---
+
+### T25: Ciclo de correção 1 do Verifier
+
+**What**: Fix 1–7 do `validation.md`: `brakeman` 8.1.0 no `Gemfile.lock` (o gate saía com 5 por versão desatualizada); testes de borda que faltavam para SRC-02, SRC-04, SRC-05, SRC-17, SRC-32 e SRC-36; `Fetch#inspect` sem os headers; documentação.
+**Where**: `Gemfile.lock`, `app/services/ingestion/apitcg/fetch.rb` (só `inspect`), `test/services/ingestion/upsert_test.rb`, `test/services/ingestion/run_test.rb`, `test/lib/ingestion_import_task_test.rb`, `test/integration/card_detail_absent_variant_test.rb`, `.context/requirements.md`, `tasks.md`
+**Depends on**: T24
+**Reuses**: dublês `FakeHttp` e helpers de cada arquivo de teste
+**Requirement**: SRC-02, SRC-04, SRC-05, SRC-17, SRC-32, SRC-36
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Fix 1: `bin/brakeman --no-pager --ensure-ignore-notes --ensure-no-obsolete-ignore-entries` sai com 0 (brakeman 8.1.0; só essa linha muda no `Gemfile.lock`)
+- [x] Fix 2: descarte sem `CardType` e sem `code` termina `succeeded`, `failed_count` 0, dois descartes no `error_log`; a mutação que faz `failed_count` contar descarte derruba 4 testes
+- [x] Fix 3: `NetHttpClient` aplica `config.timeout` a `open_timeout` e `read_timeout` (mutação nos timeouts derruba o teste); rake `import` com busca `failed` e com 401 sai com 1 e escreve `status: failed`; SRC-02 confere catálogo vazio
+- [x] Fix 4: chave fora de stdout e stderr do rake (mutação que a imprime derruba 2 testes); `Fetch#inspect` sem `@headers` (mutação que remove o `inspect` derruba o teste)
+- [x] Fix 5: dono por wishlist de carta só com ausentes recebe 200 (mutação sem wishlist derruba 2 testes); item de terceiros na ausente não aparece sem sessão
+- [x] Fix 6: `.context/requirements.md` e este arquivo corrigidos; a §8.6 do `.context/tasks.md` **não** é fechada (depende do item de 24h da T17)
+- [ ] Fix 7: asserções vacuosas trocadas por valor exato em `run_test.rb` e `ingestion_import_task_test.rb`; restam `ingestion_remap_task_test.rb`, `ingestion_compare_snapshots_task_test.rb` e `set_progress_numbers_test.rb`, fora dos arquivos permitidos neste ciclo
+- [ ] Gate full e build (a cargo do supervisor)
+
+**Tests**: unit + integration
+**Gate**: full
+**Commit**: `test(fonte-apitcg): fechar as lacunas de evidência do ciclo de correção 1`
+
+---
+
 ## Plano de delegação
 
 17 tasks, em três lotes de fases inteiras: **Lote A** = Phases 1–3 (T1–T7), que
@@ -807,6 +872,8 @@ Revisões por agente agnóstico de linguagem, já que não há revisor Ruby:
 | T21 | 1 serviço | ✅ |
 | T22 | 1 view | ✅ |
 | T23 | 1 query object + a linha da view que exibe o resultado | ⚠️ coeso |
+| T24 | 1 guarda no `Normalize` + 1 teste | ✅ |
+| T25 | correções de teste, 1 `inspect` e documentação | ⚠️ coeso |
 
 ## Diagram-Definition Cross-Check
 
@@ -835,6 +902,8 @@ Revisões por agente agnóstico de linguagem, já que não há revisor Ruby:
 | T21 | T7 (Phase 3) | fase anterior | ✅ |
 | T22 | T3 (Phase 1) | fase anterior | ✅ |
 | T23 | T4 (Phase 1) | fase anterior | ✅ |
+| T24 | T11, T12 (Phase 5) | fase anterior | ✅ |
+| T25 | T24 | fase anterior | ✅ |
 
 ## Test Co-location Validation
 
@@ -863,3 +932,5 @@ Revisões por agente agnóstico de linguagem, já que não há revisor Ruby:
 | T21 | Serviço | unit | unit | ✅ |
 | T22 | View | integration | integration | ✅ |
 | T23 | Query + view | integration | integration | ✅ |
+| T24 | Serviço | unit | unit | ✅ |
+| T25 | Testes | unit + integration | unit + integration | ✅ |

@@ -48,7 +48,10 @@ class CardDetailAbsentVariantTest < ActionDispatch::IntegrationTest
 
   # --- Done when 1 e 2: a ausente não aparece para quem não a tem ---
 
-  test "sem sessão, a variante ausente não aparece no detalhe" do
+  test "sem sessão, a variante ausente não aparece no detalhe, mesmo com item de terceiros nela" do
+    CollectionItem.create!(user: @outro, card_variant: @ausente, quantity: 3)
+    WishlistItem.create!(user: @outro, card_variant: @ausente, target_quantity: 1)
+
     get card_path(@zoro.card_number)
 
     assert_response :success
@@ -130,6 +133,17 @@ class CardDetailAbsentVariantTest < ActionDispatch::IntegrationTest
     par = variant_item("OP01-001_p1").css(".variant__meta > div").find { |div| div.at_css("dt")&.text == "Situação" }
     refute_nil par, "a ausente precisa do dt Situação"
     assert_equal "fora da fonte", par.at_css("dd").text.strip
+  end
+
+  test "carta só com variantes ausentes responde 200 para o dono por wishlist" do
+    WishlistItem.create!(user: @user, card_variant: @nami_ausente, target_quantity: 1)
+    sign_in
+
+    get card_path(@nami.card_number)
+
+    assert_response :success
+    assert_equal [ "OP01-016" ], variant_codes
+    assert_includes variant_item("OP01-016").text, "fora da fonte"
   end
 
   test "carta só com variantes ausentes responde 404 para quem não tem item" do

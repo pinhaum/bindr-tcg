@@ -8,6 +8,8 @@ module Ingestion
     CHAVE = "chave-de-teste".freeze
     BASE = "https://apitcg.test/api".freeze
     FIXTURE = Rails.root.join("spec", "fixtures", "apitcg-subset.json")
+    # [cartas, variantes, sets] que a fixture produz.
+    FIXTURE_COUNTS = [ 11, 13, 10 ].freeze
 
     # Falha se for chamado: prova que o caminho com snapshot não usa a rede.
     class ForbiddenHttp
@@ -74,7 +76,7 @@ module Ingestion
       assert_equal "succeeded", run.status
       assert_equal 0, http.calls
       assert_equal "apitcg-subset.json sha256:#{Digest::SHA256.file(FIXTURE).hexdigest}", run.source_revision
-      assert_operator Card.count, :>, 0
+      assert_equal FIXTURE_COUNTS, catalog_counts
     end
 
     test "o mesmo snapshot duas vezes deixa as contagens do catálogo idênticas" do
@@ -163,6 +165,35 @@ module Ingestion
       refute_includes run.error_log.to_json, CHAVE
     end
 
+    test "a chave não aparece em Fetch#inspect nem depois da busca" do
+      fetch = fetch_with(FakeHttp.new(snapshot_routes), config)
+      fetch.call
+
+      refute_includes fetch.inspect, CHAVE
+    end
+
+    test "NetHttpClient aplica o timeout da configuração à abertura e à leitura" do
+      captured = nil
+      resposta = Struct.new(:code, :body).new("200", "{}")
+      conexao = Object.new
+      conexao.define_singleton_method(:request) { |_request| resposta }
+      original = Net::HTTP.method(:start)
+      Net::HTTP.define_singleton_method(:start) do |host, port, **options, &block|
+        captured = { host: host, port: port, options: options }
+        block.call(conexao)
+      end
+
+      status, body = Apitcg::Fetch::NetHttpClient.new(timeout: 7).get("#{BASE}/one-piece/sets", headers: {})
+
+      assert_equal [ 200, "{}" ], [ status, body ]
+      assert_equal "apitcg.test", captured[:host]
+      assert_equal 7, captured[:options][:open_timeout]
+      assert_equal 7, captured[:options][:read_timeout]
+      assert captured[:options][:use_ssl]
+    ensure
+      Net::HTTP.define_singleton_method(:start, original)
+    end
+
     test "snapshot já existente na busca gera run failed" do
       Run.call(config: config, fetch: fetch_with(FakeHttp.new(snapshot_routes), config))
       http = FakeHttp.new(snapshot_routes)
@@ -182,6 +213,7 @@ module Ingestion
       assert_match(/APITCG_API_KEY não configurada/, error.message)
       assert_equal 0, ImportRun.count
       assert_equal 0, http.calls
+      assert_equal [ 0, 0, 0 ], catalog_counts
     end
 
     test "a chave é exigida antes de o Fetch ser chamado" do
@@ -200,8 +232,8 @@ module Ingestion
       assert_equal "succeeded", run.status
       assert_equal 2, http.calls.size
       saved = @storage.glob("apitcg-*.json").sole
-      assert_match(/\A#{Regexp.escape(saved.basename.to_s)} sha256:\h{64}\z/, run.source_revision)
-      assert_operator Card.count, :>, 0
+      assert_equal "#{saved.basename} sha256:#{Digest::SHA256.file(saved).hexdigest}", run.source_revision
+      assert_equal FIXTURE_COUNTS, catalog_counts
     end
   end
 end

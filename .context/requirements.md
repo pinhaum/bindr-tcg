@@ -23,7 +23,7 @@ automaticamente de uma fonte externa, para não digitar milhares de cartas à m�
 
 1. O sistema DEVE oferecer um processo de importação executável sob demanda que
    popule cartas, variantes e sets a partir de uma fonte externa configurável.
-   A fonte vigente é a apitcg (`GET /api/one-piece/cards` e `/sets`), autenticada
+   A fonte vigente é a apitcg (`GET /api/products?tcg=one-piece&type=card` e `GET /api/one-piece/sets`), autenticada
    pelo header `x-api-key` com a chave lida de `APITCG_API_KEY`. SE a chave
    estiver ausente ENTÃO o processo DEVE abortar antes de qualquer requisição. A
    chave NUNCA DEVE aparecer em snapshot, log, `error_log` ou saída do processo.

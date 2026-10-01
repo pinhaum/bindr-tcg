@@ -88,6 +88,10 @@ module Ingestion
         Result.new(path: destination, sha256: Digest::SHA256.hexdigest(body), byte_size: body.bytesize)
       end
 
+      # Os headers, com a chave, ficam em ivar; o `inspect` padrão os imprimiria
+      # (SRC-05).
+      def inspect = "#<#{self.class.name} config=#{@config.inspect}>"
+
       private
 
       def snapshot_path
