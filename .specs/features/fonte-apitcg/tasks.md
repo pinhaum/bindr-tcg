@@ -509,11 +509,11 @@ T4 → T23
 
 **Done when**:
 
-- [ ] `grep -rn "optcgjson\|raw.githubusercontent\|5669eab" app lib config test spec` sem ocorrência de código (comentário histórico só com AD)
-- [ ] Duas ingestões seguidas da fixture nova com um `collection_item` e um `wishlist_item` existentes deixam ambos com a mesma quantidade (SRC-18)
-- [ ] Variante presente antes e ausente no snapshot seguinte continua no banco, ausente, com o item de coleção intacto
-- [ ] Nenhum caso de garantia foi removido sem equivalente; a queda da contagem de runs corresponde só aos testes do código removido, listados no commit
-- [ ] Gate build passa (fim da Phase 5 do lado do código de ingestão); contagem de runs registrada
+- [x] `grep -rn "optcgjson\|raw.githubusercontent\|5669eab" app lib config test spec` sem ocorrência de código (comentário histórico só com AD)
+- [x] Duas ingestões seguidas da fixture nova com um `collection_item` e um `wishlist_item` existentes deixam ambos com a mesma quantidade (SRC-18)
+- [x] Variante presente antes e ausente no snapshot seguinte continua no banco, ausente, com o item de coleção intacto
+- [x] Nenhum caso de garantia foi removido sem equivalente; a queda da contagem de runs corresponde só aos testes do código removido, listados no commit
+- [x] Gate build passa (fim da Phase 5 do lado do código de ingestão); contagem de runs registrada
 
 **Tests**: unit
 **Gate**: build

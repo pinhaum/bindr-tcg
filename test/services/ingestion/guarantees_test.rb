@@ -8,12 +8,20 @@ module Ingestion
   # atualizar o primeiro (Req. 1.4 e 1.7). Se algum deles ficar vermelho, a
   # resposta certa nunca é afrouxar a asserção.
   class GuaranteesTest < ActiveSupport::TestCase
-    FIXTURE = Rails.root.join("spec", "fixtures", "optcgjson-subset.json")
-    REVISION = "5669eab51096629faf90dbf0dc903128cff80a98".freeze
+    FIXTURE = Rails.root.join("spec", "fixtures", "apitcg-subset.json")
+    REVISION = "apitcg-teste".freeze
 
-    def ingest(payload = FIXTURE.read, revision: REVISION, clock: Time)
-      Upsert.new(Normalize.call(payload), source: "optcgjson", revision: revision,
-                 clock: clock).call
+    # Duas impressões da mesma carta (ST22-014): tirar uma do snapshot deixa a
+    # carta presente e a variante ausente, o caso que o usuário sente.
+    POSSUIDA = "tcgplayer:647709".freeze
+    IRMA = "tcgplayer:647710".freeze
+    # Carta de impressão única: tirá-la do snapshot ausenta carta e variante.
+    CARTA_UNICA = "OP06-081".freeze
+
+    # `origem` é `revision:` (padrão) ou `snapshot:`, como no `Upsert`.
+    def ingest(payload = FIXTURE.read, clock: Time, **origem)
+      origem = { revision: REVISION } if origem.empty?
+      Upsert.new(Apitcg::Normalize.call(payload), source: "apitcg", clock: clock, **origem).call
     end
 
     # Relógio monotônico para os testes que asseveram **ordem** entre marcas de
@@ -45,7 +53,7 @@ module Ingestion
     end
 
     # Done when: ingestão rodada duas vezes sobre a mesma fixture não altera
-    # contagem. Req. 1.4 — idempotência.
+    # contagem. Req. 1.4 — idempotência (SRC-08).
     test "rodar a ingestão duas vezes não altera a contagem de registros" do
       primeira = ingest
       antes = contagens
@@ -54,7 +62,7 @@ module Ingestion
       depois = contagens
 
       assert_equal antes, depois
-      assert_equal({ sets: 5, cards: 376, variants: 678 }, depois)
+      assert_equal({ sets: 10, cards: 11, variants: 13 }, depois)
 
       # Contagem estável sozinha não prova idempotência: uma ingestão que
       # falhasse em todo registro também deixaria a contagem intacta. O que
@@ -84,7 +92,7 @@ module Ingestion
     test "a coleção do usuário sobrevive intacta a uma nova ingestão" do
       ingest
       dono = usuario
-      variante = CardVariant.find_by!(variant_code: "OP01-001_p1")
+      variante = CardVariant.find_by!(variant_code: "tcgplayer:647709")
       item = CollectionItem.create!(user: dono, card_variant: variante, quantity: 3)
 
       segunda = ingest
@@ -105,7 +113,7 @@ module Ingestion
     test "a wishlist do usuário sobrevive intacta a uma nova ingestão" do
       ingest
       dono = usuario
-      desejadas = %w[OP01-001_p1 OP01-002].map { |code| CardVariant.find_by!(variant_code: code) }
+      desejadas = %w[tcgplayer:647709 tcgplayer:541058].map { |code| CardVariant.find_by!(variant_code: code) }
       # Alvos **diferentes entre si e diferentes de 1**: com o mesmo valor em
       # todas as linhas, uma ingestão que sobrescrevesse todos os alvos por um
       # número igual passaria despercebida.
@@ -128,14 +136,17 @@ module Ingestion
     # variante desejada some da fonte. spec.md, Edge Cases — "o item continua
     # listado, a ingestão não deleta".
     test "variante desejada e ausente da fonte não é removida nem perde o vínculo" do
-      ingest
+      relogio = RelogioCrescente.new
+      ingest(clock: relogio)
       dono = usuario
-      variante = CardVariant.find_by!(variant_code: "OP01-001_p1")
+      variante = CardVariant.find_by!(variant_code: IRMA)
       item = WishlistItem.create!(user: dono, card_variant: variante, target_quantity: 4)
 
-      ingest(fixture_sem_variante("OP01-001_p1"))
+      reingerir_sem_variante(IRMA, relogio)
 
       assert CardVariant.exists?(variante.id), "a variante ausente da fonte sumiu do catálogo"
+      assert_not_includes CardVariant.present.pluck(:id), variante.id,
+                          "a variante ausente tinha de ter saído de CardVariant.present"
       assert_equal 4, item.reload.target_quantity
       assert_equal variante.id, item.card_variant_id
     end
@@ -147,7 +158,7 @@ module Ingestion
     test "posse e desejo da mesma variante sobrevivem juntos à reingestão" do
       ingest
       dono = usuario
-      variante = CardVariant.find_by!(variant_code: "OP01-001_p1")
+      variante = CardVariant.find_by!(variant_code: "tcgplayer:647709")
       posse = CollectionItem.create!(user: dono, card_variant: variante, quantity: 1)
       desejo = WishlistItem.create!(user: dono, card_variant: variante, target_quantity: 3)
 
@@ -191,14 +202,17 @@ module Ingestion
     # Req. 1.7 sob a condição que mais assusta: a variante que o usuário possui
     # some da fonte.
     test "variante possuída e ausente da fonte não é removida nem perde o vínculo" do
-      ingest
+      relogio = RelogioCrescente.new
+      ingest(clock: relogio)
       dono = usuario
-      variante = CardVariant.find_by!(variant_code: "OP01-001_p1")
+      variante = CardVariant.find_by!(variant_code: IRMA)
       item = CollectionItem.create!(user: dono, card_variant: variante, quantity: 2)
 
-      ingest(fixture_sem_variante("OP01-001_p1"))
+      reingerir_sem_variante(IRMA, relogio)
 
       assert CardVariant.exists?(variante.id), "a variante ausente da fonte sumiu do catálogo"
+      assert_not_includes CardVariant.present.pluck(:id), variante.id,
+                          "a variante ausente tinha de ter saído de CardVariant.present"
       assert_equal 2, item.reload.quantity
       assert_equal variante.id, item.card_variant_id
     end
@@ -208,10 +222,62 @@ module Ingestion
       ingest
       total_antes = Card.count
 
-      ingest(fixture_sem_carta("OP01-001"))
+      ingest(fixture_sem_carta(CARTA_UNICA))
 
-      assert Card.exists?(card_number: "OP01-001"), "a carta ausente da fonte sumiu do catálogo"
+      assert Card.exists?(card_number: CARTA_UNICA), "a carta ausente da fonte sumiu do catálogo"
       assert_equal total_antes, Card.count
+    end
+
+    # Run `failed` não é fonte de verdade sobre o que existe: coleção e wishlist
+    # ficam como estavam, e nada do catálogo some (SRC-16, SRC-18).
+    test "um run failed não altera nem remove a coleção e a wishlist" do
+      relogio = RelogioCrescente.new
+      ingest(clock: relogio)
+      dono = usuario
+      posse = CollectionItem.create!(user: dono, card_variant: CardVariant.find_by!(variant_code: POSSUIDA), quantity: 3)
+      desejo = WishlistItem.create!(user: dono, card_variant: CardVariant.find_by!(variant_code: IRMA), target_quantity: 5)
+      antes = contagens
+      presentes_antes = CardVariant.present.order(:id).pluck(:id)
+
+      # Snapshot menor (sem a variante desejada) **e** com um registro
+      # defeituoso: o run termina `failed` e a ausência não pode valer.
+      resultado = Apitcg::Normalize.call(fixture_sem_variante(IRMA))
+      resultado.cards.find { |c| c.card_number == "OP06-096" }.name = nil
+      falho = Upsert.new(resultado, source: "apitcg", revision: REVISION, clock: relogio).call
+
+      assert_equal "failed", falho.status, "o cenário só vale se o run tiver de fato falhado"
+      assert_equal 3, posse.reload.quantity
+      assert_equal 5, desejo.reload.target_quantity
+      assert_equal antes, contagens
+      assert_equal presentes_antes, CardVariant.present.order(:id).pluck(:id),
+                   "um run failed não pode mudar a presença de ninguém"
+    end
+
+    # design.md §5.2: ingestão sem delete, vista pelo efeito. Um snapshot muito
+    # menor que o anterior não pode diminuir nenhuma contagem do catálogo.
+    test "um snapshot menor não diminui nenhuma contagem do catálogo" do
+      ingest
+      antes = contagens
+
+      menor = JSON.parse(FIXTURE.read)
+      menor["cards"] = menor["cards"].first(3)
+      run = ingest(menor)
+
+      assert_equal "succeeded", run.status
+      assert_equal antes, contagens
+    end
+
+    # SRC-08 pela origem em arquivo: a revisão gravada é o nome e o SHA-256.
+    test "reprocessar o mesmo snapshot em arquivo não altera a contagem" do
+      primeira = ingest(snapshot: FIXTURE)
+      antes = contagens
+
+      segunda = ingest(snapshot: FIXTURE)
+
+      assert_equal antes, contagens
+      assert_equal "succeeded", primeira.status
+      assert_equal "succeeded", segunda.status
+      assert_equal primeira.source_revision, segunda.source_revision
     end
 
     # A marca é o que permite sinalizar o ausente na interface sem removê-lo:
@@ -248,14 +314,14 @@ module Ingestion
       relogio = RelogioCrescente.new
 
       ingest(clock: relogio)
-      ausente = Card.find_by!(card_number: "OP01-001")
+      ausente = Card.find_by!(card_number: CARTA_UNICA)
       marca_antiga = ausente.last_seen_at
 
-      segunda = ingest(fixture_sem_carta("OP01-001"), clock: relogio)
+      segunda = ingest(fixture_sem_carta(CARTA_UNICA), clock: relogio)
 
       assert_equal marca_antiga.to_i, ausente.reload.last_seen_at.to_i,
                    "a carta ausente não podia ter sido remarcada"
-      presente = Card.find_by!(card_number: "OP01-002")
+      presente = Card.find_by!(card_number: "OP06-096")
       assert_equal segunda.started_at.to_i, presente.reload.last_seen_at.to_i
       assert_operator presente.last_seen_at, :>, ausente.last_seen_at
     end
@@ -327,16 +393,25 @@ module Ingestion
       ActiveRecord::Base.connection.execute("DELETE FROM card_variants WHERE id = #{id}")
     end
 
+    # A variante sai do snapshot pelo `tcgplayer.id` que dá o `variant_code`.
     def fixture_sem_variante(variant_code)
+      tcgplayer_id = variant_code.delete_prefix("tcgplayer:")
       payload = JSON.parse(FIXTURE.read)
-      payload["data"].each { |s| s["cards"].reject! { |c| c["id"] == variant_code } }
+      payload["cards"].reject! { |p| p.dig("markets", "tcgplayer", "id") == tcgplayer_id }
       payload
     end
 
     def fixture_sem_carta(card_number)
       payload = JSON.parse(FIXTURE.read)
-      payload["data"].each { |s| s["cards"].reject! { |c| c["number"] == card_number } }
+      payload["cards"].reject! { |p| p["code"] == card_number }
       payload
+    end
+
+    # Segundo run `succeeded`, sem a variante: só então "ausente" tem significado
+    # (SRC-16). O relógio é o mesmo do primeiro run (AD-009).
+    def reingerir_sem_variante(variant_code, relogio)
+      run = ingest(fixture_sem_variante(variant_code), clock: relogio)
+      assert_equal "succeeded", run.status, "a ausência só vale depois de um run succeeded"
     end
   end
 end
