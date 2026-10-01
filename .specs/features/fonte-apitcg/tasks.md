@@ -417,16 +417,16 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Sobre a fixture: contagens de sets, cartas e variantes batem com as do recorte menos os descartes
-- [ ] `variant_code` `tcgplayer:<id>` e, num produto sem `tcgplayer.id` montado no teste, `apitcg:<_id>` (SRC-09)
-- [ ] `DON!!` não aparece em nenhuma lista, nem nos descartes (SRC-10); produto sem `code` aparece nos descartes com o `_id` (SRC-11)
-- [ ] Um `art_kind` de cada valor da tabela de Assumptions, incluindo sufixo numérico e sufixo igual a um `card_number` → `base` (SRC-13)
-- [ ] Carta com errata entre impressões recebe os dados da impressão base do set de estreia; sem ela, do set mais recente; empate pelo menor `variant_code` (SRC-12)
-- [ ] Efeito sem HTML, `<br>` como `\n`, `trigger_text` preenchido e ausente do efeito; `block_icon` nil
-- [ ] Código do set: `ST-01` → `ST01`, `OP07 PRE` → `OP07-PRE`, `code` nulo com maioria estrita → prefixo, com colisão → slug sem `one-piece-` (SRC-14); `released_on` preenchido
-- [ ] `base_set_size` pelo prefixo num set de numeração própria, por todos os números num set de reimpressão e num set sem nenhum número com o prefixo (SRC-24, SRC-35)
-- [ ] Variante em dois sets fica no primeiro (SRC-34)
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Sobre a fixture: contagens de sets, cartas e variantes batem com as do recorte menos os descartes
+- [x] `variant_code` `tcgplayer:<id>` e, num produto sem `tcgplayer.id` montado no teste, `apitcg:<_id>` (SRC-09)
+- [x] `DON!!` não aparece em nenhuma lista, nem nos descartes (SRC-10); produto sem `code` aparece nos descartes com o `_id` (SRC-11)
+- [x] Um `art_kind` de cada valor da tabela de Assumptions, incluindo sufixo numérico e sufixo igual a um `card_number` → `base` (SRC-13)
+- [x] Carta com errata entre impressões recebe os dados da impressão base do set de estreia; sem ela, do set mais recente; empate pelo menor `variant_code` (SRC-12)
+- [x] Efeito sem HTML, `<br>` como `\n`, `trigger_text` preenchido e ausente do efeito; `block_icon` nil
+- [x] Código do set: `ST-01` → `ST01`, `OP07 PRE` → `OP07-PRE`, `code` nulo com maioria estrita → prefixo, com colisão → slug sem `one-piece-` (SRC-14); `released_on` preenchido
+- [x] `base_set_size` pelo prefixo num set de numeração própria, por todos os números num set de reimpressão e num set sem nenhum número com o prefixo (SRC-24, SRC-35)
+- [x] Variante em dois sets fica no primeiro (SRC-34)
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
