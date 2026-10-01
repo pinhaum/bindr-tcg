@@ -9,6 +9,12 @@ require "tmpdir"
 class IngestionCompareSnapshotsTaskTest < ActiveSupport::TestCase
   setup do
     Rails.application.load_tasks unless Rake::Task.task_defined?("ingestion:compare_snapshots")
+    @original_env = ENV.to_h.slice("A", "B")
+  end
+
+  teardown do
+    %w[A B].each { |name| ENV.delete(name) }
+    @original_env.each { |name, value| ENV[name] = value }
   end
 
   test "com A= e B=, imprime comuns e mudados, e sai com código 0" do
@@ -81,9 +87,9 @@ class IngestionCompareSnapshotsTaskTest < ActiveSupport::TestCase
 
   def run_task(a_path, b_path)
     status = 0
+    ENV["A"] = a_path
+    ENV["B"] = b_path
     out, err = capture_io do
-      ENV["A"] = a_path
-      ENV["B"] = b_path
       Rake::Task["ingestion:compare_snapshots"].execute
     rescue SystemExit => e
       status = e.status

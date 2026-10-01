@@ -824,8 +824,8 @@ T24 → T25
 - [x] Fix 4: chave fora de stdout e stderr do rake (mutação que a imprime derruba 2 testes); `Fetch#inspect` sem `@headers` (mutação que remove o `inspect` derruba o teste)
 - [x] Fix 5: dono por wishlist de carta só com ausentes recebe 200 (mutação sem wishlist derruba 2 testes); item de terceiros na ausente não aparece sem sessão
 - [x] Fix 6: `.context/requirements.md` e este arquivo corrigidos; a §8.6 do `.context/tasks.md` **não** é fechada (depende do item de 24h da T17)
-- [ ] Fix 7: asserções vacuosas trocadas por valor exato em `run_test.rb` e `ingestion_import_task_test.rb`; restam `ingestion_remap_task_test.rb`, `ingestion_compare_snapshots_task_test.rb` e `set_progress_numbers_test.rb`, fora dos arquivos permitidos neste ciclo
-- [ ] Gate full e build (a cargo do supervisor)
+- [x] Fix 7: asserções vacuosas trocadas por valor exato em `run_test.rb` e `ingestion_import_task_test.rb`; depois do Verifier, `ingestion_remap_task_test.rb` perde o `refute_includes` implicado pela linha exata, `ingestion_compare_snapshots_task_test.rb` restaura `A`/`B` no teardown e o teste de teto de `set_progress_numbers_test.rb` usa `base_set_size` 2 contra 3 números (a mutação que tira o teto derruba o teste: 150,0 ≠ 100,0). `run_test.rb:77` fica: o `Run` recebe o `fetch:` com o dublê, então a asserção prova que o caminho com snapshot não o usa
+- [x] Gate full e build (a cargo do supervisor)
 
 **Tests**: unit + integration
 **Gate**: full

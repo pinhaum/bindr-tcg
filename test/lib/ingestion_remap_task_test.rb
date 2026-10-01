@@ -54,9 +54,8 @@ class IngestionRemapTaskTest < ActiveSupport::TestCase
 
     assert_equal 0, status
     assert_empty err
+    # As linhas exatas já excluem qualquer dado do usuário (SRC-23).
     assert_equal [ "movidos: 1 | pulados: 1", "pulado: OP01-004 | OP01-004 | sem candidato" ], out.lines.map(&:chomp)
-    # As linhas exatas acima já excluem qualquer id; o e-mail fica explícito.
-    refute_includes out, @user.email
     assert_equal @luffy_new.id, moved.reload.card_variant_id
     assert_equal @usopp_old.id, skipped.reload.card_variant_id
   end

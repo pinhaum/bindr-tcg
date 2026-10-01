@@ -112,12 +112,16 @@ class SetProgressNumbersTest < ActiveSupport::TestCase
 
   # --- Done when 4 / SRC-26: teto de 100% ---
 
-  test "mais variantes possuídas que o denominador não passa de 100%" do
+  # `base_set_size` legado (2) abaixo dos 3 números com o prefixo: sem o teto,
+  # o percentual seria 150%.
+  test "numerador acima do denominador não passa de 100%" do
+    @op01.update!(base_set_size: 2)
     own(@luffy_base, @luffy_topper, @luffy_parallel, @zoro_alt, @nami_manga, @usopp_em_op01)
 
     op01 = progress["OP01"]
 
     assert_equal 3, op01.owned_numbers
+    assert_equal 2, op01.base_size
     assert_equal 100.0, op01.completion_percent
   end
 
