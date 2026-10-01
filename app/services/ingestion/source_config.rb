@@ -1,38 +1,53 @@
 module Ingestion
-  # Carrega e valida a configuração da fonte. A validação da revisão acontece
-  # aqui, na carga, e não no download: o Req. 1.11 exige que atualizar o pin
-  # seja um ato explícito de quem mantém o sistema. Uma referência móvel
-  # aceita silenciosamente transformaria a CI semanal da fonte em uma
-  # alteração não revisada do catálogo.
+  # Carrega a configuração da apitcg (AD-019) e a chave da API.
+  #
+  # A chave é lida do ambiente na carga, mas só é exigida em `#api_key`: o
+  # reprocessamento de um snapshot em disco não toca a rede e não precisa dela.
+  # Quem vai fazer requisição chama `#api_key` antes da primeira, e é isso que
+  # faz a falta da chave abortar antes da rede e do banco (SRC-02).
+  #
+  # O valor da chave nunca sai deste objeto por `inspect`, `to_s` ou mensagem
+  # de erro (SRC-05): um `p config` num console ou um erro com o objeto
+  # interpolado não pode vazar o segredo para log.
   class SourceConfig
-    MOVING_REFERENCES = %w[main master head latest edge stable trunk default].freeze
-    COMMIT_SHA = /\A[0-9a-f]{40}\z/
-    # Tag de versão semântica, com pré-lançamento opcional
-    # (`v1.2.0`, `1.2.0-rc.1`). Deliberadamente estreita: qualquer coisa que
-    # pareça um nome de branch tem de cair fora, senão a checagem de
-    # referência móvel vira uma lista negra furada.
-    TAG = /\Av?\d+(\.\d+){1,2}(-(alpha|beta|rc)(\.\d+)?)?\z/
+    API_KEY_VARIABLE = "APITCG_API_KEY".freeze
 
-    class InvalidRevision < StandardError; end
     class MissingSetting < StandardError; end
+    class MissingApiKey < MissingSetting; end
 
-    attr_reader :source, :repository, :path, :revision
+    attr_reader :source, :base_url, :page_size, :timeout, :attempts
 
-    def self.load(path = Rails.root.join("config", "ingestion.yml"))
-      new(**YAML.safe_load_file(path).symbolize_keys)
+    def self.load(path = Rails.root.join("config", "ingestion.yml"), env: ENV)
+      settings = YAML.safe_load_file(path).symbolize_keys
+      new(**settings, api_key: env[API_KEY_VARIABLE])
     end
 
-    def initialize(source:, repository:, path:, revision:)
+    def initialize(source:, base_url:, page_size:, timeout:, attempts:, api_key: nil)
       @source = presence!(source, "source")
-      @repository = presence!(repository, "repository")
-      @path = presence!(path, "path")
-      @revision = validate_revision!(presence!(revision, "revision"))
+      @base_url = presence!(base_url, "base_url")
+      @page_size = positive_integer!(page_size, "page_size")
+      @timeout = positive_integer!(timeout, "timeout")
+      @attempts = positive_integer!(attempts, "attempts")
+      @api_key = api_key.to_s.strip
     end
 
-    # A URL é derivada da revisão, nunca de um branch: é o que garante que a
-    # importação busque exatamente a revisão configurada (Req. 1.9).
-    def url
-      "https://raw.githubusercontent.com/#{repository}/#{revision}/#{path}"
+    def api_key
+      raise MissingApiKey, "#{API_KEY_VARIABLE} não configurada" if @api_key.empty?
+
+      @api_key
+    end
+
+    def inspect
+      "#<#{self.class.name} source=#{source} base_url=#{base_url} page_size=#{page_size} " \
+        "timeout=#{timeout} attempts=#{attempts} api_key=#{@api_key.empty? ? '(ausente)' : '[FILTRADA]'}>"
+    end
+    alias_method :to_s, :inspect
+
+    # O `as_json` do ActiveSupport serializa as variáveis de instância, e com
+    # elas a chave: um `config.to_json` num `error_log` a vazaria.
+    def as_json(*)
+      { "source" => source, "base_url" => base_url, "page_size" => page_size,
+        "timeout" => timeout, "attempts" => attempts }
     end
 
     private
@@ -44,18 +59,11 @@ module Ingestion
       normalized
     end
 
-    def validate_revision!(value)
-      if MOVING_REFERENCES.include?(value.downcase)
-        raise InvalidRevision,
-              "revisão `#{value}` é uma referência móvel; fixe um commit ou tag imutável (Req. 1.9)"
-      end
+    def positive_integer!(value, name)
+      number = Integer(presence!(value, name), exception: false)
+      raise MissingSetting, "configuração da fonte com `#{name}` inválido" unless number&.positive?
 
-      unless value.match?(COMMIT_SHA) || value.match?(TAG)
-        raise InvalidRevision,
-              "revisão `#{value}` não é um commit de 40 caracteres nem uma tag de versão"
-      end
-
-      value
+      number
     end
   end
 end

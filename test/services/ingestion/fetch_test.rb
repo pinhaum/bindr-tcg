@@ -1,71 +1,18 @@
 require "test_helper"
 
 module Ingestion
-  # Req. 1.9 e 1.11 — a revisão é validada na carga da configuração, não no
-  # download. Se a rejeição só acontecesse na hora de buscar, uma configuração
-  # com `main` já estaria em produção esperando a próxima execução.
-  class SourceConfigTest < ActiveSupport::TestCase
-    def config(revision:)
-      SourceConfig.new(source: "optcgjson", repository: "hugoprudente/optcgjson",
-                       path: "output/AllSets.json", revision: revision)
-    end
-
-    # Done when: revisão fixada (commit/tag), nunca `main`.
-    test "referência móvel é rejeitada na carga da configuração" do
-      %w[main master HEAD latest Main].each do |movel|
-        erro = assert_raises(SourceConfig::InvalidRevision, "aceitou `#{movel}`") do
-          config(revision: movel)
-        end
-        assert_match(/referência móvel/, erro.message)
-      end
-    end
-
-    test "revisão que não é commit nem tag é rejeitada" do
-      assert_raises(SourceConfig::InvalidRevision) { config(revision: "v1-branch-do-fulano") }
-      assert_raises(SourceConfig::InvalidRevision) { config(revision: "5669eab") }
-    end
-
-    test "commit de 40 caracteres é aceito" do
-      sha = "5669eab51096629faf90dbf0dc903128cff80a98"
-      assert_equal sha, config(revision: sha).revision
-    end
-
-    test "tag de versão é aceita" do
-      assert_equal "v1.2.0", config(revision: "v1.2.0").revision
-    end
-
-    # Req. 1.9 — buscar exatamente a revisão configurada. A URL derivar da
-    # revisão é o que impede que a CI semanal da fonte mude o que é baixado.
-    test "a URL aponta para a revisão fixada, não para um branch" do
-      sha = "5669eab51096629faf90dbf0dc903128cff80a98"
-      url = config(revision: sha).url
-
-      assert_equal "https://raw.githubusercontent.com/hugoprudente/optcgjson/#{sha}/output/AllSets.json", url
-      refute_match(/\/main\/|\/HEAD\//, url)
-    end
-
-    test "a configuração versionada do projeto fixa uma revisão imutável" do
-      carregada = SourceConfig.load
-
-      assert_match(SourceConfig::COMMIT_SHA, carregada.revision)
-      assert_equal "optcgjson", carregada.source
-    end
-
-    test "configuração sem revisão falha explicitamente" do
-      assert_raises(SourceConfig::MissingSetting) do
-        SourceConfig.new(source: "optcgjson", repository: "x/y", path: "a.json", revision: "")
-      end
-    end
-  end
-
   class FetchTest < ActiveSupport::TestCase
     REVISION = "5669eab51096629faf90dbf0dc903128cff80a98".freeze
     PAYLOAD = '{"meta":{},"data":[]}'.freeze
 
+    # O `SourceConfig` passou a descrever a apitcg (T8 da `fonte-apitcg`);
+    # este Fetch da optcgjson só lê `source`, `revision` e `url` e sai na T14.
+    LegacyConfig = Struct.new(:source, :revision, :url)
+
     setup do
       @storage = Pathname(Dir.mktmpdir("ingestion-test"))
-      @config = SourceConfig.new(source: "optcgjson", repository: "hugoprudente/optcgjson",
-                                 path: "output/AllSets.json", revision: REVISION)
+      @config = LegacyConfig.new("optcgjson", REVISION,
+                                 "https://raw.githubusercontent.com/hugoprudente/optcgjson/#{REVISION}/output/AllSets.json")
     end
 
     teardown do

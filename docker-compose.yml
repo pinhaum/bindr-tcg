@@ -29,6 +29,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bindr}
       POSTGRES_DB: ${POSTGRES_DB:-bindr_development}
       POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-bindr_test}
+      APITCG_API_KEY: ${APITCG_API_KEY:-}
     volumes:
       - .:/rails
       - bundle:/usr/local/bundle

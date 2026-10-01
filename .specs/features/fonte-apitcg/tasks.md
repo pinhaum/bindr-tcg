@@ -333,11 +333,11 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Chave ausente e chave vazia levantam o erro com a mensagem de SRC-02
-- [ ] `inspect`, `to_s` e a mensagem de qualquer erro não contêm o valor da chave
-- [ ] As regras de revisão imutável (SHA, tag, referência móvel) e seus testes saem; o teste que exigia `optcgjson` no `config/ingestion.yml` passa a exigir `apitcg`
-- [ ] `.env.example` ganha `APITCG_API_KEY=` vazio
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Chave ausente e chave vazia levantam o erro com a mensagem de SRC-02
+- [x] `inspect`, `to_s` e a mensagem de qualquer erro não contêm o valor da chave
+- [x] As regras de revisão imutável (SHA, tag, referência móvel) e seus testes saem; o teste que exigia `optcgjson` no `config/ingestion.yml` passa a exigir `apitcg`
+- [x] `.env.example` ganha `APITCG_API_KEY=` vazio
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
