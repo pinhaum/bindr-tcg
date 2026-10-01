@@ -481,12 +481,12 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Com `SNAPSHOT`, a ingestão roda sem `APITCG_API_KEY` no ambiente e sem nenhuma chamada ao cliente HTTP (cliente falso que falha se chamado)
-- [ ] O mesmo snapshot processado duas vezes deixa contagens de cartas, variantes e sets idênticas (SRC-08)
-- [ ] Falha de busca (3 tentativas esgotadas, ou 401) grava `ImportRun` `failed` com o erro e sem nenhuma carta, variante ou set novos (SRC-04, SRC-32)
-- [ ] Chave ausente sem `SNAPSHOT` aborta antes de qualquer requisição e antes de escrever no banco, com a mensagem de SRC-02
-- [ ] Teste em `test/lib/` confere o rake com `SNAPSHOT` (sucesso, código 0) e sem chave (mensagem, código 1)
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Com `SNAPSHOT`, a ingestão roda sem `APITCG_API_KEY` no ambiente e sem nenhuma chamada ao cliente HTTP (cliente falso que falha se chamado)
+- [x] O mesmo snapshot processado duas vezes deixa contagens de cartas, variantes e sets idênticas (SRC-08)
+- [x] Falha de busca (3 tentativas esgotadas, ou 401) grava `ImportRun` `failed` com o erro e sem nenhuma carta, variante ou set novos (SRC-04, SRC-32)
+- [x] Chave ausente sem `SNAPSHOT` aborta antes de qualquer requisição e antes de escrever no banco, com a mensagem de SRC-02
+- [x] Teste em `test/lib/` confere o rake com `SNAPSHOT` (sucesso, código 0) e sem chave (mensagem, código 1)
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full
