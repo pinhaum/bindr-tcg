@@ -23,4 +23,28 @@ namespace :ingestion do
     warn e.message
     exit(1)
   end
+
+  desc "Compara dois snapshots e informa mudanças de tcgplayer.id (SRC-31)"
+  task compare_snapshots: :environment do
+    a_path = ENV["A"]
+    b_path = ENV["B"]
+
+    if a_path.blank? || b_path.blank?
+      warn "faltam argumentos: A=<arquivo> B=<arquivo>"
+      exit(1)
+    end
+
+    begin
+      result = Ingestion::Apitcg::CompareSnapshots.call(a_path, b_path)
+
+      puts "comuns: #{result.common}"
+      puts "mudados: #{result.changed}"
+      result.changes.each do |change|
+        puts "#{change[:_id]} #{change[:from]} → #{change[:to]}"
+      end
+    rescue => e
+      warn e.message
+      exit(1)
+    end
+  end
 end

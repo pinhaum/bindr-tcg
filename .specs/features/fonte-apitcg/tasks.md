@@ -536,10 +536,10 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Dois snapshots sintéticos com um id trocado → `changed` = 1, com o `_id` e os dois ids
-- [ ] Produto presente só num dos lados não conta como mudança
-- [ ] Teste em `test/lib/` confere o rake com `A=` e `B=` (comuns e mudados na saída) e sem um dos argumentos (código 1 com mensagem)
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Dois snapshots sintéticos com um id trocado → `changed` = 1, com o `_id` e os dois ids
+- [x] Produto presente só num dos lados não conta como mudança
+- [x] Teste em `test/lib/` confere o rake com `A=` e `B=` (comuns e mudados na saída) e sem um dos argumentos (código 1 com mensagem)
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full
