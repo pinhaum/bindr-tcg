@@ -6,6 +6,9 @@ module Ingestion
   # - **Não existe operação de delete.** Registro ausente da fonte é marcado
   #   pelo `last_seen_at`, nunca removido. Deletar uma variante apagaria o
   #   registro de coleção que a referencia.
+  # - **`last_seen_at` só avança em run `succeeded`** (SRC-16): é gravado no
+  #   `finish`, na mesma transação do status e sob o lock de presença, a partir
+  #   dos ids acumulados em memória. Run `failed` não muda a presença de ninguém.
   # - Upsert por chave natural (`card_number`; `card_id + variant_code`),
   #   nunca `create` cego — é o que dá a idempotência do Req. 1.4.
   # - Cada registro em transação própria: um erro isolado vai para
@@ -13,10 +16,14 @@ module Ingestion
   class Upsert
     MAX_LOGGED_ERRORS = 100
 
-    def initialize(result, source:, revision:, clock: Time)
+    # A origem do dado vem de `snapshot:` (arquivo; a revisão gravada é o nome e
+    # o SHA-256 dele) ou de `revision:` (fonte que já tem identificador próprio).
+    def initialize(result, source:, revision: nil, snapshot: nil, clock: Time)
+      raise ArgumentError, "informe exatamente um entre revision: e snapshot:" if revision.nil? == snapshot.nil?
+
       @result = result
       @source = source
-      @revision = revision
+      @revision = revision || snapshot_revision(snapshot)
       @clock = clock
     end
 
@@ -26,6 +33,8 @@ module Ingestion
       @started_at = run.started_at
       @counts = { created: 0, updated: 0, failed: 0 }
       @errors = []
+      @seen_card_ids = []
+      @seen_variant_ids = []
 
       @result.sets.each { |record| apply(record.code) { upsert_set(record) } }
       set_ids = CardSet.pluck(:code, :id).to_h
@@ -39,6 +48,11 @@ module Ingestion
     end
 
     private
+
+    # SRC-06: `<arquivo> sha256:<hex>`.
+    def snapshot_revision(snapshot)
+      "#{File.basename(snapshot)} sha256:#{Digest::SHA256.file(snapshot).hexdigest}"
+    end
 
     # Transação por registro. Envolver o laço inteiro faria um único registro
     # defeituoso descartar a importação toda — o oposto do Req. 1.5.
@@ -74,8 +88,9 @@ module Ingestion
         colors: record.colors, cost: record.cost, life: record.life, power: record.power,
         counter: record.counter, attributes_list: record.attributes_list, traits: record.traits,
         block_icon: record.block_icon, effect_text: record.effect_text,
-        trigger_text: record.trigger_text, last_seen_at: @started_at
+        trigger_text: record.trigger_text
       )
+      @seen_card_ids << row.id
       outcome
     end
 
@@ -90,19 +105,43 @@ module Ingestion
       row = CardVariant.find_or_initialize_by(card_id: card_id, variant_code: record.variant_code)
       outcome = row.new_record? ? :created : :updated
       row.update!(set_id: set_id, rarity: record.rarity, art_kind: record.art_kind,
-                  image_url: record.image_url, last_seen_at: @started_at)
+                  image_url: record.image_url)
+      @seen_variant_ids << row.id
       outcome
     end
 
+    # Descartes (SRC-11) não são falha: entram no log depois dos erros reais, que
+    # têm prioridade no teto, e não contam em `failed_count` nem no status.
+    def logged_entries
+      discards = (@result.respond_to?(:discarded) ? @result.discarded : []).map do |discard|
+        { "identifier" => discard["_id"].to_s, "error" => "discarded", "message" => discard["reason"].to_s }
+      end
+
+      (@errors + discards.first(MAX_LOGGED_ERRORS - @errors.size)).presence
+    end
+
+    # Status e presença mudam juntos, ou nenhum dos dois. O lock serializa com o
+    # `Remap`, que lê a presença para decidir o que mover. A presença vai antes do
+    # status: uma falha ao gravar o run desfaz também o `last_seen_at`.
     def finish(run)
-      run.update!(
-        status: @counts[:failed].zero? ? "succeeded" : "failed",
-        finished_at: @clock.current,
-        created_count: @counts[:created],
-        updated_count: @counts[:updated],
-        failed_count: @counts[:failed],
-        error_log: @errors.presence
-      )
+      ImportRun.transaction do
+        ImportRun.lock_presence!
+
+        status = @counts[:failed].zero? ? "succeeded" : "failed"
+        if status == "succeeded"
+          Card.where(id: @seen_card_ids).update_all(last_seen_at: @started_at)
+          CardVariant.where(id: @seen_variant_ids).update_all(last_seen_at: @started_at)
+        end
+
+        run.update!(
+          status: status,
+          finished_at: @clock.current,
+          created_count: @counts[:created],
+          updated_count: @counts[:updated],
+          failed_count: @counts[:failed],
+          error_log: logged_entries
+        )
+      end
       run
     end
   end

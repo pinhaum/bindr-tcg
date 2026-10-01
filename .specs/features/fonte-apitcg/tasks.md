@@ -449,16 +449,16 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Run só com descartes termina `succeeded`, com `failed_count` 0 e os descartes no `error_log`
-- [ ] Um erro real num registro continua levando a `failed` e ao `error_log` como hoje
-- [ ] `source_revision` é `"<arquivo> sha256:<hex>"`, com o hex conferido contra o arquivo
-- [ ] `upsert_test.rb` passa a usar a fixture nova e os nomes de campo da apitcg
-- [ ] Run `succeeded` grava `last_seen_at = started_at` em toda carta e variante que ele aplicou
-- [ ] Run `failed` depois de um `succeeded`: variante criada nele fica com `last_seen_at` nulo e fora de `CardVariant.present`; variante já existente que ele reaplicou mantém o `last_seen_at` do `succeeded`; o conjunto de `CardVariant.present` é idêntico antes e depois do run
-- [ ] Falha forçada ao gravar o status no `finish` não deixa `last_seen_at` avançado (status e presença na mesma transação)
-- [ ] `finish` toma `ImportRun.lock_presence!` (da T18) dentro da transação
-- [ ] `upsert_test.rb:158-159` e `guarantees_test.rb:252-260` continuam passando sem afrouxar asserção
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Run só com descartes termina `succeeded`, com `failed_count` 0 e os descartes no `error_log`
+- [x] Um erro real num registro continua levando a `failed` e ao `error_log` como hoje
+- [x] `source_revision` é `"<arquivo> sha256:<hex>"`, com o hex conferido contra o arquivo
+- [x] `upsert_test.rb` passa a usar a fixture nova e os nomes de campo da apitcg
+- [x] Run `succeeded` grava `last_seen_at = started_at` em toda carta e variante que ele aplicou
+- [x] Run `failed` depois de um `succeeded`: variante criada nele fica com `last_seen_at` nulo e fora de `CardVariant.present`; variante já existente que ele reaplicou mantém o `last_seen_at` do `succeeded`; o conjunto de `CardVariant.present` é idêntico antes e depois do run
+- [x] Falha forçada ao gravar o status no `finish` não deixa `last_seen_at` avançado (status e presença na mesma transação)
+- [x] `finish` toma `ImportRun.lock_presence!` (da T18) dentro da transação
+- [x] `upsert_test.rb:158-159` e `guarantees_test.rb:252-260` continuam passando sem afrouxar asserção
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
