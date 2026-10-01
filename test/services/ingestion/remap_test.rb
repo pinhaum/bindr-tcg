@@ -253,6 +253,108 @@ module Ingestion
       assert_equal @luffy_old_base.id, segundo.reload.card_variant_id
     end
 
+    # --- T19: lacunas da revisão do lote A ---
+
+    test "outro usuário já com item no candidato não gera colisão" do
+      own(@zoro, @luffy_new_base, 4)
+      item = own(@nami, @luffy_old_base, 1)
+
+      report = Remap.call
+
+      assert_equal @luffy_new_base.id, item.reload.card_variant_id
+      assert_empty report.skipped
+    end
+
+    test "falha no movimento da wishlist desfaz também o movimento de coleção já aplicado" do
+      colecao = own(@nami, @luffy_old_base, 1)
+      desejo = want(@zoro, @luffy_old_base, 1)
+      remap = Remap.new
+      original = remap.method(:move)
+      remap.define_singleton_method(:move) do |item, target|
+        raise ActiveRecord::StatementInvalid, "falha forçada" if item.is_a?(WishlistItem)
+
+        original.call(item, target)
+      end
+
+      assert_raises(ActiveRecord::StatementInvalid) { remap.call }
+
+      assert_equal @luffy_old_base.id, colecao.reload.card_variant_id
+      assert_equal @luffy_old_base.id, desejo.reload.card_variant_id
+    end
+
+    test "run succeeded antigo seguido de um failed mais recente: o remap prossegue" do
+      ImportRun.create!(source: "apitcg", source_revision: "apitcg-falhou.json", status: "failed",
+                        started_at: NEW_RUN_AT + 1.day)
+      item = own(@nami, @luffy_old_base, 1)
+
+      Remap.call
+
+      assert_equal @luffy_new_base.id, item.reload.card_variant_id
+    end
+
+    test "dois itens de wishlist do mesmo usuário no mesmo candidato: colisão para os dois" do
+      old_manga = variant(@luffy, "OP01-001_p2", @op01, "manga", OLD_RUN_AT)
+      paralelo = want(@nami, @luffy_old_parallel, 1)
+      manga = want(@nami, old_manga, 2)
+
+      report = Remap.call
+
+      assert_equal @luffy_old_parallel.id, paralelo.reload.card_variant_id
+      assert_equal old_manga.id, manga.reload.card_variant_id
+      assert_equal({ "OP01-001_p1" => "colisão", "OP01-001_p2" => "colisão" }, skipped_reasons(report))
+    end
+
+    test "item de wishlist já existente do usuário no candidato: colisão, e o alvo não se soma" do
+      existente = want(@nami, @luffy_new_base, 5)
+      antigo = want(@nami, @luffy_old_base, 3)
+
+      report = Remap.call
+
+      assert_equal @luffy_old_base.id, antigo.reload.card_variant_id
+      assert_equal 3, antigo.target_quantity
+      assert_equal 5, existente.reload.target_quantity
+      assert_equal({ "OP01-001" => "colisão" }, skipped_reasons(report))
+    end
+
+    test "dois candidatos não-base: ambíguo, e o item fica" do
+      variant(@luffy, "tcgplayer:14", @op01, "manga", NEW_RUN_AT)
+      item = own(@nami, @luffy_old_parallel, 1)
+
+      report = Remap.call
+
+      assert_equal @luffy_old_parallel.id, item.reload.card_variant_id
+      assert_equal({ "OP01-001_p1" => "ambíguo" }, skipped_reasons(report))
+    end
+
+    test "a segunda execução repete os pulados, não move nada e o movido fica na variante nova" do
+      movido = own(@nami, @luffy_old_base, 1)
+      usopp = card("OP01-004")
+      own(@nami, variant(usopp, "OP01-004", @op01, "base", OLD_RUN_AT), 1)
+
+      primeira = Remap.call
+      segunda = Remap.call
+
+      assert_equal [ { card_number: "OP01-004", old_variant_code: "OP01-004", reason: "sem candidato" } ],
+                   primeira.skipped
+      assert_equal primeira.skipped, segunda.skipped
+      assert_empty segunda.moved
+      assert_equal @luffy_new_base.id, movido.reload.card_variant_id
+    end
+
+    test "item em variante presente fica intocado, e o movido só muda card_variant_id" do
+      presente = own(@nami, @luffy_new_alt, 2)
+      movido = own(@zoro, @luffy_old_base, 3)
+      antes_presente = presente.reload.attributes
+      antes_movido = movido.reload.attributes
+
+      travel 1.hour do
+        Remap.call
+      end
+
+      assert_equal antes_presente, presente.reload.attributes
+      assert_equal antes_movido.merge("card_variant_id" => @luffy_new_base.id), movido.reload.attributes
+    end
+
     # --- T18: plano dentro da transação ---
 
     def captured_sql

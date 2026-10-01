@@ -644,14 +644,14 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Outro usuário já com item no candidato não gera colisão: o item é movido para o candidato e `skipped` fica vazio (SRC-21)
-- [ ] Falha forçada no movimento da wishlist desfaz também o movimento de coleção já aplicado
-- [ ] Um run `succeeded` antigo seguido de um `failed` mais recente: o remap prossegue e move o item (SRC-23)
-- [ ] Colisão entre dois itens de wishlist do mesmo usuário e com item de wishlist já existente no candidato
-- [ ] "Ambíguo" com dois candidatos não-base
-- [ ] Idempotência com item pulado: a segunda execução repete o mesmo `skipped`, não move nada e o item movido continua na variante nova (SRC-22)
-- [ ] Item cuja variante está presente fica intocado, e o item movido não muda nenhum atributo além de `card_variant_id`, `updated_at` incluído (SRC-20)
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Outro usuário já com item no candidato não gera colisão: o item é movido para o candidato e `skipped` fica vazio (SRC-21)
+- [x] Falha forçada no movimento da wishlist desfaz também o movimento de coleção já aplicado
+- [x] Um run `succeeded` antigo seguido de um `failed` mais recente: o remap prossegue e move o item (SRC-23)
+- [x] Colisão entre dois itens de wishlist do mesmo usuário e com item de wishlist já existente no candidato
+- [x] "Ambíguo" com dois candidatos não-base
+- [x] Idempotência com item pulado: a segunda execução repete o mesmo `skipped`, não move nada e o item movido continua na variante nova (SRC-22)
+- [x] Item cuja variante está presente fica intocado, e o item movido não muda nenhum atributo além de `card_variant_id`, `updated_at` incluído (SRC-20)
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: unit
 **Gate**: full
