@@ -39,35 +39,42 @@ Então `docker compose up` vai usar os valores de `.env`.
 
 ## Ingestão do catálogo
 
-A revisão do catálogo é fixada em `config/ingestion.yml` e é imutável — referência
-móvel (`main`, `HEAD`, `latest`) é rejeitada na carga. Isso evita que mudanças
-upstream na fonte entrem silenciosamente na ingestão.
+A chave da apitcg fica em `APITCG_API_KEY` no `.env` — obrigatória só para
+`ingestion:import` sem `SNAPSHOT=`. Os testes usam um cliente HTTP falso e não a usam.
 
 ```bash
+# Busca na apitcg real (requer chave em APITCG_API_KEY)
 docker compose exec app bin/rails ingestion:import
 ```
 
-A saída mostra a revisão, status (`succeeded` ou `failed`), contagem de cartas
+A saída mostra a origem do snapshot, status (`succeeded` ou `failed`), contagem de cartas
 criadas/atualizadas/falhadas e o total de registros no banco:
 
 ```
-revisão: <sha da config/ingestion.yml>
+revisão: apitcg-20261001T024920Z.json sha256:<hex>
 status: succeeded
 criados: <n> | atualizados: <n> | falhados: <n>
 cartas: <n> | variantes: <n> | sets: <n>
 ```
 
-Se a fonte não estiver disponível, o processo aborta antes de escrever no banco,
-sem deixar registros parciais. Para reprocessar o payload já salvo em disco (útil
-offline):
+Se a fonte não estiver disponível, o processo registra um `ImportRun` `failed` e
+aborta antes de escrever no catálogo, sem deixar registros parciais. Para reprocessar um snapshot já salvo em disco (útil
+offline ou para testar):
 
 ```bash
-docker compose exec -e REUSE_PAYLOAD=1 app bin/rails ingestion:import
+# Reprocessa sem rede nem chave (útil para testes ou quando a API está fora)
+docker compose exec app bin/rails ingestion:import SNAPSHOT=storage/ingestion/apitcg-20261001T024920Z.json
+
+# Aponta coleção e wishlist para as variantes da fonte atual (sempre após import)
+docker compose exec app bin/rails ingestion:remap
+
+# Compara dois snapshots para medir estabilidade do tcgplayer.id (necessário com ≥24h de diferença)
+docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/<arquivo-A> B=storage/ingestion/<arquivo-B>
 ```
 
-O payload bruto fica em `storage/ingestion/` — diretório ignorado pelo git. A tarefa
-sai com código 1 se o status não for `succeeded`. A revisão é fixada em `config/ingestion.yml`
-e imutável (AD-001).
+Os snapshots brutos ficam em `storage/ingestion/` — diretório ignorado pelo git,
+reconstruível a partir de `ingestion:import`. A tarefa sai com código 1 se o status
+não for `succeeded` (AD-019).
 
 ## Testes e verificações
 

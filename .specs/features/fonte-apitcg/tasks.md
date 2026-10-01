@@ -562,9 +562,9 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Cada comando e arquivo citado conferido por `grep` ou `ls` na mesma task
-- [ ] Nenhuma menção à optcgjson como fonte vigente; a AD-001 aparece só como histórico
-- [ ] Gate full passa; contagem de runs igual à da T15
+- [x] Cada comando e arquivo citado conferido por `grep` ou `ls` na mesma task
+- [x] Nenhuma menção à optcgjson como fonte vigente; a AD-001 aparece só como histórico
+- [x] Gate full passa; contagem de runs igual à da T15
 
 **Tests**: none
 **Gate**: full

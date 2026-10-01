@@ -58,11 +58,13 @@ Dívidas abertas que valem saber antes de mexer em autenticação:
 
 ## Comandos
 
-Tudo roda em Docker; o Postgres não existe fora dele.
+Tudo roda em Docker; o Postgres não existe fora dele. A chave da apitcg é obrigatória
+só para `ingestion:import` real; os testes usam um cliente HTTP falso e não a usam.
 
 ```bash
 cp .env.example .env
-docker compose up          # sobe db + app, roda db:prepare, serve em :3000
+# Depois de pôr a chave em `.env`, recrie o container (a variável passa como ENV):
+docker compose up
 docker compose exec app bin/rails test
 docker compose exec app bin/rails test test/integration/sessions_test.rb
 docker compose exec app bin/rails test test/models/user_password_test.rb -n "/senha/"
@@ -71,15 +73,31 @@ docker compose exec app bin/brakeman
 docker compose exec app bin/rails db:prepare
 ```
 
+Ingestão do catálogo — a chave da apitcg é lida de `APITCG_API_KEY` no `.env`:
+
+```bash
+# Busca na apitcg real (requer chave e conectividade)
+docker compose exec app bin/rails ingestion:import
+
+# Reprocessa um snapshot existente sem rede nem chave (útil offline ou para testar)
+docker compose exec app bin/rails ingestion:import SNAPSHOT=storage/ingestion/apitcg-<UTC>.json
+
+# Aponta coleção e wishlist para as variantes da fonte atual (sempre após import)
+docker compose exec app bin/rails ingestion:remap
+
+# Compara dois snapshots para medir estabilidade do tcgplayer.id (≥24h de diferença)
+docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/<arq-A> B=storage/ingestion/<arq-B>
+```
+
 Gem nova exige `docker compose run --rm --no-deps app bundle install`: o volume
 nomeado `bundle` sombreia as gems da imagem, então rebuild **não** basta.
 
-Gates da feature em execução (`.specs/features/colecao/tasks.md`): **quick** =
+Gates da feature em execução (`.specs/features/fonte-apitcg/tasks.md`): **quick** =
 `bin/rails test test/models test/queries`; **full** =
 `bin/rails test && bin/rubocop`; **build** = `docker compose build`.
 
 Verificação da fixture de ingestão, offline, sem Docker e sem Ruby — deve
-continuar passando (12 verificações):
+continuar passando (19 verificações):
 
 ```bash
 python3 spec/verify_fixture.py
@@ -144,27 +162,27 @@ na mesma língua.
 ## Decisões já tomadas (P1–P7 resolvidas)
 
 As sete pendências que bloqueavam código foram decididas na Fase 0 e estão em
-`.specs/STATE.md` como AD-001..AD-004. **Nenhuma bloqueia mais nada** — não
-reabrir sem motivo novo:
+`.specs/STATE.md`. **Nenhuma bloqueia mais nada** — não reabrir sem motivo novo:
 
 | # | Decisão | Onde |
 |---|---------|------|
-| P1 | Fonte = `hugoprudente/optcgjson` (`output/*.json`), revisão imutável | AD-001 |
+| P1 | Fonte = apitcg (`GET /api/one-piece/sets` e `/products?type=card`, header `x-api-key`) | **AD-019** |
 | P2 | Campos/raridades/sets reais extraídos da fixture; glossário de `product.md` §6 corrigido | task 0.2 |
 | P3 | "Set completo" = `baseSetSize` (variantes base); parallels em métrica separada | AD-003 |
 | P4 | Rails 8 + Hotwire + PostgreSQL | AD-002 |
-| P5 | Não se aplica: a fonte dá `id` estável por variante (`OP01-001_p1`) | AD-001 |
-| P6 | ~~Hotlink de `imageUrl`~~ → app serve a imagem com cache em disco (CORP `same-site` bloqueia hotlink) | AD-004 → **AD-012** |
+| P5 | `variant_code = "tcgplayer:<id>"`, ou `"apitcg:<_id>"` sem esse id | **AD-019** |
+| P6 | App serve a imagem com cache em disco; host = `tcgplayer-cdn.tcgplayer.com` | **AD-019** |
 | P7 | `DON!!` fora do catálogo na Fase 1 | task 0.2 |
 
-A escolha da fonte em AD-001 é o que **elimina** a fragilidade que o design
-original atribuía a `variant_code`: ele vem pronto da fonte, não é derivado por
-hash. Trocar de fonte reintroduz esse problema.
+A troca para a apitcg (AD-019) superou a AD-001. O `variant_code` agora vem do
+`tcgplayer.id` da apitcg, com reserva para `apitcg:<_id>` quando o id não existe.
+A estabilidade do `tcgplayer.id` entre buscas é um `⚠️ VERIFICAR` registrado no
+spec: dois snapshots com ≥24h de diferença devem ser comparados antes do fechamento
+(SRC-31, T17).
 
-A fixture `spec/fixtures/optcgjson-subset.json` (1.4 MB) é versionada de
-propósito — é a entrada dos testes de ingestão sem rede (Req. 11.5). Já
-`storage/ingestion/` (payloads brutos do Fetch) é ignorada: reconstruível a
-partir da revisão fixada.
+A fixture `spec/fixtures/apitcg-subset.json` é versionada de propósito — é a entrada
+dos testes de ingestão sem rede (Req. 11.5). Já `storage/ingestion/` (snapshots brutos
+do Fetch) é ignorada pelo git: reconstruível a partir de `ingestion:import`.
 
 ## Arquitetura (de `.context/design.md`)
 
@@ -203,11 +221,12 @@ referencia `card_variants`.
 
 ### Isolamento da fonte externa
 
-Todo conhecimento sobre o formato da fonte vive **no estágio Normalize e em nenhum
-outro lugar**. Trocar de fonte de dados deve significar escrever um normalizador
-novo, nada mais. O estágio Fetch salva o payload bruto em disco antes de processar
-— é isso que permite reprocessar sem rede e transforma o payload em fixture de
-teste (Req. 11.5).
+Todo conhecimento sobre o formato da apitcg vive **no estágio Normalize e em nenhum
+outro lugar** (`app/services/ingestion/apitcg/normalize.rb`). O estágio Fetch salva
+o snapshot bruto em `storage/ingestion/apitcg-<UTC>.json` antes de normalizar —
+é isso que permite reprocessar sem rede via `ingestion:import SNAPSHOT=` e transforma
+o snapshot em fixture de teste (Req. 11.5). A apitcg não tem revisão imutável; o
+snapshot em disco a substitui.
 
 ### Busca e filtros
 
@@ -232,12 +251,13 @@ filtro foi renomeado.
   junção). `traits` vem de texto livre da fonte → **normalizar caixa e espaçamento
   na ingestão**, senão `"Straw Hat Crew"` e `"Straw hat crew"` viram traits
   distintos e o filtro fica furado.
-- `rarity` como **texto, não enum** — a fixture confirma nove valores
-  (`C UC R SR SEC L P "SP CARD" TR`), mas a fonte é um scraper comunitário: enum
-  faz a ingestão explodir no dia em que aparecer um valor novo.
+- `rarity` como **texto, não enum** — o snapshot da apitcg traz `C UC R SR PR L
+  SEC TR`, mas a fonte é um agregador comunitário: enum faz a ingestão explodir
+  no dia em que aparecer um valor novo.
 - `variant_code` precisa ser **estável entre execuções**, senão a idempotência
-  quebra e o usuário perde o vínculo com a coleção. Hoje ele vem pronto da fonte
-  (`id` por variante, AD-001) — foi o que tirou este ponto da lista de riscos.
+  quebra e o usuário perde o vínculo com a coleção. Hoje ele é `"tcgplayer:<id>"`
+  do campo `markets.tcgplayer.id` da apitcg, ou `"apitcg:<_id>"` quando aquele não
+  existe. A estabilidade deste id é um `⚠️ VERIFICAR` (SRC-31, AD-019).
 
 ### Revisão por subagente
 
