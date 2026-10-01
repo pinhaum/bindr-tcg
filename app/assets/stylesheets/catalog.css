@@ -440,6 +440,9 @@ body {
 
 .card-detail__set { margin: var(--space-1) 0 0; color: var(--ink-muted); font-size: var(--caption-size); line-height: var(--caption-line-height); }
 
+/* SRC-17 — o topo descreve uma variante fora da fonte: texto visível, com o peso de destaque, não só cor. */
+.card-detail__status { margin: var(--space-1) 0 0; font-size: var(--caption-size); line-height: var(--caption-line-height); font-weight: var(--body-strong-weight); }
+
 .card-detail__trigger-label { margin: 0 0 var(--space-2); font-weight: var(--body-strong-weight); }
 
 .card-detail__variants { max-width: 100%; }

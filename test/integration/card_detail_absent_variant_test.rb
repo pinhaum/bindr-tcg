@@ -103,6 +103,33 @@ class CardDetailAbsentVariantTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal [ "OP01-016" ], variant_codes
     assert_includes variant_item("OP01-016").text, "fora da fonte"
+    assert_select ".card-detail__heading .card-detail__status", text: "Variante fora da fonte"
+  end
+
+  # --- T22: o topo do detalhe descreve a variante presente ---
+
+  test "com a ausente ordenada antes da presente, o topo usa a presente" do
+    CollectionItem.create!(user: @user, card_variant: @ausente, quantity: 1)
+    sign_in
+
+    get card_path(@zoro.card_number)
+
+    assert_equal [ "OP01-001_p1", "tcgplayer:101" ], variant_codes
+    assert_select ".card-detail__thumb img[alt=?]", "Roronoa Zoro tcgplayer:101"
+    assert_select ".card-detail__chips .card-detail__chip", text: "L"
+    assert_select ".card-detail__chips .card-detail__chip", text: "SEC", count: 0
+    assert_select ".card-detail__status", count: 0
+  end
+
+  test "na lista, a ausente tem o par Situação / fora da fonte" do
+    CollectionItem.create!(user: @user, card_variant: @ausente, quantity: 1)
+    sign_in
+
+    get card_path(@zoro.card_number)
+
+    par = variant_item("OP01-001_p1").css(".variant__meta > div").find { |div| div.at_css("dt")&.text == "Situação" }
+    refute_nil par, "a ausente precisa do dt Situação"
+    assert_equal "fora da fonte", par.at_css("dd").text.strip
   end
 
   test "carta só com variantes ausentes responde 404 para quem não tem item" do

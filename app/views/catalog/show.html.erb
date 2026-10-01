@@ -6,7 +6,8 @@
 <main class="card-detail">
 
   <% if @variants.any? %>
-    <% hero = @variants.first %>
+    <%# SRC-17 — o topo descreve uma variante presente; a ausente só sobe para cá quando é tudo o que o dono tem. %>
+    <% hero = @variants.find { |variant| !@absent_variant_ids.include?(variant.id) } || @variants.first %>
     <% hero_quantity = owned_quantity(hero) %>
 
     <%#
@@ -62,6 +63,9 @@
         <p class="card-detail__set">
           <%= hero.card_set.name %> · <%= hero.card_set.code %>
         </p>
+        <% if @absent_variant_ids.include?(hero.id) %>
+          <p class="card-detail__status">Variante fora da fonte</p>
+        <% end %>
       </header>
     </div>
 
@@ -238,7 +242,7 @@
             <%# SRC-17 — ausente da fonte, visível só ao dono do item. Texto, não só cor. %>
             <% if @absent_variant_ids.include?(variant.id) %>
               <div>
-                <dt>Fonte</dt>
+                <dt>Situação</dt>
                 <dd>fora da fonte</dd>
               </div>
             <% end %>

@@ -717,8 +717,8 @@ T4 → T23
 
 ### T22: Topo do detalhe com a variante presente
 
-**What**: O topo do detalhe usa a primeira variante presente; só quando todas são ausentes usa a primeira e mostra "Variante fora da fonte" no cabeçalho. Na lista, o par vira `Situação` / `Fora da fonte`.
-**Where**: `app/views/catalog/show.html.erb`
+**What**: O topo do detalhe usa a primeira variante presente; só quando todas são ausentes usa a primeira e mostra "Variante fora da fonte" no cabeçalho. Na lista, o par vira `Situação` / `fora da fonte` (o texto literal de SRC-17).
+**Where**: `app/views/catalog/show.html.erb` (e a regra de `.card-detail__status` em `app/assets/stylesheets/catalog.css`, que `class_coverage_test.rb` exige)
 **Depends on**: T3
 **Reuses**: `@absent_variant_ids`
 **Requirement**: SRC-17
@@ -730,11 +730,11 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Carta com variante ausente de `variant_code` menor que a presente: imagem, raridade e set do topo são os da presente
-- [ ] Carta com todas as variantes ausentes, aberta pelo dono: o cabeçalho mostra o texto visível "Variante fora da fonte"
-- [ ] Na lista, a variante ausente tem `dt` "Situação" e `dd` "Fora da fonte"
-- [ ] Os testes de `test/integration/card_detail_*` e `test/design/card_detail_*` continuam passando
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Carta com variante ausente de `variant_code` menor que a presente: imagem, raridade e set do topo são os da presente
+- [x] Carta com todas as variantes ausentes, aberta pelo dono: o cabeçalho mostra o texto visível "Variante fora da fonte"
+- [x] Na lista, a variante ausente tem `dt` "Situação" e `dd` "fora da fonte"
+- [x] Os testes de `test/integration/card_detail_*` e `test/design/card_detail_*` continuam passando
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full
