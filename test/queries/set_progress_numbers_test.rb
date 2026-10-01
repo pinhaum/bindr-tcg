@@ -121,6 +121,18 @@ class SetProgressNumbersTest < ActiveSupport::TestCase
     assert_equal 100.0, op01.completion_percent
   end
 
+  # T23 — `base_set_size` legado menor que os números com o prefixo.
+  test "o numerador exibido para no denominador, e sem denominador não é limitado" do
+    @op01.update!(base_set_size: 2)
+    own(@luffy_base, @zoro_alt, @nami_manga)
+
+    op01 = progress["OP01"]
+
+    assert_equal 3, op01.owned_numbers
+    assert_equal 2, op01.displayed_owned_numbers
+    assert_equal 4, SetProgressQuery::Row.new(owned_numbers: 4, base_size: nil).displayed_owned_numbers
+  end
+
   # --- Done when 6 / SRC-16: presença ---
 
   test "set sem variante presente não aparece na lista" do

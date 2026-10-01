@@ -202,7 +202,7 @@
             legenda, abaixo, junto dos parallels — não duplicado aqui.
           %>
           <p class="progress-set__owned-line">
-            <span class="progress-set__owned"><%= row.owned_numbers %></span>
+            <span class="progress-set__owned"><%= row.displayed_owned_numbers %></span>
             <% if row.completion_percent_known? %>
               /
               <span class="progress-set__total"><%= row.base_size %></span>
@@ -214,7 +214,7 @@
         <%# `value` limitado ao `max`: o percentual tem teto de 100% (SRC-26), a barra também. %>
         <% if row.completion_percent_known? %>
           <progress class="progress-set__bar"
-                    value="<%= [ row.owned_numbers, row.base_size ].min %>"
+                    value="<%= row.displayed_owned_numbers %>"
                     max="<%= row.base_size %>"
                     aria-hidden="true"></progress>
         <% end %>
@@ -228,7 +228,7 @@
         <div class="progress-set__legend">
           <p class="progress-set__percent <%= "progress-set__percent--unknown" unless row.completion_percent_known? %>">
             <% if row.completion_percent_known? %>
-              <span class="progress-set__percent-basis"><%= row.owned_numbers %> de <%= row.base_size %> do set base</span>
+              <span class="progress-set__percent-basis"><%= row.displayed_owned_numbers %> de <%= row.base_size %> do set base</span>
             <% else %>
               Percentual indisponível: este set não informa o tamanho do set base.
             <% end %>

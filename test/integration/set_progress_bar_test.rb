@@ -107,6 +107,28 @@ class SetProgressBarTest < ActionDispatch::IntegrationTest
       "max da barra (#{bar["max"]}) deve coincidir com .progress-set__total (#{total_span})"
   end
 
+  # --- T23 / SRC-26: o texto não passa do denominador ---
+
+  test "set com mais números possuídos que o denominador mostra 7 / 7 · 100% e 7 de 7" do
+    legado = CardSet.create!(code: "OP09", name: "Legado", kind: "booster", base_set_size: 7, total_set_size: 9)
+    variantes = (1..8).map { |i| create_variant(legado, "%03d" % i, "base") }
+    # Uma reimpressão de outro número tira o set do ramo "set inteiro" (SRC-24).
+    reimpressa = Card.create!(card_set: legado, card_number: "ST01-001", name: "Reimpressa",
+                              card_type: "character", colors: [ "Red" ])
+    CardVariant.create!(last_seen_at: CATALOG_SEEN_AT, card: reimpressa, card_set: legado, variant_code: "r1",
+                        rarity: "C", art_kind: "base")
+    variantes.each { |v| CollectionItem.create!(user: @user, card_variant: v, quantity: 1) }
+    sign_in(@user)
+
+    get progress_path
+
+    li = css_select("li#progress_set_OP09").first
+    assert li, "não encontrou o li do set OP09"
+    assert_equal "7 / 7 · 100%", li.css(".progress-set__owned-line").text.squish
+    assert_equal "7 de 7 do set base", li.css(".progress-set__percent-basis").text.squish
+    assert_equal [ "7", "7" ], [ li.css(".progress-set__bar").first["value"], li.css(".progress-set__bar").first["max"] ]
+  end
+
   # --- NAV-38: barra não renderizada sem base_set_size ---
 
   test "set sem base_set_size não renderiza barra de progresso" do

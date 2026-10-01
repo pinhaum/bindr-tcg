@@ -757,10 +757,10 @@ T4 → T23
 
 **Done when**:
 
-- [ ] Set com `base_set_size` 7 e 8 números possuídos mostra "7 / 7 · 100%" e "7 de 7 do set base"
-- [ ] Set sem denominador mostra o numerador sem limite, como hoje (PRG-10)
-- [ ] Os testes de `test/queries/set_progress_*` e `test/design/progress_*` continuam passando
-- [ ] Gate full passa; contagem de runs registrada
+- [x] Set com `base_set_size` 7 e 8 números possuídos mostra "7 / 7 · 100%" e "7 de 7 do set base"
+- [x] Set sem denominador mostra o numerador sem limite, como hoje (PRG-10)
+- [x] Os testes de `test/queries/set_progress_*` e `test/design/progress_*` continuam passando
+- [x] Gate full passa; contagem de runs registrada
 
 **Tests**: integration
 **Gate**: full

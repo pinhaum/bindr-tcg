@@ -136,6 +136,13 @@ class SetProgressQuery
     def completion_percent_known?
       !base_size.nil? && base_size.positive?
     end
+
+    # SRC-26 no texto: com o `base_set_size` legado da optcgjson, os números
+    # com o prefixo podem passar do denominador, e a linha não pode dizer
+    # "8 / 7". Sem denominador, não há o que limitar.
+    def displayed_owned_numbers
+      completion_percent_known? ? [ owned_numbers, base_size ].min : owned_numbers
+    end
   end
 
   # CNF-27/28 — `order` é lista fechada (`ORDERS`), mesmo padrão de
