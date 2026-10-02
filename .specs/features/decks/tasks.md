@@ -268,10 +268,10 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] A primeira linha é `1x<leader>`; as seguintes seguem `ordered_entries`; o separador é `"\n"` e o texto não tem `"\r"`
-- [ ] Deck sem Leader exporta só as entradas
-- [ ] `parse(format(deck))` devolve o mesmo Leader e as mesmas entradas, tanto para o deck do exemplo do dono quanto para um deck com cartas de custo nulo
-- [ ] Gate quick passa; contagem registrada
+- [x] A primeira linha é `1x<leader>`; as seguintes seguem `ordered_entries`; o separador é `"\n"` e o texto não tem `"\r"`
+- [x] Deck sem Leader exporta só as entradas
+- [x] `parse(format(deck))` devolve o mesmo Leader e as mesmas entradas, tanto para o deck do exemplo do dono quanto para um deck com cartas de custo nulo
+- [x] Gate quick passa; contagem registrada
 
 **Tests**: unit
 **Gate**: quick

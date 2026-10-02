@@ -112,6 +112,16 @@ class Deck
       end
     end
 
+    # DCK-31 — Leader primeiro, depois as entradas na ordem da página do deck,
+    # separadas por LF. ⚠️ VERIFICAR (spec, Assumptions): o exemplo do dono
+    # usava CR, e a aceitação do LF pelo simulador fica para o teste manual da
+    # T21. O `parse` aceita os três, então a ida e volta não depende disso.
+    def format(deck)
+      lines = deck.ordered_entries.map { |entry| "#{entry.quantity}x#{entry.card.card_number}" }
+      lines.unshift("1x#{deck.leader.card_number}") if deck.leader
+      lines.join("\n")
+    end
+
     def failure(errors)
       Result.new(leader: nil, entries: {}, errors: errors)
     end

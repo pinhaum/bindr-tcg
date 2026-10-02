@@ -193,4 +193,67 @@ class Deck::ListTextTest < ActiveSupport::TestCase
     assert_equal 1, capture_queries { Deck::ListText.parse("1xOP17-079\n4xOP17-094") }.size
     assert_equal 1, capture_queries { Deck::ListText.parse(OWNER_EXAMPLE) }.size
   end
+
+  # --- T7: format e ida e volta ----------------------------------------------
+
+  def build_deck(leader:, entries:)
+    user = User.create!(email: "lista-#{SecureRandom.hex(4)}@example.com", password: "senha-correta")
+    Deck.create!(user: user, name: "Deck", leader: leader).tap do |deck|
+      entries.each { |entry_card, quantity| deck.entries.create!(card: entry_card, quantity: quantity) }
+    end.reload
+  end
+
+  def owner_deck
+    parsed = Deck::ListText.parse(OWNER_EXAMPLE)
+    build_deck(leader: parsed.leader, entries: parsed.entries)
+  end
+
+  # Done when / DCK-31: `1x<leader>` primeiro, depois `ordered_entries`
+  # (character, event, stage; custo; card_number), separados por LF.
+  test "format põe o Leader primeiro e segue a ordem da página, com LF" do
+    text = Deck::ListText.format(owner_deck)
+
+    assert_equal [ "1xOP17-079",
+                   "2xOP17-084", "3xOP17-086", "4xOP17-094",
+                   "4xOP17-080", "4xOP17-081", "4xOP17-082", "4xOP17-087", "4xOP17-095",
+                   "4xOP15-088", "4xOP17-119", "4xOP17-093", "2xOP07-085",
+                   "4xOP17-096",
+                   "3xST14-017" ].join("\n"), text
+    assert_not_includes text, "\r"
+  end
+
+  # Done when: deck sem Leader exporta só as entradas.
+  test "deck sem Leader exporta só as entradas" do
+    deck = build_deck(leader: nil, entries: { card("OP17-094") => 4, card("ST14-017") => 1 })
+
+    assert_equal "4xOP17-094\n1xST14-017", Deck::ListText.format(deck)
+  end
+
+  # Done when / DCK-32: `parse(format(deck))` devolve o mesmo Leader e as
+  # mesmas entradas, para o exemplo do dono.
+  test "ida e volta do exemplo do dono devolve o mesmo deck" do
+    deck = owner_deck
+    result = Deck::ListText.parse(Deck::ListText.format(deck))
+
+    assert_empty result.errors
+    assert_equal card("OP17-079"), result.leader
+    assert_equal deck.entries.to_h { |entry| [ entry.card.card_number, entry.quantity ] },
+                 as_numbers(result.entries)
+    assert_equal 50, result.entries.values.sum
+  end
+
+  # Done when / DCK-32: e para um deck com cartas de custo nulo.
+  test "ida e volta de um deck com custo nulo devolve o mesmo deck" do
+    no_cost = Card.create!(card_set: @set, card_number: "OP17-200", name: "Sem custo", card_type: "character",
+                           cost: nil, colors: [ "Black" ])
+    deck = build_deck(leader: card("OP17-079"), entries: { no_cost => 2, card("OP17-094") => 4 })
+
+    text = Deck::ListText.format(deck)
+    result = Deck::ListText.parse(text)
+
+    assert_equal "1xOP17-079\n4xOP17-094\n2xOP17-200", text
+    assert_empty result.errors
+    assert_equal card("OP17-079"), result.leader
+    assert_equal({ "OP17-200" => 2, "OP17-094" => 4 }, as_numbers(result.entries))
+  end
 end

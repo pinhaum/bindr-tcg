@@ -348,7 +348,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 Plano da feature em `.specs/features/decks/tasks.md` (T1–T21, numeração
 própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
 
-- [ ] **9.1 Regras, schema e domínio** — T1–T7 da `decks`
+- [x] **9.1 Regras, schema e domínio** — T1–T7 da `decks`
   - Regras ⚠️ confirmadas no Rule Manual antes do validador; tabelas `decks` e
     `deck_entries` com as constraints no banco; status, falta e lista em texto
     como código puro testado por unidade.
