@@ -14,8 +14,9 @@ verificador, `validation.md` PASS): `catalogo`, `colecao`, `progresso`,
 
 O próximo trabalho **não tem plano ainda**: Fase 2 (decks) ou Fase 3 (preços),
 ambas fora do escopo da Fase 1 e obrigadas a passar por `requirements.md`
-primeiro. Pendência do dono aberta: a aprovação das capturas da T12 da
-`conformidade`. A D-03 (SRC-19) foi fechada mantendo a regra (registro no spec da
+primeiro. Pendências do dono abertas: sets não lançados no topo do catálogo sem
+arte (403 do CDN) e arte "SAMPLE" presa no cache de imagens (ver *Handoff*). A
+aprovação da T12 da `conformidade` foi dada em 2026-10-01. A D-03 (SRC-19) foi fechada mantendo a regra (registro no spec da
 `fonte-apitcg`) e o flake D-10 foi corrigido (registro no *Handoff*). `STATE.md` (*Handoff*) tem o
 retrato mais recente.
 

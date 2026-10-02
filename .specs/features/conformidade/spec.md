@@ -246,8 +246,8 @@ feature, com a imagem da comparação de cada tela.
 | CNF-31 | P1: Catálogo | Req. 13.11 (lacuna da validação da `navegacao`) | T4 | Implemented |
 | CNF-32 | P1: Pasta | Req. 13.38, 13.3 | T11, T15, T17 | Implemented |
 | CNF-33 | P1: Pasta | Req. 13.21 | T11, T16 | Implemented |
-| CNF-34 | P1: Captura | Req. 13.21 (AD-016) | T12 | Implemented (aprovação do dono pendente) |
-| CNF-35 | P1: Captura | Req. 13.21 (AD-016) | T12 | Implemented (aprovação do dono pendente) |
+| CNF-34 | P1: Captura | Req. 13.21 (AD-016) | T12 | ✅ Verified (aprovado pelo dono em 2026-10-01) |
+| CNF-35 | P1: Captura | Req. 13.21 (AD-016) | T12 | ✅ Verified (aprovado pelo dono em 2026-10-01) |
 | CNF-36 | Edge case | Req. 2.3 | T6, T21 | Implemented |
 | CNF-37 | Edge case | Req. 13.35 | T6 | Implemented |
 | CNF-38 | Edge case | Req. 9.7 | T1 | Implemented |

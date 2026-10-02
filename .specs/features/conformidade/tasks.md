@@ -709,7 +709,7 @@ Captura de 2026-09-28 (`tmp/comparacao/pasta-1280.png`): o rótulo "Adicionar ca
 - [x] Traceability da spec com CNF-01..41 apontando para as tasks
 - [x] §6.7 do `.context/tasks.md` marcada
 - [x] Gate build passa
-- [ ] O dono comparou as capturas com os artboards e aprovou
+- [x] O dono comparou as capturas com os artboards e aprovou — 2026-10-01, sobre as capturas refeitas após a troca para a apitcg (`tmp/capturas/` e `tmp/capturas-op17/`, fora do git)
 - [x] Bloco novo no *Handoff* do `STATE.md`
 
 **Tests**: none
