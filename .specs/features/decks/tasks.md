@@ -239,13 +239,13 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] O exemplo do dono (15 linhas separadas por CR, Leader OP17-079) vira 1 Leader + 50 cartas, sobre uma fixture de teste com essas cartas
-- [ ] CR, LF, CRLF e a mistura deles dão o mesmo resultado; linhas em branco e espaços nas bordas e ao redor do `x` são ignorados; `op17-079` casa com `OP17-079`
-- [ ] Linhas repetidas somam numa entrada
-- [ ] Cada recusa gera um erro com número da linha e motivo em português: formato errado, `card_number` inexistente, quantidade 0 ou 51, dois Leaders, Leader com quantidade 2
-- [ ] Texto com 201 linhas ou com 10.001 caracteres é recusado sem consultar o banco (0 consultas)
-- [ ] A busca das cartas é uma consulta só, qualquer que seja o número de linhas
-- [ ] Gate quick passa; contagem registrada
+- [x] O exemplo do dono (15 linhas separadas por CR, Leader OP17-079) vira 1 Leader + 50 cartas, sobre uma fixture de teste com essas cartas
+- [x] CR, LF, CRLF e a mistura deles dão o mesmo resultado; linhas em branco e espaços nas bordas e ao redor do `x` são ignorados; `op17-079` casa com `OP17-079`
+- [x] Linhas repetidas somam numa entrada
+- [x] Cada recusa gera um erro com número da linha e motivo em português: formato errado, `card_number` inexistente, quantidade 0 ou 51, dois Leaders, Leader com quantidade 2
+- [x] Texto com 201 linhas ou com 10.001 caracteres é recusado sem consultar o banco (0 consultas)
+- [x] A busca das cartas é uma consulta só, qualquer que seja o número de linhas
+- [x] Gate quick passa; contagem registrada
 
 **Tests**: unit
 **Gate**: quick
