@@ -139,6 +139,42 @@ class DeckShortfallQueryTest < ActiveSupport::TestCase
     assert_empty DeckShortfallQuery.new(@user, deck: alien).call
   end
 
+  # T22 (M1) — o ramo do Leader tem filtro de usuário próprio. Um deck alheio
+  # só com Leader não entra, com ou sem `deck:`; sem o filtro, o Leader dele
+  # apareceria na falta do usuário.
+  test "o Leader de um deck de outro usuário não entra" do
+    other = User.create!(email: "leader-alheio@example.com", password: "senha-correta")
+    alien = create_deck(user: other, leader: @leader)
+
+    assert_empty DeckShortfallQuery.new(@user).call
+    assert_empty DeckShortfallQuery.new(@user, deck: alien).call
+  end
+
+  # T22 (M1) — com `deck:`, o ramo do Leader também filtra pelo deck: o
+  # Leader de outro deck do mesmo usuário não entra.
+  test "com deck, o Leader de outro deck do usuário não entra" do
+    other_leader = create_card("SF01-009", card_type: "leader")
+    create_deck(name: "Outro", leader: other_leader)
+    deck = create_deck(name: "Este", leader: @leader)
+
+    rows = DeckShortfallQuery.new(@user, deck: deck).call
+
+    assert_equal [ [ "SF01-001", 1, [ deck.id ] ] ],
+                 rows.map { |row| [ row.card.card_number, row.required, row.deck_ids ] }
+  end
+
+  # T22 (L4) — o mesmo Leader em dois decks: pedida 1 (o `MAX`, não a soma) e
+  # os dois decks.
+  test "o mesmo Leader em dois decks pede 1 e lista os dois" do
+    first = create_deck(name: "A", leader: @leader)
+    second = create_deck(name: "B", leader: @leader)
+
+    row = row_for(DeckShortfallQuery.new(@user).call, @leader)
+
+    assert_equal [ 1, 0, 1 ], [ row.required, row.owned, row.missing ]
+    assert_equal [ first.id, second.id ].sort, row.deck_ids
+  end
+
   # Done when: `user` nil devolve vazio.
   test "usuário nil devolve vazio" do
     create_deck(entries: { @card => 4 })

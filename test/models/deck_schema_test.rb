@@ -39,6 +39,19 @@ class DeckSchemaTest < ActiveSupport::TestCase
     SQL
   end
 
+  # O nome da FK que parte de `table.column`, lido do catálogo do Postgres.
+  # A mensagem de violação traz o nome da constraint, e casar com ele prova
+  # qual coluna recusou, não só qual tabela (T22, L6).
+  def foreign_key_name(table, column)
+    connection.select_value(<<~SQL)
+      SELECT conname FROM pg_constraint
+      WHERE contype = 'f' AND conrelid = #{connection.quote(table)}::regclass
+        AND conkey = ARRAY[(SELECT attnum FROM pg_attribute
+                            WHERE attrelid = #{connection.quote(table)}::regclass
+                              AND attname = #{connection.quote(column)})]
+    SQL
+  end
+
   def insert_entry(deck_id:, card:, quantity:)
     sql_value(<<~SQL)
       INSERT INTO deck_entries (deck_id, card_id, quantity, created_at, updated_at)
@@ -124,13 +137,16 @@ class DeckSchemaTest < ActiveSupport::TestCase
   test "apagar uma carta que é Leader de um deck é impedido pelo banco" do
     leader = create_card(suffix: "fl", card_type: "leader")
     insert_deck(user: create_user(email: "fk-leader@example.com"), leader: leader)
+    # Lido antes do DELETE: depois do raise, a transação do teste está abortada.
+    constraint = foreign_key_name("decks", "leader_card_id")
+    assert_not_nil constraint
 
     error = assert_raises(ActiveRecord::InvalidForeignKey) do
       sql_execute("DELETE FROM cards WHERE id = #{leader.id}")
     end
-    # Nada depois do raise: a violação aborta a transação do teste. O nome da
-    # tabela na mensagem prova que quem recusou foi a FK de `decks`.
-    assert_match(/decks/, error.message)
+    # O nome da constraint na mensagem prova que quem recusou foi a FK de
+    # `decks.leader_card_id`.
+    assert_includes error.message, constraint
   end
 
   # DCK-40 — apagar a carta que está numa entrada falha pela FK.
@@ -138,11 +154,13 @@ class DeckSchemaTest < ActiveSupport::TestCase
     deck_id = insert_deck(user: create_user(email: "fk-entry@example.com"))
     card = create_card(suffix: "fe")
     insert_entry(deck_id: deck_id, card: card, quantity: 4)
+    constraint = foreign_key_name("deck_entries", "card_id")
+    assert_not_nil constraint
 
     error = assert_raises(ActiveRecord::InvalidForeignKey) do
       sql_execute("DELETE FROM cards WHERE id = #{card.id}")
     end
-    assert_match(/deck_entries/, error.message)
+    assert_includes error.message, constraint
   end
 
   # DCK-40 — nenhuma FK que parte de `cards` cascateia, e a única cascata das
@@ -162,6 +180,23 @@ class DeckSchemaTest < ActiveSupport::TestCase
       [ "decks", "cards", "r" ],
       [ "decks", "users", "r" ]
     ], rows
+  end
+
+  # T22 (M2) — os quatro índices da migração. Os três simples atendem as FKs
+  # (busca por dono, e o `ON DELETE RESTRICT` de `cards`, que sem índice faz
+  # varredura em `decks` e `deck_entries` a cada carta apagada). O único é o
+  # DCK-02 e também atende a busca por `deck_id`.
+  test "os índices de decks e deck_entries existem com as colunas e a unicidade da migração" do
+    indexes = %w[decks deck_entries].flat_map do |table|
+      connection.indexes(table).map { |index| [ table, index.columns, index.unique ] }
+    end
+
+    assert_equal [
+      [ "deck_entries", [ "card_id" ], false ],
+      [ "deck_entries", [ "deck_id", "card_id" ], true ],
+      [ "decks", [ "leader_card_id" ], false ],
+      [ "decks", [ "user_id" ], false ]
+    ], indexes.sort_by { |table, columns, _| [ table, columns ] }
   end
 
   # DCK-09 — `DELETE FROM decks` apaga só as entradas daquele deck.

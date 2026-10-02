@@ -297,10 +297,10 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Remover `AND decks.user_id = :user_id` ou o filtro de deck do ramo Leader faz um teste falhar (verificado aplicando a mutação numa cópia e descartando)
-- [ ] Remover qualquer um dos quatro índices da migração faz um teste falhar
-- [ ] L3–L6 aplicados; `deck_shortfall_query.rb` muda só em comentário
-- [ ] Gate quick passa; contagem registrada, sem queda
+- [x] Remover `AND decks.user_id = :user_id` ou o filtro de deck do ramo Leader faz um teste falhar (verificado aplicando a mutação numa cópia e descartando)
+- [x] Remover qualquer um dos quatro índices da migração faz um teste falhar
+- [x] L3–L6 aplicados; `deck_shortfall_query.rb` muda só em comentário
+- [x] Gate quick passa; contagem registrada, sem queda
 
 **Tests**: unit
 **Gate**: quick

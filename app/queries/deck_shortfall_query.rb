@@ -21,6 +21,16 @@
 #
 # Nada é gravado: a falta é derivada da coleção atual a cada chamada (DCK-23).
 #
+# ## Leader nunca é entrada do mesmo deck
+#
+# O `UNION ALL` junta o Leader às entradas sem conferir se a mesma carta
+# aparece pelos dois ramos no mesmo deck. Isso só está certo porque uma carta
+# Leader nunca vira `deck_entries`: `DeckEntry` recusa
+# (`card_must_not_be_a_leader`), e o controller recusa Leader no incremento com
+# 422. O banco não garante isso (o Postgres não faz CHECK entre tabelas,
+# design.md, Data Models). Se a carta entrasse pelos dois ramos, o `MAX` daria
+# a pedida N da entrada, e não 1 + N.
+#
 # ## O usuário é o objeto
 #
 # Como em `SetProgressQuery` e `CollectionItem.for_user`, o usuário entra como
@@ -54,6 +64,7 @@ class DeckShortfallQuery
     deck_filter = @deck ? "AND decks.id = :deck_id" : ""
 
     <<~SQL
+      -- listDeckShortfall
       WITH demand AS (
         SELECT used.card_id,
                MAX(used.quantity) AS required_quantity,
