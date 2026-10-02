@@ -554,6 +554,142 @@ na miniatura pequena da lista.
 
 ---
 
+## Requisito 14 — Decks (Fase 2)
+
+**User story:** Como jogador, quero montar decks pelas regras do jogo e ver o
+que falta na minha pasta para montá-los de verdade, para não conferir à mão,
+carta por carta, uma lista feita em outro app.
+
+Requisito da Fase 2, aprovado pelo dono em 2026-10-01. Recorte e decisões em
+`.specs/features/decks/spec.md` (DCK-NN, mesma numeração destes critérios).
+
+Regras de montagem confirmadas no Play Guide oficial
+(`en.onepiece-cardgame.com/play-guide/`): 1 Leader, deck principal de 50 cartas,
+no máximo 4 cópias por `card_number`, e as cartas do deck principal só com cores
+do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada**
+(decisão do dono): ela muda com frequência e a fonte não a traz.
+
+> ⚠️ VERIFICAR no Rule Manual (`en.onepiece-cardgame.com/pdf/rule_manual.pdf`),
+> antes do código que implementa os critérios 16 e 31: (a) carta multicolorida
+> num deck de Leader de uma cor só — o default é a leitura estrita, todas as
+> cores da carta precisam estar no Leader; em 2026-10-01 o catálogo não tem
+> nenhuma carta não-Leader multicolorida; (b) se existe carta que permite mais de
+> 4 cópias — o default é que não; (c) se o OPTCG Simulator aceita LF na lista
+> exportada — o exemplo do dono veio separado por CR.
+
+### Critérios de aceitação
+
+**Montar**
+
+1. QUANDO o usuário autenticado criar um deck com um nome ENTÃO o sistema DEVE
+   criá-lo vazio, sem Leader, pertencente a esse usuário, e abrir a página dele.
+2. O deck DEVE ser um Leader opcional mais entradas `(carta, quantidade)` que
+   referenciam `cards`, nunca `card_variants`, com no máximo uma entrada por
+   carta por deck garantida no banco.
+3. ENQUANTO houver um deck em edição, o detalhe de cada carta não-Leader DEVE
+   exibir incremento e decremento da quantidade dela nesse deck, com a
+   quantidade atual visível.
+4. ENQUANTO houver um deck em edição, o detalhe de uma carta Leader DEVE exibir
+   a ação "Usar como Leader", que substitui o Leader do deck.
+5. QUANDO o usuário incrementar ou decrementar uma carta no deck ENTÃO o sistema
+   DEVE aplicar a alteração em uma única ação, sem recarregar a página inteira.
+6. QUANDO o decremento levar a quantidade a zero ENTÃO o sistema DEVE remover a
+   entrada do deck.
+7. A página do deck DEVE exibir o Leader e as cartas do deck principal
+   agrupadas em Character, Event e Stage, ordenadas por custo e depois por
+   `card_number`, com a quantidade de cada uma e o total "N / 50".
+8. A lista de decks DEVE exibir cada deck do usuário com nome, Leader, total
+   "N / 50" e status.
+9. QUANDO o usuário excluir um deck ENTÃO o sistema DEVE pedir confirmação e,
+   confirmada, remover o deck sem alterar coleção nem wishlist.
+10. QUANDO o usuário renomear um deck ENTÃO o sistema DEVE manter Leader e
+    entradas.
+
+**Validar**
+
+11. O status do deck DEVE ser calculado a cada leitura, nunca persistido, como
+    exatamente um de `válido`, `incompleto` ou `inválido`.
+12. `válido`: há Leader, o deck principal soma exatamente 50, nenhuma carta passa
+    de 4 cópias e toda carta tem só cores do Leader.
+13. `inválido`: o deck principal passa de 50, alguma carta passa de 4 cópias ou,
+    havendo Leader, alguma carta tem cor que o Leader não tem.
+14. `incompleto`: nem `válido` nem `inválido` — sem Leader ou com menos de 50
+    cartas, sem violação do critério 13.
+15. QUANDO o status não for `válido` ENTÃO a página do deck DEVE listar cada
+    motivo em português, nomeando as cartas envolvidas.
+16. A carta multicolorida DEVE contar como tendo todas as suas cores ao mesmo
+    tempo. ⚠️ VERIFICAR (acima).
+17. A página do deck DEVE exibir o aviso "A lista de banidas não é verificada".
+18. Uma regra do jogo NUNCA DEVE recusar a gravação de uma alteração; a violação
+    aparece só no status.
+19. A carta ausente da fonte DEVE continuar no deck, contando para as regras,
+    marcada como "fora da fonte".
+
+**O que falta na pasta**
+
+20. As cópias possuídas de uma carta DEVEM ser a soma das quantidades de todas
+    as variantes dela na coleção do usuário, presentes ou não na fonte.
+21. A página do deck DEVE exibir, para o Leader e cada carta, a quantidade
+    pedida, a possuída e a que falta, `max(0, pedida − possuída)`.
+22. A página do deck DEVE exibir o total que falta, ou "Você tem todas as cartas
+    deste deck" quando for zero.
+23. O que falta DEVE ser derivado da coleção atual a cada leitura, sem
+    sincronização gravada.
+
+**Importar e exportar (formato do OPTCG Simulator)**
+
+24. QUANDO o usuário importar uma lista ENTÃO o sistema DEVE criar um deck novo,
+    nunca alterar um existente, com o nome informado ou o do Leader importado.
+25. O formato DEVE ser uma linha `<N>x<card_number>` por carta, com o Leader
+    incluído como `1x<card_number>`; aceitar CR, LF e CRLF, ignorar linhas em
+    branco e espaços nas bordas e ao redor do `x`, e comparar `card_number` sem
+    distinção de caixa.
+26. QUANDO uma linha apontar para uma carta Leader ENTÃO ela DEVE virar o Leader
+    do deck.
+27. QUANDO o mesmo `card_number` aparecer em mais de uma linha ENTÃO as
+    quantidades DEVEM ser somadas numa única entrada.
+28. SE alguma linha estiver fora do formato, apontar para `card_number`
+    inexistente, tiver quantidade fora de 1 a 50, ou a lista tiver mais de um
+    Leader ou Leader com quantidade diferente de 1, ENTÃO o sistema DEVE recusar
+    a importação inteira, sem criar deck, listando cada linha com número e
+    motivo.
+29. SE o texto passar de 200 linhas ou 10.000 caracteres ENTÃO o sistema DEVE
+    recusá-lo sem processar e informar o limite.
+30. Uma lista aceita que viole regra de montagem DEVE gerar o deck, com status
+    `inválido` ou `incompleto`.
+31. A exportação DEVE trazer o Leader como `1x<card_number>` na primeira linha e
+    uma linha `<N>x<card_number>` por carta, na ordem da página do deck,
+    separadas por LF. ⚠️ VERIFICAR (acima).
+32. Importar o texto exportado de um deck DEVE produzir o mesmo Leader e as
+    mesmas entradas.
+
+**Faltando para os baralhos (pasta)**
+
+33. O que falta de cada carta DEVE ser `max(0, maior quantidade pedida entre os
+    decks do usuário − possuída)`, com o Leader contando 1.
+34. QUANDO houver ao menos uma carta faltando ENTÃO a pasta DEVE exibir o bloco
+    "Faltando para os baralhos" com cada carta, a quantidade que falta e links
+    para os decks que a usam.
+35. QUANDO o usuário não tiver decks ou nada faltar ENTÃO a pasta DEVE omitir o
+    bloco.
+
+**Isolamento, limites e integridade**
+
+36. Um deck de outro usuário DEVE responder 404 a qualquer leitura ou alteração.
+37. Toda rota de deck DEVE exigir sessão.
+38. Incrementos simultâneos da mesma carta no mesmo deck DEVEM ser todos
+    aplicados.
+39. A quantidade por carta DEVE ficar entre 1 e 50 e o nome do deck entre 1 e 60
+    caracteres; fora disso a gravação é recusada com mensagem em português.
+40. A ingestão DEVE preservar todo Leader e toda entrada de deck; nenhuma
+    foreign key de deck DEVE usar delete em cascata a partir de `cards`.
+41. QUANDO o deck em edição for excluído ENTÃO o detalhe DEVE deixar de exibir
+    os controles de deck até outro deck ser escolhido.
+42. QUANDO o deck não tiver Leader ENTÃO a regra de cor DEVE ficar fora do
+    status e dos motivos.
+
+---
+
 ## Rastreamento de pendências
 
 ### Resolvidas

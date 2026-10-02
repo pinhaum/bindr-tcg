@@ -643,10 +643,11 @@ Para não pagar retrabalho nas fases futuras:
   `card_number` para o limite de cópias, e `card_type`. Tudo já está no modelo.
   Um deck referencia `cards` (regra do jogo), enquanto a coleção referencia
   `card_variants` — essa distinção já está resolvida pelo §3.1.
-  > ⚠️ VERIFICAR — entendo que as regras são 1 Leader, 50 cartas no deck principal,
-  > máximo 4 cópias por `card_number` e cores compatíveis com o Leader. **Confirme
-  > no regulamento oficial** antes de implementar validação. Regra de jogo errada
-  > num validador é pior que validador nenhum.
+  > Confirmado no Play Guide oficial em 2026-10-01: 1 Leader, 50 cartas no
+  > deck principal, máximo 4 cópias por `card_number` e cores do Leader. O caso
+  > da carta multicolorida e a exceção ao limite de 4 seguem como ⚠️ VERIFICAR
+  > no Rule Manual (Req. 14). Regra de jogo errada num validador é pior que
+  > validador nenhum.
 - **Preços (Fase 3):** preço é atributo de `card_variant`, não de `card`. Nada a
   fazer agora além de não colapsar as duas entidades. Continua sendo a fase mais
   incerta do roadmap, por depender de uma fonte de mercado que talvez não exista
