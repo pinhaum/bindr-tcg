@@ -199,9 +199,13 @@ class CatalogQuery
   end
 
   # Exposto para o teste de plano (Req. 11.3), pelo mesmo motivo de
-  # `search_match_sql`.
+  # `search_match_sql`. Parte de `filtered_scope`, sem a lista de ids da busca:
+  # com ela, `cards_pkey` sobre dois ids empata com o índice único (custo 12.62
+  # contra 8.31) e o planejador alterna entre os dois — e o plano por
+  # `cards_pkey` com `Filter:` é idêntico ao de `upper(card_number)`, logo o
+  # teste não distinguiria o defeito que existe para pegar (D-10).
   def exact_match_sql
-    exact_match_scope(searchable_scope).select(:id).to_sql
+    exact_match_scope(filtered_scope).select(:id).to_sql
   end
 
   private

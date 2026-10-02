@@ -14,9 +14,9 @@ verificador, `validation.md` PASS): `catalogo`, `colecao`, `progresso`,
 
 O próximo trabalho **não tem plano ainda**: Fase 2 (decks) ou Fase 3 (preços),
 ambas fora do escopo da Fase 1 e obrigadas a passar por `requirements.md`
-primeiro. Pendências do dono abertas: flake de plano em `catalog_search_test.rb`
-(D-10) e a aprovação das capturas da T12 da `conformidade`. A D-03 (SRC-19) foi
-fechada mantendo a regra; o registro está no spec da `fonte-apitcg`. `STATE.md` (*Handoff*) tem o
+primeiro. Pendência do dono aberta: a aprovação das capturas da T12 da
+`conformidade`. A D-03 (SRC-19) foi fechada mantendo a regra (registro no spec da
+`fonte-apitcg`) e o flake D-10 foi corrigido (registro no *Handoff*). `STATE.md` (*Handoff*) tem o
 retrato mais recente.
 
 O que existe hoje:

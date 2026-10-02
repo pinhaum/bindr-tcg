@@ -109,7 +109,11 @@ class CatalogSearchTest < ActiveSupport::TestCase
     GIN_INDEXES_DA_BUSCA.each do |indice|
       connection.select_value("SELECT gin_clean_pending_list('#{indice}')")
     end
-    connection.execute("ANALYZE cards")
+    # `card_variants` e `import_runs` entram no escopo de presença (SRC-16) de
+    # toda consulta medida. Sem `ANALYZE` aqui, a estatística delas é a que o
+    # autovacuum deixou no banco do worker, e o planejador ora parte de
+    # `card_variants` e chega a `cards` por `cards_pkey`, ora não (D-10).
+    connection.execute("ANALYZE cards, card_variants, import_runs")
 
     colunas = connection.select_value(
       "SELECT count(*) FROM pg_stats WHERE tablename = 'cards'"
