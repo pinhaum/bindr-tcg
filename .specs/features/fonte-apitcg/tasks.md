@@ -10,7 +10,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Spec**: `.specs/features/fonte-apitcg/spec.md` (SRC-01..SRC-36)
 **Design**: `.specs/features/fonte-apitcg/design.md`
-**Status**: Done pending verification (SRC-31 fechado com 20h27m, D-14; aguardando só a re-verificação independente do Verifier)
+**Status**: Done, verified (SRC-31 fechado com 20h27m, D-14; re-verificado de forma independente em 2026-10-02, ver `validation.md`)
 
 Regras que valem para todas as tasks:
 
