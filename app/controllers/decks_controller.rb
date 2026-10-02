@@ -44,15 +44,24 @@ class DecksController < ApplicationController
   # cada consulta vê o banco do seu instante: um decremento que apagasse uma
   # entrada entre o `find` e a `DeckShortfallQuery` deixaria a entrada sem
   # linha de falta, e a view levantaria `KeyError` (achado DB-M3).
+  #
+  # `GET /decks/:id.txt` exporta a lista no formato do OPTCG Simulator
+  # (DCK-31), em `text/plain; charset=utf-8` exibido no navegador: o usuário
+  # copia ou salva. O deck sai do mesmo `Current.user.decks`, então o de outro
+  # usuário é 404 também aqui (DCK-36).
   def show
     consistent_snapshot do
       @deck = Current.user.decks.includes(:leader, entries: :card).find(params[:id])
+      next if request.format.text?
+
       @legality = @deck.legality
       @absent_card_ids = absent_card_ids(@deck)
       # DCK-21..23 — pedida, possuída e falta, derivadas da coleção atual numa
       # consulta, sem nada gravado.
       @shortfall = DeckShortfallQuery.new(Current.user, deck: @deck).call.index_by { |row| row.card.id }
     end
+
+    render plain: Deck::ListText.format(@deck) if request.format.text?
   end
 
   def edit

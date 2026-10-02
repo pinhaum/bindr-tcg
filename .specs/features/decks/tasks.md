@@ -605,9 +605,9 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] O corpo é igual a `Deck::ListText.format(deck)`, sem `\r`, com tipo `text/plain`
-- [ ] Deck de outro usuário dá 404; sem sessão, redireciona
-- [ ] Gate full passa; contagem registrada
+- [x] O corpo é igual a `Deck::ListText.format(deck)`, sem `\r`, com tipo `text/plain`
+- [x] Deck de outro usuário dá 404; sem sessão, redireciona
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

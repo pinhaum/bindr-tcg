@@ -102,6 +102,7 @@
   </section>
 
   <p>
+    <%= link_to "Exportar lista", deck_path(@deck, format: :txt) %>
     <%= link_to "Renomear", edit_deck_path(@deck) %>
     <%= link_to "Excluir", delete_deck_path(@deck) %>
     <%= link_to "Voltar aos baralhos", decks_path %>
