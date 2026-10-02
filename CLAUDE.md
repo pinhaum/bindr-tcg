@@ -2,39 +2,48 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: catálogo pronto, coleção em construção
+## Estado atual: Fase 1 encerrada
 
-A feature **`catalogo` está encerrada e verificada** (14 tasks, dois lotes, ambos
-PASS em `.specs/features/catalogo/validation.md`): ingestão, busca com tolerância
-a typo, filtros, grade e página de detalhe funcionam e são **públicos**.
+**Todo o `.context/tasks.md` da Fase 1 está fechado** (§0 a §8). As features em
+`.specs/features/` estão todas encerradas e verificadas (Verifier autor ≠
+verificador, `validation.md` PASS): `catalogo`, `colecao`, `progresso`,
+`portabilidade`, `imagens`, `interface`, `navegacao`, `conformidade`,
+`fechamento` e `fonte-apitcg`. A última trocou a fonte do catálogo para a apitcg
+(AD-019) e fechou em 2026-10-01 com a emenda do SRC-31 (estabilidade do
+`tcgplayer.id` medida em 20h27m: 7.252 comuns, 0 mudados; D-14).
 
-A feature **`colecao` (Fase 4) está encerrada e verificada** (13 tasks, dois
-lotes, ambos PASS em `.specs/features/colecao/validation.md` — 62 critérios,
-62 PASS, 0 FAIL, autor ≠ verificador): identidade e sessão, posse por variante,
-filtro de posse, total de cópias e wishlist. Com ela fechou a **§4 inteira** de
-`.context/tasks.md` (§4.1 a §4.5). O próximo trabalho é a **Fase 5**: §5.1
-progresso por set e §5.2–5.3 import/export CSV.
+O próximo trabalho **não tem plano ainda**: Fase 2 (decks) ou Fase 3 (preços),
+ambas fora do escopo da Fase 1 e obrigadas a passar por `requirements.md`
+primeiro. Pendências do dono abertas: D-03 (SRC-19, `parallel` ausente indo para
+`alternate_art`/`manga`), flake de plano em `catalog_search_test.rb` (D-10) e a
+aprovação das capturas da T12 da `conformidade`. `STATE.md` (*Handoff*) tem o
+retrato mais recente.
 
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
-  `WishlistItem`, `User`, `Session`, `Current`.
-- **Controllers**: `CatalogController` (público), `CollectionItemsController`,
-  `WishlistItemsController`, `SessionsController`, `RegistrationsController`, e
-  o concern `Authentication`.
-- **Seis migrações**, de `20260919120000` a `20260919120500`. `schema_format`
+  `WishlistItem`, `CollectionImport`, `User`, `Session`, `Current`.
+- **Controllers**: `CatalogController` e `CardImagesController` (públicos),
+  `CollectionItemsController`, `WishlistItemsController`, `ProgressController`,
+  `CollectionImportsController`, `CollectionExportsController`,
+  `SessionsController`, `RegistrationsController`, e o concern `Authentication`.
+- **Query objects**: `CatalogQuery` (busca e filtros) e `SetProgressQuery`.
+- **Ingestão**: `app/services/ingestion/` — `Run`, `Upsert`, `Remap`,
+  `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
+- **Sete migrações**, de `20260919120000` a `20260919120600`. `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **26 arquivos de teste, 395 testes**, rubocop limpo.
-- **Importmap instalado na T8**, com Turbo pinado para `turbo.js` e **Stimulus
-  deliberadamente não pinado** (não há controller Stimulus no projeto). O
-  placeholder de imagem do catálogo continua resolvido em CSS — não trocar por
-  JS só porque agora existe pipeline.
+- **108 arquivos de teste, 1540 testes**, rubocop e brakeman limpos.
+- **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
+  controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
+  imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
+  existe pipeline.
 
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção
-declarada com `allow_unauthenticated_access` — hoje o `CatalogController` e o
-`RegistrationsController`. `CollectionItemsController` e
-`WishlistItemsController` não declaram nada e por isso exigem sessão.
+declarada com `allow_unauthenticated_access` — hoje `CatalogController`,
+`CardImagesController`, `RegistrationsController` e `new`/`create` do
+`SessionsController`. Os demais controllers não declaram nada e por isso exigem
+sessão.
 Uma action nova que não declare nada já está protegida.
 
 Dívidas abertas que valem saber antes de mexer em autenticação:
@@ -92,7 +101,7 @@ docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestio
 Gem nova exige `docker compose run --rm --no-deps app bundle install`: o volume
 nomeado `bundle` sombreia as gems da imagem, então rebuild **não** basta.
 
-Gates da feature em execução (`.specs/features/fonte-apitcg/tasks.md`): **quick** =
+Gates da última feature (`.specs/features/fonte-apitcg/tasks.md`), padrão para as próximas: **quick** =
 `bin/rails test test/models test/queries`; **full** =
 `bin/rails test && bin/rubocop`; **build** = `docker compose build`.
 
@@ -107,8 +116,9 @@ Validadores do fluxo spec-driven:
 
 ```bash
 SKILL=~/.claude/skills/tlc-spec-driven
-python3 $SKILL/scripts/validate_spec.py  .specs/features/colecao/spec.md
-python3 $SKILL/scripts/validate_tasks.py .specs/features/colecao/tasks.md
+python3 $SKILL/scripts/validate_spec.py  .specs/features/<feature>/spec.md
+python3 $SKILL/scripts/validate_tasks.py .specs/features/<feature>/tasks.md
+python3 $SKILL/scripts/validate_state.py <feature>
 ```
 
 `Dockerfile.dev` é a imagem de desenvolvimento (código como volume); `Dockerfile`
@@ -133,13 +143,13 @@ Regras que valem para qualquer sessão de trabalho aqui:
 ### Dois diretórios de spec, de propósito
 
 `.context/` é a **fonte de verdade** de requisitos, design e plano de tasks.
-`.specs/` guarda o recorte por feature — `features/catalogo/` (encerrada) e
-`features/colecao/` (em execução) —, o log de decisões (`STATE.md`, AD-001 a
-AD-005) e os artefatos do Verifier. Em divergência, `.context/` vence (AD-005).
+`.specs/` guarda o recorte por feature — dez features em `features/`, todas
+encerradas —, o log de decisões (`STATE.md`, AD-001 a AD-020) e os artefatos do
+Verifier. Em divergência, `.context/` vence (AD-005).
 Os IDs de `.specs/` apontam para os requisitos numerados de
-`.context/requirements.md`: `CAT-NN` e `T1`–`T14` no `catalogo`, `COL-NN` e
-`T1`–`T13` na `colecao`. **Os dois planos numeram `T1` em diante e as numerações
-não têm relação entre si** — sempre dizer de qual feature se fala.
+`.context/requirements.md` com prefixo próprio por feature (`CAT-NN` no
+`catalogo`, `COL-NN` na `colecao`, `SRC-NN` na `fonte-apitcg` etc.). **Todo plano
+numera `T1` em diante e as numerações não têm relação entre si** — sempre dizer de qual feature se fala.
 
 **Ao concluir uma task, marcar o checkbox nos dois planos** (`.context/tasks.md` e
 o `tasks.md` da feature em execução) e commitar junto com o código. Atenção ao

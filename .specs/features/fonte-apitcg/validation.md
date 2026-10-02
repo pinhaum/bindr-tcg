@@ -329,3 +329,18 @@ Incoerências menores (não bloqueantes): `STATE.md:169` (bloco 2026-10-01) aind
 **O que NÃO prova:** estabilidade em janelas longas (dias/semanas), reimportações de produto pela apitcg, lançamento de set novo ou limpeza da fonte; uma única janela de um par de snapshots; a saída do rake só informa comuns/mudados (produtos só de um lado, `only_in_a/b`, não aparecem). Risco residual aceito pelo dono em D-14; mitigado por `ingestion:remap`.
 
 **Veredito: PASS ✅.** Ressalva do SRC-31 removida do **Result**.
+
+---
+
+## Nota pós-verificação (orquestrador, 2026-10-02)
+
+Não altera o veredito. O débito "Fix 7 parcial" citado no *Result*, nas linhas de
+*Task Completion* e em *Overall* foi fechado depois desta re-verificação, em
+`7b05c09`: `test/lib/ingestion_remap_task_test.rb` sem o `refute_includes`
+implicado pela linha exata; `test/lib/ingestion_compare_snapshots_task_test.rb`
+restaura `A`/`B` no `teardown`; o teste de teto de
+`test/queries/set_progress_numbers_test.rb` usa `base_set_size` 2 contra 3
+números (a mutação que tira o teto falha com 150,0 ≠ 100,0). `run_test.rb:77`
+ficou: o `Run` recebe o dublê pelo `fetch:`, então a asserção não é vacuosa
+(D-12). `spec.md:257` mantém 1534 runs por ser o registro da execução sem chave da
+T17 (D-13).
