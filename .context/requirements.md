@@ -658,8 +658,9 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
     quantidades DEVEM ser somadas numa única entrada.
 28. SE alguma linha estiver fora do formato, apontar para `card_number`
     inexistente, tiver quantidade fora de 1 a 50, ou a lista tiver mais de um
-    Leader ou Leader com quantidade diferente de 1, ENTÃO o sistema DEVE recusar
-    a importação inteira, sem criar deck, listando cada linha com número e
+    Leader, Leader com quantidade diferente de 1, linhas repetidas de uma carta
+    cuja soma passe de 50 ou nenhuma carta, ENTÃO o sistema DEVE recusar a
+    importação inteira, sem criar deck, listando cada linha com número e
     motivo.
 29. SE o texto passar de 200 linhas ou 10.000 caracteres ENTÃO o sistema DEVE
     recusá-lo sem processar e informar o limite.

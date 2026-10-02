@@ -544,6 +544,7 @@ T16 → T17 → T18 → T19 → T20 → T21
 - [ ] Importar duas vezes cria dois decks sem alterar o primeiro (DCK-24)
 - [ ] Uma linha ruim entre linhas boas não cria deck nem entrada (`assert_no_difference` em `Deck` e `DeckEntry`) e mostra "Linha N: motivo" para cada linha ruim
 - [ ] Texto acima do limite dá 422 com o limite na mensagem
+- [ ] Lista sem nenhuma carta (vazia ou só linhas em branco) dá 422 com "A lista não tem nenhuma carta", sem criar deck (DCK-28)
 - [ ] Lista aceita com 5 cópias de uma carta cria o deck, e a página dele mostra `inválido` (DCK-30)
 - [ ] Exportar (T16) e reimportar o texto dá um deck com o mesmo Leader e as mesmas entradas (DCK-32, ponta a ponta)
 - [ ] Sem sessão, redireciona sem criar nada
