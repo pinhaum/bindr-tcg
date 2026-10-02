@@ -461,14 +461,14 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] O incremento de carta nova cria a entrada com 1, o seguinte leva a 2, e a 5ª cópia é aceita e gravada (DCK-18)
-- [ ] Em 50, o incremento é recusado com alerta em português e a quantidade fica em 50
-- [ ] O decremento leva 2 a 1, e em 1 remove a entrada; sem entrada, nada é criado
-- [ ] Carta Leader enviada a `increment` dá 422 sem gravar
-- [ ] Com `Accept: text/vnd.turbo-stream.html`, a resposta é um `turbo-stream` que atualiza o alvo com a quantidade nova; sem esse header, redireciona
-- [ ] Duas threads incrementando a mesma carta ao mesmo tempo terminam em 2 (DCK-38), e duas decrementando a partir de 2 terminam sem entrada
-- [ ] Deck de outro usuário dá 404 sem gravar; sem sessão, redireciona sem gravar
-- [ ] Gate full passa; contagem registrada
+- [x] O incremento de carta nova cria a entrada com 1, o seguinte leva a 2, e a 5ª cópia é aceita e gravada (DCK-18)
+- [x] Em 50, o incremento é recusado com alerta em português e a quantidade fica em 50
+- [x] O decremento leva 2 a 1, e em 1 remove a entrada; sem entrada, nada é criado
+- [x] Carta Leader enviada a `increment` dá 422 sem gravar
+- [x] Com `Accept: text/vnd.turbo-stream.html`, a resposta é um `turbo-stream` que atualiza o alvo com a quantidade nova; sem esse header, redireciona
+- [x] Duas threads incrementando a mesma carta ao mesmo tempo terminam em 2 (DCK-38), e duas decrementando a partir de 2 terminam sem entrada
+- [x] Deck de outro usuário dá 404 sem gravar; sem sessão, redireciona sem gravar
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

@@ -124,5 +124,12 @@ Rails.application.routes.draw do
     end
   end
 
+  # Quantidade de uma carta no deck (T13). Como na posse, a chave é a
+  # **carta**, não o id da entrada: o botão nasce no detalhe da carta, onde a
+  # entrada muitas vezes ainda não existe. O deck sai de `Current.user.decks`,
+  # e o de outro usuário é 404 (DCK-36).
+  post "decks/:deck_id/cards/:card_id/increment" => "deck_entries#increment", as: :increment_deck_card
+  post "decks/:deck_id/cards/:card_id/decrement" => "deck_entries#decrement", as: :decrement_deck_card
+
   root "catalog#index"
 end
