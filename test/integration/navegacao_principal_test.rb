@@ -8,10 +8,10 @@ require "test_helper"
 # requisitos da spec:
 #
 # - NAV-01: um único `nav` principal com "Catálogo"
-# - NAV-02: com sessão, "Minha pasta" e "Sair"
+# - NAV-02: com sessão, "Minha pasta", "Baralhos" e "Sair" (emenda de 2026-10-02)
 # - NAV-03: sem sessão, "Entrar" e "Criar conta"
 # - NAV-04: `aria-current="page"` na entrada aberta
-# - NAV-07: ausência de entradas de baralho, preço ou cotação
+# - NAV-07: ausência de entradas de preço ou cotação (baralho saiu em 2026-10-02)
 #
 # Usa as fixtures e helpers de login do projeto (minha_pasta_test.rb,
 # sessions_test.rb).
@@ -54,25 +54,20 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
     assert_select "header.site-header nav[aria-label='Principal']", count: 1
   end
 
-  # --- NAV-02: com sessão, as entradas são exatamente Catálogo, Minha pasta e Sair ---
+  # --- NAV-02: com sessão, as entradas são exatamente Catálogo, Minha pasta, Baralhos e Sair ---
 
-  test "com sessão, a navegação principal tem exatamente Catálogo, Minha pasta e Sair" do
+  # Emenda de 2026-10-02 (Req. 13.1, feature `decks`): "Baralhos" entra entre
+  # "Minha pasta" e "Sair", e a ordem faz parte do requisito.
+  test "com sessão, a navegação principal tem exatamente Catálogo, Minha pasta, Baralhos e Sair, nesta ordem" do
     sign_in
     get catalog_path
 
     nav = css_select("header.site-header nav[aria-label='Principal']").first
     assert nav, "não encontrou nav principal"
 
-    # Verificar que tem exatamente as três entradas
     entries = css_select("header.site-header nav[aria-label='Principal'] a,
                           header.site-header nav[aria-label='Principal'] button")
-    assert_equal 3, entries.size, "deveria ter exatamente 3 entradas na navegação"
-
-    # Verificar os textos
-    texts = entries.map(&:text)
-    assert texts.include?("Catálogo"), "deve incluir 'Catálogo'"
-    assert texts.include?("Minha pasta"), "deve incluir 'Minha pasta'"
-    assert texts.include?("Sair"), "deve incluir 'Sair'"
+    assert_equal [ "Catálogo", "Minha pasta", "Baralhos", "Sair" ], entries.map { |entry| entry.text.strip }
   end
 
   test "Minha pasta aponta para /progress com sessão" do
@@ -189,22 +184,27 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
   end
 
 
-  # --- NAV-07: não há entradas para baralho, preço ou cotação ---
+  # --- NAV-07: não há entradas para preço ou cotação ---
+  #
+  # Emenda de 2026-10-02 (Req. 13.8, feature `decks`): baralho saiu desta
+  # lista porque passou a existir. Os dois testes que recusavam "baralho" e
+  # "deck" passaram a provar a entrada nova: só com sessão, apontando para
+  # `/decks`.
 
-  test "a navegação não contém entrada com texto \"baralho\"" do
+  test "com sessão, a navegação tem a entrada Baralhos apontando para /decks" do
     sign_in
     get catalog_path
 
-    nav_text = css_select("header.site-header nav[aria-label='Principal']").first.text
-    refute_match /baralho/i, nav_text, "não deve haver 'baralho' na navegação"
+    assert_select "header.site-header nav[aria-label='Principal'] a[href='#{decks_path}']",
+                  text: "Baralhos", count: 1
   end
 
-  test "a navegação não contém entrada com texto \"deck\"" do
-    sign_in
+  test "sem sessão, a navegação não tem entrada de baralho" do
     get catalog_path
 
     nav_text = css_select("header.site-header nav[aria-label='Principal']").first.text
-    refute_match /deck/i, nav_text, "não deve haver 'deck' na navegação"
+    refute_match /baralho|deck/i, nav_text, "sem sessão não deve haver 'Baralhos' na navegação"
+    assert_select "header.site-header nav[aria-label='Principal'] a[href='#{decks_path}']", count: 0
   end
 
   test "a navegação não contém entrada com texto \"preço\"" do
@@ -231,7 +231,7 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
     refute_match /cotação/i, nav_text, "não deve haver 'cotação' na navegação"
   end
 
-  test "a navegação não contém href para baralho, preço ou cotação" do
+  test "a navegação não contém href para preço ou cotação" do
     sign_in
     get catalog_path
 
@@ -240,8 +240,8 @@ class NavegacaoPrincipalTest < ActionDispatch::IntegrationTest
     hrefs = entries.map { |e| e["href"] || "" }
 
     hrefs.each do |href|
-      refute_match /baralho|deck|preço|price|cotação/i, href,
-                    "nenhum href deve conter baralho, deck, preço, price ou cotação"
+      refute_match /preço|price|cotação/i, href,
+                    "nenhum href deve conter preço, price ou cotação"
     end
   end
 

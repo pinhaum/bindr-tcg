@@ -323,12 +323,12 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Criar com um nome gera um deck sem Leader e sem entradas, do usuário da sessão, e redireciona para ele
-- [ ] Nome vazio ou de 61 caracteres re-renderiza com 422 e mensagem em português, sem criar nada
-- [ ] A lista mostra só os decks do usuário, cada um com nome, Leader (ou "Sem Leader"), "N / 50" e status em português
-- [ ] Sem sessão, toda rota redireciona para o login sem criar nada; deck de outro usuário dá 404
-- [ ] "Baralhos" aparece na navegação só com sessão e tem `aria-current` na lista de decks
-- [ ] Gate full passa; contagem registrada
+- [x] Criar com um nome gera um deck sem Leader e sem entradas, do usuário da sessão, e redireciona para ele
+- [x] Nome vazio ou de 61 caracteres re-renderiza com 422 e mensagem em português, sem criar nada
+- [x] A lista mostra só os decks do usuário, cada um com nome, Leader (ou "Sem Leader"), "N / 50" e status em português
+- [x] Sem sessão, toda rota redireciona para o login sem criar nada; deck de outro usuário dá 404
+- [x] "Baralhos" aparece na navegação só com sessão e tem `aria-current` na lista de decks
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

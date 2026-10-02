@@ -105,5 +105,11 @@ Rails.application.routes.draw do
   post "collection/import/:token/confirm" => "collection_imports#confirm",
        as: :confirm_collection_import
 
+  # Decks (Req. 14). Ao contrário da posse, aqui **existe id na URL**, e todo
+  # acesso parte de `Current.user.decks`: um id de deck alheio cai em
+  # `RecordNotFound` e responde 404, sem revelar que o deck existe (DCK-36).
+  # As actions entram à medida que as tasks da feature as escrevem.
+  resources :decks, only: %i[index new create show]
+
   root "catalog#index"
 end

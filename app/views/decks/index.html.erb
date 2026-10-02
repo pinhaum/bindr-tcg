@@ -1,0 +1,38 @@
+<% content_for :title, "Baralhos" %>
+
+<%#
+  DCK-08 — cada deck com nome, Leader, total "N / 50" e status. O status é
+  calculado agora, sobre as entradas carregadas pelo `includes` do controller,
+  e nunca lido de uma coluna (DCK-11). O layout fica para a T20.
+%>
+<main>
+  <h1>Baralhos</h1>
+
+  <p><%= link_to "Novo deck", new_deck_path %></p>
+
+  <% if @decks.any? %>
+    <ul>
+      <% @decks.each do |deck| %>
+        <li>
+          <h2><%= link_to deck.name, deck %></h2>
+          <dl>
+            <div>
+              <dt>Leader</dt>
+              <dd><%= deck.leader ? "#{deck.leader.name} (#{deck.leader.card_number})" : "Sem Leader" %></dd>
+            </div>
+            <div>
+              <dt>Cartas</dt>
+              <dd><%= deck.main_total %> / <%= Deck::Legality::MAIN_SIZE %></dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd><%= deck_status_label(deck.legality.status) %></dd>
+            </div>
+          </dl>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>Você ainda não tem decks.</p>
+  <% end %>
+</main>
