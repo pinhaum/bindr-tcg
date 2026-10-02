@@ -1,11 +1,11 @@
 # Troca da fonte do catálogo para a apitcg (`fonte-apitcg`) Validation
 
-**Date**: 2026-10-01 (re-verificação, ciclo 1 de 3)
+**Date**: 2026-10-02 (re-verificação focada no SRC-31, ciclo 2 de 3; ciclo 1 em 2026-10-01)
 **Spec**: `.specs/features/fonte-apitcg/spec.md` (SRC-01..SRC-36 + Success Criteria)
 **Diff range**: `b026f3b..HEAD` (`43b62ae`), 35 commits, 86 arquivos
 **Verifier**: sessão nova e independente (author ≠ verifier). Nada do código ou dos testes foi escrito por este verifier; evidência re-derivada do spec e do código. Árvore real só lida; sensor em cópia descartada.
 
-**Result**: PASS ✅ (com ressalva). Nenhuma lacuna de comportamento nem de evidência: Fix 1–6 do ciclo anterior fecham de fato, o gate build sai 0 e o sensor P0 matou 39/39 mutantes. Ressalvas, nenhuma bloqueante: (1) **SRC-31, parte de ≥24h: ⏳ bloqueado por tempo (D-04)**, bloqueio externo registrado (os dois snapshots existentes têm 45 min); (2) Fix 7 só parcial, débito Minor aceito (asserções vacuosas restantes); (3) housekeeping de checkboxes (ver *Task Completion*).
+**Result**: PASS ✅ (com ressalva menor). Nenhuma lacuna de comportamento nem de evidência: Fix 1–6 do ciclo anterior fecham de fato, o gate build sai 0 e o sensor P0 matou 39/39 mutantes. SRC-31 re-verificado de forma independente em 2026-10-02 (ver *Re-verificação SRC-31*): fechado com a emenda de 20h (D-14), 7.252 comuns, 0 mudados. Ressalvas, nenhuma bloqueante: (1) Fix 7 só parcial, débito Minor aceito (asserções vacuosas restantes); (2) housekeeping de checkboxes (ver *Task Completion*).
 
 ---
 
@@ -118,7 +118,7 @@ Siglas: `FT` `test/services/ingestion/apitcg/fetch_test.rb`, `NT` `.../apitcg/no
 | SRC-29 fixture | 10 casos | `spec/fixtures/apitcg-subset.json`; casos (a)–(j) conferidos por `spec/verify_fixture.py:63-77` | ✅ PASS |
 | SRC-30 `verify_fixture.py` | um check por caso, sem Docker/Ruby | `spec/verify_fixture.py:63-77` (checks `SRC-29 (a)…(j)`); **executado**: 19 `OK`, "todas as verificações passaram", saída 0 | ✅ PASS |
 | SRC-31 serviço + rake | informa quantos produtos presentes nos dois mudaram de `tcgplayer.id` para o mesmo `_id` | `CS:20-22` `assert_equal 1, result.changed`, `assert_equal 2, result.common`; só de um lado `CS:41,44`; `CK:30-31` `assert_equal "comuns: 2", lines[0]`, `assert_equal "mudados: 1", lines[1]`; sem `A`/`B` `CK:56` `assert_equal 1, status` | ✅ PASS (mutante x5 morto) |
-| SRC-31 comparação real ≥24h | `changed` entre dois snapshots reais com ≥24h | não executável: só existem `apitcg-20261001T024920Z.json` e `apitcg-20261001T033437Z.json` (45 min; informativo: 7.252 comuns, 0 mudados) | ⏳ **bloqueado por tempo (D-04)**. Retomada, a partir de 2026-10-02T03:35Z: `docker compose exec app bin/rails ingestion:import` e depois `docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/apitcg-20261001T024920Z.json B=storage/ingestion/<snapshot-novo>.json`; se `mudados > 0`, reabrir SRC-31 com o dono antes de confiar em `tcgplayer.id` como chave |
+| SRC-31 comparação real ≥24h | `changed` entre dois snapshots reais com ≥24h | não executável: só existem `apitcg-20261001T024920Z.json` e `apitcg-20261001T033437Z.json` (45 min; informativo: 7.252 comuns, 0 mudados) | ✅ fechado pela emenda de 20h (D-14), ver *Re-verificação SRC-31*. (Histórico: antes bloqueado por tempo, D-04.) Retomada antiga, a partir de 2026-10-02T03:35Z: `docker compose exec app bin/rails ingestion:import` e depois `docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/apitcg-20261001T024920Z.json B=storage/ingestion/<snapshot-novo>.json`; se `mudados > 0`, reabrir SRC-31 com o dono antes de confiar em `tcgplayer.id` como chave |
 | SRC-32 401 | `failed`, "chave da apitcg recusada (401)", sem repetir | `FT:224` `assert_equal "chave da apitcg recusada (401)", error.message`; `FT:225` `assert_equal 1, http.calls.size`; `RuT:150-153`; rake `IK:114-118` | ✅ PASS (Fix 3b fechado; mutante c1 morto) |
 | SRC-33 dedup | deduplicar por `variant_code` antes de normalizar | `FT:98` (dedup por `_id` no Fetch); `NT:289` (dedup por `variant_code` no Normalize, `normalize.rb:86`) | ✅ PASS · ⚠️ gap: o spec não diz em que estágio |
 | SRC-34 variante em dois sets | fica no primeiro | `NT:289` `assert_equal [ [ "tcgplayer:10", "AA" ] ], resultado.variants.map { … }`; `UT:89` | ✅ PASS |
@@ -213,7 +213,7 @@ Não aplicável: feature de ingestão/CLI; as telas tocadas ("fora da fonte" e l
 - [x] Colisão no remap, rollback total e `ConcurrentChange`: `RM:170`, `RM:355`, `RK:112-125`
 - [x] Success Criteria 1–3 (grade abre por OP18, contagem/soma de coleção idênticas, nenhum set >100%): evidência registrada em `spec.md:254-256` (execução real da T17), não re-derivada (exigiria rede, chave real e escrita no banco de dev). Coleção intacta e teto de 100% re-provados por mutação (b1–b3, g1–g2).
 - [x] Success Criterion 4 (suíte sem rede e sem chave; rubocop limpo): re-derivado, ver Gate.
-- [ ] Success Criterion 5 (SRC-31 ≥24h): ⏳ bloqueado por tempo (D-04); não impede o PASS por decisão do dono.
+- [x] Success Criterion 5 (SRC-31 ≥20h, emenda D-14): re-verificado em 2026-10-02, ver *Re-verificação SRC-31*.
 
 ---
 
@@ -284,7 +284,7 @@ Nenhum Fix bloqueante. Débitos aceitos, em ordem:
 | SRC-28 | ✅ Verified | ✅ Verified |
 | SRC-29 | ✅ Verified | ✅ Verified |
 | SRC-30 | ✅ Verified | ✅ Verified |
-| SRC-31 | ⏳ Bloqueado por tempo (D-04) | ⏳ Bloqueado por tempo (D-04): serviço, rake e testes verificados; falta a comparação real ≥24h |
+| SRC-31 | ✅ Verified (emenda D-14) | ✅ serviço, rake, testes e comparação real de 20h27m verificados (2026-10-02) |
 | SRC-32 | ✅ Verified | ✅ Verified |
 | SRC-33 | ✅ Verified | ✅ Verified |
 | SRC-34 | ✅ Verified | ✅ Verified |
@@ -295,7 +295,7 @@ Nenhum Fix bloqueante. Débitos aceitos, em ordem:
 
 ## Summary
 
-**Overall**: ✅ Ready (PASS com ressalva do item de 24h do SRC-31, bloqueio externo D-04, e do débito Minor do Fix 7).
+**Overall**: ✅ Ready (PASS; SRC-31 fechado e re-verificado em 2026-10-02; resta o débito Minor do Fix 7).
 
 **Spec-anchored check**: 36/36 SRCs batem com o resultado do spec (35 completos + SRC-31 com a parte ≥24h ⏳); 12 spec-precision gaps listados, nenhum bloqueante.
 **Sensor**: 39/39 mutations killed (P0-full), 0 survived.
@@ -305,4 +305,27 @@ Nenhum Fix bloqueante. Débitos aceitos, em ordem:
 
 **Issues found**: nenhuma lacuna real. Débitos: Fix 7 parcial; checkboxes `tasks.md:828`, `:603`, `.context/tasks.md:340`; `spec.md:257` com a contagem antiga.
 
-**Next steps**: dono roda o comando do SRC-31 a partir de 2026-10-02T03:35Z e fecha `tasks.md:603`/§8.6; se `mudados > 0`, reabrir SRC-31. Decidir D-03.
+**Next steps**: decidir D-03 (SRC-19). Opcional: repetir `compare_snapshots` numa janela maior (dias, com lançamento de set) para endurecer a evidência do SRC-31.
+
+---
+
+## Re-verificação SRC-31 (2026-10-02)
+
+Verifier independente (author ≠ verifier). Git só leitura; `git status --porcelain` antes e depois idêntico (`?? .playwright-mcp/`). Sem `ingestion:import` nem `remap`; sensor de mutação opcional não executado.
+
+| # | Verificação | Evidência | Veredito |
+| - | ----------- | --------- | -------- |
+| 1 | Comparação real refeita | `bin/rails ingestion:compare_snapshots A=storage/ingestion/apitcg-20261001T024920Z.json B=storage/ingestion/apitcg-20261001T231649Z.json` → `comuns: 7252`, `mudados: 0` | ✅ |
+| 1b | Intervalo | nomes: 02:49:20Z → 23:16:49Z = 20h27m29s (≥ 20h) | ✅ |
+| 1c | ImportRun#4 | `rails runner`: `status=succeeded`, `source_revision="apitcg-20261001T231649Z.json sha256:f0e29004…"` (arquivo B), 23:20:04→23:20:17Z | ✅ |
+| 2 | Teste cobre `changed > 0` e `== 0` | `compare_snapshots_test.rb:21` `assert_equal 1, result.changed`, `:76` idem (id → ausente); `:42` e `:60` `assert_equal 0, result.changed`; serviço `compare_snapshots.rb:42-45`; `bin/rails test` nos 2 arquivos (`compare_snapshots_test.rb`, `test/lib/ingestion_compare_snapshots_task_test.rb`): 9 runs, 39 assertions, 0 falhas | ✅ |
+| 3 | Coerência documental | `spec.md:187` ("ao menos 20h", D-14), `:235` SRC-31 ✅, `:242` Coverage 36/36, `:258` Success Criterion `[x]`; `tasks.md:603` `[x]`, Status (`tasks.md:13`) "Done pending verification"; `.context/tasks.md:340` §8.6 `[x]`; `design.md:432` e `CLAUDE.md:179-181` citam 20h27m, sem "VERIFICAR" sobre `tcgplayer.id`; `STATE.md:157` AD-020, `:167` bloco 2026-10-02 | ✅ |
+| 4 | Emenda legítima | `tmp/orchestration-decisions.md:73` "Resposta do dono (D-14): opção 1 — fechar com 20h27m"; AD-020 `STATE.md:157-164` | ✅ |
+| 5 | `validate_state.py fonte-apitcg` | `0 error(s)`, saída 0 | ✅ |
+
+Incoerências menores (não bloqueantes): `STATE.md:169` (bloco 2026-10-01) ainda diz "24h+" e "§8.6 fica aberta", mas é bloco superado pelo de 2026-10-02 (que declara vencer os de baixo); `tasks.md:13` Status ainda "pending verification", a atualizar para Done por quem tem a escrita do arquivo (este verifier só altera `validation.md`).
+
+**O que 20h27m sustenta:** os 7.252 produtos comuns mantiveram `markets.tcgplayer.id` entre duas buscas independentes, então a chave `variant_code = tcgplayer:<id>` é estável entre buscas consecutivas e a idempotência (Req. 1.4) não se perde nesse horizonte; coleção/wishlist intactas.
+**O que NÃO prova:** estabilidade em janelas longas (dias/semanas), reimportações de produto pela apitcg, lançamento de set novo ou limpeza da fonte; uma única janela de um par de snapshots; a saída do rake só informa comuns/mudados (produtos só de um lado, `only_in_a/b`, não aparecem). Risco residual aceito pelo dono em D-14; mitigado por `ingestion:remap`.
+
+**Veredito: PASS ✅.** Ressalva do SRC-31 removida do **Result**.
