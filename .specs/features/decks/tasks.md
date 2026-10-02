@@ -209,14 +209,14 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Com 2 cópias da base e 1 da parallel, e um deck pedindo 4 → `required 4, owned 3, missing 1` (Independent Test do P1)
-- [ ] Variante ausente da fonte conta como possuída (DCK-20)
-- [ ] Possuir mais do que o pedido dá `missing 0`, nunca negativo
-- [ ] Dois decks pedindo 4 e 2 da mesma carta, com 1 possuída → `missing 3` e os dois `deck_ids` (DCK-33)
-- [ ] A coleção de outro usuário não conta; `user` nil devolve vazio
-- [ ] Mudar a coleção muda o resultado na chamada seguinte, sem gravar nada (DCK-23)
-- [ ] A chamada roda numa consulta só (contada no teste), com 1 deck e com 3
-- [ ] Gate quick passa; contagem registrada
+- [x] Com 2 cópias da base e 1 da parallel, e um deck pedindo 4 → `required 4, owned 3, missing 1` (Independent Test do P1)
+- [x] Variante ausente da fonte conta como possuída (DCK-20)
+- [x] Possuir mais do que o pedido dá `missing 0`, nunca negativo
+- [x] Dois decks pedindo 4 e 2 da mesma carta, com 1 possuída → `missing 3` e os dois `deck_ids` (DCK-33)
+- [x] A coleção de outro usuário não conta; `user` nil devolve vazio
+- [x] Mudar a coleção muda o resultado na chamada seguinte, sem gravar nada (DCK-23)
+- [x] A chamada roda numa consulta só (contada no teste), com 1 deck e com 3
+- [x] Gate quick passa; contagem registrada
 
 **Tests**: unit
 **Gate**: quick
