@@ -569,13 +569,19 @@ no máximo 4 cópias por `card_number`, e as cartas do deck principal só com co
 do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada**
 (decisão do dono): ela muda com frequência e a fonte não a traz.
 
-> ⚠️ VERIFICAR no Rule Manual (`en.onepiece-cardgame.com/pdf/rule_manual.pdf`),
-> antes do código que implementa os critérios 16 e 31: (a) carta multicolorida
-> num deck de Leader de uma cor só — o default é a leitura estrita, todas as
-> cores da carta precisam estar no Leader; em 2026-10-01 o catálogo não tem
-> nenhuma carta não-Leader multicolorida; (b) se existe carta que permite mais de
-> 4 cópias — o default é que não; (c) se o OPTCG Simulator aceita LF na lista
-> exportada — o exemplo do dono veio separado por CR.
+> Confirmado nas Comprehensive Rules v1.2.1 (`en.onepiece-cardgame.com/pdf/rule_comprehensive.pdf`,
+> atualizadas em 28/08/2026) em 2026-10-02: (a) a carta multicolorida "is
+> treated as a card of every color it possesses" (2-3-5), e só entram no deck
+> cartas de cor incluída no Leader (5-1-2-2): a leitura estrita vale; (b) o
+> limite de 4 (5-1-2-3) **tem exceções**: efeitos de carta sobre a montagem
+> "replace the deck construction rules above" (5-1-2-4). No snapshot da apitcg de
+> 2026-10-01 são três cartas com "you may have any number of this card in your
+> deck" (OP01-075, OP08-072, OP16-042) e três Leaders que restringem o deck
+> (OP12-001, OP13-079, P-117). Tratamento decidido pelo dono em 2026-10-02:
+> critérios 43 e 44.
+>
+> ⚠️ VERIFICAR (c): se o OPTCG Simulator aceita LF na lista exportada; o
+> exemplo do dono veio separado por CR. Fica para o teste manual do dono.
 
 ### Critérios de aceitação
 
@@ -610,15 +616,17 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
 11. O status do deck DEVE ser calculado a cada leitura, nunca persistido, como
     exatamente um de `válido`, `incompleto` ou `inválido`.
 12. `válido`: há Leader, o deck principal soma exatamente 50, nenhuma carta passa
-    de 4 cópias e toda carta tem só cores do Leader.
-13. `inválido`: o deck principal passa de 50, alguma carta passa de 4 cópias ou,
+    de 4 cópias (salvo a exceção do critério 43) e toda carta tem só cores do
+    Leader.
+13. `inválido`: o deck principal passa de 50, alguma carta não isenta pelo
+    critério 43 passa de 4 cópias ou,
     havendo Leader, alguma carta tem cor que o Leader não tem.
 14. `incompleto`: nem `válido` nem `inválido` — sem Leader ou com menos de 50
     cartas, sem violação do critério 13.
 15. QUANDO o status não for `válido` ENTÃO a página do deck DEVE listar cada
     motivo em português, nomeando as cartas envolvidas.
 16. A carta multicolorida DEVE contar como tendo todas as suas cores ao mesmo
-    tempo. ⚠️ VERIFICAR (acima).
+    tempo (Comprehensive Rules 2-3-5).
 17. A página do deck DEVE exibir o aviso "A lista de banidas não é verificada".
 18. Uma regra do jogo NUNCA DEVE recusar a gravação de uma alteração; a violação
     aparece só no status.
@@ -687,6 +695,18 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
     os controles de deck até outro deck ser escolhido.
 42. QUANDO o deck não tiver Leader ENTÃO a regra de cor DEVE ficar fora do
     status e dos motivos.
+
+**Efeitos de carta sobre a montagem (Comprehensive Rules 5-1-2-4)**
+
+43. A carta cujo texto de efeito contém "Under the rules of this game, you may
+    have any number of this card in your deck" DEVE ficar isenta do limite de 4
+    cópias, continuando sujeita ao limite de 50 do critério 39. A isenção DEVE
+    sair do texto do catálogo, sem lista mantida à mão.
+44. QUANDO o texto de efeito do Leader contiver "Under the rules of this game"
+    seguido de restrição ao deck ("cannot include" ou "can only include") ENTÃO
+    a página do deck DEVE exibir o aviso "Este Leader tem regra de montagem
+    própria, não verificada" junto com o texto dessa regra. A restrição NÃO DEVE
+    ser verificada e NÃO DEVE mudar o status (decisão do dono em 2026-10-02).
 
 ---
 

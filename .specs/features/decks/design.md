@@ -1,6 +1,6 @@
 # Decks — Design
 
-**Spec**: `.specs/features/decks/spec.md` (DCK-01..42, Req. 14)
+**Spec**: `.specs/features/decks/spec.md` (DCK-01..44, Req. 14)
 **Status**: Approved (dono, 2026-10-02: deck em edição na sessão)
 
 ---
@@ -16,7 +16,7 @@ partir do catálogo e as operações de quantidade são atômicas no SQL. O que 
 A lógica fica em quatro peças, e nenhuma delas conhece HTTP:
 
 - **`Deck::Legality`**: função pura que recebe Leader e entradas e devolve
-  status e motivos (DCK-11..16, DCK-42). Não lê o banco nem grava nada.
+  status, motivos e avisos (DCK-11..16, DCK-42..44). Não lê o banco nem grava nada.
 - **`DeckShortfallQuery`**: uma consulta que cruza os decks com a coleção. Ela
   responde "o que falta" para um deck (DCK-21, DCK-22) e para todos os decks do
   usuário (DCK-33). A pergunta é a mesma, só muda o escopo, então a consulta é
@@ -96,10 +96,11 @@ graph TD
 
 ### `Deck::Legality`
 
-- **Purpose**: status `valid | incomplete | invalid` e motivos em português (DCK-11..16, DCK-42).
+- **Purpose**: status `valid | incomplete | invalid`, motivos e avisos em português (DCK-11..16, DCK-42..44).
 - **Location**: `app/models/deck/legality.rb`
-- **Interfaces**: `Deck::Legality.call(leader:, entries:) → Result(status:, reasons:)`. `leader` é um `Card` ou `nil`; `entries` é uma lista de pares `[Card, Integer]`.
-- **Regras**: é `invalid` se o total passar de 50, se alguma quantidade passar de 4 ou se, havendo Leader, `card.colors - leader.colors` não for vazio para alguma carta. Fora disso, é `valid` se tiver Leader e o total for 50, e `incomplete` nos demais casos. Os motivos de `invalid` e de `incomplete` aparecem juntos: um deck com 51 cartas e sem Leader mostra os dois.
+- **Interfaces**: `Deck::Legality.call(leader:, entries:) → Result(status:, reasons:, warnings:)`. `leader` é um `Card` ou `nil`; `entries` é uma lista de pares `[Card, Integer]`.
+- **Regras** (Comprehensive Rules 2-3-5 e 5-1-2-2..4, confirmadas na T1): é `invalid` se o total passar de 50, se alguma carta não isenta passar de 4 cópias ou se, havendo Leader, `card.colors - leader.colors` não for vazio para alguma carta. Fora disso, é `valid` se tiver Leader e o total for 50, e `incomplete` nos demais casos. Os motivos de `invalid` e de `incomplete` aparecem juntos: um deck com 51 cartas e sem Leader mostra os dois.
+- **Efeitos de carta sobre a montagem (5-1-2-4)**: dois predicados sobre `effect_text`, em `Card`, comparando sem caixa e com espaços normalizados. `Card#unlimited_copies?` casa "Under the rules of this game, you may have any number of this card in your deck" e isenta a carta do limite de 4 (DCK-43), mas não do limite de 50 do banco. `Card#own_deck_rule` devolve a frase do Leader que começa com "Under the rules of this game" e contém "cannot include" ou "can only include", ou `nil`. Quando há frase, ela vira um item de `warnings` e o status não muda (DCK-44, decisão do dono em 2026-10-02). Não há lista mantida à mão: carta nova com a mesma frase entra sozinha na próxima ingestão.
 - **Dependencies**: nenhuma. O teste unitário não precisa de banco.
 
 ### `DeckShortfallQuery`
@@ -223,7 +224,8 @@ validação no model somada ao controller que recusa Leader no incremento.
 | Controller público não resolve a sessão sozinho | `app/controllers/catalog_controller.rb` (`show`) | O controle de deck sumiria em silêncio para quem está logado | `editing_deck` só lê `Current.user` depois de `authenticated?`, como faz `owned_quantities`. Teste de integração do detalhe com e sem sessão |
 | `CatalogController#show` já acumula muita coisa (variantes, ausentes, hero, posse, wishlist) | `app/controllers/catalog_controller.rb:48-62` | Mais uma responsabilidade num método cheio | O detalhe ganha só `@editing_deck` e a quantidade da carta nele, numa consulta. A lógica fica no partial e no `DeckEntriesController` |
 | Primeiro uso de `session[...]` no projeto | — | Padrão novo | É a sessão de cookie do próprio Rails, já assinada. O valor guardado é só um id, revalidado contra o dono a cada leitura, então adulterá-lo não dá acesso a nada (DCK-36) |
-| Regra da carta multicolorida e exceção ao limite de 4 ainda sem confirmação | spec, *Assumptions* | Um validador errado declara válido um deck ilegal | T1 do plano: ler o Rule Manual antes de `Deck::Legality`. Até lá vale a leitura estrita (todas as cores no Leader) |
+| Restrição de Leader não verificada (OP12-001, OP13-079, P-117) | `Deck::Legality` | O app mostra `válido` para um deck que a restrição do Leader torna ilegal | Decisão do dono: aviso com o texto da regra ao lado do status (DCK-44). A frase vem do catálogo, então o aviso aparece para qualquer Leader novo com regra própria |
+| Detecção pela frase do efeito depende da redação da apitcg | `Card#unlimited_copies?`, `Card#own_deck_rule` | Se a fonte mudar a redação, a isenção ou o aviso somem em silêncio | O teste da T4 usa o `effect_text` real das cartas do snapshot, e a T19 (ingestão) verifica que a frase sobrevive ao Normalize |
 | Deadlocks pré-existentes em `test/queries` sob execução concorrente | AD-010 | Flake no gate | O teste de concorrência do deck (DCK-38) é o primeiro do projeto: a coleção não tem teste de corrida, só o SQL atômico comentado. Ele roda duas threads, cada uma com conexão própria do pool (`with_connection`), fora da transação do teste (`self.use_transactional_tests = false` no arquivo, limpando o que criou) |
 | `turbo_confirm` depende de JS e não tem teste sem navegador | — | DCK-09 sem prova | Confirmação em página própria (`GET /decks/:id/delete`), testável por integração |
 

@@ -8,7 +8,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 ---
 
-**Spec**: `.specs/features/decks/spec.md` (DCK-01..DCK-42, Req. 14)
+**Spec**: `.specs/features/decks/spec.md` (DCK-01..DCK-44, Req. 14)
 **Design**: `.specs/features/decks/design.md` (aprovado; deck em edição na sessão)
 **Status**: Approved (dono, 2026-10-02)
 
@@ -98,10 +98,10 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] As duas perguntas têm resposta com citação (seção e página do Rule Manual) no spec, no Req. 14 e no `design.md` §10
-- [ ] Se (a) der "basta uma cor" ou se (b) achar exceção, o critério do spec e o Req. 14 são emendados **antes** da T4, e o dono é avisado (regra de requisito errado do `CLAUDE.md`)
-- [ ] Se o PDF não puder ser lido, a task para e volta ao dono, sem chute
-- [ ] `validate_spec.py` sai 0; o gate full passa com a contagem inalterada
+- [x] As duas perguntas têm resposta com citação (seção e página do Rule Manual) no spec, no Req. 14 e no `design.md` §10
+- [x] Se (a) der "basta uma cor" ou se (b) achar exceção, o critério do spec e o Req. 14 são emendados **antes** da T4, e o dono é avisado (regra de requisito errado do `CLAUDE.md`)
+- [x] Se o PDF não puder ser lido, a task para e volta ao dono, sem chute (lido: Rule Manual e Comprehensive Rules v1.2.1)
+- [x] `validate_spec.py` sai 0; o gate full passa com a contagem inalterada
 
 **Tests**: none
 **Gate**: full
@@ -164,11 +164,11 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 ### T4: `Deck::Legality`
 
-**What**: Função pura `Deck::Legality.call(leader:, entries:)` que devolve `Result(status:, reasons:)` com a regra confirmada na T1, e `Deck#legality` delegando a ela.
-**Where**: `app/models/deck/legality.rb`
+**What**: Função pura `Deck::Legality.call(leader:, entries:)` que devolve `Result(status:, reasons:, warnings:)` com as regras confirmadas na T1, `Deck#legality` delegando a ela, e os predicados `Card#unlimited_copies?` e `Card#own_deck_rule` sobre `effect_text`.
+**Where**: `app/models/deck/legality.rb`, `app/models/card.rb`
 **Depends on**: T1, T3
-**Reuses**: `Card#colors`, `Card#card_number`
-**Requirement**: DCK-11, DCK-12, DCK-13, DCK-14, DCK-15, DCK-16, DCK-18, DCK-42
+**Reuses**: `Card#colors`, `Card#card_number`, `Card#effect_text` (sem HTML desde `normalize.rb:263-273`)
+**Requirement**: DCK-11, DCK-12, DCK-13, DCK-14, DCK-15, DCK-16, DCK-18, DCK-42, DCK-43, DCK-44
 
 **Tools**:
 
@@ -183,6 +183,8 @@ T16 → T17 → T18 → T19 → T20 → T21
 - [ ] Com 51 cartas e sem Leader → `invalid`, mostrando os dois motivos
 - [ ] Sem Leader, carta de qualquer cor não gera motivo de cor (DCK-42)
 - [ ] A carta multicolorida segue a regra da T1 nos dois sentidos: uma cor fora gera motivo, todas dentro não
+- [ ] Carta com "you may have any number of this card in your deck" no `effect_text` (texto real de OP01-075) aceita 8 cópias sem motivo; a mesma quantidade de uma carta sem a frase gera motivo (DCK-43)
+- [ ] Leader com regra própria (textos reais de OP12-001, OP13-079 e P-117) gera um aviso com a frase da regra, e o status continua `valid` num deck de 50 cartas; Leader sem a frase não gera aviso, nem um "Under the rules of this game" que não fala do deck (texto de OP15-058) (DCK-44)
 - [ ] Nenhum status é gravado: `decks` não tem coluna de status (DCK-11)
 - [ ] Gate quick passa; contagem registrada
 
@@ -307,11 +309,11 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 ### T9: Página do deck: composição e status
 
-**What**: `DecksController#show` em HTML, com o Leader, as entradas agrupadas em Character, Event e Stage na ordem de `ordered_entries`, "N / 50", o status com os motivos, o aviso "A lista de banidas não é verificada" e a marca "fora da fonte".
+**What**: `DecksController#show` em HTML, com o Leader, as entradas agrupadas em Character, Event e Stage na ordem de `ordered_entries`, "N / 50", o status com os motivos, o aviso "A lista de banidas não é verificada", o aviso de regra própria do Leader e a marca "fora da fonte".
 **Where**: `app/views/decks/show.html.erb`
 **Depends on**: T8
 **Reuses**: `Deck#legality` (T4) e `CardVariant::PRESENT_SQL` para "fora da fonte"
-**Requirement**: DCK-07, DCK-15, DCK-17, DCK-19
+**Requirement**: DCK-07, DCK-15, DCK-17, DCK-19, DCK-44
 
 **Tools**:
 
@@ -324,6 +326,7 @@ T16 → T17 → T18 → T19 → T20 → T21
 - [ ] "N / 50" segue `main_total`, e o status aparece em português (`válido`, `incompleto`, `inválido`)
 - [ ] Status diferente de `válido` mostra cada motivo; `válido` não mostra nenhum
 - [ ] O aviso de banidas aparece sempre
+- [ ] Com Leader de regra própria, aparece "Este Leader tem regra de montagem própria, não verificada" com o texto da regra; com Leader sem regra, não aparece
 - [ ] Carta sem variante presente aparece marcada "fora da fonte" e continua contando no total
 - [ ] O número de consultas da página não cresce com o número de entradas
 - [ ] Gate full passa; contagem registrada
@@ -644,7 +647,7 @@ T16 → T17 → T18 → T19 → T20 → T21
 **Done when**:
 
 - [ ] O `CLAUDE.md` descreve o que existe depois da feature, e o `grep` registrado no commit não acha model ou controller citado que não exista
-- [ ] A traceability tem DCK-01..42 mapeados para tasks
+- [ ] A traceability tem DCK-01..44 mapeados para tasks
 - [ ] O dono respondeu sobre o LF no simulador; se o simulador não aceitar, o separador passa a CRLF ou CR, com emenda no spec e no Req. 14, numa task de correção
 - [ ] Gate full passa; contagem registrada
 

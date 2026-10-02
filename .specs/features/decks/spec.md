@@ -39,8 +39,9 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 |---|---|---|---|
 | Uso principal do deck | Montar pelas regras **e** cruzar com a pasta | Decisão do dono em 2026-10-01. O canvas "Bindr — telas" já desenha "Baralhos" na navegação e "Faltando para os baralhos" na pasta | Sim |
 | Regras de montagem | 1 Leader; deck principal com exatamente 50 cartas; no máximo 4 cópias por `card_number`; cada carta do deck principal só com cores que o Leader tem | Confirmado no Play Guide oficial (`en.onepiece-cardgame.com/play-guide/`): "1 Leader Card, a 50-card deck, and 10 DON!! cards", "Your deck must match the color of your Leader Card", "up to 4 copies of any one card number". Resolve o `⚠️ VERIFICAR` de `design.md` §10 | Sim |
-| Carta multicolorida no deck principal | Legal só se **todas** as cores dela estiverem entre as do Leader | ⚠️ VERIFICAR no Rule Manual (`/pdf/rule_manual.pdf`) antes da task que implementa a regra; o PDF não pôde ser lido nesta sessão. Hoje o catálogo tem **0** cartas não-Leader com mais de uma cor (consulta no banco de dev em 2026-10-01), então a interpretação não muda nenhum resultado atual. A leitura estrita é a que nunca declara válido um deck ilegal | Não |
-| Carta cujo texto permite mais de 4 cópias | Não existe exceção ao limite de 4 | ⚠️ VERIFICAR junto com a linha acima. Não encontrei carta assim; se aparecer, vira requisito novo | Não |
+| Carta multicolorida no deck principal | Legal só se **todas** as cores dela estiverem entre as do Leader | Confirmado nas Comprehensive Rules v1.2.1 (28/08/2026), T1 em 2026-10-02: 2-3-5 ("treated as a card of every color it possesses") com 5-1-2-2 ("Only cards of a color included on the Leader card"). O Rule Manual diz o mesmo (p. 8 e p. 16) | Sim |
+| Carta cujo texto permite mais de 4 cópias | **Existe**: a carta com "Under the rules of this game, you may have any number of this card in your deck" fica isenta do limite de 4, detectada pelo texto do catálogo (DCK-43) | T1 em 2026-10-02: 5-1-2-4 das Comprehensive Rules ("Effects related to deck construction rules … replace the deck construction rules above"). No snapshot de 2026-10-01: OP01-075 Pacifista, OP08-072 Biscuit Warrior, OP16-042 Prisoner of Impel Down. O default anterior ("não existe") marcaria `inválido` um deck legal | Sim — dono, 2026-10-02 |
+| Leader com regra de montagem própria | Não verificada; a página do deck mostra o aviso e o texto da regra, e o status não muda (DCK-44) | T1 em 2026-10-02, mesma regra 5-1-2-4: OP12-001 Silvers Rayleigh (sem carta de custo 5+), OP13-079 Imu (sem Event de custo 2+), P-117 Nami (só tipo "East Blue"). Interpretar cada restrição exigiria código por Leader; o dono escolheu `válido` com aviso em vez de um quarto status | Sim — dono, 2026-10-02 |
 | Banimentos | Não verificados; a página do deck declara isso | Decisão do dono em 2026-10-01 (ver Out of Scope) | Sim |
 | Deck fora das regras | Salvo a cada alteração, com status derivado e motivos visíveis | Decisão do dono em 2026-10-01: montar um deck leva mais de uma sessão. O status é calculado na leitura, nunca persistido, pela mesma razão da wishlist "atendida": uma flag gravada fica obsoleta na alteração seguinte | Sim |
 | Quantas cópias o usuário "tem" de uma carta | A soma de `collection_items.quantity` de **todas** as variantes da carta, presentes ou não na fonte | Para jogar, qualquer impressão serve. Variante ausente da fonte continua sendo uma carta física na pasta (Req. 1.7) | Sim — aprovado pelo dono em 2026-10-01 |
@@ -54,7 +55,7 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 | Limites de entrada | Nome de 1 a 60 caracteres; quantidade por carta de 1 a 50; texto importado até 200 linhas e 10.000 caracteres | 50 é o tamanho do deck principal, e uma lista real tem menos de 51 linhas. Os limites só barram entrada absurda | Sim — aprovado pelo dono em 2026-10-01 |
 | Escolha do deck que recebe as cartas pelo detalhe | Um "deck em edição" escolhido pelo usuário; o mecanismo (sessão, URL) fica para o design | É decisão técnica; o requisito é só que o controle saiba para qual deck vai | Não — design |
 
-**Open questions:** none — os padrões assumidos foram aprovados pelo dono em 2026-10-01. Restam três linhas ⚠️ VERIFICAR (multicolorida, exceção ao limite de 4, separador da exportação), que viram a primeira task do plano.
+**Open questions:** none — os padrões assumidos foram aprovados pelo dono em 2026-10-01 e 2026-10-02. Resta uma linha ⚠️ VERIFICAR (separador da exportação), resolvida pelo teste manual do dono na T21.
 
 ## User Stories
 
@@ -86,14 +87,16 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 
 **Acceptance Criteria**:
 1. The system SHALL calcular o status do deck a cada leitura, sem persisti-lo, como exatamente um de `válido`, `incompleto` ou `inválido`.
-2. The system SHALL classificar o deck como `válido` quando ele tiver um Leader, o deck principal somar exatamente 50 cartas, nenhuma carta passar de 4 cópias e toda carta do deck principal tiver só cores presentes no Leader.
-3. The system SHALL classificar o deck como `inválido` quando o deck principal passar de 50 cartas, alguma carta passar de 4 cópias ou, havendo Leader, alguma carta tiver uma cor que o Leader não tem.
+2. The system SHALL classificar o deck como `válido` quando ele tiver um Leader, o deck principal somar exatamente 50 cartas, nenhuma carta não isenta pelo critério 10 passar de 4 cópias e toda carta do deck principal tiver só cores presentes no Leader.
+3. The system SHALL classificar o deck como `inválido` quando o deck principal passar de 50 cartas, alguma carta não isenta pelo critério 10 passar de 4 cópias ou, havendo Leader, alguma carta tiver uma cor que o Leader não tem.
 4. The system SHALL classificar como `incompleto` o deck que não for `válido` nem `inválido`, isto é, sem Leader ou com menos de 50 cartas e nenhuma violação do critério 3.
 5. WHEN o status não for `válido` THEN the system SHALL listar na página do deck cada motivo em português, nomeando as cartas envolvidas (ex.: "OP01-016 tem 5 cópias; o máximo é 4", "Faltam 3 cartas para 50", "OP02-001 é vermelha e o Leader é preto").
-6. The system SHALL contar a carta multicolorida como tendo todas as suas cores ao mesmo tempo. ⚠️ VERIFICAR a regra (Assumptions).
+6. The system SHALL contar a carta multicolorida como tendo todas as suas cores ao mesmo tempo (Comprehensive Rules 2-3-5).
 7. The system SHALL aceitar e salvar entradas que violam as regras, deixando a violação no status, sem nunca recusar a alteração por causa de uma regra do jogo.
 8. The system SHALL exibir na página do deck o aviso "A lista de banidas não é verificada".
 9. The system SHALL marcar na página do deck a carta ausente da fonte como "fora da fonte", e ela continua contando para as regras.
+10. The system SHALL isentar do limite de 4 cópias a carta cujo texto de efeito contém "Under the rules of this game, you may have any number of this card in your deck", derivando a isenção do texto do catálogo e mantendo o limite de 50 do DCK-39.
+11. WHEN o texto de efeito do Leader contiver "Under the rules of this game" seguido de "cannot include" ou "can only include" THEN the system SHALL exibir na página do deck o aviso "Este Leader tem regra de montagem própria, não verificada" junto com o texto dessa regra, sem verificá-la e sem mudar o status.
 
 **Independent Test**: Montar decks de fixture com 49, 50 e 51 cartas, com 5 cópias de uma carta, com uma carta de cor fora do Leader e sem Leader; conferir status e motivos de cada um.
 
@@ -173,7 +176,7 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 | DCK-13 | Validar: regra de `inválido` (Req. 14.13) | - | Pending |
 | DCK-14 | Validar: regra de `incompleto` (Req. 14.14) | - | Pending |
 | DCK-15 | Validar: motivos em português (Req. 14.15) | - | Pending |
-| DCK-16 | Validar: multicolorida conta todas as cores ⚠️ (Req. 14.16) | - | Pending |
+| DCK-16 | Validar: multicolorida conta todas as cores (Req. 14.16) | - | Pending |
 | DCK-17 | Validar: aviso de banidas (Req. 14.17) | - | Pending |
 | DCK-18 | Validar: regra do jogo nunca recusa gravação (Req. 14.18) | - | Pending |
 | DCK-19 | Validar: carta fora da fonte marcada (Req. 14.19) | - | Pending |
@@ -200,8 +203,10 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 | DCK-40 | Ingestão preserva decks, sem cascata (Req. 14.40) | - | Pending |
 | DCK-41 | Deck em edição excluído (Req. 14.41) | - | Pending |
 | DCK-42 | Sem Leader, sem regra de cor (Req. 14.42) | - | Pending |
+| DCK-43 | Validar: isenção do limite de 4 pelo texto da carta (Req. 14.43) | - | Pending |
+| DCK-44 | Validar: aviso de regra própria do Leader (Req. 14.44) | - | Pending |
 
-**Coverage:** 42 total, 0 mapped to tasks, 42 unmapped ⚠️ (plano ainda não existe)
+**Coverage:** 44 total, 0 mapped to tasks, 44 unmapped ⚠️ (plano ainda não existe)
 
 ## Implicit-Requirement Dimensions
 
@@ -224,5 +229,5 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 - [ ] Existe teste que prova que um usuário não lê nem altera o deck de outro.
 - [ ] Existe teste que prova que `UNIQUE (deck_id, card_id)` e o limite de quantidade são do banco, não só da aplicação.
 - [ ] A ingestão roda duas vezes com decks povoados e nenhum Leader ou entrada muda (extensão da task 2.6).
-- [ ] As regras marcadas ⚠️ VERIFICAR foram confirmadas no Rule Manual antes do código que as implementa.
+- [x] As regras de cor e de cópias foram confirmadas nas Comprehensive Rules antes do código que as implementa (T1, 2026-10-02).
 - [ ] `bin/rails test && bin/rubocop` limpos; `bin/brakeman` sem aviso novo.
