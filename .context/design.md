@@ -429,7 +429,7 @@ Cada estágio isolado, porque cada um falha de forma diferente:
    `SNAPSHOT=<arquivo>` reprocessa sem rede e o payload salvo vira fixture
    (Req. 11.5). A variante é identificada por `variant_code = "tcgplayer:<id>"`
    (`markets.tcgplayer.id`) ou, sem esse id, `"apitcg:<_id>"`. A estabilidade do
-   `tcgplayer.id` entre buscas é `⚠️ VERIFICAR` (AD-019, SRC-31).
+   `tcgplayer.id` entre buscas foi verificada em 2026-10-01: 7.252 comuns, 0 mudados em 20h27m (SRC-31, D-14).
    *(emendado em 2026-09-29, fonte-apitcg; o texto anterior fixava um commit ou
    tag da optcgjson)*
 2. **Normalize** — mapeia o formato externo para o modelo interno. Todo

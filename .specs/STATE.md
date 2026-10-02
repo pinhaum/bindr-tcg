@@ -154,7 +154,17 @@
 - **Date**: 2026-09-29
 - **Status**: active
 
+### AD-020
+- **Decision**: SRC-31 emendado de "ao menos 24h" para "ao menos 20h" por decisão do dono em 2026-10-01 (D-14). Dois snapshots (A `apitcg-20261001T024920Z.json` e B `apitcg-20261001T231649Z.json`) com intervalo 20h27m produziram 7.252 comuns e 0 mudados em `compare_snapshots`, confirmando a estabilidade do `tcgplayer.id` entre buscas.
+- **Reason**: O dono preferiu fechar a feature com evidência real de 20h27m (7.252 comuns, 0 mudados) a aguardar 24h de diferença entre snapshots. A medição é suficiente para confirmar a idempotência (Req. 1.4) e encerrar a verificação do SRC-31.
+- **Trade-off**: Nenhum. O intervalo reduzido mantém a idempotência verificada, cobrindo a preocupação central: o `tcgplayer.id` não mudou entre buscas, e o usuário não perde o vínculo com a coleção.
+- **Scope**: SRC-31 (Success Criteria do spec de `fonte-apitcg`), §8.6 de `.context/tasks.md` e ambos os planos da feature.
+- **Date**: 2026-10-01
+- **Status**: active
+
 ## Handoff
+
+> **Estado em 2026-10-02 — este bloco vence os de baixo.** `fonte-apitcg` encerrada na parte de implementação: SRC-31 fechado (20h27m, 0 mudados) e §8.6 fechada; falta só a re-verificação independente do SRC-31 (S5). Pendências do dono: D-03 (SRC-19), flake D-10, T12 da conformidade. Próximo passo a definir pelo dono.
 
 > **Estado em 2026-10-01 (Verifier) — este bloco vence os de baixo.** **`fonte-apitcg` VERIFICADA: PASS com ressalva** (`validation.md`; 2 ciclos: FAIL com lacunas de teste/doc → correção `43b62ae` → PASS; `validate_state.py` sai 0; sensor P0 39/39 mortos; gate 1540 runs, 0 falhas). **Ressalva externa:** a comparação de `tcgplayer.id` com snapshots 24h+ separados (SRC-31, D-04) — comando nos Success Criteria do spec, a partir de 2026-10-02T03:35Z; §8.6 do `.context/tasks.md` fica aberta até lá. Débitos Minor: Fix 7 parcial (asserções vacuosas em `ingestion_remap_task_test`, `ingestion_compare_snapshots_task_test`, `set_progress_numbers_test`), flake de plano D-10. Decisões D-01..D-10 em `tmp/orchestration-decisions.md`.
 

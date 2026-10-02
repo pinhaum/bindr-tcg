@@ -337,7 +337,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
   - _Requisitos: 1.1, 11.5_
 - [x] **8.5 Normalize e Upsert sobre a fixture nova** — T11–T15
   - _Requisitos: 1.9–1.11, 11.5, 11.7_
-- [ ] **8.6 Fechamento da troca** — T16–T17
+- [x] **8.6 Fechamento da troca** — T16–T17
 - [x] **8.7 Correções da revisão do lote A** — T18–T23, executadas antes da 8.4
   - _Requisitos: 1.7, 5.1, 6.5_
 

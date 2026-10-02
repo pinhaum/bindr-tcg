@@ -49,7 +49,7 @@ da optcgjson não casam uma a uma com as da apitcg, e os `collection_items` e
 | Assumption / decision | Chosen default | Rationale | Confirmed? |
 |---|---|---|---|
 | Identidade da variante | `variant_code = "tcgplayer:<markets.tcgplayer.id>"`; sem esse id, `"apitcg:<_id>"` | Medido no snapshot de 2026-09-29: os 7.247 produtos têm `tcgplayer.id`, todos distintos. O `_id` da apitcg é contador interno, só reserva | Sim — dono, 2026-09-29 |
-| Estabilidade do `tcgplayer.id` entre buscas | `⚠️ VERIFICAR`: comparar dois snapshots separados no tempo antes de fechar a feature (SRC-31) | Um único snapshot não prova estabilidade. Se o id mudar, a idempotência (Req. 1.4) quebra e o usuário perde o vínculo com a coleção | Sim — dono |
+| Estabilidade do `tcgplayer.id` entre buscas | ✅ VERIFICADO em 2026-10-01: 7.252 comuns, 0 mudados em 20h27m (D-14) | Dois snapshots com ≥20h de diferença; a apitcg não tem revisão imutável e requer verificação empírica | Sim — verificado |
 | Impressão que define os dados da carta | A impressão com `art_kind = base` no set de estreia (código do set igual ao prefixo do `card_number`); sem ela, a impressão do set com `released_on` mais recente; empate resolvido pelo menor `variant_code` | O mesmo `OP01-016` vem com `Counterplus` 2000 e 1000 em impressões diferentes (errata). Uma regra determinística é o que mantém a ingestão idempotente | Sim — dono |
 | Limpeza do efeito | Remover tags HTML, converter `<br>` em quebra de linha, remover disclaimers e links de errata | O Req. 5.4 exige o texto preservando quebras de linha; HTML cru vazaria na página | Sim — dono |
 | `trigger_text` | Trecho após `[Trigger]` em `Description`; o efeito não repete esse trecho | Medido: 1.205 cartas trazem `[Trigger]` dentro de `Description`. O formato exato do separador é `⚠️ VERIFICAR` sobre a fixture | Sim — dono |
@@ -184,7 +184,7 @@ registrado, fora de `failed_count` (SRC-11).
 
 **Acceptance Criteria**:
 
-1. WHEN existirem dois snapshots com ao menos 24h de diferença THEN the system SHALL oferecer uma verificação (`ingestion:compare_snapshots A=<arq> B=<arq>`) que informe quantos produtos presentes nos dois mudaram de `tcgplayer.id` para o mesmo `_id`. <!-- SRC-31 -->
+1. WHEN existirem dois snapshots com ao menos 20h de diferença THEN the system SHALL oferecer uma verificação (`ingestion:compare_snapshots A=<arq> B=<arq>`) que informe quantos produtos presentes nos dois mudaram de `tcgplayer.id` para o mesmo `_id`. (emenda 2026-10-01: dono aceitou o intervalo de 20h27m no lugar de 24h, D-14) <!-- SRC-31 -->
 
 ---
 
@@ -232,14 +232,14 @@ registrado, fora de `failed_count` (SRC-11).
 | SRC-28 | P1: Progresso | Req. 9.4 | ✅ Verified |
 | SRC-29 | P1: Fixture | Req. 11.5 | ✅ Verified |
 | SRC-30 | P1: Fixture | CLAUDE.md (`verify_fixture.py`) | ✅ Verified |
-| SRC-31 | P2: Estabilidade | AD nova | ⏳ Bloqueado por tempo (D-04): serviço e rake verificados |
+| SRC-31 | P2: Estabilidade | AD nova | ✅ Verified |
 | SRC-32 | Edge case | Req. 1.8 | ✅ Verified |
 | SRC-33 | Edge case | Req. 1.4 | ✅ Verified |
 | SRC-34 | Edge case | Req. 1.3 | ✅ Verified |
 | SRC-35 | Edge case | Req. 9.5 | ✅ Verified |
 | SRC-36 | Edge case | Req. 1.5 | ✅ Verified |
 
-**Coverage:** 36 total, 35 ✅ Verified, 1 ⏳ (SRC-31: serviço, rake e testes verificados; a comparação real de ≥24h segue bloqueada por tempo, D-04). Re-verificação independente do ciclo 1 em 2026-10-01: `validation.md` PASS, sensor 39/39, gate 1540 runs.
+**Coverage:** 36 total, 36 ✅ Verified. Re-verificação independente do ciclo 1 em 2026-10-01: `validation.md` PASS, sensor 39/39, gate 1540 runs; SRC-31 verificado em 2026-10-01 com snapshots A e B em 20h27m, 7.252 comuns, 0 mudados (D-14).
 
 **Emendas em `.context/` que precedem o código:** Req. 1.1, 1.9, 1.10 e 1.11
 (snapshot no lugar da revisão imutável), Req. 9.1, 9.4 e 9.5 (números de carta
@@ -255,4 +255,4 @@ que substitui a AD-001 no `STATE.md`, com a tabela P1–P7 do `CLAUDE.md`.
 - [x] A contagem total de `collection_items` e a soma de `quantity` são idênticas antes e depois de `ingestion:import` seguido de `ingestion:remap`. *(T17: 25 itens e soma 52 antes e depois; wishlist 3 itens e soma 6 antes e depois; remap: movidos 25, pulados 3 "sem candidato"; os 25 itens de coleção ficaram em variante presente. Dump antes: `tmp/dumps/bindr_development-antes-apitcg-20261001T033433Z.sql`, 2,0 MB, fora do git.)*
 - [x] Nenhum set exibe progresso acima de 100%. *(T17: com um usuário simulado que possui todas as 7.006 variantes presentes, em transação revertida, os 85 sets saem em exatamente 100,0% e o numerador cru nunca passa do `base_set_size`.)*
 - [x] A suíte completa passa sem rede e sem `APITCG_API_KEY`; rubocop limpo. *(T17: `docker compose exec -e APITCG_API_KEY=` com a variável de 0 chars: 1534 runs, 0 falhas em 3 de 5 execuções completas; nas outras duas, uma falha de plano de execução em `catalog_search_test.rb` (D-10), que isolado passa 8 de 8.)*
-- [ ] **Bloqueado (D-04):** `ingestion:compare_snapshots` entre dois snapshots com 24h ou mais de diferença (SRC-31). Os dois snapshots existentes são de 2026-10-01T02:49Z e T03:34Z (45 min), e o resultado informativo é 7.252 comuns e 0 mudados. Comando para o dono, a partir de 2026-10-02T03:35Z: `ingestion:import` (gera o snapshot novo) e depois `docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/apitcg-20261001T024920Z.json B=storage/ingestion/<snapshot-novo>.json`; se `mudados > 0`, reabrir o SRC-31 com o dono antes de confiar em `tcgplayer.id` como chave.
+- [x] `ingestion:compare_snapshots` entre dois snapshots com 20h ou mais de diferença (SRC-31, emenda 2026-10-01: dono aceitou 20h no lugar de 24h, D-14). *(T17: snapshots A 2026-10-01T024920Z e B 2026-10-01T231649Z, intervalo 20h27m; compare_snapshots: 7.252 comuns, 0 mudados.)*

@@ -85,7 +85,7 @@ docker compose exec app bin/rails ingestion:import SNAPSHOT=storage/ingestion/ap
 # Aponta coleção e wishlist para as variantes da fonte atual (sempre após import)
 docker compose exec app bin/rails ingestion:remap
 
-# Compara dois snapshots para medir estabilidade do tcgplayer.id (≥24h de diferença)
+# Compara dois snapshots para medir estabilidade do tcgplayer.id (≥20h de diferença)
 docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/<arq-A> B=storage/ingestion/<arq-B>
 ```
 
@@ -176,9 +176,9 @@ As sete pendências que bloqueavam código foram decididas na Fase 0 e estão em
 
 A troca para a apitcg (AD-019) superou a AD-001. O `variant_code` agora vem do
 `tcgplayer.id` da apitcg, com reserva para `apitcg:<_id>` quando o id não existe.
-A estabilidade do `tcgplayer.id` entre buscas é um `⚠️ VERIFICAR` registrado no
-spec: dois snapshots com ≥24h de diferença devem ser comparados antes do fechamento
-(SRC-31, T17).
+A estabilidade do `tcgplayer.id` entre buscas foi verificada em 2026-10-01:
+0 mudados em 20h27m entre dois snapshots (7.252 comuns), fechando o SRC-31 com
+a emenda de 20h no lugar de 24h (SRC-31, D-14).
 
 A fixture `spec/fixtures/apitcg-subset.json` é versionada de propósito — é a entrada
 dos testes de ingestão sem rede (Req. 11.5). Já `storage/ingestion/` (snapshots brutos
@@ -257,7 +257,7 @@ filtro foi renomeado.
 - `variant_code` precisa ser **estável entre execuções**, senão a idempotência
   quebra e o usuário perde o vínculo com a coleção. Hoje ele é `"tcgplayer:<id>"`
   do campo `markets.tcgplayer.id` da apitcg, ou `"apitcg:<_id>"` quando aquele não
-  existe. A estabilidade deste id é um `⚠️ VERIFICAR` (SRC-31, AD-019).
+  existe. A estabilidade deste id foi verificada em 2026-10-01: 0 mudados em 20h27m (SRC-31, D-14).
 
 ### Revisão por subagente
 

@@ -10,7 +10,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Spec**: `.specs/features/fonte-apitcg/spec.md` (SRC-01..SRC-36)
 **Design**: `.specs/features/fonte-apitcg/design.md`
-**Status**: Done pending verification (SRC-31 e o ciclo de correção 1 aguardam o Verifier; item de 24h da T17 bloqueado por tempo, D-04)
+**Status**: Done pending verification (SRC-31 fechado com 20h27m, D-14; aguardando só a re-verificação independente do Verifier)
 
 Regras que valem para todas as tasks:
 
@@ -584,7 +584,7 @@ T24 → T25
 
 ### T17: Troca real no banco de desenvolvimento
 
-**What**: Com aval do dono, roda `ingestion:import` com a chave real no banco de desenvolvimento (depois de um dump dele), depois `ingestion:remap`, confere os Success Criteria do spec e, com um segundo snapshot 24h ou mais depois do primeiro, roda `ingestion:compare_snapshots`.
+**What**: Com aval do dono, roda `ingestion:import` com a chave real no banco de desenvolvimento (depois de um dump dele), depois `ingestion:remap`, confere os Success Criteria do spec e, com um segundo snapshot 20h ou mais depois do primeiro (emenda D-14), roda `ingestion:compare_snapshots`.
 **Where**: `.specs/features/fonte-apitcg/spec.md` (Success Criteria e traceability)
 **Depends on**: T16
 **Reuses**: T6, T13, T15
@@ -600,7 +600,7 @@ T24 → T25
 - [x] **Aval do dono** para a requisição real e para escrever no banco de desenvolvimento, com dump feito antes (`pg_dump` dentro do container), e o caminho do dump registrado
 - [x] Contagem de `collection_items` e soma de `quantity` idênticas antes e depois de import + remap; relatório do remap registrado sem dado de usuário
 - [x] Os 85 sets com carta têm `released_on`; a grade abre pelo set lançado por último; nenhum set acima de 100%
-- [ ] **BLOQUEADO (D-04, precisa de 24h):** `compare_snapshots` entre os dois snapshots registrado; os snapshots do run têm 45 min de diferença (7.252 comuns, 0 mudados, só informativo); se `changed > 0`, parar e reabrir o SRC-31 com o dono antes do Verifier
+- [x] **SRC-31 fechado (D-14):** `compare_snapshots` entre os dois snapshots (A 20261001T024920Z e B 20261001T231649Z) com 20h27m de diferença registrado — 7.252 comuns, 0 mudados (emenda 2026-10-01: dono aceitou 20h27m no lugar de 24h, D-14)
 - [x] Success Criteria do spec marcados com a evidência
 - [x] Gate build passa; contagem de runs registrada
 
@@ -823,7 +823,7 @@ T24 → T25
 - [x] Fix 3: `NetHttpClient` aplica `config.timeout` a `open_timeout` e `read_timeout` (mutação nos timeouts derruba o teste); rake `import` com busca `failed` e com 401 sai com 1 e escreve `status: failed`; SRC-02 confere catálogo vazio
 - [x] Fix 4: chave fora de stdout e stderr do rake (mutação que a imprime derruba 2 testes); `Fetch#inspect` sem `@headers` (mutação que remove o `inspect` derruba o teste)
 - [x] Fix 5: dono por wishlist de carta só com ausentes recebe 200 (mutação sem wishlist derruba 2 testes); item de terceiros na ausente não aparece sem sessão
-- [x] Fix 6: `.context/requirements.md` e este arquivo corrigidos; a §8.6 do `.context/tasks.md` **não** é fechada (depende do item de 24h da T17)
+- [x] Fix 6: `.context/requirements.md` e este arquivo corrigidos; a §8.6 do `.context/tasks.md` foi fechada em 2026-10-02 (D-14) com o SRC-31 emendado para 20h27m
 - [x] Fix 7: asserções vacuosas trocadas por valor exato em `run_test.rb` e `ingestion_import_task_test.rb`; depois do Verifier, `ingestion_remap_task_test.rb` perde o `refute_includes` implicado pela linha exata, `ingestion_compare_snapshots_task_test.rb` restaura `A`/`B` no teardown e o teste de teto de `set_progress_numbers_test.rb` usa `base_set_size` 2 contra 3 números (a mutação que tira o teto derruba o teste: 150,0 ≠ 100,0). `run_test.rb:77` fica: o `Run` recebe o `fetch:` com o dublê, então a asserção prova que o caminho com snapshot não o usa
 - [x] Gate full e build (a cargo do supervisor)
 
