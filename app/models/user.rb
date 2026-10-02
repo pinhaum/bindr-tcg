@@ -24,6 +24,10 @@ class User < ApplicationRecord
   # `InvalidForeignKey` cru do Postgres.
   has_many :wishlist_items, dependent: :restrict_with_exception
 
+  # Mesmo `restrict_with_exception`: o deck é dado do usuário, e a FK
+  # `on_delete: :restrict` da migração `20261002120000` já barraria o `DELETE`.
+  has_many :decks, dependent: :restrict_with_exception
+
   # `destroy`, ao contrário de `collection_items`: a sessão é derivada e
   # descartável, então encerrar a conta encerra as sessões. A assimetria entre
   # as duas linhas é deliberada.

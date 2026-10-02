@@ -150,11 +150,11 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Nome com espaços nas bordas é gravado sem eles; nome vazio e nome de 61 caracteres são inválidos, com mensagem em português
-- [ ] Leader que não é `leader` é inválido; entrada com carta Leader é inválida
-- [ ] `ordered_entries` devolve character, event e stage, nessa ordem; dentro de cada tipo, custo crescente com nulos por último e depois `card_number`
-- [ ] `main_total` soma as quantidades das entradas e não conta o Leader
-- [ ] Gate quick passa; contagem registrada
+- [x] Nome com espaços nas bordas é gravado sem eles; nome vazio e nome de 61 caracteres são inválidos, com mensagem em português
+- [x] Leader que não é `leader` é inválido; entrada com carta Leader é inválida
+- [x] `ordered_entries` devolve character, event e stage, nessa ordem; dentro de cada tipo, custo crescente com nulos por último e depois `card_number`
+- [x] `main_total` soma as quantidades das entradas e não conta o Leader
+- [x] Gate quick passa; contagem registrada
 
 **Tests**: unit
 **Gate**: quick
