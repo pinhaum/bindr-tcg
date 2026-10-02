@@ -124,10 +124,10 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] O teste prova pelo banco, sem passar pelo model: a segunda entrada com o mesmo `(deck, card)` dá `RecordNotUnique`; quantidade 0 e 51 violam o CHECK; nome vazio e nome de 61 caracteres violam o CHECK
-- [ ] O teste prova que `DELETE FROM cards` falha por FK quando a carta é Leader ou está numa entrada, e que `DELETE FROM decks` apaga só as entradas daquele deck
-- [ ] `db/structure.sql` regenerado e commitado junto
-- [ ] Gate quick passa; contagem registrada
+- [x] O teste prova pelo banco, sem passar pelo model: a segunda entrada com o mesmo `(deck, card)` dá `RecordNotUnique`; quantidade 0 e 51 violam o CHECK; nome vazio e nome de 61 caracteres violam o CHECK
+- [x] O teste prova que `DELETE FROM cards` falha por FK quando a carta é Leader ou está numa entrada, e que `DELETE FROM decks` apaga só as entradas daquele deck
+- [x] `db/structure.sql` regenerado e commitado junto
+- [x] Gate quick passa; contagem registrada
 
 **Tests**: unit
 **Gate**: quick

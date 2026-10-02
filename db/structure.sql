@@ -221,6 +221,74 @@ ALTER SEQUENCE public.collection_items_id_seq OWNED BY public.collection_items.i
 
 
 --
+-- Name: deck_entries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.deck_entries (
+    id bigint NOT NULL,
+    deck_id bigint NOT NULL,
+    card_id bigint NOT NULL,
+    quantity integer NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT deck_entries_quantity_check CHECK (((quantity >= 1) AND (quantity <= 50)))
+);
+
+
+--
+-- Name: deck_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.deck_entries_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: deck_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.deck_entries_id_seq OWNED BY public.deck_entries.id;
+
+
+--
+-- Name: decks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.decks (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    name text NOT NULL,
+    leader_card_id bigint,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT decks_name_length_check CHECK (((char_length(name) >= 1) AND (char_length(name) <= 60)))
+);
+
+
+--
+-- Name: decks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.decks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: decks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.decks_id_seq OWNED BY public.decks.id;
+
+
+--
 -- Name: import_runs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -434,6 +502,20 @@ ALTER TABLE ONLY public.collection_items ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
+-- Name: deck_entries id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.deck_entries ALTER COLUMN id SET DEFAULT nextval('public.deck_entries_id_seq'::regclass);
+
+
+--
+-- Name: decks id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.decks ALTER COLUMN id SET DEFAULT nextval('public.decks_id_seq'::regclass);
+
+
+--
 -- Name: import_runs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -506,6 +588,22 @@ ALTER TABLE ONLY public.collection_imports
 
 ALTER TABLE ONLY public.collection_items
     ADD CONSTRAINT collection_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: deck_entries deck_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.deck_entries
+    ADD CONSTRAINT deck_entries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: decks decks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.decks
+    ADD CONSTRAINT decks_pkey PRIMARY KEY (id);
 
 
 --
@@ -711,6 +809,34 @@ CREATE UNIQUE INDEX index_collection_items_on_user_id_and_card_variant_id ON pub
 
 
 --
+-- Name: index_deck_entries_on_card_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_deck_entries_on_card_id ON public.deck_entries USING btree (card_id);
+
+
+--
+-- Name: index_deck_entries_on_deck_id_and_card_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_deck_entries_on_deck_id_and_card_id ON public.deck_entries USING btree (deck_id, card_id);
+
+
+--
+-- Name: index_decks_on_leader_card_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_decks_on_leader_card_id ON public.decks USING btree (leader_card_id);
+
+
+--
+-- Name: index_decks_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_decks_on_user_id ON public.decks USING btree (user_id);
+
+
+--
 -- Name: index_sessions_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -785,11 +911,35 @@ ALTER TABLE ONLY public.card_variants
 
 
 --
+-- Name: decks fk_rails_34a85e1f11; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.decks
+    ADD CONSTRAINT fk_rails_34a85e1f11 FOREIGN KEY (leader_card_id) REFERENCES public.cards(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: deck_entries fk_rails_544c0f3b4b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.deck_entries
+    ADD CONSTRAINT fk_rails_544c0f3b4b FOREIGN KEY (deck_id) REFERENCES public.decks(id) ON DELETE CASCADE;
+
+
+--
 -- Name: wishlist_items fk_rails_5c10acf6bc; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.wishlist_items
     ADD CONSTRAINT fk_rails_5c10acf6bc FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: decks fk_rails_5d31349cbe; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.decks
+    ADD CONSTRAINT fk_rails_5d31349cbe FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -825,12 +975,21 @@ ALTER TABLE ONLY public.card_variants
 
 
 --
+-- Name: deck_entries fk_rails_b3b4a4eddb; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.deck_entries
+    ADD CONSTRAINT fk_rails_b3b4a4eddb FOREIGN KEY (card_id) REFERENCES public.cards(id) ON DELETE RESTRICT;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261002120000'),
 ('20260919120600'),
 ('20260919120500'),
 ('20260919120400'),
