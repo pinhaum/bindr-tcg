@@ -130,6 +130,8 @@ Rails.application.routes.draw do
   # e o de outro usuário é 404 (DCK-36).
   post "decks/:deck_id/cards/:card_id/increment" => "deck_entries#increment", as: :increment_deck_card
   post "decks/:deck_id/cards/:card_id/decrement" => "deck_entries#decrement", as: :decrement_deck_card
+  # O Leader do deck (T14). A carta vai no corpo, como `card_id`.
+  post "decks/:deck_id/leader" => "deck_entries#leader", as: :deck_leader
 
   root "catalog#index"
 end

@@ -72,6 +72,18 @@ class DeckEntriesController < ApplicationController
     end
   end
 
+  # DCK-04 — grava ou substitui o Leader, sem tocar as entradas. Carta que não
+  # é Leader dá 422: é a forma do modelo (`Deck#leader_must_be_a_leader`), não
+  # regra de jogo.
+  def leader
+    unless @card.card_type == "leader"
+      return refuse("#{@card.card_number} não é um Leader; use “+” para somar cópias ao deck.")
+    end
+
+    @deck.update!(leader: @card)
+    respond_with_quantity 0, notice: "#{@card.card_number} é o Leader do deck “#{@deck.name}”."
+  end
+
   private
     def set_deck
       @deck = Current.user.decks.find(params[:deck_id])

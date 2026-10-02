@@ -491,10 +491,10 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Usar um Leader num deck sem Leader grava; usar outro o substitui, sem mudar as entradas
-- [ ] Carta que não é Leader dá 422 sem gravar
-- [ ] Deck de outro usuário dá 404 sem gravar
-- [ ] Gate full passa; contagem registrada
+- [x] Usar um Leader num deck sem Leader grava; usar outro o substitui, sem mudar as entradas
+- [x] Carta que não é Leader dá 422 sem gravar
+- [x] Deck de outro usuário dá 404 sem gravar
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

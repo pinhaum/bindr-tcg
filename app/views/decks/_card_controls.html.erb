@@ -1,6 +1,8 @@
 <%#
-  O controle de deck no detalhe da carta (DCK-03, DCK-05): a quantidade da
-  carta no deck em edição, com `−` e `+`, e o nome do deck com link para ele.
+  O controle de deck no detalhe da carta (DCK-03, DCK-04, DCK-05): para carta
+  comum, a quantidade no deck em edição com `−` e `+`; para Leader, "Usar como
+  Leader" (ou a indicação de que já é o Leader). Nos dois casos, o nome do
+  deck com link para ele. `quantity` só vale para a carta comum.
 
   **O `id` é o contrato com o Turbo Stream**: `DeckEntriesController` usa
   `turbo_stream.update` sobre `dom_id(card, :deck_entry)`. `update` troca só
@@ -18,21 +20,30 @@
     Deck em edição: <%= link_to deck.name, deck_path(deck) %>
   </p>
 
-  <p><%= quantity %> <%= quantity == 1 ? "cópia" : "cópias" %> de <%= card.name %> no deck</p>
-
-  <div>
-    <%#
-      O rótulo acessível cita a carta e o deck: "−" e "+" sozinhos não dizem a
-      quem vão, e o detalhe também tem os botões de posse por variante.
-    %>
-    <%= button_to decrement_deck_card_path(deck, card),
-                  aria: { label: "Remover uma cópia de #{card.name} do deck #{deck.name}" } do %>
-      <span aria-hidden="true">&minus;</span>
+  <% if card.card_type == "leader" %>
+    <% if deck.leader_card_id == card.id %>
+      <p><%= card.name %> é o Leader deste deck</p>
+    <% else %>
+      <%= button_to "Usar como Leader", deck_leader_path(deck), params: { card_id: card.id },
+                    aria: { label: "Usar #{card.name} como Leader do deck #{deck.name}" } %>
     <% end %>
+  <% else %>
+    <p><%= quantity %> <%= quantity == 1 ? "cópia" : "cópias" %> de <%= card.name %> no deck</p>
 
-    <%= button_to increment_deck_card_path(deck, card),
-                  aria: { label: "Adicionar uma cópia de #{card.name} ao deck #{deck.name}" } do %>
-      <span aria-hidden="true">+</span>
-    <% end %>
-  </div>
+    <div>
+      <%#
+        O rótulo acessível cita a carta e o deck: "−" e "+" sozinhos não dizem a
+        quem vão, e o detalhe também tem os botões de posse por variante.
+      %>
+      <%= button_to decrement_deck_card_path(deck, card),
+                    aria: { label: "Remover uma cópia de #{card.name} do deck #{deck.name}" } do %>
+        <span aria-hidden="true">&minus;</span>
+      <% end %>
+
+      <%= button_to increment_deck_card_path(deck, card),
+                    aria: { label: "Adicionar uma cópia de #{card.name} ao deck #{deck.name}" } do %>
+        <span aria-hidden="true">+</span>
+      <% end %>
+    </div>
+  <% end %>
 </div>
