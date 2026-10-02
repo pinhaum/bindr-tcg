@@ -50,6 +50,11 @@ class Deck < ApplicationRecord
     entries.sum(&:quantity)
   end
 
+  # Calculado a cada chamada, nunca gravado (DCK-11).
+  def legality
+    Deck::Legality.call(leader: leader, entries: entries.map { |entry| [ entry.card, entry.quantity ] })
+  end
+
   private
 
   def leader_must_be_a_leader

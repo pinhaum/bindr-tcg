@@ -177,16 +177,16 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Leader com 50 cartas das cores dele, nenhuma acima de 4 cópias → `valid`, sem motivos
-- [ ] Com 49 cartas → `incomplete`, com o motivo de quantas faltam (texto exato fixado no teste a partir dos exemplos do DCK-15); sem Leader → `incomplete`, com o motivo do Leader
-- [ ] Com 51 cartas, com 5 cópias de uma carta ou com carta de cor fora do Leader → `invalid`, cada caso com seu motivo e o `card_number` envolvido
-- [ ] Com 51 cartas e sem Leader → `invalid`, mostrando os dois motivos
-- [ ] Sem Leader, carta de qualquer cor não gera motivo de cor (DCK-42)
-- [ ] A carta multicolorida segue a regra da T1 nos dois sentidos: uma cor fora gera motivo, todas dentro não
-- [ ] Carta com "you may have any number of this card in your deck" no `effect_text` (texto real de OP01-075) aceita 8 cópias sem motivo; a mesma quantidade de uma carta sem a frase gera motivo (DCK-43)
-- [ ] Leader com regra própria (textos reais de OP12-001, OP13-079 e P-117) gera um aviso com a frase da regra, e o status continua `valid` num deck de 50 cartas; Leader sem a frase não gera aviso, nem um "Under the rules of this game" que não fala do deck (texto de OP15-058) (DCK-44)
-- [ ] Nenhum status é gravado: `decks` não tem coluna de status (DCK-11)
-- [ ] Gate quick passa; contagem registrada
+- [x] Leader com 50 cartas das cores dele, nenhuma acima de 4 cópias → `valid`, sem motivos
+- [x] Com 49 cartas → `incomplete`, com o motivo de quantas faltam (texto exato fixado no teste a partir dos exemplos do DCK-15); sem Leader → `incomplete`, com o motivo do Leader
+- [x] Com 51 cartas, com 5 cópias de uma carta ou com carta de cor fora do Leader → `invalid`, cada caso com seu motivo e o `card_number` envolvido
+- [x] Com 51 cartas e sem Leader → `invalid`, mostrando os dois motivos
+- [x] Sem Leader, carta de qualquer cor não gera motivo de cor (DCK-42)
+- [x] A carta multicolorida segue a regra da T1 nos dois sentidos: uma cor fora gera motivo, todas dentro não
+- [x] Carta com "you may have any number of this card in your deck" no `effect_text` (texto real de OP01-075) aceita 8 cópias sem motivo; a mesma quantidade de uma carta sem a frase gera motivo (DCK-43)
+- [x] Leader com regra própria (textos reais de OP12-001, OP13-079 e P-117) gera um aviso com a frase da regra, e o status continua `valid` num deck de 50 cartas; Leader sem a frase não gera aviso, nem um "Under the rules of this game" que não fala do deck (texto de OP15-058) (DCK-44)
+- [x] Nenhum status é gravado: `decks` não tem coluna de status (DCK-11)
+- [x] Gate quick passa; contagem registrada
 
 **Tests**: unit
 **Gate**: quick

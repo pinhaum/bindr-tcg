@@ -41,4 +41,36 @@ class Card < ApplicationRecord
     value = public_send(field)
     value.is_a?(Array) ? value.any? : !value.nil?
   end
+
+  # Comprehensive Rules 5-1-2-4: efeito de carta sobre a montagem substitui a
+  # regra geral. Detectado pela frase do catálogo, e não por uma lista mantida
+  # à mão: carta nova com a mesma frase entra sozinha na próxima ingestão.
+  # A comparação ignora caixa e normaliza espaços porque a fonte é um agregador
+  # comunitário e a quebra de linha do texto não é estável.
+  UNLIMITED_COPIES_PHRASE = "under the rules of this game, you may have any number of this card in your deck"
+
+  # A frase que abre uma regra de montagem, terminada no primeiro ponto final.
+  DECK_RULE_SENTENCE = /under the rules of this game\b.*?\.(?=\s|\z)/i
+  DECK_RULE_MARKERS = [ "cannot include", "can only include" ].freeze
+
+  # DCK-43 — a carta fica isenta do limite de 4 cópias (não do de 50, que é do
+  # banco).
+  def unlimited_copies?
+    normalized_effect_text.downcase.include?(UNLIMITED_COPIES_PHRASE)
+  end
+
+  # DCK-44 — a frase do Leader que restringe o deck, ou `nil`. Só "cannot
+  # include" e "can only include" contam: OP15-058 também abre com "Under the
+  # rules of this game", mas fala do deck de DON!!, que não é montado aqui.
+  def own_deck_rule
+    normalized_effect_text.scan(DECK_RULE_SENTENCE).find do |sentence|
+      DECK_RULE_MARKERS.any? { |marker| sentence.downcase.include?(marker) }
+    end
+  end
+
+  private
+
+  def normalized_effect_text
+    effect_text.to_s.squish
+  end
 end
