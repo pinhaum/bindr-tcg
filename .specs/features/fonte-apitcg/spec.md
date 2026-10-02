@@ -141,6 +141,8 @@ registrado, fora de `failed_count` (SRC-11).
 
 **Independent Test**: três itens (um com candidato único, um ambíguo, um sem candidato), rodar o remapeamento duas vezes e conferir movimentos, quantidades e relatório.
 
+**Decisão do dono sobre o SRC-19 (D-03, 2026-10-01): a regra fica como está.** No remap real, 1 dos 25 itens movidos trocou de classe: EB01-001 `EB01-001_p1` (`parallel` na optcgjson) foi para `tcgplayer:544524` (`alternate_art` na apitcg). É a mesma impressão com outro rótulo, porque a EB01 tem só base e uma arte alternativa nas duas fontes. Para quem só possui essa impressão, o percentual da EB01 sobe um número. Isso segue o SRC-25/28 e vale para qualquer pessoa que registre a carta hoje. Exigir `parallel` com `parallel` teria deixado o item preso numa variante ausente como "sem candidato". Se a dúvida for se `alternate_art` deve contar para set completo, quem decide é a AD-003/SRC-25, não o remap.
+
 ---
 
 ### P1: Progresso por set com denominador derivado ⭐ MVP
