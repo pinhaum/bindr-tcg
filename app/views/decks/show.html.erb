@@ -8,6 +8,13 @@
 <main>
   <h1><%= @deck.name %></h1>
 
+  <%# T12 — o deck em edição é o que recebe as cartas pelo detalhe da carta. %>
+  <% if editing_deck == @deck %>
+    <p>Em edição</p>
+  <% else %>
+    <%= button_to "Editar este deck", select_deck_path(@deck) %>
+  <% end %>
+
   <section aria-labelledby="deck-status-title">
     <h2 id="deck-status-title">Status: <%= deck_status_label(@legality.status) %></h2>
 

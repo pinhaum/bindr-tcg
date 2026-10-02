@@ -9,6 +9,8 @@
 # 404, o mesmo de um id que não existe: a resposta não revela que o deck existe
 # (DCK-36).
 class DecksController < ApplicationController
+  include EditingDeck
+
   # O status vem de `Deck#legality`, calculado sobre as entradas carregadas. O
   # `includes` carrega Leader, entradas e cartas de todos os decks em consultas
   # fixas, sem uma por deck (design.md, Tech Decisions).
@@ -20,11 +22,14 @@ class DecksController < ApplicationController
     @deck = Current.user.decks.new
   end
 
-  # O deck nasce vazio, sem Leader e sem entradas (DCK-01).
+  # O deck nasce vazio, sem Leader e sem entradas (DCK-01), e já em edição:
+  # o fluxo do Independent Test (criar, abrir o detalhe, usar o Leader) não
+  # precisa de um passo a mais (design.md, Tech Decisions).
   def create
     @deck = Current.user.decks.new(deck_params)
 
     if @deck.save
+      start_editing(@deck)
       redirect_to @deck, notice: "Deck criado."
     else
       render :new, status: :unprocessable_entity
@@ -56,6 +61,15 @@ class DecksController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  # Troca o deck em edição. O deck sai de `Current.user.decks`, então o de
+  # outro usuário é 404 e a sessão não muda (DCK-36).
+  def select
+    deck = Current.user.decks.find(params[:id])
+    start_editing(deck)
+
+    redirect_to deck, notice: "Agora as cartas vão para o deck “#{deck.name}”."
   end
 
   # DCK-09 — a confirmação. Só lê: nada é apagado num `GET`.

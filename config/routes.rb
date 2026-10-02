@@ -114,8 +114,14 @@ Rails.application.routes.draw do
   # e não num `turbo_confirm`: o diálogo depende de JS e não tem como ser
   # testado sem navegador (design.md, Risks). O `GET` só mostra; quem apaga é o
   # `DELETE`.
+  #
+  # `select` marca o deck como "em edição" na sessão (T12). É `POST` porque
+  # muda estado: um `GET` trocaria o deck em edição num prefetch.
   resources :decks, only: %i[index new create show edit update destroy] do
-    get :delete, on: :member
+    member do
+      get :delete
+      post :select
+    end
   end
 
   root "catalog#index"

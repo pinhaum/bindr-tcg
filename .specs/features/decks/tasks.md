@@ -434,11 +434,11 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Criar um deck o deixa em edição; `select` troca o deck em edição
-- [ ] `select` de deck de outro usuário dá 404 e não altera a sessão
-- [ ] Depois de excluído o deck em edição, `editing_deck` devolve `nil` e a chave sai da sessão
-- [ ] Um id de deck de outro usuário posto na sessão (simulado no teste) não é aceito
-- [ ] Gate full passa; contagem registrada
+- [x] Criar um deck o deixa em edição; `select` troca o deck em edição
+- [x] `select` de deck de outro usuário dá 404 e não altera a sessão
+- [x] Depois de excluído o deck em edição, `editing_deck` devolve `nil` e a chave sai da sessão
+- [x] Um id de deck de outro usuário posto na sessão (simulado no teste) não é aceito
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full
