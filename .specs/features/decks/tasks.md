@@ -351,14 +351,14 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Com fixture de Leader e entradas dos três tipos, o HTML mostra os grupos na ordem, e dentro de cada um a ordem é custo e depois `card_number`
-- [ ] "N / 50" segue `main_total`, e o status aparece em português (`válido`, `incompleto`, `inválido`)
-- [ ] Status diferente de `válido` mostra cada motivo; `válido` não mostra nenhum
-- [ ] O aviso de banidas aparece sempre
-- [ ] Com Leader de regra própria, aparece "Este Leader tem regra de montagem própria, não verificada" com o texto da regra; com Leader sem regra, não aparece
-- [ ] Carta sem variante presente aparece marcada "fora da fonte" e continua contando no total
-- [ ] O número de consultas da página não cresce com o número de entradas
-- [ ] Gate full passa; contagem registrada
+- [x] Com fixture de Leader e entradas dos três tipos, o HTML mostra os grupos na ordem, e dentro de cada um a ordem é custo e depois `card_number`
+- [x] "N / 50" segue `main_total`, e o status aparece em português (`válido`, `incompleto`, `inválido`)
+- [x] Status diferente de `válido` mostra cada motivo; `válido` não mostra nenhum
+- [x] O aviso de banidas aparece sempre
+- [x] Com Leader de regra própria, aparece "Este Leader tem regra de montagem própria, não verificada" com o texto da regra; com Leader sem regra, não aparece
+- [x] Carta sem variante presente aparece marcada "fora da fonte" e continua contando no total
+- [x] O número de consultas da página não cresce com o número de entradas
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

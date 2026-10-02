@@ -31,11 +31,24 @@ class DecksController < ApplicationController
     end
   end
 
+  # Leader, entradas e cartas vêm pelo `includes`, e "fora da fonte" sai de
+  # uma consulta só: o número de consultas da página não cresce com o número
+  # de entradas.
   def show
-    @deck = Current.user.decks.find(params[:id])
+    @deck = Current.user.decks.includes(:leader, entries: :card).find(params[:id])
+    @legality = @deck.legality
+    @absent_card_ids = absent_card_ids(@deck)
   end
 
   private
+    # DCK-19 — a carta está "fora da fonte" quando nenhuma variante dela está
+    # presente (`CardVariant::PRESENT_SQL`), a mesma regra do catálogo. Ela
+    # continua no deck e contando para as regras: só ganha a marca.
+    def absent_card_ids(deck)
+      ids = [ deck.leader_card_id, *deck.entries.map(&:card_id) ].compact
+      ids.to_set - CardVariant.present.where(card_id: ids).distinct.pluck(:card_id)
+    end
+
     # Só o nome: Leader e entradas mudam pelas próprias rotas, nunca pelo
     # formulário do deck.
     def deck_params

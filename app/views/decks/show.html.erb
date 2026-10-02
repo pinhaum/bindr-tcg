@@ -1,5 +1,82 @@
 <% content_for :title, @deck.name %>
 
+<%#
+  A página do deck (DCK-07, DCK-15, DCK-17, DCK-19, DCK-44). O status vem de
+  `Deck#legality`, calculado agora e nunca gravado (DCK-11). O layout fica
+  para a T20; aqui só a estrutura e o texto.
+%>
 <main>
   <h1><%= @deck.name %></h1>
+
+  <section aria-labelledby="deck-status-title">
+    <h2 id="deck-status-title">Status: <%= deck_status_label(@legality.status) %></h2>
+
+    <%# DCK-15 — motivos só quando o deck não é válido; `válido` não tem o que explicar. %>
+    <% if @legality.status != :valid %>
+      <ul>
+        <% @legality.reasons.each do |reason| %>
+          <li><%= reason %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <%#
+      DCK-44 — a regra própria do Leader é mostrada, não verificada, e não muda
+      o status (decisão do dono em 2026-10-02). O texto vem do catálogo.
+    %>
+    <% @legality.warnings.each do |rule| %>
+      <div>
+        <p><strong>Este Leader tem regra de montagem própria, não verificada</strong></p>
+        <blockquote><p><%= rule %></p></blockquote>
+      </div>
+    <% end %>
+
+    <%# DCK-17 — sempre, porque o app não mantém a lista de banidas. %>
+    <p>A lista de banidas não é verificada</p>
+  </section>
+
+  <section aria-labelledby="deck-leader-title">
+    <h2 id="deck-leader-title">Leader</h2>
+    <% if @deck.leader %>
+      <p>
+        <%= link_to "#{@deck.leader.name} (#{@deck.leader.card_number})", card_path(@deck.leader.card_number) %>
+        <% if @absent_card_ids.include?(@deck.leader_card_id) %>
+          <span>fora da fonte</span>
+        <% end %>
+      </p>
+    <% else %>
+      <p>Sem Leader</p>
+    <% end %>
+  </section>
+
+  <section aria-labelledby="deck-main-title">
+    <%# DCK-07 — o total é só o deck principal; o Leader fica fora dos 50. %>
+    <h2 id="deck-main-title">Deck principal: <%= @deck.main_total %> / <%= Deck::Legality::MAIN_SIZE %></h2>
+
+    <%#
+      `ordered_entries` já vem em Character, Event e Stage, por custo e depois
+      `card_number`; `chunk_while` só corta onde o tipo muda, sem reordenar.
+    %>
+    <% @deck.ordered_entries.chunk_while { |a, b| a.card.card_type == b.card.card_type }.each do |group| %>
+      <section>
+        <h3><%= group.first.card.card_type.humanize %></h3>
+        <ul>
+          <% group.each do |entry| %>
+            <li>
+              <span><%= entry.quantity %>×</span>
+              <%= link_to "#{entry.card.name} (#{entry.card.card_number})", card_path(entry.card.card_number) %>
+              <% if entry.card.cost %>
+                <span>custo <%= entry.card.cost %></span>
+              <% end %>
+              <% if @absent_card_ids.include?(entry.card_id) %>
+                <span>fora da fonte</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  </section>
+
+  <p><%= link_to "Voltar aos baralhos", decks_path %></p>
 </main>
