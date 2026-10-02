@@ -74,7 +74,10 @@ A T22 (correções da revisão de banco do Lote A) entrou depois do lote e roda 
 T8 → T9 → T10
 T8 → T11
 T8 → T12 → T13 → T14 → T15
+T15 → T23 → T24
 ```
+
+T23 e T24 (correções das revisões de segurança, banco e a11y do Lote B) entraram depois do lote e rodam antes da T16.
 
 ### Phase 3: Lista em texto, pasta e fechamento
 
@@ -529,11 +532,69 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 ---
 
+### T23: Robustez do deck sob corrida e entrada malformada
+
+**What**: Fechar os achados das revisões do Lote B: (DB-H1) o teste de corrida força a sobreposição — uma terceira conexão segura a linha com `SELECT ... FOR UPDATE` numa transação aberta, os dois POSTs são disparados, o teste espera ambos bloqueados em `pg_stat_activity` (`wait_event_type = 'Lock'`) e só então libera — e ganha os casos 49 + 49 → 50 com um recusado e incremento ∥ decremento a partir de 1; (DB-M2) `ActiveRecord::InvalidForeignKey` no `DeckEntriesController` vira 404, não 500 (deck excluído em corrida); (DB-M3) as três leituras do `DecksController#show` rodam numa transação `REPEATABLE READ`, sem `KeyError` com um decremento concorrente; (SEC-L1) `card_id` não escalar (`card_id[]=`) dá 404 em vez de 500; (DB-L6) binds de id como `BigInteger` aqui e em `collection_items_controller.rb`; (DB-L7) teste de corrida com nomes únicos por execução e teardown tolerante a setup parcial; (DB-L4) a janela do decremento em duas etapas fica anotada no cabeçalho do controller.
+**Where**: `app/controllers/deck_entries_controller.rb`, `app/controllers/decks_controller.rb`, `app/controllers/collection_items_controller.rb`, `test/integration/deck_entries_concurrency_test.rb`
+**Depends on**: T15
+**Reuses**: `pg_stat_activity`, `Deck.transaction(isolation: :repeatable_read)`
+**Requirement**: DCK-36, DCK-38, DCK-39
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Com o incremento trocado por leitura em Ruby + `update!` (mutação numa cópia, descartada), o teste de corrida falha em toda execução, não às vezes
+- [ ] Dois incrementos simultâneos a partir de 49 terminam em 50, e exatamente um recebe a recusa
+- [ ] Incremento contra deck apagado depois do `find` responde 404 sem 500 (teste que apaga o deck entre o `find` e o SQL)
+- [ ] A página do deck não levanta erro quando a entrada some entre as leituras (teste que provoca a corrida ou que prova a transação `REPEATABLE READ`)
+- [ ] `card_id[]=1&card_id[]=2` em `leader`, `increment` e `decrement` dá 404
+- [ ] Os testes existentes de coleção passam sem edição
+- [ ] Gate full passa 3 vezes seguidas; contagem registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(decks): resistir a corrida e a parâmetro malformado no deck`
+
+---
+
+### T24: Acessibilidade das telas de deck
+
+**What**: Fechar os achados de `ecc:a11y-architect` no markup: (H2) "Usar como Leader" não tira o foco do DOM — o botão continua após a troca, com `aria-disabled="true"` e o texto "é o Leader deste deck", no padrão do controle de posse; (M3) o erro do nome fica associado ao campo (`aria-invalid`, `aria-describedby="deck-name-error"`) e ganha ajuda "até 60 caracteres"; (M4) a região viva do `_card_controls` envolve só a frase da quantidade ("N cópias de <carta> no deck"), e o sucesso é anunciado por um canal só; (M5) o controle do detalhe fica numa `section` com `h2` "Deck em edição"; (L8) "carta fora da fonte"; (L10) tipos em português no agrupamento: "Personagens", "Eventos", "Locais".
+**Where**: `app/views/decks/_card_controls.html.erb`, `app/views/decks/_name_form.html.erb`, `app/views/decks/show.html.erb`, `app/controllers/deck_entries_controller.rb`
+**Depends on**: T23
+**Reuses**: `app/views/collection_items/_ownership.html.erb` (`aria-disabled`, região viva)
+**Requirement**: DCK-03, DCK-04, DCK-05, DCK-07, DCK-19, DCK-39
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] A resposta Turbo Stream de `leader` contém o botão com `aria-disabled="true"`, sem remover o elemento focável
+- [ ] Com nome inválido, o campo tem `aria-invalid="true"` e `aria-describedby` apontando para o id da mensagem; sem erro, nenhum dos dois
+- [ ] Exatamente uma região viva anuncia a quantidade nova, e ela não contém botões nem links
+- [ ] O detalhe com deck em edição tem `section` com `aria-labelledby` para um `h2` "Deck em edição"
+- [ ] A página do deck agrupa em "Personagens", "Eventos" e "Locais", e a marca diz "carta fora da fonte"
+- [ ] Testes ajustados só onde o texto do critério mudou, cada um listado no corpo do commit
+- [ ] Gate full passa; contagem registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(decks): ajustar foco, anúncios e rótulos das telas de deck`
+
+---
+
 ### T16: Exportar o deck
 
 **What**: `GET /decks/:id.txt` responde `text/plain; charset=utf-8` com `Deck::ListText.format`, e a página do deck ganha o link "Exportar lista".
 **Where**: `app/controllers/decks_controller.rb`
-**Depends on**: None (a Phase 2 inteira fecha antes)
+**Depends on**: None (a Phase 2 inteira, com T23 e T24, fecha antes)
 **Reuses**: `Deck::ListText.format` (T7)
 **Requirement**: DCK-31, DCK-36
 
@@ -651,6 +712,7 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
+- [ ] Botões `−`, `+`, "Usar como Leader", "Editar este deck", "Excluir deck" e o submit do nome têm `min-height` e `min-width` de 44px, como `.ownership__button`, e os links de ação da página do deck ficam separados por ao menos 24px (achado H1 da revisão de a11y)
 - [ ] O teste de design prova que as classes novas existem no CSS (`class_coverage_test.rb`) e que nenhuma regra delas impede a quebra de linha a 360px
 - [ ] Capturas da lista, do deck, da importação, do detalhe com o controle e da pasta com o bloco, em 390px e 1280px, anexadas à task (fora do git)
 - [ ] Gate build passa; contagem registrada
