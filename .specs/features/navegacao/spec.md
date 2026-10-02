@@ -4,7 +4,11 @@
 com NAV-30..NAV-39 (Req. 13.9–13.14), depois da reprovação visual na T11,
 aprovada pelo dono na mesma data. Emendada de novo em 2026-09-26 com
 NAV-40..NAV-51 (Req. 13.15–13.20), depois da primeira revisão com as telas
-renderizadas (AD-015), aprovada pelo dono em 2026-09-26.
+renderizadas (AD-015), aprovada pelo dono em 2026-09-26. Emendada em
+2026-10-02 em NAV-02 e NAV-07 (Req. 13.1 e 13.8), pela feature `decks`
+(Req. 14): "Baralhos" entra na navegação com sessão, entre "Minha pasta" e
+"Sair", porque o deck passou a existir. Aprovada pelo dono no design e nas
+tasks da `decks`.
 
 ## Problem Statement
 
@@ -97,12 +101,12 @@ de sucesso do `product.md` §7 ("quanto falta do set X?" em até três toques).
 **Acceptance Criteria**:
 
 1. The system SHALL renderizar em toda página um único elemento `nav` de navegação principal com a entrada "Catálogo" apontando para o catálogo. O layout é único (`application.html.erb`), por isso a prova em duas páginas vale para todas. <!-- NAV-01 -->
-2. WHILE houver sessão, the system SHALL exibir na navegação principal as entradas "Minha pasta", apontando para `/progress`, e "Sair", que encerra a sessão. <!-- NAV-02 -->
-3. WHILE não houver sessão, the system SHALL exibir "Entrar" e "Criar conta" no lugar de "Minha pasta" e "Sair". <!-- NAV-03 -->
+2. WHILE houver sessão, the system SHALL exibir na navegação principal, nesta ordem, as entradas "Minha pasta", apontando para `/progress`, "Baralhos", apontando para `/decks`, e "Sair", que encerra a sessão. *(Emenda de 2026-10-02, feature `decks`: entrou "Baralhos".)* <!-- NAV-02 -->
+3. WHILE não houver sessão, the system SHALL exibir "Entrar" e "Criar conta" no lugar de "Minha pasta", "Baralhos" e "Sair". <!-- NAV-03 -->
 4. WHEN uma página da navegação estiver aberta THEN the system SHALL marcar a entrada correspondente com `aria-current="page"` e com peso de fonte distinto das demais. Isso vale para todas as entradas, inclusive "Entrar" e "Criar conta". Página sem entrada própria, como o detalhe da carta, não marca nenhuma. <!-- NAV-04 -->
 5. WHILE a largura da viewport for menor que 1024px, the system SHALL fixar a navegação principal na borda inferior, com cada entrada de altura mínima de 44px, e reservar no fim do conteúdo espaço igual à altura da barra. <!-- NAV-05 -->
 6. WHILE a largura da viewport for de 1024px ou mais, the system SHALL posicionar a navegação principal numa coluna lateral à esquerda do conteúdo. <!-- NAV-06 -->
-7. The system SHALL não exibir na navegação entrada para baralho, preço ou cotação. <!-- NAV-07 -->
+7. The system SHALL não exibir na navegação entrada para preço ou cotação. *(Emenda de 2026-10-02, feature `decks`: baralho saiu desta lista porque passou a existir e entra pelo NAV-02.)* <!-- NAV-07 -->
 
 **Independent Test**: Abrir o catálogo logado e anônimo; o HTML traz uma única
 `nav` principal com as entradas de cada caso e `aria-current="page"` em

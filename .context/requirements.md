@@ -398,8 +398,10 @@ critério de aceite de cada tela (AD-016, critério 21).
 ### Critérios de aceitação
 
 1. O sistema DEVE exibir em toda página uma navegação principal com as entradas
-   "Catálogo" e, para quem tem sessão, "Minha pasta" e "Sair"; para anônimo,
-   "Entrar" e "Criar conta" no lugar das duas últimas.
+   "Catálogo" e, para quem tem sessão, "Minha pasta", "Baralhos" e "Sair", nesta
+   ordem; para anônimo, "Entrar" e "Criar conta" no lugar das três últimas.
+   *Emendado em 2026-10-02 pela feature `decks` (Req. 14): "Baralhos" entra
+   quando o deck passa a existir.*
 2. A entrada da página atual DEVE ser marcada com `aria-current="page"` e
    distinguida por mais do que a cor.
 3. Em viewport estreita a navegação DEVE ficar fixa na borda inferior, com alvos
@@ -415,7 +417,8 @@ critério de aceite de cada tela (AD-016, critério 21).
 7. As verificações de 360px do Req. 2.5 e os critérios do Req. 12 DEVEM continuar
    passando.
 8. A navegação NÃO DEVE exibir entrada para funcionalidade que não existe
-   (baralho, preços).
+   (preços). *Emendado em 2026-10-02 pela feature `decks` (Req. 14): baralho
+   saiu da lista porque passou a existir, e entra pelo critério 1.*
 
 Os critérios 9 a 14 foram acrescentados em 2026-09-24, depois que o dono do
 produto reprovou a revisão visual da `navegacao`. A implementação cumpria os
