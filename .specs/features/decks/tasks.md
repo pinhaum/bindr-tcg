@@ -63,7 +63,10 @@ T1 → T4
 T2 → T3 → T4
 T3 → T5
 T3 → T6 → T7
+T5 → T22
 ```
+
+A T22 (correções da revisão de banco do Lote A) entrou depois do lote e roda antes da T8.
 
 ### Phase 2: Telas do deck e montagem pelo detalhe
 
@@ -276,6 +279,32 @@ T16 → T17 → T18 → T19 → T20 → T21
 **Tests**: unit
 **Gate**: quick
 **Commit**: `feat(decks): exportar o deck no formato do OPTCG Simulator`
+
+---
+
+### T22: Correções da revisão de banco do Lote A
+
+**What**: Fechar os achados de `ecc:database-reviewer` sobre T2 e T5: (M1) provar o filtro de usuário e de deck no ramo Leader da `DeckShortfallQuery`; (M2) provar os índices `decks(user_id)`, `decks(leader_card_id)`, `deck_entries(card_id)` e o único `(deck_id, card_id)`; (L3) registrar no cabeçalho da query a invariante "Leader nunca é entrada do mesmo deck", garantida por `DeckEntry`; (L4) afirmar `required = 1` e os dois `deck_ids` no teste do Leader em dois decks; (L5) comentário de nome `-- listDeckShortfall` na primeira linha do SQL (convenção do projeto); (L6) asserções de FK com o nome da constraint ou coluna.
+**Where**: `test/queries/deck_shortfall_query_test.rb`, `test/models/deck_schema_test.rb`, `app/queries/deck_shortfall_query.rb`
+**Depends on**: T5
+**Reuses**: `pg_indexes` / `connection.index_exists?`
+**Requirement**: DCK-02, DCK-21, DCK-33, DCK-36
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Remover `AND decks.user_id = :user_id` ou o filtro de deck do ramo Leader faz um teste falhar (verificado aplicando a mutação numa cópia e descartando)
+- [ ] Remover qualquer um dos quatro índices da migração faz um teste falhar
+- [ ] L3–L6 aplicados; `deck_shortfall_query.rb` muda só em comentário
+- [ ] Gate quick passa; contagem registrada, sem queda
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `test(decks): cobrir o ramo Leader da falta e os índices do deck`
 
 ---
 
