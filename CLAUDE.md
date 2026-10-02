@@ -33,7 +33,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Sete migrações**, de `20260919120000` a `20260919120600`. `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **108 arquivos de teste, 1540 testes**, rubocop e brakeman limpos.
+- **109 arquivos de teste, 1549 testes**, rubocop e brakeman limpos.
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque

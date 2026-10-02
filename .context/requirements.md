@@ -512,7 +512,7 @@ critério. A partir daqui o artboard é critério de aceite (AD-016).
 31. O cabeçalho do detalhe DEVE exibir, como chips, o tipo, a raridade e a cor
     da carta (e o counter, em viewport larga), e uma linha "nome do set ·
     código". Raridade e set são da variante: o cabeçalho usa os da primeira
-    variante listada, a mesma da imagem. Os demais campos do Req. 5.1 continuam
+    variante em destaque, a mesma da imagem (critério 40). Os demais campos do Req. 5.1 continuam
     visíveis, em forma compacta, respeitando o Req. 5.5.
 32. O texto de trigger (Req. 5.4) DEVE aparecer dentro da seção de efeito.
 33. A seção de variantes DEVE se chamar "Variantes na pasta". Cada linha DEVE
@@ -539,6 +539,18 @@ critério. A partir daqui o artboard é critério de aceite (AD-016).
     larga.
 39. Em viewport larga, os cartões de indicador DEVEM ter a largura do artboard,
     um quarto da coluna de conteúdo cada, sem esticar.
+
+O critério 40 foi acrescentado em 2026-10-01, a pedido do dono: a imagem
+principal mostrava sempre a primeira variante, e a arte alternativa só aparecia
+na miniatura pequena da lista.
+
+40. QUANDO o usuário escolher uma variante na seção "Variantes na pasta" ENTÃO a
+    imagem principal, o selo de quantidade, a legenda de ilustração e a
+    raridade e o set do cabeçalho DEVEM passar a ser os dessa variante, sem
+    JavaScript. A escolha DEVE ficar na URL (`?variant=<variant_code>`), e a
+    variante em destaque DEVE estar marcada na lista. Sem escolha, ou com um
+    `variant` que não está entre as variantes listadas, vale a primeira
+    variante presente — parâmetro inválido é ignorado, nunca causa erro.
 
 ---
 

@@ -211,3 +211,23 @@ Nenhum. Sem lacuna de critério e sem mutante sobrevivente.
 2. T12: aprovação das capturas pelo dono adiada por decisão dele (`tasks.md:712`).
 
 **Next steps**: o dono decide a medida de CNF-17 e aprova as capturas; depois marcar `tasks.md:712`.
+
+## Verificação da T25 (CNF-42, 2026-10-01)
+
+**Veredito: PASS ✅** — Verifier independente (Sonnet, autor ≠ verificador), 2 ciclos. Escopo: só a T25 (escolha da variante em destaque, Req. 13.40); o veredito acima, dos CNF-01..41, não muda.
+
+- **Ciclo 1 = FAIL.** Comportamento correto e 7 de 9 mutantes mortos. Sobreviveram M1 (padrão em `@variants.first`, que ignora a regra de primeira *presente* do SRC-17) e M8 (`?variant=` aceito entre todas as variantes da carta, revelando uma ausente). Faltavam teste com uma ausente ordenada antes da presente e teste de `?variant=` de uma ausente sem item.
+- **Ciclo 2 = PASS.** Quatro testes novos em `test/integration/card_detail_variant_choice_test.rb:96-174`; nenhuma mudança de produção. 7 de 7 mutantes mortos: M1 (`:130`), M8 (`:170`), rótulo "fora da fonte" sempre visível (`:131`) e nunca exibido (`:143`, `:155`), `held_variant_ids` ignorado (`:170`), nenhuma ausente listada (`:129`, `:141`, `:154`), padrão na última presente (`:52`, `:82`, `:91`).
+
+| Cláusula do CNF-42 | Evidência |
+|---|---|
+| Imagem principal (miniatura e `<details>`) | `card_detail_variant_choice_test.rb:36-38` |
+| Selo de quantidade | `card_detail_variant_choice_test.rb:91-95` |
+| Legenda, raridade e set do cabeçalho | `card_detail_variant_choice_test.rb:39-41`, `:59-60` |
+| `?variant=` na URL e `aria-current` | `card_detail_variant_choice_test.rb:42-45` |
+| Sem JavaScript (prova estrutural, aceita) | `card_detail_variant_choice_test.rb:65-74` |
+| Inválido cai no padrão, 200 | `card_detail_variant_choice_test.rb:77-84` |
+| Padrão = primeira presente (SRC-17) | `card_detail_variant_choice_test.rb:121-132`, `:134-144` |
+| Só entre as listadas, sem revelar ausente | `card_detail_variant_choice_test.rb:160-175` |
+
+Ausente só na wishlist já tem cobertura em `card_detail_absent_variant_test.rb:88`. Integridade do sensor: hash do diff de `catalog_controller.rb` e `show.html.erb` idêntico antes e depois e `git status --porcelain` inalterado; sem `git stash` e sem commit.

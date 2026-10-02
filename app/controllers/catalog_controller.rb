@@ -56,11 +56,24 @@ class CatalogController < ApplicationController
                      .sort_by { |variant| variant.variant_code }
     raise ActiveRecord::RecordNotFound if @variants.empty? && @card.card_variants.any?
 
+    @hero = hero_variant
     @owned_quantities = owned_quantities(@variants)
     @wishlist_targets = wishlist_targets(@variants)
   end
 
   private
+    # CNF-42 — a variante em destaque vem de `?variant=`, mas só entre as que
+    # a página já lista: um código de outra carta, de variante ausente que o
+    # usuário não tem, ou lixo cai no padrão em vez de dar erro. O padrão é a
+    # primeira variante presente; a ausente só sobe quando é tudo o que o dono
+    # tem (SRC-17).
+    def hero_variant
+      requested = params[:variant].to_s
+      @variants.find { |variant| variant.variant_code == requested } ||
+        @variants.find { |variant| !@absent_variant_ids.include?(variant.id) } ||
+        @variants.first
+    end
+
     # Um hash `card_variant_id => quantity` para as variantes desta página, em
     # **uma** consulta. A grade soma este hash por carta para o selo (CNF-02);
     # o detalhe usa o mesmo hash para o controle por variante (Req. 5.3 /

@@ -141,6 +141,17 @@ T20 → T24
 T23 ∥ T24
 ```
 
+### Phase 9: Escolha da variante em destaque (pedido do dono, 2026-10-01)
+
+O dono pediu que a arte de cada variante pudesse ocupar a imagem principal
+do detalhe (Req. 13.40, CNF-42). A T25 edita `catalog_controller.rb`,
+`show.html.erb` e `catalog.css`, que a T24 não toca; depende dela só para
+manter a ordem do plano.
+
+```
+T24 → T25
+```
+
 ---
 
 ## Task Breakdown
@@ -926,6 +937,38 @@ Revisão de a11y, achado 5 (`show.html.erb:33` e `:84`): com o `<details>` abert
 **Tests**: unit (folha)
 **Gate**: full
 **Commit**: `test(conformidade): afirmar posição do selo no canto superior direito`
+
+---
+
+### T25: Escolha da variante em destaque no detalhe (CNF-42)
+
+**What**: A miniatura de cada linha de "Variantes na pasta" vira link para `?variant=<variant_code>` (com `data-turbo-action="replace"` e `aria-current` na escolhida); `CatalogController#show` resolve `@hero` só entre as variantes listadas, com a primeira presente como padrão (SRC-17), e a view usa `@hero` na imagem, no selo, na legenda e no cabeçalho.
+**Where**: `app/controllers/catalog_controller.rb`, `app/views/catalog/show.html.erb`, `app/assets/stylesheets/catalog.css`, `test/integration/card_detail_variant_choice_test.rb`
+**Depends on**: T24
+**Reuses**: a regra do topo do SRC-17 (agora em `hero_variant`); `card_path` e `card_image_path`
+**Requirement**: CNF-42
+
+Pedido do dono em 2026-10-01: a imagem principal mostrava sempre a primeira variante, e a arte alternativa só aparecia na miniatura pequena da lista. Req. 13.40 e 13.31 emendados em `.context/requirements.md`; CNF-14, CNF-16 e CNF-17 passam a falar da variante em destaque.
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Sem `?variant=`, a primeira variante presente fica em destaque e marcada na lista
+- [x] Com `?variant=` de uma variante listada, imagem, selo, legenda, raridade e set passam a ser os dela
+- [x] `variant` desconhecido, de outra carta, vazio, com path traversal ou em array cai no padrão, com 200
+- [x] Nenhum `<script>` novo na página
+- [x] Com uma ausente ordenada antes da presente, sem escolha, a presente fica em destaque (SRC-17); só com a ausente que o usuário tem, ela fica em destaque com "Variante fora da fonte"
+- [x] `?variant=` de ausente sem item, com e sem sessão, cai no padrão e não revela a imagem dela; com item, a põe em destaque
+- [x] Mutantes mortos: "ignorar `?variant=`", fallback para a primeira listada (M1) e escolha entre todas as variantes da carta (M8) — os dois últimos sobreviveram ao ciclo 1 do Verifier
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `feat(conformidade): escolher a variante em destaque no detalhe`
 
 ---
 

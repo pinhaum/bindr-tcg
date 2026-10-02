@@ -137,10 +137,10 @@ canvas, para registrar as cópias de cada impressão com o polegar.
 
 **Acceptance Criteria**:
 
-1. WHILE a largura da viewport for menor que 1024px, the system SHALL exibir uma miniatura da primeira variante listada ao lado do título, e a imagem maior do Req. 5.1 dentro de um `<details>` que expande no lugar, sem JavaScript. <!-- CNF-14 -->
+1. WHILE a largura da viewport for menor que 1024px, the system SHALL exibir uma miniatura da variante em destaque (CNF-42) ao lado do título, e a imagem maior do Req. 5.1 dentro de um `<details>` que expande no lugar, sem JavaScript. <!-- CNF-14 -->
 2. WHILE a largura da viewport for de 1024px ou mais, the system SHALL exibir a imagem maior numa coluna própria de 320px à esquerda dos dados, sempre visível, com o placeholder do Req. 2.3 na mesma medida. <!-- CNF-15 -->
-3. WHILE o usuário tiver sessão e possuir a primeira variante listada, the system SHALL exibir sobre a imagem principal o selo com a quantidade dessa variante; WHEN a variante tiver ilustrador THEN the system SHALL exibir abaixo da imagem a legenda "Ilustração: {nome}". <!-- CNF-16 -->
-4. The system SHALL exibir no cabeçalho, como chips, o tipo, a raridade da primeira variante listada e cada cor da carta, mais o counter quando existir e a viewport for de 1024px ou mais, e abaixo do título a linha "{nome do set} · {código}" da primeira variante; os demais campos do Req. 5.1 (custo, power, life, attribute, traits, block) SHALL aparecer em forma compacta, respeitando o Req. 5.5. <!-- CNF-17 -->
+3. WHILE o usuário tiver sessão e possuir a variante em destaque (CNF-42), the system SHALL exibir sobre a imagem principal o selo com a quantidade dessa variante; WHEN a variante tiver ilustrador THEN the system SHALL exibir abaixo da imagem a legenda "Ilustração: {nome}". <!-- CNF-16 -->
+4. The system SHALL exibir no cabeçalho, como chips, o tipo, a raridade da variante em destaque (CNF-42) e cada cor da carta, mais o counter quando existir e a viewport for de 1024px ou mais, e abaixo do título a linha "{nome do set} · {código}" da mesma variante; os demais campos do Req. 5.1 (custo, power, life, attribute, traits, block) SHALL aparecer em forma compacta, respeitando o Req. 5.5. <!-- CNF-17 -->
 5. WHEN a carta tiver texto de trigger THEN the system SHALL exibi-lo dentro da seção "Efeito", depois do efeito, com o rótulo "Trigger" em peso 600, preservando quebras de linha (Req. 5.4). <!-- CNF-18 -->
 6. The system SHALL intitular a lista de variantes "Variantes na pasta" e separá-la da seção de efeito por um divisor de 1px `--border`. <!-- CNF-19 -->
 7. The system SHALL exibir em cada linha de variante o código, "{raridade} · {tipo de arte}", o set, e uma miniatura própria menor que a imagem principal, com os rótulos "Código", "Raridade" e "Set" presentes no HTML e fora da vista. <!-- CNF-20 -->
@@ -148,6 +148,7 @@ canvas, para registrar as cópias de cada impressão com o polegar.
 9. WHEN o usuário acionar `+` ou `−` no detalhe THEN the system SHALL atualizar a quantidade exibida da variante sem recarregar a página (Req. 7.5, Turbo Stream). <!-- CNF-22 -->
 10. The system SHALL exibir "Voltar ao catálogo" como botão bordado de altura mínima de 44px, sem seta; WHILE a largura da viewport for de 1024px ou mais, SHALL posicioná-lo na coluna lateral, abaixo da navegação e de um divisor de 1px. <!-- CNF-23 -->
 11. WHILE a largura da viewport for de 1024px ou mais, the system SHALL exibir a marca "Bindr" com a tipografia `display` do design system (28/32, peso 700). <!-- CNF-24 -->
+12. WHEN o usuário escolher uma variante em "Variantes na pasta" THEN the system SHALL exibir essa variante na imagem principal, no selo de quantidade, na legenda de ilustração e na raridade e no set do cabeçalho, sem JavaScript, com a escolha na URL (`?variant=<variant_code>`) e a variante em destaque marcada na lista com `aria-current`; IF não houver escolha, ou `variant` não estiver entre as variantes listadas, THEN the system SHALL usar a primeira variante presente e responder 200 (Req. 13.40). <!-- CNF-42 -->
 
 **Independent Test**: `get card_path(card.card_number)` com uma carta de três
 variantes (uma com ilustrador, uma possuída) com e sem sessão; asserções sobre a
@@ -254,6 +255,7 @@ feature, com a imagem da comparação de cada tela.
 | CNF-39 | Edge case | Req. 13.31 | T7 | Implemented |
 | CNF-40 | Edge case | Req. 13.29, `rarity` como texto | T2 | Implemented |
 | CNF-41 | P1: Catálogo | Req. 13.26, 3.6 (decisão T17) | T17, T21 | Implemented |
+| CNF-42 | P1: Detalhe | Req. 13.40 (pedido do dono, 2026-10-01) | T25 | Implemented |
 
 **Coverage:** 41 total, 41 mapped to tasks (T1–T22); T13–T17 são as correções da conferência com o canvas de 2026-09-28; T18–T22 são as correções do ciclo 1.
 

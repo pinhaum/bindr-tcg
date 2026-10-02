@@ -6,8 +6,8 @@
 <main class="card-detail">
 
   <% if @variants.any? %>
-    <%# SRC-17 — o topo descreve uma variante presente; a ausente só sobe para cá quando é tudo o que o dono tem. %>
-    <% hero = @variants.find { |variant| !@absent_variant_ids.include?(variant.id) } || @variants.first %>
+    <%# CNF-42 / SRC-17 — `@hero` é a variante escolhida em `?variant=` ou, sem escolha válida, a primeira presente. %>
+    <% hero = @hero %>
     <% hero_quantity = owned_quantity(hero) %>
 
     <%#
@@ -207,12 +207,24 @@
       %>
       <% art_kind_labels = { "base" => "arte base", "parallel" => "parallel" } %>
       <% @variants.each do |variant| %>
-        <li class="variant">
-          <div class="variant__art">
-            <div class="variant__placeholder" aria-hidden="true">
+        <%#
+          CNF-42 — a miniatura é um link para a própria página com
+          `?variant=`: a troca da imagem principal sai do servidor, sem
+          JavaScript, e a URL compartilhada abre na mesma variante.
+          `replace` para que trocar de variante não encha o histórico — o
+          "voltar" do navegador continua levando ao catálogo.
+        %>
+        <% current = variant == hero %>
+        <li class="variant<%= " variant--current" if current %>">
+          <%= link_to card_path(@card.card_number, variant: variant.variant_code),
+                      class: "variant__art",
+                      aria: { label: "Mostrar #{variant.variant_code} na imagem principal",
+                              current: (current ? "true" : nil) },
+                      data: { turbo_action: "replace" } do %>
+            <span class="variant__placeholder" aria-hidden="true">
               <span><%= @card.name %></span>
               <span><code class="code"><%= variant.variant_code %></code></span>
-            </div>
+            </span>
 
             <% if variant.image_url.present? %>
               <%= image_tag card_image_path(variant.variant_code),
@@ -220,7 +232,7 @@
                             loading: "lazy",
                             class: "variant__image" %>
             <% end %>
-          </div>
+          <% end %>
 
           <%#
             CNF-20 — rótulos "Código", "Raridade" e "Set" no HTML e fora da

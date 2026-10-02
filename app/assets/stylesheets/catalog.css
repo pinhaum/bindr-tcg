@@ -581,6 +581,7 @@ body {
 .variant > .wishlist-mark { flex-basis: 100%; }
 
 .variant__art {
+  display: block;
   position: relative;
   width: 80px;
   height: 112px;
@@ -601,6 +602,12 @@ body {
 }
 
 .variant__image { object-fit: cover; }
+
+/*
+ * CNF-42 — a variante em destaque ganha um contorno grosso, que é forma e não
+ * só cor; para leitor de tela, quem marca é o `aria-current` do link.
+ */
+.variant--current .variant__art { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 .variant__placeholder {
   display: flex;
