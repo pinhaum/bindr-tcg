@@ -38,6 +38,9 @@ class DecksController < ApplicationController
     @deck = Current.user.decks.includes(:leader, entries: :card).find(params[:id])
     @legality = @deck.legality
     @absent_card_ids = absent_card_ids(@deck)
+    # DCK-21..23 — pedida, possuída e falta, derivadas da coleção atual numa
+    # consulta, sem nada gravado.
+    @shortfall = DeckShortfallQuery.new(Current.user, deck: @deck).call.index_by { |row| row.card.id }
   end
 
   private

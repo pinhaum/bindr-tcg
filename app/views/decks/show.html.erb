@@ -35,6 +35,20 @@
     <p>A lista de banidas não é verificada</p>
   </section>
 
+  <%#
+    DCK-22 — o total do que falta soma o Leader e todas as entradas. Zero vira
+    a frase do spec, sem número.
+  %>
+  <section aria-labelledby="deck-shortfall-title">
+    <h2 id="deck-shortfall-title">Na sua pasta</h2>
+    <% missing_total = @shortfall.values.sum(&:missing) %>
+    <% if missing_total.zero? %>
+      <p>Você tem todas as cartas deste deck</p>
+    <% else %>
+      <p><%= missing_total == 1 ? "Falta 1 cópia para montar este deck" : "Faltam #{missing_total} cópias para montar este deck" %></p>
+    <% end %>
+  </section>
+
   <section aria-labelledby="deck-leader-title">
     <h2 id="deck-leader-title">Leader</h2>
     <% if @deck.leader %>
@@ -43,6 +57,7 @@
         <% if @absent_card_ids.include?(@deck.leader_card_id) %>
           <span>fora da fonte</span>
         <% end %>
+        <%= render "decks/shortfall_counts", row: @shortfall.fetch(@deck.leader_card_id) %>
       </p>
     <% else %>
       <p>Sem Leader</p>
@@ -71,6 +86,7 @@
               <% if @absent_card_ids.include?(entry.card_id) %>
                 <span>fora da fonte</span>
               <% end %>
+              <%= render "decks/shortfall_counts", row: @shortfall.fetch(entry.card_id) %>
             </li>
           <% end %>
         </ul>

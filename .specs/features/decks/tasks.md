@@ -381,10 +381,10 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] O cenário do Independent Test (2 base + 1 parallel, deck pedindo 4) mostra "pedida 4, possuída 3, falta 1"
-- [ ] O total soma o que falta de todas as cartas, Leader incluído; com total zero, a página mostra "Você tem todas as cartas deste deck"
-- [ ] Incrementar a coleção entre duas leituras muda o que falta na segunda
-- [ ] Gate full passa; contagem registrada
+- [x] O cenário do Independent Test (2 base + 1 parallel, deck pedindo 4) mostra "pedida 4, possuída 3, falta 1"
+- [x] O total soma o que falta de todas as cartas, Leader incluído; com total zero, a página mostra "Você tem todas as cartas deste deck"
+- [x] Incrementar a coleção entre duas leituras muda o que falta na segunda
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full
