@@ -1,0 +1,16 @@
+<% content_for :title, "Excluir deck" %>
+
+<%#
+  DCK-09 — a confirmação em página própria, como a do import da coleção
+  (`collection_imports/show.html.erb`): sem JS, testável por integração, e
+  nada é apagado só por abrir esta página.
+%>
+<main>
+  <h1>Excluir o deck “<%= @deck.name %>”?</h1>
+
+  <p>O deck e as cartas dele somem. Sua coleção e sua wishlist não mudam.</p>
+
+  <%= button_to "Excluir deck", deck_path(@deck), method: :delete %>
+
+  <p><%= link_to "Cancelar", deck_path(@deck) %></p>
+</main>

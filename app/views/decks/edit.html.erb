@@ -1,0 +1,9 @@
+<% content_for :title, "Renomear deck" %>
+
+<main>
+  <h1>Renomear deck</h1>
+
+  <%= render "decks/name_form", deck: @deck, submit: "Salvar nome" %>
+
+  <p><%= link_to "Voltar ao deck", deck_path(@deck) %></p>
+</main>

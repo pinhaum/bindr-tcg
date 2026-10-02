@@ -407,11 +407,11 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Renomear grava o nome novo e mantém Leader e entradas; nome inválido dá 422 sem gravar
-- [ ] `GET /decks/:id/delete` mostra a confirmação sem apagar nada; `DELETE` apaga o deck e as entradas dele
-- [ ] Excluir não muda nenhum `collection_item` nem `wishlist_item` (`assert_no_changes` sobre os dois)
-- [ ] Renomear ou excluir deck de outro usuário dá 404 sem alterar nada
-- [ ] Gate full passa; contagem registrada
+- [x] Renomear grava o nome novo e mantém Leader e entradas; nome inválido dá 422 sem gravar
+- [x] `GET /decks/:id/delete` mostra a confirmação sem apagar nada; `DELETE` apaga o deck e as entradas dele
+- [x] Excluir não muda nenhum `collection_item` nem `wishlist_item` (`assert_no_changes` sobre os dois)
+- [x] Renomear ou excluir deck de outro usuário dá 404 sem alterar nada
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

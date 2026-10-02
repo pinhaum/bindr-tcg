@@ -109,7 +109,14 @@ Rails.application.routes.draw do
   # acesso parte de `Current.user.decks`: um id de deck alheio cai em
   # `RecordNotFound` e responde 404, sem revelar que o deck existe (DCK-36).
   # As actions entram à medida que as tasks da feature as escrevem.
-  resources :decks, only: %i[index new create show]
+  #
+  # A exclusão pede confirmação numa página própria, `GET /decks/:id/delete`,
+  # e não num `turbo_confirm`: o diálogo depende de JS e não tem como ser
+  # testado sem navegador (design.md, Risks). O `GET` só mostra; quem apaga é o
+  # `DELETE`.
+  resources :decks, only: %i[index new create show edit update destroy] do
+    get :delete, on: :member
+  end
 
   root "catalog#index"
 end

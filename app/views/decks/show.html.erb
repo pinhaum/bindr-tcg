@@ -94,5 +94,9 @@
     <% end %>
   </section>
 
-  <p><%= link_to "Voltar aos baralhos", decks_path %></p>
+  <p>
+    <%= link_to "Renomear", edit_deck_path(@deck) %>
+    <%= link_to "Excluir", delete_deck_path(@deck) %>
+    <%= link_to "Voltar aos baralhos", decks_path %>
+  </p>
 </main>

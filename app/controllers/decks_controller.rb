@@ -43,6 +43,35 @@ class DecksController < ApplicationController
     @shortfall = DeckShortfallQuery.new(Current.user, deck: @deck).call.index_by { |row| row.card.id }
   end
 
+  def edit
+    @deck = Current.user.decks.find(params[:id])
+  end
+
+  # DCK-10 — renomear muda só o nome; Leader e entradas não passam por aqui.
+  def update
+    @deck = Current.user.decks.find(params[:id])
+
+    if @deck.update(deck_params)
+      redirect_to @deck, notice: "Deck renomeado."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  # DCK-09 — a confirmação. Só lê: nada é apagado num `GET`.
+  def delete
+    @deck = Current.user.decks.find(params[:id])
+  end
+
+  # DCK-09 — apaga o deck e as entradas dele, e nada mais: coleção e wishlist
+  # não têm FK para `decks`.
+  def destroy
+    deck = Current.user.decks.find(params[:id])
+    deck.destroy!
+
+    redirect_to decks_path, notice: "Deck “#{deck.name}” excluído."
+  end
+
   private
     # DCK-19 — a carta está "fora da fonte" quando nenhuma variante dela está
     # presente (`CardVariant::PRESENT_SQL`), a mesma regra do catálogo. Ela
