@@ -9,6 +9,8 @@
 # deste controller herdam o acesso público sem precisar lembrar de nada. Toda
 # mutação continua exigindo sessão porque vive em outro controller.
 class CatalogController < ApplicationController
+  include EditingDeck
+
   allow_unauthenticated_access
 
   def index
@@ -59,9 +61,20 @@ class CatalogController < ApplicationController
     @hero = hero_variant
     @owned_quantities = owned_quantities(@variants)
     @wishlist_targets = wishlist_targets(@variants)
+    @editing_deck_quantity = editing_deck_quantity
   end
 
   private
+    # DCK-03 — a quantidade desta carta no deck em edição, numa consulta, ou
+    # `nil` sem deck em edição. `editing_deck` chama `authenticated?` antes de
+    # ler `Current.user` (ver o concern): este controller é público, e sem isso
+    # o controle de deck sumiria calado para quem está logado.
+    def editing_deck_quantity
+      return unless editing_deck
+
+      editing_deck.entries.where(card_id: @card.id).pick(:quantity).to_i
+    end
+
     # CNF-42 — a variante em destaque vem de `?variant=`, mas só entre as que
     # a página já lista: um código de outra carta, de variante ausente que o
     # usuário não tem, ou lixo cai no padrão em vez de dar erro. O padrão é a

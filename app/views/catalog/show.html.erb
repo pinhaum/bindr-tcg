@@ -183,6 +183,16 @@
   </div>
 
   <%#
+    DCK-03, DCK-04 — com um deck em edição, o controle de deck da carta. Ele é
+    da carta, e não de uma variante: o deck referencia `cards` (design.md §10).
+    Sem sessão, sem deck em edição ou com o deck em edição excluído,
+    `editing_deck` é `nil` e nada aparece (DCK-41).
+  %>
+  <% if editing_deck %>
+    <%= render "decks/card_controls", deck: editing_deck, card: @card, quantity: @editing_deck_quantity %>
+  <% end %>
+
+  <%#
     Req. 5.2 — a coleção referencia variantes, não cartas (design.md §3.1):
     arte base e arte alternativa são objetos de coleção distintos. Por isso
     cada variante aparece inteira, com raridade, set e imagem próprias.

@@ -517,11 +517,11 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Com sessão e deck em edição, a carta comum mostra o controle com a quantidade atual (0 sem entrada) e o nome do deck
-- [ ] Com sessão e deck em edição, a carta Leader mostra "Usar como Leader" no lugar do `− N +`
-- [ ] Sem sessão, sem deck em edição ou com o deck em edição excluído, o detalhe responde 200 sem controle de deck
-- [ ] Os controles de posse da coleção não mudam: os testes existentes do detalhe passam sem edição
-- [ ] Gate full passa; contagem registrada
+- [x] Com sessão e deck em edição, a carta comum mostra o controle com a quantidade atual (0 sem entrada) e o nome do deck
+- [x] Com sessão e deck em edição, a carta Leader mostra "Usar como Leader" no lugar do `− N +`
+- [x] Sem sessão, sem deck em edição ou com o deck em edição excluído, o detalhe responde 200 sem controle de deck
+- [x] Os controles de posse da coleção não mudam: os testes existentes do detalhe passam sem edição
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

@@ -353,7 +353,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
     `deck_entries` com as constraints no banco; status, falta e lista em texto
     como código puro testado por unidade.
   - _Requisitos: 14.2, 14.11–14.16, 14.20–14.23, 14.25–14.29, 14.31–14.33, 14.39_
-- [ ] **9.2 Telas do deck e montagem pelo detalhe** — T8–T15
+- [x] **9.2 Telas do deck e montagem pelo detalhe** — T8–T15
   - _Requisitos: 14.1, 14.3–14.10, 14.15, 14.17–14.19, 14.21–14.23, 14.36–14.39, 14.41_
 - [ ] **9.3 Lista em texto, pasta e fechamento** — T16–T21
   - _Requisitos: 14.24–14.35, 14.40; 2.5_
