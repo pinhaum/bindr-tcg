@@ -8,6 +8,7 @@ class Deck
   module ListText
     MAX_LINES = 200
     MAX_CHARS = 10_000
+    EMPTY_LIST = "A lista não tem nenhuma carta".freeze
 
     # O exemplo do dono veio separado por CR; um `<textarea>` envia CRLF; colar
     # de um site costuma dar LF. A ordem da alternância importa: `\r\n` antes
@@ -30,6 +31,11 @@ class Deck
       return failure([ { line: nil, message: limit_error } ]) if limit_error
 
       lines, errors = read_lines(text)
+      # DCK-28 (emendado em 2026-10-02) — sem nenhuma linha de carta, não há
+      # deck a criar. Só quando nenhuma linha foi recusada: com linhas ruins,
+      # os motivos delas já dizem o que houve.
+      return failure([ { line: nil, message: EMPTY_LIST } ]) if lines.empty? && errors.empty?
+
       cards = Card.where(card_number: lines.map { |line| line[:number] }.uniq).index_by(&:card_number)
 
       errors += lines.filter_map do |line|

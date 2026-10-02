@@ -1,0 +1,64 @@
+<% content_for :title, "Importar lista" %>
+
+<%#
+  DCK-24..29 — a lista colada vira um deck novo. As recusas vêm todas juntas,
+  na ordem do texto, como "Linha N: motivo"; a recusa que vale para o texto
+  inteiro (limite, lista sem carta) vem sem número. O resumo tem
+  `role="alert"`, como o do nome do deck, e o campo aponta para ele.
+
+  O layout fica para a T20.
+%>
+<main>
+  <h1>Importar lista</h1>
+
+  <p>
+    Cole a lista do OPTCG Simulator: uma carta por linha, como 4xOP01-016, com
+    o Leader como 1x. A importação cria um deck novo e não altera nenhum deck
+    que você já tem.
+  </p>
+
+  <% list_invalid = @list_errors.present? %>
+  <% if list_invalid %>
+    <div id="deck-list-error" role="alert" tabindex="-1">
+      <p>A lista não foi importada. Nenhum deck foi criado.</p>
+      <ul>
+        <% @list_errors.each do |error| %>
+          <li><%= error[:line] ? "Linha #{error[:line]}: #{error[:message]}" : error[:message] %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%# Sem `model:`: o campo do nome é opcional aqui, e o erro dele vem do deck. %>
+  <% if @deck.errors[:name].any? %>
+    <div id="deck-name-error" role="alert" tabindex="-1">
+      <ul>
+        <% @deck.errors[:name].each do |message| %>
+          <li>O nome <%= message %>.</li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_with scope: :deck_import, url: deck_imports_path, method: :post do |form| %>
+    <div>
+      <%= form.label :name do %>
+        Nome do deck <span>(opcional; sem nome, o deck leva o nome do Leader)</span>
+      <% end %>
+      <%= form.text_field :name, value: @import&.dig(:name), maxlength: Deck::NAME_LENGTH.max,
+                                 aria: @deck.errors[:name].any? ? { invalid: true, describedby: "deck-name-error" } : {} %>
+    </div>
+
+    <div>
+      <%= form.label :list do %>
+        Lista <span>(até <%= Deck::ListText::MAX_LINES %> linhas e <%= number_with_delimiter(Deck::ListText::MAX_CHARS, delimiter: ".") %> caracteres)</span>
+      <% end %>
+      <%= form.text_area :list, value: @import&.dig(:list), rows: 16, required: true,
+                                aria: list_invalid ? { invalid: true, describedby: "deck-list-error" } : {} %>
+    </div>
+
+    <%= form.submit "Importar lista" %>
+  <% end %>
+
+  <p><%= link_to "Voltar aos baralhos", decks_path %></p>
+</main>

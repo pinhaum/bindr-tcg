@@ -630,15 +630,15 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] O exemplo do dono importa num deck com Leader OP17-079 e 50 cartas; sem nome informado, o deck leva o nome do Leader
-- [ ] Importar duas vezes cria dois decks sem alterar o primeiro (DCK-24)
-- [ ] Uma linha ruim entre linhas boas não cria deck nem entrada (`assert_no_difference` em `Deck` e `DeckEntry`) e mostra "Linha N: motivo" para cada linha ruim
-- [ ] Texto acima do limite dá 422 com o limite na mensagem
-- [ ] Lista sem nenhuma carta (vazia ou só linhas em branco) dá 422 com "A lista não tem nenhuma carta", sem criar deck (DCK-28)
-- [ ] Lista aceita com 5 cópias de uma carta cria o deck, e a página dele mostra `inválido` (DCK-30)
-- [ ] Exportar (T16) e reimportar o texto dá um deck com o mesmo Leader e as mesmas entradas (DCK-32, ponta a ponta)
-- [ ] Sem sessão, redireciona sem criar nada
-- [ ] Gate full passa; contagem registrada
+- [x] O exemplo do dono importa num deck com Leader OP17-079 e 50 cartas; sem nome informado, o deck leva o nome do Leader
+- [x] Importar duas vezes cria dois decks sem alterar o primeiro (DCK-24)
+- [x] Uma linha ruim entre linhas boas não cria deck nem entrada (`assert_no_difference` em `Deck` e `DeckEntry`) e mostra "Linha N: motivo" para cada linha ruim
+- [x] Texto acima do limite dá 422 com o limite na mensagem
+- [x] Lista sem nenhuma carta (vazia ou só linhas em branco) dá 422 com "A lista não tem nenhuma carta", sem criar deck (DCK-28)
+- [x] Lista aceita com 5 cópias de uma carta cria o deck, e a página dele mostra `inválido` (DCK-30)
+- [x] Exportar (T16) e reimportar o texto dá um deck com o mesmo Leader e as mesmas entradas (DCK-32, ponta a ponta)
+- [x] Sem sessão, redireciona sem criar nada
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

@@ -156,6 +156,18 @@ class Deck::ListTextTest < ActiveSupport::TestCase
   end
 
   # DCK-39 — a soma das linhas repetidas também respeita o teto de 50.
+  # DCK-28 (emendado em 2026-10-02) — lista sem nenhuma carta é recusada, e a
+  # recusa vale para o texto inteiro, sem número de linha.
+  test "texto vazio ou só com linhas em branco é recusado com A lista não tem nenhuma carta" do
+    [ "", "   ", "\r\n\n\r", nil ].each do |text|
+      result = Deck::ListText.parse(text)
+
+      assert_equal [ { line: nil, message: "A lista não tem nenhuma carta" } ], result.errors, text.inspect
+      assert_nil result.leader
+      assert_empty result.entries
+    end
+  end
+
   test "linhas repetidas que somam mais de 50 são recusadas" do
     result = Deck::ListText.parse("30xOP17-094\n30xOP17-094")
 

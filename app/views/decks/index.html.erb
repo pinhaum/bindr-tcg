@@ -8,7 +8,10 @@
 <main>
   <h1>Baralhos</h1>
 
-  <p><%= link_to "Novo deck", new_deck_path %></p>
+  <p>
+    <%= link_to "Novo deck", new_deck_path %>
+    <%= link_to "Importar lista", new_deck_import_path %>
+  </p>
 
   <% if @decks.any? %>
     <ul>

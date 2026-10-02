@@ -117,6 +117,13 @@ Rails.application.routes.draw do
   #
   # `select` marca o deck como "em edição" na sessão (T12). É `POST` porque
   # muda estado: um `GET` trocaria o deck em edição num prefetch.
+  #
+  # A importação (T17) vem **antes** de `resources :decks`: depois dele,
+  # `GET /decks/import` casaria com `decks#show` e `import` viraria um id.
+  # Importar só cria deck, nunca altera um existente (DCK-24), então não há id
+  # no caminho.
+  get "decks/import" => "deck_imports#new", as: :new_deck_import
+  post "decks/import" => "deck_imports#create", as: :deck_imports
   resources :decks, only: %i[index new create show edit update destroy] do
     member do
       get :delete
