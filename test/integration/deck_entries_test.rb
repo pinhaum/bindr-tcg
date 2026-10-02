@@ -114,6 +114,25 @@ class DeckEntriesTest < ActionDispatch::IntegrationTest
     assert_equal 3, quantity_in
   end
 
+  # T24 (achado M4) — um canal só: a região viva tem só a frase da quantidade,
+  # e o flash do Stream não a repete.
+  test "com Turbo, exatamente uma região viva anuncia a quantidade nova, sem botões nem links" do
+    @deck.entries.create!(card: @card, quantity: 2)
+    sign_in
+
+    post increment_deck_card_path(@deck, @card), headers: TURBO_STREAM
+
+    stream = css_select("turbo-stream[action='update'][target='deck_entry_card_#{@card.id}']").first
+    assert_equal "morph", stream["method"]
+    regions = Nokogiri::HTML5.fragment(stream.at_css("template").inner_html).css("[aria-live]")
+    assert_equal 1, regions.size
+    assert_equal "3 cópias de Carta Preta no deck", regions.first.text.squish
+    assert_empty regions.first.css("button, a")
+    assert_select "turbo-stream[target='flash_notice'] template" do |template|
+      assert_equal "", template.first.inner_html.strip
+    end
+  end
+
   test "o decremento que remove a entrada responde o Stream com zero" do
     @deck.entries.create!(card: @card, quantity: 1)
     sign_in

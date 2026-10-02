@@ -75,6 +75,26 @@ class CardDetailDeckControlsTest < ActionDispatch::IntegrationTest
     assert_nil controls.at_css("form[action='#{decrement_deck_card_path(deck, @leader)}']")
   end
 
+  # T24 (achados M4 e M5) — o controle tem título próprio, e só a frase da
+  # quantidade fica na região viva.
+  test "com deck em edição, o controle fica numa section com h2 Deck em edição e uma só região viva" do
+    sign_in
+    create_editing_deck
+
+    get card_path("DT15-010")
+
+    section = css_select("section[aria-labelledby='deck-controls-title']").first
+    assert section, "o controle de deck deveria estar numa section rotulada"
+    assert_equal "Deck em edição", section.at_css("h2#deck-controls-title")&.text&.strip
+    controls = section.at_css("##{ActionView::RecordIdentifier.dom_id(@card, :deck_entry)}")
+    assert controls, "o controle deveria estar dentro da section"
+    assert_nil controls["aria-live"]
+    regions = controls.css("[aria-live]")
+    assert_equal 1, regions.size
+    assert_equal "0 cópias de Carta Comum no deck", regions.first.text.squish
+    assert_empty regions.first.css("button, a")
+  end
+
   test "sem sessão, o detalhe responde 200 sem controle de deck" do
     get card_path("DT15-010")
 

@@ -87,6 +87,30 @@ class DecksTest < ActionDispatch::IntegrationTest
     assert_select "[role='alert'] li", text: "O nome não pode ficar vazio."
   end
 
+  # T24 (achado M3 da revisão de a11y) — o erro fica ligado ao campo.
+  test "com nome inválido, o campo tem aria-invalid e aria-describedby para a mensagem" do
+    sign_in
+
+    post decks_path, params: { deck: { name: "" } }
+
+    assert_select "input[name='deck[name]'][aria-invalid='true'][aria-describedby='deck-name-error']"
+    assert_select "#deck-name-error li", text: "O nome não pode ficar vazio."
+  end
+
+  test "sem erro, o campo não tem aria-invalid nem aria-describedby, e o rótulo diz o limite" do
+    sign_in
+
+    get new_deck_path
+
+    assert_select "input[name='deck[name]']" do |inputs|
+      assert_nil inputs.first["aria-invalid"]
+      assert_nil inputs.first["aria-describedby"]
+    end
+    assert_select "label[for='deck_name']" do |labels|
+      assert_equal "Nome do deck (até 60 caracteres)", labels.first.text.squish
+    end
+  end
+
   test "nome de 61 caracteres re-renderiza com 422 e mensagem em português, sem criar nada" do
     sign_in
 

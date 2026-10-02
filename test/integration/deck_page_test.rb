@@ -65,7 +65,7 @@ class DeckPageTest < ActionDispatch::IntegrationTest
 
   # --- Composição (DCK-07) ---
 
-  test "as entradas aparecem em Character, Event e Stage, por custo e depois card_number" do
+  test "as entradas aparecem em Personagens, Eventos e Locais, por custo e depois card_number" do
     stage = create_card("DT09-050", card_type: "stage", cost: 1)
     event_cost2 = create_card("DT09-040", card_type: "event", cost: 2)
     event_cost1 = create_card("DT09-041", card_type: "event", cost: 1)
@@ -82,7 +82,7 @@ class DeckPageTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     groups = css_select("section[aria-labelledby='deck-main-title'] section")
-    assert_equal [ "Character", "Event", "Stage" ], groups.map { |group| group.at_css("h3").text.strip }
+    assert_equal [ "Personagens", "Eventos", "Locais" ], groups.map { |group| group.at_css("h3").text.strip }
     assert_equal [
       [ "DT09-029", "DT09-021", "DT09-022", "DT09-030" ],
       [ "DT09-041", "DT09-040" ],
@@ -197,7 +197,7 @@ class DeckPageTest < ActionDispatch::IntegrationTest
     get deck_path(deck)
 
     items = css_select("section[aria-labelledby='deck-main-title'] li")
-    marks = items.to_h { |li| [ li.at_css("a").text[/DT09-\d+/], li.text.include?("fora da fonte") ] }
+    marks = items.to_h { |li| [ li.at_css("a").text[/DT09-\d+/], li.text.include?("carta fora da fonte") ] }
     assert_equal({ "DT09-060" => true, "DT09-061" => false }, marks)
     assert_select "h2#deck-main-title", text: "Deck principal: 4 / 50"
   end
@@ -209,7 +209,7 @@ class DeckPageTest < ActionDispatch::IntegrationTest
 
     get deck_path(deck)
 
-    assert_select "section[aria-labelledby='deck-leader-title'] span", text: "fora da fonte"
+    assert_select "section[aria-labelledby='deck-leader-title'] span", text: "carta fora da fonte"
   end
 
   # --- Consultas ---

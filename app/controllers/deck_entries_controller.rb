@@ -163,17 +163,24 @@ class DeckEntriesController < ApplicationController
     end
 
     # A mesma resposta dupla da posse: sem JS, `redirect_back`; com Turbo, o
-    # Stream troca só o controle desta carta. `update`, não `replace`, para
-    # manter a região `aria-live` do partial e o anúncio da quantidade nova.
+    # Stream troca só o controle desta carta. `update` com morph, não
+    # `replace`: mantém o botão focado e a região `aria-live` do partial, que
+    # anuncia a quantidade nova (cabeçalho do partial).
+    #
+    # Na carta comum, o sucesso já é anunciado pela região viva, então o
+    # notice não vai para o flash do Stream: dois canais repetiriam a mesma
+    # frase (achado M4). O alerta vai, porque a recusa não muda a quantidade e
+    # a região não tem o que anunciar. No Leader não há região, e o notice é o
+    # único canal.
     def respond_with_quantity(quantity, **flash_options)
       respond_to do |format|
         format.html { redirect_back_with(**flash_options) }
         format.turbo_stream do
-          flash.now[:notice] = flash_options[:notice] if flash_options[:notice]
+          flash.now[:notice] = flash_options[:notice] if flash_options[:notice] && @card.card_type == "leader"
           flash.now[:alert] = flash_options[:alert] if flash_options[:alert]
 
           render turbo_stream: [
-            turbo_stream.update(helpers.dom_id(@card, :deck_entry), partial: "decks/card_controls",
+            turbo_stream.update(helpers.dom_id(@card, :deck_entry), partial: "decks/card_controls", method: :morph,
                                 locals: { deck: @deck, card: @card, quantity: quantity.to_i }),
             *flash_streams
           ]

@@ -576,13 +576,13 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] A resposta Turbo Stream de `leader` contém o botão com `aria-disabled="true"`, sem remover o elemento focável
-- [ ] Com nome inválido, o campo tem `aria-invalid="true"` e `aria-describedby` apontando para o id da mensagem; sem erro, nenhum dos dois
-- [ ] Exatamente uma região viva anuncia a quantidade nova, e ela não contém botões nem links
-- [ ] O detalhe com deck em edição tem `section` com `aria-labelledby` para um `h2` "Deck em edição"
-- [ ] A página do deck agrupa em "Personagens", "Eventos" e "Locais", e a marca diz "carta fora da fonte"
-- [ ] Testes ajustados só onde o texto do critério mudou, cada um listado no corpo do commit
-- [ ] Gate full passa; contagem registrada
+- [x] A resposta Turbo Stream de `leader` contém o botão com `aria-disabled="true"`, sem remover o elemento focável
+- [x] Com nome inválido, o campo tem `aria-invalid="true"` e `aria-describedby` apontando para o id da mensagem; sem erro, nenhum dos dois
+- [x] Exatamente uma região viva anuncia a quantidade nova, e ela não contém botões nem links
+- [x] O detalhe com deck em edição tem `section` com `aria-labelledby` para um `h2` "Deck em edição"
+- [x] A página do deck agrupa em "Personagens", "Eventos" e "Locais", e a marca diz "carta fora da fonte"
+- [x] Testes ajustados só onde o texto do critério mudou, cada um listado no corpo do commit
+- [x] Gate full passa; contagem registrada
 
 **Tests**: integration
 **Gate**: full

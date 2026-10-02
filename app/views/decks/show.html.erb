@@ -62,7 +62,7 @@
       <p>
         <%= link_to "#{@deck.leader.name} (#{@deck.leader.card_number})", card_path(@deck.leader.card_number) %>
         <% if @absent_card_ids.include?(@deck.leader_card_id) %>
-          <span>fora da fonte</span>
+          <span>carta fora da fonte</span>
         <% end %>
         <%= render "decks/shortfall_counts", row: @shortfall.fetch(@deck.leader_card_id) %>
       </p>
@@ -81,7 +81,7 @@
     %>
     <% @deck.ordered_entries.chunk_while { |a, b| a.card.card_type == b.card.card_type }.each do |group| %>
       <section>
-        <h3><%= group.first.card.card_type.humanize %></h3>
+        <h3><%= deck_group_label(group.first.card.card_type) %></h3>
         <ul>
           <% group.each do |entry| %>
             <li>
@@ -91,7 +91,7 @@
                 <span>custo <%= entry.card.cost %></span>
               <% end %>
               <% if @absent_card_ids.include?(entry.card_id) %>
-                <span>fora da fonte</span>
+                <span>carta fora da fonte</span>
               <% end %>
               <%= render "decks/shortfall_counts", row: @shortfall.fetch(entry.card_id) %>
             </li>

@@ -188,8 +188,15 @@
     Sem sessão, sem deck em edição ou com o deck em edição excluído,
     `editing_deck` é `nil` e nada aparece (DCK-41).
   %>
+  <%#
+    A seção fica aqui, fora do partial: o Turbo Stream troca o conteúdo do
+    controle, e o título não pode ir junto (achado M5 da revisão de a11y).
+  %>
   <% if editing_deck %>
-    <%= render "decks/card_controls", deck: editing_deck, card: @card, quantity: @editing_deck_quantity %>
+    <section aria-labelledby="deck-controls-title">
+      <h2 id="deck-controls-title">Deck em edição</h2>
+      <%= render "decks/card_controls", deck: editing_deck, card: @card, quantity: @editing_deck_quantity %>
+    </section>
   <% end %>
 
   <%#

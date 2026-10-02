@@ -4,9 +4,16 @@
   `full_messages` prefixaria o nome do atributo em inglês ("Name não pode
   ficar vazio"). O resumo tem `role="alert"` pelo mesmo motivo do cadastro:
   quem usa leitor de tela precisa saber o que houve sem varrer o formulário.
+
+  Com erro, o campo aponta para a mensagem (`aria-invalid` e
+  `aria-describedby`), e quem chega ao campo ouve o motivo junto com o rótulo.
+  Sem erro, nenhum dos dois: um `aria-invalid="false"` ou um
+  `aria-describedby` para um id ausente não diz nada de útil (achado M3). A
+  ajuda do limite fica no próprio rótulo, que já é o nome acessível do campo.
 %>
-<% if deck.errors[:name].any? %>
-  <div role="alert" tabindex="-1">
+<% name_invalid = deck.errors[:name].any? %>
+<% if name_invalid %>
+  <div id="deck-name-error" role="alert" tabindex="-1">
     <ul>
       <% deck.errors[:name].each do |message| %>
         <li>O nome <%= message %>.</li>
@@ -17,8 +24,11 @@
 
 <%= form_with model: deck do |form| %>
   <div>
-    <%= form.label :name, "Nome do deck" %>
-    <%= form.text_field :name, required: true, maxlength: Deck::NAME_LENGTH.max, autofocus: true %>
+    <%= form.label :name do %>
+      Nome do deck <span>(até <%= Deck::NAME_LENGTH.max %> caracteres)</span>
+    <% end %>
+    <%= form.text_field :name, required: true, maxlength: Deck::NAME_LENGTH.max, autofocus: true,
+                               aria: name_invalid ? { invalid: true, describedby: "deck-name-error" } : {} %>
   </div>
 
   <%= form.submit submit %>

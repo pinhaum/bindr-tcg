@@ -52,6 +52,22 @@ class DeckLeaderTest < ActionDispatch::IntegrationTest
     assert_equal @first.id, @deck.reload.leader_card_id
   end
 
+  # T24 (achado H2) — o botão continua, focável, com `aria-disabled`; o morph
+  # mantém o nó, e o foco não cai no `<body>`.
+  test "a resposta Stream do leader mantém o botão com aria-disabled, sem trocá-lo por texto" do
+    sign_in
+
+    post deck_leader_path(@deck), params: { card_id: @first.id }, headers: TURBO_STREAM
+
+    stream = css_select("turbo-stream[action='update'][target='deck_entry_card_#{@first.id}']").first
+    assert_equal "morph", stream["method"]
+    fragment = Nokogiri::HTML5.fragment(stream.at_css("template").inner_html)
+    button = fragment.at_css("form[action='#{deck_leader_path(@deck)}'] button")
+    assert button, "o botão do Leader deveria continuar na resposta"
+    assert_equal "true", button["aria-disabled"]
+    assert_equal "Primeiro Leader é o Leader deste deck", button.text.squish
+  end
+
   test "carta que não é Leader dá 422 sem gravar" do
     @deck.update!(leader: @first)
     sign_in
