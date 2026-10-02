@@ -96,12 +96,13 @@ class CollectionItemsController < ApplicationController
     end
 
     # `exec_query` com bind params, não interpolação: o id vem do request.
-    # Devolve a quantidade resultante, ou `nil` quando nenhuma linha foi
-    # afetada.
+    # `BigInteger`, como as colunas `bigint`: `Integer` recusaria um id acima
+    # de 2³¹ com `RangeError`. Devolve a quantidade resultante, ou `nil`
+    # quando nenhuma linha foi afetada.
     def execute_returning_quantity(sql, user_id, card_variant_id)
       binds = [
-        ActiveRecord::Relation::QueryAttribute.new("user_id", user_id, ActiveRecord::Type::Integer.new),
-        ActiveRecord::Relation::QueryAttribute.new("card_variant_id", card_variant_id, ActiveRecord::Type::Integer.new)
+        ActiveRecord::Relation::QueryAttribute.new("user_id", user_id, ActiveRecord::Type::BigInteger.new),
+        ActiveRecord::Relation::QueryAttribute.new("card_variant_id", card_variant_id, ActiveRecord::Type::BigInteger.new)
       ]
       CollectionItem.connection.exec_query(sql, "CollectionItem Quantity", binds).rows.dig(0, 0)
     end

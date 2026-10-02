@@ -547,13 +547,13 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Com o incremento trocado por leitura em Ruby + `update!` (mutação numa cópia, descartada), o teste de corrida falha em toda execução, não às vezes
-- [ ] Dois incrementos simultâneos a partir de 49 terminam em 50, e exatamente um recebe a recusa
-- [ ] Incremento contra deck apagado depois do `find` responde 404 sem 500 (teste que apaga o deck entre o `find` e o SQL)
-- [ ] A página do deck não levanta erro quando a entrada some entre as leituras (teste que provoca a corrida ou que prova a transação `REPEATABLE READ`)
-- [ ] `card_id[]=1&card_id[]=2` em `leader`, `increment` e `decrement` dá 404
-- [ ] Os testes existentes de coleção passam sem edição
-- [ ] Gate full passa 3 vezes seguidas; contagem registrada
+- [x] Com o incremento trocado por leitura em Ruby + `update!` (mutação numa cópia, descartada), o teste de corrida falha em toda execução, não às vezes
+- [x] Dois incrementos simultâneos a partir de 49 terminam em 50, e exatamente um recebe a recusa
+- [x] Incremento contra deck apagado depois do `find` responde 404 sem 500 (teste que apaga o deck entre o `find` e o SQL)
+- [x] A página do deck não levanta erro quando a entrada some entre as leituras (teste que provoca a corrida ou que prova a transação `REPEATABLE READ`)
+- [x] `card_id[]=1&card_id[]=2` em `leader`, `increment` e `decrement` dá 404
+- [x] Os testes existentes de coleção passam sem edição
+- [x] Gate full passa 3 vezes seguidas; contagem registrada
 
 **Tests**: integration
 **Gate**: full

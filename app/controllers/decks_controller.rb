@@ -39,13 +39,20 @@ class DecksController < ApplicationController
   # Leader, entradas e cartas vêm pelo `includes`, e "fora da fonte" sai de
   # uma consulta só: o número de consultas da página não cresce com o número
   # de entradas.
+  #
+  # As leituras rodam num retrato só (`REPEATABLE READ`). Em `READ COMMITTED`,
+  # cada consulta vê o banco do seu instante: um decremento que apagasse uma
+  # entrada entre o `find` e a `DeckShortfallQuery` deixaria a entrada sem
+  # linha de falta, e a view levantaria `KeyError` (achado DB-M3).
   def show
-    @deck = Current.user.decks.includes(:leader, entries: :card).find(params[:id])
-    @legality = @deck.legality
-    @absent_card_ids = absent_card_ids(@deck)
-    # DCK-21..23 — pedida, possuída e falta, derivadas da coleção atual numa
-    # consulta, sem nada gravado.
-    @shortfall = DeckShortfallQuery.new(Current.user, deck: @deck).call.index_by { |row| row.card.id }
+    consistent_snapshot do
+      @deck = Current.user.decks.includes(:leader, entries: :card).find(params[:id])
+      @legality = @deck.legality
+      @absent_card_ids = absent_card_ids(@deck)
+      # DCK-21..23 — pedida, possuída e falta, derivadas da coleção atual numa
+      # consulta, sem nada gravado.
+      @shortfall = DeckShortfallQuery.new(Current.user, deck: @deck).call.index_by { |row| row.card.id }
+    end
   end
 
   def edit
@@ -87,6 +94,17 @@ class DecksController < ApplicationController
   end
 
   private
+    # O nível de isolamento só pode ser escolhido na transação de fora. Já
+    # dentro de uma (a do teste transacional, ou um chamador futuro), o Rails
+    # recusaria com `TransactionIsolationError`, e as leituras entram nela. A
+    # prova do retrato único roda fora da transação do teste, em
+    # `deck_entries_concurrency_test.rb`.
+    def consistent_snapshot(&)
+      return yield if Deck.connection.transaction_open?
+
+      Deck.transaction(isolation: :repeatable_read, &)
+    end
+
     # DCK-19 — a carta está "fora da fonte" quando nenhuma variante dela está
     # presente (`CardVariant::PRESENT_SQL`), a mesma regra do catálogo. Ela
     # continua no deck e contando para as regras: só ganha a marca.

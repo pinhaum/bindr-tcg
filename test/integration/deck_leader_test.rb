@@ -63,6 +63,16 @@ class DeckLeaderTest < ActionDispatch::IntegrationTest
     assert_equal [ [ @card.id, 3 ] ], entries_of(@deck)
   end
 
+  # SEC-L1 (T23) — `card_id` que não é escalar dá 404, não 500.
+  test "card_id[] com dois valores dá 404 sem gravar" do
+    sign_in
+
+    post deck_leader_path(@deck), params: "card_id[]=#{@first.id}&card_id[]=#{@second.id}"
+
+    assert_response :not_found
+    assert_nil @deck.reload.leader_card_id
+  end
+
   test "deck de outro usuário dá 404 sem gravar" do
     alien = Deck.create!(user: @other, name: "Alheio", leader: @first)
     sign_in

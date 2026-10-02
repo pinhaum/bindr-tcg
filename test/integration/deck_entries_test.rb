@@ -158,6 +158,27 @@ class DeckEntriesTest < ActionDispatch::IntegrationTest
     assert_equal 2, quantity_in(alien)
   end
 
+  # SEC-L1 (T23) — em increment e decrement o `card_id` é segmento do
+  # caminho, e o Rails põe o parâmetro de caminho por cima do de mesmo nome no
+  # corpo: `card_id[]` no corpo nunca chega à action, e o 404 do critério não
+  # tem como acontecer aqui. O que o teste prova é que a lista não dá 500 e
+  # que vale a carta do caminho. O 404 de `card_id[]` fica no `leader`, onde o
+  # `card_id` vem do corpo (`deck_leader_test.rb`).
+  test "card_id[] no corpo de increment e decrement é ignorado: vale a carta do caminho, sem 500" do
+    @deck.entries.create!(card: @card, quantity: 2)
+    sign_in
+    malformed = "card_id[]=#{@leader.id}&card_id[]=#{@card.id}"
+
+    post increment_deck_card_path(@deck, @card), params: malformed
+    assert_response :redirect
+    assert_equal 3, quantity_in
+
+    post decrement_deck_card_path(@deck, @card), params: malformed
+    assert_response :redirect
+    assert_equal 2, quantity_in
+    assert_not DeckEntry.exists?(deck: @deck, card: @leader)
+  end
+
   test "sem sessão, incremento e decremento redirecionam sem gravar" do
     @deck.entries.create!(card: @card, quantity: 2)
 

@@ -10,10 +10,27 @@
 # Regra de jogo nunca recusa gravação (DCK-18): a 5ª cópia entra, e o status do
 # deck é que fica `inválido`. O que recusa é a forma do modelo: carta Leader
 # não é entrada (422) e nenhuma entrada passa de 50 (DCK-39).
+#
+# O decremento tem duas etapas (`UPDATE` acima de 1, `DELETE` em 1), e entre
+# elas havia uma janela: com a entrada em 1, o `UPDATE` não casava, um
+# incremento concorrente subia para 2 e o `DELETE ... quantity = 1` também não
+# casava. O usuário ouvia "não está no deck" com a carta lá, e o decremento se
+# perdia. A janela fecha com o `SELECT ... FOR UPDATE` que abre a transação do
+# decremento: as duas etapas rodam com a linha travada, e o incremento espera
+# (achado DB-L4 da revisão do Lote B; teste em
+# `deck_entries_concurrency_test.rb`).
+#
+# O deck pode ser apagado entre o `find` e o SQL (outra aba excluindo). O
+# `INSERT` do incremento então viola a FK e responde 404, o mesmo de um deck que
+# não existe, em vez de 500 (achado DB-M2).
 class DeckEntriesController < ApplicationController
   MAX_QUANTITY = DeckEntry::QUANTITY_RANGE.max
 
   before_action :set_deck, :set_card
+
+  rescue_from ActiveRecord::InvalidForeignKey do
+    raise ActiveRecord::RecordNotFound, "Deck excluído durante a operação"
+  end
 
   # `ON CONFLICT DO UPDATE` lê e escreve num statement só: dois incrementos
   # simultâneos somam os dois em vez de um sobrescrever o outro (DCK-38), e a
@@ -47,23 +64,34 @@ class DeckEntriesController < ApplicationController
   # O piso mora no `WHERE`: acima de 1, o `UPDATE` tira uma cópia; em 1, nada
   # casa e o `DELETE ... WHERE quantity = 1` apaga a entrada (DCK-06). Com dois
   # decrementos simultâneos sobre 2, o primeiro baixa para 1 e o segundo apaga
-  # a linha. Sem entrada, nenhum dos dois casa e nada é criado.
+  # a linha. Sem entrada, nenhum dos dois casa e nada é criado. A trava da
+  # primeira consulta fecha a janela entre as duas etapas (cabeçalho).
   def decrement
-    quantity = execute_returning_quantity(<<~SQL)
-      -- decrementDeckEntry
-      UPDATE deck_entries
-      SET quantity = quantity - 1, updated_at = now()
-      WHERE deck_id = $1 AND card_id = $2 AND quantity > 1
-      RETURNING quantity
-    SQL
-    return respond_with_quantity(quantity, notice: copies_notice(quantity)) if quantity
+    quantity, removed = DeckEntry.transaction do
+      execute_returning_quantity(<<~SQL)
+        -- lockDeckEntryForDecrement
+        SELECT quantity FROM deck_entries
+        WHERE deck_id = $1 AND card_id = $2
+        FOR UPDATE
+      SQL
 
-    removed = execute_returning_quantity(<<~SQL)
-      -- deleteLastDeckEntryCopy
-      DELETE FROM deck_entries
-      WHERE deck_id = $1 AND card_id = $2 AND quantity = 1
-      RETURNING quantity
-    SQL
+      decremented = execute_returning_quantity(<<~SQL)
+        -- decrementDeckEntry
+        UPDATE deck_entries
+        SET quantity = quantity - 1, updated_at = now()
+        WHERE deck_id = $1 AND card_id = $2 AND quantity > 1
+        RETURNING quantity
+      SQL
+      next [ decremented, nil ] if decremented
+
+      [ nil, execute_returning_quantity(<<~SQL) ]
+        -- deleteLastDeckEntryCopy
+        DELETE FROM deck_entries
+        WHERE deck_id = $1 AND card_id = $2 AND quantity = 1
+        RETURNING quantity
+      SQL
+    end
+    return respond_with_quantity(quantity, notice: copies_notice(quantity)) if quantity
 
     if removed
       respond_with_quantity 0, notice: "#{@card.card_number} saiu do deck “#{@deck.name}”."
@@ -89,18 +117,25 @@ class DeckEntriesController < ApplicationController
       @deck = Current.user.decks.find(params[:deck_id])
     end
 
-    # A carta é catálogo público: um id inválido é 404, sem vazar nada.
+    # A carta é catálogo público: um id inválido é 404, sem vazar nada. Um
+    # `card_id` que não é escalar (`card_id[]=1&card_id[]=2`) também: sem a
+    # guarda, `Card.find` devolveria uma lista e a action daria 500 (achado
+    # SEC-L1).
     def set_card
-      @card = Card.find(params[:card_id])
+      card_id = params[:card_id]
+      raise ActiveRecord::RecordNotFound, "card_id precisa ser um valor só" unless card_id.is_a?(String)
+
+      @card = Card.find(card_id)
     end
 
     # `exec_query` com bind params, não interpolação: os ids vêm do request.
-    # Devolve a quantidade resultante, ou `nil` quando nenhuma linha foi
-    # afetada.
+    # `BigInteger`, como as colunas `bigint`: `Integer` recusaria um id acima
+    # de 2³¹ com `RangeError` (achado DB-L6). Devolve a quantidade resultante,
+    # ou `nil` quando nenhuma linha foi afetada.
     def execute_returning_quantity(sql)
       binds = [
-        ActiveRecord::Relation::QueryAttribute.new("deck_id", @deck.id, ActiveRecord::Type::Integer.new),
-        ActiveRecord::Relation::QueryAttribute.new("card_id", @card.id, ActiveRecord::Type::Integer.new)
+        ActiveRecord::Relation::QueryAttribute.new("deck_id", @deck.id, ActiveRecord::Type::BigInteger.new),
+        ActiveRecord::Relation::QueryAttribute.new("card_id", @card.id, ActiveRecord::Type::BigInteger.new)
       ]
       DeckEntry.connection.exec_query(sql, "DeckEntry Quantity", binds).rows.dig(0, 0)
     end
