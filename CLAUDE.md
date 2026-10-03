@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: Fase 1 encerrada
+## Estado atual: Fase 1 encerrada, Fase 2 (decks) implementada
 
 **Todo o `.context/tasks.md` da Fase 1 está fechado** (§0 a §8). As features em
 `.specs/features/` estão todas encerradas e verificadas (Verifier autor ≠
@@ -12,9 +12,13 @@ verificador, `validation.md` PASS): `catalogo`, `colecao`, `progresso`,
 (AD-019) e fechou em 2026-10-01 com a emenda do SRC-31 (estabilidade do
 `tcgplayer.id` medida em 20h27m: 7.252 comuns, 0 mudados; D-14).
 
-O próximo trabalho **não tem plano ainda**: Fase 2 (decks) ou Fase 3 (preços),
-ambas fora do escopo da Fase 1 e obrigadas a passar por `requirements.md`
-primeiro. Pendências do dono abertas: sets não lançados no topo do catálogo sem
+A **Fase 2 (`decks`, Req. 14, DCK-01..44)** está implementada: montar deck de
+1 Leader + 50 pelo detalhe da carta, status derivado pelas regras de montagem
+(Comprehensive Rules v1.2.1, com cartas sem limite de cópias e aviso para Leader
+de regra própria), o que falta na pasta por deck e no agregado, e lista em texto
+do OPTCG Simulator (importar e exportar). Falta o teste manual do dono (T21: LF
+no simulador) e o Verifier. Fase 3 (preços) **não tem plano** e passa por
+`requirements.md` primeiro. Pendências do dono abertas: sets não lançados no topo do catálogo sem
 arte (403 do CDN) e arte "SAMPLE" presa no cache de imagens (ver *Handoff*). A
 aprovação da T12 da `conformidade` foi dada em 2026-10-01. A D-03 (SRC-19) foi fechada mantendo a regra (registro no spec da
 `fonte-apitcg`) e o flake D-10 foi corrigido (registro no *Handoff*). `STATE.md` (*Handoff*) tem o
@@ -23,17 +27,23 @@ retrato mais recente.
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
-  `WishlistItem`, `CollectionImport`, `User`, `Session`, `Current`.
+  `WishlistItem`, `CollectionImport`, `Deck`, `DeckEntry`, `User`, `Session`,
+  `Current`, e as peças puras `Deck::Legality` (status, motivos e avisos) e
+  `Deck::ListText` (`parse`/`format` do OPTCG Simulator).
 - **Controllers**: `CatalogController` e `CardImagesController` (públicos),
   `CollectionItemsController`, `WishlistItemsController`, `ProgressController`,
   `CollectionImportsController`, `CollectionExportsController`,
-  `SessionsController`, `RegistrationsController`, e o concern `Authentication`.
-- **Query objects**: `CatalogQuery` (busca e filtros) e `SetProgressQuery`.
+  `DecksController`, `DeckEntriesController`, `DeckImportsController`,
+  `SessionsController`, `RegistrationsController`, e os concerns
+  `Authentication` e `EditingDeck`.
+- **Query objects**: `CatalogQuery` (busca e filtros), `SetProgressQuery` e
+  `DeckShortfallQuery` (o que falta na pasta, por deck ou agregado pelo maior
+  uso; uma consulta, que a pasta paga mesmo sem decks, AD-021).
 - **Ingestão**: `app/services/ingestion/` — `Run`, `Upsert`, `Remap`,
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
-- **Sete migrações**, de `20260919120000` a `20260919120600`. `schema_format`
+- **Oito migrações**, de `20260919120000` a `20261002120000` (`CreateDecks`). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **109 arquivos de teste, 1549 testes**, rubocop e brakeman limpos.
+- **129 arquivos de teste, 1748 testes**, rubocop e brakeman limpos.
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
@@ -47,6 +57,14 @@ declarada com `allow_unauthenticated_access` — hoje `CatalogController`,
 sessão.
 Uma action nova que não declare nada já está protegida.
 
+**O deck em edição mora na sessão do Rails** (`session[:editing_deck_id]`,
+concern `EditingDeck`) e é revalidado contra `Current.user.decks` a cada
+leitura — um id herdado de outra conta vira `nil`. Num controller público
+(`CatalogController`), `editing_deck` chama `authenticated?` antes. O
+`DeckEntriesController` usa o mesmo SQL atômico da coleção, com o teto de 50 no
+`WHERE` do `DO UPDATE` e o decremento sob `FOR UPDATE`; o teste de corrida força
+a sobreposição por lock e é o único com `use_transactional_tests = false`.
+
 Dívidas abertas que valem saber antes de mexer em autenticação:
 
 - **Login sem limite de tentativas.** O `rate_limit` do template do Rails foi
@@ -54,6 +72,11 @@ Dívidas abertas que valem saber antes de mexer em autenticação:
   nada (teste é `:null_store`; produção cai em `:file_store` por container).
   Justificativa completa em `app/controllers/sessions_controller.rb`. Reabrir
   junto com Redis ou `solid_cache`.
+- **Login e logout não chamam `reset_session`.** O cookie de sessão do Rails
+  sobrevive ao logout e é herdado pelo próximo login no mesmo navegador. Hoje
+  ele só carrega `return_to_after_authenticating` e `editing_deck_id`, ambos
+  inofensivos (o segundo é revalidado). Dívida anterior aos decks, registrada
+  pela revisão de segurança de 2026-10-02.
 - **O cookie de sessão não declara `secure` explicitamente** — em produção vem
   de `config.force_ssl`. A garantia é indireta; comentada no concern.
 - **Não há navegador no container**, logo não há system test. Teste de UI vira

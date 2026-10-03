@@ -766,8 +766,8 @@ A T25 (deck vazio, emenda do DCK-22 em 2026-10-02, e o id duplicado do alvo do S
 
 **Done when**:
 
-- [ ] O `CLAUDE.md` descreve o que existe depois da feature, e o `grep` registrado no commit não acha model ou controller citado que não exista
-- [ ] A traceability tem DCK-01..44 mapeados para tasks
+- [x] O `CLAUDE.md` descreve o que existe depois da feature, e o `grep` registrado no commit não acha model ou controller citado que não exista
+- [x] A traceability tem DCK-01..44 mapeados para tasks
 - [ ] O dono respondeu sobre o LF no simulador; se o simulador não aceitar, o separador passa a CRLF ou CR, com emenda no spec e no Req. 14, numa task de correção
 - [ ] Gate full passa; contagem registrada
 

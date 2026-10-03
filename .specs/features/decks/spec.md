@@ -161,52 +161,52 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| DCK-01 | Montar: criar deck vazio (Req. 14.1) | - | Pending |
-| DCK-02 | Montar: modelo Leader + entradas sobre `cards` (Req. 14.2) | - | Pending |
-| DCK-03 | Montar: controle no detalhe de carta não-Leader (Req. 14.3) | - | Pending |
-| DCK-04 | Montar: "Usar como Leader" (Req. 14.4) | - | Pending |
-| DCK-05 | Montar: incremento/decremento sem recarregar (Req. 14.5) | - | Pending |
-| DCK-06 | Montar: zero remove a entrada (Req. 14.6) | - | Pending |
-| DCK-07 | Montar: página do deck agrupada e "N / 50" (Req. 14.7) | - | Pending |
-| DCK-08 | Montar: lista de decks (Req. 14.8) | - | Pending |
-| DCK-09 | Montar: excluir com confirmação, sem tocar a coleção (Req. 14.9) | - | Pending |
-| DCK-10 | Montar: renomear (Req. 14.10) | - | Pending |
-| DCK-11 | Validar: status derivado, nunca persistido (Req. 14.11) | - | Pending |
-| DCK-12 | Validar: regra de `válido` (Req. 14.12) | - | Pending |
-| DCK-13 | Validar: regra de `inválido` (Req. 14.13) | - | Pending |
-| DCK-14 | Validar: regra de `incompleto` (Req. 14.14) | - | Pending |
-| DCK-15 | Validar: motivos em português (Req. 14.15) | - | Pending |
-| DCK-16 | Validar: multicolorida conta todas as cores (Req. 14.16) | - | Pending |
-| DCK-17 | Validar: aviso de banidas (Req. 14.17) | - | Pending |
-| DCK-18 | Validar: regra do jogo nunca recusa gravação (Req. 14.18) | - | Pending |
-| DCK-19 | Validar: carta fora da fonte marcada (Req. 14.19) | - | Pending |
-| DCK-20 | Faltando: possuída = soma das variantes (Req. 14.20) | - | Pending |
-| DCK-21 | Faltando: pedida/possuída/falta por carta (Req. 14.21) | - | Pending |
-| DCK-22 | Faltando: total do deck (Req. 14.22) | - | Pending |
-| DCK-23 | Faltando: derivado da coleção atual (Req. 14.23) | - | Pending |
-| DCK-24 | Importar: sempre cria deck novo (Req. 14.24) | - | Pending |
-| DCK-25 | Importar: formato e fins de linha (Req. 14.25) | - | Pending |
-| DCK-26 | Importar: linha Leader vira Leader (Req. 14.26) | - | Pending |
-| DCK-27 | Importar: linhas repetidas somam (Req. 14.27) | - | Pending |
-| DCK-28 | Importar: tudo ou nada com linhas listadas (Req. 14.28) | - | Pending |
-| DCK-29 | Importar: limite de tamanho (Req. 14.29) | - | Pending |
-| DCK-30 | Importar: deck fora das regras é criado (Req. 14.30) | - | Pending |
-| DCK-31 | Exportar: formato e ordem (Req. 14.31) | - | Pending |
-| DCK-32 | Exportar → importar reproduz o deck (Req. 14.32) | - | Pending |
-| DCK-33 | Pasta: falta = maior uso − possuída (Req. 14.33) | - | Pending |
-| DCK-34 | Pasta: bloco "Faltando para os baralhos" (Req. 14.34) | - | Pending |
-| DCK-35 | Pasta: bloco omitido sem falta (Req. 14.35) | - | Pending |
-| DCK-36 | Isolamento: deck de outro usuário é 404 (Req. 14.36) | - | Pending |
-| DCK-37 | Isolamento: rota de deck exige sessão (Req. 14.37) | - | Pending |
-| DCK-38 | Concorrência: incrementos simultâneos (Req. 14.38) | - | Pending |
-| DCK-39 | Limites: quantidade até 50 e nome até 60 (Req. 14.39) | - | Pending |
-| DCK-40 | Ingestão preserva decks, sem cascata (Req. 14.40) | - | Pending |
-| DCK-41 | Deck em edição excluído (Req. 14.41) | - | Pending |
-| DCK-42 | Sem Leader, sem regra de cor (Req. 14.42) | - | Pending |
-| DCK-43 | Validar: isenção do limite de 4 pelo texto da carta (Req. 14.43) | - | Pending |
-| DCK-44 | Validar: aviso de regra própria do Leader (Req. 14.44) | - | Pending |
+| DCK-01 | Montar: criar deck vazio (Req. 14.1) | T8 | Implemented |
+| DCK-02 | Montar: modelo Leader + entradas sobre `cards` (Req. 14.2) | T2, T3, T22 | Implemented |
+| DCK-03 | Montar: controle no detalhe de carta não-Leader (Req. 14.3) | T15, T24 | Implemented |
+| DCK-04 | Montar: "Usar como Leader" (Req. 14.4) | T14, T15, T24 | Implemented |
+| DCK-05 | Montar: incremento/decremento sem recarregar (Req. 14.5) | T13, T24, T25 | Implemented |
+| DCK-06 | Montar: zero remove a entrada (Req. 14.6) | T13 | Implemented |
+| DCK-07 | Montar: página do deck agrupada e "N / 50" (Req. 14.7) | T3, T9, T20, T24 | Implemented |
+| DCK-08 | Montar: lista de decks (Req. 14.8) | T8 | Implemented |
+| DCK-09 | Montar: excluir com confirmação, sem tocar a coleção (Req. 14.9) | T11 | Implemented |
+| DCK-10 | Montar: renomear (Req. 14.10) | T11 | Implemented |
+| DCK-11 | Validar: status derivado, nunca persistido (Req. 14.11) | T4 | Implemented |
+| DCK-12 | Validar: regra de `válido` (Req. 14.12) | T1, T4 | Implemented |
+| DCK-13 | Validar: regra de `inválido` (Req. 14.13) | T1, T4 | Implemented |
+| DCK-14 | Validar: regra de `incompleto` (Req. 14.14) | T4 | Implemented |
+| DCK-15 | Validar: motivos em português (Req. 14.15) | T4, T9 | Implemented |
+| DCK-16 | Validar: multicolorida conta todas as cores (Req. 14.16) | T1, T4 | Implemented |
+| DCK-17 | Validar: aviso de banidas (Req. 14.17) | T9 | Implemented |
+| DCK-18 | Validar: regra do jogo nunca recusa gravação (Req. 14.18) | T4, T13 | Implemented |
+| DCK-19 | Validar: carta fora da fonte marcada (Req. 14.19) | T9, T24 | Implemented |
+| DCK-20 | Faltando: possuída = soma das variantes (Req. 14.20) | T5 | Implemented |
+| DCK-21 | Faltando: pedida/possuída/falta por carta (Req. 14.21) | T5, T10, T22 | Implemented |
+| DCK-22 | Faltando: total do deck (Req. 14.22) | T5, T10, T25 | Implemented |
+| DCK-23 | Faltando: derivado da coleção atual (Req. 14.23) | T5, T10 | Implemented |
+| DCK-24 | Importar: sempre cria deck novo (Req. 14.24) | T17 | Implemented |
+| DCK-25 | Importar: formato e fins de linha (Req. 14.25) | T6 | Implemented |
+| DCK-26 | Importar: linha Leader vira Leader (Req. 14.26) | T6, T17 | Implemented |
+| DCK-27 | Importar: linhas repetidas somam (Req. 14.27) | T6, T17 | Implemented |
+| DCK-28 | Importar: tudo ou nada com linhas listadas (Req. 14.28) | T6, T17 | Implemented |
+| DCK-29 | Importar: limite de tamanho (Req. 14.29) | T6, T17 | Implemented |
+| DCK-30 | Importar: deck fora das regras é criado (Req. 14.30) | T17 | Implemented |
+| DCK-31 | Exportar: formato e ordem (Req. 14.31) | T7, T16, T21 | Implemented |
+| DCK-32 | Exportar → importar reproduz o deck (Req. 14.32) | T7, T17 | Implemented |
+| DCK-33 | Pasta: falta = maior uso − possuída (Req. 14.33) | T5, T18, T22 | Implemented |
+| DCK-34 | Pasta: bloco "Faltando para os baralhos" (Req. 14.34) | T18, T20 | Implemented |
+| DCK-35 | Pasta: bloco omitido sem falta (Req. 14.35) | T18 | Implemented |
+| DCK-36 | Isolamento: deck de outro usuário é 404 (Req. 14.36) | T8, T11, T12, T13, T14, T16, T22, T23 | Implemented |
+| DCK-37 | Isolamento: rota de deck exige sessão (Req. 14.37) | T8, T13 | Implemented |
+| DCK-38 | Concorrência: incrementos simultâneos (Req. 14.38) | T13, T23 | Implemented |
+| DCK-39 | Limites: quantidade até 50 e nome até 60 (Req. 14.39) | T2, T3, T8, T11, T13, T23, T24 | Implemented |
+| DCK-40 | Ingestão preserva decks, sem cascata (Req. 14.40) | T2, T19 | Implemented |
+| DCK-41 | Deck em edição excluído (Req. 14.41) | T12, T15 | Implemented |
+| DCK-42 | Sem Leader, sem regra de cor (Req. 14.42) | T4 | Implemented |
+| DCK-43 | Validar: isenção do limite de 4 pelo texto da carta (Req. 14.43) | T4 | Implemented |
+| DCK-44 | Validar: aviso de regra própria do Leader (Req. 14.44) | T4, T9 | Implemented |
 
-**Coverage:** 44 total, 0 mapped to tasks, 44 unmapped ⚠️ (plano ainda não existe)
+**Coverage:** 44 total, 44 mapped to tasks, 0 unmapped
 
 ## Implicit-Requirement Dimensions
 
