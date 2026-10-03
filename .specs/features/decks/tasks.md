@@ -687,9 +687,9 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Duas ingestões sobre a fixture não mudam `leader_card_id` nem nenhum par `(card_id, quantity)` do deck
-- [ ] Uma carta do deck ausente do snapshot continua no deck (a ingestão não apaga)
-- [ ] Gate full passa; contagem registrada
+- [x] Duas ingestões sobre a fixture não mudam `leader_card_id` nem nenhum par `(card_id, quantity)` do deck
+- [x] Uma carta do deck ausente do snapshot continua no deck (a ingestão não apaga)
+- [x] Gate full passa; contagem registrada
 
 **Tests**: unit
 **Gate**: full

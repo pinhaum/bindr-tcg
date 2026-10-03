@@ -17,6 +17,13 @@ module Ingestion
     IRMA = "tcgplayer:647710".freeze
     # Carta de impressão única: tirá-la do snapshot ausenta carta e variante.
     CARTA_UNICA = "OP06-081".freeze
+    # O único Leader da fixture com `card_number` (verde e vermelho).
+    LEADER = "EB01-001".freeze
+    # `Description` crua da OP01-075 (Pacifista) no snapshot da apitcg de
+    # 2026-10-01T23:16:49Z. A carta não está na fixture.
+    DESCRICAO_OP01_075 = "Under the rules of this game, you may have any number of this card in your deck.\r\n" \
+                         "<br>\r\n[Blocker] <em>(After your opponent declares an attack, you may rest this card " \
+                         "to make it the new target of the attack.)</em>".freeze
 
     # `origem` é `revision:` (padrão) ou `snapshot:`, como no `Upsert`.
     def ingest(payload = FIXTURE.read, clock: Time, **origem)
@@ -166,6 +173,55 @@ module Ingestion
 
       assert_equal 1, posse.reload.quantity
       assert_equal 3, desejo.reload.target_quantity
+    end
+
+    # T19 da `decks` (DCK-40): o deck é a terceira coisa que o usuário escreve,
+    # e tem o mesmo direito da coleção e da wishlist. Ele referencia `cards`,
+    # não `card_variants`, então a garantia é sobre o Leader e os pares
+    # `(card_id, quantity)` das entradas.
+    test "os decks do usuário sobrevivem intactos a duas ingestões" do
+      ingest
+      deck = deck_povoado
+      antes = retrato_do_deck(deck)
+
+      runs = 2.times.map { ingest }
+
+      assert_equal [ "succeeded" ] * 2, runs.map(&:status),
+                   "o deck só está provado intacto se as duas reingestões tiverem de fato rodado"
+      assert_equal antes, retrato_do_deck(deck.reload), "a ingestão alterou o Leader ou alguma entrada do deck"
+    end
+
+    # DCK-40 e spec.md, *Assumptions* — "Carta do deck ausente da fonte
+    # continua no deck". Saem do snapshot uma carta do deck principal e o
+    # próprio Leader, que são as duas pontas que o deck referencia.
+    test "carta do deck ausente do snapshot continua no deck, assim como o Leader" do
+      ingest
+      deck = deck_povoado
+      antes = retrato_do_deck(deck)
+
+      run = ingest(fixture_sem_cartas(CARTA_UNICA, LEADER))
+
+      assert_equal "succeeded", run.status, "a ausência só vale depois de um run succeeded"
+      presentes = CardVariant.present.joins(:card).distinct.pluck("cards.card_number")
+      assert_empty [ CARTA_UNICA, LEADER ] & presentes,
+                   "o cenário só vale se a carta e o Leader tiverem de fato saído da fonte"
+      assert_equal antes, retrato_do_deck(deck.reload), "a carta ausente da fonte saiu do deck"
+    end
+
+    # design.md, *Risks* — a isenção do limite de 4 (DCK-43) depende da frase
+    # chegar inteira ao `effect_text`. A fixture não tem OP01-075 (nem outra
+    # carta com a frase) e não é alterada aqui: a `Description` crua da
+    # OP01-075 no snapshot de 2026-10-01, com `\r\n<br>\r\n` e `<em>`, entra em
+    # memória no lugar da de uma carta da fixture.
+    test "a frase de cópias ilimitadas sobrevive ao Normalize" do
+      payload = JSON.parse(FIXTURE.read)
+      alvo = payload["cards"].find { |p| p["code"] == "OP03-091" }
+      alvo["attributes"]["Description"] = DESCRICAO_OP01_075
+
+      ingest(payload)
+
+      carta = Card.find_by!(card_number: "OP03-091")
+      assert carta.unlimited_copies?, "a frase não sobreviveu ao Normalize: #{carta.effect_text.inspect}"
     end
 
     test "nenhuma foreign key da wishlist usa exclusão em cascata" do
@@ -402,9 +458,35 @@ module Ingestion
     end
 
     def fixture_sem_carta(card_number)
+      fixture_sem_cartas(card_number)
+    end
+
+    def fixture_sem_cartas(*card_numbers)
       payload = JSON.parse(FIXTURE.read)
-      payload["cards"].reject! { |p| p["code"] == card_number }
+      payload["cards"].reject! { |p| card_numbers.include?(p["code"]) }
       payload
+    end
+
+    # Leader e entradas com quantidades **diferentes entre si**: com o mesmo
+    # valor em todas, uma ingestão que sobrescrevesse as quantidades por um
+    # número igual passaria despercebida. Inclui uma carta fora das cores do
+    # Leader, porque o deck guarda o que o usuário pôs, legal ou não (DCK-18).
+    def deck_povoado
+      deck = Deck.create!(user: usuario, name: "Deck da ingestão", leader: Card.find_by!(card_number: LEADER))
+      { CARTA_UNICA => 3, "OP05-033" => 4, "OP07-020" => 2, "OP06-096" => 1 }.each do |numero, quantidade|
+        deck.entries.create!(card: Card.find_by!(card_number: numero), quantity: quantidade)
+      end
+      deck
+    end
+
+    # O que a ingestão não pode mudar: o Leader e os pares `(card_id, quantity)`,
+    # mais o `card_number` de cada um, para a mensagem dizer qual carta mudou.
+    def retrato_do_deck(deck)
+      {
+        leader_card_id: deck.leader_card_id,
+        leader: deck.leader&.card_number,
+        entradas: deck.entries.joins(:card).order("cards.card_number").pluck("cards.card_number", :card_id, :quantity)
+      }
     end
 
     # Segundo run `succeeded`, sem a variante: só então "ausente" tem significado
