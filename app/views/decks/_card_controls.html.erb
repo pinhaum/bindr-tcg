@@ -6,6 +6,10 @@
 
   **O `id` é o contrato com o Turbo Stream**: `DeckEntriesController` usa
   `turbo_stream.update` com `method: :morph` sobre `dom_id(card, :deck_entry)`.
+  O elemento com esse id fica em `catalog/show.html.erb`, fora deste partial:
+  o `update` troca o **conteúdo** do alvo, e um partial que trouxesse o próprio
+  invólucro deixaria dois `#deck_entry_card_N` aninhados depois do primeiro
+  clique (T25).
   O morph mexe só no que mudou e mantém os nós que ficaram: o botão que tinha
   o foco continua no DOM (achado H2 da revisão de a11y), e a região viva
   continua sendo a mesma, o que faz a mudança de texto ser anunciada. Um
@@ -19,7 +23,6 @@
   Sem JavaScript continua funcionando: `button_to` é um `<form method="post">`
   com token CSRF, e o controller responde `redirect_back`.
 %>
-<div id="<%= dom_id(card, :deck_entry) %>" class="deck-controls">
   <p class="deck-controls__target">
     As cartas vão para o deck <%= link_to deck.name, deck_path(deck) %>
   </p>
@@ -60,4 +63,3 @@
       <% end %>
     </div>
   <% end %>
-</div>

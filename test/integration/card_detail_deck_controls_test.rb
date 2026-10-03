@@ -123,4 +123,14 @@ class CardDetailDeckControlsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_nil controls_for(@card)
   end
+
+  # T25 — o alvo do Stream existe uma vez só na página.
+  test "o detalhe tem exatamente um elemento com o id do alvo do Stream" do
+    sign_in
+    create_editing_deck
+
+    get card_path("DT15-010")
+
+    assert_equal 1, css_select("##{ActionView::RecordIdentifier.dom_id(@card, :deck_entry)}").size
+  end
 end

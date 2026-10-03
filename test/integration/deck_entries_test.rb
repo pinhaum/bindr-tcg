@@ -209,4 +209,18 @@ class DeckEntriesTest < ActionDispatch::IntegrationTest
 
     assert_equal 2, quantity_in
   end
+
+  # T25 — o Stream troca o conteúdo do alvo; se o conteúdo trouxesse um
+  # elemento com o mesmo id, o DOM ficaria com dois `#deck_entry_card_N`
+  # aninhados depois do primeiro clique.
+  test "o conteúdo do Stream não repete o id do alvo" do
+    sign_in
+
+    post increment_deck_card_path(@deck, @card), headers: TURBO_STREAM
+
+    target = "deck_entry_card_#{@card.id}"
+    stream = css_select("turbo-stream[target='#{target}']").first
+    fragment = Nokogiri::HTML5.fragment(stream.at_css("template").inner_html)
+    assert_empty fragment.css("##{target}")
+  end
 end

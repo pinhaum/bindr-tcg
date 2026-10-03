@@ -110,4 +110,24 @@ class DeckShortfallPageTest < ActionDispatch::IntegrationTest
     assert_includes entry_text(@card), "pedida 4, possuída 1, falta 3"
     assert_equal "Faltam 3 cópias para montar este deck", total_text
   end
+
+  # DCK-22 emendado em 2026-10-02 — o deck sem nada não diz que você tem tudo.
+  test "deck sem Leader e sem entradas mostra que ainda não tem cartas" do
+    deck = create_deck
+    sign_in
+
+    get deck_path(deck)
+
+    assert_equal "Este deck ainda não tem cartas", total_text
+  end
+
+  test "deck só com o Leader, possuído, diz que você tem todas as cartas" do
+    own(@leader_base, 1)
+    deck = create_deck(leader: @leader)
+    sign_in
+
+    get deck_path(deck)
+
+    assert_equal "Você tem todas as cartas deste deck", total_text
+  end
 end

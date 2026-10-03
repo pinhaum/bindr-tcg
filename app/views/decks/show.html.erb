@@ -43,12 +43,16 @@
 
   <%#
     DCK-22 — o total do que falta soma o Leader e todas as entradas. Zero vira
-    a frase do spec, sem número.
+    a frase do spec, sem número; o deck sem Leader nem entradas tem frase
+    própria, para não dizer "você tem todas" de um deck vazio (emenda de
+    2026-10-02).
   %>
   <section class="deck__section" aria-labelledby="deck-shortfall-title">
     <h2 id="deck-shortfall-title" class="deck__section-title">Na sua pasta</h2>
     <% missing_total = @shortfall.values.sum(&:missing) %>
-    <% if missing_total.zero? %>
+    <% if @deck.leader.nil? && @deck.entries.empty? %>
+      <p class="deck__summary">Este deck ainda não tem cartas</p>
+    <% elsif missing_total.zero? %>
       <p class="deck__summary">Você tem todas as cartas deste deck</p>
     <% else %>
       <p class="deck__summary"><%= missing_total == 1 ? "Falta 1 cópia para montar este deck" : "Faltam #{missing_total} cópias para montar este deck" %></p>

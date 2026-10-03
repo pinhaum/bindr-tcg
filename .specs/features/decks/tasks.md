@@ -82,8 +82,10 @@ T23 e T24 (correções das revisões de segurança, banco e a11y do Lote B) entr
 ### Phase 3: Lista em texto, pasta e fechamento
 
 ```
-T16 → T17 → T18 → T19 → T20 → T21
+T16 → T17 → T18 → T19 → T20 → T25 → T21
 ```
+
+A T25 (deck vazio, emenda do DCK-22 em 2026-10-02, e o id duplicado do alvo do Stream achado na T20) entrou depois da T20 e roda antes da T21.
 
 ---
 
@@ -723,11 +725,37 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 ---
 
+### T25: Deck vazio e id único do alvo do Stream
+
+**What**: (a) Deck sem Leader e sem entradas mostra "Este deck ainda não tem cartas" em vez de "Você tem todas as cartas deste deck" (DCK-22 emendado em 2026-10-02). (b) O invólucro `#deck_entry_card_N` sai de `decks/_card_controls` e fica em `catalog/show.html.erb`: o `update` do Stream troca o conteúdo do alvo, e o partial trazia o próprio invólucro, deixando dois elementos com o mesmo id depois do primeiro clique (achado na T20).
+**Where**: `app/views/decks/_card_controls.html.erb`, `app/views/catalog/show.html.erb`, `app/views/decks/show.html.erb`
+**Depends on**: T20
+**Reuses**: o alvo e o `method: :morph` da T24
+**Requirement**: DCK-05, DCK-22
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Deck sem Leader e sem entradas mostra "Este deck ainda não tem cartas"; deck só com Leader possuído mostra "Você tem todas as cartas deste deck"
+- [x] O conteúdo do Stream não contém elemento com o id do alvo, e o detalhe tem exatamente um
+- [x] Os testes existentes passam sem edição
+- [x] Gate full passa; contagem registrada
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `fix(decks): distinguir o deck vazio e não repetir o id do alvo do Stream`
+
+---
+
 ### T21: Documentação e aceite do dono
 
 **What**: Atualizar o `CLAUDE.md` (models, controllers, contagem de testes, deck em edição na sessão), o *Handoff* do `STATE.md` e a traceability do spec. Pedir ao dono o teste manual: colar no OPTCG Simulator uma lista exportada, o que resolve o ⚠️ do separador LF, e montar um deck pelo detalhe até `válido` a 360px.
 **Where**: `CLAUDE.md`
-**Depends on**: T20
+**Depends on**: T25
 **Reuses**: o formato da seção "Estado atual" do `CLAUDE.md`
 **Requirement**: DCK-31 (⚠️ LF), Success Criteria
 
