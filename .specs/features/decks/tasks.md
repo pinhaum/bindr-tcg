@@ -712,10 +712,10 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 **Done when**:
 
-- [ ] Botões `−`, `+`, "Usar como Leader", "Editar este deck", "Excluir deck" e o submit do nome têm `min-height` e `min-width` de 44px, como `.ownership__button`, e os links de ação da página do deck ficam separados por ao menos 24px (achado H1 da revisão de a11y)
-- [ ] O teste de design prova que as classes novas existem no CSS (`class_coverage_test.rb`) e que nenhuma regra delas impede a quebra de linha a 360px
-- [ ] Capturas da lista, do deck, da importação, do detalhe com o controle e da pasta com o bloco, em 390px e 1280px, anexadas à task (fora do git)
-- [ ] Gate build passa; contagem registrada
+- [x] Botões `−`, `+`, "Usar como Leader", "Editar este deck", "Excluir deck" e o submit do nome têm `min-height` e `min-width` de 44px, como `.ownership__button`, e os links de ação da página do deck ficam separados por ao menos 24px (achado H1 da revisão de a11y)
+- [x] O teste de design prova que as classes novas existem no CSS (`class_coverage_test.rb`) e que nenhuma regra delas impede a quebra de linha a 360px
+- [x] Capturas da lista, do deck, da importação, do detalhe com o controle e da pasta com o bloco, em 390px e 1280px, anexadas à task (fora do git)
+- [x] Gate build passa; contagem registrada
 
 **Tests**: integration
 **Gate**: build

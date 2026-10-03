@@ -5,12 +5,12 @@
   (`collection_imports/show.html.erb`): sem JS, testável por integração, e
   nada é apagado só por abrir esta página.
 %>
-<main>
-  <h1>Excluir o deck “<%= @deck.name %>”?</h1>
+<main class="deck">
+  <h1 class="deck__title">Excluir o deck “<%= @deck.name %>”?</h1>
 
-  <p>O deck e as cartas dele somem. Sua coleção e sua wishlist não mudam.</p>
+  <p class="deck__summary">O deck e as cartas dele somem. Sua coleção e sua wishlist não mudam.</p>
 
-  <%= button_to "Excluir deck", deck_path(@deck), method: :delete %>
+  <%= button_to "Excluir deck", deck_path(@deck), method: :delete, class: "deck__button", form_class: "deck__form" %>
 
-  <p><%= link_to "Cancelar", deck_path(@deck) %></p>
+  <p class="deck__actions"><%= link_to "Cancelar", deck_path(@deck), class: "deck__action" %></p>
 </main>

@@ -3,39 +3,39 @@
 <%#
   DCK-08 — cada deck com nome, Leader, total "N / 50" e status. O status é
   calculado agora, sobre as entradas carregadas pelo `includes` do controller,
-  e nunca lido de uma coluna (DCK-11). O layout fica para a T20.
+  e nunca lido de uma coluna (DCK-11).
 %>
-<main>
-  <h1>Baralhos</h1>
+<main class="deck">
+  <h1 class="deck__title">Baralhos</h1>
 
-  <p>
-    <%= link_to "Novo deck", new_deck_path %>
-    <%= link_to "Importar lista", new_deck_import_path %>
+  <p class="deck__actions">
+    <%= link_to "Novo deck", new_deck_path, class: "deck__action" %>
+    <%= link_to "Importar lista", new_deck_import_path, class: "deck__action" %>
   </p>
 
   <% if @decks.any? %>
-    <ul>
+    <ul class="deck__list">
       <% @decks.each do |deck| %>
-        <li>
-          <h2><%= link_to deck.name, deck %></h2>
-          <dl>
-            <div>
-              <dt>Leader</dt>
-              <dd><%= deck.leader ? "#{deck.leader.name} (#{deck.leader.card_number})" : "Sem Leader" %></dd>
+        <li class="deck__item">
+          <h2 class="deck__item-title"><%= link_to deck.name, deck, class: "deck__item-link" %></h2>
+          <dl class="deck__facts">
+            <div class="deck__fact">
+              <dt class="deck__fact-label">Leader</dt>
+              <dd class="deck__fact-value"><%= deck.leader ? "#{deck.leader.name} (#{deck.leader.card_number})" : "Sem Leader" %></dd>
             </div>
-            <div>
-              <dt>Cartas</dt>
-              <dd><%= deck.main_total %> / <%= Deck::Legality::MAIN_SIZE %></dd>
+            <div class="deck__fact">
+              <dt class="deck__fact-label">Cartas</dt>
+              <dd class="deck__fact-value"><%= deck.main_total %> / <%= Deck::Legality::MAIN_SIZE %></dd>
             </div>
-            <div>
-              <dt>Status</dt>
-              <dd><%= deck_status_label(deck.legality.status) %></dd>
+            <div class="deck__fact">
+              <dt class="deck__fact-label">Status</dt>
+              <dd class="deck__fact-value"><%= deck_status_label(deck.legality.status) %></dd>
             </div>
           </dl>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p>Você ainda não tem decks.</p>
+    <p class="deck__empty">Você ainda não tem decks.</p>
   <% end %>
 </main>

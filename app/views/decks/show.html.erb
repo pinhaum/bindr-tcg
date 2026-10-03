@@ -2,27 +2,26 @@
 
 <%#
   A página do deck (DCK-07, DCK-15, DCK-17, DCK-19, DCK-44). O status vem de
-  `Deck#legality`, calculado agora e nunca gravado (DCK-11). O layout fica
-  para a T20; aqui só a estrutura e o texto.
+  `Deck#legality`, calculado agora e nunca gravado (DCK-11).
 %>
-<main>
-  <h1><%= @deck.name %></h1>
+<main class="deck">
+  <h1 class="deck__title"><%= @deck.name %></h1>
 
   <%# T12 — o deck em edição é o que recebe as cartas pelo detalhe da carta. %>
   <% if editing_deck == @deck %>
-    <p>Em edição</p>
+    <p class="deck__editing">Em edição</p>
   <% else %>
-    <%= button_to "Editar este deck", select_deck_path(@deck) %>
+    <%= button_to "Editar este deck", select_deck_path(@deck), class: "deck__button", form_class: "deck__form" %>
   <% end %>
 
-  <section aria-labelledby="deck-status-title">
-    <h2 id="deck-status-title">Status: <%= deck_status_label(@legality.status) %></h2>
+  <section class="deck__section" aria-labelledby="deck-status-title">
+    <h2 id="deck-status-title" class="deck__section-title">Status: <%= deck_status_label(@legality.status) %></h2>
 
     <%# DCK-15 — motivos só quando o deck não é válido; `válido` não tem o que explicar. %>
     <% if @legality.status != :valid %>
-      <ul>
+      <ul class="deck__reasons">
         <% @legality.reasons.each do |reason| %>
-          <li><%= reason %></li>
+          <li class="deck__reason"><%= reason %></li>
         <% end %>
       </ul>
     <% end %>
@@ -32,66 +31,66 @@
       o status (decisão do dono em 2026-10-02). O texto vem do catálogo.
     %>
     <% @legality.warnings.each do |rule| %>
-      <div>
-        <p><strong>Este Leader tem regra de montagem própria, não verificada</strong></p>
-        <blockquote><p><%= rule %></p></blockquote>
+      <div class="deck__warning">
+        <p class="deck__warning-title"><strong>Este Leader tem regra de montagem própria, não verificada</strong></p>
+        <blockquote class="deck__rule"><p><%= rule %></p></blockquote>
       </div>
     <% end %>
 
     <%# DCK-17 — sempre, porque o app não mantém a lista de banidas. %>
-    <p>A lista de banidas não é verificada</p>
+    <p class="deck__note">A lista de banidas não é verificada</p>
   </section>
 
   <%#
     DCK-22 — o total do que falta soma o Leader e todas as entradas. Zero vira
     a frase do spec, sem número.
   %>
-  <section aria-labelledby="deck-shortfall-title">
-    <h2 id="deck-shortfall-title">Na sua pasta</h2>
+  <section class="deck__section" aria-labelledby="deck-shortfall-title">
+    <h2 id="deck-shortfall-title" class="deck__section-title">Na sua pasta</h2>
     <% missing_total = @shortfall.values.sum(&:missing) %>
     <% if missing_total.zero? %>
-      <p>Você tem todas as cartas deste deck</p>
+      <p class="deck__summary">Você tem todas as cartas deste deck</p>
     <% else %>
-      <p><%= missing_total == 1 ? "Falta 1 cópia para montar este deck" : "Faltam #{missing_total} cópias para montar este deck" %></p>
+      <p class="deck__summary"><%= missing_total == 1 ? "Falta 1 cópia para montar este deck" : "Faltam #{missing_total} cópias para montar este deck" %></p>
     <% end %>
   </section>
 
-  <section aria-labelledby="deck-leader-title">
-    <h2 id="deck-leader-title">Leader</h2>
+  <section class="deck__section" aria-labelledby="deck-leader-title">
+    <h2 id="deck-leader-title" class="deck__section-title">Leader</h2>
     <% if @deck.leader %>
-      <p>
-        <%= link_to "#{@deck.leader.name} (#{@deck.leader.card_number})", card_path(@deck.leader.card_number) %>
+      <p class="deck__entry">
+        <%= link_to "#{@deck.leader.name} (#{@deck.leader.card_number})", card_path(@deck.leader.card_number), class: "deck__entry-link" %>
         <% if @absent_card_ids.include?(@deck.leader_card_id) %>
-          <span>carta fora da fonte</span>
+          <span class="deck__absent">carta fora da fonte</span>
         <% end %>
         <%= render "decks/shortfall_counts", row: @shortfall.fetch(@deck.leader_card_id) %>
       </p>
     <% else %>
-      <p>Sem Leader</p>
+      <p class="deck__summary">Sem Leader</p>
     <% end %>
   </section>
 
-  <section aria-labelledby="deck-main-title">
+  <section class="deck__section" aria-labelledby="deck-main-title">
     <%# DCK-07 — o total é só o deck principal; o Leader fica fora dos 50. %>
-    <h2 id="deck-main-title">Deck principal: <%= @deck.main_total %> / <%= Deck::Legality::MAIN_SIZE %></h2>
+    <h2 id="deck-main-title" class="deck__section-title">Deck principal: <%= @deck.main_total %> / <%= Deck::Legality::MAIN_SIZE %></h2>
 
     <%#
       `ordered_entries` já vem em Character, Event e Stage, por custo e depois
       `card_number`; `chunk_while` só corta onde o tipo muda, sem reordenar.
     %>
     <% @deck.ordered_entries.chunk_while { |a, b| a.card.card_type == b.card.card_type }.each do |group| %>
-      <section>
-        <h3><%= deck_group_label(group.first.card.card_type) %></h3>
-        <ul>
+      <section class="deck__group">
+        <h3 class="deck__group-title"><%= deck_group_label(group.first.card.card_type) %></h3>
+        <ul class="deck__entries">
           <% group.each do |entry| %>
-            <li>
-              <span><%= entry.quantity %>×</span>
-              <%= link_to "#{entry.card.name} (#{entry.card.card_number})", card_path(entry.card.card_number) %>
+            <li class="deck__entry">
+              <span class="deck__quantity"><%= entry.quantity %>×</span>
+              <%= link_to "#{entry.card.name} (#{entry.card.card_number})", card_path(entry.card.card_number), class: "deck__entry-link" %>
               <% if entry.card.cost %>
-                <span>custo <%= entry.card.cost %></span>
+                <span class="deck__cost">custo <%= entry.card.cost %></span>
               <% end %>
               <% if @absent_card_ids.include?(entry.card_id) %>
-                <span>carta fora da fonte</span>
+                <span class="deck__absent">carta fora da fonte</span>
               <% end %>
               <%= render "decks/shortfall_counts", row: @shortfall.fetch(entry.card_id) %>
             </li>
@@ -101,10 +100,11 @@
     <% end %>
   </section>
 
-  <p>
-    <%= link_to "Exportar lista", deck_path(@deck, format: :txt) %>
-    <%= link_to "Renomear", edit_deck_path(@deck) %>
-    <%= link_to "Excluir", delete_deck_path(@deck) %>
-    <%= link_to "Voltar aos baralhos", decks_path %>
+  <%# Achado H1 da revisão de a11y: os links de ação ficam a 24px uns dos outros (`.deck__actions`). %>
+  <p class="deck__actions">
+    <%= link_to "Exportar lista", deck_path(@deck, format: :txt), class: "deck__action" %>
+    <%= link_to "Renomear", edit_deck_path(@deck), class: "deck__action" %>
+    <%= link_to "Excluir", delete_deck_path(@deck), class: "deck__action" %>
+    <%= link_to "Voltar aos baralhos", decks_path, class: "deck__action" %>
   </p>
 </main>

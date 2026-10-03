@@ -10,13 +10,14 @@ require_relative "support/stylesheet"
 # que bloco novo não entre sem alguém olhar.
 class LiteralValuesTest < ActiveSupport::TestCase
   # Os 21 blocos BEM medidos no inventário de `.specs/features/interface/tasks.md`,
-  # mais `code`, o envoltório inline de identificador da T11.
+  # mais `code`, o envoltório inline de identificador da T11, e os três blocos
+  # das telas de deck (T20 da `decks`): `deck`, `deck-controls` e `deck-shortfall`.
   # A lista vive aqui, não é lida da folha.
   EXPECTED_BLOCKS = %w[
-    auth card-detail card-tile catalog code collection-export field filter-chip
-    flash flash-area import-preview import-summary ownership pagination
-    progress progress-set site-header variant variant-list wishlist
-    wishlist-item wishlist-mark
+    auth card-detail card-tile catalog code collection-export deck deck-controls
+    deck-shortfall field filter-chip flash flash-area import-preview import-summary
+    ownership pagination progress progress-set site-header variant variant-list
+    wishlist wishlist-item wishlist-mark
   ].freeze
 
   # Seletores sem classe: o seletor raiz.

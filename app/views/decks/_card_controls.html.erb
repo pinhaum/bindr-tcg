@@ -18,11 +18,9 @@
 
   Sem JavaScript continua funcionando: `button_to` é um `<form method="post">`
   com token CSRF, e o controller responde `redirect_back`.
-
-  O layout fica para a T20; aqui só a estrutura, sem classe.
 %>
-<div id="<%= dom_id(card, :deck_entry) %>">
-  <p>
+<div id="<%= dom_id(card, :deck_entry) %>" class="deck-controls">
+  <p class="deck-controls__target">
     As cartas vão para o deck <%= link_to deck.name, deck_path(deck) %>
   </p>
 
@@ -34,25 +32,29 @@
     %>
     <% if deck.leader_card_id == card.id %>
       <%= button_to "#{card.name} é o Leader deste deck", deck_leader_path(deck), params: { card_id: card.id },
+                    class: "deck-controls__button", form_class: "deck-controls__form",
                     aria: { disabled: true } %>
     <% else %>
       <%= button_to "Usar como Leader", deck_leader_path(deck), params: { card_id: card.id },
+                    class: "deck-controls__button", form_class: "deck-controls__form",
                     aria: { label: "Usar #{card.name} como Leader do deck #{deck.name}" } %>
     <% end %>
   <% else %>
-    <p id="<%= dom_id(card, :deck_entry_quantity) %>" aria-live="polite" aria-atomic="true"><%= quantity %> <%= quantity == 1 ? "cópia" : "cópias" %> de <%= card.name %> no deck</p>
+    <p id="<%= dom_id(card, :deck_entry_quantity) %>" class="deck-controls__quantity" aria-live="polite" aria-atomic="true"><%= quantity %> <%= quantity == 1 ? "cópia" : "cópias" %> de <%= card.name %> no deck</p>
 
-    <div>
+    <div class="deck-controls__actions">
       <%#
         O rótulo acessível cita a carta e o deck: "−" e "+" sozinhos não dizem a
         quem vão, e o detalhe também tem os botões de posse por variante.
       %>
       <%= button_to decrement_deck_card_path(deck, card),
+                    class: "deck-controls__button", form_class: "deck-controls__form",
                     aria: { label: "Remover uma cópia de #{card.name} do deck #{deck.name}" } do %>
         <span aria-hidden="true">&minus;</span>
       <% end %>
 
       <%= button_to increment_deck_card_path(deck, card),
+                    class: "deck-controls__button", form_class: "deck-controls__form",
                     aria: { label: "Adicionar uma cópia de #{card.name} ao deck #{deck.name}" } do %>
         <span aria-hidden="true">+</span>
       <% end %>

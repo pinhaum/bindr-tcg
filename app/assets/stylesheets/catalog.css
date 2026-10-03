@@ -106,7 +106,8 @@ body {
 .import-preview__number,
 .import-preview__variant,
 .import-summary__number-card,
-.import-summary__variant {
+.import-summary__variant,
+.deck-shortfall__number {
   font-family: var(--font-mono);
   font-size: var(--code-size);
   line-height: var(--code-line-height);
@@ -2282,6 +2283,9 @@ summary:focus-visible,
 
   .card-detail__variants { grid-column: 2; }
 
+  /* T20 da `decks` — o controle de deck fica na coluna dos dados, ao lado da imagem. */
+  .card-detail__deck { grid-column: 2; }
+
   /*
    * D:69 — em 1024px ou mais, a variante inteira fica numa linha só (o
    * `flex-wrap` da regra base deixa de quebrar porque a largura disponível
@@ -2499,3 +2503,324 @@ summary:focus-visible,
   text-decoration: none;
   align-self: flex-start;
 }
+
+/*
+ * T20 da `decks` — telas de deck, o controle no detalhe da carta e o bloco
+ * "Faltando para os baralhos" na pasta (DCK-07, DCK-34; Req. 2.5).
+ *
+ * As regras de 360px da wishlist e do export: nenhuma largura fixa, nenhum
+ * `white-space: nowrap`, nenhum `overflow-x`. Nome de deck e de carta vêm do
+ * usuário ou da fonte e podem ter 60 caracteres sem espaço, então todo texto
+ * deles quebra com `overflow-wrap: anywhere`.
+ *
+ * Os botões de deck têm o alvo de 44px do `.ownership__button` no detalhe
+ * (NAV-50), em altura e largura, porque `−` e `+` são estreitos.
+ */
+
+.deck { min-width: 0; padding: var(--space-4); }
+
+.deck__title {
+  font-size: var(--display-size);
+  line-height: var(--display-line-height);
+  font-weight: var(--display-weight);
+  margin: 0 0 var(--space-3);
+  overflow-wrap: anywhere;
+}
+
+.deck__section { margin: 0 0 var(--space-4); }
+
+.deck__section-title {
+  font-size: var(--title-size);
+  line-height: var(--title-line-height);
+  font-weight: var(--title-weight);
+  margin: 0 0 var(--space-2);
+}
+
+.deck__group { margin: 0 0 var(--space-3); }
+
+.deck__group-title {
+  font-size: var(--body-strong-size);
+  line-height: var(--body-strong-line-height);
+  font-weight: var(--body-strong-weight);
+  margin: 0 0 var(--space-2);
+}
+
+.deck__summary,
+.deck__note,
+.deck__editing { margin: 0 0 var(--space-3); }
+
+/* Texto secundário em `ink-muted`, não em opacidade. */
+.deck__note,
+.deck__hint,
+.deck__cost,
+.deck__counts {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
+
+/* "Em edição" é estado, não ação: reforço por forma, sem `accent`. */
+.deck__editing {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-weight: var(--body-strong-weight);
+}
+
+.deck__reasons { margin: 0 0 var(--space-2); padding-left: var(--space-4); }
+
+.deck__reason { margin: 0 0 var(--space-1); overflow-wrap: anywhere; }
+
+.deck__warning {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.deck__warning-title { margin: 0 0 var(--space-1); }
+
+.deck__rule { margin: 0; overflow-wrap: anywhere; }
+
+.deck__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+
+.deck__item {
+  min-width: 0;
+  padding: var(--space-3);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.deck__item-title {
+  font-size: var(--title-size);
+  line-height: var(--title-line-height);
+  font-weight: var(--title-weight);
+  margin: 0 0 var(--space-2);
+}
+
+.deck__item-link {
+  display: inline-block;
+  min-height: 24px;
+  overflow-wrap: anywhere;
+}
+
+.deck__facts {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  margin: 0;
+}
+
+.deck__fact { min-width: 0; }
+
+.deck__fact-label {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
+
+.deck__fact-value { margin: 0; overflow-wrap: anywhere; }
+
+.deck__empty { margin: 0; }
+
+.deck__entries { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+
+/* Quantidade, nome, custo, "fora da fonte" e contagens: fluem e quebram em 360px. */
+.deck__entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  row-gap: var(--space-1);
+  margin: 0;
+  min-width: 0;
+}
+
+.deck__entry-link { min-width: 0; overflow-wrap: anywhere; }
+
+.deck__quantity { font-weight: var(--display-weight); font-variant-numeric: tabular-nums; }
+
+/* SRC-17 e DCK-19 — "fora da fonte" é texto com peso de destaque, não só cor. */
+.deck__absent {
+  padding: 0 var(--space-1);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  font-weight: var(--body-strong-weight);
+}
+
+.deck__counts { font-variant-numeric: tabular-nums; }
+
+/* Achado H1 da revisão de a11y: 24px entre os links de ação (SC 2.5.8). */
+.deck__actions {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-4);
+  row-gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+}
+
+.deck__action {
+  display: inline-block;
+  min-height: 24px;
+  min-width: 24px;
+  padding: var(--space-1) 0;
+  overflow-wrap: anywhere;
+}
+
+.deck__form { margin: 0 0 var(--space-3); }
+
+.deck__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  padding: var(--space-1) var(--space-3);
+  font: inherit;
+  color: var(--ink);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+/* O submit do nome e da importação: o accent do `.auth__submit`, com o alvo de 44px. */
+.deck__submit {
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+}
+
+.deck__list-input {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  line-height: var(--code-line-height);
+  color: var(--ink);
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+}
+
+/* Controle de deck no detalhe da carta (DCK-03..05). */
+.card-detail__deck { margin: 0 0 var(--space-3); min-width: 0; }
+
+.deck-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.deck-controls__target { margin: 0; overflow-wrap: anywhere; }
+
+.deck-controls__quantity { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+.deck-controls__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.deck-controls__form { margin: 0; }
+
+/* "−" e "+" se distinguem pelo rótulo, não por cor; nenhum é destrutivo. */
+.deck-controls__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  padding: var(--space-1) var(--space-3);
+  font: inherit;
+  font-weight: var(--body-strong-weight);
+  color: var(--ink);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+/*
+ * O Leader atual fica com `aria-disabled` e focável (T14). Inerte pela forma,
+ * borda tracejada, sem opacidade: a opacidade da folha é só da posse.
+ */
+.deck-controls__button[aria-disabled="true"] { border-style: dashed; cursor: default; }
+
+/*
+ * "Faltando para os baralhos" (DCK-34), no topo de `.progress__secondary`,
+ * como no canvas (`Desktop-Pasta.dc.html:126-140`): título em `title` e um
+ * cartão `surface-raised` com uma linha por carta. Ocupa a linha inteira da
+ * coluna, que é flex com quebra.
+ */
+.deck-shortfall {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex-basis: 100%;
+  min-width: 0;
+}
+
+.deck-shortfall__title {
+  font-size: var(--title-size);
+  line-height: var(--title-line-height);
+  font-weight: var(--title-weight);
+  margin: 0;
+}
+
+.deck-shortfall__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: var(--space-3);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.deck-shortfall__item { min-width: 0; }
+
+.deck-shortfall__card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  row-gap: var(--space-1);
+  margin: 0;
+}
+
+.deck-shortfall__name {
+  min-width: 0;
+  font-weight: var(--body-strong-weight);
+  overflow-wrap: anywhere;
+}
+
+.deck-shortfall__number { color: var(--ink-muted); }
+
+.deck-shortfall__missing {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
+
+.deck-shortfall__decks {
+  margin: var(--space-1) 0 0;
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.deck-shortfall__deck { color: var(--ink); }

@@ -8,24 +8,22 @@
 
   A falta de cada carta é o maior uso entre os decks menos o possuído, então
   os decks listados são todos os que a usam, e cada um tem link (DCK-34).
-
-  O layout fica para a T20.
 %>
 <% if rows.any? %>
-  <section aria-labelledby="deck-folder-shortfall-title">
-    <h2 id="deck-folder-shortfall-title">Faltando para os baralhos</h2>
+  <section class="deck-shortfall" aria-labelledby="deck-folder-shortfall-title">
+    <h2 id="deck-folder-shortfall-title" class="deck-shortfall__title">Faltando para os baralhos</h2>
 
-    <ul>
+    <ul class="deck-shortfall__list">
       <% rows.each do |row| %>
-        <li>
-          <p>
-            <%= link_to row.card.name, card_path(row.card.card_number) %>
-            <code><%= row.card.card_number %></code>
-            <span><%= row.missing == 1 ? "falta 1" : "faltam #{row.missing}" %></span>
+        <li class="deck-shortfall__item">
+          <p class="deck-shortfall__card">
+            <%= link_to row.card.name, card_path(row.card.card_number), class: "deck-shortfall__name" %>
+            <code class="deck-shortfall__number"><%= row.card.card_number %></code>
+            <span class="deck-shortfall__missing"><%= row.missing == 1 ? "falta 1" : "faltam #{row.missing}" %></span>
           </p>
-          <p>
+          <p class="deck-shortfall__decks">
             Em
-            <% row.deck_ids.filter_map { |id| decks[id] }.each_with_index do |deck, index| %><%= ", " if index.positive? %><%= link_to deck.name, deck_path(deck) %><% end %>
+            <% row.deck_ids.filter_map { |id| decks[id] }.each_with_index do |deck, index| %><%= ", " if index.positive? %><%= link_to deck.name, deck_path(deck), class: "deck-shortfall__deck" %><% end %>
           </p>
         </li>
       <% end %>

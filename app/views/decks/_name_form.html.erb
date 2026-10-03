@@ -13,7 +13,7 @@
 %>
 <% name_invalid = deck.errors[:name].any? %>
 <% if name_invalid %>
-  <div id="deck-name-error" role="alert" tabindex="-1">
+  <div id="deck-name-error" class="auth__errors" role="alert" tabindex="-1">
     <ul>
       <% deck.errors[:name].each do |message| %>
         <li>O nome <%= message %>.</li>
@@ -22,14 +22,14 @@
   </div>
 <% end %>
 
-<%= form_with model: deck do |form| %>
-  <div>
+<%= form_with model: deck, class: "auth__form" do |form| %>
+  <div class="auth__field">
     <%= form.label :name do %>
-      Nome do deck <span>(até <%= Deck::NAME_LENGTH.max %> caracteres)</span>
+      Nome do deck <span class="deck__hint">(até <%= Deck::NAME_LENGTH.max %> caracteres)</span>
     <% end %>
     <%= form.text_field :name, required: true, maxlength: Deck::NAME_LENGTH.max, autofocus: true,
                                aria: name_invalid ? { invalid: true, describedby: "deck-name-error" } : {} %>
   </div>
 
-  <%= form.submit submit %>
+  <%= form.submit submit, class: "auth__submit deck__submit" %>
 <% end %>
