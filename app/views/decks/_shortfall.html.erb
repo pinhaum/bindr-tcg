@@ -1,0 +1,34 @@
+<%#
+  "Faltando para os baralhos" (DCK-33..35), no topo da coluna lateral da
+  pasta, como no canvas (`navegacao/canvas/Desktop-Pasta.dc.html:126-140`),
+  sem o preço, que é da Fase 3.
+
+  `rows` só traz as cartas que faltam. Sem nenhuma (sem decks, ou com tudo
+  possuído), o bloco não aparece, nem o título: não há estado vazio (DCK-35).
+
+  A falta de cada carta é o maior uso entre os decks menos o possuído, então
+  os decks listados são todos os que a usam, e cada um tem link (DCK-34).
+
+  O layout fica para a T20.
+%>
+<% if rows.any? %>
+  <section aria-labelledby="deck-folder-shortfall-title">
+    <h2 id="deck-folder-shortfall-title">Faltando para os baralhos</h2>
+
+    <ul>
+      <% rows.each do |row| %>
+        <li>
+          <p>
+            <%= link_to row.card.name, card_path(row.card.card_number) %>
+            <code><%= row.card.card_number %></code>
+            <span><%= row.missing == 1 ? "falta 1" : "faltam #{row.missing}" %></span>
+          </p>
+          <p>
+            Em
+            <% row.deck_ids.filter_map { |id| decks[id] }.each_with_index do |deck, index| %><%= ", " if index.positive? %><%= link_to deck.name, deck_path(deck) %><% end %>
+          </p>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

@@ -145,6 +145,8 @@
   %>
   <div class="progress__content">
     <div class="progress__secondary">
+      <%= render "decks/shortfall", rows: @deck_shortfall, decks: @shortfall_decks %>
+
       <%= render "progress/export_link" %>
 
       <p class="progress__action">

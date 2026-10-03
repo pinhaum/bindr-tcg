@@ -35,5 +35,19 @@ class ProgressController < ApplicationController
     query = SetProgressQuery.new(Current.user, order: params[:order])
     @order = query.order
     @rows = query.call
+    load_deck_shortfall
   end
+
+  private
+    # DCK-33..35 — o que falta para montar qualquer um dos decks: o maior uso
+    # entre eles menos o possuído, da mesma `DeckShortfallQuery` da página do
+    # deck, sem `deck:`. Só as cartas que faltam entram; sem nenhuma, o bloco
+    # some. Os decks citados vêm numa consulta só, e só quando há o que
+    # mostrar.
+    def load_deck_shortfall
+      @deck_shortfall = DeckShortfallQuery.new(Current.user).call.select { |row| row.missing.positive? }
+      return @shortfall_decks = {} if @deck_shortfall.empty?
+
+      @shortfall_decks = Current.user.decks.where(id: @deck_shortfall.flat_map(&:deck_ids).uniq).index_by(&:id)
+    end
 end
