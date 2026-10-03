@@ -775,6 +775,15 @@ A T25 (deck vazio, emenda do DCK-22 em 2026-10-02, e o id duplicado do alvo do S
 **Gate**: full
 **Commit**: `docs(decks): registrar a feature no CLAUDE.md e no STATE`
 
+
+**Teste no navegador pelo orquestrador (2026-10-03, Chromium a 360px, conta de dev `t21-decks@example.com`)**:
+
+- Item 1, importação: o exemplo do dono (CR) vira o deck 10, `válido`, 50 / 50, `scrollWidth` 360.
+- Exportação: `text/plain; charset=utf-8`, 15 linhas por LF, sem CR, `1xOP17-079` primeiro. Reimportar dá o deck 11 com o mesmo texto exportado.
+- Item 3, montagem pelo detalhe: o deck 12 chega a `válido` (50 / 50) com 49 cliques em `+` e "Usar como Leader". Nenhuma navegação de página (Turbo Stream), `scrollWidth` 360 em todo detalhe e um único `#deck_entry_card_N` por página.
+- Achado de a11y, **anterior aos decks**: depois de `+`/`−`, o foco cai no `<body>`. O Turbo põe `disabled` no botão durante o envio, e o elemento focado perde o foco. O controle de posse da coleção faz o mesmo. Aberto para o dono, sem código alterado.
+- Achado menor: o nome acessível "Usar Monkey.D.Luffy como Leader do deck …" não contém o texto visível "Usar como Leader" (WCAG 2.5.3). O mesmo padrão dos `−`/`+` foi aceito no projeto.
+- **Pendente**: o item 2, colar a lista no OPTCG Simulator para confirmar o LF, depende do app do dono. Uma busca na web não esclareceu o separador.
 ---
 
 ## Plano de delegação
