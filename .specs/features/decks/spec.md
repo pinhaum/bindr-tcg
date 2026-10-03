@@ -109,7 +109,7 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 **Acceptance Criteria**:
 1. The system SHALL considerar como possuídas de uma carta a soma das quantidades de todas as variantes dela na coleção do usuário, presentes ou não na fonte.
 2. WHEN o usuário abrir a página de um deck THEN the system SHALL exibir, para o Leader e para cada carta do deck principal, a quantidade pedida, a possuída e a que falta, sendo a que falta `max(0, pedida − possuída)`.
-3. WHEN o usuário abrir a página de um deck THEN the system SHALL exibir o total de cópias que faltam somando todas as cartas do deck, ou "Você tem todas as cartas deste deck" quando o total for zero.
+3. WHEN o usuário abrir a página de um deck THEN the system SHALL exibir o total de cópias que faltam somando todas as cartas do deck, ou "Você tem todas as cartas deste deck" quando o total for zero e o deck tiver Leader ou entradas. Deck sem Leader e sem entradas exibe "Este deck ainda não tem cartas" (decisão do dono em 2026-10-02).
 4. WHEN a coleção do usuário mudar THEN the system SHALL refletir a mudança no que falta na próxima leitura da página do deck, sem nenhuma sincronização gravada.
 
 **Independent Test**: Com 2 cópias da variante base e 1 da parallel de uma carta, e um deck que pede 4 dela, a página mostra "pedida 4, possuída 3, falta 1".

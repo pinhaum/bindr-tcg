@@ -643,7 +643,8 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
 21. A página do deck DEVE exibir, para o Leader e cada carta, a quantidade
     pedida, a possuída e a que falta, `max(0, pedida − possuída)`.
 22. A página do deck DEVE exibir o total que falta, ou "Você tem todas as cartas
-    deste deck" quando for zero.
+    deste deck" quando for zero e o deck tiver Leader ou entradas. Deck sem
+    Leader e sem entradas DEVE exibir "Este deck ainda não tem cartas".
 23. O que falta DEVE ser derivado da coleção atual a cada leitura, sem
     sincronização gravada.
 
