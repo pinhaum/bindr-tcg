@@ -663,7 +663,7 @@ T16 → T17 → T18 → T19 → T20 → T21
 
 - [ ] Dois decks pedindo 4 e 2 da mesma carta, com 1 possuída, mostram "faltam 3" e links para os dois decks
 - [ ] Sem decks, ou com tudo possuído, o HTML não tem o bloco nem um título vazio
-- [ ] Os testes existentes da pasta passam sem edição
+- [ ] Os testes existentes da pasta passam sem edição, exceto `set_progress_plan_test.rb`, que passa de 2 para 3 consultas com a `listDeckShortfall` nomeada (AD-021)
 - [ ] Gate full passa; contagem registrada
 
 **Tests**: integration

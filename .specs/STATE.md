@@ -162,6 +162,14 @@
 - **Date**: 2026-10-01
 - **Status**: active
 
+### AD-021
+- **Decision**: O teste protegido `test/queries/set_progress_plan_test.rb` ("descontadas as consultas de sessão, a página resolve em duas agregações") passa a aceitar **três** consultas em "Minha pasta". A terceira é a `listDeckShortfall` (`DeckShortfallQuery` sem `deck:`), que alimenta o bloco "Faltando para os baralhos" (DCK-33..35). A edição entra na T18 da `decks`.
+- **Reason**: O teste protege a pasta contra N+1 por set. A consulta nova é uma só, fixa e de agregação única, e não cresce com sets nem com decks. A alternativa (pular a consulta para quem não tem decks) exigiria um contador em `users`, com migração, para economizar uma consulta. Decisão do dono em 2026-10-02.
+- **Trade-off**: Quem não tem decks paga uma consulta que devolve vazio.
+- **Scope**: `decks` T18; `test/queries/set_progress_plan_test.rb`. Mesma classe da AD-017 e da AD-018.
+- **Date**: 2026-10-02
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-10-02, Fase 2 — este bloco vence os de baixo.** Feature **`decks`**: spec, `design.md` e `tasks.md` escritos. O design foi aprovado pelo dono com o **deck em edição guardado na sessão do Rails** (`session[:editing_deck_id]`, revalidado por `Current.user.decks`). As alternativas recusadas foram `users.editing_deck_id` e `?deck=` na URL. Plano: T1–T21 em três phases (domínio; telas e detalhe; texto, pasta e fechamento). A §9 do `.context/tasks.md` está aberta, e `validate_tasks.py` sai 0. Nada de código. `tasks.md` aprovado. **T1 feita (2026-10-02):** as Comprehensive Rules v1.2.1 confirmam a leitura estrita da multicolorida (2-3-5), mas a regra 5-1-2-4 abre exceções ao limite de 4. O spec ganhou DCK-43 (isenção pela frase "you may have any number of this card", derivada do `effect_text`) e DCK-44 (Leader com regra própria: aviso com o texto, sem verificar e sem mudar o status, decisão do dono), com o Req. 14.43–14.44 e as T4/T9 emendados. **Próximo passo:** oferta de subagentes por lote e depois a T2.
