@@ -77,6 +77,8 @@ class DeckImportsTest < ActionDispatch::IntegrationTest
     # T12 — o deck importado já fica em edição.
     follow_redirect!
     assert_select "main p", text: "Em edição"
+    # Success Criterion do spec: o exemplo do dono é um deck `válido`.
+    assert_select "h2#deck-status-title", text: "Status: válido"
   end
 
   test "com nome informado, o deck leva esse nome" do

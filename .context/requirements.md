@@ -652,6 +652,8 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
 
 24. QUANDO o usuário importar uma lista ENTÃO o sistema DEVE criar um deck novo,
     nunca alterar um existente, com o nome informado ou o do Leader importado.
+    Sem nome e sem Leader na lista, a importação DEVE ser recusada pedindo um
+    nome, sem criar deck.
 25. O formato DEVE ser uma linha `<N>x<card_number>` por carta, com o Leader
     incluído como `1x<card_number>`; aceitar CR, LF e CRLF, ignorar linhas em
     branco e espaços nas bordas e ao redor do `x`, e comparar `card_number` sem

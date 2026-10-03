@@ -121,7 +121,7 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 **Why P2**: Montar carta por carta funciona sozinho (P1); a importação poupa o trabalho de copiar uma lista que já existe.
 
 **Acceptance Criteria**:
-1. WHEN o usuário colar uma lista e confirmar a importação THEN the system SHALL criar um deck novo, nunca alterar um existente, com o nome informado ou, sem nome, o nome do Leader importado.
+1. WHEN o usuário colar uma lista e confirmar a importação THEN the system SHALL criar um deck novo, nunca alterar um existente, com o nome informado ou, sem nome, o nome do Leader importado. Sem nome e sem Leader na lista, the system SHALL recusar a importação pedindo um nome, sem criar deck (emenda de 2026-10-02, lacuna do Verifier).
 2. The system SHALL ler uma linha por carta no formato `<N>x<card_number>`, aceitando CR, LF e CRLF como fim de linha, ignorando linhas em branco e espaços nas bordas e ao redor do `x`, e comparando `card_number` sem distinção de caixa.
 3. WHEN uma linha importada apontar para uma carta Leader THEN the system SHALL usá-la como Leader do deck.
 4. WHEN o mesmo `card_number` aparecer em mais de uma linha THEN the system SHALL somar as quantidades numa única entrada.
