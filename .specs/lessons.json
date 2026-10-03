@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 61,
+  "next_id": 62,
   "lessons": [
     {
       "id": "L-001",
@@ -1084,6 +1084,24 @@
       ],
       "created": "2026-10-01T04:14:32Z",
       "last_seen": "2026-10-01T04:14:32Z"
+    },
+    {
+      "id": "L-061",
+      "key": "spec_precision_gap::when a requirement derives a default from optional inputs specify the outcome when every source of the default is absent",
+      "text": "When a requirement derives a default from optional inputs, specify the outcome when every source of the default is absent",
+      "signal": "spec_precision_gap",
+      "scope": "import",
+      "status": "candidate",
+      "features": [
+        "decks"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "DCK-24; test/integration/deck_imports_test.rb:186 (import)"
+      ],
+      "created": "2026-10-03T02:28:07Z",
+      "last_seen": "2026-10-03T02:28:07Z"
     }
   ]
 }

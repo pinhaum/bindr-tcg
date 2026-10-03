@@ -374,6 +374,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: SRC-11 (spec.md:102), SRC-13 (spec.md:104) (spec)
 - last seen: 2026-10-01T04:14:32Z
 
+### L-061 - When a requirement derives a default from optional inputs, specify the outcome when every source of the default is absent
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `import` · harmful: 0
+- features: decks
+- evidence: DCK-24; test/integration/deck_imports_test.rb:186 (import)
+- last seen: 2026-10-03T02:28:07Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
