@@ -109,11 +109,11 @@ T8
 
 **Done when**:
 
-- [ ] A fixture dá `BigDecimal("1.7")` e `"USD"` para `tcgplayer:541058`
-- [ ] `market` ausente, nulo, string (`"1.70"`), negativo e não finito dão `nil, nil`; `0` dá `BigDecimal("0")`, `"USD"`
-- [ ] Produto com `printings` de preços diferentes usa o `prices` de topo
-- [ ] Nenhum outro arquivo de `app/` lê `markets` (busca por `"markets"` fora do Normalize volta vazia)
-- [ ] Gate check passes: quick
+- [x] A fixture dá `BigDecimal("1.7")` e `"USD"` para `tcgplayer:541058`
+- [x] `market` ausente, nulo, string (`"1.70"`), negativo e não finito dão `nil, nil`; `0` dá `BigDecimal("0")`, `"USD"`
+- [x] Produto com `printings` de preços diferentes usa o `prices` de topo
+- [x] Nenhum outro arquivo de `app/` lê `markets` (busca por `"markets"` fora do Normalize volta vazia)
+- [x] Gate check passes: quick
 
 **Tests**: unit
 **Gate**: quick

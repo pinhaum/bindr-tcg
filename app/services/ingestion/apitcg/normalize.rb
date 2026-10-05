@@ -21,7 +21,10 @@ module Ingestion
                                   :effect_text, :trigger_text, keyword_init: true)
 
       NormalizedVariant = Struct.new(:variant_code, :card_number, :set_code, :rarity, :art_kind,
-                                     :image_url, keyword_init: true)
+                                     :image_url, :price_amount, :price_currency, keyword_init: true)
+
+      # A apitcg só cota em dólar: o preço é o do TCGplayer (Req. 15).
+      PRICE_CURRENCY = "USD".freeze
 
       Result = Struct.new(:sets, :cards, :variants, :discarded, keyword_init: true)
 
@@ -221,14 +224,30 @@ module Ingestion
       end
 
       def normalize_variant(entry)
+        amount = extract_price(entry.product)
         NormalizedVariant.new(
           variant_code: entry.variant_code,
           card_number: entry.card_number,
           set_code: entry.set_code,
           rarity: presence(entry.product.dig("attributes", "Rarity")),
           art_kind: entry.art_kind,
-          image_url: entry.product.dig("images", 0, "large")
+          image_url: entry.product.dig("images", 0, "large"),
+          price_amount: amount,
+          price_currency: amount && PRICE_CURRENCY
         )
+      end
+
+      # PRC-02, PRC-03: o `market` de topo, que é o da impressão principal do
+      # produto; `printings` nunca é lido. Qualquer valor que não seja número
+      # finito e não negativo vira "sem preço", sem falhar o registro: a fonte
+      # entrega número em todos os casos medidos, e um preço duvidoso exibido
+      # como certo engana mais que a falta dele. `to_s` antes de `BigDecimal`
+      # para não levar o erro binário do `Float` ao banco (1.7, não 1.69999…).
+      def extract_price(raw_product)
+        market = raw_product.dig("markets", "tcgplayer", "prices", "market")
+        return nil unless market.is_a?(Numeric) && market.finite? && !market.negative?
+
+        BigDecimal(market.to_s)
       end
 
       def clean_card_name(name)

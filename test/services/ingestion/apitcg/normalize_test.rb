@@ -545,6 +545,81 @@ module Ingestion
         assert_equal [ nil, nil ], efeito_de("")
         assert_equal [ nil, nil ], efeito_de("<br>\r\n<br>")
       end
+
+      # ---------- preço (T2 da `precos`: PRC-02, PRC-03, PRC-06) ----------
+
+      def preco_de(tcgplayer)
+        produto = produto(9001, "OP01-001", "s1")
+        produto["markets"] = { "tcgplayer" => { "id" => "9001" }.merge(tcgplayer) }
+        v = normalizar([ conjunto("s1", code: "OP01") ], [ produto ]).variants.sole
+        [ v.price_amount, v.price_currency ]
+      end
+
+      test "PRC-01: a fixture dá o market do TCGplayer em USD, como decimal exato" do
+        v = variant("tcgplayer:541058")
+
+        assert_equal BigDecimal("1.7"), v.price_amount
+        assert_instance_of BigDecimal, v.price_amount
+        assert_equal "USD", v.price_currency
+      end
+
+      test "PRC-02: market inteiro vira decimal em USD" do
+        assert_equal [ BigDecimal("13000"), "USD" ], preco_de("prices" => { "market" => 13000 })
+      end
+
+      test "PRC-02: market zero é preço válido, distinto de sem preço" do
+        assert_equal [ BigDecimal("0"), "USD" ], preco_de("prices" => { "market" => 0 })
+      end
+
+      test "PRC-02: sem prices, market ausente ou market nulo dão sem preço" do
+        assert_equal [ nil, nil ], preco_de({})
+        assert_equal [ nil, nil ], preco_de("prices" => { "low" => 0.5, "mid" => 2.55 })
+        assert_equal [ nil, nil ], preco_de("prices" => { "market" => nil })
+      end
+
+      test "PRC-02: market string, mesmo numérica, dá sem preço" do
+        assert_equal [ nil, nil ], preco_de("prices" => { "market" => "1.70" })
+      end
+
+      test "PRC-02: market negativo ou não finito dá sem preço" do
+        assert_equal [ nil, nil ], preco_de("prices" => { "market" => -0.01 })
+        assert_equal [ nil, nil ], preco_de("prices" => { "market" => Float::INFINITY })
+        assert_equal [ nil, nil ], preco_de("prices" => { "market" => Float::NAN })
+      end
+
+      test "PRC-02: produto sem tcgplayer em markets dá sem preço" do
+        produto = produto(9002, "OP01-002", "s1", tcgplayer: nil)
+        v = normalizar([ conjunto("s1", code: "OP01") ], [ produto ]).variants.sole
+
+        assert_equal [ nil, nil ], [ v.price_amount, v.price_currency ]
+      end
+
+      test "PRC-03: com mais de uma impressão, vale o prices de topo e nunca o de printings" do
+        tcgplayer = {
+          "prices" => { "market" => 0.18 },
+          "printing" => "Normal",
+          "printings" => [
+            { "subTypeName" => "Foil", "prices" => { "market" => 0.3 } },
+            { "subTypeName" => "Normal", "prices" => { "market" => 0.18 } }
+          ]
+        }
+
+        assert_equal [ BigDecimal("0.18"), "USD" ], preco_de(tcgplayer)
+      end
+
+      test "PRC-03: printings com preço e prices sem market dá sem preço" do
+        tcgplayer = { "printings" => [ { "subTypeName" => "Foil", "prices" => { "market" => 0.3 } } ] }
+
+        assert_equal [ nil, nil ], preco_de(tcgplayer)
+      end
+
+      test "PRC-06: o formato de preço da apitcg só é lido no Normalize" do
+        leitores = Dir[Rails.root.join("app/**/*.{rb,erb}")].select do |arquivo|
+          File.read(arquivo).match?(/["']prices["']|["']market["']/)
+        end
+
+        assert_equal [ Rails.root.join("app/services/ingestion/apitcg/normalize.rb").to_s ], leitores
+      end
     end
   end
 end

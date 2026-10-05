@@ -111,10 +111,10 @@ o mostra na variante e no valor da pasta.
 |---|---|---|---|
 | PRC-01 | Ingestão: grava valor, `USD` e data (Req. 15.1) | Design | Pending |
 | PRC-02 | Ingestão: sem `market` válido → sem preço (Req. 15.2) | Design | Pending |
-| PRC-03 | Ingestão: `prices` de topo, nunca `printings` (Req. 15.3) | Design | Pending |
+| PRC-03 | Ingestão: `prices` de topo, nunca `printings` (Req. 15.3) | T2 | Implemented |
 | PRC-04 | Ingestão: ausente da fonte mantém o preço (Req. 15.4) | Design | Pending |
 | PRC-05 | Ingestão: constraint tudo-ou-nada e não negativo (Req. 15.5) | T1 | Implemented |
-| PRC-06 | Ingestão: formato só no Normalize (Req. 15.6) | Design | Pending |
+| PRC-06 | Ingestão: formato só no Normalize (Req. 15.6) | T2 | Implemented |
 | PRC-07 | Ingestão: idempotência com coleção intacta (Req. 15.7) | Design | Pending |
 | PRC-08 | Detalhe: valor e rótulo com data (Req. 15.8) | Design | Pending |
 | PRC-09 | Detalhe: "Sem preço" (Req. 15.9) | Design | Pending |
