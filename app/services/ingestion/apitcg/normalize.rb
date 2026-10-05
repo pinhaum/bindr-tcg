@@ -25,6 +25,9 @@ module Ingestion
 
       # A apitcg só cota em dólar: o preço é o do TCGplayer (Req. 15).
       PRICE_CURRENCY = "USD".freeze
+      # O teto de `card_variants.price_amount numeric(10,2)`. Acima dele o banco
+      # recusaria a variante inteira, e o PRC-02 pede "sem preço", não falha.
+      MAX_PRICE = BigDecimal("99999999.99")
 
       Result = Struct.new(:sets, :cards, :variants, :discarded, keyword_init: true)
 
@@ -243,11 +246,16 @@ module Ingestion
       # entrega número em todos os casos medidos, e um preço duvidoso exibido
       # como certo engana mais que a falta dele. `to_s` antes de `BigDecimal`
       # para não levar o erro binário do `Float` ao banco (1.7, não 1.69999…).
+      # `prices` fora do formato (lista, texto) também é "sem preço": o `dig`
+      # levantaria `TypeError` aqui, fora da transação por registro do Upsert, e
+      # derrubaria o import inteiro por causa de um produto.
       def extract_price(raw_product)
-        market = raw_product.dig("markets", "tcgplayer", "prices", "market")
+        prices = raw_product.dig("markets", "tcgplayer", "prices")
+        market = prices["market"] if prices.is_a?(Hash)
         return nil unless market.is_a?(Numeric) && market.finite? && !market.negative?
 
-        BigDecimal(market.to_s)
+        amount = BigDecimal(market.to_s)
+        amount if amount <= MAX_PRICE
       end
 
       def clean_card_name(name)

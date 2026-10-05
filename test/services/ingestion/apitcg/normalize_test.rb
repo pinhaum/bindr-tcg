@@ -587,6 +587,16 @@ module Ingestion
         assert_equal [ nil, nil ], preco_de("prices" => { "market" => Float::NAN })
       end
 
+      test "PRC-02: prices fora do formato dá sem preço e não derruba o Normalize" do
+        assert_equal [ nil, nil ], preco_de("prices" => [])
+        assert_equal [ nil, nil ], preco_de("prices" => "N/A")
+      end
+
+      test "PRC-02: market acima do que a coluna comporta dá sem preço" do
+        assert_equal [ nil, nil ], preco_de("prices" => { "market" => 100_000_000 })
+        assert_equal [ BigDecimal("99999999.99"), "USD" ], preco_de("prices" => { "market" => 99_999_999.99 })
+      end
+
       test "PRC-02: produto sem tcgplayer em markets dá sem preço" do
         produto = produto(9002, "OP01-002", "s1", tcgplayer: nil)
         v = normalizar([ conjunto("s1", code: "OP01") ], [ produto ]).variants.sole
