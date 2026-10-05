@@ -67,7 +67,16 @@ module Authentication
     # 2. **`permanent` dá validade de 20 anos ao cookie**, sem expiração por
     #    inatividade. A revogação existe e é do servidor: `terminate_session`
     #    apaga o registro, e um cookie órfão deixa de resolver sessão nenhuma.
+    #
+    # `reset_session` ao autenticar troca o id da sessão do Rails (fixação) e
+    # descarta o que ela carregava antes; só a origem guardada atravessa, porque
+    # é o que fecha o Req. 6.4. Ao sair, o mesmo reset impede que o próximo
+    # login no navegador herde a sessão da conta anterior.
     def start_new_session_for(user)
+      return_to = session[:return_to_after_authenticating]
+      reset_session
+      session[:return_to_after_authenticating] = return_to if return_to
+
       user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
         Current.session = session
         cookies.signed.permanent[:session_id] = { value: session.id, httponly: true, same_site: :lax }
@@ -77,5 +86,6 @@ module Authentication
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_id)
+      reset_session
     end
 end

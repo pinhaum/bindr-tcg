@@ -44,7 +44,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Oito migrações**, de `20260919120000` a `20261002120000` (`CreateDecks`). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **129 arquivos de teste, 1748 testes**, rubocop e brakeman limpos.
+- **129 arquivos de teste, 1751 testes**, rubocop e brakeman limpos.
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
@@ -73,11 +73,6 @@ Dívidas abertas que valem saber antes de mexer em autenticação:
   nada (teste é `:null_store`; produção cai em `:file_store` por container).
   Justificativa completa em `app/controllers/sessions_controller.rb`. Reabrir
   junto com Redis ou `solid_cache`.
-- **Login e logout não chamam `reset_session`.** O cookie de sessão do Rails
-  sobrevive ao logout e é herdado pelo próximo login no mesmo navegador. Hoje
-  ele só carrega `return_to_after_authenticating` e `editing_deck_id`, ambos
-  inofensivos (o segundo é revalidado). Dívida anterior aos decks, registrada
-  pela revisão de segurança de 2026-10-02.
 - **O cookie de sessão não declara `secure` explicitamente** — em produção vem
   de `config.force_ssl`. A garantia é indireta; comentada no concern.
 - **Não há navegador no container**, logo não há system test. Teste de UI vira

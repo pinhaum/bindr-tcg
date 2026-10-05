@@ -13,6 +13,7 @@ require "test_helper"
 class SessionsTest < ActionDispatch::IntegrationTest
   class ProtectedProbeController < ApplicationController
     def show
+      session[:probe] = Current.user.email
       render plain: "coleção de #{Current.user.email}"
     end
   end
@@ -130,6 +131,49 @@ class SessionsTest < ActionDispatch::IntegrationTest
     post session_path, params: { email: "franky@example.com", password: "super-1234" }
 
     assert_redirected_to protected_probe_url
+  end
+
+  # --- Sessão do Rails: fixação e herança entre contas ---
+
+  # Sem `reset_session`, o id da sessão do Rails escolhido antes do login segue
+  # válido depois dele: quem plantou o cookie no navegador da vítima continua
+  # dono da sessão autenticada (fixação).
+  test "entrar troca o id da sessão do Rails e preserva a origem guardada" do
+    User.create!(email: "vivi@example.com", password: "alabasta-12")
+    get protected_probe_path
+    anterior = session.id.public_id
+
+    post session_path, params: { email: "vivi@example.com", password: "alabasta-12" }
+
+    assert_not_equal anterior, session.id.public_id
+    assert_redirected_to protected_probe_url
+  end
+
+  test "criar conta troca o id da sessão do Rails" do
+    get protected_probe_path
+    anterior = session.id.public_id
+
+    post registration_path, params: { user: {
+      email: "carrot@example.com", password: "sulong-4321", password_confirmation: "sulong-4321"
+    } }
+
+    assert_not_equal anterior, session.id.public_id
+    assert_redirected_to protected_probe_url
+  end
+
+  # O próximo login no mesmo navegador não pode herdar o que a conta anterior
+  # deixou na sessão do Rails.
+  test "sair limpa a sessão do Rails" do
+    User.create!(email: "yamato@example.com", password: "oden-fan-55")
+    post session_path, params: { email: "yamato@example.com", password: "oden-fan-55" }
+    get protected_probe_path
+    assert_equal "yamato@example.com", session[:probe]
+
+    delete session_path
+
+    assert_nil session[:probe]
+    assert_redirected_to root_path
+    assert_equal "Sessão encerrada.", flash[:notice]
   end
 
   test "entrar sem origem guardada leva à raiz" do

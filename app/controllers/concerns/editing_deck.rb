@@ -4,9 +4,9 @@
 #
 # O valor guardado é só um id, e **nunca é confiado**: toda leitura o revalida
 # por `Current.user.decks.find_by`. Um id adulterado, o de um deck excluído ou
-# o de um deck de outro usuário (a sessão do Rails sobrevive ao logout, e o
-# próximo login no mesmo navegador a herda) dão `nil`, e a chave sai da
-# sessão. É isso que faz o DCK-41 sair de graça e mantém o DCK-36.
+# o de um deck de outro usuário dão `nil`, e a chave sai da sessão. Login e
+# logout chamam `reset_session`, então a herança entre contas no mesmo
+# navegador já não traz id alheio; a revalidação não depende disso. É isso que faz o DCK-41 sair de graça e mantém o DCK-36.
 #
 # `authenticated?` vem antes de `Current.user`: num controller público, como o
 # do catálogo, `allow_unauthenticated_access` tira o `before_action` que

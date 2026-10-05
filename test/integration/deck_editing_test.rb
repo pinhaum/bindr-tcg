@@ -79,17 +79,17 @@ class DeckEditingTest < ActionDispatch::IntegrationTest
     assert_nil session[:editing_deck_id]
   end
 
-  # DCK-36 — a sessão do Rails sobrevive ao logout (não há `reset_session`),
-  # então o próximo login no mesmo navegador herda o id do deck do anterior.
-  # É o caso real de um id de deck de outro usuário posto na sessão.
+  # DCK-36 — login e logout chamam `reset_session`, então a herança entre
+  # contas no mesmo navegador não planta mais um id alheio. A revalidação
+  # continua sendo a garantia: aqui o deck em edição muda de dono enquanto o id
+  # está na sessão, e passa a ser de outro usuário sem a sessão saber.
   test "um id de deck de outro usuário na sessão não é aceito" do
-    sign_in(@other)
-    post select_deck_path(@alien)
-    delete session_path
-    assert_equal @alien.id, session[:editing_deck_id], "pré-condição: o id do deck alheio ficou na sessão"
-
     sign_in(@user)
-    assert_editing_marker(@mine, editing: false)
+    post select_deck_path(@mine)
+    @mine.update!(user: @other)
+    assert_equal @mine.id, session[:editing_deck_id], "pré-condição: o id do deck alheio está na sessão"
+
+    assert_editing_marker(Deck.create!(user: @user, name: "Outro"), editing: false)
 
     assert_nil session[:editing_deck_id]
   end
