@@ -71,15 +71,32 @@ class CollectionItem < ApplicationRecord
   # (`set_progress_plan_test.rb`) mede que a página resolve com duas consultas de
   # sessão + uma agregação por set + uma agregação dos indicadores = três consultas
   # no total (sem contar a conclusão de transação).
+  #
+  # Req. 15 (PRC-11..PRC-16) — a mesma consulta traz o valor da coleção,
+  # agrupada pelo set da **variante**: total e indicadores são a soma das linhas,
+  # então a soma dos subtotais é o total por construção, com as cópias de
+  # variante ausente da fonte incluídas. Só preço em USD entra na soma (AD-022).
   def self.collection_stats_for(user)
-    result = for_user(user).owned.pluck(Arel.sql("SUM(quantity) as total_copies, COUNT(*) as distinct_variants")).first
+    rows = for_user(user).owned.joins(:card_variant).group("card_variants.set_id").pluck(*STATS_COLUMNS)
 
-    if result.nil?
-      { total_copies: 0, distinct_variants: 0 }
-    else
-      { total_copies: result[0] || 0, distinct_variants: result[1] || 0 }
-    end
+    {
+      total_copies: rows.sum { |row| row[1] },
+      distinct_variants: rows.sum { |row| row[2] },
+      estimated_value: rows.sum(BigDecimal("0")) { |row| row[3] },
+      unpriced_copies: rows.sum { |row| row[4] },
+      value_by_set_id: rows.to_h { |row| [ row[0], row[3] ] }
+    }
   end
+
+  STATS_COLUMNS = [
+    "card_variants.set_id",
+    "SUM(collection_items.quantity)",
+    "COUNT(*)",
+    "COALESCE(SUM(collection_items.quantity * card_variants.price_amount) " \
+    "FILTER (WHERE card_variants.price_currency = 'USD'), 0)",
+    "COALESCE(SUM(collection_items.quantity) FILTER (WHERE card_variants.price_amount IS NULL), 0)"
+  ].map { |column| Arel.sql(column) }.freeze
+  private_constant :STATS_COLUMNS
 
   # Req. 7.3 — a pergunta "o usuário tem esta variante?" é sobre a quantidade,
   # não sobre a existência do registro.

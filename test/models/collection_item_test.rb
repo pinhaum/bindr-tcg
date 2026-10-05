@@ -262,4 +262,126 @@ class CollectionItemTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) { CollectionItem.collection_stats_for(user.id) }
     assert_raises(ArgumentError) { CollectionItem.collection_stats_for(user.id.to_s) }
   end
+
+  # ---------- valor da coleção (T6 da `precos`: PRC-11..PRC-16) ----------
+
+  def priced_variant(set, code, amount, last_seen_at: nil)
+    card = Card.create!(card_set: set, card_number: code, name: "Carta #{code}",
+                        card_type: "character", colors: [ "Red" ])
+    price = amount ? { price_amount: amount, price_currency: "USD", price_observed_at: Time.utc(2026, 10, 1) } : {}
+    CardVariant.create!(card: card, card_set: set, variant_code: "tcgplayer:#{code}", rarity: "C",
+                        art_kind: "base", last_seen_at: last_seen_at, **price)
+  end
+
+  # O cenário do Independent Test do spec: 3 × 1,70 no set A, 1 × 10,00 no set
+  # B e 2 cópias sem preço.
+  def spec_scenario(user)
+    set_a = CardSet.create!(code: "PRA", name: "Set A", kind: "booster")
+    set_b = CardSet.create!(code: "PRB", name: "Set B", kind: "booster")
+    CollectionItem.create!(user: user, card_variant: priced_variant(set_a, "PRA-001", BigDecimal("1.7")), quantity: 3)
+    CollectionItem.create!(user: user, card_variant: priced_variant(set_b, "PRB-001", BigDecimal("10")), quantity: 1)
+    CollectionItem.create!(user: user, card_variant: priced_variant(set_a, "PRA-002", nil), quantity: 2)
+    [ set_a, set_b ]
+  end
+
+  test "PRC-11: o valor estimado soma quantidade × preço das variantes com preço" do
+    user = create_user(email: "valor-1@example.com")
+    spec_scenario(user)
+
+    assert_equal BigDecimal("15.10"), CollectionItem.collection_stats_for(user)[:estimated_value]
+  end
+
+  test "PRC-12: conta as cópias de variantes sem preço" do
+    user = create_user(email: "valor-2@example.com")
+    spec_scenario(user)
+
+    assert_equal 2, CollectionItem.collection_stats_for(user)[:unpriced_copies]
+  end
+
+  test "PRC-13: subtotal por set da variante" do
+    user = create_user(email: "valor-3@example.com")
+    set_a, set_b = spec_scenario(user)
+
+    assert_equal({ set_a.id => BigDecimal("5.10"), set_b.id => BigDecimal("10") },
+                 CollectionItem.collection_stats_for(user)[:value_by_set_id])
+  end
+
+  test "PRC-13: os indicadores existentes continuam certos com a consulta agrupada por set" do
+    user = create_user(email: "valor-4@example.com")
+    spec_scenario(user)
+
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal 6, stats[:total_copies]
+    assert_equal 3, stats[:distinct_variants]
+  end
+
+  test "PRC-13: a cópia de variante ausente da fonte entra no total e no subtotal do set dela" do
+    user = create_user(email: "valor-5@example.com")
+    set_a, = spec_scenario(user)
+    antiga = priced_variant(set_a, "PRA-003", BigDecimal("4"), last_seen_at: Time.utc(2020, 1, 1))
+    CollectionItem.create!(user: user, card_variant: antiga, quantity: 1)
+
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal BigDecimal("19.10"), stats[:estimated_value]
+    assert_equal BigDecimal("9.10"), stats[:value_by_set_id][set_a.id]
+    assert_equal stats[:estimated_value], stats[:value_by_set_id].values.sum
+  end
+
+  test "PRC-14: o valor de outro usuário não entra" do
+    user = create_user(email: "valor-6@example.com")
+    other = create_user(email: "valor-7@example.com")
+    set_a, = spec_scenario(user)
+    CollectionItem.create!(user: other, card_variant: CardVariant.find_by!(variant_code: "tcgplayer:PRA-001"),
+                           quantity: 50)
+
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal BigDecimal("15.10"), stats[:estimated_value]
+    assert_equal BigDecimal("5.10"), stats[:value_by_set_id][set_a.id]
+    assert_equal BigDecimal("85"), CollectionItem.collection_stats_for(other)[:estimated_value]
+  end
+
+  test "PRC-15: sem cópia com preço, o valor é zero e não há subtotal" do
+    user = create_user(email: "valor-8@example.com")
+    set = CardSet.create!(code: "PRZ", name: "Set Z", kind: "booster")
+    CollectionItem.create!(user: user, card_variant: priced_variant(set, "PRZ-001", nil), quantity: 4)
+
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal BigDecimal("0"), stats[:estimated_value]
+    assert_equal 4, stats[:unpriced_copies]
+    assert_equal({ set.id => BigDecimal("0") }, stats[:value_by_set_id])
+  end
+
+  test "PRC-15: usuário sem itens e nil dão valor zero, nenhuma cópia sem preço e nenhum subtotal" do
+    user = create_user(email: "valor-9@example.com")
+
+    [ user, nil ].each do |owner|
+      stats = CollectionItem.collection_stats_for(owner)
+      assert_equal BigDecimal("0"), stats[:estimated_value]
+      assert_equal 0, stats[:unpriced_copies]
+      assert_equal({}, stats[:value_by_set_id])
+    end
+  end
+
+  test "PRC-11: preço em moeda diferente de USD não entra na soma em dólar" do
+    user = create_user(email: "valor-10@example.com")
+    set_a, = spec_scenario(user)
+    CardVariant.find_by!(variant_code: "tcgplayer:PRA-001").update!(price_currency: "BRL")
+
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal BigDecimal("10"), stats[:estimated_value]
+    assert_equal BigDecimal("0"), stats[:value_by_set_id][set_a.id]
+  end
+
+  test "PRC-16: tudo sai de uma única consulta" do
+    user = create_user(email: "valor-11@example.com")
+    spec_scenario(user)
+
+    queries = []
+    counter = ->(*, payload) { queries << payload[:sql] unless payload[:name].in?(%w[SCHEMA TRANSACTION]) }
+    ActiveSupport::Notifications.subscribed(counter, "sql.active_record") do
+      CollectionItem.collection_stats_for(user)
+    end
+
+    assert_equal 1, queries.size
+  end
 end

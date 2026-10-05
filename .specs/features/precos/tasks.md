@@ -219,12 +219,12 @@ T8
 
 **Done when**:
 
-- [ ] Cenário do Independent Test do spec: `15.10`, 2 sem preço, `5.10` no set A e `10.00` no set B
-- [ ] Soma dos subtotais igual ao total, com uma cópia de variante ausente da fonte incluída
-- [ ] Outro usuário não altera os números; usuário sem itens e `nil` dão `0` e `{}`
-- [ ] Os seis testes atuais de `collection_stats_for` passam sem edição
-- [ ] Uma única consulta SQL por chamada
-- [ ] Gate check passes: quick
+- [x] Cenário do Independent Test do spec: `15.10`, 2 sem preço, `5.10` no set A e `10.00` no set B
+- [x] Soma dos subtotais igual ao total, com uma cópia de variante ausente da fonte incluída
+- [x] Outro usuário não altera os números; usuário sem itens e `nil` dão `0` e `{}`
+- [x] Os seis testes atuais de `collection_stats_for` passam sem edição
+- [x] Uma única consulta SQL por chamada
+- [x] Gate check passes: quick
 
 **Tests**: unit
 **Gate**: quick
