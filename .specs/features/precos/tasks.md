@@ -191,11 +191,11 @@ T8
 
 **Done when**:
 
-- [ ] Sem sessão, uma variante com preço mostra `US$ 1,70` e `TCGplayer · market · <data>`, e outra mostra "Sem preço"
-- [ ] Variante ausente da fonte com preço antigo mostra o valor e a data dele
-- [ ] O detalhe não ganha consulta (contagem de consultas antes e depois igual no teste)
-- [ ] Guardas de 360px existentes continuam verdes
-- [ ] Gate check passes: full
+- [x] Sem sessão, uma variante com preço mostra `US$ 1,70` e `TCGplayer · market · <data>`, e outra mostra "Sem preço"
+- [x] Variante ausente da fonte com preço antigo mostra o valor e a data dele
+- [x] O detalhe não ganha consulta (contagem de consultas antes e depois igual no teste)
+- [x] Guardas de 360px existentes continuam verdes
+- [x] Gate check passes: full
 
 **Tests**: integration
 **Gate**: full

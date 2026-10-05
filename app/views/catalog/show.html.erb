@@ -283,6 +283,18 @@
                 <%= variant.card_set.name %> (<%= variant.card_set.code %>)
               </dd>
             </div>
+            <%# PRC-08, PRC-09 — o preço vem da própria linha da variante, sem consulta nova. %>
+            <div>
+              <dt>Preço</dt>
+              <dd class="variant__price">
+                <% if variant.priced? %>
+                  <%= format_price(variant.price_amount, variant.price_currency) %>
+                  <span class="variant__price-source"><%= price_label(variant) %></span>
+                <% else %>
+                  Sem preço
+                <% end %>
+              </dd>
+            </div>
           </dl>
 
           <%#

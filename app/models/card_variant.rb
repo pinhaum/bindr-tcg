@@ -16,4 +16,9 @@ class CardVariant < ApplicationRecord
                 "(SELECT max(started_at) FROM import_runs WHERE status = 'succeeded')".freeze
 
   scope :present, -> { where(PRESENT_SQL) }
+
+  # Preço zero é preço; "sem preço" é só o valor nulo (PRC-08, PRC-09).
+  def priced?
+    !price_amount.nil?
+  end
 end

@@ -116,9 +116,9 @@ o mostra na variante e no valor da pasta.
 | PRC-05 | Ingestão: constraint tudo-ou-nada e não negativo (Req. 15.5) | T1 | Implemented |
 | PRC-06 | Ingestão: formato só no Normalize (Req. 15.6) | T2 | Implemented |
 | PRC-07 | Ingestão: idempotência com coleção intacta (Req. 15.7) | T3 | Implemented |
-| PRC-08 | Detalhe: valor e rótulo com data (Req. 15.8) | Design | Pending |
-| PRC-09 | Detalhe: "Sem preço" (Req. 15.9) | Design | Pending |
-| PRC-10 | Detalhe: público (Req. 15.10) | Design | Pending |
+| PRC-08 | Detalhe: valor e rótulo com data (Req. 15.8) | T4, T5 | Implemented |
+| PRC-09 | Detalhe: "Sem preço" (Req. 15.9) | T5 | Implemented |
+| PRC-10 | Detalhe: público (Req. 15.10) | T5 | Implemented |
 | PRC-11 | Pasta: valor estimado (Req. 15.11) | Design | Pending |
 | PRC-12 | Pasta: "N cópias sem preço" (Req. 15.12) | Design | Pending |
 | PRC-13 | Pasta: subtotal por set da variante (Req. 15.13) | Design | Pending |

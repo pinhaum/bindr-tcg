@@ -641,6 +641,8 @@ body {
   white-space: nowrap;
 }
 .variant__meta dd { margin: 0; overflow-wrap: anywhere; }
+.variant__price { font-variant-numeric: tabular-nums; }
+.variant__price-source { display: block; color: var(--ink-muted); }
 .variant__code { font-variant-numeric: tabular-nums; }
 .variant__rarity {
   font-size: var(--caption-size);
