@@ -768,8 +768,8 @@ A T25 (deck vazio, emenda do DCK-22 em 2026-10-02, e o id duplicado do alvo do S
 
 - [x] O `CLAUDE.md` descreve o que existe depois da feature, e o `grep` registrado no commit não acha model ou controller citado que não exista
 - [x] A traceability tem DCK-01..44 mapeados para tasks
-- [ ] O dono respondeu sobre o LF no simulador; se o simulador não aceitar, o separador passa a CRLF ou CR, com emenda no spec e no Req. 14, numa task de correção
-- [ ] Gate full passa; contagem registrada
+- [x] O dono respondeu sobre o LF no simulador (2026-10-05: aceita, sem task de correção); se o simulador não aceitar, o separador passa a CRLF ou CR, com emenda no spec e no Req. 14, numa task de correção
+- [x] Gate full passa; contagem registrada (2026-10-05: 1748 runs, 7262 assertions, 0 falhas; RuboCop 211 arquivos, 0 ofensas)
 
 **Tests**: none
 **Gate**: full
@@ -783,7 +783,7 @@ A T25 (deck vazio, emenda do DCK-22 em 2026-10-02, e o id duplicado do alvo do S
 - Item 3, montagem pelo detalhe: o deck 12 chega a `válido` (50 / 50) com 49 cliques em `+` e "Usar como Leader". Nenhuma navegação de página (Turbo Stream), `scrollWidth` 360 em todo detalhe e um único `#deck_entry_card_N` por página.
 - Achado de a11y, **anterior aos decks**: depois de `+`/`−`, o foco cai no `<body>`. O Turbo põe `disabled` no botão durante o envio, e o elemento focado perde o foco. O controle de posse da coleção faz o mesmo. Aberto para o dono, sem código alterado.
 - Achado menor: o nome acessível "Usar Monkey.D.Luffy como Leader do deck …" não contém o texto visível "Usar como Leader" (WCAG 2.5.3). O mesmo padrão dos `−`/`+` foi aceito no projeto.
-- **Pendente**: o item 2, colar a lista no OPTCG Simulator para confirmar o LF, depende do app do dono. Uma busca na web não esclareceu o separador.
+- Item 2, LF no simulador: **confirmado pelo dono em 2026-10-05** — a lista exportada colada no OPTCG Simulator foi aceita.
 ---
 
 ## Plano de delegação

@@ -583,8 +583,8 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
 > (OP12-001, OP13-079, P-117). Tratamento decidido pelo dono em 2026-10-02:
 > critérios 43 e 44.
 >
-> ⚠️ VERIFICAR (c): se o OPTCG Simulator aceita LF na lista exportada; o
-> exemplo do dono veio separado por CR. Fica para o teste manual do dono.
+> Verificado (c) em 2026-10-05: o OPTCG Simulator aceita LF na lista exportada
+> (teste manual do dono na T21 da `decks`; o exemplo do dono veio separado por CR).
 
 ### Critérios de aceitação
 
@@ -674,7 +674,7 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
     `inválido` ou `incompleto`.
 31. A exportação DEVE trazer o Leader como `1x<card_number>` na primeira linha e
     uma linha `<N>x<card_number>` por carta, na ordem da página do deck,
-    separadas por LF. ⚠️ VERIFICAR (acima).
+    separadas por LF (verificado no simulador, acima).
 32. Importar o texto exportado de um deck DEVE produzir o mesmo Leader e as
     mesmas entradas.
 

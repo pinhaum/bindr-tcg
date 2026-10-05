@@ -48,14 +48,14 @@ deck com a coleção. O deck referencia `cards` e a coleção referencia
 | "Faltando para os baralhos" com a mesma carta em vários decks | Vale o **maior** uso entre os decks, menos o possuído | Decisão do dono em 2026-10-01: um deck é desmontado para montar outro | Sim |
 | Formato da lista em texto | Uma linha por carta, `<N>x<card_number>` (ex.: `4xOP17-094`), com o Leader incluído como `1x<card_number>` | Exemplo fornecido pelo dono em 2026-10-01, compatível com o OPTCG Simulator: 15 linhas, soma 51, primeira linha `1xOP17-079` (Leader Monkey.D.Luffy no banco de dev) | Sim |
 | Separador de linha na importação | Aceitar CR, LF e CRLF, misturados ou não | O exemplo do dono veio separado por CR; um `<textarea>` envia CRLF; colar de um site costuma dar LF | Sim |
-| Separador de linha na exportação | LF, Leader na primeira linha | ⚠️ VERIFICAR que o OPTCG Simulator aceita LF; o exemplo do dono usava CR | Não |
+| Separador de linha na exportação | LF, Leader na primeira linha | Verificado em 2026-10-05: o dono colou uma lista exportada no OPTCG Simulator e ele aceitou LF (T21); o exemplo do dono usava CR | Sim |
 | Importação sobre deck existente | Importar sempre cria um deck novo | Substituir um deck existente por colagem destruiria o deck sem volta; criar um novo não destrói nada | Sim — aprovado pelo dono em 2026-10-01 |
 | Importação com linha ruim | Tudo ou nada: nenhuma linha é aplicada e a mensagem lista os números das linhas problemáticas | Pular linha em silêncio entrega um deck diferente do colado, e o usuário só descobre na mesa | Sim — aprovado pelo dono em 2026-10-01 |
 | Carta do deck ausente da fonte | Continua no deck, contando para as regras, marcada como "fora da fonte" | A ingestão nunca apaga (Req. 1.7); sumir com a carta do deck mudaria a lista sem o usuário pedir | Sim — aprovado pelo dono em 2026-10-01 |
 | Limites de entrada | Nome de 1 a 60 caracteres; quantidade por carta de 1 a 50; texto importado até 200 linhas e 10.000 caracteres | 50 é o tamanho do deck principal, e uma lista real tem menos de 51 linhas. Os limites só barram entrada absurda | Sim — aprovado pelo dono em 2026-10-01 |
 | Escolha do deck que recebe as cartas pelo detalhe | Um "deck em edição" escolhido pelo usuário; o mecanismo (sessão, URL) fica para o design | É decisão técnica; o requisito é só que o controle saiba para qual deck vai | Não — design |
 
-**Open questions:** none — os padrões assumidos foram aprovados pelo dono em 2026-10-01 e 2026-10-02. Resta uma linha ⚠️ VERIFICAR (separador da exportação), resolvida pelo teste manual do dono na T21.
+**Open questions:** none — os padrões assumidos foram aprovados pelo dono em 2026-10-01 e 2026-10-02. A linha ⚠️ VERIFICAR do separador da exportação foi resolvida pelo teste manual do dono na T21 (2026-10-05): o simulador aceita LF.
 
 ## User Stories
 

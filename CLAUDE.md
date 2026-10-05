@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: Fase 1 encerrada, Fase 2 (decks) implementada
+## Estado atual: Fases 1 e 2 (decks) encerradas
 
 **Todo o `.context/tasks.md` da Fase 1 está fechado** (§0 a §8). As features em
 `.specs/features/` estão todas encerradas e verificadas (Verifier autor ≠
@@ -16,8 +16,9 @@ A **Fase 2 (`decks`, Req. 14, DCK-01..44)** está implementada: montar deck de
 1 Leader + 50 pelo detalhe da carta, status derivado pelas regras de montagem
 (Comprehensive Rules v1.2.1, com cartas sem limite de cópias e aviso para Leader
 de regra própria), o que falta na pasta por deck e no agregado, e lista em texto
-do OPTCG Simulator (importar e exportar). Falta o teste manual do dono (T21: LF
-no simulador) e o Verifier. Fase 3 (preços) **não tem plano** e passa por
+do OPTCG Simulator (importar e exportar). A feature está
+**encerrada e verificada** (`validation.md` PASS; T21 fechada em 2026-10-05 com
+o dono confirmando que o simulador aceita a lista exportada com LF). Fase 3 (preços) **não tem plano** e passa por
 `requirements.md` primeiro. Pendências do dono abertas: sets não lançados no topo do catálogo sem
 arte (403 do CDN) e arte "SAMPLE" presa no cache de imagens (ver *Handoff*). A
 aprovação da T12 da `conformidade` foi dada em 2026-10-01. A D-03 (SRC-19) foi fechada mantendo a regra (registro no spec da
