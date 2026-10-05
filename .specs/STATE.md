@@ -170,6 +170,14 @@
 - **Date**: 2026-10-02
 - **Status**: active
 
+### AD-022
+- **Decision**: Valor monetário é guardado como `numeric` mais moeda ISO 4217 em `text`, lado a lado, com a data da cotação, e uma `CHECK` no banco exige que os três sejam todos nulos ou todos preenchidos. A primeira aplicação são as colunas `price_amount`, `price_currency` e `price_observed_at` de `card_variants` (Fase 3, `precos`).
+- **Reason**: O dono quer USD agora e BRL no futuro (2026-10-05). Um número solto em "dólares" obrigaria a migrar dado para acrescentar moeda depois; com a moeda no registro, BRL entra como valor novo da coluna. A `CHECK` impede um preço sem data ou sem moeda, que a tela mostraria como atual.
+- **Trade-off**: Somas precisam filtrar por moeda (`FILTER (WHERE price_currency = 'USD')`). Enquanto não houver conversão, um preço em outra moeda fica fora do valor da pasta.
+- **Scope**: `card_variants` e qualquer coluna monetária futura (wishlist, deck, histórico).
+- **Date**: 2026-10-05
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-10-05, tarde — este bloco vence os de baixo.** **`reset_session` no login, no cadastro e no logout** (escolha do dono entre isso e a Fase 3). `start_new_session_for` reseta a sessão do Rails e preserva só `return_to_after_authenticating` (Req. 6.4); `terminate_session` reseta depois de apagar o cookie, e o flash do logout sobrevive. Três testes novos em `sessions_test.rb` (id da sessão troca no login e no cadastro; sair limpa a sessão). O DCK-36 em `deck_editing_test.rb` não pode mais plantar o id alheio por herança: agora o deck em edição muda de dono com o id na sessão; mutação na revalidação o derruba. Gate full: 1751 runs, 0 falhas, RuboCop e Brakeman limpos. Revisão de segurança: nada médio ou alto. Baixo, anterior: login de quem já está autenticado deixa uma `Session` órfã; `config.hosts` em produção não está restrito, então `return_to` depende do header Host (redirect só para o próprio host do request). Ponto solto que continua: `validation.md` da `decks` ainda mostra a T21 como pendente (escrita bloqueada sem aval do dono). **Próximo passo:** a definir pelo dono — Fase 3 (preços) começa por `requirements.md`.

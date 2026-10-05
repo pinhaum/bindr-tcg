@@ -358,6 +358,21 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [x] **9.3 Lista em texto, pasta e fechamento** — T16–T21
   - _Requisitos: 14.24–14.35, 14.40; 2.5_
 
+## 10 — Preços (Fase 3)
+
+Plano da feature em `.specs/features/precos/tasks.md` (T1–T8, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [ ] **10.1 Dado e ingestão** — T1–T3 da `precos`
+  - Colunas de preço em `card_variants` com `CHECK` tudo-ou-nada (AD-022); o
+    Normalize lê `markets.tcgplayer.prices.market`; o Upsert grava com a data do
+    import.
+  - _Requisitos: 15.1–15.7_
+- [ ] **10.2 Detalhe e pasta** — T4–T7
+  - _Requisitos: 15.8–15.16; 2.5_
+- [ ] **10.3 Fechamento** — T8
+  - _Requisitos: 15.1, 15.8, 15.11_
+
 ---
 
 ## Fora do escopo da Fase 1
@@ -367,7 +382,7 @@ Não implemente, mesmo que pareça rápido — cada um destes precisa passar por
 
 - Deck builder e validador (Fase 2) — regras do jogo precisam de confirmação no
   regulamento oficial antes de qualquer código.
-- Preços e valor da coleção (Fase 3) — depende de fonte de mercado ainda não
-  identificada.
+- Preços e valor da coleção (Fase 3) — a fonte foi identificada em 2026-10-05
+  (preço do TCGplayer que a apitcg já entrega): Req. 15 e §10.
 - Uso offline / PWA — não é requisito hoje. Se importar, vira requisito antes de
   virar task.
