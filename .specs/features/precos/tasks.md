@@ -165,9 +165,9 @@ T8
 
 **Done when**:
 
-- [ ] `1234.56 USD` → `US$ 1.234,56`; `0` → `US$ 0,00`; `1.7` → `US$ 1,70`; moeda sem unidade cai no código ISO
-- [ ] `price_label` de uma variante observada em `2026-10-06 01:30 UTC` mostra `05/10/2026` (`America/Sao_Paulo`)
-- [ ] Gate check passes: quick
+- [x] `1234.56 USD` → `US$ 1.234,56`; `0` → `US$ 0,00`; `1.7` → `US$ 1,70`; moeda sem unidade cai no código ISO
+- [x] `price_label` de uma variante observada em `2026-10-06 01:30 UTC` mostra `05/10/2026` (`America/Sao_Paulo`)
+- [x] Gate check passes: quick
 
 **Tests**: unit
 **Gate**: quick
