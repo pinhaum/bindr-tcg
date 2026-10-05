@@ -137,11 +137,11 @@ T8
 
 **Done when**:
 
-- [ ] Com relógio fixo, a variante recebe valor, `USD` e a data igual a `import_runs.started_at`
-- [ ] Segundo import em que o produto perdeu `market` deixa os três nulos
-- [ ] Variante ausente do segundo snapshot mantém valor, moeda e data do primeiro
-- [ ] Mesmo snapshot duas vezes: mesmos valores e moedas, e `collection_items.quantity` intacta (estende o teste de garantias da task 2.6)
-- [ ] Gate check passes: quick
+- [x] Com relógio fixo, a variante recebe valor, `USD` e a data igual a `import_runs.started_at`
+- [x] Segundo import em que o produto perdeu `market` deixa os três nulos
+- [x] Variante ausente do segundo snapshot mantém valor, moeda e data do primeiro
+- [x] Mesmo snapshot duas vezes: mesmos valores e moedas, e `collection_items.quantity` intacta (estende o teste de garantias da task 2.6)
+- [x] Gate check passes: quick
 
 **Tests**: unit
 **Gate**: quick

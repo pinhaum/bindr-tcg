@@ -366,5 +366,70 @@ module Ingestion
       assert_equal 1, profundidades.size
       assert_operator profundidades.first, :>, base, "lock_presence! rodou fora da transação do finish"
     end
+
+    # ---------- preço (T3 da `precos`: PRC-01, PRC-02, PRC-04, PRC-07) ----------
+
+    def com_preco(produto, market)
+      produto["markets"]["tcgplayer"]["prices"] = { "market" => market }
+      produto
+    end
+
+    def preco(tcgplayer)
+      v = variante(tcgplayer)
+      [ v.price_amount, v.price_currency, v.price_observed_at ]
+    end
+
+    test "PRC-01: grava valor, USD e a data em que o import começou" do
+      run = ingest(normalized(snapshot(com_preco(produto(1), 1.7))), clock: RelogioCrescente.new)
+
+      assert_equal [ BigDecimal("1.7"), "USD", run.started_at ], preco(1)
+    end
+
+    test "PRC-01: o import seguinte troca o valor e a data" do
+      relogio = RelogioCrescente.new
+      ingest(normalized(snapshot(com_preco(produto(1), 1.7))), clock: relogio)
+      segundo = ingest(normalized(snapshot(com_preco(produto(1), 2.25))), clock: relogio)
+
+      assert_equal [ BigDecimal("2.25"), "USD", segundo.started_at ], preco(1)
+    end
+
+    test "PRC-02: o produto que perdeu o market deixa a variante sem preço" do
+      relogio = RelogioCrescente.new
+      ingest(normalized(snapshot(com_preco(produto(1), 1.7))), clock: relogio)
+      ingest(normalized(snapshot(produto(1))), clock: relogio)
+
+      assert_equal [ nil, nil, nil ], preco(1)
+    end
+
+    test "PRC-02: market inválido não falha o registro" do
+      run = ingest(normalized(snapshot(com_preco(produto(1), "1.70"))), clock: RelogioCrescente.new)
+
+      assert_equal "succeeded", run.status
+      assert_equal 0, run.failed_count
+      assert_equal [ nil, nil, nil ], preco(1)
+    end
+
+    test "PRC-04: a variante ausente da fonte mantém o último preço e a data dele" do
+      relogio = RelogioCrescente.new
+      primeiro = ingest(normalized(snapshot(com_preco(produto(1), 1.7), com_preco(produto(2), 3))), clock: relogio)
+      ingest(normalized(snapshot(com_preco(produto(2), 4))), clock: relogio)
+
+      assert_equal [ BigDecimal("1.7"), "USD", primeiro.started_at ], preco(1)
+    end
+
+    test "PRC-07: o mesmo snapshot duas vezes dá os mesmos preços e não toca na coleção" do
+      dados = normalized(snapshot(com_preco(produto(1), 1.7), produto(2)))
+      relogio = RelogioCrescente.new
+      ingest(dados, clock: relogio)
+      dono = User.create!(email: "colecionador@exemplo.test", password_digest: "x")
+      item = CollectionItem.create!(user: dono, card_variant: variante(1), quantity: 3)
+
+      ingest(dados, clock: relogio)
+
+      assert_equal [ BigDecimal("1.7"), "USD" ], preco(1).first(2)
+      assert_equal [ nil, nil ], preco(2).first(2)
+      assert_equal 3, item.reload.quantity
+      assert_equal variante(1).id, item.card_variant_id
+    end
   end
 end

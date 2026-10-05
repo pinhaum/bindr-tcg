@@ -105,9 +105,18 @@ module Ingestion
       row = CardVariant.find_or_initialize_by(card_id: card_id, variant_code: record.variant_code)
       outcome = row.new_record? ? :created : :updated
       row.update!(set_id: set_id, rarity: record.rarity, art_kind: record.art_kind,
-                  image_url: record.image_url)
+                  image_url: record.image_url, **price_attributes(record))
       @seen_variant_ids << row.id
       outcome
+    end
+
+    # PRC-01, PRC-02: o preço vale a partir do instante em que este import
+    # começou, o mesmo que vira `last_seen_at`. Sem preço na fonte, os três
+    # campos vão a nulo juntos, como exige a `CHECK` do banco (AD-022). A
+    # variante ausente do snapshot nem passa por aqui e mantém o preço (PRC-04).
+    def price_attributes(record)
+      { price_amount: record.price_amount, price_currency: record.price_currency,
+        price_observed_at: record.price_amount && @started_at }
     end
 
     # Descartes (SRC-11) não são falha: entram no log depois dos erros reais, que
