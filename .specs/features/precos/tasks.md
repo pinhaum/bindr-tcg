@@ -69,7 +69,7 @@ T8
 
 ### T1: Colunas de preço em `card_variants`
 
-**What**: Migração com `price_amount numeric(10,2)`, `price_currency text`, `price_observed_at timestamp`, as duas `CHECK` do design e `CardVariant#priced?`; `db/structure.sql` regenerado.
+**What**: Migração com `price_amount numeric(10,2)`, `price_currency text`, `price_observed_at timestamp`, as duas `CHECK` do design; `db/structure.sql` regenerado. `CardVariant#priced?` foi para a T5, onde é usado pela primeira vez.
 **Where**: `db/migrate/20261005120000_add_price_to_card_variants.rb`
 **Depends on**: None
 **Reuses**: padrão de `card_variants_art_kind_check`
@@ -82,10 +82,10 @@ T8
 
 **Done when**:
 
-- [ ] Teste prova que valor sem moeda, valor sem data, moeda sem valor e valor negativo são recusados pelo banco, e que os três nulos e os três preenchidos gravam
-- [ ] `db/structure.sql` contém as duas `CHECK`
-- [ ] Gate check passes: quick
-- [ ] Test count: suíte anterior (1751) + novos, sem remoção
+- [x] Teste prova que valor sem moeda, valor sem data, moeda sem valor e valor negativo são recusados pelo banco, e que os três nulos e os três preenchidos gravam
+- [x] `db/structure.sql` contém as duas `CHECK`
+- [x] Gate check passes: quick
+- [x] Test count: suíte anterior (1751) + novos, sem remoção
 
 **Tests**: unit
 **Gate**: quick

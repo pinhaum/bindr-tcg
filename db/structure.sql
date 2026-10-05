@@ -80,7 +80,12 @@ CREATE TABLE public.card_variants (
     last_seen_at timestamp(6) without time zone,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    CONSTRAINT card_variants_art_kind_check CHECK ((art_kind = ANY (ARRAY['base'::text, 'alternate_art'::text, 'parallel'::text, 'manga'::text, 'promo'::text, 'other'::text])))
+    price_amount numeric(10,2),
+    price_currency text,
+    price_observed_at timestamp(6) without time zone,
+    CONSTRAINT card_variants_art_kind_check CHECK ((art_kind = ANY (ARRAY['base'::text, 'alternate_art'::text, 'parallel'::text, 'manga'::text, 'promo'::text, 'other'::text]))),
+    CONSTRAINT card_variants_price_amount_check CHECK ((price_amount >= (0)::numeric)),
+    CONSTRAINT card_variants_price_complete_check CHECK ((((price_amount IS NULL) = (price_currency IS NULL)) AND ((price_amount IS NULL) = (price_observed_at IS NULL))))
 );
 
 
@@ -989,6 +994,7 @@ ALTER TABLE ONLY public.deck_entries
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261005120000'),
 ('20261002120000'),
 ('20260919120600'),
 ('20260919120500'),
