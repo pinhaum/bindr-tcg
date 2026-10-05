@@ -717,6 +717,78 @@ do Leader. As 10 DON!! ficam fora (P7). **A lista de banidas não é verificada*
 
 ---
 
+## Requisito 15 — Preços (Fase 3)
+
+**User story:** Como colecionador, quero ver quanto vale cada variante e quanto
+vale a minha pasta, para saber o que tenho de valor sem consultar carta por
+carta num site de mercado.
+
+Requisito da Fase 3, com decisões do dono em 2026-10-05. Recorte em
+`.specs/features/precos/spec.md` (PRC-NN, mesma numeração destes critérios).
+
+Fonte: o preço `market` do TCGplayer que a própria apitcg já entrega por produto
+(`markets.tcgplayer.prices.market`), lido no Normalize a cada
+`ingestion:import`. Não há integração nova nem consulta à apitcg fora da
+ingestão (decisão do dono: guardar no banco, não consultar por página). Medido
+no snapshot `apitcg-20261001T231649Z.json`: 7.253 produtos, 7.038 com `prices`,
+6.903 com `market` numérico; 90 produtos têm mais de uma impressão (Normal e
+Foil) sob o mesmo id. O produto do TCGplayer é a `card_variant` deste app
+(`variant_code = tcgplayer:<id>`, AD-019), então o preço é atributo da variante
+(`design.md` §10). Só o preço atual é guardado; não há histórico. A moeda é USD
+e fica explícita no dado, para BRL entrar depois sem migrar o que existe.
+
+### Critérios de aceitação
+
+**Ingestão**
+
+1. QUANDO a ingestão processar um produto cujo `markets.tcgplayer.prices.market`
+   seja um número maior ou igual a zero ENTÃO o sistema DEVE gravar na variante
+   esse valor, a moeda `USD` e a data e hora em que o import começou.
+2. SE o produto vier sem `markets.tcgplayer.prices.market` numérico e maior ou
+   igual a zero (ausente, nulo, negativo ou não numérico) ENTÃO o sistema DEVE
+   deixar a variante sem preço (valor, moeda e data nulos), mesmo que ela tivesse
+   preço antes, e o registro NÃO DEVE falhar por isso.
+3. O preço DEVE vir de `markets.tcgplayer.prices`, o preço da impressão principal
+   do produto, e nunca de `markets.tcgplayer.printings`, mesmo quando houver mais
+   de uma impressão.
+4. QUANDO uma variante não vier na fonte num import ENTÃO o sistema DEVE manter o
+   último preço dela, com a moeda e a data desse preço.
+5. O banco DEVE garantir que valor, moeda e data do preço sejam todos nulos ou
+   todos preenchidos, e que o valor nunca seja negativo.
+6. O conhecimento do formato de preço da apitcg DEVE ficar só no estágio
+   Normalize, como o resto do formato da fonte.
+7. QUANDO o mesmo snapshot for importado duas vezes ENTÃO os valores e as moedas
+   dos preços DEVEM ser os mesmos depois de cada import, e a coleção do usuário
+   DEVE continuar intacta.
+
+**Detalhe da carta**
+
+8. QUANDO alguém abrir o detalhe de uma carta ENTÃO o sistema DEVE exibir, em
+   cada variante com preço, o valor no formato `US$ 1.234,56` e o rótulo
+   `TCGplayer · market · <dd/mm/aaaa>`, com a data do preço.
+9. QUANDO a variante não tiver preço ENTÃO o detalhe DEVE exibir "Sem preço" no
+   lugar do valor.
+10. O preço no detalhe DEVE ser visível sem sessão, como o resto do catálogo
+    (Req. 6.3).
+
+**Valor da pasta**
+
+11. QUANDO o usuário autenticado abrir a pasta ENTÃO o sistema DEVE exibir o
+    valor estimado da coleção: a soma de `quantidade × preço` das variantes
+    possuídas que têm preço, em USD, no formato `US$ 1.234,56`.
+12. QUANDO houver cópias possuídas de variantes sem preço ENTÃO a pasta DEVE
+    exibir quantas são, junto do valor estimado ("N cópias sem preço").
+13. A pasta DEVE exibir, em cada set, o subtotal `quantidade × preço` das
+    variantes possuídas daquele set, agrupando pelo set da variante.
+14. O valor da pasta e os subtotais DEVEM considerar só a coleção do usuário da
+    sessão (Req. 6.5).
+15. QUANDO o usuário não tiver nenhuma cópia com preço ENTÃO a pasta DEVE exibir
+    o valor estimado como `US$ 0,00`.
+16. O valor estimado e os subtotais por set DEVEM sair de uma consulta agregada,
+    sem uma consulta por variante ou por set.
+
+---
+
 ## Rastreamento de pendências
 
 ### Resolvidas
