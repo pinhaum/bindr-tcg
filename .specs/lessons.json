@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 62,
+  "next_id": 63,
   "lessons": [
     {
       "id": "L-001",
@@ -1102,6 +1102,24 @@
       ],
       "created": "2026-10-03T02:28:07Z",
       "last_seen": "2026-10-03T02:28:07Z"
+    },
+    {
+      "id": "L-062",
+      "key": "surviving_mutant::quando zero e valor valido distinto de ausencia o cenario de agregacao precisa de um item com valor zero sem ele contar o zero como ausente sobrevive",
+      "text": "Quando zero é valor válido distinto de ausência, o cenário de agregação precisa de um item com valor zero; sem ele, contar o zero como ausente sobrevive.",
+      "signal": "surviving_mutant",
+      "scope": "aggregation/zero-value",
+      "status": "candidate",
+      "features": [
+        "precos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "app/models/collection_item.rb:97 (M15) (aggregation/zero-value)"
+      ],
+      "created": "2026-10-06T00:36:45Z",
+      "last_seen": "2026-10-06T00:36:45Z"
     }
   ]
 }

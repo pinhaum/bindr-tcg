@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: Fases 1 e 2 (decks) encerradas
+## Estado atual: Fases 1, 2 (decks) e 3 (preços) encerradas
 
 **Todo o `.context/tasks.md` da Fase 1 está fechado** (§0 a §8). As features em
 `.specs/features/` estão todas encerradas e verificadas (Verifier autor ≠
@@ -18,8 +18,12 @@ A **Fase 2 (`decks`, Req. 14, DCK-01..44)** está implementada: montar deck de
 de regra própria), o que falta na pasta por deck e no agregado, e lista em texto
 do OPTCG Simulator (importar e exportar). A feature está
 **encerrada e verificada** (`validation.md` PASS; T21 fechada em 2026-10-05 com
-o dono confirmando que o simulador aceita a lista exportada com LF). Fase 3 (preços) **não tem plano** e passa por
-`requirements.md` primeiro. Pendências do dono abertas: sets não lançados no topo do catálogo sem
+o dono confirmando que o simulador aceita a lista exportada com LF). A **Fase 3 (`precos`, Req. 15, PRC-01..16)** está
+**encerrada e verificada** (`validation.md` PASS na iteração 2, 2026-10-05): o
+preço `market` do TCGplayer que a apitcg já entrega é gravado em `card_variants`
+(valor, moeda ISO 4217 e data do import, AD-022), aparece no detalhe da carta e
+vira o valor estimado da pasta, com subtotal por set, na mesma consulta dos
+indicadores (AD-021 intacta). Só USD e só o preço atual, por decisão do dono. Pendências do dono abertas: sets não lançados no topo do catálogo sem
 arte (403 do CDN) e arte "SAMPLE" presa no cache de imagens (ver *Handoff*). A
 aprovação da T12 da `conformidade` foi dada em 2026-10-01. A D-03 (SRC-19) foi fechada mantendo a regra (registro no spec da
 `fonte-apitcg`) e o flake D-10 foi corrigido (registro no *Handoff*). `STATE.md` (*Handoff*) tem o
@@ -42,9 +46,9 @@ O que existe hoje:
   uso; uma consulta, que a pasta paga mesmo sem decks, AD-021).
 - **Ingestão**: `app/services/ingestion/` — `Run`, `Upsert`, `Remap`,
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
-- **Oito migrações**, de `20260919120000` a `20261002120000` (`CreateDecks`). `schema_format`
+- **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **129 arquivos de teste, 1751 testes**, rubocop e brakeman limpos.
+- **133 arquivos de teste, 1807 testes**, rubocop e brakeman limpos.
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque

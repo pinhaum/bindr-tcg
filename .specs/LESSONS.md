@@ -380,6 +380,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: DCK-24; test/integration/deck_imports_test.rb:186 (import)
 - last seen: 2026-10-03T02:28:07Z
 
+### L-062 - Quando zero é valor válido distinto de ausência, o cenário de agregação precisa de um item com valor zero; sem ele, contar o zero como ausente sobrevive.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `aggregation/zero-value` · harmful: 0
+- features: precos
+- evidence: app/models/collection_item.rb:97 (M15) (aggregation/zero-value)
+- last seen: 2026-10-06T00:36:45Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
