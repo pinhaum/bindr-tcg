@@ -363,14 +363,14 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 Plano da feature em `.specs/features/precos/tasks.md` (T1–T8, numeração
 própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
 
-- [ ] **10.1 Dado e ingestão** — T1–T3 da `precos`
+- [x] **10.1 Dado e ingestão** — T1–T3 da `precos`
   - Colunas de preço em `card_variants` com `CHECK` tudo-ou-nada (AD-022); o
     Normalize lê `markets.tcgplayer.prices.market`; o Upsert grava com a data do
     import.
   - _Requisitos: 15.1–15.7_
-- [ ] **10.2 Detalhe e pasta** — T4–T7
+- [x] **10.2 Detalhe e pasta** — T4–T7
   - _Requisitos: 15.8–15.16; 2.5_
-- [ ] **10.3 Fechamento** — T8
+- [x] **10.3 Fechamento** — T8
   - _Requisitos: 15.1, 15.8, 15.11_
 
 ---

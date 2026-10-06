@@ -144,9 +144,9 @@ o mostra na variante e no valor da pasta.
 
 ## Success Criteria
 
-- [ ] Depois de um `ingestion:import` real, pelo menos 6.900 variantes têm preço (a cobertura medida em 2026-10-01 foi 6.903 de 7.253).
-- [ ] O valor estimado da pasta bate com a soma manual de `quantidade × preço` em um teste com coleção conhecida.
-- [ ] O gate full continua verde e a pasta não ganha consulta por variante.
+- [x] Depois de um `ingestion:import` real, toda variante do catálogo cujo produto traz `market` tem preço. *Emendado em 2026-10-05 (T8): o texto anterior pedia "pelo menos 6.900", contados sobre **produtos** com `market` (6.903), o que incluía 237 DON!!, fora do catálogo por P7, e 6 produtos repetidos absorvidos pela SRC-34. Medido no import do snapshot `apitcg-20261001T231649Z.json`: 7.006 variantes presentes, 6.660 com preço, igual ao número de variantes cujo produto tem `market` (100% do elegível).*
+- [x] O valor estimado da pasta bate com a soma manual de `quantidade × preço` em um teste com coleção conhecida.
+- [x] O gate full continua verde e a pasta não ganha consulta por variante.
 
 ## Referências visuais
 

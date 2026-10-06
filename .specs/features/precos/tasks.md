@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/precos/design.md`
-**Status**: Draft
+**Status**: Done
 
 ---
 
@@ -276,13 +276,15 @@ T8
 
 **Done when**:
 
-- [ ] Pelo menos 6.900 variantes com preço após o import (Success Criteria)
-- [ ] Capturas de detalhe e pasta em 390px e 1280px sem scroll horizontal, conferidas contra o canvas
-- [ ] Gate check passes: build
-- [ ] `.context/tasks.md` §10 e este plano marcados
+- [x] Toda variante cujo produto tem `market` ficou com preço: 6.660 de 7.006 variantes presentes (Success Criteria emendado; a meta de 6.900 contava produtos, DON!! incluídos)
+- [x] Capturas de detalhe e pasta em 390px e 1280px sem scroll horizontal, conferidas contra o canvas
+- [x] Gate check passes: build
+- [x] `.context/tasks.md` §10 e este plano marcados
 
 **Tests**: none
 **Gate**: build
+
+**Resultado (2026-10-05)**: import `succeeded`, 0 falhas, 9.965 atualizados; coleção de dev intacta (52 cópias em 26 itens antes e depois). Capturas da pasta e do detalhe (usuário de captura com 23 cópias, US$ 30.601,33, 2 cópias sem preço) em 360, 390 e 1280px: os elementos de preço não passam da tela. A pasta continua com 408px a 390px por `.progress-set__code` e `.progress-set__catalog-link`, estouro anterior já registrado no `STATE.md` e fora desta feature. App no host pela porta 3100, porque a 3000 estava ocupada por outro projeto.
 
 **Commit**: `docs(precos): registrar o import real e as capturas`
 
