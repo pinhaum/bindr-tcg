@@ -372,6 +372,20 @@ class CollectionItemTest < ActiveSupport::TestCase
     assert_equal BigDecimal("0"), stats[:value_by_set_id][set_a.id]
   end
 
+  # Edge case do spec: preço zero é preço, distinto de "sem preço" (gap M15 do
+  # Verifier).
+  test "PRC-12: cópia com preço zero não conta como sem preço" do
+    user = create_user(email: "valor-12@example.com")
+    set = CardSet.create!(code: "PR0", name: "Set Zero", kind: "booster")
+    CollectionItem.create!(user: user, card_variant: priced_variant(set, "PR0-001", BigDecimal("0")), quantity: 3)
+    CollectionItem.create!(user: user, card_variant: priced_variant(set, "PR0-002", nil), quantity: 1)
+
+    stats = CollectionItem.collection_stats_for(user)
+    assert_equal 1, stats[:unpriced_copies]
+    assert_equal BigDecimal("0"), stats[:estimated_value]
+    assert_equal({ set.id => BigDecimal("0") }, stats[:value_by_set_id])
+  end
+
   test "PRC-16: tudo sai de uma única consulta" do
     user = create_user(email: "valor-11@example.com")
     spec_scenario(user)
