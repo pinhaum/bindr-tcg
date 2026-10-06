@@ -305,14 +305,18 @@ class MinhaPageTest < ActionDispatch::IntegrationTest
   end
 
   # --- T19: NAV-37 indicadores como cartões ---
+  #
+  # Emendado em 2026-10-05 pela `precos` (T7, Req. 15.11), com aval do dono: o
+  # valor estimado é o terceiro cartão, onde o canvas da pasta o desenha.
 
-  test "indicadores de cópias e variantes são cartões em grid" do
+  test "indicadores de cópias, variantes e valor estimado são cartões em grid" do
     sign_in(@user)
     get progress_path
 
     assert_select ".progress__summary" do
-      assert_select ".progress__stat", count: 2,
-        fail_message: "progress__summary deve conter exatamente 2 cartões"
+      assert_select ".progress__stat", count: 3,
+        fail_message: "progress__summary deve conter exatamente 3 cartões"
+      assert_select ".progress__stat--value", count: 1
     end
   end
 

@@ -100,6 +100,20 @@
         <%= stats[:distinct_variants] == 1 ? "carta diferente" : "cartas diferentes" %>
       </div>
     </div>
+    <%#
+      PRC-11, PRC-12, PRC-15 — valor estimado da pasta, da mesma consulta dos
+      indicadores (AD-021). As cópias sem preço ficam fora da soma e por isso
+      aparecem contadas ao lado dela, para o número não parecer completo.
+    %>
+    <div class="progress__stat progress__stat--value">
+      <div class="progress__stat-value"><%= format_price(stats[:estimated_value], "USD") %></div>
+      <div class="progress__stat-label">valor estimado</div>
+      <% if stats[:unpriced_copies].positive? %>
+        <div class="progress__stat-note">
+          <%= stats[:unpriced_copies] %> <%= stats[:unpriced_copies] == 1 ? "cópia sem preço" : "cópias sem preço" %>
+        </div>
+      <% end %>
+    </div>
   </div>
 
   <%#
@@ -244,6 +258,13 @@
             <%= row.parallel_variants == 1 ? "parallel" : "parallels" %>
           </p>
         </div>
+        <%#
+          PRC-13 — subtotal pelo set da variante; set sem cópia com preço mostra
+          zero. Linha própria, fora da legenda única de base e parallels (CNF-26).
+        %>
+        <p class="progress-set__value-line">
+          valor <span class="progress-set__value"><%= format_price(stats[:value_by_set_id].fetch(row.set_id, 0), "USD") %></span>
+        </p>
       </li>
     <% end %>
     </ul>

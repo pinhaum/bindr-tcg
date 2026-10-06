@@ -248,11 +248,11 @@ T8
 
 **Done when**:
 
-- [ ] Integração: total, "2 cópias sem preço" e subtotais aparecem para o dono; outro usuário logado vê os próprios números
-- [ ] Sem cópia com preço: `US$ 0,00` e nenhum texto "cópias sem preço"
-- [ ] `test/queries/set_progress_plan_test.rb` passa **sem edição** (3 consultas, AD-021)
-- [ ] Guardas de 360px existentes continuam verdes
-- [ ] Gate check passes: full
+- [x] Integração: total, "2 cópias sem preço" e subtotais aparecem para o dono; outro usuário logado vê os próprios números
+- [x] Sem cópia com preço: `US$ 0,00` e nenhum texto "cópias sem preço"
+- [x] `test/queries/set_progress_plan_test.rb` passa **sem edição** (3 consultas, AD-021)
+- [x] Guardas de 360px existentes continuam verdes
+- [x] Gate check passes: full
 
 **Tests**: integration
 **Gate**: full

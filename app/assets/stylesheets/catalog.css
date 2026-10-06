@@ -1220,6 +1220,19 @@ summary:focus-visible,
 }
 
 /*
+  PRC-11 — o valor ocupa a linha inteira na grade de duas colunas: um
+  "US$ 13.000,00" em tamanho de display não cabe em meia coluna a 360px. Na
+  grade de quatro colunas (largura mínima, abaixo) volta a ocupar uma.
+*/
+.progress__stat--value { grid-column: 1 / -1; }
+.progress__stat-value { font-variant-numeric: tabular-nums; }
+.progress__stat-note {
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
+
+/*
  * T3 — título "Progresso por set" rebaixado de h1 para h2.
  * T10 — tipografia corrigida para `title` (20/26/600), o valor do artboard
  * (Mobile:41, D:56); a T3 havia herdado `display` (28/32/700) do h1 anterior.
@@ -1515,6 +1528,14 @@ summary:focus-visible,
 }
 
 .progress-set__percent,
+.progress-set__value-line {
+  margin: 0;
+  font-size: var(--caption-size);
+  line-height: var(--caption-line-height);
+  color: var(--ink-muted);
+}
+.progress-set__value { font-variant-numeric: tabular-nums; }
+
 .progress-set__parallels {
   margin: 0;
   display: flex;
@@ -2382,6 +2403,7 @@ summary:focus-visible,
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-3);
   }
+  .progress__stat--value { grid-column: auto; }
 }
 
 /* Chips de filtro (T14 — NAV-33, NAV-34, NAV-35) */

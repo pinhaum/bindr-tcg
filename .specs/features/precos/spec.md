@@ -119,14 +119,14 @@ o mostra na variante e no valor da pasta.
 | PRC-08 | Detalhe: valor e rótulo com data (Req. 15.8) | T4, T5 | Implemented |
 | PRC-09 | Detalhe: "Sem preço" (Req. 15.9) | T5 | Implemented |
 | PRC-10 | Detalhe: público (Req. 15.10) | T5 | Implemented |
-| PRC-11 | Pasta: valor estimado (Req. 15.11) | Design | Pending |
-| PRC-12 | Pasta: "N cópias sem preço" (Req. 15.12) | Design | Pending |
-| PRC-13 | Pasta: subtotal por set da variante (Req. 15.13) | Design | Pending |
-| PRC-14 | Pasta: só a coleção da sessão (Req. 15.14) | Design | Pending |
-| PRC-15 | Pasta: `US$ 0,00` sem cópia com preço (Req. 15.15) | Design | Pending |
-| PRC-16 | Pasta: consulta agregada (Req. 15.16) | Design | Pending |
+| PRC-11 | Pasta: valor estimado (Req. 15.11) | T6, T7 | Implemented |
+| PRC-12 | Pasta: "N cópias sem preço" (Req. 15.12) | T6, T7 | Implemented |
+| PRC-13 | Pasta: subtotal por set da variante (Req. 15.13) | T6, T7 | Implemented |
+| PRC-14 | Pasta: só a coleção da sessão (Req. 15.14) | T6, T7 | Implemented |
+| PRC-15 | Pasta: `US$ 0,00` sem cópia com preço (Req. 15.15) | T6, T7 | Implemented |
+| PRC-16 | Pasta: consulta agregada (Req. 15.16) | T6, T7 | Implemented |
 
-**Coverage:** 16 total, 0 mapped to tasks, 16 unmapped ⚠️ (tasks ainda não existem)
+**Coverage:** 16 total, 16 mapped to tasks, 0 unmapped
 
 ## Implicit-Requirement Dimensions
 
