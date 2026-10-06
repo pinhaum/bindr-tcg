@@ -55,6 +55,26 @@ class CardVariantPriceTest < ActiveSupport::TestCase
     end
   end
 
+  # AD-022: moeda é código ISO 4217. Um "usd" ficaria fora da soma em USD e
+  # também fora das "cópias sem preço", sumindo da pasta sem aviso.
+  test "moeda fora do formato ISO 4217 é recusada pelo banco" do
+    [ "usd", "US$", "", "USDT" ].each do |currency|
+      assert_raises(ActiveRecord::StatementInvalid, currency) do
+        CardVariant.transaction(requires_new: true) do
+          write_price!(amount: 1, currency: currency, observed_at: @observed_at)
+        end
+      end
+    end
+  end
+
+  # `NaN >= 0` é verdadeiro no `numeric` do Postgres, e um NaN contaminaria a
+  # soma do set inteiro.
+  test "NaN é recusado pelo banco" do
+    assert_raises(ActiveRecord::StatementInvalid) do
+      write_price!(amount: BigDecimal("NaN"), currency: "USD", observed_at: @observed_at)
+    end
+  end
+
   test "valor negativo é recusado pelo banco" do
     assert_raises(ActiveRecord::StatementInvalid) do
       write_price!(amount: -0.01, currency: "USD", observed_at: @observed_at)

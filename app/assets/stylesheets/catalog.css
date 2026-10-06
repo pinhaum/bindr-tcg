@@ -1225,7 +1225,7 @@ summary:focus-visible,
   grade de quatro colunas (largura mínima, abaixo) volta a ocupar uma.
 */
 .progress__stat--value { grid-column: 1 / -1; }
-.progress__stat-value { font-variant-numeric: tabular-nums; }
+.progress__stat-value { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .progress__stat-note {
   font-size: var(--caption-size);
   line-height: var(--caption-line-height);
