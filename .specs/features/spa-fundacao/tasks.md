@@ -551,9 +551,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem: envio chama `signUp` com os três campos; erro em `password` e `password_confirmation` mostra cada mensagem junto do campo, com `aria-invalid` e `aria-describedby`, e foca `password` (primeiro inválido na ordem); erro só em `email` foca `email`; atributo desconhecido (`base`) aparece no topo e não é descartado; "Dados inválidos." não aparece quando todo `fields` tem campo; envio pendente ignorado; `return_to` preservado após o cadastro; guarda de já autenticado
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem: envio chama `signUp` com os três campos; erro em `password` e `password_confirmation` mostra cada mensagem junto do campo, com `aria-invalid` e `aria-describedby`, e foca `password` (primeiro inválido na ordem); erro só em `email` foca `email`; atributo desconhecido (`base`) aparece no topo e não é descartado; "Dados inválidos." não aparece quando todo `fields` tem campo; envio pendente ignorado; `return_to` preservado após o cadastro; guarda de já autenticado
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
