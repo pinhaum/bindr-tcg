@@ -658,9 +658,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Specs passam nas duas larguras e nos dois temas, com o tema certo já no primeiro quadro (atributo e cor lidos num `addInitScript` que observa o `<html>` antes do primeiro script do Kit)
-- [ ] Gate check passes: quick, depois full (com o e2e)
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Specs passam nas duas larguras e nos dois temas, com o tema certo já no primeiro quadro (atributo e cor lidos num `addInitScript` que observa o `<html>` antes do primeiro script do Kit)
+- [x] Gate check passes: quick, depois full (com o e2e)
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: e2e
 **Gate**: full
