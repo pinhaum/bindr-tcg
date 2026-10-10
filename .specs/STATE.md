@@ -194,6 +194,14 @@
 - **Date**: 2026-10-10
 - **Status**: active
 
+### AD-025
+- **Decision**: A SPA tem dois temas, claro e escuro, sobre um único conjunto de tokens semânticos (os nomes do design §11.3), cada um com valor por tema. O padrão segue `prefers-color-scheme`; o usuário escolhe "Sistema", "Claro" ou "Escuro", guardado em `localStorage` por dispositivo e aplicado antes da primeira pintura. O escuro parte dos valores do §11.3 e só muda onde um par reprovar o Req. 12.3; o claro usa as mesmas duas matizes. Emenda o Req. 12.2 para a SPA; as páginas Hotwire seguem no tema único até a `spa-troca`.
+- **Reason**: Decisão do dono em 2026-10-10. A tela é lida em mesa de loja iluminada e à noite; um tema só obriga um dos dois contextos a se adaptar.
+- **Trade-off**: Todo contraste passa a ser verificado duas vezes, e `on-accent` deixa de poder ser o próprio `surface-base` no claro (§11.2). A escolha não acompanha o usuário entre dispositivos, porque não há preferência no servidor.
+- **Scope**: `spa-fundacao` e toda fatia de tela da SPA.
+- **Date**: 2026-10-10
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-10-10 — este bloco vence os de baixo.** **`api-fundacao` (Fase 4, Req. 16, API-01..32) ENCERRADA e verificada** (`validation.md` PASS; 32/32 ACs, sensor 9/9 mutantes mortos; `validate_state.py api-fundacao` sai 0). T1–T12 commitadas direto na `main` (de `1da3029` a `e73a676`), mais três commits `fix(api-fundacao)` vindos das revisões (segurança, banco, testes): log do 500 sem a mensagem, `ParameterMissing`→400, inteiro fora do int4 ignorado no `CatalogQuery` (o HTML também dava 500), corrida de e-mail duplicado→422, `set` na carta (AC-27). Gate final: 1908 testes, 0 falhas, rubocop limpo, brakeman com o único aviso de fim de suporte do Rails 8.0.5.1 (calendário). Dívidas conhecidas, aceitas: sem limite de tentativas no login e enumeração de e-mail pelo 422 `taken`; `q` e listas de filtro do `CatalogQuery` sem teto de tamanho; NUL byte/UTF-8 inválido em `card_number` ou query vira 500 em vez de 400/404 (LOW, não corrigido). Flake ambiental conhecido: relógio do host anda para trás e índices GIN (D-10); rodar suítes em série. Próximo passo a definir pelo dono (front SPA consome `/api`).

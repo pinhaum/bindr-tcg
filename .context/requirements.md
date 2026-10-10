@@ -346,6 +346,11 @@ os critérios abaixo preservam explicitamente.
    literal que exista como token.
 2. O sistema DEVE ter **um único tema, escuro**, declarado com `color-scheme: dark`,
    e NÃO DEVE declarar `prefers-color-scheme`.
+   *Emendado em 2026-10-10 pela feature `spa-fundacao` (Req. 17, AD-025): a SPA
+   tem tema claro e escuro, com padrão em `prefers-color-scheme` e escolha
+   manual. As páginas Hotwire continuam no tema único escuro até saírem
+   (`spa-troca`, AD-023); os demais critérios deste requisito valem para os
+   dois temas.*
 3. Todo par de texto sobre fundo DEVE atingir contraste de 4.5:1, exceto texto a
    partir de 24px, bordas de controle, anéis de foco e ícones, que DEVEM atingir
    3:1 — verificável por cálculo de luminância relativa sobre os valores dos tokens.
@@ -898,6 +903,142 @@ com "Requisição inválida.", e não `500`.
     refletir o usuário da sessão e ser `null` sem sessão.
 32. Posse e wishlist DEVEM sair só de `Current.user`; a resposta de um usuário
     nunca contém dado de outro.
+
+---
+
+## Requisito 17 — Fundação da SPA
+
+**User story:** Como colecionador, quero entrar, criar conta e navegar numa SPA
+com tema claro ou escuro, servida pelo mesmo endereço do app, para usar o Bindr
+sem as páginas Hotwire; e como dono, quero uma base única que as fatias de tela
+seguintes herdem.
+
+Requisito da troca de front (AD-023, AD-025), com decisões do dono em
+2026-10-10. Recorte em `.specs/features/spa-fundacao/spec.md` (SPA-NN, mesma
+numeração destes critérios). Consome o contrato do Req. 16 sem redefini-lo.
+
+A SPA é SvelteKit 2 + Svelte 5, adapter-static em modo SPA, em `frontend/`, sob
+`/app` durante a transição. Telas de catálogo, carta, pasta, decks e
+portabilidade são fatias seguintes; cada componente nasce na primeira fatia
+que o usa.
+
+### Critérios de aceitação
+
+**Entrega na mesma origem**
+
+1. QUANDO `docker compose up` terminar ENTÃO o sistema DEVE servir a SPA em
+   `/app` pelo Vite, encaminhando ao Rails todo caminho fora de `/app`, sem
+   comando adicional (Req. 11.6).
+2. QUANDO o Rails de produção receber `GET /app/<caminho>` sem arquivo no build
+   ENTÃO o sistema DEVE responder `200` com a página de entrada da SPA
+   (`200.html`) e `Cache-Control: no-cache`. Arquivo inexistente sob `/app/_app/` DEVE
+   responder `404`.
+3. O Rails de produção DEVE servir os arquivos do build sob `/app/` pelo
+   servidor de estáticos, com o cache de longa duração que ele já aplica.
+4. As rotas fora de `/app` DEVEM continuar inalteradas: a suíte existente passa
+   sem edição.
+5. O build da SPA DEVE sair de um estágio Node do `Dockerfile` de produção, sem
+   Node na imagem final.
+
+**Cliente HTTP**
+
+6. Toda chamada à API DEVE passar por um único módulo cliente, com cookie da
+   mesma origem.
+7. Toda mutação DEVE enviar `X-CSRF-Token` com o token vigente.
+8. QUANDO uma resposta de sessão, login, cadastro ou logout trouxer
+   `csrf_token` ENTÃO o cliente DEVE trocar o token vigente por ele.
+9. SE uma resposta vier `401 unauthenticated` ENTÃO o sistema DEVE marcar a
+   sessão como anônima e levar a `/app/entrar?return_to=<caminho atual>`,
+   salvo no logout, que segue o critério 22.
+10. SE uma mutação vier `422 invalid_csrf_token` ENTÃO o cliente DEVE renovar o
+    token por `GET /api/session` e reenviar a mutação uma única vez, só se o
+    usuário da sessão continuar o mesmo. Se a sessão acabou, DEVE seguir o
+    critério 9, salvo no logout, que segue o critério 22; se outra conta
+    entrou, DEVE atualizar a sessão, levar a `/app` e avisar "A sessão mudou em
+    outra aba. Confira a conta e tente de novo.", sem reenviar. *Decisão do
+    dono, 2026-10-10: uma ação nunca é executada em conta diferente da que
+    estava na tela.*
+11. Erros da API DEVEM chegar à tela com `status`, `code`, `message` e `fields`
+    como vieram, sem reescrever a mensagem.
+12. SE a requisição falhar sem resposta ou passar de 15 s ENTÃO o erro DEVE ser
+    `network_error` com "Sem conexão com o servidor. Tente novamente.".
+13. SE a resposta não seguir o envelope do Req. 16 ENTÃO o erro DEVE ser
+    `unexpected_response` com "Erro inesperado. Tente novamente.".
+
+**Sessão, entrar e criar conta**
+
+14. QUANDO a SPA carregar ENTÃO o sistema DEVE ler `GET /api/session` antes de
+    renderizar a primeira rota.
+15. SE essa leitura falhar, por rede, por resposta fora do contrato ou por erro
+    da API (como navegador não suportado ou erro interno), ENTÃO o sistema DEVE
+    exibir a mensagem e "Tentar novamente", sem renderizar a rota.
+16. QUANDO o usuário entrar com credenciais corretas ENTÃO o sistema DEVE
+    atualizar a sessão e seguir para o destino pós-login.
+17. SE as credenciais forem recusadas ENTÃO o sistema DEVE exibir a mensagem da
+    API acima do formulário, manter o e-mail, limpar a senha e focar a
+    mensagem.
+18. QUANDO o cadastro for aceito ENTÃO o sistema DEVE atualizar a sessão e
+    seguir para o destino pós-login.
+19. SE o cadastro for recusado com `validation_failed` ENTÃO cada mensagem DEVE
+    aparecer junto do seu campo, ligada por `aria-describedby`, com
+    `aria-invalid` e foco no primeiro campo inválido.
+20. Mensagem de campo sem controle correspondente DEVE aparecer acima do
+    formulário, nunca ser descartada.
+21. Enquanto um envio estiver pendente, o botão DEVE ficar desabilitado e novo
+    envio DEVE ser ignorado.
+22. QUANDO o usuário sair ENTÃO o sistema DEVE encerrar a sessão pela API,
+    levar a `/app` e avisar "Sessão encerrada."; se a API responder que a
+    sessão já tinha acabado (`401`, ou sessão anônima na renovação do
+    critério 10, que é como chega o logout feito em outra aba, porque o Rails
+    confere o CSRF antes da sessão), o resultado DEVE ser o mesmo.
+23. O destino pós-login DEVE ser o `return_to` decodificado só quando começa
+    por `/app/` e não contém `//` nem `\`; senão, `/app`.
+24. Usuário com sessão em `/app/entrar` ou `/app/criar-conta` DEVE ser levado a
+    `/app`.
+
+**Casco de navegação**
+
+25. Toda rota da SPA DEVE exibir a navegação do Req. 13.1, na mesma ordem.
+26. Entrada para tela ainda não migrada DEVE apontar para a página Hotwire
+    equivalente, com navegação de página inteira.
+27. A entrada atual DEVE ter `aria-current="page"` e se distinguir por fundo e
+    peso, não só por cor.
+28. Abaixo de 64rem, a navegação DEVE ficar fixa embaixo, com entradas iguais,
+    alvos de 44px e sem cobrir o fim do conteúdo.
+29. A partir de 64rem, a navegação DEVE ficar no topo de uma coluna lateral de
+    largura fixa, abaixo da marca, em superfície elevada com borda.
+30. Casco e telas DEVEM funcionar em 360px sem scroll horizontal (Req. 2.5).
+
+**Temas claro e escuro**
+
+31. Cor, tipografia, espaço, raio, duração e easing DEVEM ser tokens num único
+    arquivo, sem literal repetido nos componentes (Req. 12.1).
+32. Cada token de cor DEVE ter valor claro e escuro com o mesmo nome semântico
+    do design §11.3; nenhum componente escolhe cor por tema.
+33. Os dois temas DEVEM cumprir os contrastes do Req. 12.3, verificados por
+    cálculo sobre os tokens.
+34. Os dois temas DEVEM usar só azul-petróleo, âmbar e `danger` (Req. 12.4).
+35. Com preferência "Sistema" ou ausente, o tema DEVE seguir
+    `prefers-color-scheme`, inclusive quando ele mudar com a página aberta.
+36. QUANDO o usuário escolher "Claro" ou "Escuro" ENTÃO o tema DEVE mudar na hora
+    e a escolha DEVE persistir no dispositivo.
+37. O tema efetivo DEVE estar aplicado antes da primeira pintura.
+38. SE o armazenamento local falhar ou trouxer valor desconhecido ENTÃO o
+    sistema DEVE usar "Sistema", sem erro.
+39. `color-scheme` DEVE acompanhar o tema efetivo.
+40. O anel de foco do Req. 12.9 DEVE valer nos dois temas.
+
+**Movimento e mensagens**
+
+41. Durações e easing DEVEM ser tokens, e só `transform` e `opacity` animam.
+42. Com `prefers-reduced-motion: reduce`, toda duração DEVE ser zero.
+43. A troca de rota DEVE usar View Transitions quando o navegador suportar, e
+    trocar sem transição nem erro quando não suportar.
+44. Mensagem de sucesso DEVE ser anunciada em `aria-live="polite"` e sumir em
+    5 s.
+45. Mensagem de erro DEVE ter `role="alert"`, distinguir-se por rótulo escrito
+    (Req. 12.8) e ficar até ser fechada.
+46. Mensagens NÃO DEVEM mover o foco nem deslocar o conteúdo.
 
 ---
 
