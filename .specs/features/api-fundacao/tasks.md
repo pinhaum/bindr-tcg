@@ -90,10 +90,10 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/queries/variant_holdings_test.rb` cobrem anônimo (`nil`, sem consulta), autenticado sem item (`0`/`nil`), com item, quantidade zero registrada, e dois usuários (B não vê A)
-- [ ] Contagem de consultas afirmada (uma por hash)
-- [ ] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/queries/variant_holdings_test.rb` cobrem anônimo (`nil`, sem consulta), autenticado sem item (`0`/`nil`), com item, quantidade zero registrada, e dois usuários (B não vê A)
+- [x] Contagem de consultas afirmada (uma por hash)
+- [x] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
