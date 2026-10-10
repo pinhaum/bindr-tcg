@@ -35,7 +35,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 | ---------- | ----------- | ------- |
 | Quick | Tasks do front com teste de unidade | `docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm run lint && npm test -- --run"` |
 | Full | Tasks que tocam o Rails; tasks e2e (depois do quick) | `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`; nas tasks e2e, também `docker compose up -d app frontend && docker compose --profile e2e run --rm e2e` |
-| Build | Fim de phase e fechamento | `docker compose build && docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm run lint && npm test -- --run && npm run build"` + Full + `docker compose exec app bin/brakeman -q --no-pager && python3 spec/verify_fixture.py` |
+| Build | Fim de phase e fechamento | `docker build -f Dockerfile . && docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm run lint && npm test -- --run && npm run build"` + Full + `docker compose exec app bin/brakeman -q --no-pager && python3 spec/verify_fixture.py` |
 
 ---
 
@@ -791,9 +791,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Texto trocado em `spec.md`, `tasks.md`, `.context/requirements.md` e `CLAUDE.md` (onde existir) e emenda registrada no `STATE.md`
-- [ ] `docker build -f Dockerfile .` passa
-- [ ] `validate_spec.py` e `validate_tasks.py` da feature saem 0
+- [x] Texto trocado em `spec.md`, `tasks.md`, `.context/requirements.md` e `CLAUDE.md` (onde existir) e emenda registrada no `STATE.md`
+- [x] `docker build -f Dockerfile .` passa
+- [x] `validate_spec.py` e `validate_tasks.py` da feature saem 0
 
 **Tests**: none
 **Gate**: build

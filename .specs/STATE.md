@@ -202,6 +202,14 @@
 - **Date**: 2026-10-10
 - **Status**: active
 
+### AD-026
+- **Decision**: O gate de build do `spa-fundacao` (AC SPA-05 e o gate Build do `tasks.md`) passa a ser `docker build -f Dockerfile .`, não `docker compose build`.
+- **Reason**: Decisão do dono em 2026-10-10 (D6 da validação 1). O compose constrói o `Dockerfile.dev` (sem o estágio `frontend-build`); só o `Dockerfile` de produção prova que a SPA é gerada num estágio Node e copiada para a imagem final.
+- **Trade-off**: O gate deixa de exercitar a imagem de desenvolvimento; ela segue provada pelo `docker compose run` dos gates quick e e2e.
+- **Scope**: `spa-fundacao` (spec.md SPA-05 e edge case de `200.html`, tasks.md). O `CLAUDE.md` e o `.context/requirements.md` não citam o comando para esta feature (o `build` do `CLAUDE.md` é o da `fonte-apitcg`).
+- **Date**: 2026-10-10
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-10-10, spa-fundacao — este bloco vence os de baixo.** **`spa-fundacao` (Req. 17, SPA-01..46) IMPLEMENTADA: T1–T22 commitadas** na branch `svelt-front` (hashes em `tmp/commits-so-far.txt`). O front mora em `frontend/` (SvelteKit 3 + Svelte 5, adapter-static com `200.html`, base `/app`), com serviço `frontend` e perfil `e2e` no compose, proxy do Vite sem `changeOrigin`, estágio `frontend-build` no `Dockerfile` e `SpaController` servindo a página de entrada. Gates verdes: 281 testes Vitest (25 arquivos), Rails 1912 runs com 0 falhas e rubocop limpo, e2e do casco e da sessão contra a API real, `docker compose build`. **Falta:** o Verifier (autor ≠ verificador) e o `validation.md`; o `spec.md` está com a traceability em `Implemented` e os Success Criteria desmarcados de propósito. A §12 do `.context/tasks.md` está fechada (12.1–12.5). Detalhes técnicos e armadilhas: seção *Emendas da execução* do `design.md` e `CLAUDE.md` ("Front SPA"). **Decisões abertas para o dono:** `Button` pendente com `disabled` + `aria-busy` (foco perdido, estado não anunciado; `aria-disabled` exigiria emendar o SPA-21); toast de sucesso sem pausa (exceção à WCAG 2.2.1); dica de formato da senha só no erro; chave desconhecida de `fields` aparece como `chave: mensagem`; `/app/200.html` com cache de 1 ano; login sem limite de tentativas (dívida da API); e-mail como identidade da sessão. O e2e deixa contas `e2e-<timestamp>@exemplo.test` no banco de dev.

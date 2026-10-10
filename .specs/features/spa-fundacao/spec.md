@@ -80,7 +80,7 @@ essa base e as telas de entrar e criar conta, que já a exercitam por inteiro.
 2. WHEN o Rails de produção receber `GET /app` ou `GET /app/<qualquer caminho>` sem arquivo correspondente no build THEN the system SHALL responder `200` com a página de entrada da SPA (`200.html`, fallback do adapter-static) e `Cache-Control: no-cache`.
 3. WHEN o Rails de produção receber `GET` de um arquivo existente do build sob `/app/` THEN the system SHALL servir o arquivo pelo servidor de arquivos estáticos do Rails, com o `Cache-Control` de longa duração que ele já aplica (`max-age` de 1 ano).
 4. The system SHALL manter inalteradas as rotas fora de `/app`: a suíte Rails existente passa sem edição.
-5. WHEN `docker compose build` rodar THEN the system SHALL gerar o build da SPA num estágio Node do `Dockerfile` de produção e copiá-lo para a imagem final, sem Node na imagem final.
+5. WHEN `docker build -f Dockerfile .` rodar THEN the system SHALL gerar o build da SPA num estágio Node do `Dockerfile` de produção e copiá-lo para a imagem final, sem Node na imagem final.
 
 **Independent Test**: Request test no Rails sobre `/app/qualquer/coisa` com um `200.html` de fixture; `docker compose up` seguido de `curl` em `/app` e em `/api/session` pela porta do Vite.
 
@@ -215,7 +215,7 @@ essa base e as telas de entrar e criar conta, que já a exercitam por inteiro.
 - WHEN o usuário recarregar o navegador em `/app/criar-conta?return_to=/app/x` THEN the system SHALL manter o `return_to` após o cadastro.
 - WHEN a viewport cruzar 64rem com a página aberta THEN the system SHALL trocar barra inferior por coluna lateral sem recarregar e sem perder o foco.
 - IF o Rails de produção receber `GET` de arquivo inexistente sob `/app/_app/` (chunk de um build anterior) THEN the system SHALL responder `404`, nunca a página de entrada com `200`.
-- IF o build de produção não tiver `200.html` THEN the system SHALL falhar o `docker compose build`, não o primeiro request.
+- IF o build de produção não tiver `200.html` THEN the system SHALL falhar o `docker build -f Dockerfile .`, não o primeiro request.
 
 ---
 
