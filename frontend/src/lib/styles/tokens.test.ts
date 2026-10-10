@@ -110,6 +110,10 @@ describe.each(['dark', 'light'] as const)('tema %s', (name) => {
 		expect(contrast(t['--danger'], t['--surface-base'])).toBeGreaterThanOrEqual(4.5);
 	});
 
+	it.each(SURFACES)('danger como texto tem 4.5:1 sobre %s', (surface) => {
+		expect(contrast(t['--danger'], t[`--${surface}`])).toBeGreaterThanOrEqual(4.5);
+	});
+
 	it('toda cor com croma ≥ 0.01 cai em 228°, 66° ou 28° (só danger) ± 8', () => {
 		for (const token of COLOR_TOKENS) {
 			const { c, h } = oklch(t[`--${token}`]);

@@ -695,6 +695,113 @@ T21 → T22
 
 ---
 
+### T23: Contraste de `danger` como texto nas três superfícies (G1)
+
+**What**: Teste de que `danger` usado como texto tem ≥ 4.5:1 sobre `surface-base`, `surface-raised` e `surface-sunken` nos dois temas (`it.each` sobre as superfícies). Sem mexer em `tokens.css` (os valores atuais já passam).
+**Where**: `frontend/src/lib/styles/tokens.test.ts`
+**Depends on**: T22
+**Reuses**: helpers de contraste e lista de superfícies de `tokens.test.ts`
+**Requirement**: SPA-33, Success Criterion 2
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [x] `it.each` cobre `danger` × as 3 superfícies nos dois temas, com limite 4.5
+- [x] Mutante M6c (`--danger` escuro `#e84b3f`) reprova o teste novo; sem o mutante, passa
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
+
+**Tests**: unit
+**Gate**: quick
+
+**Commit**: `test(spa-fundacao): exigir contraste de danger sobre as três superfícies`
+
+---
+
+### T24: E2E do deslocamento de conteúdo ao exibir a mensagem (G2)
+
+**What**: No e2e, no passo em que a mensagem de sair aparece: `getComputedStyle(.layer).position === 'fixed'` e `boundingBox` de `main#conteudo` igual antes e depois da mensagem.
+**Where**: `frontend/e2e/sessao.spec.ts`
+**Depends on**: T22
+**Reuses**: jornada de sessão (T20)
+**Requirement**: SPA-46
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] Asserções de `position: fixed` e de `boundingBox` estável no passo "Sessão encerrada."
+- [x] Mutante M7c (`.layer` `fixed` → `static` em `Toaster.svelte`) reprova o e2e; sem o mutante, passa
+- [x] Gate check passes: quick, depois full (com o e2e)
+- [x] Test count: anteriores + novos, nenhum removido
+
+**Tests**: e2e
+**Gate**: full
+
+**Commit**: `test(spa-fundacao): provar que a mensagem não desloca o conteúdo`
+
+---
+
+### T25: Guarda de tokens e de propriedades animadas (G3 e G4)
+
+**What**: `ThemeSelect.svelte`: `min-height: 44px` vira `var(--touch-target)` e `var(--radius-md, 0.5rem)` vira `var(--radius-md)`. Teste-guarda Vitest que varre `src/**/*.svelte` e `src/**/*.css` (exceto `tokens.css`) e falha com px literal que exista como token ou hex, e falha se `transition`, `transition-property` ou `@keyframes` animar propriedade fora de `transform` e `opacity`.
+**Where**: `frontend/src/lib/components/ThemeSelect.svelte`
+**Depends on**: T22
+**Reuses**: `tokens.css` (lista de valores px)
+**Requirement**: SPA-31, SPA-41
+
+**Tools**:
+
+- MCP: `plugin:svelte` (`svelte-autofixer`)
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [x] Teste-guarda novo (ex.: `frontend/src/lib/styles/guard.test.ts`) passa no código atual
+- [x] Reintroduzir `44px` em `ThemeSelect.svelte` reprova o guarda; reintroduzir `transition: width` reprova o guarda
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
+
+**Tests**: unit
+**Gate**: quick
+
+**Commit**: `test(spa-fundacao): guardar contra valor literal de token e animação fora de transform e opacity`
+
+---
+
+### T26: Emenda do gate de build do SPA-05 (D6)
+
+**What**: Só documentação, aprovada pelo dono em 2026-10-10: trocar `docker compose build` por `docker build -f Dockerfile .` no AC SPA-05 e no gate Build do `tasks.md` (o compose constrói o `Dockerfile.dev`); espelhar no Req. 17 de `.context/requirements.md` e no `CLAUDE.md` onde o texto aparecer; registrar a emenda no `STATE.md`.
+**Where**: `.specs/features/spa-fundacao/spec.md`
+**Depends on**: T22
+**Reuses**: -
+**Requirement**: SPA-05
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Texto trocado em `spec.md`, `tasks.md`, `.context/requirements.md` e `CLAUDE.md` (onde existir) e emenda registrada no `STATE.md`
+- [ ] `docker build -f Dockerfile .` passa
+- [ ] `validate_spec.py` e `validate_tasks.py` da feature saem 0
+
+**Tests**: none
+**Gate**: build
+
+**Commit**: `docs(spa-fundacao): emendar o gate de build do SPA-05 para o Dockerfile de produção`
+
+---
+
 ## Phase Execution Map
 
 Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6, em série; dentro de cada phase, as tasks rodam na ordem numérica.
