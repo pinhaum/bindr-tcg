@@ -394,9 +394,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem: as duas regiões existem antes de qualquer mensagem; sucesso aparece na região `polite` e some aos 5000 ms com timer falso (e não antes); erro aparece com `role="alert"` e "Erro:" escrito e só some com "Fechar"; `document.activeElement` não muda ao emitir
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem: as duas regiões existem antes de qualquer mensagem; sucesso aparece na região `polite` e some aos 5000 ms com timer falso (e não antes); erro aparece com `role="alert"` e "Erro:" escrito e só some com "Fechar"; `document.activeElement` não muda ao emitir
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
