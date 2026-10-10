@@ -259,9 +259,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes com `fetch` falso cobrem: `X-CSRF-Token` presente em `POST`, `PATCH`, `PUT`, `DELETE` e ausente em `GET`; `credentials: "same-origin"`; token trocado após resposta com `csrf_token` e mantido sem ele; `data` devolvido do envelope; erro `{ error }` vira `ApiError` com os campos exatos; `fetch` rejeitado com `TypeError` e tempo limite (timer falso) viram `network_error` com a mensagem exata; HTML, JSON inválido e JSON sem `data`/`error` viram `unexpected_response`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes com `fetch` falso cobrem: `X-CSRF-Token` presente em `POST`, `PATCH`, `PUT`, `DELETE` e ausente em `GET`; `credentials: "same-origin"`; token trocado após resposta com `csrf_token` e mantido sem ele; `data` devolvido do envelope; erro `{ error }` vira `ApiError` com os campos exatos; `fetch` rejeitado com `TypeError` e tempo limite (timer falso) viram `network_error` com a mensagem exata; HTML, JSON inválido e JSON sem `data`/`error` viram `unexpected_response`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
