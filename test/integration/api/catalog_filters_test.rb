@@ -10,7 +10,7 @@ class Api::CatalogFiltersTest < ActionDispatch::IntegrationTest
     mark_catalog_present!
   end
 
-  test "API-16: data é igual a CatalogQuery.filter_options, com sets em code e name" do
+  test "API-22: data é igual a CatalogQuery.filter_options, com sets em code e name" do
     get "/api/catalog/filters"
 
     assert_response :ok
@@ -20,7 +20,7 @@ class Api::CatalogFiltersTest < ActionDispatch::IntegrationTest
     assert_equal [ { "code" => "OP01", "name" => "Romance Dawn" } ], response.parsed_body.dig("data", "sets")
   end
 
-  test "API-22: falha em filter_options responde 500 internal_error genérico, sem vazar a exceção" do
+  test "API-16: falha em filter_options responde 500 internal_error genérico, sem vazar a exceção" do
     original = CatalogQuery.method(:filter_options)
     CatalogQuery.define_singleton_method(:filter_options) { raise RuntimeError, "segredo-interno" }
     begin

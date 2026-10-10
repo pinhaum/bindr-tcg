@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: Fases 1, 2 (decks) e 3 (preços) encerradas
+## Estado atual: Fases 1, 2 (decks) e 3 (preços) encerradas; API JSON (`api-fundacao`) implementada
 
 **Todo o `.context/tasks.md` da Fase 1 está fechado** (§0 a §8). As features em
 `.specs/features/` estão todas encerradas e verificadas (Verifier autor ≠
@@ -27,7 +27,9 @@ indicadores (AD-021 intacta). Só USD e só o preço atual, por decisão do dono
 arte (403 do CDN) e arte "SAMPLE" presa no cache de imagens (ver *Handoff*). A
 aprovação da T12 da `conformidade` foi dada em 2026-10-01. A D-03 (SRC-19) foi fechada mantendo a regra (registro no spec da
 `fonte-apitcg`) e o flake D-10 foi corrigido (registro no *Handoff*). `STATE.md` (*Handoff*) tem o
-retrato mais recente.
+retrato mais recente. A feature `api-fundacao` (Req. 16, API-01..32) acrescentou a
+API JSON sob `/api` (sessão, cadastro, catálogo e detalhe da carta), com teste de
+ponta a ponta; a §11 do `.context/tasks.md` está fechada.
 
 O que existe hoje:
 
@@ -48,11 +50,53 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **133 arquivos de teste, 1807 testes**, rubocop e brakeman limpos.
+- **144 arquivos de teste, 1904 testes**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
   existe pipeline.
+
+### API JSON (`/api`, `api-fundacao`)
+
+Controllers em `app/controllers/api/`, todos filhos de `Api::BaseController`
+(irmão de `ApplicationController`, não filho: herdar traria o `allow_browser` do
+HTML). Rotas no `scope "api"` de `config/routes.rb` (`format: false` +
+`defaults: { format: :json }`):
+
+| Rota | Controller | Acesso |
+|---|---|---|
+| `GET/POST/DELETE /api/session` | `SessionsController` | `GET` público; login público; logout exige sessão |
+| `POST /api/registration` | `RegistrationsController` | público |
+| `GET /api/catalog`, `GET /api/catalog/filters` | `CatalogController` | público (posse só com sessão) |
+| `GET /api/cards/:card_number` | `CardsController` | público (posse só com sessão) |
+| `* /api/*path` | `NotFoundController` | catch-all |
+
+Sucesso é `{ "data": ... }` (a lista traz `meta`); erro é sempre
+`{ "error": { "code", "message", "fields" } }` com mensagem em pt-BR. Códigos:
+`unauthenticated` 401, `invalid_credentials` 401, `invalid_csrf_token` 422,
+`validation_failed` 422, `bad_request` 400, `invalid_json` 400, `not_found` 404,
+`not_acceptable` 406, `unsupported_browser` 406, `internal_error` 500 (genérico,
+a exceção só vai para o log). Nenhuma resposta sob `/api` é HTML ou redirect;
+`end_to_end_test.rb` varre isso. As peças reaproveitadas pelo HTML e pela API:
+`CatalogQuery`, `CardDetail`, `VariantHoldings`, `Card.preload_present_variants`.
+
+Armadilhas:
+
+- **`before_action :resume_session` no base é obrigatório.** Sem ele, `Current.user`
+  é `nil` nos endpoints públicos e a posse some com 200 (mesma armadilha do
+  `allow_unauthenticated_access`).
+- **`ParseError` tem handler próprio** (`invalid_json` 400): o Rails levanta
+  `ActionDispatch::Http::Parameters::ParseError` ao ler o corpo JSON malformado,
+  antes da action, e cairia no `StandardError` como 500.
+- **CSRF vai por sessão, não por cookie de formulário.** Todo `GET /api/session`,
+  login, cadastro e logout devolve `csrf_token`; login, cadastro e logout trocam a
+  sessão e portanto o token, e o anterior passa a ser recusado. O cliente usa o
+  token devolvido no passo anterior, no header `X-CSRF-Token`.
+- **O catch-all `match "*path"` tem de ser a última rota** do escopo; rota nova da
+  API entra acima dele. `catalog/filters` vem antes de qualquer rota com `:id`.
+- **Teste de CSRF liga `ActionController::Base.allow_forgery_protection`** no
+  `setup` e restaura no `teardown`: o ambiente de teste o desliga, e sem isso
+  nenhum teste prova o `422`.
 
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção

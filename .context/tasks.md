@@ -386,7 +386,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
   - Base da API (CSRF, `401`, envelope de erro, `404`/`406`/`500`, JSON
     forçado), sessão e cadastro em JSON, mensagens em pt-BR.
   - _Requisitos: 16.1–16.16_
-- [ ] **11.3 Catálogo e fechamento** — T9–T12
+- [x] **11.3 Catálogo e fechamento** — T9–T12
   - _Requisitos: 16.12, 16.16, 16.18–16.32_
 
 ---

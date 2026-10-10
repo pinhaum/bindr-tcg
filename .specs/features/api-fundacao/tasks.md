@@ -381,9 +381,9 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Teste de ponta a ponta verde; nenhuma resposta de `/api` nos testes é HTML ou redirect
-- [ ] Gate check passes: `docker compose build && docker compose exec app bin/rails test && docker compose exec app bin/rubocop && docker compose exec app bin/brakeman -q --no-pager && python3 spec/verify_fixture.py`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Teste de ponta a ponta verde; nenhuma resposta de `/api` nos testes é HTML ou redirect
+- [x] Gate check passes: `docker compose build && docker compose exec app bin/rails test && docker compose exec app bin/rubocop && docker compose exec app bin/brakeman -q --no-pager && python3 spec/verify_fixture.py`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: build

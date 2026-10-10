@@ -160,40 +160,40 @@ que exercita essas convenções num payload real.
 
 ## Requirement Traceability
 
-| Requirement ID | Story | Phase | Status |
-|---|---|---|---|
-| API-01 | P1: Sessão — `GET` anônimo (Req. 16.1) | Tasks | Pending |
-| API-02 | P1: Sessão — `GET` autenticado (Req. 16.2) | Tasks | Pending |
-| API-03 | P1: Sessão — login (Req. 16.3) | Tasks | Pending |
-| API-04 | P1: Sessão — credencial inválida (Req. 16.4) | Tasks | Pending |
-| API-05 | P1: Sessão — logout (Req. 16.5) | Tasks | Pending |
-| API-06 | P1: Sessão — cadastro (Req. 16.6) | Tasks | Pending |
-| API-07 | P1: Sessão — cadastro inválido (Req. 16.7) | Tasks | Pending |
-| API-08 | P1: Sessão — CSRF obrigatório (Req. 16.8) | Tasks | Pending |
-| API-09 | P1: Sessão — CSRF renovado (Req. 16.9) | Tasks | Pending |
-| API-10 | P1: Contrato — `401` (Req. 16.10) | Tasks | Pending |
-| API-11 | P1: Contrato — formato de erro (Req. 16.11) | Tasks | Pending |
-| API-12 | P1: Contrato — `404` de registro (Req. 16.12) | Tasks | Pending |
-| API-13 | P1: Contrato — `404` de rota (Req. 16.13) | Tasks | Pending |
-| API-14 | P1: Contrato — sempre JSON (Req. 16.14) | Tasks | Pending |
-| API-15 | P1: Contrato — `406` (Req. 16.15) | Tasks | Pending |
-| API-16 | P1: Contrato — `500` (Req. 16.16) | Tasks | Pending |
-| API-17 | P1: Contrato — HTML intacto (Req. 16.17) | Tasks | Pending |
-| API-18 | P1: Catálogo — lista (Req. 16.18) | Tasks | Pending |
-| API-19 | P1: Catálogo — parâmetro inválido (Req. 16.19) | Tasks | Pending |
-| API-20 | P1: Catálogo — filtro de posse (Req. 16.20) | Tasks | Pending |
-| API-21 | P1: Catálogo — variantes presentes (Req. 16.21) | Tasks | Pending |
-| API-22 | P1: Catálogo — opções de filtro (Req. 16.22) | Tasks | Pending |
-| API-23 | P1: Catálogo — detalhe (Req. 16.23) | Tasks | Pending |
-| API-24 | P1: Catálogo — variante em destaque (Req. 16.24) | Tasks | Pending |
-| API-25 | P1: Catálogo — `404` do detalhe (Req. 16.25) | Tasks | Pending |
-| API-26 | P1: Catálogo — público (Req. 16.26) | Tasks | Pending |
-| API-27 | P1: Serialização — carta ≠ variante (Req. 16.27) | Tasks | Pending |
-| API-28 | P1: Serialização — NULL ≠ 0 (Req. 16.28) | Tasks | Pending |
-| API-29 | P1: Serialização — preço (Req. 16.29) | Tasks | Pending |
-| API-30 | P1: Serialização — imagem (Req. 16.30) | Tasks | Pending |
-| API-31 | P1: Serialização — posse e desejo (Req. 16.31) | Tasks | Pending |
-| API-32 | P1: Serialização — isolamento (Req. 16.32) | Tasks | Pending |
+| Requirement ID | Story | Task | Teste | Status |
+|---|---|---|---|---|
+| API-01 | P1: Sessão — `GET` anônimo (Req. 16.1) | T7 | `test/integration/api/sessions_test.rb › GET anônimo devolve user nil e um csrf_token` | Verified |
+| API-02 | P1: Sessão — `GET` autenticado (Req. 16.2) | T7 | `test/integration/api/sessions_test.rb › GET autenticado devolve o e-mail da sessão` | Verified |
+| API-03 | P1: Sessão — login (Req. 16.3) | T7 | `test/integration/api/sessions_test.rb › login cria a Session, grava o cookie e devolve token novo; end_to_end_test.rb › ponta a ponta` | Verified |
+| API-04 | P1: Sessão — credencial inválida (Req. 16.4) | T7 | `test/integration/api/sessions_test.rb › credencial inválida responde 401; campo ausente no login` | Verified |
+| API-05 | P1: Sessão — logout (Req. 16.5) | T7 | `test/integration/api/sessions_test.rb › logout apaga a Session; end_to_end_test.rb › ponta a ponta` | Verified |
+| API-06 | P1: Sessão — cadastro (Req. 16.6) | T8 | `test/integration/api/registrations_test.rb › cadastro válido cria User e Session e devolve token novo` | Verified |
+| API-07 | P1: Sessão — cadastro inválido (Req. 16.7) | T5, T8 | `test/integration/api/registrations_test.rb › e-mail vazio/já usado/senha curta/confirmação diferente/sem user; test/models/user_messages_pt_br_test.rb` | Verified |
+| API-08 | P1: Sessão — CSRF obrigatório (Req. 16.8) | T7, T8 | `test/integration/api/sessions_test.rb › mutação sem token é 422; registrations_test.rb › sem token CSRF é 422` | Verified |
+| API-09 | P1: Sessão — CSRF renovado (Req. 16.9) | T7, T8 | `test/integration/api/sessions_test.rb › token anterior é recusado e o novo aceito (login e logout); registrations_test.rb › o token devolvido é aceito` | Verified |
+| API-10 | P1: Contrato — `401` (Req. 16.10) | T7 | `test/integration/api/sessions_test.rb › DELETE anônimo é 401 unauthenticated` | Verified |
+| API-11 | P1: Contrato — formato de erro (Req. 16.11) | T6 | `test/integration/api/contract_test.rb › caminho inexistente responde 404 em JSON; sessions_test.rb (INVALID_BODY); catalog_filters_test.rb › 500` | Verified |
+| API-12 | P1: Contrato — `404` de registro (Req. 16.12) | T9 | `test/integration/api/cards_test.rb › carta inexistente é 404; carta com todas as variantes ocultas é 404` | Verified |
+| API-13 | P1: Contrato — `404` de rota (Req. 16.13) | T6 | `test/integration/api/contract_test.rb › caminho inexistente, POST sem token CSRF, caminho aninhado` | Verified |
+| API-14 | P1: Contrato — sempre JSON (Req. 16.14) | T6, T12 | `test/integration/api/contract_test.rb › Accept text/html e extensão .html; end_to_end_test.rb › API-17 (varredura)` | Verified |
+| API-15 | P1: Contrato — `406` (Req. 16.15) | T6 | `test/integration/api/contract_test.rb › navegador antigo recebe 406; formato desconhecido responde 406` | Verified |
+| API-16 | P1: Contrato — `500` (Req. 16.16) | T6, T11 | `test/integration/api/contract_test.rb › exceção inesperada responde 500 e é logada; catalog_filters_test.rb › falha em filter_options` | Verified |
+| API-17 | P1: Contrato — HTML intacto (Req. 16.17) | T4, T6, T12 | `test/integration/api/contract_test.rb › as rotas HTML não são afetadas; end_to_end_test.rb › API-17 (varredura)` | Verified |
+| API-18 | P1: Catálogo — lista (Req. 16.18) | T10 | `test/integration/api/catalog_test.rb › API-18 (lista e paginação)` | Verified |
+| API-19 | P1: Catálogo — parâmetro inválido (Req. 16.19) | T10 | `test/integration/api/catalog_test.rb › API-19; per_page acima do teto` | Verified |
+| API-20 | P1: Catálogo — filtro de posse (Req. 16.20) | T10 | `test/integration/api/catalog_test.rb › API-20 (owned, missing, sem sessão, user_id ignorado); end_to_end_test.rb › ponta a ponta` | Verified |
+| API-21 | P1: Catálogo — variantes presentes (Req. 16.21) | T3, T10 | `test/integration/api/catalog_test.rb › API-21; test/models/card_preload_present_variants_test.rb; test/queries/card_detail_test.rb` | Verified |
+| API-22 | P1: Catálogo — opções de filtro (Req. 16.22) | T11 | `test/integration/api/catalog_filters_test.rb › data é igual a CatalogQuery.filter_options` | Verified |
+| API-23 | P1: Catálogo — detalhe (Req. 16.23) | T2, T9 | `test/integration/api/cards_test.rb › devolve a carta com envelope data; test/queries/card_detail_test.rb` | Verified |
+| API-24 | P1: Catálogo — variante em destaque (Req. 16.24) | T2, T9 | `test/integration/api/cards_test.rb › featured_variant_code segue o CNF-42; variante pedida de outra carta` | Verified |
+| API-25 | P1: Catálogo — `404` do detalhe (Req. 16.25) | T2, T9 | `test/integration/api/cards_test.rb › carta inexistente / todas ocultas é 404; test/queries/card_detail_test.rb › levanta RecordNotFound` | Verified |
+| API-26 | P1: Catálogo — público (Req. 16.26) | T9, T10 | `test/integration/api/catalog_test.rb › API-26; cards_test.rb › anônimo vê owned_quantity e wishlist_target null` | Verified |
+| API-27 | P1: Serialização — carta ≠ variante (Req. 16.27) | T9 | `test/integration/api/cards_test.rb › carta e variante são objetos distintos` | Verified |
+| API-28 | P1: Serialização — NULL ≠ 0 (Req. 16.28) | T9 | `test/integration/api/cards_test.rb › devolve a carta com envelope data (life e counter null, cost 0)` | Verified |
+| API-29 | P1: Serialização — preço (Req. 16.29) | T9 | `test/integration/api/cards_test.rb › preço: 1.70, 0.00 e null` | Verified |
+| API-30 | P1: Serialização — imagem (Req. 16.30) | T9 | `test/integration/api/cards_test.rb › image_url é o caminho do app; variante sem imagem sai com null` | Verified |
+| API-31 | P1: Serialização — posse e desejo (Req. 16.31) | T1, T9 | `test/integration/api/cards_test.rb › anônimo vê owned_quantity e wishlist_target null; test/queries/variant_holdings_test.rb` | Verified |
+| API-32 | P1: Serialização — isolamento (Req. 16.32) | T1, T9, T10 | `test/integration/api/cards_test.rb › dois usuários veem só a própria posse; catalog_test.rb › user_id ignorado e posse de outro usuário; variant_holdings_test.rb › dois usuários` | Verified |
 
 **Coverage:** 32 total, 32 mapped to tasks (`tasks.md`, T1–T12), 0 unmapped
 
