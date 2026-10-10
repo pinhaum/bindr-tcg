@@ -420,9 +420,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem: `null`, vazio, `/app/x?y=1` aceito, `/app` sozinho e `/catalog` → `/app`, `//evil.com`, `/app//evil`, `%2F%2Fevil.com`, `/app/%2F%2Fevil`, `https://evil.com/app/x`, `/app\evil`, `%E0%A4%A` (decodificação inválida) → `/app`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem: `null`, vazio, `/app/x?y=1` aceito, `/app` sozinho e `/catalog` → `/app`, `//evil.com`, `/app//evil`, `%2F%2Fevil.com`, `/app/%2F%2Fevil`, `https://evil.com/app/x`, `/app\evil`, `%E0%A4%A` (decodificação inválida) → `/app`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
