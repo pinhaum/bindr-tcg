@@ -917,7 +917,7 @@ Requisito da troca de front (AD-023, AD-025), com decisões do dono em
 2026-10-10. Recorte em `.specs/features/spa-fundacao/spec.md` (SPA-NN, mesma
 numeração destes critérios). Consome o contrato do Req. 16 sem redefini-lo.
 
-A SPA é SvelteKit 2 + Svelte 5, adapter-static em modo SPA, em `frontend/`, sob
+A SPA é SvelteKit 3 + Svelte 5, adapter-static em modo SPA, em `frontend/`, sob
 `/app` durante a transição. Telas de catálogo, carta, pasta, decks e
 portabilidade são fatias seguintes; cada componente nasce na primeira fatia
 que o usa.

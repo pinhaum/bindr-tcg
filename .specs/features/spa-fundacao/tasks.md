@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/spa-fundacao/design.md`
-**Status**: Draft
+**Status**: Implemented
 
 ---
 
@@ -107,7 +107,7 @@ T21 → T22
 
 ### T1: Scaffold do `frontend/` e serviço `frontend` no compose
 
-**What**: Projeto SvelteKit 2 + Svelte 5 (TypeScript) em `frontend/` com `adapter-static` (`fallback: "200.html"`), `paths.base = "/app"`, Vitest (`jsdom`, `@testing-library/svelte`), ESLint com `no-restricted-globals` para `fetch` liberado só em `src/lib/api/client.ts`, scripts `check`, `lint`, `test`, `build`, `package-lock.json` versionado; serviço `frontend` no `docker-compose.yml` (imagem `node:<LTS fixada>-slim`, volume nomeado `frontend_node_modules`, porta 5173) para os gates rodarem no container.
+**What**: Projeto SvelteKit 3 + Svelte 5 (TypeScript) em `frontend/` com `adapter-static` (`fallback: "200.html"`), `paths.base = "/app"`, Vitest (`jsdom`, `@testing-library/svelte`), ESLint com `no-restricted-globals` para `fetch` liberado só em `src/lib/api/client.ts`, scripts `check`, `lint`, `test`, `build`, `package-lock.json` versionado; serviço `frontend` no `docker-compose.yml` (imagem `node:<LTS fixada>-slim`, volume nomeado `frontend_node_modules`, porta 5173) para os gates rodarem no container.
 **Where**: `frontend/` (novo), `docker-compose.yml`
 **Depends on**: None
 **Reuses**: padrão do volume nomeado `bundle` no `docker-compose.yml`
@@ -684,9 +684,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Traceability do `spec.md` com todos os SPA-01..46 apontando para a task que os cobre
-- [ ] `docker compose build` e o gate de build passam em série
-- [ ] `validate_spec.py` da feature sai 0
+- [x] Traceability do `spec.md` com todos os SPA-01..46 apontando para a task que os cobre
+- [x] `docker compose build` e o gate de build passam em série
+- [x] `validate_spec.py` da feature sai 0
 
 **Tests**: none
 **Gate**: build

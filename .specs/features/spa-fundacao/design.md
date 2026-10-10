@@ -14,11 +14,11 @@ Abordagem de entrega em produção escolhida pelo dono em 2026-10-10: build em
 
 Três camadas no front, cada uma dona de uma regra:
 
-- **Cliente HTTP** (`$lib/api`): fala o contrato da `api-fundacao`. É o único lugar
+- **Cliente HTTP** (`src/lib/api`): fala o contrato da `api-fundacao`. É o único lugar
   que conhece CSRF, envelope, `401`, `422 invalid_csrf_token`, tempo limite e rede.
 - **Estado** (`*.svelte.ts` com `$state`): sessão, tema e mensagens. Cada módulo
   expõe funções; as telas não mexem no estado cru.
-- **Telas e casco** (`src/routes`, `$lib/components`): consomem estado e cliente,
+- **Telas e casco** (`src/routes`, `src/lib/components`): consomem estado e cliente,
   sem `fetch` próprio (SPA-06, imposto por lint).
 
 Os temas não passam por JavaScript em tempo de renderização. Um script inline em
@@ -52,7 +52,7 @@ graph TD
 ```
 frontend/
   package.json, package-lock.json
-  svelte.config.js | vite.config.ts      # ver Risks: local da config do Kit
+  vite.config.ts                         # config do Kit (adapter, paths) fica aqui no Kit 3
   eslint.config.js, playwright.config.ts
   src/
     app.html                             # script inline de tema
@@ -124,10 +124,10 @@ frontend/
   - `config.x.spa_entry_path` vale `Rails.public_path.join("app/200.html")`; o teste aponta para um arquivo temporário. É costura de teste, não configuração de produto: os testes rodam em paralelo (`parallelize(workers: :number_of_processors)`) e não podem escrever em `public/`.
   - Os assets com hash ficam sob `/app/_app/immutable/` e são servidos pelo `ActionDispatch::Static` com o cabeçalho global atual (`public, max-age=1 ano`). Não existe `public/app/index.html`, então `GET /app` não é atendido pelo estático e chega à rota.
   - `.gitignore`: `/public/app`. `.dockerignore`: `frontend/node_modules`, `frontend/build`.
-- **Dependencies**: `adapter-static` com `fallback: "200.html"` e `paths.base = "/app"`.
+- **Dependencies**: `adapter-static` com `fallback: "200.html"` e `paths.base = "/app"`, ambos em `vite.config.ts` (Kit 3, sem `svelte.config.js`).
 - **Reuses**: o `public_file_server` existente.
 
-### Cliente HTTP — `$lib/api/client.ts` (SPA-06..13)
+### Cliente HTTP — `src/lib/api/client.ts` (SPA-06..13)
 
 - **Purpose**: porta única para a API, dona das regras do contrato.
 - **Interfaces**:
@@ -141,11 +141,11 @@ frontend/
   - `422 invalid_csrf_token` numa mutação → `GET /api/session` (troca o token) e compara `data.user?.email ?? null` com `currentUserEmail()` (SPA-10). Igual: um reenvio, marcado por parâmetro interno `retried`, sem estado global; o segundo `422` lança. `null` onde havia usuário: `onUnauthenticated()` e lança o `ApiError` `unauthenticated` (status 401, "Faça login para continuar.", a mensagem da API); em `DELETE /api/session`, só lança, sem `onUnauthenticated()`, pela mesma exceção do `401` (SPA-22). Este é o caminho real do "Sair" depois de um logout em outra aba: o `Api::BaseController` roda `verify_authenticity_token` antes de `require_authentication` (ordem dos `before_action`, conferida com `bin/rails runner` no Rails 8.0.5.1), e o `reset_session` da outra aba já invalidou o token, então a resposta é `422`, não `401`. Outro e-mail: `onSessionChanged(user)` (a sessão troca `user` e navega para `/app`) e lança `ApiError` `session_changed` (status 422, "A sessão mudou em outra aba. Confira a conta e tente de novo."). O e-mail é a identidade disponível: o `user` da API só tem `email`, que é único (índice do `users`).
   - Tempo limite com `AbortSignal.timeout(timeoutMs)`; `TypeError` do `fetch` e `TimeoutError`/`AbortError` viram `network_error` (SPA-12).
   - JSON inválido ou sem `data`/`error` no topo vira `unexpected_response` (SPA-13).
-- **`$lib/api/errors.ts`**: `class ApiError extends Error { status: number; code: string; fields: Record<string, string[]> }`, com `message` vindo da API sem alteração (SPA-11).
-- **`$lib/api/index.ts`**: instância única `api`, ligada ao `fetch` global e ao `handleUnauthenticated` da sessão.
+- **`src/lib/api/errors.ts`**: `class ApiError extends Error { status: number; code: string; fields: Record<string, string[]> }`, com `message` vindo da API sem alteração (SPA-11).
+- **`src/lib/api/index.ts`**: instância única `api`, ligada ao `fetch` global e ao `handleUnauthenticated` da sessão.
 - **SPA-06 por construção**: `eslint.config.js` proíbe `fetch` com `no-restricted-globals`, liberado só em `src/lib/api/client.ts`. O gate de lint falha em qualquer outra chamada.
 
-### Sessão — `$lib/session.svelte.ts` (SPA-14..24)
+### Sessão — `src/lib/session.svelte.ts` (SPA-14..24)
 
 - **Purpose**: estado de sessão e as quatro transições.
 - **Interfaces**:
@@ -156,7 +156,7 @@ frontend/
   - `handleUnauthenticated()`: põe `user = null` e navega para `` `${base}/entrar?return_to=${encodeURIComponent(atual)}` ``, sem navegar se a rota atual já é `/entrar` ou `/criar-conta`.
 - **Carga inicial (SPA-14, 15)**: `routes/+layout.ts` exporta `ssr = false`, `prerender = false` e um `load` que chama `loadSession()` e captura qualquer `ApiError` em `session.status = "error"` (SPA-15): `network_error`, `unexpected_response` e erros da API como `406 unsupported_browser`, que o `allow_browser :modern` do `Api::BaseController` devolve a navegador antigo mesmo com a página da SPA servida. O `+layout.svelte` só renderiza `children` com `status === "ready"`; com `"error"`, mostra a mensagem e o botão "Tentar novamente", que chama `refreshAll()` (ver Tech Decisions). O `load` do layout raiz não depende de URL, então roda uma vez por carga de página.
 - **Guarda de já autenticado (SPA-24)**: `entrar/+page.ts` e `criar-conta/+page.ts` fazem `await parent()` e lançam `redirect(307, base)` com `session.user`.
-- **Destino pós-login (SPA-23)**: `$lib/navigation/return-to.ts` exporta `safeReturnTo(raw: string | null): string`. Decodifica com `decodeURIComponent` dentro de `try`; aceita só se começa por `${base}/` e não contém `//` nem `\`; senão, `base`.
+- **Destino pós-login (SPA-23)**: `src/lib/navigation/return-to.ts` exporta `safeReturnTo(raw: string | null): string`. Decodifica com `decodeURIComponent` dentro de `try`; aceita só se começa por `${base}/` e não contém `//` nem `\`; senão, `base`.
 
 ### Formulários — `TextField`, `Button`, `FormError` e as duas páginas (SPA-16..21)
 
@@ -170,7 +170,7 @@ frontend/
 ### Casco — `AppShell`, `MainNav`, `ThemeSelect` (SPA-25..30)
 
 - **`AppShell.svelte`**: grade CSS com três áreas, `brand` (marca + `ThemeSelect`), `nav` e `main`. Abaixo de 64rem: `brand` em cabeçalho no topo, `nav` fixa embaixo, `main` com `padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom))`. A partir de 64rem: coluna lateral de `--sidebar-width` com `brand` e `nav` empilhados no topo, superfície `surface-raised` com `border`. O mesmo DOM nas duas larguras; só o CSS muda, então cruzar 64rem não remonta nada nem perde o foco (edge case).
-- **`$lib/navigation/nav-entries.ts`**: `navEntries(user)` devolve a lista ordenada de entradas, cada uma link (`label`, `href`, `reload`) ou a ação "Sair". Catálogo, Minha pasta e Baralhos com `reload: true` e href Hotwire enquanto a fatia não existe (SPA-26); cada fatia troca a sua entrada. Teste unitário fixa a ordem do Req. 13.1 (SPA-25).
+- **`src/lib/navigation/nav-entries.ts`**: `navEntries(user)` devolve a lista ordenada de entradas, cada uma link (`label`, `href`, `reload`) ou a ação "Sair". Catálogo, Minha pasta e Baralhos com `reload: true` e href Hotwire enquanto a fatia não existe (SPA-26); cada fatia troca a sua entrada. Teste unitário fixa a ordem do Req. 13.1 (SPA-25).
 - **`MainNav.svelte`**: `<nav aria-label="Principal">` com lista; `aria-current="page"` pela rota de `page.url.pathname` (`$app/state`); a entrada atual tem fundo `surface-sunken` e `font-weight: var(--nav-current-weight)` (SPA-27). "Sair" é `<button>` com fundo `transparent`, chama `signOut()` e emite o sucesso "Sessão encerrada.".
 - **`ThemeSelect.svelte`**: `<label>Tema</label>` + `<select>` nativo com "Sistema", "Claro" e "Escuro", 44px, ligado a `theme.preference`.
 
@@ -216,7 +216,7 @@ dá cerca de 2:1 sobre branco e reprova até o anel de foco. A matiz 66° se man
 
 - **Tokens** em `tokens.css`: `--duration-fast: 120ms`, `--duration-base: 200ms`, `--duration-slow: 320ms`, `--ease-standard: cubic-bezier(0.2, 0, 0, 1)`, `--ease-exit: cubic-bezier(0.3, 0, 1, 1)`.
 - **Corte em CSS** (`base.css`): `@media (prefers-reduced-motion: reduce)` zera os três tokens de duração e força `transition-duration`/`animation-duration` em `0s` para `*`, `::before`, `::after` e `::view-transition-*`.
-- **Corte nas transições do Svelte**: as do Svelte 5 não leem CSS. `$lib/motion.ts` exporta `duration(ms: number): number`, que devolve `0` com `prefersReducedMotion.current` (`svelte/motion`, desde 5.7). Toda transição do Svelte passa por ela.
+- **Corte nas transições do Svelte**: as do Svelte 5 não leem CSS. `src/lib/motion.ts` exporta `duration(ms: number): number`, que devolve `0` com `prefersReducedMotion.current` (`svelte/motion`, desde 5.7). Toda transição do Svelte passa por ela.
 - **Propriedades animadas**: só `transform` e `opacity`, conferido por `grep` no gate sobre `transition:` e `@keyframes` em `src/`.
 - **View Transitions (SPA-43)**: no `+layout.svelte`, `onNavigate` retorna sem nada quando `!document.startViewTransition` ou com movimento reduzido; senão, devolve a `Promise` que chama `startViewTransition` e espera `navigation.complete`, como na doc do `$app/navigation`.
 
@@ -230,7 +230,7 @@ dá cerca de 2:1 sobre branco e reprova até o anel de foco. A matiz 66° se man
 ## Data Models
 
 ```typescript
-// $lib/api/types.ts — espelho manual do spec da api-fundacao (AD-024)
+// src/lib/api/types.ts — espelho manual do spec da api-fundacao (AD-024)
 export type ApiEnvelope<T> = { data: T; meta?: Record<string, unknown> };
 export type ApiErrorBody = {
   error: { code: string; message: string; fields: Record<string, string[]> };
@@ -238,7 +238,7 @@ export type ApiErrorBody = {
 export type SessionUser = { email: string };
 export type SessionPayload = { user: SessionUser | null; csrf_token: string };
 
-// $lib/theme.svelte.ts
+// src/lib/theme.svelte.ts
 export type ThemePreference = "system" | "light" | "dark";
 export type EffectiveTheme = "light" | "dark";
 ```
@@ -296,3 +296,60 @@ export type EffectiveTheme = "light" | "dark";
 | Mensagens nos testes | Todo teste que cobre um critério com texto fixo (SPA-12, 13, 15, 17, 45) compara a mensagem exata, não só o `code` | Lição L-064 da `api-fundacao`: o Verifier achou lacuna de precisão onde só o código era conferido |
 
 Nenhuma decisão aqui é de projeto além da AD-025, já registrada.
+
+## Emendas da execução
+
+Fatos que a execução (T1–T22) mostrou e que o corpo acima não previa. O corpo foi
+corrigido onde ficou falso (caminhos `src/lib/`, local da config do Kit); o que
+segue é o registro.
+
+**Versões e Kit 3.** Instalado: SvelteKit 3.0.1, Svelte 5.57.2, Vitest 5.0.3,
+`@playwright/test` 1.64.0. O `spec.md`, o Req. 17 e o design diziam "SvelteKit 2" (o spec, o Req. 17 e o `tasks.md` foram emendados para 3). No Kit 3:
+
+- A config do Kit (`adapter`, `paths`) fica em `vite.config.ts`; não há `svelte.config.js`.
+- Não existe o alias `$lib`: o front usa imports relativos (`src/lib/...` no disco).
+- `base` saiu de `$app/paths`: a base vem de `resolve('/')` sem a barra final; nos
+  testes, `vi.mock('$app/paths')`. Os trechos acima que escrevem `${base}` leem-se assim.
+- Arquivo de teste sob `src/routes` não pode começar com `+`: usa-se `page.test.ts` e `layout.test.ts`.
+- Rodar `npx svelte-kit sync` antes de `tsc`/`check`, para os tipos das rotas.
+
+**Proxy do Vite (⚠️ VERIFICAR resolvido).** Os internos do Vite (`/app/@vite/client` e
+o WebSocket do HMR) ficam sob `/app`, então a regex `^/(?!app(/|$))` basta; nenhuma
+exclusão extra. Sem `changeOrigin`, como previsto. Acrescentou-se
+`server.allowedHosts: ['localhost', 'frontend']` e `config.hosts << 'frontend'` em
+`config/environments/development.rb`.
+
+**Entrega.** O estágio `frontend-build` roda em `node:24.21.0-slim`. Medido em
+produção: `/app/_app/immutable/<arquivo>` sai com `max-age=31556952` (o `1.year` do
+Rails); `/app` e `/app/x`, com `no-cache`. **Armadilha:** `/app/200.html` pedido
+direto sai do `ActionDispatch::Static` com `max-age` de 1 ano (nada linka para ele;
+dívida baixa).
+
+**Serviços.** `frontend` (volume nomeado `frontend_node_modules`, healthcheck) e
+`e2e` (perfil `e2e`, healthchecks em `app` e `frontend`, mesmo volume). `npm ci` com o
+`frontend` de pé troca o volume sob o Vite: parar antes ou reiniciar depois. O
+`credsStore` do host quebra o pull de imagem nova: `DOCKER_CONFIG` temporário com `{}`.
+
+**Cliente.** Além do previsto: `path` só aceita início por `/` (não `//`); erros
+tipados `network_error` e `unexpected_response` com `status` 0, e `session_changed`
+(422); o reenvio do SPA-10 só ocorre se o e-mail da sessão renovada for o mesmo
+(`user` nulo → `unauthenticated`; outro e-mail → `onSessionChanged` + `session_changed`).
+
+**Limitação conhecida (SPA-37).** Em dev o CSS chega por injeção do Vite depois do
+primeiro quadro. O e2e prova `data-theme` certo desde o primeiro quadro e a cor exata
+após o carregamento; o gate de build confere que `build/200.html` traz o script
+inline de tema antes do `<link>` da stylesheet no `<head>`.
+
+**Efeito colateral dos testes.** O e2e escreve contas de e-mail único
+(`e2e-<timestamp>@exemplo.test`) no banco de dev, sem limpeza.
+
+**Decisões abertas para o dono:**
+
+- `Button` pendente usa `disabled` + `aria-busy` (SPA-21): derruba o foco do botão e
+  leitores não anunciam o estado. A alternativa `aria-disabled` exige emendar o SPA-21.
+- O toast de sucesso some sozinho em 5000 ms sem pausa: exceção à WCAG 2.2.1, registrada.
+- A dica de formato da senha (mínimo 8) só aparece no erro.
+- Chave desconhecida em `fields` aparece como `chave: mensagem`.
+- `/app/200.html` com cache de 1 ano (acima).
+- Login sem limite de tentativas (dívida da API).
+- O e-mail é a identidade da sessão no cliente: quebra se um dia houver troca de e-mail.

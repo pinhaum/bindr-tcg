@@ -31,6 +31,10 @@ retrato mais recente. A feature `api-fundacao` (Req. 16, API-01..32) acrescentou
 API JSON sob `/api` (sessão, cadastro, catálogo e detalhe da carta), com teste de
 ponta a ponta; a §11 do `.context/tasks.md` está fechada.
 
+A **`spa-fundacao`** (Req. 17, SPA-01..46) está **implementada** (T1–T22, front em
+`frontend/`: SvelteKit + Svelte 5, entrega em `/app`, cliente HTTP da API, sessão,
+temas, casco e mensagens) e aguarda o Verifier; `STATE.md` (*Handoff*) tem o retrato.
+
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
@@ -50,7 +54,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **144 arquivos de teste, 1904 testes**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **145 arquivos de teste, 1912 testes**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
@@ -97,6 +101,82 @@ Armadilhas:
 - **Teste de CSRF liga `ActionController::Base.allow_forgery_protection`** no
   `setup` e restaura no `teardown`: o ambiente de teste o desliga, e sem isso
   nenhum teste prova o `422`.
+
+### Front SPA (`frontend/`, `spa-fundacao`)
+
+SPA em **SvelteKit 3.0.1 + Svelte 5.57.2 + TypeScript**, `adapter-static` com
+fallback `200.html` e `paths.base = /app`, em `frontend/`. Consome só a API JSON
+acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
+1.64.0. O ESLint proíbe `fetch` fora de `src/lib/api/client.ts` (SPA-06).
+
+- **Dev**: serviço `frontend` do compose (`node:24.21.0-slim`, `npm ci && npm run dev`,
+  porta 5173, volume nomeado `frontend_node_modules`). O proxy do Vite manda tudo fora
+  de `/app` (regex `^/(?!app(/|$))`) para `http://app:3000`.
+- **Produção**: o estágio `frontend-build` do `Dockerfile` roda `npm ci`, `npm run
+  build`, `test -f build/200.html` e copia para `/rails/public/app` (a imagem final não
+  tem Node; `/public/app` está no `.gitignore`). `SpaController < ActionController::Base`
+  (sem `Authentication` nem `allow_browser`) serve `config.x.spa_entry_path`
+  (`public/app/200.html`) como `text/html` com `Cache-Control: no-cache`. A rota
+  `get "app(/*path)"` é a **última** de `config/routes.rb` e exclui `/app/_app/`
+  (chunk ausente dá 404, nunca o HTML).
+- **Cliente** (`src/lib/api/client.ts`): JSON, `credentials: same-origin`,
+  `X-CSRF-Token` só em mutação e trocado por qualquer `data.csrf_token` string, tempo
+  limite de 15 s, `path` só iniciando por `/` (não `//`). Erros tipados `ApiError`
+  (`network_error` e `unexpected_response` com status 0; `session_changed` 422). `401
+  unauthenticated` chama `onUnauthenticated` (exceto `DELETE /api/session`). `422
+  invalid_csrf_token` em mutação renova por `GET /api/session` e reenvia **uma** vez,
+  só se o e-mail for o mesmo (`user` nulo → `unauthenticated`; outro e-mail →
+  `onSessionChanged` + `session_changed`).
+- **Estado e telas**: `session.svelte.ts`, `theme.svelte.ts` (script inline em
+  `app.html` antes do paint; `localStorage` `bindr-theme`), `toasts.svelte.ts` +
+  `Toaster` (duas regiões sempre montadas; o sucesso some em 5000 ms sem pausa, exceção
+  à WCAG 2.2.1 registrada), `motion.ts`, `safeReturnTo` (rejeita `//`, `\`, controle e
+  segmentos `.`/`..`). Rotas `/app`, `/app/entrar`, `/app/criar-conta`. `AppShell`: barra
+  inferior abaixo de `64rem`, coluna lateral a partir dele, mesmo DOM. `<title>` por
+  rota; `afterNavigate` move o foco para `main#conteudo` (não na carga inicial). Tokens
+  dos dois temas verificados por contraste em `tokens.test.ts` (porta de
+  `test/design/contrast_test.rb`).
+
+Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura):
+
+```bash
+# quick
+docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm run lint && npm test -- --run"
+# e2e (Playwright contra a API real; não sobe no `docker compose up`)
+docker compose up -d app frontend && docker compose --profile e2e run --rm e2e
+```
+
+Armadilhas:
+
+- **Kit 3 difere do que a doc antiga mostra.** A config do Kit (`adapter`, `paths`)
+  fica em `vite.config.ts` (não há `svelte.config.js`); **não existe `$lib`** (imports
+  relativos); `base` saiu de `$app/paths` (vem de `resolve('/')` sem a barra final; nos
+  testes, `vi.mock('$app/paths')`); arquivo de teste sob `src/routes` não pode começar
+  com `+` (`page.test.ts`, `layout.test.ts`); rodar `npx svelte-kit sync` antes de
+  `tsc`/`check`.
+- **O proxy não pode ter `changeOrigin`.** O `Host` chega ao Rails como
+  `localhost:5173` e a checagem de origem do CSRF compara `Origin` com
+  `request.base_url`; com `changeOrigin` o CSRF falharia. Também exigem
+  `server.allowedHosts` (`localhost`, `frontend`) e `config.hosts << "frontend"` em
+  `development.rb`. Os internos do Vite (`/app/@vite/client`, HMR) ficam sob `/app`,
+  então a regex basta.
+- **`npm ci` com o `frontend` de pé troca o volume `node_modules` sob o Vite:** parar
+  o serviço antes ou reiniciá-lo depois.
+- **`credsStore` do host quebra o pull de imagem nova:** `export
+  DOCKER_CONFIG=$(mktemp -d)` com `{}` em `config.json`. A imagem do `e2e` tem de ter a
+  mesma versão do `@playwright/test`.
+- **`200.html` e cache:** `/app/_app/immutable/*` sai com `max-age` de 1 ano (certo, tem
+  hash); `/app` e `/app/x` saem `no-cache`. `/app/200.html` pedido direto também sai
+  com 1 ano, pelo `ActionDispatch::Static` (nada linka para ele; dívida baixa). A rota
+  `app(/*path)` tem de continuar **última**.
+- **Primeiro quadro em dev:** o CSS chega por injeção do Vite depois do primeiro quadro;
+  o e2e prova `data-theme` certo desde o primeiro quadro e a cor após o carregamento. O
+  build é conferido por `build/200.html` trazer o script de tema antes da stylesheet.
+- **O e2e escreve contas** `e2e-<timestamp>@exemplo.test` no banco de dev, sem limpeza.
+- **Abertas para o dono:** `Button` pendente com `disabled` + `aria-busy` (perde o foco
+  e não é anunciado; `aria-disabled` exigiria emendar o SPA-21); dica de formato da
+  senha só no erro; chave desconhecida de `fields` vira `chave: mensagem`; e-mail como
+  identidade da sessão; login sem limite de tentativas (dívida da API).
 
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção
@@ -165,6 +245,10 @@ docker compose exec app bin/rails ingestion:remap
 # Compara dois snapshots para medir estabilidade do tcgplayer.id (≥20h de diferença)
 docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/<arq-A> B=storage/ingestion/<arq-B>
 ```
+
+Front SPA (`frontend/`): gates e armadilhas na seção "Front SPA" acima. Atalho:
+`docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm run lint && npm test -- --run"`
+(quick) e `docker compose up -d app frontend && docker compose --profile e2e run --rm e2e` (e2e).
 
 Gem nova exige `docker compose run --rm --no-deps app bundle install`: o volume
 nomeado `bundle` sombreia as gems da imagem, então rebuild **não** basta.

@@ -405,7 +405,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
   - _Requisitos: 17.9, 17.10, 17.14–17.16, 17.18, 17.22, 17.23, 17.31–17.46_
 - [x] **12.4 Formulários e casco** — T15–T19
   - _Requisitos: 17.16–17.30, 17.36_
-- [ ] **12.5 Ponta a ponta e fechamento** — T20–T22
+- [x] **12.5 Ponta a ponta e fechamento** — T20–T22
   - _Requisitos: 17.1, 17.5, 17.14–17.18, 17.22–17.24, 17.27–17.30, 17.35–17.37, 17.42, 17.43_
 
 ---
