@@ -10,4 +10,8 @@ class Api::CatalogController < Api::BaseController
     ActiveRecord::Associations::Preloader.new(records: variants, associations: :card_set).call
     @holdings = VariantHoldings.new(Current.user, variants)
   end
+
+  def filters
+    @options = CatalogQuery.filter_options
+  end
 end

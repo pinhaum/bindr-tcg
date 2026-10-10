@@ -355,9 +355,9 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/integration/api/catalog_filters_test.rb`: `data` igual a `filter_options` (`colors`, `card_types`, `rarities`, `sets` com `code` e `name`); com `CatalogQuery.filter_options` substituído por um que levanta, a resposta é `500 internal_error` com a mensagem genérica e sem classe, mensagem ou stack da exceção no corpo
-- [ ] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/integration/api/catalog_filters_test.rb`: `data` igual a `filter_options` (`colors`, `card_types`, `rarities`, `sets` com `code` e `name`); com `CatalogQuery.filter_options` substituído por um que levanta, a resposta é `500 internal_error` com a mensagem genérica e sem classe, mensagem ou stack da exceção no corpo
+- [x] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: full

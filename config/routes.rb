@@ -151,6 +151,7 @@ Rails.application.routes.draw do
     # extensão e a constraint deixa o segmento casar tudo até a próxima barra.
     # `catalog/filters` (T11) entra logo abaixo, antes de qualquer rota com `:id`.
     get "catalog" => "catalog#index", as: :api_catalog
+    get "catalog/filters" => "catalog#filters", as: :api_catalog_filters
 
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
