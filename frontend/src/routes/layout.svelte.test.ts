@@ -4,8 +4,14 @@ import { createRawSnippet } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, networkError, unexpectedResponse } from '../lib/api/errors';
 
+vi.hoisted(() => {
+	vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
+});
+
 const nav = vi.hoisted(() => ({ refreshAll: vi.fn(), onNavigate: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
+vi.mock('$app/paths', () => ({ resolve: () => '/app/' }));
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/app/') } }));
 
 const reduced = vi.hoisted(() => ({ current: false }));
 vi.mock('svelte/motion', () => ({ prefersReducedMotion: reduced }));

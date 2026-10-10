@@ -6,7 +6,7 @@ export type NavEntry =
   | { kind: "action"; label: string };
 
 // `resolve('/entrar')` só tipa quando a rota existir (T16/T17); o prefixo vem de `resolve('/')`.
-const appPath = (path: string) => `${resolve("/").replace(/\/$/, "")}${path}`;
+export const appPath = (path: string) => `${resolve("/").replace(/\/$/, "")}${path}`;
 
 const hotwire = (label: string, href: string): NavEntry => ({
   kind: "link",

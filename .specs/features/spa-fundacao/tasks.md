@@ -604,10 +604,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem: `ThemeSelect` com rótulo "Tema", as três opções na ordem, valor inicial de `theme.preference` e troca chamando `setPreference`; `AppShell` renderiza marca, `MainNav` e conteúdo; `/app` mostra o e-mail com sessão e os links de entrar sem ela
-- [ ] Nenhum componente usa `data-theme` nem cor literal fora de `tokens.css` e `app.html` (`grep` registrado no gate)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem: `ThemeSelect` com rótulo "Tema", as três opções na ordem, valor inicial de `theme.preference` e troca chamando `setPreference`; `AppShell` renderiza marca, `MainNav` e conteúdo; `/app` mostra o e-mail com sessão e os links de entrar sem ela
+- [x] Nenhum componente usa `data-theme` nem cor literal fora de `tokens.css` e `app.html` (`grep` registrado no gate)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
