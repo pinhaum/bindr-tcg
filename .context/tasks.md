@@ -378,7 +378,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 Plano da feature em `.specs/features/api-fundacao/tasks.md` (T1–T12, numeração
 própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
 
-- [ ] **11.1 Extração sem mudar o HTML** — T1–T4 da `api-fundacao`
+- [x] **11.1 Extração sem mudar o HTML** — T1–T4 da `api-fundacao`
   - `VariantHoldings`, `CardDetail` e `Card.preload_present_variants`; o
     `CatalogController` passa a usá-los com a suíte existente intacta.
   - _Requisitos: 16.17, 16.21, 16.23–16.25, 16.31–16.32_
