@@ -176,11 +176,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `test/integration/spa_test.rb` cobre: `GET /app`, `GET /app/entrar` e `GET /app/qualquer/coisa?x=1` dão `200` com o corpo da fixture, `text/html` e `Cache-Control` com `no-cache`; `GET /app/_app/immutable/velho.js` dá `404` e não o corpo da fixture; arquivo de entrada ausente dá `404`; sem sessão, nenhum redirect para login
-- [ ] O teste aponta `config.x.spa_entry_path` para um arquivo temporário e restaura no `teardown` (nunca escreve em `public/`)
-- [ ] A suíte existente passa sem edição (SPA-04)
-- [ ] Gate check passes: full
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] `test/integration/spa_test.rb` cobre: `GET /app`, `GET /app/entrar` e `GET /app/qualquer/coisa?x=1` dão `200` com o corpo da fixture, `text/html` e `Cache-Control` com `no-cache`; `GET /app/_app/immutable/velho.js` dá `404` e não o corpo da fixture; arquivo de entrada ausente dá `404`; sem sessão, nenhum redirect para login
+- [x] O teste aponta `config.x.spa_entry_path` para um arquivo temporário e restaura no `teardown` (nunca escreve em `public/`)
+- [x] A suíte existente passa sem edição (SPA-04)
+- [x] Gate check passes: full
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: full

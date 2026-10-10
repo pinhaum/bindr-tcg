@@ -159,4 +159,11 @@ Rails.application.routes.draw do
   end
 
   root "catalog#index"
+
+  # Página de entrada da SPA (`200.html` do adapter-static). Tem de ser a última
+  # rota: `/*path` casa qualquer coisa sob `/app`. Os arquivos do build em
+  # `/app/_app/` saem pela constraint e caem no 404 do Rails/`public`, nunca no
+  # HTML da SPA.
+  get "app(/*path)", to: "spa#show", format: false,
+      constraints: ->(request) { !request.path.start_with?("/app/_app/") }
 end

@@ -25,6 +25,9 @@
 !.env.example
 /config/master.key
 
+# Build da SPA copiado para o Rails
+/public/app
+
 # Editor / SO
 .DS_Store
 *.swp
