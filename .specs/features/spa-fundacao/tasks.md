@@ -368,9 +368,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem `duration(200)` com e sem `prefers-reduced-motion: reduce` (`matchMedia` falso)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem `duration(200)` com e sem `prefers-reduced-motion: reduce` (`matchMedia` falso)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
