@@ -303,9 +303,9 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/integration/api/cards_test.rb`: carta com `counter` NULL sai `null`; variante com preço `0` sai `"0.00"`, outra com preço sai `"1.70"` com `currency` e `observed_at` ISO 8601 UTC, outra sem preço sai `null`; `image_url` é `/card_images/<code>` também com `:` no código; anônimo vê `owned_quantity`/`wishlist_target` `null`; dois usuários veem só a própria posse; ausente retida sai com `in_source: false` só para o dono; `?variant=` segue o CNF-42; inexistente e toda oculta dão `404 not_found`; `card_number` com ponto responde JSON
-- [ ] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/integration/api/cards_test.rb`: carta com `counter` NULL sai `null`; variante com preço `0` sai `"0.00"`, outra com preço sai `"1.70"` com `currency` e `observed_at` ISO 8601 UTC, outra sem preço sai `null`; `image_url` é `/card_images/<code>` também com `:` no código; anônimo vê `owned_quantity`/`wishlist_target` `null`; dois usuários veem só a própria posse; ausente retida sai com `in_source: false` só para o dono; `?variant=` segue o CNF-42; inexistente e toda oculta dão `404 not_found`; `card_number` com ponto responde JSON
+- [x] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: full

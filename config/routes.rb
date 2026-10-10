@@ -147,6 +147,10 @@ Rails.application.routes.draw do
     resource :session, only: %i[show create destroy], as: :api_session
     resource :registration, only: :create, as: :api_registration
 
+    # O ponto em `P.029` não pode virar formato: `format: false` do scope tira a
+    # extensão e a constraint deixa o segmento casar tudo até a próxima barra.
+    get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
+
     match "*path", to: "not_found#show", via: :all
   end
 
