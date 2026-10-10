@@ -472,10 +472,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem: com `loading` nada da rota aparece; com `ready` o `children` aparece; com erro `network_error`, `unexpected_response`, `406 unsupported_browser` e `500` aparecem a mensagem exata e "Tentar novamente", sem o `children`; o botão chama o recarregamento; o `load` chama `GET /api/session` uma vez
-- [ ] `onNavigate` sem `document.startViewTransition` não lança e não chama nada; com movimento reduzido também não
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem: com `loading` nada da rota aparece; com `ready` o `children` aparece; com erro `network_error`, `unexpected_response`, `406 unsupported_browser` e `500` aparecem a mensagem exata e "Tentar novamente", sem o `children`; o botão chama o recarregamento; o `load` chama `GET /api/session` uma vez
+- [x] `onNavigate` sem `document.startViewTransition` não lança e não chama nada; com movimento reduzido também não
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick

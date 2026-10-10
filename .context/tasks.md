@@ -401,7 +401,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
   - _Requisitos: 17.1–17.6_
 - [x] **12.2 Cliente HTTP** — T5–T7
   - _Requisitos: 17.6–17.13, 17.22_
-- [ ] **12.3 Temas, movimento, sessão e mensagens** — T8–T14
+- [x] **12.3 Temas, movimento, sessão e mensagens** — T8–T14
   - _Requisitos: 17.9, 17.10, 17.14–17.16, 17.18, 17.22, 17.23, 17.31–17.46_
 - [ ] **12.4 Formulários e casco** — T15–T19
   - _Requisitos: 17.16–17.30, 17.36_
