@@ -23,6 +23,16 @@ class Card < ApplicationRecord
     "stage" => %i[colors cost attributes_list traits block_icon]
   }.freeze
 
+  # SRC-16 — pré-carrega só as variantes presentes na fonte, numa consulta para
+  # o array inteiro. `preload` em vez de `includes`: o `CatalogQuery` devolve
+  # um Array (o match exato é prependido), não uma relação.
+  def self.preload_present_variants(cards)
+    ActiveRecord::Associations::Preloader.new(
+      records: cards, associations: :card_variants, scope: CardVariant.present
+    ).call
+    cards
+  end
+
   def field_applicable?(field)
     APPLICABLE_FIELDS.fetch(card_type, APPLICABLE_FIELDS["character"]).include?(field)
   end

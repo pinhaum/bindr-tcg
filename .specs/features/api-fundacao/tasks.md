@@ -143,9 +143,9 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Teste em `test/models/card_preload_present_variants_test.rb`: variante ausente fica fora; N cartas custam uma consulta de variantes
-- [ ] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Teste em `test/models/card_preload_present_variants_test.rb`: variante ausente fica fora; N cartas custam uma consulta de variantes
+- [x] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
