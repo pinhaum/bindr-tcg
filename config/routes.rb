@@ -149,6 +149,9 @@ Rails.application.routes.draw do
 
     # O ponto em `P.029` não pode virar formato: `format: false` do scope tira a
     # extensão e a constraint deixa o segmento casar tudo até a próxima barra.
+    # `catalog/filters` (T11) entra logo abaixo, antes de qualquer rota com `:id`.
+    get "catalog" => "catalog#index", as: :api_catalog
+
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
     match "*path", to: "not_found#show", via: :all

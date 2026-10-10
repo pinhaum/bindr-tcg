@@ -329,9 +329,9 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/integration/api/catalog_test.rb`: mesma lista e ordem do `CatalogQuery` para um filtro de cor; parâmetro desconhecido e valor inválido ignorados com `200`; `per_page=500` reflete o teto em `meta.per_page`; `owned=owned` filtra pela coleção da sessão, é ignorado sem sessão, e `user_id` no parâmetro não muda a coleção lida; variante ausente fora de `variants`; contagem de consultas não cresce com o número de cartas
-- [ ] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/integration/api/catalog_test.rb`: mesma lista e ordem do `CatalogQuery` para um filtro de cor; parâmetro desconhecido e valor inválido ignorados com `200`; `per_page=500` reflete o teto em `meta.per_page`; `owned=owned` filtra pela coleção da sessão, é ignorado sem sessão, e `user_id` no parâmetro não muda a coleção lida; variante ausente fora de `variants`; contagem de consultas não cresce com o número de cartas
+- [x] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: full
