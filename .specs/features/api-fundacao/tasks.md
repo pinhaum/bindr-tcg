@@ -169,10 +169,10 @@ T11 → T12
 
 **Done when**:
 
-- [ ] `git diff --stat test/` vazio nesta task: nenhum teste existente editado
-- [ ] Remover o `authenticated?` do topo do `show` derruba ao menos um teste existente (prova manual registrada no commit; o defeito silencioso continua coberto)
-- [ ] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
-- [ ] Test count: igual ao da T3 (só refactor)
+- [x] `git diff --stat test/` vazio nesta task: nenhum teste existente editado
+- [x] Remover o `authenticated?` do topo do `show` derruba ao menos um teste existente (prova manual registrada no commit; o defeito silencioso continua coberto)
+- [x] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
+- [x] Test count: igual ao da T3 (só refactor)
 
 **Tests**: integration
 **Gate**: full

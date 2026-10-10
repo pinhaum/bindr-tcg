@@ -18,7 +18,7 @@ class CatalogController < ApplicationController
     # próprio, separado de `params`: o query object não tem caminho de `params`
     # para o usuário, então `?owned=owned&user_id=7` não lê a coleção de
     # ninguém. `authenticated?` antes, pelo mesmo motivo de
-    # `#owned_quantities` — `allow_unauthenticated_access` não resolve a sessão,
+    # `VariantHoldings` — `allow_unauthenticated_access` não resolve a sessão,
     # e sem esta chamada `Current.user` seria `nil` aqui e o filtro sairia
     # silenciosamente ignorado para quem está autenticado.
     authenticated?
@@ -27,40 +27,28 @@ class CatalogController < ApplicationController
     @result = @query.call
     @filter_options = CatalogQuery.filter_options
 
-    # `preload` e não `includes`: o `CatalogQuery` monta a página em Ruby (o
-    # match exato é prependido a um array), então o que chega aqui é um Array
-    # de `Card`, não uma relação. `preload` aceita o array e resolve as
-    # variantes em **uma** consulta. Sem isto, o tile dispararia uma consulta
-    # por carta só para descobrir quantas impressões ela tem.
-    #
-    # Só as variantes presentes na fonte (SRC-16): o tile mostra a primeira
-    # delas, e o selo soma a posse só sobre elas.
-    ActiveRecord::Associations::Preloader.new(
-      records: @result.records, associations: :card_variants, scope: CardVariant.present
-    ).call
+    # Só as variantes presentes na fonte (SRC-16); o `preload` fica no `Card`.
+    Card.preload_present_variants(@result.records)
 
-    @owned_quantities = owned_quantities(@result.records.flat_map(&:card_variants))
+    @owned_quantities = VariantHoldings.new(Current.user, @result.records.flat_map(&:card_variants)).owned_quantities
   end
 
-  # SRC-16/SRC-17 — o detalhe lista as variantes presentes na fonte e, para o
-  # usuário da sessão, as ausentes que ele tem na coleção ou na wishlist, que a
-  # view rotula "fora da fonte". Carta cujas variantes ficaram todas ocultas é
-  # 404: o catálogo não a lista, e o detalhe não a revela a quem não tem item.
-  # Carta sem variante nenhuma continua abrindo o detalhe, como antes.
+  # SRC-16/SRC-17 — as regras do detalhe vivem em `CardDetail`. Carta cujas
+  # variantes ficaram todas ocultas é 404 (`RecordNotFound`).
+  #
+  # `authenticated?` uma vez, no topo: `allow_unauthenticated_access` não
+  # resolve a sessão, e sem isto `Current.user` seria `nil` e o usuário
+  # autenticado veria posse zero e "Quero esta" em tudo, com a página em 200.
   def show
-    @card = Card.includes(card_variants: :card_set).find_by!(card_number: params[:id])
-    present_ids = @card.card_variants.present.pluck(:id).to_set
-    absent = @card.card_variants.reject { |variant| present_ids.include?(variant.id) }
-    @absent_variant_ids = held_variant_ids(absent)
+    authenticated?
 
-    @variants = @card.card_variants
-                     .select { |variant| present_ids.include?(variant.id) || @absent_variant_ids.include?(variant.id) }
-                     .sort_by { |variant| variant.variant_code }
-    raise ActiveRecord::RecordNotFound if @variants.empty? && @card.card_variants.any?
-
-    @hero = hero_variant
-    @owned_quantities = owned_quantities(@variants)
-    @wishlist_targets = wishlist_targets(@variants)
+    detail = CardDetail.new(card_number: params[:id], user: Current.user, requested_variant: params[:variant]).call
+    @card = detail.card
+    @variants = detail.variants
+    @absent_variant_ids = detail.absent_variant_ids
+    @hero = detail.featured_variant
+    @owned_quantities = detail.holdings.owned_quantities
+    @wishlist_targets = detail.holdings.wishlist_targets
     @editing_deck_quantity = editing_deck_quantity
   end
 
@@ -73,90 +61,5 @@ class CatalogController < ApplicationController
       return unless editing_deck
 
       editing_deck.entries.where(card_id: @card.id).pick(:quantity).to_i
-    end
-
-    # CNF-42 — a variante em destaque vem de `?variant=`, mas só entre as que
-    # a página já lista: um código de outra carta, de variante ausente que o
-    # usuário não tem, ou lixo cai no padrão em vez de dar erro. O padrão é a
-    # primeira variante presente; a ausente só sobe quando é tudo o que o dono
-    # tem (SRC-17).
-    def hero_variant
-      requested = params[:variant].to_s
-      @variants.find { |variant| variant.variant_code == requested } ||
-        @variants.find { |variant| !@absent_variant_ids.include?(variant.id) } ||
-        @variants.first
-    end
-
-    # Um hash `card_variant_id => quantity` para as variantes desta página, em
-    # **uma** consulta. A grade soma este hash por carta para o selo (CNF-02);
-    # o detalhe usa o mesmo hash para o controle por variante (Req. 5.3 /
-    # COL-18) — perguntar a posse variante a variante seria N+1 nos dois casos.
-    #
-    # A consulta parte de `CollectionItem.for_user(Current.user)` e de mais
-    # nada: o usuário vem da sessão, nunca do request (Req. 6.5). Para o
-    # anônimo, `for_user(nil)` é `none` e o resultado é hash vazio — sem
-    # consulta ao banco e sem ramo especial aqui.
-    #
-    # `authenticated?` **antes** de ler `Current.user`, e isso não é cerimônia.
-    # Este controller declara `allow_unauthenticated_access`, que remove o
-    # `before_action :require_authentication` — e era ele que resolvia a sessão
-    # a partir do cookie assinado. Sem esta chamada, `Current.session` ainda é
-    # `nil` aqui e **todo usuário autenticado veria quantidade zero**, porque a
-    # sessão só seria resolvida mais tarde, quando a view chamasse
-    # `authenticated?` para decidir se mostra os botões. O defeito é silencioso:
-    # a página responde 200, os controles aparecem e a posse some.
-    #
-    # `resume_session` é idempotente (`Current.session ||= ...`), então a
-    # chamada da view não repete a consulta.
-    def owned_quantities(variants)
-      authenticated?
-
-      CollectionItem.for_user(Current.user)
-                    .where(card_variant_id: variants.map(&:id))
-                    .pluck(:card_variant_id, :quantity)
-                    .to_h
-    end
-
-    # Um hash `card_variant_id => target_quantity` para as impressões desta
-    # carta, em **uma** consulta (Req. 8.1 / COL-14): o formulário de desejo
-    # aparece por variante no detalhe, e perguntar item a item dentro do loop
-    # seria N+1 — o mesmo problema que `#owned_quantities` resolve para a posse.
-    #
-    # `authenticated?` **antes** de ler `Current.user`, pela quinta vez nesta
-    # feature e pelo mesmo motivo: `allow_unauthenticated_access` remove o
-    # `before_action :require_authentication`, que era quem chamava
-    # `resume_session`. Sem esta chamada, `Current.user` seria `nil` aqui e
-    # **todo usuário autenticado veria "Quero esta" numa impressão que já está
-    # na sua lista**, com a página respondendo 200 — defeito silencioso.
-    #
-    # `for_user(nil)` é `none` para o anônimo: hash vazio, sem consulta e sem
-    # ramo especial. Quem decide não renderizar o formulário é a view.
-    #
-    # **A chamada é redundante hoje e não deve ser removida.** `#show` chama `#owned_quantities` uma linha antes,
-    # e ela já resolveu a sessão — o sensor da T13 confirmou que remover **só**
-    # esta chamada sobrevive. Removidas as duas, porém, o formulário volta a
-    # dizer "Quero esta" para uma impressão que já está na lista do usuário, com
-    # a página em 200, e um teste morre. A redundância existe para que uma
-    # reordenação futura de `#show` não reintroduza o defeito silencioso.
-    # Os ids, entre `variants`, em que o usuário da sessão tem item de coleção
-    # ou de wishlist. `authenticated?` antes de ler `Current.user`, pelo mesmo
-    # motivo de `#owned_quantities`; para o anônimo, `for_user(nil)` é `none`.
-    # Item de coleção com quantidade zero conta: continua sendo registro do
-    # usuário sobre aquela impressão.
-    def held_variant_ids(variants)
-      authenticated?
-      ids = variants.map(&:id)
-
-      (CollectionItem.for_user(Current.user).where(card_variant_id: ids).pluck(:card_variant_id) +
-        WishlistItem.for_user(Current.user).where(card_variant_id: ids).pluck(:card_variant_id)).to_set
-    end
-
-    def wishlist_targets(variants)
-      authenticated?
-
-      WishlistItem.for_user(Current.user)
-                  .where(card_variant_id: variants.map(&:id))
-                  .pluck(:card_variant_id, :target_quantity)
-                  .to_h
     end
 end
