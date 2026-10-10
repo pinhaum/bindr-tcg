@@ -382,7 +382,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
   - `VariantHoldings`, `CardDetail` e `Card.preload_present_variants`; o
     `CatalogController` passa a usá-los com a suíte existente intacta.
   - _Requisitos: 16.17, 16.21, 16.23–16.25, 16.31–16.32_
-- [ ] **11.2 Contrato e sessão** — T5–T8
+- [x] **11.2 Contrato e sessão** — T5–T8
   - Base da API (CSRF, `401`, envelope de erro, `404`/`406`/`500`, JSON
     forçado), sessão e cadastro em JSON, mensagens em pt-BR.
   - _Requisitos: 16.1–16.16_

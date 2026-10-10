@@ -145,6 +145,7 @@ Rails.application.routes.draw do
   # novas da API entram acima do catch-all, que tem de ser a última.
   scope "api", module: :api, defaults: { format: :json }, format: false do
     resource :session, only: %i[show create destroy], as: :api_session
+    resource :registration, only: :create, as: :api_registration
 
     match "*path", to: "not_found#show", via: :all
   end

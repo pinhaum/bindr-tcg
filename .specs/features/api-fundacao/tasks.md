@@ -277,9 +277,9 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/integration/api/registrations_test.rb`: cadastro válido cria `User` e `Session` e devolve token novo; cada caso inválido (e-mail vazio, já usado com outra caixa, senha curta, confirmação diferente) traz a mensagem pt-BR exata em `fields` e não cria nada; sem `user` dá `422`; sem token CSRF dá `422 invalid_csrf_token`
-- [ ] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/integration/api/registrations_test.rb`: cadastro válido cria `User` e `Session` e devolve token novo; cada caso inválido (e-mail vazio, já usado com outra caixa, senha curta, confirmação diferente) traz a mensagem pt-BR exata em `fields` e não cria nada; sem `user` dá `422`; sem token CSRF dá `422 invalid_csrf_token`
+- [x] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: full
