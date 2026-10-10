@@ -631,10 +631,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `docker compose up` não sobe o `e2e` (Req. 11.6 continua um comando)
-- [ ] Jornada passa com as mensagens exatas ("E-mail ou senha inválidos.", "Sessão encerrada."); `/app/entrar?return_to=/app/criar-conta` com sessão volta a `/app`; nenhuma resposta `406` (User-Agent headless)
-- [ ] Gate check passes: quick, depois full (com o e2e)
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `docker compose up` não sobe o `e2e` (Req. 11.6 continua um comando)
+- [x] Jornada passa com as mensagens exatas ("E-mail ou senha inválidos.", "Sessão encerrada."); `/app/entrar?return_to=/app/criar-conta` com sessão volta a `/app`; nenhuma resposta `406` (User-Agent headless)
+- [x] Gate check passes: quick, depois full (com o e2e)
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: e2e
 **Gate**: full
