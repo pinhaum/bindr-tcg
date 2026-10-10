@@ -223,10 +223,10 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/integration/api/contract_test.rb`: `GET`/`POST`/`DELETE` em caminho inexistente sob `/api` dão `404 not_found` JSON (inclusive `POST` sem token CSRF com a proteção ligada); `Accept: text/html` e caminho com `.html` continuam JSON; User-Agent de navegador antigo dá `406 unsupported_browser`; corpo segue `{ error: { code, message, fields: {} } }`; `Content-Type` é `application/json`
-- [ ] Rotas HTML intactas: suíte inteira verde sem edição
-- [ ] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/integration/api/contract_test.rb`: `GET`/`POST`/`DELETE` em caminho inexistente sob `/api` dão `404 not_found` JSON (inclusive `POST` sem token CSRF com a proteção ligada); `Accept: text/html` e caminho com `.html` continuam JSON; User-Agent de navegador antigo dá `406 unsupported_browser`; corpo segue `{ error: { code, message, fields: {} } }`; `Content-Type` é `application/json`
+- [x] Rotas HTML intactas: suíte inteira verde sem edição
+- [x] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: full

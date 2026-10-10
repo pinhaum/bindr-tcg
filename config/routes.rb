@@ -140,5 +140,12 @@ Rails.application.routes.draw do
   # O Leader do deck (T14). A carta vai no corpo, como `card_id`.
   post "decks/:deck_id/leader" => "deck_entries#leader", as: :deck_leader
 
+  # API JSON. `format: false` tira a extensão do caminho (`.html` cai no
+  # catch-all) e o default fixa `params[:format]`, que vence o `Accept`. Rotas
+  # novas da API entram acima do catch-all, que tem de ser a última.
+  scope "api", module: :api, defaults: { format: :json }, format: false do
+    match "*path", to: "not_found#show", via: :all
+  end
+
   root "catalog#index"
 end
