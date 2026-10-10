@@ -1,0 +1,90 @@
+/*
+ * Tokens de design. Nomes e valores escuros espelham
+ * app/assets/stylesheets/catalog.css (§11.3 a §11.5); o tema claro vem do design
+ * da spa-fundacao. Os pares de contraste são verificados em tokens.test.ts.
+ */
+
+:root {
+	/* Tipografia */
+	--font-sans: system-ui, sans-serif;
+	--font-mono: monospace;
+
+	--display-size: 28px;
+	--display-line-height: 32px;
+	--display-weight: 700;
+
+	--title-size: 20px;
+	--title-line-height: 26px;
+	--title-weight: 600;
+
+	--body-size: 15px;
+	--body-line-height: 22px;
+	--body-weight: 400;
+
+	--body-strong-size: 15px;
+	--body-strong-line-height: 22px;
+	--body-strong-weight: 600;
+
+	--caption-size: 13px;
+	--caption-line-height: 18px;
+	--caption-weight: 400;
+
+	--code-size: 13px;
+	--code-line-height: 18px;
+	--code-weight: 500;
+
+	--nav-current-weight: 600;
+
+	/* Espaçamento */
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 16px;
+	--space-4: 24px;
+
+	/* Navegação */
+	--nav-height: 56px;
+	--touch-target: 44px;
+	--sidebar-width: 280px;
+
+	/* Raio */
+	--radius-sm: 4px;
+	--radius-md: 8px;
+	--radius-full: 360px;
+
+	/* Movimento */
+	--duration-fast: 120ms;
+	--duration-base: 200ms;
+	--duration-slow: 320ms;
+	--ease-standard: cubic-bezier(0.2, 0, 0, 1);
+	--ease-exit: cubic-bezier(0.3, 0, 1, 1);
+}
+
+:root[data-theme="dark"] {
+	--surface-base: #051b23;
+	--surface-raised: #102b36;
+	--surface-sunken: #011018;
+	--border: #1c3a47;
+	--border-strong: #717e84;
+	--ink: #e9f0f3;
+	--ink-muted: #9ba7ad;
+	--accent: #ff9e14;
+	--on-accent: #051b23;
+	--danger: #ff5448;
+
+	color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+	--surface-base: #f2f8fb;
+	--surface-raised: #ffffff;
+	--surface-sunken: #e3edf2;
+	--border: #cedadf;
+	--border-strong: #69777e;
+	--ink: #0b222c;
+	--ink-muted: #475860;
+	--accent: #995b00;
+	--on-accent: #ffffff;
+	--danger: #be241f;
+
+	color-scheme: light;
+}

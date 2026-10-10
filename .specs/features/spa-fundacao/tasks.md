@@ -311,13 +311,13 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `tokens.test.ts` lê `tokens.css`, extrai os dois blocos e aplica os pares de `contrast_test.rb` com a mesma fórmula (limiar 0.04045): 4.5:1 texto, 3:1 borda de controle e `accent` como anel, nas três superfícies
-- [ ] Teste de matiz: toda cor com croma ≥ 0.01 cai em 228° ± 8, 66° ± 8 ou 28° ± 8 (só `danger`)
-- [ ] Teste confere os mesmos dez nomes nos dois blocos e `color-scheme` coerente em cada um
-- [ ] Teste confere que `base.css` declara `:focus-visible` com `2px solid var(--accent)` e `outline-offset: 2px`, e o bloco de `prefers-reduced-motion` com os tokens de duração em zero
-- [ ] `catalog.css` não muda
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `tokens.test.ts` lê `tokens.css`, extrai os dois blocos e aplica os pares de `contrast_test.rb` com a mesma fórmula (limiar 0.04045): 4.5:1 texto, 3:1 borda de controle e `accent` como anel, nas três superfícies
+- [x] Teste de matiz: toda cor com croma ≥ 0.01 cai em 228° ± 8, 66° ± 8 ou 28° ± 8 (só `danger`)
+- [x] Teste confere os mesmos dez nomes nos dois blocos e `color-scheme` coerente em cada um
+- [x] Teste confere que `base.css` declara `:focus-visible` com `2px solid var(--accent)` e `outline-offset: 2px`, e o bloco de `prefers-reduced-motion` com os tokens de duração em zero
+- [x] `catalog.css` não muda
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
