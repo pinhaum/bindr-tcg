@@ -446,9 +446,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes com cliente falso cobrem: `loadSession` guarda `user` e token; `signIn` envia `{ email, password }` no topo; `signUp` envia `{ user: { email, password, password_confirmation } }`; `signOut` com `200` e com `ApiError` `unauthenticated` põe `user = null`, navega para `base` e emite "Sessão encerrada."; `signOut` com outro erro relança sem mudar `user`; `handleUnauthenticated` navega para `/app/entrar?return_to=<caminho com query codificado>` e não navega a partir de `/entrar` nem de `/criar-conta`; `onSessionChanged` troca `user` e navega para `base`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes com cliente falso cobrem: `loadSession` guarda `user` e token; `signIn` envia `{ email, password }` no topo; `signUp` envia `{ user: { email, password, password_confirmation } }`; `signOut` com `200` e com `ApiError` `unauthenticated` põe `user = null`, navega para `base` e emite "Sessão encerrada."; `signOut` com outro erro relança sem mudar `user`; `handleUnauthenticated` navega para `/app/entrar?return_to=<caminho com query codificado>` e não navega a partir de `/entrar` nem de `/criar-conta`; `onSessionChanged` troca `user` e navega para `base`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
