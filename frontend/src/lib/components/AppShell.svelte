@@ -6,6 +6,8 @@
 	let { children }: { children: Snippet } = $props();
 </script>
 
+<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+
 <div class="shell">
 	<header class="brand">
 		<strong>Bindr</strong>
@@ -14,12 +16,32 @@
 	<div class="nav">
 		<MainNav />
 	</div>
-	<main>
+	<main id="conteudo" tabindex="-1">
 		{@render children()}
 	</main>
 </div>
 
 <style>
+	.skip-link {
+		position: absolute;
+		inset-block-start: var(--space-2);
+		inset-inline-start: var(--space-2);
+		z-index: 1;
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-md);
+		background: var(--surface-raised);
+		color: var(--ink);
+		transform: translateY(-200%);
+	}
+
+	.skip-link:focus {
+		transform: none;
+	}
+
+	main:focus {
+		outline: none;
+	}
+
 	.shell {
 		display: grid;
 		grid-template-areas:
@@ -49,6 +71,11 @@
 		padding-bottom: env(safe-area-inset-bottom);
 		background: var(--surface-raised);
 		border-top: 1px solid var(--border);
+	}
+
+	.nav :global(nav),
+	.nav :global(ul) {
+		inline-size: 100%;
 	}
 
 	main {

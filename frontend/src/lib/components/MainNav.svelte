@@ -47,13 +47,22 @@
 		list-style: none;
 	}
 
+	li {
+		flex: 1 1 0;
+		min-inline-size: 0;
+	}
+
 	a,
 	button {
+		box-sizing: border-box;
+		inline-size: 100%;
+		text-align: center;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		min-height: var(--touch-target);
-		min-width: var(--touch-target);
+		min-width: 0;
+		overflow-wrap: anywhere;
 		padding: 0 var(--space-3);
 		border: 0;
 		border-block-end: 2px solid transparent;

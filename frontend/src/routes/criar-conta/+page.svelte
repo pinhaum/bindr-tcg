@@ -61,6 +61,8 @@
 	}
 </script>
 
+<svelte:head><title>Criar conta — Bindr</title></svelte:head>
+
 <h1>Criar conta</h1>
 
 <form {onsubmit}>

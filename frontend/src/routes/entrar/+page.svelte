@@ -38,6 +38,8 @@
 	}
 </script>
 
+<svelte:head><title>Entrar — Bindr</title></svelte:head>
+
 <h1>Entrar</h1>
 
 <form {onsubmit}>

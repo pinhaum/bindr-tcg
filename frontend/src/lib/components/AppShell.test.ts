@@ -32,4 +32,14 @@ describe('AppShell', () => {
 		expect(screen.getAllByRole('navigation')).toHaveLength(1);
 		expect(screen.getAllByLabelText('Tema')).toHaveLength(1);
 	});
+
+	it('tem o skip link como primeiro focável, apontando para main#conteudo', () => {
+		const { container } = render(AppShell, { children });
+
+		const skip = screen.getByRole('link', { name: 'Ir para o conteúdo' });
+		expect(skip).toHaveAttribute('href', '#conteudo');
+		expect(container.querySelector('a, button, select')).toBe(skip);
+		expect(screen.getByRole('main')).toHaveAttribute('id', 'conteudo');
+		expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
+	});
 });

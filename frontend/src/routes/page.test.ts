@@ -27,4 +27,17 @@ describe('+page.svelte (/app)', () => {
 		expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/app/entrar');
 		expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute('href', '/app/criar-conta');
 	});
+
+	it('define o título da página', () => {
+		render(Page);
+
+		expect(document.title).toBe('Bindr');
+	});
+
+	it('sem sessão, os links ficam em uma lista', () => {
+		render(Page);
+
+		expect(screen.getByRole('list')).toContainElement(screen.getByRole('link', { name: 'Entrar' }));
+		expect(screen.getAllByRole('listitem')).toHaveLength(2);
+	});
 });

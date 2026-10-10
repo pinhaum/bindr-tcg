@@ -12,6 +12,12 @@ body {
 	outline-offset: 2px;
 }
 
+@media (max-width: 63.999rem) {
+	html {
+		scroll-padding-block-end: calc(var(--nav-height) + env(safe-area-inset-bottom));
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	:root {
 		--duration-fast: 0ms;

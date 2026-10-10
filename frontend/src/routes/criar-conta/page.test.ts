@@ -216,4 +216,10 @@ describe('criar-conta/+page load', () => {
 		session.user = null;
 		await expect(load({ parent: async () => ({}) } as never)).resolves.toBeUndefined();
 	});
+
+	it('define o título da página', () => {
+		render(Page);
+
+		expect(document.title).toBe('Criar conta — Bindr');
+	});
 });

@@ -8,7 +8,7 @@ vi.hoisted(() => {
 	vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
 });
 
-const nav = vi.hoisted(() => ({ refreshAll: vi.fn(), onNavigate: vi.fn() }));
+const nav = vi.hoisted(() => ({ refreshAll: vi.fn(), onNavigate: vi.fn(), afterNavigate: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
 vi.mock('$app/paths', () => ({ resolve: () => '/app/' }));
 vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/app/') } }));
@@ -27,6 +27,7 @@ describe('+layout.svelte', () => {
 	beforeEach(() => {
 		nav.refreshAll.mockReset();
 		nav.onNavigate.mockReset();
+		nav.afterNavigate.mockReset();
 		session.status = 'loading';
 		session.user = null;
 		session.error = null;
@@ -39,6 +40,23 @@ describe('+layout.svelte', () => {
 
 		expect(screen.queryByText('conteúdo da rota')).not.toBeInTheDocument();
 		expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument();
+	});
+
+	it('com "loading" anuncia "Carregando…" em um status', () => {
+		renderLayout();
+
+		expect(screen.getByRole('status')).toHaveTextContent('Carregando…');
+	});
+
+	it('com erro mostra h1 "Erro", a mensagem em alert, main#conteudo e o título', () => {
+		session.status = 'error';
+		session.error = networkError();
+		const { container } = renderLayout();
+
+		expect(screen.getByRole('heading', { level: 1, name: 'Erro' })).toBeInTheDocument();
+		expect(screen.getByText(networkError().message)).toHaveAttribute('role', 'alert');
+		expect(container.querySelector('main#conteudo')).toBeInTheDocument();
+		expect(document.title).toBe('Erro — Bindr');
 	});
 
 	it('com "ready" mostra a rota', () => {
@@ -83,5 +101,41 @@ describe('+layout.svelte', () => {
 
 		expect(container.querySelector('[aria-live="polite"]')).toBeInTheDocument();
 		expect(nav.onNavigate).toHaveBeenCalledWith(viewTransitionOnNavigate);
+	});
+
+	describe('foco após navegação', () => {
+		const navigate = (type: string) => {
+			session.status = 'ready';
+			const { container } = renderLayout();
+			const callback = nav.afterNavigate.mock.calls[0][0];
+			callback({ type });
+			return container.querySelector<HTMLElement>('main#conteudo')!;
+		};
+
+		it('navegação client-side move o foco para o main', () => {
+			const main = navigate('link');
+
+			expect(main).toHaveAttribute('tabindex', '-1');
+			expect(main).toHaveFocus();
+		});
+
+		it('na carga inicial ("enter") não rouba o foco', () => {
+			const main = navigate('enter');
+
+			expect(main).not.toHaveFocus();
+		});
+
+		it('não tira o foco de quem já está dentro do main', () => {
+			session.status = 'ready';
+			const { container } = renderLayout();
+			const main = container.querySelector<HTMLElement>('main#conteudo')!;
+			const inner = document.createElement('input');
+			main.appendChild(inner);
+			inner.focus();
+
+			nav.afterNavigate.mock.calls[0][0]({ type: 'goto' });
+
+			expect(inner).toHaveFocus();
+		});
 	});
 });
