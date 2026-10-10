@@ -67,7 +67,8 @@
 		inset: auto 0 0 0;
 		display: flex;
 		justify-content: center;
-		min-height: var(--nav-height);
+		box-sizing: border-box;
+		min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
 		padding-bottom: env(safe-area-inset-bottom);
 		background: var(--surface-raised);
 		border-top: 1px solid var(--border);
