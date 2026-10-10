@@ -151,4 +151,45 @@ class Api::CatalogTest < ActionDispatch::IntegrationTest
     assert_equal 9, response.parsed_body["data"].size
     assert_equal with_three, with_nine
   end
+
+  test "o número de consultas não cresce com as cartas para o anônimo, que não toca posse nem meta" do
+    get "/api/catalog"
+    with_three = count_queries { get "/api/catalog" }
+
+    4.upto(9) do |n|
+      card = card!("OP01-00#{n}", "Carta #{n}", "Blue")
+      variant!(card, "tcgplayer:#{n}0")
+    end
+    mark_catalog_present!
+    with_nine = count_queries { get "/api/catalog" }
+
+    assert_equal 9, response.parsed_body["data"].size
+    assert_equal with_three, with_nine
+
+    sql = []
+    collector = ->(*, payload) { sql << payload[:sql] }
+    ActiveSupport::Notifications.subscribed(collector, "sql.active_record") { get "/api/catalog" }
+    assert_empty sql.grep(/collection_items|wishlist_items/)
+  end
+
+  test "posse e meta de outro usuário não aparecem para o da sessão" do
+    CollectionItem.create!(user: @other, card_variant: @red_v, quantity: 5)
+    WishlistItem.create!(user: @other, card_variant: @red_v, target_quantity: 3)
+    sign_in @user
+
+    red = fetch["data"].find { |c| c["card_number"] == "OP01-002" }["variants"].first
+
+    assert_equal 0, red["owned_quantity"]
+    assert_nil red["wishlist_target"]
+  end
+
+  test "a meta de desejo lida é a do próprio usuário, não a do outro" do
+    WishlistItem.create!(user: @user, card_variant: @red_v, target_quantity: 2)
+    WishlistItem.create!(user: @other, card_variant: @red_v, target_quantity: 4)
+    sign_in @user
+
+    red = fetch["data"].find { |c| c["card_number"] == "OP01-002" }["variants"].first
+
+    assert_equal 2, red["wishlist_target"]
+  end
 end

@@ -42,6 +42,18 @@ class VariantHoldingsTest < ActiveSupport::TestCase
     assert_empty queries
   end
 
+  test "logado com lista de variantes vazia: hashes vazios e nenhuma consulta" do
+    queries = count_queries do
+      h = VariantHoldings.new(@user, [])
+      assert_equal({}, h.owned_quantities)
+      assert_equal({}, h.wishlist_targets)
+      assert_equal 0, h.owned_quantity(@owned)
+      assert_nil h.wishlist_target(@owned)
+    end
+
+    assert_empty queries
+  end
+
   test "autenticado sem item: posse 0 e meta nil" do
     h = holdings(@user)
 

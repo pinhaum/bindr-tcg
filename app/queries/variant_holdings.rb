@@ -11,18 +11,12 @@ class VariantHoldings
 
   # `card_variant_id => quantity`. Item com quantidade zero entra no hash.
   def owned_quantities
-    @owned_quantities ||= CollectionItem.for_user(@user)
-                                        .where(card_variant_id: @variant_ids)
-                                        .pluck(:card_variant_id, :quantity)
-                                        .to_h
+    @owned_quantities ||= load(CollectionItem, :quantity)
   end
 
   # `card_variant_id => target_quantity`.
   def wishlist_targets
-    @wishlist_targets ||= WishlistItem.for_user(@user)
-                                      .where(card_variant_id: @variant_ids)
-                                      .pluck(:card_variant_id, :target_quantity)
-                                      .to_h
+    @wishlist_targets ||= load(WishlistItem, :target_quantity)
   end
 
   def owned_quantity(variant)
@@ -35,5 +29,13 @@ class VariantHoldings
     return unless @user
 
     wishlist_targets[variant.id]
+  end
+
+  private
+
+  def load(model, column)
+    return {} if @variant_ids.empty?
+
+    model.for_user(@user).where(card_variant_id: @variant_ids).pluck(:card_variant_id, column).to_h
   end
 end
