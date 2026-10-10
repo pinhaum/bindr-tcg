@@ -31,9 +31,9 @@ retrato mais recente. A feature `api-fundacao` (Req. 16, API-01..32) acrescentou
 API JSON sob `/api` (sessão, cadastro, catálogo e detalhe da carta), com teste de
 ponta a ponta; a §11 do `.context/tasks.md` está fechada.
 
-A **`spa-fundacao`** (Req. 17, SPA-01..46) está **implementada** (T1–T22, front em
+A **`spa-fundacao`** (Req. 17, SPA-01..46) está **encerrada e verificada** (T1–T26, front em
 `frontend/`: SvelteKit + Svelte 5, entrega em `/app`, cliente HTTP da API, sessão,
-temas, casco e mensagens) está **encerrada e verificada** (`validation.md` PASS na iteração 2); `STATE.md` (*Handoff*) tem o retrato.
+temas, casco e mensagens; `validation.md` PASS na iteração 2); `STATE.md` (*Handoff*) tem o retrato.
 
 O que existe hoje:
 
