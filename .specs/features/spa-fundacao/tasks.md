@@ -120,12 +120,12 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Versões do Kit, do Svelte, do Vitest e do `@playwright/test` fixadas no lockfile
-- [ ] Um teste de fumaça do Vitest passa (prova o ambiente `jsdom` e o `resolve.conditions`)
-- [ ] `npm run lint` falha num arquivo de prova com `fetch(...)` fora de `src/lib/api/client.ts` e passa sem ele (prova registrada no commit, arquivo removido)
-- [ ] `npm run build` gera `build/200.html` e nenhum `build/index.html`
-- [ ] Gate check passes: quick
-- [ ] Test count: 1 teste Vitest
+- [x] Versões do Kit, do Svelte, do Vitest e do `@playwright/test` fixadas no lockfile
+- [x] Um teste de fumaça do Vitest passa (prova o ambiente `jsdom` e o `resolve.conditions`)
+- [x] `npm run lint` falha num arquivo de prova com `fetch(...)` fora de `src/lib/api/client.ts` e passa sem ele (prova registrada no commit, arquivo removido)
+- [x] `npm run build` gera `build/200.html` e nenhum `build/index.html`
+- [x] Gate check passes: quick
+- [x] Test count: 1 teste Vitest
 
 **Tests**: unit
 **Gate**: quick
