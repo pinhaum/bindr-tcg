@@ -101,6 +101,17 @@ T4 → T22
 T21 → T22
 ```
 
+### Phase 7: Correções da validação 1
+
+```
+T22 → T23
+T22 → T24
+T22 → T25
+T22 → T26
+```
+
+T23, T24 e T25 têm `Where` disjunto e rodam em paralelo; T26 é só documentação.
+
 ---
 
 ## Task Breakdown
