@@ -117,9 +117,9 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/queries/card_detail_test.rb` cobrem: ausente retida por coleção e por wishlist (e não retida para outro usuário e para o anônimo); destaque por código válido, de outra carta, lixo, e o padrão quando só há ausente; carta inexistente e toda oculta levantam `RecordNotFound`; carta sem variante nenhuma não levanta
-- [ ] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/queries/card_detail_test.rb` cobrem: ausente retida por coleção e por wishlist (e não retida para outro usuário e para o anônimo); destaque por código válido, de outra carta, lixo, e o padrão quando só há ausente; carta inexistente e toda oculta levantam `RecordNotFound`; carta sem variante nenhuma não levanta
+- [x] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
