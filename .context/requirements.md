@@ -789,6 +789,118 @@ e fica explícita no dado, para BRL entrar depois sem migrar o que existe.
 
 ---
 
+## Requisito 16 — Fundação da API JSON
+
+**User story:** Como SPA do Bindr, quero sessão, CSRF, erros e o catálogo em
+JSON sob `/api`, para substituir as telas Hotwire sem depender de HTML nem de
+redirect.
+
+Requisito da troca de front (AD-023), com decisões do dono em 2026-10-10.
+Recorte em `.specs/features/api-fundacao/spec.md` (API-NN, mesma numeração
+destes critérios).
+
+A API mora em `/api/*`, sem versão, na mesma origem do Rails. A sessão é o mesmo
+cookie assinado do HTML (`httponly`, `same_site: lax`) e toda mutação verifica
+CSRF. A serialização usa `jbuilder` (AD-024). Os controllers HTML não mudam; a
+API tem controllers próprios que reusam os query objects e os models; lógica
+extraída de um controller HTML para objeto compartilhado é permitida, desde que
+o comportamento HTML não mude. Esta
+feature cobre a infraestrutura e o catálogo; coleção, wishlist, pasta, decks e
+portabilidade são fatias seguintes.
+
+### Critérios de aceitação
+
+**Sessão e CSRF**
+
+1. QUANDO `GET /api/session` chegar sem sessão ENTÃO o sistema DEVE responder
+   `200` com `user: null` e um `csrf_token`.
+2. QUANDO `GET /api/session` chegar com sessão ENTÃO o sistema DEVE responder
+   `200` com o e-mail do usuário da sessão e um `csrf_token`.
+3. QUANDO `POST /api/session` chegar com credenciais corretas ENTÃO o sistema
+   DEVE criar a sessão, gravar o cookie assinado e responder `200` com o
+   usuário e um `csrf_token` novo.
+4. SE as credenciais estiverem erradas ENTÃO o sistema DEVE responder `401`
+   `invalid_credentials` com "E-mail ou senha inválidos.", o mesmo corpo para
+   e-mail inexistente e senha errada, sem criar sessão.
+5. QUANDO `DELETE /api/session` chegar com sessão ENTÃO o sistema DEVE encerrá-la
+   e responder `200` com `user: null` e um `csrf_token` novo.
+6. QUANDO `POST /api/registration` chegar com dados válidos ENTÃO o sistema DEVE
+   criar a conta, autenticá-la e responder `201` com o usuário e um
+   `csrf_token` novo.
+7. SE o cadastro for inválido ENTÃO o sistema DEVE responder `422`
+   `validation_failed` com as mensagens por campo em pt-BR, sem criar conta nem
+   sessão.
+8. SE uma mutação em `/api` chegar sem `X-CSRF-Token` válido ENTÃO o sistema
+   DEVE responder `422` `invalid_csrf_token` sem executar a action, inclusive
+   no login e no cadastro.
+9. QUANDO login, cadastro ou logout terminarem ENTÃO o sistema DEVE recusar o
+   token anterior e aceitar o devolvido na resposta.
+
+**Contrato de acesso e de erro**
+
+10. SE um endpoint protegido de `/api` for chamado sem sessão ENTÃO o sistema
+    DEVE responder `401` `unauthenticated` com "Faça login para continuar.",
+    sem redirect.
+11. Todo erro de `/api` DEVE ter o corpo `{ "error": { "code", "message",
+    "fields" } }`, com mensagem em pt-BR e `fields` igual a `{}` quando o erro
+    não é de campo.
+12. SE o registro pedido não existir ENTÃO o sistema DEVE responder `404`
+    `not_found` com "Não encontrado.".
+13. SE o caminho sob `/api` não tiver rota ENTÃO o sistema DEVE responder `404`
+    `not_found` em JSON.
+14. Todo endpoint de `/api` DEVE responder `application/json`, qualquer que seja
+    o `Accept`.
+15. SE o navegador for recusado por `allow_browser` ENTÃO o sistema DEVE
+    responder `406` `unsupported_browser` em JSON.
+16. SE uma exceção não tratada escapar ENTÃO o sistema DEVE responder `500`
+    `internal_error` com "Erro inesperado. Tente novamente.", sem dado da
+    exceção no corpo.
+17. O comportamento dos controllers e das rotas HTML DEVE continuar inalterado:
+    a suíte existente passa sem edição.
+
+Caso de borda (emenda do design, 2026-10-10): SE o corpo JSON de uma requisição
+a `/api` estiver malformado ENTÃO o sistema DEVE responder `400` `invalid_json`
+com "Requisição inválida.", e não `500`.
+
+**Catálogo**
+
+18. QUANDO `GET /api/catalog` chegar ENTÃO o sistema DEVE devolver as cartas da
+    página do `CatalogQuery` para os mesmos parâmetros, na mesma ordem, com
+    `page`, `per_page`, `total_count`, `total_pages` e `active_filters`.
+19. SE houver parâmetro desconhecido ou inválido ENTÃO o sistema DEVE ignorá-lo
+    e responder `200`.
+20. O filtro `owned` DEVE valer só com sessão e só sobre a coleção do usuário da
+    sessão; um `user_id` nos parâmetros nunca muda a coleção lida.
+21. Cada carta da lista DEVE trazer só as variantes presentes na fonte,
+    ordenadas por `variant_code`.
+22. QUANDO `GET /api/catalog/filters` chegar ENTÃO o sistema DEVE devolver
+    `CatalogQuery.filter_options`.
+23. QUANDO `GET /api/cards/:card_number` chegar ENTÃO o sistema DEVE devolver a
+    carta com as variantes que o detalhe HTML lista, as ausentes da fonte
+    marcadas com `in_source: false`.
+24. O detalhe DEVE indicar a variante em destaque pela regra do CNF-42, a partir
+    de `?variant=`.
+25. SE a carta não existir ou tiver todas as variantes ocultas para quem pede
+    ENTÃO o sistema DEVE responder `404` `not_found`.
+26. Os endpoints do catálogo DEVEM funcionar sem sessão.
+
+**Convenções de serialização**
+
+27. Carta e variante DEVEM ser objetos distintos no payload, com as variantes em
+    `variants[]` dentro da carta.
+28. `cost`, `life`, `power`, `counter` e `block_icon` DEVEM ser `null` quando
+    ausentes, nunca `0`.
+29. `price` DEVE ser `{ amount, currency, observed_at }`, com `amount` em string
+    decimal de duas casas, ou `null` sem preço (AD-022).
+30. `image_url` DEVE ser o caminho `/card_images/<variant_code>` do app, nunca a
+    URL do CDN.
+31. `owned_quantity` (`0` sem item) e `wishlist_target` (`null` sem item) DEVEM
+    refletir o usuário da sessão e ser `null` sem sessão.
+32. Posse e wishlist DEVEM sair só de `Current.user`; a resposta de um usuário
+    nunca contém dado de outro.
+
+---
+
 ## Rastreamento de pendências
 
 ### Resolvidas

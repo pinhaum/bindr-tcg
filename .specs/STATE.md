@@ -178,6 +178,22 @@
 - **Date**: 2026-10-05
 - **Status**: active
 
+### AD-023
+- **Decision**: O front Hotwire será substituído por uma SPA SvelteKit (adapter-static, fallback `index.html`) em `frontend/`, servida na **mesma origem** do Rails: proxy do Vite em desenvolvimento e build servido pelo Rails em produção. A SPA conversa com uma API JSON em `/api/*`, sem versão, com controllers próprios que reusam query objects e models, sem tocar nos controllers HTML. Durante a transição a SPA vive em `/app/*` e o Hotwire continua no ar; ele sai quando a SPA atingir paridade. Supera a AD-002 só na parte do front; Rails 8 e PostgreSQL continuam.
+- **Reason**: Decisão do dono em 2026-10-10. A mesma origem mantém a sessão no cookie assinado `httponly`, `same_site: lax`, e o CSRF do Rails sem CORS nem token de autenticação no cliente.
+- **Trade-off**: Duas camadas de apresentação convivem até a paridade, e cada tela existe em dobro nesse período. A API exige `ActionController::Base`, não `::API`, por causa de cookies e CSRF.
+- **Scope**: `api-fundacao` e as fatias de API seguintes; `spa-fundacao` no lado front.
+- **Date**: 2026-10-10
+- **Status**: active
+
+### AD-024
+- **Decision**: A API serializa com `jbuilder`, em views `.json.jbuilder` com partials por entidade. Carta e variante são objetos distintos no payload; campos numéricos opcionais saem `null`, nunca `0`; valor monetário sai como `{ amount: <string decimal>, currency, observed_at }`.
+- **Reason**: Decisão do dono em 2026-10-10. A gem já estava no `Gemfile` e é o padrão do Rails; o volume de dados é pequeno e paginado, então o custo de renderização dos partials não pesa. O formato do payload fica num lugar só, revisável sem abrir controller.
+- **Trade-off**: Não há tipos TypeScript gerados do backend (a alternativa era `oj_serializers` + `types_from_serializers`); o contrato do lado Svelte é mantido à mão e protegido pelos request tests do Rails.
+- **Scope**: Toda resposta de `/api`.
+- **Date**: 2026-10-10
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-10-05, noite — este bloco vence os de baixo.** **`precos` (Fase 3) ENCERRADA e verificada.** Req. 15 e spec PRC-01..16 aprovados pelo dono; design com AD-022 (valor + moeda ISO 4217 + data, `CHECK` tudo-ou-nada). T1–T8 commitadas de `5dae3e5` a `9b7fbe9`, mais duas correções de revisão (`13e3e1c`: `prices` malformado e acima do teto viram "sem preço"; `87233dd`: moeda ISO e recusa de `NaN`). Verifier: FAIL na iteração 1 (M15, preço zero contado como sem preço, só faltava teste), PASS na iteração 2 (17/17 mutantes, 1807 runs). Lição L-062. Teste do NAV-37 emendado de 2 para 3 cartões com aval do dono. Import do snapshot de 2026-10-01 no banco de dev: 6.660 de 7.006 variantes com preço (100% das que têm `market`; o Success Criteria de 6.900 contava DON!! e foi emendado). Abertos para o dono: "valor US$ 0,00" repetido em ~70 sets da pasta (PRC-13 pede o zero; a revisão de a11y sugere omitir); "US$" e "market" lidos de forma irregular por leitor de tela pt-BR (baixa). Ambiente: outro projeto (`deskansa`) ocupa as portas 3000 e 5432 do host; os testes rodaram com um override de compose sem portas, e o app foi publicado na 3100 para as capturas. Nenhum commit da Fase 3 foi enviado ao remoto. **Próximo passo:** a definir pelo dono.

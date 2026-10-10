@@ -373,6 +373,22 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [x] **10.3 Fechamento** — T8
   - _Requisitos: 15.1, 15.8, 15.11_
 
+## 11 — Fundação da API JSON (troca de front, AD-023)
+
+Plano da feature em `.specs/features/api-fundacao/tasks.md` (T1–T12, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [ ] **11.1 Extração sem mudar o HTML** — T1–T4 da `api-fundacao`
+  - `VariantHoldings`, `CardDetail` e `Card.preload_present_variants`; o
+    `CatalogController` passa a usá-los com a suíte existente intacta.
+  - _Requisitos: 16.17, 16.21, 16.23–16.25, 16.31–16.32_
+- [ ] **11.2 Contrato e sessão** — T5–T8
+  - Base da API (CSRF, `401`, envelope de erro, `404`/`406`/`500`, JSON
+    forçado), sessão e cadastro em JSON, mensagens em pt-BR.
+  - _Requisitos: 16.1–16.16_
+- [ ] **11.3 Catálogo e fechamento** — T9–T12
+  - _Requisitos: 16.12, 16.16, 16.18–16.32_
+
 ---
 
 ## Fora do escopo da Fase 1
