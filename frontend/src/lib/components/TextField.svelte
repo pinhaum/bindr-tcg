@@ -47,7 +47,7 @@
 	/>
 	{#if invalid}
 		<ul id={errorsId} class="errors">
-			{#each errors as message (message)}
+			{#each errors as message, index (index)}
 				<li>{message}</li>
 			{/each}
 		</ul>
@@ -67,6 +67,7 @@
 	}
 
 	input {
+		box-sizing: border-box;
 		min-block-size: var(--touch-target);
 		padding-inline: var(--space-3);
 		border: 1px solid var(--border-strong);
@@ -77,7 +78,9 @@
 	}
 
 	input[aria-invalid='true'] {
+		border-width: 2px;
 		border-color: var(--danger);
+		padding-inline: calc(var(--space-3) - 1px);
 	}
 
 	.errors {

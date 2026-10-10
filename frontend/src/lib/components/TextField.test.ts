@@ -36,6 +36,11 @@ describe('TextField', () => {
 		expect(list.querySelectorAll('li')).toHaveLength(2);
 	});
 
+	it('renderiza uma linha por mensagem mesmo repetida', () => {
+		render(TextField, { name: 'email', label: 'E-mail', errors: ['x', 'x'] });
+		expect(document.getElementById('field-email-errors')!.querySelectorAll('li')).toHaveLength(2);
+	});
+
 	it('focus() foca o input', () => {
 		const { component } = render(TextField, { name: 'email', label: 'E-mail', errors: [] });
 		component.focus();

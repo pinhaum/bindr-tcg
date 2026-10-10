@@ -155,6 +155,20 @@ describe('base.css', () => {
 		expect(baseCss).toMatch(/:focus-visible\s*\{[^}]*outline-offset:\s*2px/);
 	});
 
+	it('estiliza o body com tokens, sem cor literal', () => {
+		const body = baseCss.match(/body\s*\{([^}]*)\}/)?.[1] ?? '';
+		for (const decl of [
+			'margin: 0',
+			'background: var(--surface-base)',
+			'color: var(--ink)',
+			'font-family: var(--font-sans)',
+			'font-size: var(--body-size)',
+			'line-height: var(--body-line-height)'
+		])
+			expect(body).toContain(decl);
+		expect(body).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+	});
+
 	it('zera os tokens de duração e as transições sob prefers-reduced-motion', () => {
 		const start = baseCss.indexOf('@media (prefers-reduced-motion: reduce)');
 		expect(start).toBeGreaterThan(-1);

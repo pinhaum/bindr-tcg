@@ -7,6 +7,9 @@
 
 	const entries = $derived(navEntries(session.user));
 
+	const trimSlash = (path: string) => (path.length > 1 ? path.replace(/\/+$/, '') : path);
+	const isCurrent = (href: string) => trimSlash(page.url.pathname) === trimSlash(href);
+
 	async function leave() {
 		try {
 			await signOut();
@@ -27,8 +30,7 @@
 					<a href={entry.href} rel="external" data-sveltekit-reload>{entry.label}</a>
 				{:else}
 					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href já vem de resolve('/') em nav-entries -->
-					<a href={entry.href} aria-current={page.url.pathname === entry.href ? 'page' : undefined}
-						>{entry.label}</a
+					<a href={entry.href} aria-current={isCurrent(entry.href) ? 'page' : undefined}>{entry.label}</a
 					>
 				{/if}
 			</li>
@@ -39,7 +41,7 @@
 <style>
 	ul {
 		display: flex;
-		gap: var(--space-2, 0.5rem);
+		gap: var(--space-2);
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -50,11 +52,12 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 44px;
-		min-width: 44px;
-		padding: 0 var(--space-3, 0.75rem);
+		min-height: var(--touch-target);
+		min-width: var(--touch-target);
+		padding: 0 var(--space-3);
 		border: 0;
-		border-radius: var(--radius-md, 0.5rem);
+		border-block-end: 2px solid transparent;
+		border-radius: var(--radius-md);
 		background: transparent;
 		color: inherit;
 		font: inherit;
@@ -63,6 +66,7 @@
 	}
 
 	a[aria-current='page'] {
+		border-block-end-color: var(--accent);
 		background: var(--surface-sunken);
 		font-weight: var(--nav-current-weight);
 	}

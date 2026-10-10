@@ -1,3 +1,12 @@
+body {
+	margin: 0;
+	background: var(--surface-base);
+	color: var(--ink);
+	font-family: var(--font-sans);
+	font-size: var(--body-size);
+	line-height: var(--body-line-height);
+}
+
 :focus-visible {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;

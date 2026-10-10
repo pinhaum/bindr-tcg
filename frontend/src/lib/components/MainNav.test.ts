@@ -47,6 +47,15 @@ describe("MainNav", () => {
     expect(current[0]).toHaveAttribute("aria-current", "page");
   });
 
+  it("ignores a trailing slash when marking the current route", () => {
+    mocks.pathname = "/app/entrar/";
+    render(MainNav);
+    expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
   it("never marks Hotwire entries as current", () => {
     mocks.pathname = "/catalog";
     render(MainNav);
