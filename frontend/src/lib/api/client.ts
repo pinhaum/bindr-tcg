@@ -1,11 +1,14 @@
-import { apiErrorFromBody, networkError, unexpectedResponse } from './errors';
-import type { ApiErrorBody } from './types';
+import { ApiError, apiErrorFromBody, networkError, sessionChanged, unexpectedResponse } from './errors';
+import type { ApiErrorBody, SessionPayload, SessionUser } from './types';
 
 type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 type Query = Record<string, string | number | boolean | undefined>;
 
 export type ApiClientDeps = {
 	fetch: typeof fetch;
+	onUnauthenticated: () => void;
+	currentUserEmail: () => string | null;
+	onSessionChanged: (user: SessionUser) => void;
 	timeoutMs?: number;
 };
 
@@ -19,6 +22,8 @@ export type ApiClient = {
 };
 
 const DEFAULT_TIMEOUT_MS = 15000;
+const SESSION_PATH = '/api/session';
+const UNAUTHENTICATED_MESSAGE = 'Faça login para continuar.';
 const NETWORK_ERROR_NAMES = new Set(['TypeError', 'TimeoutError', 'AbortError']);
 
 const isNetworkFailure = (error: unknown): boolean =>
@@ -48,7 +53,13 @@ const readJson = async (response: Response): Promise<unknown> => {
 	}
 };
 
-export const createApiClient = ({ fetch, timeoutMs = DEFAULT_TIMEOUT_MS }: ApiClientDeps): ApiClient => {
+export const createApiClient = ({
+	fetch,
+	onUnauthenticated,
+	currentUserEmail,
+	onSessionChanged,
+	timeoutMs = DEFAULT_TIMEOUT_MS
+}: ApiClientDeps): ApiClient => {
 	let csrfToken: string | null = null;
 
 	const send = async (method: Method, url: string, body?: unknown): Promise<{ status: number; payload: unknown }> => {
@@ -71,16 +82,41 @@ export const createApiClient = ({ fetch, timeoutMs = DEFAULT_TIMEOUT_MS }: ApiCl
 		}
 	};
 
-	const request = async <T>(method: Method, url: string, body?: unknown): Promise<T> => {
+	const request = async <T>(method: Method, url: string, body?: unknown, retried = false): Promise<T> => {
 		const { status, payload } = await send(method, url, body);
 		const ok = status >= 200 && status < 300;
 
-		if (!ok && isRecord(payload) && isErrorBody(payload)) throw apiErrorFromBody(status, payload);
+		if (!ok && isRecord(payload) && isErrorBody(payload)) {
+			const error = apiErrorFromBody(status, payload);
+			const signingOut = method === 'DELETE' && url === SESSION_PATH;
+
+			if (status === 401 && error.code === 'unauthenticated') {
+				if (!signingOut) onUnauthenticated();
+				throw error;
+			}
+			if (status === 422 && error.code === 'invalid_csrf_token' && method !== 'GET' && !retried) {
+				return recoverFromStaleCsrf<T>(method, url, body, signingOut);
+			}
+			throw error;
+		}
 		if (!ok || !isRecord(payload) || !('data' in payload)) throw unexpectedResponse();
 
 		const { data } = payload;
 		if (isRecord(data) && typeof data.csrf_token === 'string') csrfToken = data.csrf_token;
 		return data as T;
+	};
+
+	const recoverFromStaleCsrf = async <T>(method: Method, url: string, body: unknown, signingOut: boolean): Promise<T> => {
+		const { user } = await request<SessionPayload>('GET', SESSION_PATH);
+
+		if ((user?.email ?? null) === currentUserEmail()) return request<T>(method, url, body, true);
+
+		if (user === null) {
+			if (!signingOut) onUnauthenticated();
+			throw new ApiError(401, 'unauthenticated', UNAUTHENTICATED_MESSAGE);
+		}
+		onSessionChanged(user);
+		throw sessionChanged();
 	};
 
 	return {

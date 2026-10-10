@@ -285,9 +285,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem: `401 unauthenticated` num `GET` e num `POST` chamam `onUnauthenticated` uma vez; em `DELETE /api/session` não chamam e lançam `unauthenticated`; `401 invalid_credentials` não chama; `422` com o mesmo e-mail gera exatamente um `GET /api/session` e um reenvio com o token novo; anônimo nos dois lados também reenvia; segundo `422` lança "Token de segurança inválido." sem terceiro envio; `null` onde havia usuário chama `onUnauthenticated`, não reenvia e lança `unauthenticated` com "Faça login para continuar."; o mesmo no `DELETE /api/session` não chama `onUnauthenticated`; outro e-mail chama `onSessionChanged` com o usuário novo, não reenvia e lança `session_changed` com a mensagem exata; `422` em `GET` não renova
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem: `401 unauthenticated` num `GET` e num `POST` chamam `onUnauthenticated` uma vez; em `DELETE /api/session` não chamam e lançam `unauthenticated`; `401 invalid_credentials` não chama; `422` com o mesmo e-mail gera exatamente um `GET /api/session` e um reenvio com o token novo; anônimo nos dois lados também reenvia; segundo `422` lança "Token de segurança inválido." sem terceiro envio; `null` onde havia usuário chama `onUnauthenticated`, não reenvia e lança `unauthenticated` com "Faça login para continuar."; o mesmo no `DELETE /api/session` não chama `onUnauthenticated`; outro e-mail chama `onSessionChanged` com o usuário novo, não reenvia e lança `session_changed` com a mensagem exata; `422` em `GET` não renova
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick

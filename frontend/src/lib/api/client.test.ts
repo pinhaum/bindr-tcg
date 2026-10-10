@@ -1,14 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from './errors';
 import { createApiClient } from './client';
+import type { SessionUser } from './types';
 
 const json = (body: unknown, status = 200): Response =>
 	new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
 const setup = (respond: () => Response | Promise<Response> = () => json({ data: null }), timeoutMs?: number) => {
 	const fetch = vi.fn<typeof globalThis.fetch>(async () => respond());
-	const client = createApiClient({ fetch, timeoutMs });
-	return { fetch, client };
+	const onUnauthenticated = vi.fn<() => void>();
+	const onSessionChanged = vi.fn<(user: SessionUser) => void>();
+	const currentUserEmail = vi.fn<() => string | null>(() => null);
+	const client = createApiClient({ fetch, onUnauthenticated, currentUserEmail, onSessionChanged, timeoutMs });
+	return { fetch, client, onUnauthenticated, onSessionChanged, currentUserEmail };
 };
 
 const lastCall = (fetch: ReturnType<typeof setup>['fetch']) => {
@@ -247,7 +251,13 @@ describe('createApiClient network failures', () => {
 						init!.signal!.addEventListener('abort', () => reject(init!.signal!.reason));
 					})
 			);
-			const client = createApiClient({ fetch, timeoutMs: 15000 });
+			const client = createApiClient({
+				fetch,
+				onUnauthenticated: vi.fn(),
+				currentUserEmail: () => null,
+				onSessionChanged: vi.fn(),
+				timeoutMs: 15000
+			});
 
 			const pending = caught(client.get('/api/x'));
 			await vi.advanceTimersByTimeAsync(15000);
@@ -309,4 +319,208 @@ describe('createApiClient unexpected responses', () => {
 	it('error status carrying only data', () => expectUnexpected(json({ data: {} }, 500)));
 
 	it('error envelope with a malformed error', () => expectUnexpected(json({ error: 'boom' }, 500)));
+});
+
+const apiError = (status: number, code: string, message: string): Response =>
+	json({ error: { code, message, fields: {} } }, status);
+
+const unauthenticated = () => apiError(401, 'unauthenticated', 'Faça login para continuar.');
+const csrfInvalid = () => apiError(422, 'invalid_csrf_token', 'Token de segurança inválido.');
+const sessionOf = (email: string | null, csrf_token: string) =>
+	json({ data: { user: email === null ? null : { email }, csrf_token } });
+
+const scripted = (currentEmail: string | null, ...responses: Response[]) => {
+	const queue = [...responses];
+	const ctx = setup(() => {
+		const next = queue.shift();
+		if (!next) throw new Error('unexpected extra request');
+		return next;
+	});
+	ctx.currentUserEmail.mockReturnValue(currentEmail);
+	const calls = () =>
+		ctx.fetch.mock.calls.map(([url, init]) => ({
+			method: init!.method,
+			url: String(url),
+			csrf: new Headers(init!.headers).get('X-CSRF-Token')
+		}));
+	return { ...ctx, calls };
+};
+
+describe('createApiClient 401 handling', () => {
+	it.each([
+		['GET', (c: ReturnType<typeof setup>['client']) => c.get('/api/cards/OP01-001')],
+		['POST', (c: ReturnType<typeof setup>['client']) => c.post('/api/decks', {})]
+	])('calls onUnauthenticated once and throws on 401 unauthenticated in a %s', async (_verb, call) => {
+		const { client, onUnauthenticated } = scripted('a@b.c', unauthenticated());
+
+		const error = await caught(call(client));
+
+		expect(onUnauthenticated).toHaveBeenCalledTimes(1);
+		expect(error.status).toBe(401);
+		expect(error.code).toBe('unauthenticated');
+		expect(error.message).toBe('Faça login para continuar.');
+	});
+
+	it('does not call onUnauthenticated on DELETE /api/session but still throws unauthenticated', async () => {
+		const { client, onUnauthenticated } = scripted('a@b.c', unauthenticated());
+
+		const error = await caught(client.delete('/api/session'));
+
+		expect(onUnauthenticated).not.toHaveBeenCalled();
+		expect(error.code).toBe('unauthenticated');
+	});
+
+	it('does not call onUnauthenticated on 401 invalid_credentials and throws it', async () => {
+		const { client, onUnauthenticated } = scripted(
+			null,
+			apiError(401, 'invalid_credentials', 'E-mail ou senha inválidos.')
+		);
+
+		const error = await caught(client.post('/api/session', { email: 'a@b.c', password: 'x' }));
+
+		expect(onUnauthenticated).not.toHaveBeenCalled();
+		expect(error.status).toBe(401);
+		expect(error.code).toBe('invalid_credentials');
+		expect(error.message).toBe('E-mail ou senha inválidos.');
+	});
+});
+
+describe('createApiClient CSRF renewal', () => {
+	const csrfMessage = 'Token de segurança inválido.';
+
+	it('with the same user, does exactly one GET /api/session and one resend with the new token', async () => {
+		const { client, calls, onUnauthenticated, onSessionChanged } = scripted(
+			'a@b.c',
+			csrfInvalid(),
+			sessionOf('a@b.c', 'tok-new'),
+			json({ data: { id: 1 } })
+		);
+		client.setCsrfToken('tok-old');
+
+		await expect(client.post('/api/decks', { name: 'x' })).resolves.toEqual({ id: 1 });
+
+		expect(calls()).toEqual([
+			{ method: 'POST', url: '/api/decks', csrf: 'tok-old' },
+			{ method: 'GET', url: '/api/session', csrf: null },
+			{ method: 'POST', url: '/api/decks', csrf: 'tok-new' }
+		]);
+		expect(onUnauthenticated).not.toHaveBeenCalled();
+		expect(onSessionChanged).not.toHaveBeenCalled();
+	});
+
+	it('resends the same body', async () => {
+		const { client, fetch } = scripted('a@b.c', csrfInvalid(), sessionOf('a@b.c', 't2'), json({ data: null }));
+
+		await client.patch('/api/decks/1', { name: 'novo' });
+
+		expect(fetch.mock.calls[2][1]!.method).toBe('PATCH');
+		expect(fetch.mock.calls[2][1]!.body).toBe('{"name":"novo"}');
+	});
+
+	it('resends when anonymous on both sides', async () => {
+		const { client, calls } = scripted(null, csrfInvalid(), sessionOf(null, 'tok-new'), json({ data: null }));
+
+		await client.post('/api/registration', {});
+
+		expect(calls().map((c) => `${c.method} ${c.url}`)).toEqual([
+			'POST /api/registration',
+			'GET /api/session',
+			'POST /api/registration'
+		]);
+		expect(calls()[2].csrf).toBe('tok-new');
+	});
+
+	it('throws the second 422 without a third send', async () => {
+		const { client, calls } = scripted('a@b.c', csrfInvalid(), sessionOf('a@b.c', 'tok-new'), csrfInvalid());
+
+		const error = await caught(client.post('/api/decks', {}));
+
+		expect(error.status).toBe(422);
+		expect(error.code).toBe('invalid_csrf_token');
+		expect(error.message).toBe(csrfMessage);
+		expect(calls()).toHaveLength(3);
+	});
+
+	it('does not renew on a 422 in a GET', async () => {
+		const { client, calls } = scripted('a@b.c', csrfInvalid());
+
+		const error = await caught(client.get('/api/catalog'));
+
+		expect(error.code).toBe('invalid_csrf_token');
+		expect(calls()).toHaveLength(1);
+	});
+
+	it('with null user where there was one: calls onUnauthenticated, does not resend, throws unauthenticated', async () => {
+		const { client, calls, onUnauthenticated, onSessionChanged } = scripted(
+			'a@b.c',
+			csrfInvalid(),
+			sessionOf(null, 'tok-new')
+		);
+
+		const error = await caught(client.post('/api/decks', {}));
+
+		expect(onUnauthenticated).toHaveBeenCalledTimes(1);
+		expect(onSessionChanged).not.toHaveBeenCalled();
+		expect(error.status).toBe(401);
+		expect(error.code).toBe('unauthenticated');
+		expect(error.message).toBe('Faça login para continuar.');
+		expect(calls()).toHaveLength(2);
+	});
+
+	it('with null user on DELETE /api/session: no onUnauthenticated, no resend, throws unauthenticated', async () => {
+		const { client, calls, onUnauthenticated } = scripted('a@b.c', csrfInvalid(), sessionOf(null, 'tok-new'));
+
+		const error = await caught(client.delete('/api/session'));
+
+		expect(onUnauthenticated).not.toHaveBeenCalled();
+		expect(error.status).toBe(401);
+		expect(error.code).toBe('unauthenticated');
+		expect(error.message).toBe('Faça login para continuar.');
+		expect(calls()).toHaveLength(2);
+	});
+
+	it('with another e-mail: calls onSessionChanged with the new user, does not resend, throws session_changed', async () => {
+		const { client, calls, onUnauthenticated, onSessionChanged } = scripted(
+			'a@b.c',
+			csrfInvalid(),
+			sessionOf('outro@b.c', 'tok-new')
+		);
+
+		const error = await caught(client.post('/api/decks', {}));
+
+		expect(onSessionChanged).toHaveBeenCalledTimes(1);
+		expect(onSessionChanged).toHaveBeenCalledWith({ email: 'outro@b.c' });
+		expect(onUnauthenticated).not.toHaveBeenCalled();
+		expect(error.status).toBe(422);
+		expect(error.code).toBe('session_changed');
+		expect(error.message).toBe('A sessão mudou em outra aba. Confira a conta e tente de novo.');
+		expect(calls()).toHaveLength(2);
+	});
+
+	it('with a user appearing where there was none: treats it as another user', async () => {
+		const { client, onSessionChanged } = scripted(null, csrfInvalid(), sessionOf('novo@b.c', 'tok-new'));
+
+		const error = await caught(client.post('/api/decks', {}));
+
+		expect(onSessionChanged).toHaveBeenCalledWith({ email: 'novo@b.c' });
+		expect(error.code).toBe('session_changed');
+	});
+
+	it('keeps the renewed token after a recovery that does not resend', async () => {
+		const { client, calls } = scripted('a@b.c', csrfInvalid(), sessionOf('outro@b.c', 'tok-new'), json({ data: null }));
+
+		await caught(client.post('/api/decks', {}));
+		await client.post('/api/x');
+
+		expect(calls()[2].csrf).toBe('tok-new');
+	});
+
+	it('propagates a failure of the renewal GET without resending', async () => {
+		const { client, calls } = scripted('a@b.c', csrfInvalid(), apiError(500, 'internal_error', 'Erro inesperado. Tente novamente.'));
+
+		const error = await caught(client.post('/api/decks', {}));
+
+		expect(error.code).toBe('internal_error');
+		expect(calls()).toHaveLength(2);
+	});
 });
