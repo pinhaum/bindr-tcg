@@ -7,7 +7,7 @@ const goto = vi.hoisted(() => vi.fn());
 vi.mock('$app/navigation', () => ({ goto }));
 
 const currentPage = vi.hoisted(() => ({ url: new URL('http://localhost/app/x?y=1') }));
-vi.mock('$app/state', () => ({ page: currentPage }));
+vi.mock('$app/state', () => ({ page: currentPage, navigating: { to: null } }));
 
 // Importa `api` antes de `session`: exercita o ciclo entre os dois módulos nessa ordem.
 import { api } from './index';

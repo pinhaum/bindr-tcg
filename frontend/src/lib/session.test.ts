@@ -9,7 +9,8 @@ const goto = vi.hoisted(() => vi.fn());
 vi.mock('$app/navigation', () => ({ goto }));
 
 const currentPage = vi.hoisted(() => ({ url: new URL('http://localhost/app/') }));
-vi.mock('$app/state', () => ({ page: currentPage }));
+const navigation = vi.hoisted(() => ({ navigating: { to: null as { url: URL } | null } }));
+vi.mock('$app/state', () => ({ page: currentPage, navigating: navigation.navigating }));
 
 const api = vi.hoisted(() => ({
 	get: vi.fn(),
@@ -21,7 +22,7 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock('./api/index', () => ({ api }));
 
-import { handleUnauthenticated, loadSession, session, signIn, signOut, signUp } from './session.svelte';
+import { handleSessionChanged, handleUnauthenticated, loadSession, session, signIn, signOut, signUp } from './session.svelte';
 
 const ana = { email: 'ana@example.com' };
 
@@ -36,6 +37,7 @@ describe('session', () => {
 		session.user = null;
 		session.error = null;
 		visit('/app/');
+		navigation.navigating.to = null;
 	});
 
 	afterEach(() => {
@@ -128,6 +130,7 @@ describe('session', () => {
 		const expectSignedOut = () => {
 			expect(api.delete).toHaveBeenCalledWith('/api/session');
 			expect(session.user).toBeNull();
+			expect(goto).toHaveBeenCalledTimes(1);
 			expect(goto).toHaveBeenCalledWith('/app');
 			expect(toasts).toHaveLength(1);
 			expect(toasts[0]).toMatchObject({ kind: 'success', message: 'Sessão encerrada.' });
@@ -161,6 +164,34 @@ describe('session', () => {
 		});
 	});
 
+	describe('signOut com sessão trocada', () => {
+		it('relança session_changed sem toast nem navegação própria', async () => {
+			session.user = ana;
+			const novo = { email: 'bia@example.com' };
+			const failure = new ApiError(409, 'session_changed', 'Sessão alterada.');
+			api.delete.mockImplementation(async () => {
+				handleSessionChanged(novo);
+				throw failure;
+			});
+
+			await expect(signOut()).rejects.toBe(failure);
+
+			expect(session.user).toEqual(novo);
+			expect(goto).toHaveBeenCalledTimes(1);
+			expect(toasts).toHaveLength(0);
+		});
+	});
+
+	describe('handleSessionChanged', () => {
+		it('troca o usuário e navega para a base uma vez', () => {
+			handleSessionChanged(ana);
+
+			expect(session.user).toEqual(ana);
+			expect(goto).toHaveBeenCalledTimes(1);
+			expect(goto).toHaveBeenCalledWith('/app');
+		});
+	});
+
 	describe('handleUnauthenticated', () => {
 		beforeEach(() => {
 			session.user = ana;
@@ -175,7 +206,7 @@ describe('session', () => {
 			expect(goto).toHaveBeenCalledWith('/app/entrar?return_to=%2Fapp%2Fx%3Fy%3D1');
 		});
 
-		it.each([['/app/entrar'], ['/app/criar-conta']])('não navega a partir de %s, mas limpa o usuário', (path) => {
+		it.each([['/app/entrar'], ['/app/entrar?return_to=%2Fapp%2Fx'], ['/app/criar-conta'], ['/app/criar-conta?x=1']])('não navega a partir de %s, mas limpa o usuário', (path) => {
 			visit(path);
 
 			handleUnauthenticated();
