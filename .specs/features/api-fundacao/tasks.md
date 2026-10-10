@@ -250,10 +250,10 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Testes em `test/integration/api/sessions_test.rb`, com a proteção CSRF ligada: os nove critérios de sessão; corpo idêntico para e-mail inexistente e senha errada; `Session` e cookie não criados na falha; cookie `httponly` e `samesite=lax`; token anterior recusado e novo aceito depois de login e logout; mutação sem token dá `422` sem executar; `DELETE` anônimo dá `401` sem gravar `return_to_after_authenticating`; corpo JSON malformado dá `400 invalid_json`; login de quem já está logado troca a sessão
-- [ ] O fluxo do Independent Test do spec passa num teste só
-- [ ] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Testes em `test/integration/api/sessions_test.rb`, com a proteção CSRF ligada: os nove critérios de sessão; corpo idêntico para e-mail inexistente e senha errada; `Session` e cookie não criados na falha; cookie `httponly` e `samesite=lax`; token anterior recusado e novo aceito depois de login e logout; mutação sem token dá `422` sem executar; `DELETE` anônimo dá `401` sem gravar `return_to_after_authenticating`; corpo JSON malformado dá `400 invalid_json`; login de quem já está logado troca a sessão
+- [x] O fluxo do Independent Test do spec passa num teste só
+- [x] Gate check passes: `docker compose exec app bin/rails test && docker compose exec app bin/rubocop`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: integration
 **Gate**: full

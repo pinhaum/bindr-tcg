@@ -144,6 +144,8 @@ Rails.application.routes.draw do
   # catch-all) e o default fixa `params[:format]`, que vence o `Accept`. Rotas
   # novas da API entram acima do catch-all, que tem de ser a última.
   scope "api", module: :api, defaults: { format: :json }, format: false do
+    resource :session, only: %i[show create destroy], as: :api_session
+
     match "*path", to: "not_found#show", via: :all
   end
 
