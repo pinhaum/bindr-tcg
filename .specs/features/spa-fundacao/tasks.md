@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/spa-fundacao/design.md`
-**Status**: Implemented
+**Status**: Verified
 
 ---
 

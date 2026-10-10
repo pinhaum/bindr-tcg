@@ -33,7 +33,7 @@ ponta a ponta; a §11 do `.context/tasks.md` está fechada.
 
 A **`spa-fundacao`** (Req. 17, SPA-01..46) está **implementada** (T1–T22, front em
 `frontend/`: SvelteKit + Svelte 5, entrega em `/app`, cliente HTTP da API, sessão,
-temas, casco e mensagens) e aguarda o Verifier; `STATE.md` (*Handoff*) tem o retrato.
+temas, casco e mensagens) está **encerrada e verificada** (`validation.md` PASS na iteração 2); `STATE.md` (*Handoff*) tem o retrato.
 
 O que existe hoje:
 
