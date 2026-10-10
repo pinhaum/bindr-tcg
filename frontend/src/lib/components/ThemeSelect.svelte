@@ -23,10 +23,10 @@
 	}
 
 	select {
-		min-height: 44px;
+		min-height: var(--touch-target);
 		padding: 0 var(--space-2);
 		border: 1px solid var(--border-strong);
-		border-radius: var(--radius-md, 0.5rem);
+		border-radius: var(--radius-md);
 		background: var(--surface-raised);
 		color: inherit;
 		font: inherit;
