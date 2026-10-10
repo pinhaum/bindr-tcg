@@ -386,6 +386,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: app/models/collection_item.rb:97 (M15) (aggregation/zero-value)
 - last seen: 2026-10-06T00:36:45Z
 
+### L-063 - Define the serialized value for an empty-collection case in the spec, not only that the code does not raise
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `routes` · harmful: 0
+- features: api-fundacao
+- evidence: validation.md G1 / API-24 / card_detail_test.rb:126 (routes)
+- last seen: 2026-10-10T19:11:03Z
+
+### L-064 - Assert the exact error message text on every endpoint that the spec pins, not only the error code
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `routes` · harmful: 0
+- features: api-fundacao
+- evidence: validation.md G2 / API-12 / cards_test.rb:155 (routes)
+- last seen: 2026-10-10T19:11:03Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

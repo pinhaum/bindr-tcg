@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 63,
+  "next_id": 65,
   "lessons": [
     {
       "id": "L-001",
@@ -1120,6 +1120,42 @@
       ],
       "created": "2026-10-06T00:36:45Z",
       "last_seen": "2026-10-06T00:36:45Z"
+    },
+    {
+      "id": "L-063",
+      "key": "spec_precision_gap::define the serialized value for an empty collection case in the spec not only that the code does not raise",
+      "text": "Define the serialized value for an empty-collection case in the spec, not only that the code does not raise",
+      "signal": "spec_precision_gap",
+      "scope": "routes",
+      "status": "candidate",
+      "features": [
+        "api-fundacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md G1 / API-24 / card_detail_test.rb:126 (routes)"
+      ],
+      "created": "2026-10-10T19:11:03Z",
+      "last_seen": "2026-10-10T19:11:03Z"
+    },
+    {
+      "id": "L-064",
+      "key": "spec_precision_gap::assert the exact error message text on every endpoint that the spec pins not only the error code",
+      "text": "Assert the exact error message text on every endpoint that the spec pins, not only the error code",
+      "signal": "spec_precision_gap",
+      "scope": "routes",
+      "status": "candidate",
+      "features": [
+        "api-fundacao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md G2 / API-12 / cards_test.rb:155 (routes)"
+      ],
+      "created": "2026-10-10T19:11:03Z",
+      "last_seen": "2026-10-10T19:11:03Z"
     }
   ]
 }
