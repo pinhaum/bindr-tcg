@@ -71,10 +71,17 @@ for (const combo of COMBOS) {
 			await test.step('sair mostra a mensagem e volta a anônimo (SPA-22)', async () => {
 				await signOut(page);
 
-				await expect(page.getByText('Sessão encerrada.', { exact: true })).toBeVisible();
+				const message = page.getByText('Sessão encerrada.', { exact: true });
+				await expect(message).toBeVisible();
 				await expect(page).toHaveURL(/\/app\/?$/);
 				await expect(page.getByText(email)).toHaveCount(0);
 				await expectLayout(page, combo, '/ após sair');
+
+				const main = page.locator('main#conteudo');
+				await expect(page.locator('.layer')).toHaveCSS('position', 'fixed');
+				const withMessage = await main.boundingBox();
+				await expect(message).toHaveCount(0, { timeout: 10_000 });
+				expect(await main.boundingBox(), 'a mensagem não desloca o conteúdo (SPA-46)').toEqual(withMessage);
 			});
 
 			await test.step('senha errada mostra o erro, mantém o e-mail e foca o bloco (SPA-17)', async () => {
