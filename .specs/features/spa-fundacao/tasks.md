@@ -149,10 +149,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `docker compose up` sobe `db`, `app` e `frontend` sem comando adicional
-- [ ] `curl -i localhost:5173/app` devolve a página da SPA; `curl -i localhost:5173/api/session` devolve o JSON da API com `csrf_token`; `curl -i localhost:5173/catalog` devolve o HTML do Hotwire (saídas registradas no commit)
-- [ ] HMR funciona sob `/app` (cliente do Vite não vai ao Rails)
-- [ ] Gate check passes: full (a suíte Rails continua verde com o `development.rb` alterado)
+- [x] `docker compose up` sobe `db`, `app` e `frontend` sem comando adicional
+- [x] `curl -i localhost:5173/app` devolve a página da SPA; `curl -i localhost:5173/api/session` devolve o JSON da API com `csrf_token`; `curl -i localhost:5173/catalog` devolve o HTML do Hotwire (saídas registradas no commit)
+- [x] HMR funciona sob `/app` (cliente do Vite não vai ao Rails)
+- [x] Gate check passes: full (a suíte Rails continua verde com o `development.rb` alterado)
 
 **Tests**: none
 **Gate**: full
