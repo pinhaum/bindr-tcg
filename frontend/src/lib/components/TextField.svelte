@@ -7,6 +7,7 @@
 		type?: HTMLInputAttributes['type'];
 		autocomplete?: HTMLInputAttributes['autocomplete'];
 		value?: string;
+		required?: boolean;
 		errors?: string[];
 	}
 
@@ -16,6 +17,7 @@
 		type = 'text',
 		autocomplete,
 		value = $bindable(''),
+		required = false,
 		errors = []
 	}: Props = $props();
 
@@ -39,6 +41,7 @@
 		{name}
 		{type}
 		{autocomplete}
+		{required}
 		aria-invalid={invalid ? 'true' : undefined}
 		aria-describedby={invalid ? errorsId : undefined}
 	/>

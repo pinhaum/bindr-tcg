@@ -525,9 +525,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes com sessão falsa cobrem: envio chama `signIn` com os valores; sucesso navega para o `return_to` seguro e para `/app` sem ele; `invalid_credentials` mostra "E-mail ou senha inválidos.", mantém o e-mail, limpa a senha e foca a mensagem; `network_error` mostra a mensagem exata no topo; segundo envio pendente não chama `signIn` de novo e o botão fica desabilitado; com `session.user`, o `load` lança redirect para `/app`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes com sessão falsa cobrem: envio chama `signIn` com os valores; sucesso navega para o `return_to` seguro e para `/app` sem ele; `invalid_credentials` mostra "E-mail ou senha inválidos.", mantém o e-mail, limpa a senha e foca a mensagem; `network_error` mostra a mensagem exata no topo; segundo envio pendente não chama `signIn` de novo e o botão fica desabilitado; com `session.user`, o `load` lança redirect para `/app`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
