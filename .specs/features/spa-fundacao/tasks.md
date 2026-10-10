@@ -499,9 +499,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes cobrem: rótulo associado ao campo; sem erro, sem `aria-invalid` nem `aria-describedby`; com erro, os dois presentes e apontando para a lista com as mensagens; `focus()` foca o input; `Button` pendente desabilitado com `aria-busy="true"`; `FormError` com "Erro:" e `focus()` que o torna o `activeElement`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes cobrem: rótulo associado ao campo; sem erro, sem `aria-invalid` nem `aria-describedby`; com erro, os dois presentes e apontando para a lista com as mensagens; `focus()` foca o input; `Button` pendente desabilitado com `aria-busy="true"`; `FormError` com "Erro:" e `focus()` que o torna o `activeElement`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
