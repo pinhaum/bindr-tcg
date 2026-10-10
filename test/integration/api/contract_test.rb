@@ -70,4 +70,45 @@ class Api::ContractTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "text/html", response.media_type
   end
+
+  test "exceção inesperada responde 500 internal_error genérico e é logada" do
+    log = StringIO.new
+    original_logger = Rails.logger
+    Rails.logger = ActiveSupport::Logger.new(log)
+    begin
+      with_failing_show(RuntimeError.new("segredo-interno")) { get "/api/qualquer" }
+    ensure
+      Rails.logger = original_logger
+    end
+
+    assert_response :internal_server_error
+    assert_equal "internal_error", response.parsed_body.dig("error", "code")
+    assert_equal "Erro inesperado. Tente novamente.", response.parsed_body.dig("error", "message")
+    assert_no_match(/RuntimeError|segredo-interno|\.rb/, response.body)
+    assert_match(/RuntimeError: segredo-interno/, log.string)
+  end
+
+  test "parâmetro obrigatório ausente responde 400 bad_request e não 500" do
+    with_failing_show(ActionController::ParameterMissing.new(:user)) { get "/api/qualquer" }
+
+    assert_response :bad_request
+    assert_equal "bad_request", response.parsed_body.dig("error", "code")
+    assert_no_match(/user/, response.body)
+  end
+
+  test "formato desconhecido responde 406 e não 500" do
+    with_failing_show(ActionController::UnknownFormat.new) { get "/api/qualquer" }
+
+    assert_response :not_acceptable
+    assert_equal "not_acceptable", response.parsed_body.dig("error", "code")
+  end
+
+  private
+    def with_failing_show(error)
+      original = Api::NotFoundController.instance_method(:show)
+      Api::NotFoundController.send(:define_method, :show) { raise error }
+      yield
+    ensure
+      Api::NotFoundController.send(:define_method, :show, original)
+    end
 end

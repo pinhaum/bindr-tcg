@@ -18,6 +18,7 @@ class Api::BaseController < ActionController::Base
   # declarado para o primeiro.
   rescue_from StandardError do |error|
     Rails.error.report(error, handled: true, severity: :error)
+    Rails.logger.error("[api] #{error.class}: #{error.message}\n#{error.backtrace&.first(5)&.join("\n")}")
     render_error(:internal_server_error, "internal_error", "Erro inesperado. Tente novamente.")
   end
   rescue_from ActionController::InvalidAuthenticityToken do
@@ -25,6 +26,12 @@ class Api::BaseController < ActionController::Base
   end
   rescue_from ActiveRecord::RecordNotFound do
     render_error(:not_found, "not_found", "Não encontrado.")
+  end
+  rescue_from ActionController::ParameterMissing do
+    render_error(:bad_request, "bad_request", "Requisição inválida.")
+  end
+  rescue_from ActionController::UnknownFormat do
+    render_error(:not_acceptable, "not_acceptable", "Formato não suportado.")
   end
   rescue_from ActionDispatch::Http::Parameters::ParseError do
     render_error(:bad_request, "invalid_json", "Requisição inválida.")
