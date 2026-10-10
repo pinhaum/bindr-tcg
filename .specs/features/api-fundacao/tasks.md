@@ -196,10 +196,10 @@ T11 → T12
 
 **Done when**:
 
-- [ ] Teste em `test/models/user_messages_pt_br_test.rb`: sob `I18n.with_locale(:"pt-BR")`, cada caso de cadastro inválido emite a string pt-BR exata, sem "translation missing"; sob o locale padrão, a mensagem continua em inglês
-- [ ] `test/models/user_password_test.rb` passa sem edição
-- [ ] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
-- [ ] Test count: suíte anterior + novos, nenhum removido
+- [x] Teste em `test/models/user_messages_pt_br_test.rb`: sob `I18n.with_locale(:"pt-BR")`, cada caso de cadastro inválido emite a string pt-BR exata, sem "translation missing"; sob o locale padrão, a mensagem continua em inglês
+- [x] `test/models/user_password_test.rb` passa sem edição
+- [x] Gate check passes: `docker compose exec app bin/rails test test/models test/queries`
+- [x] Test count: suíte anterior + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
