@@ -232,10 +232,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes fixam `status`, `code`, `fields` e `message` de cada fábrica, com o texto exato ("Sem conexão com o servidor. Tente novamente.", "Erro inesperado. Tente novamente.", "A sessão mudou em outra aba. Confira a conta e tente de novo.")
-- [ ] `ApiError` montado de um corpo da API preserva `message` e `fields` sem alteração
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes fixam `status`, `code`, `fields` e `message` de cada fábrica, com o texto exato ("Sem conexão com o servidor. Tente novamente.", "Erro inesperado. Tente novamente.", "A sessão mudou em outra aba. Confira a conta e tente de novo.")
+- [x] `ApiError` montado de um corpo da API preserva `message` e `fields` sem alteração
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
