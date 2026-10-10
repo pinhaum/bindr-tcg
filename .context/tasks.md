@@ -389,6 +389,25 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [x] **11.3 Catálogo e fechamento** — T9–T12
   - _Requisitos: 16.12, 16.16, 16.18–16.32_
 
+## 12 — Fundação da SPA SvelteKit (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-fundacao/tasks.md` (T1–T22, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [ ] **12.1 Scaffold e entrega** — T1–T4 da `spa-fundacao`
+  - Projeto em `frontend/`, serviço no compose e proxy do Vite em dev;
+    `SpaController` com `200.html` e `no-cache` e estágio Node no `Dockerfile`
+    em produção.
+  - _Requisitos: 17.1–17.6_
+- [ ] **12.2 Cliente HTTP** — T5–T7
+  - _Requisitos: 17.6–17.13, 17.22_
+- [ ] **12.3 Temas, movimento, sessão e mensagens** — T8–T14
+  - _Requisitos: 17.9, 17.10, 17.14–17.16, 17.18, 17.22, 17.23, 17.31–17.46_
+- [ ] **12.4 Formulários e casco** — T15–T19
+  - _Requisitos: 17.16–17.30, 17.36_
+- [ ] **12.5 Ponta a ponta e fechamento** — T20–T22
+  - _Requisitos: 17.1, 17.5, 17.14–17.18, 17.22–17.24, 17.27–17.30, 17.35–17.37, 17.42, 17.43_
+
 ---
 
 ## Fora do escopo da Fase 1

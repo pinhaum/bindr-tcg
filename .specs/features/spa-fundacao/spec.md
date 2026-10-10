@@ -223,52 +223,52 @@ essa base e as telas de entrar e criar conta, que já a exercitam por inteiro.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| SPA-01 | P1: Entrega — dev em um comando (Req. 17.1) | Design | In Design |
-| SPA-02 | P1: Entrega — página de entrada `200.html` (Req. 17.2) | Design | In Design |
-| SPA-03 | P1: Entrega — arquivos do build (Req. 17.3) | Design | In Design |
-| SPA-04 | P1: Entrega — rotas fora de `/app` intactas (Req. 17.4) | Design | In Design |
-| SPA-05 | P1: Entrega — estágio Node no build (Req. 17.5) | Design | In Design |
-| SPA-06 | P1: Cliente — porta única (Req. 17.6) | Design | In Design |
-| SPA-07 | P1: Cliente — `X-CSRF-Token` (Req. 17.7) | Design | In Design |
-| SPA-08 | P1: Cliente — troca do token (Req. 17.8) | Design | In Design |
-| SPA-09 | P1: Cliente — `401` → entrar (Req. 17.9) | Design | In Design |
-| SPA-10 | P1: Cliente — CSRF desatualizado (Req. 17.10) | Design | In Design |
-| SPA-11 | P1: Cliente — erro tipado (Req. 17.11) | Design | In Design |
-| SPA-12 | P1: Cliente — falha de rede (Req. 17.12) | Design | In Design |
-| SPA-13 | P1: Cliente — resposta inesperada (Req. 17.13) | Design | In Design |
-| SPA-14 | P1: Sessão — carga inicial (Req. 17.14) | Design | In Design |
-| SPA-15 | P1: Sessão — falha na carga (Req. 17.15) | Design | In Design |
-| SPA-16 | P1: Sessão — entrar (Req. 17.16) | Design | In Design |
-| SPA-17 | P1: Sessão — credencial inválida (Req. 17.17) | Design | In Design |
-| SPA-18 | P1: Sessão — criar conta (Req. 17.18) | Design | In Design |
-| SPA-19 | P1: Sessão — erro por campo (Req. 17.19) | Design | In Design |
-| SPA-20 | P1: Sessão — erro sem campo (Req. 17.20) | Design | In Design |
-| SPA-21 | P1: Sessão — envio pendente (Req. 17.21) | Design | In Design |
-| SPA-22 | P1: Sessão — sair (Req. 17.22) | Design | In Design |
-| SPA-23 | P1: Sessão — destino pós-login (Req. 17.23) | Design | In Design |
-| SPA-24 | P1: Sessão — já autenticado (Req. 17.24) | Design | In Design |
-| SPA-25 | P1: Casco — entradas (Req. 17.25) | Design | In Design |
-| SPA-26 | P1: Casco — telas não migradas (Req. 17.26) | Design | In Design |
-| SPA-27 | P1: Casco — entrada atual (Req. 17.27) | Design | In Design |
-| SPA-28 | P1: Casco — barra inferior (Req. 17.28) | Design | In Design |
-| SPA-29 | P1: Casco — coluna lateral (Req. 17.29) | Design | In Design |
-| SPA-30 | P1: Casco — 360px (Req. 17.30) | Design | In Design |
-| SPA-31 | P1: Temas — tokens únicos (Req. 17.31) | Design | In Design |
-| SPA-32 | P1: Temas — valor por tema (Req. 17.32) | Design | In Design |
-| SPA-33 | P1: Temas — contraste nos dois (Req. 17.33) | Design | In Design |
-| SPA-34 | P1: Temas — duas matizes (Req. 17.34) | Design | In Design |
-| SPA-35 | P1: Temas — seguir o sistema (Req. 17.35) | Design | In Design |
-| SPA-36 | P1: Temas — escolha manual (Req. 17.36) | Design | In Design |
-| SPA-37 | P1: Temas — sem flash (Req. 17.37) | Design | In Design |
-| SPA-38 | P1: Temas — `localStorage` indisponível (Req. 17.38) | Design | In Design |
-| SPA-39 | P1: Temas — `color-scheme` (Req. 17.39) | Design | In Design |
-| SPA-40 | P1: Temas — anel de foco (Req. 17.40) | Design | In Design |
-| SPA-41 | P2: Movimento — tokens e propriedades (Req. 17.41) | Design | In Design |
-| SPA-42 | P2: Movimento — reduced motion (Req. 17.42) | Design | In Design |
-| SPA-43 | P2: Movimento — View Transitions (Req. 17.43) | Design | In Design |
-| SPA-44 | P2: Mensagens — sucesso (Req. 17.44) | Design | In Design |
-| SPA-45 | P2: Mensagens — erro (Req. 17.45) | Design | In Design |
-| SPA-46 | P2: Mensagens — sem mover foco (Req. 17.46) | Design | In Design |
+| SPA-01 | P1: Entrega — dev em um comando (Req. 17.1) | Tasks (T2, T20, T22) | Planned |
+| SPA-02 | P1: Entrega — página de entrada `200.html` (Req. 17.2) | Tasks (T3) | Planned |
+| SPA-03 | P1: Entrega — arquivos do build (Req. 17.3) | Tasks (T4) | Planned |
+| SPA-04 | P1: Entrega — rotas fora de `/app` intactas (Req. 17.4) | Tasks (T3) | Planned |
+| SPA-05 | P1: Entrega — estágio Node no build (Req. 17.5) | Tasks (T4, T22) | Planned |
+| SPA-06 | P1: Cliente — porta única (Req. 17.6) | Tasks (T1, T6) | Planned |
+| SPA-07 | P1: Cliente — `X-CSRF-Token` (Req. 17.7) | Tasks (T6) | Planned |
+| SPA-08 | P1: Cliente — troca do token (Req. 17.8) | Tasks (T6) | Planned |
+| SPA-09 | P1: Cliente — `401` → entrar (Req. 17.9) | Tasks (T7, T13) | Planned |
+| SPA-10 | P1: Cliente — CSRF desatualizado (Req. 17.10) | Tasks (T7, T13) | Planned |
+| SPA-11 | P1: Cliente — erro tipado (Req. 17.11) | Tasks (T5, T6) | Planned |
+| SPA-12 | P1: Cliente — falha de rede (Req. 17.12) | Tasks (T5, T6) | Planned |
+| SPA-13 | P1: Cliente — resposta inesperada (Req. 17.13) | Tasks (T5, T6) | Planned |
+| SPA-14 | P1: Sessão — carga inicial (Req. 17.14) | Tasks (T13, T14, T20) | Planned |
+| SPA-15 | P1: Sessão — falha na carga (Req. 17.15) | Tasks (T14) | Planned |
+| SPA-16 | P1: Sessão — entrar (Req. 17.16) | Tasks (T13, T16, T20) | Planned |
+| SPA-17 | P1: Sessão — credencial inválida (Req. 17.17) | Tasks (T15, T16, T20) | Planned |
+| SPA-18 | P1: Sessão — criar conta (Req. 17.18) | Tasks (T13, T17, T20) | Planned |
+| SPA-19 | P1: Sessão — erro por campo (Req. 17.19) | Tasks (T15, T17) | Planned |
+| SPA-20 | P1: Sessão — erro sem campo (Req. 17.20) | Tasks (T17) | Planned |
+| SPA-21 | P1: Sessão — envio pendente (Req. 17.21) | Tasks (T15, T16, T17) | Planned |
+| SPA-22 | P1: Sessão — sair (Req. 17.22) | Tasks (T7, T13, T20) | Planned |
+| SPA-23 | P1: Sessão — destino pós-login (Req. 17.23) | Tasks (T12, T16, T17, T20) | Planned |
+| SPA-24 | P1: Sessão — já autenticado (Req. 17.24) | Tasks (T16, T17, T20) | Planned |
+| SPA-25 | P1: Casco — entradas (Req. 17.25) | Tasks (T18) | Planned |
+| SPA-26 | P1: Casco — telas não migradas (Req. 17.26) | Tasks (T18) | Planned |
+| SPA-27 | P1: Casco — entrada atual (Req. 17.27) | Tasks (T18, T21) | Planned |
+| SPA-28 | P1: Casco — barra inferior (Req. 17.28) | Tasks (T19, T21) | Planned |
+| SPA-29 | P1: Casco — coluna lateral (Req. 17.29) | Tasks (T19, T21) | Planned |
+| SPA-30 | P1: Casco — 360px (Req. 17.30) | Tasks (T19, T21) | Planned |
+| SPA-31 | P1: Temas — tokens únicos (Req. 17.31) | Tasks (T8) | Planned |
+| SPA-32 | P1: Temas — valor por tema (Req. 17.32) | Tasks (T8) | Planned |
+| SPA-33 | P1: Temas — contraste nos dois (Req. 17.33) | Tasks (T8) | Planned |
+| SPA-34 | P1: Temas — duas matizes (Req. 17.34) | Tasks (T8) | Planned |
+| SPA-35 | P1: Temas — seguir o sistema (Req. 17.35) | Tasks (T9, T21) | Planned |
+| SPA-36 | P1: Temas — escolha manual (Req. 17.36) | Tasks (T9, T19, T21) | Planned |
+| SPA-37 | P1: Temas — sem flash (Req. 17.37) | Tasks (T9, T21) | Planned |
+| SPA-38 | P1: Temas — `localStorage` indisponível (Req. 17.38) | Tasks (T9) | Planned |
+| SPA-39 | P1: Temas — `color-scheme` (Req. 17.39) | Tasks (T8) | Planned |
+| SPA-40 | P1: Temas — anel de foco (Req. 17.40) | Tasks (T8) | Planned |
+| SPA-41 | P2: Movimento — tokens e propriedades (Req. 17.41) | Tasks (T8) | Planned |
+| SPA-42 | P2: Movimento — reduced motion (Req. 17.42) | Tasks (T8, T10, T21) | Planned |
+| SPA-43 | P2: Movimento — View Transitions (Req. 17.43) | Tasks (T14, T21) | Planned |
+| SPA-44 | P2: Mensagens — sucesso (Req. 17.44) | Tasks (T11) | Planned |
+| SPA-45 | P2: Mensagens — erro (Req. 17.45) | Tasks (T11) | Planned |
+| SPA-46 | P2: Mensagens — sem mover foco (Req. 17.46) | Tasks (T11) | Planned |
 
 **Coverage:** 46 total, 0 mapped to tasks, 46 unmapped ⚠️ (tasks ainda não escritas)
 
