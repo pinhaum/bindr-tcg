@@ -10,7 +10,11 @@ describe('safeReturnTo', () => {
 		['/app/x'],
 		['/app/catalogo?q=luffy&page=2#topo'],
 		['/app/x%20y'],
-		['/app/%252F%252Fevil']
+		['/app/%252F%252Fevil'],
+		['/app/x..y'],
+		['/app/a.b/c'],
+		['/app/x?y=..'],
+		['/app/x#/../y']
 	])('aceita %s', (raw) => {
 		expect(safeReturnTo(raw)).toBe(raw);
 	});
@@ -42,7 +46,19 @@ describe('safeReturnTo', () => {
 		['tab entre as barras', '/app/\t/evil'],
 		['newline entre as barras', '/app/\n/evil'],
 		['%09 no começo', '%09/app/x'],
-		['%0A entre as barras', '/app/%0A/evil']
+		['%0A entre as barras', '/app/%0A/evil'],
+		['ponto-ponto no caminho', '/app/../x'],
+		['%2e%2e minúsculo', '/app/%2e%2e/x'],
+		['%2E%2E maiúsculo', '/app/%2E%2E/x'],
+		['.%2e misto', '/app/.%2e/x'],
+		['%2e. misto', '/app/%2e./x'],
+		['ponto-ponto encadeado', '/app/x/../../y'],
+		['ponto simples', '/app/./x'],
+		['%2e simples', '/app/%2e/x'],
+		['ponto-ponto no fim', '/app/x/..'],
+		['ponto-ponto antes da query', '/app/x/..?y=1'],
+		['ponto-ponto antes do hash', '/app/x/..#a'],
+		['ponto-ponto após %3F no segmento anterior', '/app/x%3F/../y']
 	])('descarta %s', (_nome, raw) => {
 		expect(safeReturnTo(raw)).toBe('/app');
 	});
