@@ -106,6 +106,48 @@ describe('createApiClient request shape', () => {
 	});
 });
 
+describe('createApiClient caller mistakes', () => {
+	it('propagates the original error when the body cannot be serialized, without calling fetch', async () => {
+		const { fetch, client } = setup();
+		const circular: Record<string, unknown> = {};
+		circular.self = circular;
+
+		await expect(client.post('/api/x', circular)).rejects.toThrow(/circular/i);
+		await expect(client.post('/api/x', { n: 1n })).rejects.toThrow(/BigInt/);
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it.each(['api/x', '//evil.example/x', '/\\evil.example/x', 'https://evil.example/x', 'javascript:alert(1)', ''])(
+		'rejects the path %j before calling fetch',
+		async (path) => {
+			const { fetch, client } = setup();
+
+			for (const call of [
+				() => client.get(path),
+				() => client.post(path),
+				() => client.patch(path),
+				() => client.put(path),
+				() => client.delete(path)
+			]) {
+				const error = await call().then(
+					() => null,
+					(e: unknown) => e
+				);
+				expect(error).toBeInstanceOf(Error);
+				expect(error).not.toBeInstanceOf(ApiError);
+			}
+			expect(fetch).not.toHaveBeenCalled();
+		}
+	);
+
+	it('rejects a path that is not a string', async () => {
+		const { fetch, client } = setup();
+
+		await expect(client.get(undefined as unknown as string)).rejects.toBeInstanceOf(Error);
+		expect(fetch).not.toHaveBeenCalled();
+	});
+});
+
 describe('createApiClient CSRF token', () => {
 	it.each(['post', 'patch', 'put', 'delete'] as const)('sends X-CSRF-Token on %s', async (verb) => {
 		const { fetch, client } = setup();
@@ -211,6 +253,40 @@ describe('createApiClient envelope', () => {
 		expect(error.message).toBe('Faça login para continuar.');
 		expect(error.fields).toEqual({});
 	});
+
+	it.each([
+		['absent', undefined],
+		['null', null],
+		['a string', 'boom'],
+		['an array', ['x']]
+	])('gives an empty fields object when fields is %s', async (_label, fields) => {
+		const { client } = setup(() => json({ error: { code: 'bad_request', message: 'Requisição inválida.', fields } }, 400));
+
+		const error = await caught(client.post('/api/x', {}));
+
+		expect(error.code).toBe('bad_request');
+		expect(error.message).toBe('Requisição inválida.');
+		expect(error.fields).toEqual({});
+	});
+
+	it('drops fields entries whose value is not an array of strings', async () => {
+		const { client } = setup(() =>
+			json(
+				{
+					error: {
+						code: 'validation_failed',
+						message: 'Dados inválidos.',
+						fields: { email: ['é inválido', 3], name: 'em branco', age: null, ok: ['a'] }
+					}
+				},
+				422
+			)
+		);
+
+		const error = await caught(client.post('/api/registration', {}));
+
+		expect(error.fields).toEqual({ email: ['é inválido'], ok: ['a'] });
+	});
 });
 
 describe('createApiClient network failures', () => {
@@ -277,7 +353,9 @@ describe('createApiClient network failures', () => {
 
 		const error = await caught(client.get('/api/x'));
 
+		expect(error.status).toBe(0);
 		expect(error.code).toBe('network_error');
+		expect(error.message).toBe(networkMessage);
 	});
 
 	it('does not swallow unrelated errors', async () => {
@@ -329,11 +407,12 @@ const csrfInvalid = () => apiError(422, 'invalid_csrf_token', 'Token de seguran�
 const sessionOf = (email: string | null, csrf_token: string) =>
 	json({ data: { user: email === null ? null : { email }, csrf_token } });
 
-const scripted = (currentEmail: string | null, ...responses: Response[]) => {
+const scripted = (currentEmail: string | null, ...responses: (Response | Error)[]) => {
 	const queue = [...responses];
 	const ctx = setup(() => {
 		const next = queue.shift();
 		if (!next) throw new Error('unexpected extra request');
+		if (next instanceof Error) throw next;
 		return next;
 	});
 	ctx.currentUserEmail.mockReturnValue(currentEmail);
@@ -521,6 +600,71 @@ describe('createApiClient CSRF renewal', () => {
 		const error = await caught(client.post('/api/decks', {}));
 
 		expect(error.code).toBe('internal_error');
+		expect(calls()).toHaveLength(2);
+	});
+
+	it.each([
+		['PATCH', (c: ReturnType<typeof setup>['client']) => c.patch('/api/decks/1', { name: 'x' })],
+		['PUT', (c: ReturnType<typeof setup>['client']) => c.put('/api/decks/1', { name: 'x' })],
+		['DELETE', (c: ReturnType<typeof setup>['client']) => c.delete('/api/decks/1')]
+	])('renews and resends once in a %s', async (method, call) => {
+		const { client, calls } = scripted('a@b.c', csrfInvalid(), sessionOf('a@b.c', 'tok-new'), json({ data: null }));
+		client.setCsrfToken('tok-old');
+
+		await call(client);
+
+		expect(calls()).toEqual([
+			{ method, url: '/api/decks/1', csrf: 'tok-old' },
+			{ method: 'GET', url: '/api/session', csrf: null },
+			{ method, url: '/api/decks/1', csrf: 'tok-new' }
+		]);
+	});
+
+	it('throws a 401 unauthenticated on the resend without a third send, calling onUnauthenticated once', async () => {
+		const { client, calls, onUnauthenticated } = scripted(
+			'a@b.c',
+			csrfInvalid(),
+			sessionOf('a@b.c', 'tok-new'),
+			unauthenticated()
+		);
+
+		const error = await caught(client.post('/api/decks', {}));
+
+		expect(error.status).toBe(401);
+		expect(error.code).toBe('unauthenticated');
+		expect(error.message).toBe('Faça login para continuar.');
+		expect(onUnauthenticated).toHaveBeenCalledTimes(1);
+		expect(calls()).toHaveLength(3);
+	});
+
+	it('turns a network failure of the renewal GET into network_error without resending', async () => {
+		const { client, calls, onUnauthenticated } = scripted('a@b.c', csrfInvalid(), new TypeError('Failed to fetch'));
+
+		const error = await caught(client.post('/api/decks', {}));
+
+		expect(error.status).toBe(0);
+		expect(error.code).toBe('network_error');
+		expect(error.message).toBe('Sem conexão com o servidor. Tente novamente.');
+		expect(onUnauthenticated).not.toHaveBeenCalled();
+		expect(calls()).toHaveLength(2);
+	});
+
+	it.each([
+		['data null', json({ data: null })],
+		['data without user', json({ data: { csrf_token: 'tok-new' } })],
+		['data as array', json({ data: [] })],
+		['user as string', json({ data: { user: 'a@b.c', csrf_token: 'tok-new' } })],
+		['user without e-mail', json({ data: { user: {}, csrf_token: 'tok-new' } })]
+	])('throws unexpected_response when the renewal GET carries %s, without resending', async (_label, session) => {
+		const { client, calls, onUnauthenticated, onSessionChanged } = scripted(null, csrfInvalid(), session);
+
+		const error = await caught(client.post('/api/registration', {}));
+
+		expect(error.status).toBe(0);
+		expect(error.code).toBe('unexpected_response');
+		expect(error.message).toBe('Erro inesperado. Tente novamente.');
+		expect(onUnauthenticated).not.toHaveBeenCalled();
+		expect(onSessionChanged).not.toHaveBeenCalled();
 		expect(calls()).toHaveLength(2);
 	});
 });

@@ -35,6 +35,13 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isErrorBody = (payload: Record<string, unknown>): payload is ApiErrorBody =>
 	isRecord(payload.error) && typeof payload.error.code === 'string' && typeof payload.error.message === 'string';
 
+const isSessionUser = (value: unknown): value is SessionUser => isRecord(value) && typeof value.email === 'string';
+
+const isSessionPayload = (value: unknown): value is Pick<SessionPayload, 'user'> =>
+	isRecord(value) && 'user' in value && (value.user === null || isSessionUser(value.user));
+
+const isLocalPath = (path: unknown): path is string => typeof path === 'string' && /^\/(?![/\\])/.test(path);
+
 const withQuery = (path: string, query?: Query): string => {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(query ?? {})) {
@@ -66,13 +73,14 @@ export const createApiClient = ({
 		const headers: Record<string, string> = { Accept: 'application/json' };
 		if (body !== undefined) headers['Content-Type'] = 'application/json';
 		if (method !== 'GET' && csrfToken !== null) headers['X-CSRF-Token'] = csrfToken;
+		const serialized = body === undefined ? undefined : JSON.stringify(body);
 
 		try {
 			const response = await fetch(url, {
 				method,
 				headers,
 				credentials: 'same-origin',
-				body: body === undefined ? undefined : JSON.stringify(body),
+				body: serialized,
 				signal: AbortSignal.timeout(timeoutMs)
 			});
 			return { status: response.status, payload: await readJson(response) };
@@ -83,6 +91,7 @@ export const createApiClient = ({
 	};
 
 	const request = async <T>(method: Method, url: string, body?: unknown, retried = false): Promise<T> => {
+		if (!isLocalPath(url)) throw new Error(`O caminho da API deve começar com "/" (recebido: ${String(url)}).`);
 		const { status, payload } = await send(method, url, body);
 		const ok = status >= 200 && status < 300;
 
@@ -107,7 +116,9 @@ export const createApiClient = ({
 	};
 
 	const recoverFromStaleCsrf = async <T>(method: Method, url: string, body: unknown, signingOut: boolean): Promise<T> => {
-		const { user } = await request<SessionPayload>('GET', SESSION_PATH);
+		const session = await request<unknown>('GET', SESSION_PATH);
+		if (!isSessionPayload(session)) throw unexpectedResponse();
+		const { user } = session;
 
 		if ((user?.email ?? null) === currentUserEmail()) return request<T>(method, url, body, true);
 

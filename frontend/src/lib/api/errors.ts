@@ -14,8 +14,17 @@ export class ApiError extends Error {
 	}
 }
 
+const fieldsFrom = (raw: unknown): Record<string, string[]> => {
+	if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return {};
+	const fields: Record<string, string[]> = {};
+	for (const [name, messages] of Object.entries(raw)) {
+		if (Array.isArray(messages)) fields[name] = messages.filter((m): m is string => typeof m === 'string');
+	}
+	return fields;
+};
+
 export const apiErrorFromBody = (status: number, { error }: ApiErrorBody): ApiError =>
-	new ApiError(status, error.code, error.message, error.fields);
+	new ApiError(status, error.code, error.message, fieldsFrom(error.fields));
 
 export const networkError = (): ApiError =>
 	new ApiError(0, 'network_error', 'Sem conexão com o servidor. Tente novamente.');
