@@ -341,10 +341,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes do script inline (executado em `jsdom` a partir do `app.html`) cobrem: `light`, `dark`, `system` com `matchMedia` claro e escuro, valor desconhecido e `localStorage` que lança → `system` sem `console.error`
-- [ ] Testes de `theme.svelte.ts` cobrem: `setPreference("light")` grava e aplica `data-theme="light"`; `localStorage.setItem` que lança não quebra a troca; com `system`, um evento `change` do `matchMedia` reaplica; ao sair de `system`, o ouvinte é removido
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes do script inline (executado em `jsdom` a partir do `app.html`) cobrem: `light`, `dark`, `system` com `matchMedia` claro e escuro, valor desconhecido e `localStorage` que lança → `system` sem `console.error`
+- [x] Testes de `theme.svelte.ts` cobrem: `setPreference("light")` grava e aplica `data-theme="light"`; `localStorage.setItem` que lança não quebra a troca; com `system`, um evento `change` do `matchMedia` reaplica; ao sair de `system`, o ouvinte é removido
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
