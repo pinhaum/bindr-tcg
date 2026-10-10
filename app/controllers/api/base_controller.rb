@@ -18,7 +18,7 @@ class Api::BaseController < ActionController::Base
   # declarado para o primeiro.
   rescue_from StandardError do |error|
     Rails.error.report(error, handled: true, severity: :error)
-    Rails.logger.error("[api] #{error.class}: #{error.message}\n#{error.backtrace&.first(5)&.join("\n")}")
+    Rails.logger.error("[api] #{error.class}\n#{error.backtrace&.first(5)&.join("\n")}")
     render_error(:internal_server_error, "internal_error", "Erro inesperado. Tente novamente.")
   end
   rescue_from ActionController::InvalidAuthenticityToken do

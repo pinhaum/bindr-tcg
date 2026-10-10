@@ -44,7 +44,8 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
     assert_equal({ "card_number" => "OP01-001", "name" => "Nami", "card_type" => "character",
                    "colors" => [ "Blue" ], "cost" => 0, "life" => nil, "power" => 2000, "counter" => nil,
                    "block_icon" => nil, "attributes" => [], "traits" => [ "Straw Hat Crew" ],
-                   "effect_text" => "Efeito", "trigger_text" => nil },
+                   "effect_text" => "Efeito", "trigger_text" => nil,
+                   "set" => { "code" => "OP01", "name" => "Romance Dawn" } },
                  card.except("variants", "featured_variant_code"))
     assert_equal %w[tcgplayer:1 tcgplayer:2 tcgplayer:3], card["variants"].pluck("variant_code")
   end
@@ -116,6 +117,21 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
     body = fetch
     assert_equal false, variant_json(body, "tcgplayer:9")["in_source"]
     assert_equal true, variant_json(body, "tcgplayer:1")["in_source"]
+  end
+
+  test "AC-23: variante ausente retida só pela wishlist aparece com in_source false só para o dono" do
+    absent = variant!("tcgplayer:9", last_seen_at: CATALOG_SEEN_AT - 1.day)
+    WishlistItem.create!(user: @user, card_variant: absent, target_quantity: 2)
+
+    assert_not_includes fetch["data"]["variants"].pluck("variant_code"), "tcgplayer:9"
+
+    sign_in(@other)
+    assert_not_includes fetch["data"]["variants"].pluck("variant_code"), "tcgplayer:9"
+
+    sign_in(@user)
+    body = fetch
+    assert_equal false, variant_json(body, "tcgplayer:9")["in_source"]
+    assert_equal 2, variant_json(body, "tcgplayer:9")["wishlist_target"]
   end
 
   test "featured_variant_code segue o CNF-42" do

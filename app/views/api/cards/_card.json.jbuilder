@@ -12,6 +12,10 @@ json.attributes card.attributes_list
 json.traits card.traits
 json.effect_text card.effect_text
 json.trigger_text card.trigger_text
+json.set do
+  json.code card.card_set.code
+  json.name card.card_set.name
+end
 json.variants variants do |variant|
   json.partial! "api/cards/variant", variant: variant, holdings: holdings,
                                      absent_variant_ids: local_assigns.fetch(:absent_variant_ids, Set.new)

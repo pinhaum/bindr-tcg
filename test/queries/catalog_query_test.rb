@@ -58,6 +58,16 @@ class CatalogQueryTest < ActiveSupport::TestCase
     result.records.map(&:card_number).sort
   end
 
+  test "inteiro fora do intervalo int4 é ignorado como parâmetro inválido" do
+    huge = "9" * 30
+    resultado = CatalogQuery.new(page: huge, per_page: huge, cost_min: huge, cost_max: "-#{huge}").call
+
+    assert_equal 1, resultado.page
+    assert_equal CatalogQuery::DEFAULT_PER_PAGE, resultado.per_page
+    assert_empty resultado.active_filters.slice(:cost_min, :cost_max)
+    assert_equal numbers(CatalogQuery.new({}).call), numbers(resultado)
+  end
+
   # --- Req. 4.1: cada filtro isolado ---
 
   test "filtra por cor" do

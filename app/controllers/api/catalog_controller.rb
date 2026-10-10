@@ -6,6 +6,7 @@ class Api::CatalogController < Api::BaseController
   def index
     @result = CatalogQuery.new(params, Current.user).call
     Card.preload_present_variants(@result.records)
+    ActiveRecord::Associations::Preloader.new(records: @result.records, associations: :card_set).call
     variants = @result.records.flat_map(&:card_variants)
     ActiveRecord::Associations::Preloader.new(records: variants, associations: :card_set).call
     @holdings = VariantHoldings.new(Current.user, variants)

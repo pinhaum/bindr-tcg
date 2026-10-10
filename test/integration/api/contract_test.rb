@@ -85,7 +85,8 @@ class Api::ContractTest < ActionDispatch::IntegrationTest
     assert_equal "internal_error", response.parsed_body.dig("error", "code")
     assert_equal "Erro inesperado. Tente novamente.", response.parsed_body.dig("error", "message")
     assert_no_match(/RuntimeError|segredo-interno|\.rb/, response.body)
-    assert_match(/RuntimeError: segredo-interno/, log.string)
+    assert_match(/RuntimeError/, log.string)
+    assert_no_match(/segredo-interno/, log.string)
   end
 
   test "parâmetro obrigatório ausente responde 400 bad_request e não 500" do

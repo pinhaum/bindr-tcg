@@ -113,4 +113,22 @@ class Api::RegistrationsTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_equal "invalid_csrf_token", response.parsed_body.dig("error", "code")
   end
+
+  test "corrida de e-mail duplicado (RecordNotUnique no save) vira 422 com a mensagem de taken" do
+    token = fetch_token
+    original = User.method(:new)
+    User.define_singleton_method(:new) do |*args|
+      original.call(*args).tap do |user|
+        user.define_singleton_method(:save) { |*| raise ActiveRecord::RecordNotUnique, "duplicate key (robin@example.com)" }
+      end
+    end
+
+    begin
+      assert_no_difference([ -> { User.count }, -> { Session.count } ]) { register(VALID, token) }
+    ensure
+      User.singleton_class.remove_method(:new)
+    end
+
+    assert_rejected("email" => [ I18n.t("errors.messages.taken", locale: :"pt-BR") ])
+  end
 end

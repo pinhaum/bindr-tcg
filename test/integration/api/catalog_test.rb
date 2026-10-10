@@ -192,4 +192,15 @@ class Api::CatalogTest < ActionDispatch::IntegrationTest
 
     assert_equal 2, red["wishlist_target"]
   end
+
+  test "página e custo fora do intervalo int4 são ignorados, não viram 500" do
+    get "/api/catalog", params: { page: "1000000000000000000000000000000", cost_min: "99999999999999999999" }
+
+    assert_response :ok
+    assert_equal 1, response.parsed_body.dig("meta", "page")
+    assert_equal %w[OP01-001 OP01-002 OP01-003], numbers(response.parsed_body)
+
+    get "/catalog", params: { page: "1000000000000000000000000000000", cost_max: "-99999999999999999999" }
+    assert_response :ok
+  end
 end

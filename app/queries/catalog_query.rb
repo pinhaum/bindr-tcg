@@ -20,6 +20,7 @@
 # prependido (Req. 3.4). Ver `#search_scope` e `#call`.
 class CatalogQuery
   DEFAULT_PER_PAGE = 25
+  INT4_RANGE = (-2_147_483_648..2_147_483_647)
   MAX_PER_PAGE = 100
 
   # Colunas de array no Postgres. `&&` ("tem elemento em comum") é o que faz o
@@ -519,7 +520,8 @@ class CatalogQuery
     value = @params[param]
     return nil if value.nil? || value.to_s.strip.empty?
 
-    Integer(value.to_s.strip, 10)
+    number = Integer(value.to_s.strip, 10)
+    INT4_RANGE.cover?(number) ? number : nil
   rescue ArgumentError, TypeError
     nil
   end
