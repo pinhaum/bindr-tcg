@@ -577,10 +577,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Testes de `navEntries` fixam a ordem com sessão ("Catálogo", "Minha pasta", "Baralhos", "Sair") e sem ("Catálogo", "Entrar", "Criar conta") e os destinos `/catalog`, `/progress`, `/decks` com `reload`
-- [ ] Testes do componente cobrem: `aria-current="page"` só na entrada da rota atual; links Hotwire com `data-sveltekit-reload`; "Sair" é botão e chama `signOut`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Testes de `navEntries` fixam a ordem com sessão ("Catálogo", "Minha pasta", "Baralhos", "Sair") e sem ("Catálogo", "Entrar", "Criar conta") e os destinos `/catalog`, `/progress`, `/decks` com `reload`
+- [x] Testes do componente cobrem: `aria-current="page"` só na entrada da rota atual; links Hotwire com `data-sveltekit-reload`; "Sair" é botão e chama `signOut`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
