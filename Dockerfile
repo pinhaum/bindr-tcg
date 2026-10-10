@@ -51,12 +51,27 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 
+# Throw-away stage that builds the SvelteKit SPA; Node never reaches the final image
+FROM docker.io/library/node:24.21.0-slim AS frontend-build
+
+WORKDIR /frontend
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build && test -f build/200.html
+
+
+
+
 # Final stage for app image
 FROM base
 
-# Copy built artifacts: gems, application
+# Copy built artifacts: gems, application, SPA
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
+COPY --from=frontend-build /frontend/build /rails/public/app
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \

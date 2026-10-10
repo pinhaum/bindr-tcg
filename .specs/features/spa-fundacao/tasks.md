@@ -204,11 +204,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `docker build -f Dockerfile .` termina e a imagem final tem `/rails/public/app/200.html` e `/rails/public/app/_app/immutable/`
-- [ ] A imagem final não tem `node` no `PATH`
-- [ ] Com `200.html` removido do build (prova local, sem commit), o `docker build` falha no estágio Node
-- [ ] Na imagem final em modo produção, `GET /app/_app/immutable/<arquivo existente>` sai com `Cache-Control` de 1 ano e `GET /app/x` com `no-cache` (saídas registradas no commit)
-- [ ] Gate check passes: build
+- [x] `docker build -f Dockerfile .` termina e a imagem final tem `/rails/public/app/200.html` e `/rails/public/app/_app/immutable/`
+- [x] A imagem final não tem `node` no `PATH`
+- [x] Com `200.html` removido do build (prova local, sem commit), o `docker build` falha no estágio Node
+- [x] Na imagem final em modo produção, `GET /app/_app/immutable/<arquivo existente>` sai com `Cache-Control` de 1 ano e `GET /app/x` com `no-cache` (saídas registradas no commit)
+- [x] Gate check passes: build
 
 **Tests**: none
 **Gate**: build
