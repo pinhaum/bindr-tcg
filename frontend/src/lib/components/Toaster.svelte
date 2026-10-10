@@ -15,7 +15,7 @@
 			</p>
 		{/each}
 	</div>
-	<div role="alert" class="region">
+	<div role="alert" aria-atomic="false" class="region">
 		{#each errors as toast (toast.id)}
 			<div class="toast error" transition:fly={{ y: 8, duration: duration(200) }}>
 				<p class="message"><strong>Erro:</strong> {toast.message}</p>
@@ -29,7 +29,9 @@
 	.layer {
 		position: fixed;
 		inset-inline: var(--space-3);
-		bottom: calc(var(--nav-height) + var(--space-3));
+		bottom: calc(var(--nav-height) + var(--space-3) + env(safe-area-inset-bottom));
+		max-block-size: 50dvh;
+		overflow: auto;
 		z-index: 100;
 		display: flex;
 		flex-direction: column;
@@ -49,6 +51,7 @@
 		justify-content: space-between;
 		gap: var(--space-3);
 		margin: 0;
+		overflow-wrap: anywhere;
 		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--border-strong);
 		border-radius: var(--radius-md);
@@ -65,6 +68,7 @@
 
 	.message {
 		margin: 0;
+		overflow-wrap: anywhere;
 	}
 
 	button {
@@ -79,7 +83,7 @@
 		cursor: pointer;
 	}
 
-	@media (min-width: 768px) {
+	@media (min-width: 64rem) {
 		.layer {
 			inset-inline: auto var(--space-4);
 			bottom: var(--space-4);

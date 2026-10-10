@@ -4,10 +4,13 @@ import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { notifyError, notifySuccess, toasts } from '../toasts.svelte';
 import Toaster from './Toaster.svelte';
+import { duration } from '../motion';
 
 function polite(container: HTMLElement) {
 	return container.querySelector<HTMLElement>('[aria-live="polite"]')!;
 }
+
+vi.mock('../motion', () => ({ duration: vi.fn(() => 0) }));
 
 vi.hoisted(() => {
 	window.matchMedia = ((query: string) => ({
@@ -83,5 +86,31 @@ describe('Toaster', () => {
 
 		expect(document.activeElement).toBe(button);
 		button.remove();
+	});
+
+	it('passa 200 ms por duration() nas transições de sucesso e erro', () => {
+		render(Toaster);
+
+		notifySuccess('Ok');
+		notifyError('Falha');
+		flushSync();
+
+		expect(duration).toHaveBeenCalledWith(200);
+		expect(vi.mocked(duration).mock.calls.every(([ms]) => ms === 200)).toBe(true);
+	});
+
+	it('fecha o erro pelo teclado no botão focado', async () => {
+		render(Toaster);
+		notifyError('Falha ao salvar.');
+		flushSync();
+
+		const close = within(screen.getByRole('alert')).getByRole('button', { name: 'Fechar' });
+		close.focus();
+		expect(document.activeElement).toBe(close);
+		await fireEvent.keyDown(close, { key: 'Enter' });
+		await fireEvent.click(close);
+		await vi.advanceTimersByTimeAsync(50);
+
+		expect(screen.queryByText('Falha ao salvar.')).not.toBeInTheDocument();
 	});
 });
