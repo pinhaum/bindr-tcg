@@ -390,10 +390,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Sem sessão → `editing_deck: null`; com sessão sem deck em edição → `null`; com deck → `quantity` 0 sem entrada e N com entrada, `is_leader` verdadeiro só para o Leader do deck
-- [ ] Depois de excluir o deck em edição (pelo HTML ou pela API) → `null`
-- [ ] Os demais campos do `GET /api/cards/:card_number` iguais aos de antes (os testes de `cards` existentes passam sem edição); consultas a mais só com sessão e deck em edição, em número fixo
-- [ ] Gate check passes: Full (última task do Rails)
+- [x] Sem sessão → `editing_deck: null`; com sessão sem deck em edição → `null`; com deck → `quantity` 0 sem entrada e N com entrada, `is_leader` verdadeiro só para o Leader do deck
+- [x] Depois de excluir o deck em edição (pelo HTML ou pela API) → `null`
+- [x] Os demais campos do `GET /api/cards/:card_number` iguais aos de antes (os testes de `cards` existentes passam sem edição); consultas a mais só com sessão e deck em edição, em número fixo
+- [x] Gate check passes: Full (última task do Rails)
 
 **Tests**: integration
 **Gate**: full

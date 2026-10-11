@@ -46,7 +46,7 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
                    "block_icon" => nil, "attributes" => [], "traits" => [ "Straw Hat Crew" ],
                    "effect_text" => "Efeito", "trigger_text" => nil,
                    "set" => { "code" => "OP01", "name" => "Romance Dawn" } },
-                 card.except("variants", "featured_variant_code"))
+                 card.except("variants", "featured_variant_code", "editing_deck"))
     assert_equal %w[tcgplayer:1 tcgplayer:2 tcgplayer:3], card["variants"].pluck("variant_code")
   end
 
