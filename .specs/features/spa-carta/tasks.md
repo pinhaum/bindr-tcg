@@ -265,10 +265,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `cardDetailHref('P-029')` → `/app/cartas/P-029`; com `'tcgplayer:1'` → `…?variant=tcgplayer%3A1`; `card_number` com espaço e `/` codificados
-- [ ] `cardApiPath('OP01-001', 'tcgplayer:1')` → `/api/cards/OP01-001?variant=tcgplayer%3A1`; sem `variant` não leva query (SCAR-02)
-- [ ] `variantApiPath('OP01-001', 'tcgplayer:1', 'increment')` → `/api/cards/OP01-001/variants/tcgplayer%3A1/increment`
-- [ ] Gate check passes: Front quick
+- [x] `cardDetailHref('P-029')` → `/app/cartas/P-029`; com `'tcgplayer:1'` → `…?variant=tcgplayer%3A1`; `card_number` com espaço e `/` codificados
+- [x] `cardApiPath('OP01-001', 'tcgplayer:1')` → `/api/cards/OP01-001?variant=tcgplayer%3A1`; sem `variant` não leva query (SCAR-02)
+- [x] `variantApiPath('OP01-001', 'tcgplayer:1', 'increment')` → `/api/cards/OP01-001/variants/tcgplayer%3A1/increment`
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
