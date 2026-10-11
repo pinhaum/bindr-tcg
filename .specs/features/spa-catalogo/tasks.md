@@ -202,15 +202,15 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `catalogHref({})` é `/app`; `catalogHref({ colors: ['Red', 'Green'], sort: 'name' })` é `/app?colors%5B%5D=Red&colors%5B%5D=Green&sort=name`
-- [ ] `toggleHref` acrescenta valor inativo e remove ativo numa lista; em `owned`, liga o valor, e remove a chave com o mesmo valor ou com `all`; sem `page` (SCAT-19, 25)
-- [ ] `withoutHref` tira um valor de lista (a chave some com a lista vazia) ou a chave escalar; sem `page`
-- [ ] `pageHref` mantém os filtros e põe `page`; `clearHref` mantém só `sort` e `dir` (SCAT-30, 36)
-- [ ] `searchHref(f, '  zoro ')` com `colors: ['Red']` e `page: 3` gera `?q=zoro` mais `colors[]=Red`, sem `page`; termo só com espaços remove `q` (SCAT-16)
-- [ ] `setHref`: `null` mantém tudo menos `page`; `''` remove `sets`; código põe `sets` igual só a ele (SCAT-23, 24)
-- [ ] Faixas, `attributes`, `traits`, `sort` e `dir` sobrevivem a toda função (SCAT-27); nenhum link contém chave fora de `active_filters` (SCAT-06)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `catalogHref({})` é `/app`; `catalogHref({ colors: ['Red', 'Green'], sort: 'name' })` é `/app?colors%5B%5D=Red&colors%5B%5D=Green&sort=name`
+- [x] `toggleHref` acrescenta valor inativo e remove ativo numa lista; em `owned`, liga o valor, e remove a chave com o mesmo valor ou com `all`; sem `page` (SCAT-19, 25)
+- [x] `withoutHref` tira um valor de lista (a chave some com a lista vazia) ou a chave escalar; sem `page`
+- [x] `pageHref` mantém os filtros e põe `page`; `clearHref` mantém só `sort` e `dir` (SCAT-30, 36)
+- [x] `searchHref(f, '  zoro ')` com `colors: ['Red']` e `page: 3` gera `?q=zoro` mais `colors[]=Red`, sem `page`; termo só com espaços remove `q` (SCAT-16)
+- [x] `setHref`: `null` mantém tudo menos `page`; `''` remove `sets`; código põe `sets` igual só a ele (SCAT-23, 24)
+- [x] Faixas, `attributes`, `traits`, `sort` e `dir` sobrevivem a toda função (SCAT-27); nenhum link contém chave fora de `active_filters` (SCAT-06)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
