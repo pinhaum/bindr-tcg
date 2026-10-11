@@ -431,18 +431,20 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Link `href` `/app/cartas/OP01-001` (`card_number` reservado codificado) com o nome e o `variant_code` em `code` (SPAS-30)
-- [ ] "1 de 1 cópia" e "0 de 2 cópias" (SPAS-30)
-- [ ] 3 de 2 → "Atendido"; 0 de 2 → "Faltam 2" (SPAS-31)
-- [ ] Nome acessível "Remover Luffy tcgplayer:1 da lista de desejos (atendido)" e "(faltam 2)"; alvo mínimo de 44px no CSS (SPAS-32)
-- [ ] Com `pending`, o botão fica desabilitado e o clique não chama `onremove` (SPAS-35)
-- [ ] Gate check passes: Front quick
+- [x] Link `href` `/app/cartas/OP01-001` (`card_number` reservado codificado) com o nome e o `variant_code` em `code` (SPAS-30)
+- [x] "1 de 1 cópia" e "0 de 2 cópias" (SPAS-30)
+- [x] 3 de 2 → "Atendido"; 0 de 2 → "Faltam 2" (SPAS-31)
+- [x] Nome acessível "Remover Luffy tcgplayer:1 da lista de desejos (atendido)" e "(faltam 2)"; alvo mínimo de 44px no CSS (SPAS-32)
+- [x] Com `pending`, o botão fica desabilitado e o clique não chama `onremove` (SPAS-35)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): item da lista de desejos`
 
+
+**Registro**: Desvio aceito na revisão: `<button>` próprio no lugar do `Button` (este não repassa `aria-label`, `onclick` nem `bind:this`); estilo equivalente. MINOR: `disabled` sem `aria-busy` (pendência do dono já registrada).
 ---
 
 ### T13: Rota `/app/pasta`
