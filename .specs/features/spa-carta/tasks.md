@@ -691,10 +691,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Tile → detalhe: durante a transição existe `::view-transition-group(<nome da carta>)` (SCAR-39)
-- [ ] Detalhe → catálogo pelo botão e pelo voltar do navegador: idem quando o tile está na grade (SCAR-40)
-- [ ] Com `reducedMotion: 'reduce'`: nenhum grupo da carta e a navegação conclui (SCAR-41)
-- [ ] Gate check passes: Full
+- [x] Tile → detalhe: durante a transição existe `::view-transition-group(<nome da carta>)` (SCAR-39)
+- [x] Detalhe → catálogo pelo botão e pelo voltar do navegador: idem quando o tile está na grade (SCAR-40)
+- [x] Com `reducedMotion: 'reduce'`: nenhum grupo da carta e a navegação conclui (SCAR-41)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
