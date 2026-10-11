@@ -335,11 +335,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] O texto de `GET /decks/:id.txt` importado cria deck com o mesmo Leader e as mesmas entradas e o torna o deck em edição → `201` (SDEC-57)
-- [ ] Sem nome com Leader → nome do Leader; sem nome e sem Leader → `fields.name == ["O nome não pode ficar vazio."]` (SDEC-46)
-- [ ] Lista com duas linhas ruins → `422`, `message` "A lista não foi importada. Nenhum deck foi criado.", `fields.list` == `["Linha 2: …", "Linha 5: …"]` na ordem; 201 linhas e 10.001 caracteres → o limite sem número de linha; `list` ausente → "A lista não tem nenhuma carta"; contagem de decks inalterada (SDEC-58)
-- [ ] Sem sessão `401`, sem token `422 invalid_csrf_token`, `user_id` alheio ignorado (SDEC-60)
-- [ ] Gate check passes: Rails quick
+- [x] O texto de `GET /decks/:id.txt` importado cria deck com o mesmo Leader e as mesmas entradas e o torna o deck em edição → `201` (SDEC-57)
+- [x] Sem nome com Leader → nome do Leader; sem nome e sem Leader → `fields.name == ["O nome não pode ficar vazio."]` (SDEC-46)
+- [x] Lista com duas linhas ruins → `422`, `message` "A lista não foi importada. Nenhum deck foi criado.", `fields.list` == `["Linha 2: …", "Linha 5: …"]` na ordem; 201 linhas e 10.001 caracteres → o limite sem número de linha; `list` ausente → "A lista não tem nenhuma carta"; contagem de decks inalterada (SDEC-58)
+- [x] Sem sessão `401`, sem token `422 invalid_csrf_token`, `user_id` alheio ignorado (SDEC-60)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
