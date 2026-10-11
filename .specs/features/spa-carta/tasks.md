@@ -459,12 +459,12 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `h1` com o nome; chips com tipo capitalizado, raridade do destaque, uma por cor e "Counter N" só com `wide` e counter aplicável não `null`; linha "<set> · <código>" (SCAR-13)
-- [ ] Abaixo de 64rem: miniatura + `<details>` fechado com resumo "Ver imagem maior"; a partir dele: coluna sem `<details>` (SCAR-11, SCAR-12)
-- [ ] "Variante fora da fonte" só com `in_source: false` (SCAR-14); "Ilustração: X" só com `illustrator` (SCAR-16)
-- [ ] Selo com `role="img"` e nome "N cópias" só com sessão e valor exibido > 0, seguindo o valor recebido por prop (SCAR-15)
-- [ ] Com a carta marcada, exatamente um elemento com o `view-transition-name` dela, nos dois valores de `wide` (SCAR-39)
-- [ ] Gate check passes: Front quick
+- [x] `h1` com o nome; chips com tipo capitalizado, raridade do destaque, uma por cor e "Counter N" só com `wide` e counter aplicável não `null`; linha "<set> · <código>" (SCAR-13)
+- [x] Abaixo de 64rem: miniatura + `<details>` fechado com resumo "Ver imagem maior"; a partir dele: coluna sem `<details>` (SCAR-11, SCAR-12)
+- [x] "Variante fora da fonte" só com `in_source: false` (SCAR-14); "Ilustração: X" só com `illustrator` (SCAR-16)
+- [x] Selo com `role="img"` e nome "N cópias" só com sessão e valor exibido > 0, seguindo o valor recebido por prop (SCAR-15)
+- [x] Com a carta marcada, exatamente um elemento com o `view-transition-name` dela, nos dois valores de `wide` (SCAR-39)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
