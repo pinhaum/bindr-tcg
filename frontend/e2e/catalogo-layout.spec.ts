@@ -136,6 +136,28 @@ for (const combo of COMBOS) {
 			const idle = page.locator('.panel').getByRole('link', { name: 'Green', exact: true });
 			await expect(idle).toBeVisible();
 			expect(await idle.evaluate((el) => getComputedStyle(el).borderTopWidth), 'chip inativo').toBe('1px');
+
+			// SCAT-20/21: a amostra do chip de cor é neutra (borda em border-strong), nunca preenchida com accent.
+			const borderStrong = await resolveToken(page, 'color', '--border-strong');
+			const swatches = [
+				['amostra do chip ativo', page.locator('.panel').getByRole('link', { name: 'Remover filtro Cor: Red' })],
+				['amostra do chip inativo', idle]
+			] as const;
+			for (const [what, chip] of swatches) {
+				const swatch = chip.locator('.swatch');
+				await expect(swatch, what).toBeVisible();
+				const style = await swatch.evaluate((el) => {
+					const computed = getComputedStyle(el);
+					return {
+						background: computed.backgroundColor,
+						width: computed.borderTopWidth,
+						color: computed.borderTopColor
+					};
+				});
+				expect(style.background, `${what}: não é preenchida com accent`).not.toBe(accent);
+				expect(style.width, `${what}: borda de 1px`).toBe('1px');
+				expect(style.color, `${what}: borda em border-strong`).toBe(borderStrong);
+			}
 		});
 
 		test('sem imagem, o placeholder fica visível sob a arte transparente e o tile não muda (SCAT-10, SCAT-11)', async ({
@@ -230,7 +252,47 @@ for (const combo of COMBOS) {
 					formBox.y + formBox.height - 1
 				);
 				expect(statusBox.x, 'status alinhado à esquerda da barra').toBeCloseTo(toolbarBox.x, 0);
+
+				// Deslogado, os dois links não cabem ao lado da frase e quebram para uma 2ª linha: o
+				// bloco continua encostado na borda direita da linha de status.
+				await expect(status.getByRole('link', { name: 'Entrar para registrar posse' })).toBeVisible();
+				const linksBox = await box(clear.locator('..'));
+				expect(linksBox.y, 'links quebraram para baixo da frase').toBeGreaterThanOrEqual(
+					sentenceBox.y + sentenceBox.height - 1
+				);
+				expect(
+					Math.abs(linksBox.x + linksBox.width - (statusBox.x + statusBox.width)),
+					'links encostados na borda direita da linha de status ao quebrar'
+				).toBeLessThanOrEqual(1);
 			}
+		});
+	});
+}
+
+// A 360px os dois links (frase de entrada incluída) não cabem na linha da frase e quebram para
+// baixo; a "à direita" só é medível onde frase e links dividem a linha, abaixo e junto de 64rem.
+for (const width of [768, WIDE_MIN_WIDTH - 1]) {
+	test.describe(`links do status a ${width}px`, () => {
+		test.use({ viewport: { width, height: 800 } });
+
+		test('encostam na borda direita da linha de status abaixo de 64rem (SCAT-30)', async ({ page }) => {
+			await openCatalog(page, [['colors[]', 'Red']]);
+
+			const sentence = spaStatus(page);
+			const status = sentence.locator('..');
+			const links = status.getByRole('link', { name: 'Limpar filtros' }).locator('..');
+			const statusBox = await box(status);
+			const sentenceBox = await box(sentence);
+			const linksBox = await box(links);
+
+			expect(linksBox.x, 'links à direita da frase, na mesma linha').toBeGreaterThanOrEqual(
+				sentenceBox.x + sentenceBox.width
+			);
+			expect(Math.abs(linksBox.y - statusBox.y), 'links na primeira linha do status').toBeLessThanOrEqual(1);
+			expect(
+				Math.abs(linksBox.x + linksBox.width - (statusBox.x + statusBox.width)),
+				'links encostados na borda direita da linha de status'
+			).toBeLessThanOrEqual(1);
 		});
 	});
 }

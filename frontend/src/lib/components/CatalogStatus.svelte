@@ -55,6 +55,8 @@
 	.links {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: flex-end;
+		margin-inline-start: auto;
 		gap: var(--space-1) var(--space-3);
 	}
 

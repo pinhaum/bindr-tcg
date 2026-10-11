@@ -950,11 +950,11 @@ T30 → T31
 
 **Done when**:
 
-- [ ] A `.swatch` não é preenchida com `accent` e a borda usa `--border-strong`
-- [ ] Abaixo de 64rem, "Limpar filtros" fica à direita da linha de status
-- [ ] A mutação "amostra preenchida com accent" e a mutação "links com `flex-start`" matam o teste (provadas numa cópia isolada)
-- [ ] Gate check passes: full
-- [ ] Test count: e2e anteriores + novos, nenhum removido
+- [x] A `.swatch` não é preenchida com `accent` e a borda usa `--border-strong`
+- [x] Abaixo de 64rem, "Limpar filtros" fica à direita da linha de status
+- [x] A mutação "amostra preenchida com accent" e a mutação "links com `flex-start`" matam o teste (provadas numa cópia isolada)
+- [x] Gate check passes: full
+- [x] Test count: e2e anteriores + novos, nenhum removido
 
 **Tests**: e2e
 **Gate**: full
@@ -978,10 +978,10 @@ T30 → T31
 
 **Done when**:
 
-- [ ] A 360px deslogado com filtro ativo, os links encostam na borda direita da linha de status (asserção de e2e que falha antes da correção)
-- [ ] A 768px, 1023px e 1280px continuam à direita; `CatalogStatus.test.ts` e `guard.test.ts` verdes
-- [ ] Gate check passes: full
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] A 360px deslogado com filtro ativo, os links encostam na borda direita da linha de status (asserção de e2e que falha antes da correção)
+- [x] A 768px, 1023px e 1280px continuam à direita; `CatalogStatus.test.ts` e `guard.test.ts` verdes
+- [x] Gate check passes: full
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: e2e
 **Gate**: full
