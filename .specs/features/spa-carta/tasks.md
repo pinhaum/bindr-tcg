@@ -348,12 +348,12 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Cinco `tap('increment')` sobre 0 dão `displayed` 1..5 na hora e uma só chamada de `send` em voo por vez, na ordem (SCAR-27, SCAR-30)
-- [ ] `tap('decrement')` com `displayed` 0 devolve `'refused'` e não chama `send` (SCAR-29)
-- [ ] Ao esvaziar a fila, `displayed` é o `owned_quantity` da última resposta (ex.: 7 vindo de outra aba) e `onSettled(7)` é chamado uma vez (SCAR-31, SCAR-33)
-- [ ] Falha na 3ª de cinco: `displayed` volta ao último confirmado, 4ª e 5ª não são enviadas, `onError` recebe o erro (SCAR-32)
-- [ ] `discard()` com operação em voo: não envia as pendentes e a resposta em voo não muda `displayed` nem chama `onSettled`
-- [ ] Gate check passes: Front quick
+- [x] Cinco `tap('increment')` sobre 0 dão `displayed` 1..5 na hora e uma só chamada de `send` em voo por vez, na ordem (SCAR-27, SCAR-30)
+- [x] `tap('decrement')` com `displayed` 0 devolve `'refused'` e não chama `send` (SCAR-29)
+- [x] Ao esvaziar a fila, `displayed` é o `owned_quantity` da última resposta (ex.: 7 vindo de outra aba) e `onSettled(7)` é chamado uma vez (SCAR-31, SCAR-33)
+- [x] Falha na 3ª de cinco: `displayed` volta ao último confirmado, 4ª e 5ª não são enviadas, `onError` recebe o erro (SCAR-32)
+- [x] `discard()` com operação em voo: não envia as pendentes e a resposta em voo não muda `displayed` nem chama `onSettled`
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
