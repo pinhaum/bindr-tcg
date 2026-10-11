@@ -234,6 +234,14 @@
 - **Date**: 2026-10-11
 - **Status**: active
 
+### AD-030
+- **Decision**: Todo contador otimista da SPA (posse da variante, cópias no deck e os próximos) usa uma só fila em série, `createOwnershipQueue` com `send: (op) => Promise<number>`, e um só componente, `QuantityStepper.svelte`, com rótulos, frase de recusa e texto da quantidade por prop. `OwnershipStepper` passa a ser um invólucro dele. O SQL atômico de contagem mora no model (`CollectionItem.increment_for!`, `DeckEntry.increment_for!`), e a montagem de uma página lida por HTML e API mora num objeto de consulta (`CardDetail`, `DeckDetail`), nunca no controller.
+- **Reason**: Aprovação do design da `spa-decks` pelo dono em 2026-10-11 (abordagens A1 e B1). A regra de falha (SCAR-32) e a de concorrência (teto, nunca abaixo de 1) ficam com um dono cada, em vez de uma cópia por tela.
+- **Trade-off**: Mexe em arquivos de features encerradas (`spa-carta`, `decks`); a prova é a suíte existente passar sem edição de teste.
+- **Scope**: `spa-decks` e as fatias seguintes com contador ou página espelhada.
+- **Date**: 2026-10-11
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-10-11, spa-pasta — este bloco vence os de baixo só para a `spa-pasta`; o da `spa-carta` segue valendo para ela.** Feature **`spa-pasta`** (Req. 20, SPAS-01..46) **encerrada e verificada** (Verifier autor ≠ verificador, `validation.md` PASS na iteração 5, depois do FAIL Minor da 4: T18 `80baee3` pôs o `variant_code` dentro do link, SPAS-30; T19 `9e0b095` provou a curva `--ease-standard`, SPAS-12; `validate_state.py spa-pasta` limpo). `<base>` = `8e6c92d`. Entregue: `GET /api/progress`, `GET /api/wishlist`, `DELETE …/wishlist`; `createLoader`, `requireSession`, `easeStandard`, `AnimatedNumber`, `PastaSummary`, `SetProgressRow`, `WishlistItem`; rotas `/app/pasta` e `/app/pasta/desejos`; e2e `pasta.spec.ts` e `pasta-desejos.spec.ts`. Gates: Vitest 860, e2e 193, Rails 1995, rubocop limpo, brakeman só com o aviso de calendário. **Dívida:** migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`. **Decisões a confirmar com o dono:** SPAS-11 medido descontando os vãos da grade; SPAS-26 com capturas geradas pelo e2e e comparação pelo dono; SPAS-34 só move o foco quando ele ficou no `body` (precisões agora no spec). Capturas em `frontend/test-results/pasta-capturas/` (não versionado).
