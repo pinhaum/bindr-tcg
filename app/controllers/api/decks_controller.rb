@@ -52,6 +52,15 @@ class Api::DecksController < Api::BaseController
     render json: { data: { id: deck.id, name: deck.name } }
   end
 
+  # SDEC-59 — o bloco "Faltando para os baralhos" da pasta: o mesmo filtro de
+  # `ProgressController#load_deck_shortfall`. Os decks citados vêm numa consulta
+  # só, e só quando há linhas.
+  def shortfall
+    @rows = DeckShortfallQuery.new(Current.user).call.select { |row| row.missing.positive? }
+    deck_ids = @rows.flat_map(&:deck_ids).uniq
+    @decks = deck_ids.empty? ? {} : Current.user.decks.where(id: deck_ids).pluck(:id, :name).to_h
+  end
+
   private
     # Nome ausente ou que não é texto vale como vazio: a mesma frase de SDEC-46.
     def name_param

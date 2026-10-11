@@ -156,7 +156,9 @@ Rails.application.routes.draw do
     get "progress" => "progress#show", as: :api_progress
     get "wishlist" => "wishlist#index", as: :api_wishlist
 
-    # Antes de `resources :decks`: depois dele, `import` casaria com `decks#show`.
+    # Antes de `resources :decks`: depois dele, `import` e `shortfall` casariam
+    # com `decks#show`.
+    get "decks/shortfall" => "decks#shortfall", as: :api_decks_shortfall
     post "decks/import" => "deck_imports#create", as: :api_deck_imports
 
     # `as:` evita colidir com os nomes `decks` e `deck` das rotas HTML.

@@ -363,10 +363,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Para dois decks que dividem uma carta, as cartas, `missing` e decks são os mesmos do bloco de `/progress`; cartas completas ficam de fora; sem decks → `[]` (SDEC-59)
-- [ ] Consultas: duas com linhas, uma sem; iguais com 1 e 3 decks
-- [ ] Sem sessão `401`; decks de outro usuário nunca aparecem (SDEC-60)
-- [ ] Gate check passes: Rails quick
+- [x] Para dois decks que dividem uma carta, as cartas, `missing` e decks são os mesmos do bloco de `/progress`; cartas completas ficam de fora; sem decks → `[]` (SDEC-59)
+- [x] Consultas: duas com linhas, uma sem; iguais com 1 e 3 decks
+- [x] Sem sessão `401`; decks de outro usuário nunca aparecem (SDEC-60)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
