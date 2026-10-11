@@ -888,9 +888,9 @@ T25 → T28
 
 **Done when**:
 
-- [ ] Com a falha das opções, a grade, a linha de status e os filtros ativos seguem renderizados e o painel mostra a `message` e "Tentar novamente"
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Com a falha das opções, a grade, a linha de status e os filtros ativos seguem renderizados e o painel mostra a `message` e "Tentar novamente"
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick

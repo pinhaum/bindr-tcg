@@ -514,6 +514,20 @@ describe('+page.svelte (/app, catálogo)', () => {
 			await waitFor(() => expect(summary).toHaveTextContent('Filtros · 1 filtro ativo'));
 		});
 
+		it('com a falha das opções de filtro a grade, a linha de status e os filtros ativos seguem intactos (SCAT-40)', async () => {
+			filterOptions.error = new ApiError(500, 'internal_error', 'Não foi possível carregar os filtros.');
+			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], { colors: ['Red', 'Blue'] }));
+			render(Page);
+			await findTile('Zoro');
+
+			expect(statusLine()).toHaveTextContent('1');
+			expect(screen.getByRole('list', { name: 'Filtros ativos' })).toBeInTheDocument();
+			expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar os filtros.');
+			expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeInTheDocument();
+			expect(screen.queryByRole('group', { name: 'Cor' })).not.toBeInTheDocument();
+			expect(getEnvelope).toHaveBeenCalledTimes(1);
+		});
+
 		it('o painel aberto continua aberto quando só a query muda', async () => {
 			const { container } = render(Page);
 			await findTile('Zoro');
