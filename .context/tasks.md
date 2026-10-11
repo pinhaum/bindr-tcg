@@ -454,7 +454,7 @@ Só abre depois do fechamento da §14 (`spa-carta`).
   - `GET /api/progress`, `GET /api/wishlist` e `DELETE …/variants/:variant_code/wishlist`
     (AD-027), sobre as consultas da pasta e da lista Hotwire.
   - _Requisitos: 20.37–20.46_
-- [ ] **15.2 Funções puras, estado e navegação do front** — T4–T8
+- [x] **15.2 Funções puras, estado e navegação do front** — T4–T8
   - _Requisitos: 20.2–20.7, 20.12, 20.30, 20.43_
 - [ ] **15.3 Componentes** — T9–T12
   - _Requisitos: 20.8–20.16, 20.19–20.23, 20.30–20.32, 20.35_
