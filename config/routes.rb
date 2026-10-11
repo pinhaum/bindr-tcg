@@ -163,6 +163,9 @@ Rails.application.routes.draw do
     post "cards/:card_number/variants/:variant_code/decrement" => "card_variants#decrement",
          as: :api_decrement_card_variant,
          constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+    put "cards/:card_number/variants/:variant_code/wishlist" => "card_variants#wishlist",
+        as: :api_wishlist_card_variant,
+        constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
 
     match "*path", to: "not_found#show", via: :all
   end

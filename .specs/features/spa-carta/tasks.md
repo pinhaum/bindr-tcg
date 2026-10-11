@@ -180,13 +180,13 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `PUT` com `2` sem desejo cria e responde `200` `{ data: { variant_code, wishlist_target: 2 } }`; com `3` atualiza o mesmo registro; com o mesmo alvo responde igual sem duplicar (SCAR-45)
-- [ ] `0`, `-1`, `1.5`, `"abc"`, `null` e ausência → `422` `validation_failed`, `message` "Dados inválidos.", `fields.target_quantity` `["Informe um número inteiro maior ou igual a 1."]`, sem gravar (SCAR-46)
-- [ ] `"3"` é aceito como 3
-- [ ] Corpo JSON malformado → `400 invalid_json`
-- [ ] 404, 401, 422 de CSRF, `user_id` alheio e "JSON, nunca redirect" como na T2 (SCAR-47, SCAR-48)
-- [ ] `RecordNotUnique` simulado na primeira tentativa resulta em `200` com o alvo gravado
-- [ ] Gate check passes: Rails quick
+- [x] `PUT` com `2` sem desejo cria e responde `200` `{ data: { variant_code, wishlist_target: 2 } }`; com `3` atualiza o mesmo registro; com o mesmo alvo responde igual sem duplicar (SCAR-45)
+- [x] `0`, `-1`, `1.5`, `"abc"`, `null` e ausência → `422` `validation_failed`, `message` "Dados inválidos.", `fields.target_quantity` `["Informe um número inteiro maior ou igual a 1."]`, sem gravar (SCAR-46)
+- [x] `"3"` é aceito como 3
+- [x] Corpo JSON malformado → `400 invalid_json`
+- [x] 404, 401, 422 de CSRF, `user_id` alheio e "JSON, nunca redirect" como na T2 (SCAR-47, SCAR-48)
+- [x] `RecordNotUnique` simulado na primeira tentativa resulta em `200` com o alvo gravado
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
