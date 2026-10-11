@@ -92,16 +92,29 @@ describe("MainNav", () => {
     ).not.toHaveAttribute("aria-current");
   });
 
-  it("never marks Hotwire entries as current", () => {
+  it.each(["/app/baralhos", "/app/baralhos?x=1"])(
+    "marks Baralhos as current at %s",
+    (path) => {
+      session.user = { email: "a@b.c" };
+      mocks.pathname = path;
+      render(MainNav);
+      expect(screen.getByRole("link", { name: "Baralhos" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+    },
+  );
+
+  it("does not mark Baralhos as current at /app/baralhos/7", () => {
     session.user = { email: "a@b.c" };
-    mocks.pathname = "/decks";
+    mocks.pathname = "/app/baralhos/7";
     render(MainNav);
     expect(screen.getByRole("link", { name: "Baralhos" })).not.toHaveAttribute(
       "aria-current",
     );
   });
 
-  it("reloads the page on Hotwire links only", () => {
+  it("does not reload the page on any link", () => {
     session.user = { email: "a@b.c" };
     render(MainNav);
     expect(screen.getByRole("link", { name: "Minha pasta" })).not.toHaveAttribute(
@@ -110,7 +123,7 @@ describe("MainNav", () => {
     expect(screen.getByRole("link", { name: "Catálogo" })).not.toHaveAttribute(
       "data-sveltekit-reload",
     );
-    expect(screen.getByRole("link", { name: "Baralhos" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Baralhos" })).not.toHaveAttribute(
       "data-sveltekit-reload",
     );
   });

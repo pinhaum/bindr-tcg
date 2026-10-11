@@ -497,9 +497,9 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Unit test: com sessão, "Baralhos" aponta para `/app/baralhos` sem `reload`; `MainNav` marca `aria-current="page"` em `/app/baralhos` e `/app/baralhos?x=1`, e não em `/app/baralhos/7`
-- [ ] Testes de casco existentes que esperavam `/decks` atualizados só nessa asserção (registrado na task)
-- [ ] Gate check passes: Front quick
+- [x] Unit test: com sessão, "Baralhos" aponta para `/app/baralhos` sem `reload`; `MainNav` marca `aria-current="page"` em `/app/baralhos` e `/app/baralhos?x=1`, e não em `/app/baralhos/7`
+- [x] Testes de casco existentes que esperavam `/decks` atualizados só nessa asserção (registrado na task)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick

@@ -40,12 +40,12 @@ describe("navEntries", () => {
     });
   });
 
-  it("points Baralhos at its Hotwire path with reload", () => {
+  it("points Baralhos at the app route without reload", () => {
     expect(navEntries({ email: "a@b.c" })[2]).toEqual({
       kind: "link",
       label: "Baralhos",
-      href: "/decks",
-      reload: true,
+      href: "/app/baralhos",
+      reload: false,
     });
   });
 
