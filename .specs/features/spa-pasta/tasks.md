@@ -497,21 +497,23 @@ T16 → T17
 
 **Done when**:
 
-- [ ] `load` sem sessão redireciona sem chamar o cliente; com sessão chama `get('/api/wishlist')`; `<title>` "Lista de desejos — Bindr" e `h1` "Lista de desejos" (SPAS-03, SPAS-27)
-- [ ] "Carregando lista de desejos…" só após 200 ms; erro mostra a `message` e "Tentar novamente" (SPAS-06, SPAS-07)
-- [ ] Lista vazia: as duas frases e "catálogo" como link para `/app` (SPAS-28)
-- [ ] "1 item" e "2 itens", itens na ordem de `data` (SPAS-29)
-- [ ] Remoção com `200`: `delete` no caminho de `variantWishlistPath`, item sai, contagem atualiza, toast "Item removido da lista de desejos." (SPAS-33)
-- [ ] Foco depois de `tick()`: "Remover" do seguinte; do último, o do anterior; do único, o `h1` (SPAS-34)
-- [ ] Segundo clique durante a pendência não chama o cliente; o botão de outro item segue acionável e a segunda remoção conclui (SPAS-35)
-- [ ] `500` mantém o item e chama `notifyError` com a `message` (SPAS-36)
-- [ ] Gate check passes: Front quick
+- [x] `load` sem sessão redireciona sem chamar o cliente; com sessão chama `get('/api/wishlist')`; `<title>` "Lista de desejos — Bindr" e `h1` "Lista de desejos" (SPAS-03, SPAS-27)
+- [x] "Carregando lista de desejos…" só após 200 ms; erro mostra a `message` e "Tentar novamente" (SPAS-06, SPAS-07)
+- [x] Lista vazia: as duas frases e "catálogo" como link para `/app` (SPAS-28)
+- [x] "1 item" e "2 itens", itens na ordem de `data` (SPAS-29)
+- [x] Remoção com `200`: `delete` no caminho de `variantWishlistPath`, item sai, contagem atualiza, toast "Item removido da lista de desejos." (SPAS-33)
+- [x] Foco depois de `tick()`: "Remover" do seguinte; do último, o do anterior; do único, o `h1` (SPAS-34)
+- [x] Segundo clique durante a pendência não chama o cliente; o botão de outro item segue acionável e a segunda remoção conclui (SPAS-35)
+- [x] `500` mantém o item e chama `notifyError` com a `message` (SPAS-36)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): lista de desejos em /app/pasta/desejos`
 
+
+**Registro**: Revisão a11y: 1 MAJOR (foco no `body` após falha da remoção) e MINORs de teste (foco após 500, guard do segundo clique, `aria-busy`, `index < 0`, desmontagem) corrigidos por worker novo. Remoção usa `variantApiPath(…, "wishlist")` (T7). Front quick: 856 testes.
 ---
 
 ### T15: E2E da pasta
