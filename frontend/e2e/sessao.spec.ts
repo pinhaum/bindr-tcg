@@ -43,10 +43,29 @@ async function expectSignedOut(page: Page) {
 	await expect(mainNav(page).getByRole('button', { name: 'Sair' })).toHaveCount(0);
 }
 
+async function expectNavOnTop(page: Page, name: string) {
+	const entry = mainNav(page).getByRole('button', { name });
+	await entry.scrollIntoViewIfNeeded();
+	// Repete: durante uma view transition o hit-test cai em <html>; coberto de verdade fica coberto.
+	await expect
+		.poll(
+			() =>
+				entry.evaluate((el) => {
+					const { x, y, width, height } = el.getBoundingClientRect();
+					const hit = document.elementFromPoint(x + width / 2, y + height / 2);
+					return hit !== null && el.contains(hit) ? 'ok' : `${hit?.tagName}.${hit?.className}`;
+				}),
+			{ message: `"${name}" não está coberto pelo conteúdo` }
+		)
+		.toBe('ok');
+}
+
 function trackBadResponses(page: Page) {
 	const bad: string[] = [];
 	page.on('response', (response) => {
 		const status = response.status();
+		// A arte vem de um CDN externo e responde 502 quando ele recusa (403); a SPA mostra o placeholder (SCAT-11).
+		if (new URL(response.url()).pathname.startsWith('/card_images/')) return;
 		if (status === 406 || status >= 500) bad.push(`${status} ${response.request().method()} ${response.url()}`);
 	});
 	return bad;
@@ -77,6 +96,7 @@ for (const combo of COMBOS) {
 				await expect(page).toHaveURL(/\/app\/?$/);
 				await expectSignedIn(page);
 				await expectLayout(page, combo, '/ com sessão');
+				await expectNavOnTop(page, 'Sair');
 			});
 
 			await test.step('sair mostra a mensagem e volta a anônimo (SPA-22)', async () => {
@@ -88,11 +108,15 @@ for (const combo of COMBOS) {
 				await expectSignedOut(page);
 				await expectLayout(page, combo, '/ após sair');
 
-				const main = page.locator('main#conteudo');
+				// Só posição e largura: a altura de main acompanha a grade do catálogo, que recarrega ao sair.
+				const anchor = async () => {
+					const { x, y, width } = (await page.locator('main#conteudo').boundingBox())!;
+					return { x, y, width };
+				};
 				await expect(page.locator('.layer')).toHaveCSS('position', 'fixed');
-				const withMessage = await main.boundingBox();
+				const withMessage = await anchor();
 				await expect(message).toHaveCount(0, { timeout: 10_000 });
-				expect(await main.boundingBox(), 'a mensagem não desloca o conteúdo (SPA-46)').toEqual(withMessage);
+				expect(await anchor(), 'a mensagem não desloca o conteúdo (SPA-46)').toEqual(withMessage);
 			});
 
 			await test.step('senha errada mostra o erro, mantém o e-mail e foca o bloco (SPA-17)', async () => {

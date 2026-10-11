@@ -1,4 +1,7 @@
 import '@testing-library/jest-dom/vitest';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { cleanup, render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -77,6 +80,51 @@ describe('AppShell', () => {
 			const { container } = render(AppShell, { children });
 
 			expect(container.querySelector('.aside')).toBeNull();
+		});
+	});
+
+	describe('empilhamento da barra inferior', () => {
+		const here = dirname(fileURLToPath(import.meta.url));
+		const cssOf = (file: string): string =>
+			[...readFileSync(join(here, file), 'utf8').matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)]
+				.map((m) => m[1])
+				.join('\n')
+				.replace(/\/\*[\s\S]*?\*\//g, '');
+		const declarationsOf = (css: string, selector: string): Map<string, string> => {
+			const rule = css.match(new RegExp(`(?:^|\\})\\s*${selector.replace('.', '\\.')}\\s*\\{([^}]*)\\}`));
+			expect(rule, `regra ${selector} ausente`).not.toBeNull();
+			return new Map(
+				(rule?.[1] ?? '')
+					.split(';')
+					.map((d) => d.trim())
+					.filter(Boolean)
+					.map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()] as const)
+			);
+		};
+		const tokens = readFileSync(join(here, '..', 'styles', 'tokens.css'), 'utf8');
+		const zNav = Number(tokens.match(/--z-nav:\s*(\d+)\s*;/)?.[1]);
+
+		it('a .nav fixa abaixo de 64rem declara z-index pelo token --z-nav', () => {
+			const narrow = cssOf('AppShell.svelte').split('@media')[0];
+			const nav = declarationsOf(narrow, '.nav');
+
+			expect(nav.get('position')).toBe('fixed');
+			expect(nav.get('z-index')).toBe('var(--z-nav)');
+			expect(zNav).toBeGreaterThan(0);
+		});
+
+		it('nenhum elemento do CardTile se empilha com z-index igual ou acima da barra', () => {
+			const zIndexes = [...cssOf('CardTile.svelte').matchAll(/z-index\s*:\s*(-?\d+)/g)].map((m) =>
+				Number(m[1])
+			);
+
+			for (const z of zIndexes) expect(z).toBeLessThan(zNav);
+		});
+
+		it('as mensagens do Toaster ficam acima da barra', () => {
+			const toaster = Number(cssOf('Toaster.svelte').match(/z-index\s*:\s*(\d+)/)?.[1]);
+
+			expect(toaster).toBeGreaterThan(zNav);
 		});
 	});
 });

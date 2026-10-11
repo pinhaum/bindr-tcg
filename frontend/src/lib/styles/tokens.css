@@ -45,6 +45,7 @@
 	--nav-height: 56px;
 	--touch-target: 44px;
 	--sidebar-width: 280px;
+	--z-nav: 10;
 
 	/* Raio */
 	--radius-sm: 4px;

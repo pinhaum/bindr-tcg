@@ -68,6 +68,7 @@
 	.nav {
 		grid-area: nav;
 		position: fixed;
+		z-index: var(--z-nav);
 		inset: auto 0 0 0;
 		display: flex;
 		justify-content: center;
