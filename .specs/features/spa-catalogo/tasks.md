@@ -719,10 +719,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Nenhuma asserção procura o e-mail em `main`; com sessão, "Sair" está na navegação; sem sessão, "Entrar"
-- [ ] `casco.spec.ts` e `sessao.spec.ts` verdes contra a API real, nas combinações de largura e tema já existentes
-- [ ] Gate check passes: full
-- [ ] Test count: e2e anteriores, nenhum removido
+- [x] Nenhuma asserção procura o e-mail em `main`; com sessão, "Sair" está na navegação; sem sessão, "Entrar"
+- [x] `casco.spec.ts` e `sessao.spec.ts` verdes contra a API real, nas combinações de largura e tema já existentes
+- [x] Gate check passes: full
+- [x] Test count: e2e anteriores, nenhum removido
 
 **Tests**: e2e
 **Gate**: full

@@ -29,8 +29,19 @@ async function expectLayout(page: Page, combo: Combo, where: string) {
 	await expectTheme(page, combo.scheme, where);
 }
 
-const signOut = (page: Page) =>
-	page.getByRole('navigation', { name: 'Principal' }).getByRole('button', { name: 'Sair' }).click();
+const mainNav = (page: Page) => page.getByRole('navigation', { name: 'Principal' });
+
+const signOut = (page: Page) => mainNav(page).getByRole('button', { name: 'Sair' }).click();
+
+async function expectSignedIn(page: Page) {
+	await expect(mainNav(page).getByRole('button', { name: 'Sair' })).toBeVisible();
+	await expect(mainNav(page).getByRole('link', { name: 'Entrar', exact: true })).toHaveCount(0);
+}
+
+async function expectSignedOut(page: Page) {
+	await expect(mainNav(page).getByRole('link', { name: 'Entrar', exact: true })).toBeVisible();
+	await expect(mainNav(page).getByRole('button', { name: 'Sair' })).toHaveCount(0);
+}
 
 function trackBadResponses(page: Page) {
 	const bad: string[] = [];
@@ -64,7 +75,7 @@ for (const combo of COMBOS) {
 				await page.getByRole('button', { name: 'Criar conta' }).click();
 
 				await expect(page).toHaveURL(/\/app\/?$/);
-				await expect(page.getByRole('main').getByText(email, { exact: true })).toBeVisible();
+				await expectSignedIn(page);
 				await expectLayout(page, combo, '/ com sessão');
 			});
 
@@ -74,7 +85,7 @@ for (const combo of COMBOS) {
 				const message = page.getByText('Sessão encerrada.', { exact: true });
 				await expect(message).toBeVisible();
 				await expect(page).toHaveURL(/\/app\/?$/);
-				await expect(page.getByText(email)).toHaveCount(0);
+				await expectSignedOut(page);
 				await expectLayout(page, combo, '/ após sair');
 
 				const main = page.locator('main#conteudo');
@@ -103,14 +114,14 @@ for (const combo of COMBOS) {
 				await page.getByRole('button', { name: 'Entrar' }).click();
 
 				await expect(page).toHaveURL(/\/app\/?$/);
-				await expect(page.getByRole('main').getByText(email, { exact: true })).toBeVisible();
+				await expectSignedIn(page);
 				await expectLayout(page, combo, '/ após entrar');
 			});
 
 			await test.step('com sessão, /entrar e /criar-conta voltam a /app sem formulário (SPA-24)', async () => {
 				await page.goto('entrar?return_to=/app/criar-conta');
 				await expect(page).toHaveURL(/\/app\/?$/);
-				await expect(page.getByRole('main').getByText(email, { exact: true })).toBeVisible();
+				await expectSignedIn(page);
 
 				await page.goto('criar-conta');
 				await expect(page).toHaveURL(/\/app\/?$/);
@@ -120,7 +131,7 @@ for (const combo of COMBOS) {
 
 			await test.step('a sessão sobrevive a recarregar a página (SPA-14)', async () => {
 				await page.reload();
-				await expect(page.getByRole('main').getByText(email, { exact: true })).toBeVisible();
+				await expectSignedIn(page);
 				await expectLayout(page, combo, '/ após recarregar');
 			});
 
@@ -128,7 +139,7 @@ for (const combo of COMBOS) {
 				await signOut(page);
 
 				await expect(page.getByText('Sessão encerrada.', { exact: true })).toBeVisible();
-				await expect(page.getByText(email)).toHaveCount(0);
+				await expectSignedOut(page);
 				await expectLayout(page, combo, '/ após sair no fim');
 			});
 
@@ -146,14 +157,14 @@ test('return_to externo é descartado e o destino é /app (SPA-23)', async ({ pa
 	await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
 	await page.getByLabel('Confirmação da senha').fill(PASSWORD);
 	await page.getByRole('button', { name: 'Criar conta' }).click();
-	await expect(page.getByRole('main').getByText(email, { exact: true })).toBeVisible();
+	await expectSignedIn(page);
 	await signOut(page);
 	await expect(page.getByText('Sessão encerrada.', { exact: true })).toBeVisible();
 
 	await page.goto('entrar?return_to=%2F%2Fexemplo.test%2Fapp');
 	await signIn(page, email, PASSWORD);
 	await expect(page).toHaveURL(/^http:\/\/frontend:5173\/app\/?$/);
-	await expect(page.getByRole('main').getByText(email, { exact: true })).toBeVisible();
+	await expectSignedIn(page);
 
 	expect(bad, 'nenhuma resposta 406 nem 5xx').toEqual([]);
 });
