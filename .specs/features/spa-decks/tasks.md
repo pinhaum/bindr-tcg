@@ -172,10 +172,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Query test: deck do usuário com Leader e entradas devolve `legality` igual a `Deck::Legality`, `absent_card_ids` só com a carta sem variante presente e `shortfall_by_card_id` com `required`/`owned`/`missing` por carta; deck de outro usuário e id inexistente levantam `RecordNotFound`
-- [ ] Dentro de transação aberta não pede `REPEATABLE READ` (sem `TransactionIsolationError`)
-- [ ] `deck_page_test.rb`, `deck_shortfall_page_test.rb`, `deck_export_test.rb` e `deck_entries_concurrency_test.rb` passam sem edição
-- [ ] Gate check passes: Rails quick
+- [x] Query test: deck do usuário com Leader e entradas devolve `legality` igual a `Deck::Legality`, `absent_card_ids` só com a carta sem variante presente e `shortfall_by_card_id` com `required`/`owned`/`missing` por carta; deck de outro usuário e id inexistente levantam `RecordNotFound`
+- [x] Dentro de transação aberta não pede `REPEATABLE READ` (sem `TransactionIsolationError`)
+- [x] `deck_page_test.rb`, `deck_shortfall_page_test.rb`, `deck_export_test.rb` e `deck_entries_concurrency_test.rb` passam sem edição
+- [x] Gate check passes: Rails quick
 
 **Tests**: unit
 **Gate**: quick
