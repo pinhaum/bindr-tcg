@@ -210,11 +210,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] N incrementos sobrepostos a partir de zero terminam em N
-- [ ] Decrementos sobrepostos a partir de 1 terminam em 0, um deles com `owned_quantity: 0` e sem registro negativo
-- [ ] Mutação que troque o SQL atômico por ler-somar-gravar em `CollectionItem` faz o teste falhar (verificado à mão e registrado na task)
-- [ ] O teste limpa o que gravou
-- [ ] Gate check passes: Rails quick
+- [x] N incrementos sobrepostos a partir de zero terminam em N
+- [x] Decrementos sobrepostos a partir de 1 terminam em 0, um deles com `owned_quantity: 0` e sem registro negativo
+- [x] Mutação que troque o SQL atômico por ler-somar-gravar em `CollectionItem` faz o teste falhar (verificado à mão e registrado na task)
+- [x] O teste limpa o que gravou
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
