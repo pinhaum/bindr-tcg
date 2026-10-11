@@ -201,12 +201,12 @@ T16 → T17
 
 **Done when**:
 
-- [ ] `load('?order=code')` chama `fetch('?order=code')`; `retry()` repete a última chave (SPAS-07)
-- [ ] `slow` só vira `true` depois de 200 ms pendentes; antes disso `result` anterior continua (SPAS-06)
-- [ ] Resposta de um `load` superado por outro não altera `state` (SPAS-05)
-- [ ] `ApiError` vai para `error` e zera `pending`/`slow`; erro que não é `ApiError` é relançado
-- [ ] `npm run check` aceita os tipos novos
-- [ ] Gate check passes: Front quick
+- [x] `load('?order=code')` chama `fetch('?order=code')`; `retry()` repete a última chave (SPAS-07)
+- [x] `slow` só vira `true` depois de 200 ms pendentes; antes disso `result` anterior continua (SPAS-06)
+- [x] Resposta de um `load` superado por outro não altera `state` (SPAS-05)
+- [x] `ApiError` vai para `error` e zera `pending`/`slow`; erro que não é `ApiError` é relançado
+- [x] `npm run check` aceita os tipos novos
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick

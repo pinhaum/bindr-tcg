@@ -85,3 +85,36 @@ export type CardDetailPayload = Omit<CatalogCard, 'variants'> & {
 export type OwnershipResult = { variant_code: string; owned_quantity: number };
 
 export type WishlistResult = { variant_code: string; wishlist_target: number };
+
+export type Money = { amount: string; currency: string };
+
+export type ProgressSet = {
+	code: string;
+	name: string;
+	owned_numbers: number;
+	base_size: number | null;
+	completion_percent: number | null;
+	parallel_owned: number;
+	parallel_total: number;
+	value: Money;
+};
+
+export type ProgressPayload = {
+	order: 'recent' | 'code';
+	summary: {
+		total_copies: number;
+		distinct_variants: number;
+		estimated_value: Money;
+		unpriced_copies: number;
+	};
+	sets: ProgressSet[];
+};
+
+export type WishlistEntry = {
+	card_number: string;
+	card_name: string;
+	variant_code: string;
+	target_quantity: number;
+	owned_quantity: number;
+	fulfilled: boolean;
+};
