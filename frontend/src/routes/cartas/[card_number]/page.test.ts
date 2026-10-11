@@ -100,6 +100,7 @@ const detail = (
 	trigger_text: null,
 	set: { code: 'OP01', name: 'Romance Dawn' },
 	featured_variant_code: variants[0]?.variant_code ?? null,
+	editing_deck: null,
 	variants
 });
 

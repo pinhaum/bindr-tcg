@@ -42,6 +42,7 @@ const card = (over: Partial<CardDetailPayload> = {}): CardDetailPayload => ({
 	trigger_text: null,
 	set: { code: 'OP01', name: 'Romance Dawn' },
 	featured_variant_code: 'tcgplayer:1',
+	editing_deck: null,
 	variants: [variant()],
 	...over
 });

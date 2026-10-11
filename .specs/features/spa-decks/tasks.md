@@ -417,9 +417,9 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Unit test: `deckHref(7)` → `/app/baralhos/7`, `deckHref(7, 'renomear')` → `/app/baralhos/7/renomear`; `deckCardApiPath(7, 'P-117', 'increment')` e com espaço/ponto codificados por `encodeURIComponent`; `deckApiPath(7, 'leader')` → `/api/decks/7/leader`
-- [ ] `npm run check` passa com os tipos novos usados pelo menos pelo teste
-- [ ] Gate check passes: Front quick
+- [x] Unit test: `deckHref(7)` → `/app/baralhos/7`, `deckHref(7, 'renomear')` → `/app/baralhos/7/renomear`; `deckCardApiPath(7, 'P-117', 'increment')` e com espaço/ponto codificados por `encodeURIComponent`; `deckApiPath(7, 'leader')` → `/api/decks/7/leader`
+- [x] `npm run check` passa com os tipos novos usados pelo menos pelo teste
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
