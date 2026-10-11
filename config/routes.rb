@@ -173,6 +173,8 @@ Rails.application.routes.draw do
            constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
 
     post "collection/imports" => "collection_imports#create", as: :api_collection_imports
+    get "collection/imports/:token" => "collection_imports#show", as: :api_collection_import,
+        constraints: { token: /[^\/]+/ }
 
     match "*path", to: "not_found#show", via: :all
   end

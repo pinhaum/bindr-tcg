@@ -13,6 +13,13 @@ class Api::CollectionImportsController < Api::BaseController
     inalterada: "unchanged"
   }.freeze
 
+  # Sem filtro de prazo (SPOR-38): reler a pré-visualização não confirma nada.
+  # Token alheio, inexistente e malformado caem no mesmo 404 do base (SPOR-39).
+  def show
+    @collection_import = CollectionImport.find_by_token_for(Current.user, params[:token])
+    raise ActiveRecord::RecordNotFound if @collection_import.nil?
+  end
+
   def create
     result = CollectionCsv::Upload.new(Current.user, params[:file], request.content_length).call
 

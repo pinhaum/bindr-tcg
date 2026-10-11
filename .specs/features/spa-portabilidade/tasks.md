@@ -168,11 +168,11 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Leitura devolve o mesmo `data` do `201` da T2 para o mesmo staging; staging vencido (`travel` além de 2 h) continua `200` (SPOR-38)
-- [ ] Token de outro usuário, inexistente e malformado (`%2F..`) → o mesmo corpo `404 not_found` (SPOR-39)
-- [ ] Sem sessão → `401`; `?user_id=` alheio ignorado (SPOR-43)
-- [ ] Número de consultas igual com 2 e com 200 linhas (SPOR-44); `collection_items` inalterada depois da leitura (SPOR-20)
-- [ ] Gate check passes: Rails quick
+- [x] Leitura devolve o mesmo `data` do `201` da T2 para o mesmo staging; staging vencido (`travel` além de 2 h) continua `200` (SPOR-38)
+- [x] Token de outro usuário, inexistente e malformado (`%2F..`) → o mesmo corpo `404 not_found` (SPOR-39)
+- [x] Sem sessão → `401`; `?user_id=` alheio ignorado (SPOR-43)
+- [x] Número de consultas igual com 2 e com 200 linhas (SPOR-44); `collection_items` inalterada depois da leitura (SPOR-20)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
