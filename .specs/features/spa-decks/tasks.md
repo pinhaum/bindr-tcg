@@ -550,8 +550,8 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Renderiza `document.title` "Deck não encontrado — Bindr", a mensagem e o link com `href` `/app/baralhos`
-- [ ] Gate check passes: Front quick
+- [x] Renderiza `document.title` "Deck não encontrado — Bindr", a mensagem e o link com `href` `/app/baralhos`
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
