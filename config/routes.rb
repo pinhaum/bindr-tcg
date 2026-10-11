@@ -156,6 +156,9 @@ Rails.application.routes.draw do
     get "progress" => "progress#show", as: :api_progress
     get "wishlist" => "wishlist#index", as: :api_wishlist
 
+    # `as:` evita colidir com os nomes `decks` e `deck` das rotas HTML.
+    resources :decks, only: %i[index show], as: :api_decks
+
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
     # Posse por variante (SCAR-42, SCAR-43). O `variant_code` tem `:` e chega

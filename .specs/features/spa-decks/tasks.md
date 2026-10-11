@@ -199,10 +199,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] `index`: decks do usuário por nome e id, cada um com `id`, `name`, `leader` (`{card_number, name}` ou `null`), `main_total` e `status` igual ao da lista `/decks`; deck de outro usuário ausente; consultas iguais com 1 e 3 decks (SDEC-43)
-- [ ] `show`: todos os campos do SDEC-47; `entries` na ordem de `ordered_entries`; `required`/`owned`/`missing`, `in_source`, `cost: null` de Event, `missing_total` e `reasons`/`warnings` iguais aos de `/decks/:id` para um deck vazio, um incompleto, um inválido por cor e um com Leader de regra própria; `editing` verdadeiro só para o deck da sessão (SDEC-47)
-- [ ] Sem sessão → `401`; deck de outro usuário e id inexistente → `404 not_found`; `user_id` alheio na query ignorado; resposta JSON, nunca redirect (SDEC-60)
-- [ ] Gate check passes: Rails quick
+- [x] `index`: decks do usuário por nome e id, cada um com `id`, `name`, `leader` (`{card_number, name}` ou `null`), `main_total` e `status` igual ao da lista `/decks`; deck de outro usuário ausente; consultas iguais com 1 e 3 decks (SDEC-43)
+- [x] `show`: todos os campos do SDEC-47; `entries` na ordem de `ordered_entries`; `required`/`owned`/`missing`, `in_source`, `cost: null` de Event, `missing_total` e `reasons`/`warnings` iguais aos de `/decks/:id` para um deck vazio, um incompleto, um inválido por cor e um com Leader de regra própria; `editing` verdadeiro só para o deck da sessão (SDEC-47)
+- [x] Sem sessão → `401`; deck de outro usuário e id inexistente → `404 not_found`; `user_id` alheio na query ignorado; resposta JSON, nunca redirect (SDEC-60)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
