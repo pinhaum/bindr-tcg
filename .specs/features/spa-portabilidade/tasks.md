@@ -429,9 +429,9 @@ T14 → T15
 
 **Done when**:
 
-- [ ] "Importar coleção" → `href="/app/pasta/importar"` sem `data-sveltekit-reload`; a expectativa do `page.test.ts` da pasta passa a este destino (SPOR-02 substitui o destino Hotwire do SPAS-25)
-- [ ] "Baixar minha coleção (CSV)" continua `/collection/export` com `data-sveltekit-reload` (SPOR-33)
-- [ ] Gate check passes: Front quick
+- [x] "Importar coleção" → `href="/app/pasta/importar"` sem `data-sveltekit-reload`; a expectativa do `page.test.ts` da pasta passa a este destino (SPOR-02 substitui o destino Hotwire do SPAS-25)
+- [x] "Baixar minha coleção (CSV)" continua `/collection/export` com `data-sveltekit-reload` (SPOR-33)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick

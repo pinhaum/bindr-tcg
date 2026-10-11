@@ -92,8 +92,8 @@
 				<a href={appPath('/pasta/desejos')}>Lista de desejos</a>
 			</li>
 			<li>
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- endpoint HTML fora da SPA -->
-				<a href="/collection/import" data-sveltekit-reload>Importar coleção</a>
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href parte de appPath -->
+				<a href={appPath('/pasta/importar')}>Importar coleção</a>
 			</li>
 		</ul>
 	{/if}
