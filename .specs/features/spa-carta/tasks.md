@@ -403,11 +403,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Com `image_url` mostra `<img>` com `alt` recebido ("<nome> <variant_code>") e o placeholder atrás
-- [ ] `image_url` `null` → sem `<img>`, placeholder visível; `error` da imagem → imagem oculta (edge case 403)
-- [ ] O quadro usa a mesma regra de proporção nos três casos (verificado pela classe aplicada)
-- [ ] `transitionName` presente vira `style="view-transition-name: …"`; ausente, nenhum
-- [ ] Gate check passes: Front quick (inclui `guard.test.ts`)
+- [x] Com `image_url` mostra `<img>` com `alt` recebido ("<nome> <variant_code>") e o placeholder atrás
+- [x] `image_url` `null` → sem `<img>`, placeholder visível; `error` da imagem → imagem oculta (edge case 403)
+- [x] O quadro usa a mesma regra de proporção nos três casos (verificado pela classe aplicada)
+- [x] `transitionName` presente vira `style="view-transition-name: …"`; ausente, nenhum
+- [x] Gate check passes: Front quick (inclui `guard.test.ts`)
 
 **Tests**: unit
 **Gate**: quick
