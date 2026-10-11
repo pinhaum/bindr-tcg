@@ -546,12 +546,12 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Miniatura com `alt=""` e `loading="lazy"`; `variant_code` em `<code>`; "R · arte base", "SR · parallel", "SEC · alternativa"; sem `rarity`, sem o rótulo; "<set> (<código>)" (SCAR-19)
-- [ ] "fora da fonte" só com `in_source: false` (SCAR-20)
-- [ ] Preço `US$ 1.234,56` + "TCGplayer · market · dd/mm/aaaa", `EUR` com o código, "Sem preço" com `null`, com e sem sessão (SCAR-21)
-- [ ] Miniatura é link para `cardDetailHref(card, variant)`, nome "Mostrar <variant_code> na imagem principal", `aria-current="true"` só no destaque; clique chama o callback de seleção e não navega (SCAR-22, SCAR-23)
-- [ ] Sem sessão: link "Entrar para registrar posse" para `/app/entrar?return_to=<caminho e query atuais>`, sem stepper nem desejo (SCAR-26)
-- [ ] Gate check passes: Front quick
+- [x] Miniatura com `alt=""` e `loading="lazy"`; `variant_code` em `<code>`; "R · arte base", "SR · parallel", "SEC · alternativa"; sem `rarity`, sem o rótulo; "<set> (<código>)" (SCAR-19)
+- [x] "fora da fonte" só com `in_source: false` (SCAR-20)
+- [x] Preço `US$ 1.234,56` + "TCGplayer · market · dd/mm/aaaa", `EUR` com o código, "Sem preço" com `null`, com e sem sessão (SCAR-21)
+- [x] Miniatura é link para `cardDetailHref(card, variant)`, nome "Mostrar <variant_code> na imagem principal", `aria-current="true"` só no destaque; clique chama o callback de seleção e não navega (SCAR-22, SCAR-23)
+- [x] Sem sessão: link "Entrar para registrar posse" para `/app/entrar?return_to=<caminho e query atuais>`, sem stepper nem desejo (SCAR-26)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
