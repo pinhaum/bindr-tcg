@@ -377,9 +377,9 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `morphName('OP01-001')`, `morphName('P-029')` e um código com `.` e espaço dão nomes distintos que casam com a gramática de `<custom-ident>`
-- [ ] Marcar uma carta substitui a anterior; `isMarked(x)` só é verdadeiro para a última
-- [ ] Gate check passes: Front quick
+- [x] `morphName('OP01-001')`, `morphName('P-029')` e um código com `.` e espaço dão nomes distintos que casam com a gramática de `<custom-ident>`
+- [x] Marcar uma carta substitui a anterior; `isMarked(x)` só é verdadeiro para a última
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
