@@ -238,10 +238,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `formatPrice('1234.56', 'USD')` → `US$ 1.234,56` com espaço comum; `EUR` → `EUR 1.234,56`; `'0.5'` → `US$ 0,50`
-- [ ] `formatObservedDate('2026-10-05T02:00:00Z')` → `04/10/2026` (São Paulo)
-- [ ] `copies(1)` → "1 cópia"; `copies(2)` → "2 cópias"
-- [ ] Gate check passes: Front quick
+- [x] `formatPrice('1234.56', 'USD')` → `US$ 1.234,56` com espaço comum; `EUR` → `EUR 1.234,56`; `'0.5'` → `US$ 0,50`
+- [x] `formatObservedDate('2026-10-05T02:00:00Z')` → `04/10/2026` (São Paulo)
+- [x] `copies(1)` → "1 cópia"; `copies(2)` → "2 cópias"
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
