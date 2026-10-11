@@ -570,11 +570,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Três chips viram três links na lista "Filtros ativos", com nome "Remover filtro <rótulo>: <valor>" e o `href` do chip
-- [ ] Clicar o segundo chama `onremove(1)`
-- [ ] Lista vazia não renderiza a `<ul>`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Três chips viram três links na lista "Filtros ativos", com nome "Remover filtro <rótulo>: <valor>" e o `href` do chip
+- [x] Clicar o segundo chama `onremove(1)`
+- [x] Lista vazia não renderiza a `<ul>`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
