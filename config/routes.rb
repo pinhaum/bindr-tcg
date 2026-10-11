@@ -172,6 +172,8 @@ Rails.application.routes.draw do
     delete "cards/:card_number/variants/:variant_code/wishlist" => "card_variants#unwish",
            constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
 
+    post "collection/imports" => "collection_imports#create", as: :api_collection_imports
+
     match "*path", to: "not_found#show", via: :all
   end
 

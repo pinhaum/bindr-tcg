@@ -139,12 +139,12 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Envio aceito → `201` com `token` do staging criado, `filename` saneado e `rows` na ordem do arquivo com as cinco classificações mapeadas (`removes`, `creates`, `updates`, `rejected`, `unchanged`), `line` = índice + 2, `quantity_before` `null` em `creates`, `quantity_after` e `message` conforme o SPOR-38; `collection_items` inalterada (SPOR-36, SPOR-38)
-- [ ] Sem `file`, corpo JSON, `file` como string, `;`, vazio, Latin-1 e `Content-Length` acima de 12 MB → `422 validation_failed`, `message` "O arquivo não foi importado. Sua coleção não foi alterada." e `fields.file` com a frase do HTML; nenhum staging (SPOR-37)
-- [ ] Sem sessão → `401 unauthenticated`; sem token CSRF com `allow_forgery_protection` ligado → `422 invalid_csrf_token`; `user_id` de outro usuário no corpo ou na query é ignorado (staging do usuário da sessão) (SPOR-43)
-- [ ] Número de consultas SQL igual com 2 e com 200 linhas de dado (SPOR-44)
-- [ ] Resposta `application/json`, nunca HTML nem redirect
-- [ ] Gate check passes: Rails quick
+- [x] Envio aceito → `201` com `token` do staging criado, `filename` saneado e `rows` na ordem do arquivo com as cinco classificações mapeadas (`removes`, `creates`, `updates`, `rejected`, `unchanged`), `line` = índice + 2, `quantity_before` `null` em `creates`, `quantity_after` e `message` conforme o SPOR-38; `collection_items` inalterada (SPOR-36, SPOR-38)
+- [x] Sem `file`, corpo JSON, `file` como string, `;`, vazio, Latin-1 e `Content-Length` acima de 12 MB → `422 validation_failed`, `message` "O arquivo não foi importado. Sua coleção não foi alterada." e `fields.file` com a frase do HTML; nenhum staging (SPOR-37)
+- [x] Sem sessão → `401 unauthenticated`; sem token CSRF com `allow_forgery_protection` ligado → `422 invalid_csrf_token`; `user_id` de outro usuário no corpo ou na query é ignorado (staging do usuário da sessão) (SPOR-43)
+- [x] Número de consultas SQL igual com 2 e com 200 linhas de dado (SPOR-44)
+- [x] Resposta `application/json`, nunca HTML nem redirect
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
