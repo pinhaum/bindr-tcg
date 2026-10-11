@@ -1803,7 +1803,7 @@ abaixo (P12) tem opção recomendada e está no *Rastreamento de pendências*.
 51. QUANDO `POST /api/decks/:id/cards/:card_number/increment` chegar ENTÃO o
     sistema DEVE somar 1 à entrada da carta no deck, criando-a com 1 quando não
     existe, e responder `200` com `{ "data": { "card_number", "quantity" } }`.
-    *(Chave das rotas: DECISÃO PENDENTE P12.)*
+    *(Chave das rotas: P12, decidida em AD-029.)*
 52. QUANDO `POST /api/decks/:id/cards/:card_number/decrement` chegar ENTÃO o
     sistema DEVE subtrair 1 da entrada, apagá-la quando chegar a zero e
     responder `200` com a quantidade resultante; sem entrada, DEVE responder
@@ -2270,7 +2270,7 @@ nos Req. 17 a 22 passa a ler `/<caminho>`.
 | # | Pendência | Onde |
 |---|---|---|
 | P8 | Hexadecimais das seis cores do jogo (Req. 12.11) | Req. 12 (emenda de 2026-09-29); Req. 18.21 (chip de cor da SPA, neutro até a decisão) |
-| P12 | DECISÃO PENDENTE — chave das rotas de deck da API: `id` do deck, exposto no payload, mais `card_number` no caminho (`POST /api/decks/:id/cards/:card_number/increment` e `/decrement`, `PUT /api/decks/:id/leader`; recomendada: a ação vai para o deck exibido na tela, mesmo que outra aba ou o Hotwire tenha trocado o deck em edição, princípio do Req. 17.10) ou rotas sobre o deck em edição da sessão, sem id (`/api/editing_deck/cards/:card_number/…`), como o detalhe Hotwire recebe | Req. 21.51–21.55; `.specs/features/spa-decks/spec.md` |
+| P12 | Chave das rotas de deck da API | `id` do deck, exposto no payload, mais `card_number` no caminho (`POST /api/decks/:id/cards/:card_number/increment` e `/decrement`, `PUT /api/decks/:id/leader`): a ação vai para o deck exibido na tela (AD-029, 2026-10-11) | Req. 21.51–21.55; `.specs/features/spa-decks/spec.md` |
 | P13 | DECISÃO PENDENTE — confirmação do import da coleção cuja resposta se perde (rede ou tempo limite): manter o resumo não persistido, como o HTML, e exibir "Não foi possível saber se a importação foi gravada. Confira a sua pasta antes de enviar o arquivo de novo." sem reenviar (recomendada; sem migração, e o `Commit` já impede gravar duas vezes) ou persistir o resultado do `Commit` em `collection_imports` (migração) e devolvê-lo na leitura da pré-visualização confirmada, para recuperar o resumo | Req. 22.31, 22.40; `.specs/features/spa-portabilidade/spec.md` |
 | P14 | DECISÃO PENDENTE — destino das rotas de arquivo `GET /collection/export` e `GET /decks/<id>.txt` depois da troca: mantê-las nas URLs atuais como rotas do Rails fora de `/api`, com sessão e `302` para `/entrar?return_to=` sem ela (recomendada; o Req. 16.14 continua valendo, as URLs já entregues ao simulador e aos favoritos não mudam e a SPA já linka para elas) ou movê-las para `/api`, emendando o Req. 16.14 para admitir `text/csv` e `text/plain` | Req. 23.16–23.19, 23.22; `.specs/features/spa-troca/spec.md` |
 | P15 | DECISÃO PENDENTE — status dos redirecionamentos das URLs Hotwire e de `/app`: `301` permanente (recomendada; a AD-023 torna a troca definitiva e o Req. 4.7 pede URL estável) ou `302` temporário, que deixa voltar ao Hotwire num rollback sem cache de navegador apontando para rotas que a imagem anterior não tem | Req. 23.11, 23.12; `.specs/features/spa-troca/spec.md` |

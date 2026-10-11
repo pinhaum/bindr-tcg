@@ -226,6 +226,14 @@
 - **Date**: 2026-10-11
 - **Status**: active
 
+### AD-029
+- **Decision**: Fecha a pendência P12: as rotas da API que mexem nas entradas de um deck identificam o deck pelo `id` no caminho (`POST /api/decks/:id/cards/:card_number/increment` e `/decrement`, `PUT /api/decks/:id/leader` com `card_number` no corpo), não pelo deck em edição da sessão. O `id` do deck passa a sair no payload.
+- **Reason**: Decisão do dono em 2026-10-11. A operação vai para o deck que a tela mostra, mesmo que outra aba ou o Hotwire troque o deck em edição entre a carga e o toque (princípio do Req. 17.10). O deck não tem chave natural.
+- **Trade-off**: Expõe id de banco no payload, ao contrário do P9 para variantes; o isolamento continua por construção, buscando o deck em `Current.user.decks`.
+- **Scope**: `spa-decks` (Req. 21.51–21.55).
+- **Date**: 2026-10-11
+- **Status**: active
+
 ## Handoff
 
 > **Estado em 2026-10-11, spa-pasta — este bloco vence os de baixo só para a `spa-pasta`; o da `spa-carta` segue valendo para ela.** Feature **`spa-pasta`** (Req. 20, SPAS-01..46): **T1–T17 implementadas e commitadas, aguardando o Verifier** (`validation.md` ainda não existe). `<base>` = `8e6c92d`. Entregue: `GET /api/progress`, `GET /api/wishlist`, `DELETE …/wishlist`; `createLoader`, `requireSession`, `easeStandard`, `AnimatedNumber`, `PastaSummary`, `SetProgressRow`, `WishlistItem`; rotas `/app/pasta` e `/app/pasta/desejos`; e2e `pasta.spec.ts` e `pasta-desejos.spec.ts`. Gates: Vitest 856, e2e 193, Rails 1995, rubocop limpo. **Dívida:** migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`. **Decisão a confirmar com o dono:** SPAS-11 medido como a trilha de `repeat(4, 1fr)` descontados os vãos (cartão = (coluna − 3·gap)/4). **Próximo passo:** Verifier em contexto novo, depois `validate_state.py spa-pasta`.
