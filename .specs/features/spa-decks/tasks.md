@@ -226,11 +226,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Criar com nome válido → `201`, deck vazio do usuário da sessão, e o `GET /decks` HTML mostra "Em edição" nele (SDEC-44)
-- [ ] Renomear muda só o nome → `200` no formato do `show`; Leader e entradas intactos (SDEC-45)
-- [ ] Nome ausente, não-`String`, só espaços → `fields.name == ["O nome não pode ficar vazio."]`; 61 caracteres → `["O nome pode ter no máximo 60 caracteres."]`; nada gravado (SDEC-46)
-- [ ] Sem token com `allow_forgery_protection` ligado → `422 invalid_csrf_token`; `user_id` alheio no corpo ignorado; renomear deck de outro usuário → `404`; JSON malformado → `400 invalid_json` (SDEC-60)
-- [ ] Gate check passes: Rails quick
+- [x] Criar com nome válido → `201`, deck vazio do usuário da sessão, e o `GET /decks` HTML mostra "Em edição" nele (SDEC-44)
+- [x] Renomear muda só o nome → `200` no formato do `show`; Leader e entradas intactos (SDEC-45)
+- [x] Nome ausente, não-`String`, só espaços → `fields.name == ["O nome não pode ficar vazio."]`; 61 caracteres → `["O nome pode ter no máximo 60 caracteres."]`; nada gravado (SDEC-46)
+- [x] Sem token com `allow_forgery_protection` ligado → `422 invalid_csrf_token`; `user_id` alheio no corpo ignorado; renomear deck de outro usuário → `404`; JSON malformado → `400 invalid_json` (SDEC-60)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
