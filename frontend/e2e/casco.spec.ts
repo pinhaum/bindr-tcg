@@ -12,6 +12,8 @@ function trackBadResponses(page: Page) {
 	const bad: string[] = [];
 	page.on('response', (response) => {
 		const status = response.status();
+		// A arte vem de um CDN externo e responde 502 quando ele recusa (403); a SPA mostra o placeholder (SCAT-11).
+		if (new URL(response.url()).pathname.startsWith('/card_images/')) return;
 		if (status === 406 || status >= 500) bad.push(`${status} ${response.request().method()} ${response.url()}`);
 	});
 	return bad;

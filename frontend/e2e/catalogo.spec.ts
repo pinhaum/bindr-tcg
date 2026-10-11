@@ -41,8 +41,9 @@ const spaAnnouncement = (page: Page) => page.getByRole('status').filter({ hasTex
 
 async function waitForSpaCatalog(page: Page) {
 	await expect(page.getByRole('heading', { name: 'Catálogo', level: 1 })).toBeVisible();
-	await expect(page.locator('section[aria-busy="false"]')).toBeVisible();
+	// A linha de status só existe com o resultado da API na tela; só então o skeleton já saiu.
 	await expect(spaStatus(page)).toBeVisible();
+	await expect(page.locator('section[aria-busy="false"]')).toBeVisible();
 }
 
 async function readSpa(page: Page, query: string): Promise<Listing> {
@@ -161,33 +162,55 @@ test.describe('busca e paginação pela URL (SCAT-16, SCAT-27, SCAT-36)', () => 
 		expect(new URL(page.url()).searchParams.getAll('colors[]')).toEqual(['Red']);
 	});
 
-	test('a paginação leva os filtros e as faixas pela URL a cada link', async ({ page }) => {
-		const filters: [string, string][] = [
-			['cost_min', '1'],
-			['cost_max', '9'],
-			['sort', 'name'],
-			['dir', 'desc']
-		];
-		await page.goto(`/app/?${encode([...filters, ['page', '2']])}`);
-		await waitForSpaCatalog(page);
+	const paginationCases: { name: string; params: [string, string][] }[] = [
+		{
+			name: 'faixas e ordenação',
+			params: [
+				['cost_min', '1'],
+				['cost_max', '9'],
+				['sort', 'name'],
+				['dir', 'desc']
+			]
+		},
+		{
+			name: 'duas cores',
+			params: [
+				['colors[]', 'Red'],
+				['colors[]', 'Green']
+			]
+		},
+		{ name: 'um set', params: [['sets[]', SET_CODE]] },
+		{ name: 'termo de busca', params: [['q', 'Luffy']] }
+	];
 
-		const pagination = page.getByRole('navigation', { name: 'Paginação do catálogo' });
-		await expect(pagination).toBeVisible();
-		await expect(pagination.getByText(/^Página 2 de \d+$/)).toBeVisible();
-		const hrefOf = async (name: string) =>
-			new URL((await pagination.getByRole('link', { name }).getAttribute('href'))!, page.url())
-				.searchParams;
+	for (const { name, params } of paginationCases) {
+		test(`a paginação leva os filtros a cada link: ${name}`, async ({ page }) => {
+			await page.goto(`/app/?${encode([...params, ['page', '2']])}`);
+			await waitForSpaCatalog(page);
 
-		const previous = await hrefOf('Anterior');
-		expect(previous.get('page')).toBe('1');
-		for (const [key, value] of filters) expect(previous.get(key), `Anterior: ${key}`).toBe(value);
+			const pagination = page.getByRole('navigation', { name: 'Paginação do catálogo' });
+			await expect(pagination).toBeVisible();
+			await expect(pagination.getByText(/^Página 2 de \d+$/)).toBeVisible();
 
-		if ((await pagination.getByRole('link', { name: 'Próxima' }).count()) > 0) {
-			const next = await hrefOf('Próxima');
-			expect(next.get('page')).toBe('3');
-			for (const [key, value] of filters) expect(next.get(key), `Próxima: ${key}`).toBe(value);
-		}
-	});
+			const linkParams = async (linkName: string) => {
+				const link = pagination.getByRole('link', { name: linkName });
+				await expect(link, `link "${linkName}"`).toHaveCount(1);
+				return new URL((await link.getAttribute('href'))!, page.url()).searchParams;
+			};
+			const expected = new URLSearchParams(encode(params));
+
+			for (const [linkName, target] of [
+				['Anterior', '1'],
+				['Próxima', '3']
+			]) {
+				const actual = await linkParams(linkName);
+				expect(actual.get('page'), `${linkName}: page`).toBe(target);
+				for (const key of new Set(expected.keys())) {
+					expect(actual.getAll(key), `${linkName}: ${key}`).toEqual(expected.getAll(key));
+				}
+			}
+		});
+	}
 });
 
 for (const combo of COMBOS) {

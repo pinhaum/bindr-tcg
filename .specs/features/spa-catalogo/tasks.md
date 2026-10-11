@@ -773,9 +773,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Cada jornada acima verde contra a API real, com o marcador provando que a página não recarregou
-- [ ] Gate check passes: full
-- [ ] Test count: e2e anteriores + novos
+- [x] Cada jornada acima verde contra a API real, com o marcador provando que a página não recarregou
+- [x] Gate check passes: full
+- [x] Test count: e2e anteriores + novos
 
 **Tests**: e2e
 **Gate**: full
