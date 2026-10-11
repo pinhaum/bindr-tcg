@@ -455,16 +455,18 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Mesmo arquivo enviado pelo HTML e pela SPA (mesma conta): grupos, ordem, linhas, números de linha, antes, depois e motivos iguais entre `/collection/import/<token>` e `/app/pasta/importar/<token>` (Goal 1)
-- [ ] Export antes = export depois de enviar, abrir, recarregar e sair da pré-visualização (SPOR-20)
-- [ ] Confirmar pela SPA: resumo com contagens e o export igual ao que a confirmação pelo HTML produz numa segunda conta com a mesma coleção inicial (Goal 2); recarregar e confirmar de novo → alerta de `409` e export inalterado (SPOR-30)
-- [ ] Arquivo com `;` → alerta com a frase do separador e foco nele (SPOR-07)
-- [ ] 360px e 1280px nos dois temas, nas três telas, com nome de 120 caracteres e `tcgplayer:1234567890`: `scrollWidth` = `clientWidth`; botões com caixa de 44px ou mais (SPOR-46)
-- [ ] Pré-visualização de 10.000 linhas: tempo até o botão de confirmar visível registrado no *Registro* da task; acima de 5 s a 360px, parar e levar ao dono
-- [ ] Gate check passes: Full
+- [x] Mesmo arquivo enviado pelo HTML e pela SPA (mesma conta): grupos, ordem, linhas, números de linha, antes, depois e motivos iguais entre `/collection/import/<token>` e `/app/pasta/importar/<token>` (Goal 1)
+- [x] Export antes = export depois de enviar, abrir, recarregar e sair da pré-visualização (SPOR-20)
+- [x] Confirmar pela SPA: resumo com contagens e o export igual ao que a confirmação pelo HTML produz numa segunda conta com a mesma coleção inicial (Goal 2); recarregar e confirmar de novo → alerta de `409` e export inalterado (SPOR-30)
+- [x] Arquivo com `;` → alerta com a frase do separador e foco nele (SPOR-07)
+- [x] 360px e 1280px nos dois temas, nas três telas, com nome de 120 caracteres e `tcgplayer:1234567890`: `scrollWidth` = `clientWidth`; botões com caixa de 44px ou mais (SPOR-46)
+- [x] Pré-visualização de 10.000 linhas: tempo até o botão de confirmar visível registrado no *Registro* da task; acima de 5 s a 360px, parar e levar ao dono
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
+
+**Registro**: 10.000 linhas, do clique em enviar até o botão de confirmar visível: 360px ≈ 3,0 s (envio) e 1,9 s (abrir a URL); 1280px ≈ 3,0 s e 2,3 s (duas rodadas do supervisor, orçamento de 5 s a 360px respeitado). A API aceita 10.000 linhas em 0,7 s. O primeiro timeout de 120 s era bug do gerador de CSV do teste (aspas em nomes não escapadas), não lentidão.
 
 **Commit**: `test(spa-portabilidade): provar o import da coleção na SPA de ponta a ponta`
 
