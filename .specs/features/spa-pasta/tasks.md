@@ -256,10 +256,10 @@ T16 → T17
 
 **Done when**:
 
-- [ ] `easeStandard(0)` é 0, `easeStandard(1)` é 1 e a curva é monotônica em 0..1 (amostras a cada 0,05)
-- [ ] Valores em 0,25 e 0,5 batem com uma referência de `cubic-bezier(0.2, 0, 0, 1)` calculada no teste com tolerância de 0,001
-- [ ] O teste lê `--ease-standard` de `tokens.css` e confirma os quatro números usados
-- [ ] Gate check passes: Front quick
+- [x] `easeStandard(0)` é 0, `easeStandard(1)` é 1 e a curva é monotônica em 0..1 (amostras a cada 0,05)
+- [x] Valores em 0,25 e 0,5 batem com uma referência de `cubic-bezier(0.2, 0, 0, 1)` calculada no teste com tolerância de 0,001
+- [x] O teste lê `--ease-standard` de `tokens.css` e confirma os quatro números usados
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
