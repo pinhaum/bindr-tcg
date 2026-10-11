@@ -444,6 +444,23 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [x] **14.4 Página, tile, ponta a ponta e fechamento** — T17–T22
   - _Requisitos: 19.1–19.13, 19.15, 19.17, 19.19, 19.21–19.27, 19.29–19.31, 19.36, 19.39–19.41, 19.49_
 
+## 15 — Pasta e lista de desejos na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-pasta/tasks.md` (T1–T17, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+Só abre depois do fechamento da §14 (`spa-carta`).
+
+- [ ] **15.1 API da pasta e da lista de desejos** — T1–T3 da `spa-pasta`
+  - `GET /api/progress`, `GET /api/wishlist` e `DELETE …/variants/:variant_code/wishlist`
+    (AD-027), sobre as consultas da pasta e da lista Hotwire.
+  - _Requisitos: 20.37–20.46_
+- [ ] **15.2 Funções puras, estado e navegação do front** — T4–T8
+  - _Requisitos: 20.2–20.7, 20.12, 20.30, 20.43_
+- [ ] **15.3 Componentes** — T9–T12
+  - _Requisitos: 20.8–20.16, 20.19–20.23, 20.30–20.32, 20.35_
+- [ ] **15.4 Páginas, ponta a ponta e fechamento** — T13–T17
+  - _Requisitos: 20.1, 20.3–20.7, 20.11, 20.12, 20.14, 20.16–20.18, 20.24–20.29, 20.33–20.36, 20.43, 20.46_
+
 ---
 
 ## Fora do escopo da Fase 1

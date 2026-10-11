@@ -218,7 +218,17 @@
 - **Date**: 2026-10-11
 - **Status**: active
 
+### AD-028
+- **Decision**: Ação lateral de tela da SPA (como "Adicionar cartas" da pasta) vai no slot `shell.aside` de `frontend/src/lib/shell.svelte.ts`, num só nó no DOM, e quem decide onde ele monta é `wide` (`MediaQuery` de `64rem`): na coluna lateral do `AppShell` a partir de `64rem`, na própria página abaixo disso. Nunca duas instâncias.
+- **Reason**: Aprovação do design da `spa-pasta` pelo dono em 2026-10-11. É a segunda tela a usar o slot (a primeira foi o painel de filtros da `spa-catalogo`); duas instâncias duplicariam id e foco, e o Hotwire já fazia o mesmo com `sidebar_actions`.
+- **Trade-off**: A página precisa limpar `shell.aside` ao desmontar, senão a ação vaza para a rota seguinte.
+- **Scope**: `spa-catalogo`, `spa-pasta` e as fatias de tela seguintes.
+- **Date**: 2026-10-11
+- **Status**: active
+
 ## Handoff
+
+> **Estado em 2026-10-11, spa-pasta — este bloco vence os de baixo só para a `spa-pasta`; o da `spa-carta` segue valendo para ela.** Feature **`spa-pasta`** (Req. 20, SPAS-01..46): spec aprovado pelo dono (escolhas do agente confirmadas; `validate_spec.py` limpo), `design.md` **aprovado** com a abordagem A do carregador (um `createLoader<T>` genérico só para a pasta e a lista; migrar `catalog.svelte.ts` e `card-detail.svelte.ts` fica como dívida para depois da `spa-carta`) e AD-028 (`shell.aside` para a ação lateral). `tasks.md` escrito (T1–T17 em 4 phases; `validate_tasks.py` sai 0), aguardando aprovação do dono. §15 do `.context/tasks.md` aberta (15.1–15.4). Nada de código. **Pré-condição:** a `spa-carta` encerrada; a T1 registra o commit-pai como base do gate SPAS-46. **Próximo passo:** aprovação do `tasks.md`; execução só depois do fechamento da `spa-carta`, com oferta de subagentes (17 tasks → 3 lotes).
 
 > **Estado em 2026-10-11, spa-carta — este bloco vence os de baixo.** Feature **`spa-carta`** (Req. 19, SCAR-01..49) **implementada (T1–T22) e aguardando o Verifier**: detalhe da carta em `/app/cartas/[card_number]` (cabeçalho, campos por tipo, variantes com troca local do destaque, posse otimista em fila por variante, desejo, morph grade → detalhe), três endpoints de escrita em `Api::CardVariantsController` e o SQL atômico de posse em `CollectionItem.increment_for!`/`decrement_for!` (abordagem A; nenhum teste Rails existente editado, `git diff --name-status 213f0bc..HEAD -- test/` só com `A`). Gates ao fechar a T22: Vitest 737, e2e 143 (um flake conhecido: `sessao.spec.ts` "a mensagem não desloca o conteúdo", SPA-46, passa isolado 3×), Rails 1966, rubocop limpo, brakeman só com o aviso de calendário, `docker build` OK. Desvios do design (registrados no `design.md`): o `OwnershipStepper` cria a própria fila (sem `Map`; `{#key}`), o morph ganhou o rendezvous `awaitArrival`/`signalArrival` (`view-transition.ts` deixou de ser inalterado) e `CardFields` indexa por `card_type` minúsculo. **Dívidas fora do escopo (back):** `CardImagesController` busca a variante só por `variant_code` (`app/controllers/card_images_controller.rb:23`; o `UNIQUE` é `(card_id, variant_code)`); o `WishlistItemsController` HTML tem a mesma corrida de criação que a API trata (500 no HTML). §14 do `.context/tasks.md` fechada. **Próximo passo:** Verifier (autor ≠ verificador), code review e `/simplify`.
 
