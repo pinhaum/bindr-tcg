@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/spa-catalogo/design.md`
-**Status**: Draft
+**Status**: Executed (T1–T25); Verifier it.1 FAIL → fase 5 (T26–T28)
 
 ---
 
@@ -100,6 +100,14 @@ T7 → T25
 T24 → T25
 ```
 
+### Phase 5: Correções do Verifier (iteração 1)
+
+```
+T25 → T26
+T26 → T27
+T25 → T28
+```
+
 ---
 
 ## Task Breakdown
@@ -149,7 +157,7 @@ T24 → T25
 **Done when**:
 
 - [x] `/app?colors%5B%5D=Red&owned=owned` e `/app` voltam como vieram
-- [x] `/appx`, `/app?x=//evil`, `/app?\\`, `/app?` com caractere de controle e todas as recusas anteriores continuam devolvendo `/app` (o teste antigo passa sem edição)
+- [x] `/appx`, `/app?x=//evil`, `/app?\\`, `/app?` com caractere de controle e todas as recusas anteriores continuam devolvendo `/app` (emenda da execução: os dois casos antigos que recusavam `/app` e `/app?x=1` viraram aceitos por exigência do SCAT-31; as demais recusas passam sem edição)
 - [x] Gate check passes: quick
 - [x] Test count: anteriores + novos, nenhum removido
 
@@ -810,6 +818,87 @@ T24 → T25
 
 ---
 
+### T26: E2E de layout dos ACs de dimensão e posição (G1)
+
+**What**: `e2e/catalogo-layout.spec.ts` contra a API real, nos quatro combos de largura e tema onde couber: (a) `boundingBox().height >= 44` de cada chip do painel e dos ativos, do `select` "Set", de "Aplicar", "Buscar" e do campo de busca; (b) chip ativo com largura de borda de 2px e cor igual a `--accent` (`getComputedStyle`); (c) selo de posse com `right` e `top` do canto superior direito da arte (tolerância de `--space-2`); (d) a 1280px a linha de status na mesma linha do campo de busca (`status.y` ≈ `search.y`) com "Limpar filtros" à direita, e a 360px empilhados; (e) para uma `img` com `naturalWidth === 0` (a pilha real tem imagens 502), o placeholder visível e `getComputedStyle(img).backgroundColor` transparente.
+**Where**: `frontend/e2e/catalogo-layout.spec.ts`
+**Depends on**: T25
+**Reuses**: helpers de largura e tema de `casco.spec.ts`; `signIn` e o fluxo de posse de `catalogo-interacao.spec.ts`
+**Requirement**: SCAT-10, SCAT-11, SCAT-13, SCAT-15, SCAT-20, SCAT-22, SCAT-30, SCAT-32
+
+**Tools**:
+
+- MCP: `playwright` (depuração local, se preciso)
+- Skill: `ecc:e2e-testing`
+
+**Done when**:
+
+- [x] Cada AC de dimensão e posição acima tem asserção numérica ou de estilo computado (`toBeGreaterThanOrEqual(44)`, `'2px'`, posição do canto, `y` da mesma linha)
+- [x] Reexecutados na cópia isolada, os mutantes C01 (remove `min-block-size` do chip), C02 (anel de 1px), C03 (selo no canto esquerdo), C05 (toolbar em coluna a partir de 64rem) e C06 (`.image` opaca) morrem
+- [x] Gate check passes: full
+- [x] Test count: e2e anteriores + novos, nenhum removido
+
+**Tests**: e2e
+**Gate**: full
+
+**Commit**: `test(spa-catalogo): provar alvos, anel, selo e linha de status por e2e de layout`
+
+---
+
+### T27: E2E residuais: paridade nos quatro combos, três chips por teclado e altura da sessão (G2, G3, G5)
+
+**What**: Em `catalogo.spec.ts`, rodar os testes de paridade nos quatro combos de largura e tema (não só 1280×720 claro). Em `catalogo-interacao.spec.ts`, aplicar três chips de cor seguidos pelo teclado (`tabTo(Red)` + Enter, esperar o chip ativo, `Green`, `Blue`), afirmando `colors[]` com três valores, o foco ainda no painel e a região de anúncio com "1 filtro ativo", "2 filtros ativos" e "3 filtros ativos". Em `sessao.spec.ts`, esperar `section[aria-busy="false"]` antes de medir e voltar a comparar a caixa inteira de `main` na prova do SPA-46.
+**Where**: `frontend/e2e/catalogo-interacao.spec.ts`
+**Depends on**: T26
+**Reuses**: `tabTo` e `spaAnnouncement` dos próprios specs
+**Requirement**: SCAT-41, SCAT-44
+
+**Tools**:
+
+- MCP: `playwright` (depuração local, se preciso)
+- Skill: `ecc:e2e-testing`
+
+**Done when**:
+
+- [ ] A paridade `/app` × `/catalog` passa nos quatro combos
+- [ ] Três chips seguidos pelo teclado dão `colors[]` com três valores, foco no painel e anúncio a cada resposta
+- [ ] A prova do SPA-46 compara a caixa inteira de `main` depois de a grade estabilizar
+- [ ] Gate check passes: full
+- [ ] Test count: e2e anteriores + novos, nenhum removido
+
+**Tests**: e2e
+**Gate**: full
+
+**Commit**: `test(spa-catalogo): cobrir paridade nos combos e três chips seguidos por teclado`
+
+---
+
+### T28: Página com falha das opções de filtro e grade intacta (G4)
+
+**What**: Em `page.test.ts`, montar a página com `filterOptions.error` setado e afirmar que o tile, a frase de status, a lista "Filtros ativos" e a `message` com "Tentar novamente" no painel coexistem.
+**Where**: `frontend/src/routes/page.test.ts`
+**Depends on**: T25
+**Reuses**: mocks e `envelope` de `page.test.ts`; `filterOptions` de `filter-options.svelte.ts`
+**Requirement**: SCAT-40
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] Com a falha das opções, a grade, a linha de status e os filtros ativos seguem renderizados e o painel mostra a `message` e "Tentar novamente"
+- [ ] Gate check passes: quick
+- [ ] Test count: anteriores + novos, nenhum removido
+
+**Tests**: unit
+**Gate**: quick
+
+**Commit**: `test(spa-catalogo): provar a grade intacta quando as opções de filtro falham`
+
+---
+
 ## Phase Execution Map
 
 Phase 1 → Phase 2 → Phase 3 → Phase 4, em série; dentro de cada phase, as tasks rodam na ordem numérica.
@@ -820,6 +909,7 @@ Phase 1 → Phase 2 → Phase 3 → Phase 4, em série; dentro de cada phase, as
 | 2 | T8, T9, T10, T11, T12, T13 |
 | 3 | T14, T15, T16, T17, T18, T19 |
 | 4 | T20, T21, T22, T23, T24, T25 |
+| 5 | T26, T27, T28 |
 
 Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2 (T8–T13), **C** = Phase 3 (T14–T19), **D** = Phase 4 (T20–T25). Os lotes rodam em série.
 
@@ -854,6 +944,9 @@ Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2
 | T23: E2E de paridade | 1 spec | ✅ Granular |
 | T24: E2E de interação | 1 spec | ✅ Granular |
 | T25: Fechamento | docs | ✅ Granular |
+| T26: E2E de layout | 1 spec | ✅ Granular |
+| T27: E2E residuais | 3 emendas de spec do mesmo tema | ⚠️ Coeso (mesma jornada de e2e) |
+| T28: Página com opções falhando | 1 teste | ✅ Granular |
 
 ---
 
@@ -886,6 +979,9 @@ Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2
 | T23 | T22 | T22 → T23 | ✅ Match |
 | T24 | T23 | T23 → T24 | ✅ Match |
 | T25 | T7, T24 | T7 → T25, T24 → T25 | ✅ Match |
+| T26 | T25 | T25 → T26 | ✅ Match |
+| T27 | T26 | T26 → T27 | ✅ Match |
+| T28 | T25 | T25 → T28 | ✅ Match |
 
 ---
 
@@ -911,6 +1007,8 @@ Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2
 | T23: E2E de paridade | Jornada | e2e | e2e | ✅ OK |
 | T24: E2E de interação | Jornada | e2e | e2e | ✅ OK |
 | T25: Fechamento | docs | none | none | ✅ OK |
+| T26–T27: E2E | Jornada | e2e | e2e | ✅ OK |
+| T28: Página | Página | unit | unit | ✅ OK |
 
 ---
 
