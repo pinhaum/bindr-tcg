@@ -443,11 +443,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] `statusLabel` dá "válido", "incompleto", "inválido"
-- [ ] `groupLabel` dá "Personagens", "Eventos", "Locais" e "Don" para `don`
-- [ ] `groupEntries` em `[character, character, event, character]` dá três grupos, sem reordenar
-- [ ] `missingSentence` para deck sem Leader e sem entradas, `missing_total` 0, 1 e 3 dá as quatro frases exatas do SDEC-24
-- [ ] Gate check passes: Front quick
+- [x] `statusLabel` dá "válido", "incompleto", "inválido"
+- [x] `groupLabel` dá "Personagens", "Eventos", "Locais" e "Don" para `don`
+- [x] `groupEntries` em `[character, character, event, character]` dá três grupos, sem reordenar
+- [x] `missingSentence` para deck sem Leader e sem entradas, `missing_total` 0, 1 e 3 dá as quatro frases exatas do SDEC-24
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
