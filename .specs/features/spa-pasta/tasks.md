@@ -565,18 +565,20 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Com três desejos (um atendido), a lista da SPA tem os mesmos nomes, `variant_code`, contagens e estados, na mesma ordem, que `/wishlist` (SPAS-29, SPAS-31)
-- [ ] Remover o do meio: o foco vai ao "Remover" do seguinte e nunca ao `<body>`; recarregar `/wishlist` não mostra o item; o mesmo desejo de outro usuário continua lá (SPAS-33, SPAS-34, SPAS-43)
-- [ ] Remover todos: foco no `h1` e a mensagem de lista vazia (SPAS-34)
-- [ ] O link do item abre `/app/cartas/<card_number>` sem recarga (SPAS-30)
-- [ ] 360px nos dois temas sem scroll horizontal (SPAS-27)
-- [ ] Gate check passes: Full
+- [x] Com três desejos (um atendido), a lista da SPA tem os mesmos nomes, `variant_code`, contagens e estados, na mesma ordem, que `/wishlist` (SPAS-29, SPAS-31)
+- [x] Remover o do meio: o foco vai ao "Remover" do seguinte e nunca ao `<body>`; recarregar `/wishlist` não mostra o item; o mesmo desejo de outro usuário continua lá (SPAS-33, SPAS-34, SPAS-43)
+- [x] Remover todos: foco no `h1` e a mensagem de lista vazia (SPAS-34)
+- [x] O link do item abre `/app/cartas/<card_number>` sem recarga (SPAS-30)
+- [x] 360px nos dois temas sem scroll horizontal (SPAS-27)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
 
 **Commit**: `test(spa-pasta): lista de desejos e remoção contra a API real`
 
+
+**Registro**: Gate Full: Front quick 856, e2e completo 193, Rails 1995 (0 falhas). A T16 expôs defeito da T14 (`api.get` já devolve `data` desempacotado; o mock do `page.test.ts` escondia o envelope): corrigido no commit anterior, por autorização do supervisor ao worker da T16. Achados MINOR da revisão (testes de remoção seriais e dependentes de ordem; `quantity`/`status` por classe; `quantity` do HTML montada à mão) registrados no relatório.
 ---
 
 ### T17: Fechamento da documentação
