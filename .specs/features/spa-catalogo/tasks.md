@@ -690,12 +690,12 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Com `matchMedia` casando, o painel é renderizado no slot do casco e não há `<details>`; sem casar, há `<details>` "Filtros" fechado na carga, com "2 filtros ativos" no resumo quando há dois chips, e a lista "Filtros ativos" visível fora dele (SCAT-33, 34)
-- [ ] Abrir o `<details>` e trocar `page.url` (só query) mantém o painel aberto; nunca há duas instâncias do painel (SCAT-35)
-- [ ] Remover o 2º de 3 chips foca o novo 2º; remover o último de 2 foca o anterior; remover o único foca a linha de status; "Próxima" foca a linha de status (SCAT-42, 43)
-- [ ] Desmontar a página zera `shell.aside`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Com `matchMedia` casando, o painel é renderizado no slot do casco e não há `<details>`; sem casar, há `<details>` "Filtros" fechado na carga, com "2 filtros ativos" no resumo quando há dois chips, e a lista "Filtros ativos" visível fora dele (SCAT-33, 34)
+- [x] Abrir o `<details>` e trocar `page.url` (só query) mantém o painel aberto; nunca há duas instâncias do painel (SCAT-35)
+- [x] Remover o 2º de 3 chips foca o novo 2º; remover o último de 2 foca o anterior; remover o único foca a linha de status; "Próxima" foca a linha de status (SCAT-42, 43)
+- [x] Desmontar a página zera `shell.aside`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
