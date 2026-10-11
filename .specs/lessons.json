@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 74,
+  "next_id": 76,
   "lessons": [
     {
       "id": "L-001",
@@ -1318,6 +1318,42 @@
       ],
       "created": "2026-10-11T17:14:14Z",
       "last_seen": "2026-10-11T17:14:14Z"
+    },
+    {
+      "id": "L-074",
+      "key": "surviving_mutant::quando o spec fixa a curva de uma animacao amostrar o valor num instante em que a curva e a linear divergem e afirmar esse valor testar so os extremos e entre 0 e o final deixa a troca de easing passar",
+      "text": "Quando o spec fixa a curva de uma animação, amostrar o valor num instante em que a curva e a linear divergem e afirmar esse valor; testar só os extremos e 'entre 0 e o final' deixa a troca de easing passar.",
+      "signal": "surviving_mutant",
+      "scope": "frontend/motion",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "frontend/src/lib/components/AnimatedNumber.svelte:19 (F4, SPAS-12) (frontend/motion)"
+      ],
+      "created": "2026-10-11T17:30:16Z",
+      "last_seen": "2026-10-11T17:30:16Z"
+    },
+    {
+      "id": "L-075",
+      "key": "ac_gap::no e2e de paridade extrair o mesmo trecho do dom nos dois lados sem normalizar a estrutura de um deles remover um elemento so do lado do html esconde desvio de marcacao que o spec proibe",
+      "text": "No e2e de paridade, extrair o mesmo trecho do DOM nos dois lados sem normalizar a estrutura de um deles; remover um elemento só do lado do HTML esconde desvio de marcação que o spec proíbe.",
+      "signal": "ac_gap",
+      "scope": "frontend/e2e/paridade",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "frontend/e2e/pasta-desejos.spec.ts:146-148; frontend/src/lib/components/WishlistItem.test.ts:23 (SPAS-30) (frontend/e2e/paridade)"
+      ],
+      "created": "2026-10-11T17:30:16Z",
+      "last_seen": "2026-10-11T17:30:16Z"
     }
   ]
 }

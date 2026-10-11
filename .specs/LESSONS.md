@@ -452,6 +452,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M7 frontend/src/routes/pasta/desejos/+page.svelte:62 (SPAS-34) (frontend-tests)
 - last seen: 2026-10-11T17:14:14Z
 
+### L-074 - Quando o spec fixa a curva de uma animação, amostrar o valor num instante em que a curva e a linear divergem e afirmar esse valor; testar só os extremos e 'entre 0 e o final' deixa a troca de easing passar.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/motion` · harmful: 0
+- features: spa-pasta
+- evidence: frontend/src/lib/components/AnimatedNumber.svelte:19 (F4, SPAS-12) (frontend/motion)
+- last seen: 2026-10-11T17:30:16Z
+
+### L-075 - No e2e de paridade, extrair o mesmo trecho do DOM nos dois lados sem normalizar a estrutura de um deles; remover um elemento só do lado do HTML esconde desvio de marcação que o spec proíbe.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `frontend/e2e/paridade` · harmful: 0
+- features: spa-pasta
+- evidence: frontend/e2e/pasta-desejos.spec.ts:146-148; frontend/src/lib/components/WishlistItem.test.ts:23 (SPAS-30) (frontend/e2e/paridade)
+- last seen: 2026-10-11T17:30:16Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
