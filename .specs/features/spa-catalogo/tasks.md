@@ -262,10 +262,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Teste lê `base.css` cru e confere a regra com as propriedades acima
-- [ ] `guard.test.ts` verde sem edição
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Teste lê `base.css` cru e confere a regra com as propriedades acima
+- [x] `guard.test.ts` verde sem edição
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick

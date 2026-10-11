@@ -12,6 +12,18 @@ body {
 	outline-offset: 2px;
 }
 
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
 @media (max-width: 63.999rem) {
 	html {
 		scroll-padding-block-end: calc(var(--nav-height) + env(safe-area-inset-bottom));
