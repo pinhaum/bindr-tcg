@@ -464,20 +464,22 @@ T16 → T17
 
 **Done when**:
 
-- [ ] `load` sem sessão redireciona sem chamar o cliente; com sessão a página chama `get('/api/progress?order=code')` com a URL `?order=code` e `get('/api/progress')` sem `order` (SPAS-03, SPAS-04)
-- [ ] `<title>` "Minha pasta — Bindr" e `h1` "Minha pasta" (SPAS-01)
-- [ ] Resposta antiga descartada; "Carregando pasta…" e `aria-busy="true"` só após 200 ms; `500` mostra a `message` e "Tentar novamente", que repete a consulta (SPAS-05, SPAS-06, SPAS-07)
-- [ ] Chips "Recentes" e "Por código" na lista "Ordenar sets", `aria-current="page"` no chip de `data.order = "recent"` com a URL `?order=xyz` (SPAS-17)
-- [ ] Lista de sets nomeada por "Progresso por set", na ordem de `data.sets`, sem contagem (SPAS-18)
-- [ ] Links "Baixar minha coleção (CSV)" `/collection/export` e "Importar coleção" `/collection/import` com `data-sveltekit-reload`; "Lista de desejos" `/app/pasta/desejos` e "Adicionar cartas à pasta" `/app` sem recarga (SPAS-24, SPAS-25)
-- [ ] Com `wide` verdadeiro, `shell.aside` recebe a ação com o texto "Adicionar cartas"; ao desmontar, volta a `null` (SPAS-24, AD-028)
-- [ ] Gate check passes: Front quick
+- [x] `load` sem sessão redireciona sem chamar o cliente; com sessão a página chama `get('/api/progress?order=code')` com a URL `?order=code` e `get('/api/progress')` sem `order` (SPAS-03, SPAS-04)
+- [x] `<title>` "Minha pasta — Bindr" e `h1` "Minha pasta" (SPAS-01)
+- [x] Resposta antiga descartada; "Carregando pasta…" e `aria-busy="true"` só após 200 ms; `500` mostra a `message` e "Tentar novamente", que repete a consulta (SPAS-05, SPAS-06, SPAS-07)
+- [x] Chips "Recentes" e "Por código" na lista "Ordenar sets", `aria-current="page"` no chip de `data.order = "recent"` com a URL `?order=xyz` (SPAS-17)
+- [x] Lista de sets nomeada por "Progresso por set", na ordem de `data.sets`, sem contagem (SPAS-18)
+- [x] Links "Baixar minha coleção (CSV)" `/collection/export` e "Importar coleção" `/collection/import` com `data-sveltekit-reload`; "Lista de desejos" `/app/pasta/desejos` e "Adicionar cartas à pasta" `/app` sem recarga (SPAS-24, SPAS-25)
+- [x] Com `wide` verdadeiro, `shell.aside` recebe a ação com o texto "Adicionar cartas"; ao desmontar, volta a `null` (SPAS-24, AD-028)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): pasta em /app/pasta`
 
+
+**Registro**: Revisão: 1 MAJOR (reserva de espaço da ação fixa no contêiner errado) e 1 MINOR (consulta sem sessão no logout) corrigidos por worker novo. A medida real (390px) fica na T15. Front quick: 843 testes.
 ---
 
 ### T14: Rota `/app/pasta/desejos`
