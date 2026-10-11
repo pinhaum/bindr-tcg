@@ -5,6 +5,8 @@
 class Api::CollectionImportsController < Api::BaseController
   REFUSAL_MESSAGE = "O arquivo não foi importado. Sua coleção não foi alterada.".freeze
 
+  CLOSED_MESSAGE = CollectionImportsController::MENSAGEM_JA_CONFIRMADA
+
   CLASSIFICATIONS = {
     zera: "removes",
     cria: "creates",
@@ -28,6 +30,20 @@ class Api::CollectionImportsController < Api::BaseController
       render :create, status: :created
     else
       render_error(:unprocessable_entity, "validation_failed", REFUSAL_MESSAGE, { file: [ result.error ] })
+    end
+  end
+
+  # Toda a escrita é do `Commit`; nada do corpo é lido (SPOR-40). `nil` é token
+  # alheio ou inexistente (404 do base); não reivindicada é confirmação repetida
+  # ou staging vencido (SPOR-41), e nada foi gravado.
+  def confirm
+    @result = CollectionCsv::Commit.new(Current.user, params[:token]).call
+    raise ActiveRecord::RecordNotFound if @result.nil?
+
+    if @result.reivindicada?
+      @collection_import = CollectionImport.find_by_token_for(Current.user, params[:token])
+    else
+      render_error(:conflict, "import_closed", CLOSED_MESSAGE)
     end
   end
 end

@@ -196,20 +196,22 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Para o mesmo conteúdo, confirmar pela API e pelo HTML (dois usuários com a mesma coleção inicial) deixa `collection_items` igual (SPOR-40)
-- [ ] Corpo `200`: `filename`, `created`, `updated` incluindo `removed`, `removed`, `unchanged`, `rejected` com `line`/`card_number`/`variant_code`/`card_name`/`message` e `failures` com `line`/`card_number`/`variant_code` (falha forçada no upsert); `file` ou `linhas` no corpo da confirmação são ignorados (SPOR-40)
-- [ ] Coleção alterada por `increment` entre a leitura e a confirmação → o resumo traz as contagens que o `Commit` gravou (Edge Case)
-- [ ] Segunda confirmação e staging vencido → `409 import_closed` com "Esta importação já foi confirmada ou expirou. Sua coleção não foi alterada; envie o arquivo de novo se quiser importar." e coleção inalterada (SPOR-41)
-- [ ] Duas threads confirmando o mesmo token (`use_transactional_tests = false`, arquivo próprio `collection_imports_concurrency_test.rb`) → uma `200` e uma `409`, coleção gravada uma vez (SPOR-42)
-- [ ] Token alheio e inexistente → o mesmo `404`, sem gravar (SPOR-39); sem sessão `401`; sem CSRF `422 invalid_csrf_token` (SPOR-43)
-- [ ] `docker compose exec app bin/rails test` inteiro passa sem editar teste existente (SPOR-45)
-- [ ] Tempo do `Commit` com 10.000 linhas medido no container e registrado no *Registro* desta task; acima de 30 s, parar e levar ao dono antes da T10
-- [ ] Gate check passes: Rails quick e `docker compose exec app bin/rails test`
+- [x] Para o mesmo conteúdo, confirmar pela API e pelo HTML (dois usuários com a mesma coleção inicial) deixa `collection_items` igual (SPOR-40)
+- [x] Corpo `200`: `filename`, `created`, `updated` incluindo `removed`, `removed`, `unchanged`, `rejected` com `line`/`card_number`/`variant_code`/`card_name`/`message` e `failures` com `line`/`card_number`/`variant_code` (falha forçada no upsert); `file` ou `linhas` no corpo da confirmação são ignorados (SPOR-40)
+- [x] Coleção alterada por `increment` entre a leitura e a confirmação → o resumo traz as contagens que o `Commit` gravou (Edge Case)
+- [x] Segunda confirmação e staging vencido → `409 import_closed` com "Esta importação já foi confirmada ou expirou. Sua coleção não foi alterada; envie o arquivo de novo se quiser importar." e coleção inalterada (SPOR-41)
+- [x] Duas threads confirmando o mesmo token (`use_transactional_tests = false`, arquivo próprio `collection_imports_concurrency_test.rb`) → uma `200` e uma `409`, coleção gravada uma vez (SPOR-42)
+- [x] Token alheio e inexistente → o mesmo `404`, sem gravar (SPOR-39); sem sessão `401`; sem CSRF `422 invalid_csrf_token` (SPOR-43)
+- [x] `docker compose exec app bin/rails test` inteiro passa sem editar teste existente (SPOR-45)
+- [x] Tempo do `Commit` com 10.000 linhas medido no container e registrado no *Registro* desta task; acima de 30 s, parar e levar ao dono antes da T10
+- [x] Gate check passes: Rails quick e `docker compose exec app bin/rails test`
 
 **Tests**: integration
 **Gate**: full
 
 **Commit**: `feat(spa-portabilidade): confirmar o import da coleção pela API`
+
+**Registro**: `Commit` com 10.000 linhas levou 7,91 s no container (RAILS_ENV=test), abaixo do teto de 30 s. Um flake isolado em `bin/rails test` (staging vencido) não se repetiu em 4 rodadas seguintes.
 
 ---
 

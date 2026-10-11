@@ -473,7 +473,7 @@ Plano da feature em `.specs/features/spa-portabilidade/tasks.md` (T1–T15, nume
 própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham. A §16
 fica reservada à `spa-decks` (Req. 21). Só abre depois do fechamento da §15 (`spa-pasta`).
 
-- [ ] **17.1 API do import** — T1–T4 da `spa-portabilidade`
+- [x] **17.1 API do import** — T1–T4 da `spa-portabilidade`
   - `CollectionCsv::Upload` e `POST /api/collection/imports`, `GET …/:token`,
     `POST …/:token/confirm` (`409 import_closed`), sem mudar o import HTML.
   - _Requisitos: 22.36–22.45_
