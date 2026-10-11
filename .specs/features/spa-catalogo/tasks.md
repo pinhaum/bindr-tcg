@@ -658,15 +658,15 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Título e `<h1>` exatos; nenhum resto da página de início (e-mail, links "Entrar"/"Criar conta" em `main`) (SCAT-01)
-- [ ] Com cliente falso: abrir em `/app?colors%5B%5D=Red` chama `/api/catalog?colors%5B%5D=Red`; trocar `page.url` refaz a consulta e mostra o termo novo no campo (SCAT-04, 07, 17)
-- [ ] Trocar `session.user` com a URL igual refaz a consulta (SCAT-09)
-- [ ] Vazio com `q` "zoro": "Nenhuma carta encontrada para zoro." com o termo em destaque; sem `q` e sem filtro: "Nenhuma carta corresponde aos filtros aplicados." sem "Limpar filtros"; com filtro: com "Limpar filtros" (SCAT-37)
-- [ ] Skeleton: dez tiles esqueleto, `aria-busy="true"` e "Carregando cartas…" depois de 200 ms; erro: `message` e "Tentar novamente", que refaz a consulta, com busca e filtros ainda presentes (SCAT-38, 39)
-- [ ] Sem sessão, "Entrar para registrar posse" leva a `/app/entrar?return_to=` com o caminho e a query atuais codificados (SCAT-31)
-- [ ] A região `role="status"` recebe a frase da linha de status a cada resposta, inclusive com frase igual à anterior, e a `message` em erro (SCAT-44)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores − os 4 testes do início da fundação + novos
+- [x] Título e `<h1>` exatos; nenhum resto da página de início (e-mail, links "Entrar"/"Criar conta" em `main`) (SCAT-01)
+- [x] Com cliente falso: abrir em `/app?colors%5B%5D=Red` chama `/api/catalog?colors%5B%5D=Red`; trocar `page.url` refaz a consulta e mostra o termo novo no campo (SCAT-04, 07, 17)
+- [x] Trocar `session.user` com a URL igual refaz a consulta (SCAT-09)
+- [x] Vazio com `q` "zoro": "Nenhuma carta encontrada para zoro." com o termo em destaque; sem `q` e sem filtro: "Nenhuma carta corresponde aos filtros aplicados." sem "Limpar filtros"; com filtro: com "Limpar filtros" (SCAT-37)
+- [x] Skeleton: dez tiles esqueleto, `aria-busy="true"` e "Carregando cartas…" depois de 200 ms; erro: `message` e "Tentar novamente", que refaz a consulta, com busca e filtros ainda presentes (SCAT-38, 39)
+- [x] Sem sessão, "Entrar para registrar posse" leva a `/app/entrar?return_to=` com o caminho e a query atuais codificados (SCAT-31)
+- [x] A região `role="status"` recebe a frase da linha de status a cada resposta, inclusive com frase igual à anterior, e a `message` em erro (SCAT-44)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores − os 4 testes do início da fundação + novos
 
 **Tests**: unit
 **Gate**: quick

@@ -1,3 +1,9 @@
+<script module lang="ts">
+	export const statusSentence = (total: number, chipCount: number) =>
+		`${total} ${total === 1 ? 'carta' : 'cartas'}` +
+		(chipCount > 0 ? ` · ${chipCount} ${chipCount === 1 ? 'filtro ativo' : 'filtros ativos'}` : '');
+</script>
+
 <script lang="ts">
 	interface Props {
 		total: number;
@@ -14,10 +20,7 @@
 		sentenceEl?.focus();
 	}
 
-	const sentence = $derived(
-		`${total} ${total === 1 ? 'carta' : 'cartas'}` +
-			(chipCount > 0 ? ` · ${chipCount} ${chipCount === 1 ? 'filtro ativo' : 'filtros ativos'}` : '')
-	);
+	const sentence = $derived(statusSentence(total, chipCount));
 </script>
 
 <div class="status">

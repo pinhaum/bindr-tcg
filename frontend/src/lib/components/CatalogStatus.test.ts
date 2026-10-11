@@ -1,19 +1,26 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it } from 'vitest';
-import CatalogStatus from './CatalogStatus.svelte';
+import CatalogStatus, { statusSentence } from './CatalogStatus.svelte';
 
 afterEach(cleanup);
 
 describe('CatalogStatus', () => {
-	it.each([
+	const sentences = [
 		[2815, 0, '2815 cartas'],
+		[1, 0, '1 carta'],
 		[1, 1, '1 carta · 1 filtro ativo'],
 		[30, 3, '30 cartas · 3 filtros ativos'],
 		[0, 0, '0 cartas']
-	])('total %i e chipCount %i → "%s"', (total, chipCount, text) => {
+	] as const;
+
+	it.each(sentences)('total %i e chipCount %i → "%s"', (total, chipCount, text) => {
 		const { container } = render(CatalogStatus, { total, chipCount });
 		expect(container.querySelector('p')?.textContent?.trim()).toBe(text);
+	});
+
+	it.each(sentences)('statusSentence(%i, %i) → "%s"', (total, chipCount, text) => {
+		expect(statusSentence(total, chipCount)).toBe(text);
 	});
 
 	it('o parágrafo da frase é focável por script', () => {
