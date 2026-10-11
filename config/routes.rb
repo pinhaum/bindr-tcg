@@ -153,6 +153,8 @@ Rails.application.routes.draw do
     get "catalog" => "catalog#index", as: :api_catalog
     get "catalog/filters" => "catalog#filters", as: :api_catalog_filters
 
+    get "progress" => "progress#show", as: :api_progress
+
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
     # Posse por variante (SCAR-42, SCAR-43). O `variant_code` tem `:` e chega

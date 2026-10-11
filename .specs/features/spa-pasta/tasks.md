@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/spa-pasta/design.md`
-**Status**: Draft
+**Status**: Approved
 
 **Pré-condição:** a `spa-carta` encerrada (T1–T22 commitadas e `validation.md` PASS). A
 T1 só abre com a árvore limpa dos arquivos da `spa-carta`. O commit-pai da T1 é a
@@ -109,20 +109,22 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Request test: dois usuários com coleções diferentes recebem `summary` igual a `collection_stats_for` de cada um e `sets` igual, linha a linha, a `SetProgressQuery` (code, name, `displayed_owned_numbers`, base, parallels), com `value` igual a `value_by_set_id` e `"0.00"` sem cópia com preço (SPAS-37, SPAS-39, SPAS-40)
-- [ ] `order` ausente, `xyz`, vazio e `order[]=code` → `order: "recent"` e `200`; `code` → `order: "code"` e a ordem por código (SPAS-38)
-- [ ] Set com `base_set_size` nulo e com zero → `base_size: null` e `completion_percent: null`; posse acima do `base_size` → `owned_numbers` igual ao `base_size` e `completion_percent: 100` (SPAS-40)
-- [ ] `completion_percent` igual ao inteiro que a página `/progress` renderiza para 1 de 8 (13) e 7 de 8 (88)
-- [ ] Preço em moeda diferente de `USD` fica fora de `estimated_value` e de `value`
-- [ ] Número de consultas SQL igual com 2 e com 20 sets e com 1 e 10 itens de coleção (SPAS-41)
-- [ ] Sem sessão → `401 unauthenticated`; `user_id` de outro usuário na query é ignorado; resposta `application/json`, nunca redirect (SPAS-45)
-- [ ] Gate check passes: Rails quick
+- [x] Request test: dois usuários com coleções diferentes recebem `summary` igual a `collection_stats_for` de cada um e `sets` igual, linha a linha, a `SetProgressQuery` (code, name, `displayed_owned_numbers`, base, parallels), com `value` igual a `value_by_set_id` e `"0.00"` sem cópia com preço (SPAS-37, SPAS-39, SPAS-40)
+- [x] `order` ausente, `xyz`, vazio e `order[]=code` → `order: "recent"` e `200`; `code` → `order: "code"` e a ordem por código (SPAS-38)
+- [x] Set com `base_set_size` nulo e com zero → `base_size: null` e `completion_percent: null`; posse acima do `base_size` → `owned_numbers` igual ao `base_size` e `completion_percent: 100` (SPAS-40)
+- [x] `completion_percent` igual ao inteiro que a página `/progress` renderiza para 1 de 8 (13) e 7 de 8 (88)
+- [x] Preço em moeda diferente de `USD` fica fora de `estimated_value` e de `value`
+- [x] Número de consultas SQL igual com 2 e com 20 sets e com 1 e 10 itens de coleção (SPAS-41)
+- [x] Sem sessão → `401 unauthenticated`; `user_id` de outro usuário na query é ignorado; resposta `application/json`, nunca redirect (SPAS-45)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): expor o progresso da pasta na API`
 
+
+**Registro**: `<base>` da feature = `8e6c92d` (commit-pai da T1). Achados MINOR da revisão (moeda "USD" repetida em três lugares; `format` via Float; lacunas de cobertura de `order=code` com sets sem posse) registrados no relatório, sem correção.
 ---
 
 ### T2: `GET /api/wishlist`
