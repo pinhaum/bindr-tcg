@@ -542,11 +542,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `total` 2815 e `chipCount` 0 → "2815 cartas"; 1 e 1 → "1 carta · 1 filtro ativo"; 30 e 3 → "30 cartas · 3 filtros ativos"
-- [ ] Os links aparecem só com as props, com o `href` dado; "Limpar filtros" tem `data-sveltekit-reset="false"`
-- [ ] O parágrafo da frase é focável por script (`tabindex="-1"`)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `total` 2815 e `chipCount` 0 → "2815 cartas"; 1 e 1 → "1 carta · 1 filtro ativo"; 30 e 3 → "30 cartas · 3 filtros ativos"
+- [x] Os links aparecem só com as props, com o `href` dado; "Limpar filtros" tem `data-sveltekit-reset="false"`
+- [x] O parágrafo da frase é focável por script (`tabindex="-1"`)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
