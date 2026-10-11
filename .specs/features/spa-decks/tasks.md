@@ -309,9 +309,9 @@ T28 → T29
 
 **Done when**:
 
-- [ ] N incrementos simultâneos somam N; incrementos a partir de 48 param em 50 com os excedentes `422`; decrementos simultâneos a partir de 2 deixam a linha apagada e nenhum `quantity` abaixo de 1 gravado
-- [ ] `use_transactional_tests = false` com limpeza no `teardown`; o teste falha se o SQL atômico for trocado por ler-e-gravar (conferido localmente, não commitado)
-- [ ] Gate check passes: Rails quick
+- [x] N incrementos simultâneos somam N; incrementos a partir de 48 param em 50 com os excedentes `422`; decrementos simultâneos a partir de 2 deixam a linha apagada e nenhum `quantity` abaixo de 1 gravado
+- [x] `use_transactional_tests = false` com limpeza no `teardown`; o teste falha se o SQL atômico for trocado por ler-e-gravar (conferido localmente, não commitado)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
