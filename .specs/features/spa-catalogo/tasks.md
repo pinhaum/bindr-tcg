@@ -627,14 +627,14 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Chips de cor, tipo e raridade na ordem das opções; tipo "CHARACTER" exibido "Character" com `card_types%5B%5D=CHARACTER` no `href` (SCAT-18)
-- [ ] Chip ativo em `colors` leva ao `href` sem o valor; inativo, com o valor acrescentado (SCAT-19)
-- [ ] Seletor: um set ativo vem selecionado; dois sets ativos mostram "2 sets selecionados" selecionado, e "Aplicar" com ela chama `goto` com os sets intactos e sem `page`; "Todos os sets" remove `sets` (SCAT-23, 24)
-- [ ] `goto` recebe `{ reset: false }`
-- [ ] Com `signedIn`: três chips de posse, "Todas" com `aria-current="true"` sem filtro; sem `signedIn`: nenhum controle de posse (SCAT-25, 26)
-- [ ] Falha das opções: `message` e "Tentar novamente", que chama `retryFilterOptions` (SCAT-40)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Chips de cor, tipo e raridade na ordem das opções; tipo "CHARACTER" exibido "Character" com `card_types%5B%5D=CHARACTER` no `href` (SCAT-18)
+- [x] Chip ativo em `colors` leva ao `href` sem o valor; inativo, com o valor acrescentado (SCAT-19)
+- [x] Seletor: um set ativo vem selecionado; dois sets ativos mostram "2 sets selecionados" selecionado, e "Aplicar" com ela chama `goto` com os sets intactos e sem `page`; "Todos os sets" remove `sets` (SCAT-23, 24)
+- [x] `goto` recebe `{ reset: false }`
+- [x] Com `signedIn`: três chips de posse, "Todas" com `aria-current="true"` sem filtro; sem `signedIn`: nenhum controle de posse (SCAT-25, 26)
+- [x] Falha das opções: `message` e "Tentar novamente", que chama `retryFilterOptions` (SCAT-40)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
