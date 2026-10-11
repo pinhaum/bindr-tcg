@@ -467,6 +467,27 @@ Só abre depois do fechamento da §14 (`spa-carta`).
 
 ---
 
+## 17 — Import e export da coleção na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-portabilidade/tasks.md` (T1–T15, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham. A §16
+fica reservada à `spa-decks` (Req. 21). Só abre depois do fechamento da §15 (`spa-pasta`).
+
+- [ ] **17.1 API do import** — T1–T4 da `spa-portabilidade`
+  - `CollectionCsv::Upload` e `POST /api/collection/imports`, `GET …/:token`,
+    `POST …/:token/confirm` (`409 import_closed`), sem mudar o import HTML.
+  - _Requisitos: 22.36–22.45_
+- [ ] **17.2 Cliente, tipos e funções puras do front** — T5–T7
+  - _Requisitos: 22.12–22.14, 22.18, 22.24–22.27, 22.32, 22.35_
+- [ ] **17.3 Componentes** — T8–T9
+  - _Requisitos: 22.14–22.17, 22.22–22.29_
+- [ ] **17.4 Páginas** — T10–T12
+  - _Requisitos: 22.1–22.13, 22.16, 22.18, 22.19, 22.21, 22.22, 22.30–22.33_
+- [ ] **17.5 Ponta a ponta e fechamento** — T13–T15
+  - _Requisitos: 22.20, 22.33, 22.34, 22.45, 22.46_
+
+---
+
 ## Fora do escopo da Fase 1
 
 Não implemente, mesmo que pareça rápido — cada um destes precisa passar por

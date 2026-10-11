@@ -3,8 +3,8 @@
 Recorte da feature `spa-portabilidade` sobre `.context/requirements.md` Req. 22
 (SPOR-NN, mesma numeração dos critérios). Em divergência, `.context/` vence
 (AD-005). Depende da `api-fundacao` (Req. 16) e da `spa-fundacao` (Req. 17),
-encerradas e verificadas, e da `spa-pasta` (Req. 20), especificada e ainda não
-implementada, dona da tela de onde se chega ao import e ao export. A regra do
+encerradas e verificadas, e da `spa-pasta` (Req. 20), encerrada e verificada
+em 2026-10-11, dona da tela de onde se chega ao import e ao export. A regra do
 CSV é da feature `portabilidade` (Req. 10, POR-01..13), encerrada e verificada:
 formato, parser, resolvedor, staging (AD-007), substituição (AD-006), teto de
 10.000 linhas (AD-008) e gravação atômica por reivindicação continuam nos
