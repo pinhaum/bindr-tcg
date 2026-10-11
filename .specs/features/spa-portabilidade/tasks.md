@@ -397,15 +397,15 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Sessão anônima → redirect com `return_to=%2Fapp%2Fpasta%2Fimportar%2Fabc` sem chamar a API (SPOR-03)
-- [ ] `GET` do token; título "Pré-visualização da importação — Bindr" e `h1` "Confira o que vai mudar"; após 200 ms `aria-busy="true"` e "Carregando pré-visualização…" (SPOR-09, SPOR-10)
-- [ ] `404` → `message` e "Enviar um arquivo" sem "Tentar novamente"; `500` → `message` e "Tentar novamente" que repete o `GET` (SPOR-11)
-- [ ] "Arquivo: … — N linhas analisadas.", aviso em destaque, grupos na ordem fixa com `h2` "<título> (<n>)", aviso de remoção antes do botão só com `removes`, botão "Confirmar e gravar na minha coleção" e frase final com link "envie outro arquivo" sem recarga; só cabeçalho → "0 linhas analisadas.", nenhum grupo e o botão (SPOR-12, SPOR-13, SPOR-18, SPOR-19)
-- [ ] Confirmar chama `api.post(confirmPath, undefined, { timeoutMs: 60000 })` uma vez em duplo clique (SPOR-21, SPOR-32)
-- [ ] `200` → resumo na mesma URL, título "Importação concluída — Bindr", foco no `h1` (SPOR-22)
-- [ ] `409 import_closed` → pré-visualização mantida e `message` com `role="alert"` (SPOR-30)
-- [ ] `network_error` na confirmação → frase do SPOR-31 com "Ver minha coleção", uma chamada só (SPOR-31)
-- [ ] Gate check passes: Front quick
+- [x] Sessão anônima → redirect com `return_to=%2Fapp%2Fpasta%2Fimportar%2Fabc` sem chamar a API (SPOR-03)
+- [x] `GET` do token; título "Pré-visualização da importação — Bindr" e `h1` "Confira o que vai mudar"; após 200 ms `aria-busy="true"` e "Carregando pré-visualização…" (SPOR-09, SPOR-10)
+- [x] `404` → `message` e "Enviar um arquivo" sem "Tentar novamente"; `500` → `message` e "Tentar novamente" que repete o `GET` (SPOR-11)
+- [x] "Arquivo: … — N linhas analisadas.", aviso em destaque, grupos na ordem fixa com `h2` "<título> (<n>)", aviso de remoção antes do botão só com `removes`, botão "Confirmar e gravar na minha coleção" e frase final com link "envie outro arquivo" sem recarga; só cabeçalho → "0 linhas analisadas.", nenhum grupo e o botão (SPOR-12, SPOR-13, SPOR-18, SPOR-19)
+- [x] Confirmar chama `api.post(confirmPath, undefined, { timeoutMs: 60000 })` uma vez em duplo clique (SPOR-21, SPOR-32)
+- [x] `200` → resumo na mesma URL, título "Importação concluída — Bindr", foco no `h1` (SPOR-22)
+- [x] `409 import_closed` → pré-visualização mantida e `message` com `role="alert"` (SPOR-30)
+- [x] `network_error` na confirmação → frase do SPOR-31 com "Ver minha coleção", uma chamada só (SPOR-31)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
