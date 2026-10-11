@@ -518,11 +518,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `role="group"` com nome "Marcar <nome> <variant_code> como desejada"; campo de rótulo "Quero", `min="1"`, `step="1"`, valor inicial `wishlist_target`; botão "Quero esta" com `null`, "Atualizar desejo" com valor (SCAR-35)
-- [ ] Sucesso: toast "<nome> <variant_code> na lista de desejos: 1 cópia." ou "…: N cópias.", campo com o alvo devolvido, botão "Atualizar desejo" (SCAR-36)
-- [ ] `validation_failed`: mensagem de `fields.target_quantity` ligada por `aria-describedby`, `aria-invalid="true"`, foco no campo, valor digitado mantido (SCAR-37)
-- [ ] Com envio pendente o botão está desabilitado e um segundo submit não chama o cliente (SCAR-38)
-- [ ] Gate check passes: Front quick
+- [x] `role="group"` com nome "Marcar <nome> <variant_code> como desejada"; campo de rótulo "Quero", `min="1"`, `step="1"`, valor inicial `wishlist_target`; botão "Quero esta" com `null`, "Atualizar desejo" com valor (SCAR-35)
+- [x] Sucesso: toast "<nome> <variant_code> na lista de desejos: 1 cópia." ou "…: N cópias.", campo com o alvo devolvido, botão "Atualizar desejo" (SCAR-36)
+- [x] `validation_failed`: mensagem de `fields.target_quantity` ligada por `aria-describedby`, `aria-invalid="true"`, foco no campo, valor digitado mantido (SCAR-37)
+- [x] Com envio pendente o botão está desabilitado e um segundo submit não chama o cliente (SCAR-38)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
