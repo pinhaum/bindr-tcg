@@ -52,6 +52,7 @@
 </p>
 
 <form {onsubmit}>
+	<p class="visually-hidden" role="status">{pending ? 'Enviando o arquivo…' : ''}</p>
 	{#if message}
 		<div id={ERROR_ID}>
 			<FormError bind:this={errorBlock}>{[message, ...fileMessages].join(' ')}</FormError>

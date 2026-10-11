@@ -131,4 +131,13 @@ describe('pasta/importar/+page.svelte', () => {
 		await waitFor(() => expect(screen.getByRole('button', { name: 'Pré-visualizar importação' })).toBeEnabled());
 		expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 	});
+
+	it('anuncia o envio em andamento numa região status', async () => {
+		post.mockReturnValue(new Promise(() => {}));
+		render(Page);
+		await pick();
+		await submit();
+
+		await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Enviando o arquivo…'));
+	});
 });

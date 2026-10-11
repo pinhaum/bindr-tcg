@@ -184,6 +184,34 @@ describe('pasta/importar/[token]/+page.svelte', () => {
 		);
 		expect(screen.getByRole('heading', { level: 1, name: 'Confira o que vai mudar' })).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Confirmar e gravar na minha coleção' })).toBeEnabled();
+		await waitFor(() => expect(screen.getByRole('alert')).toHaveFocus());
+	});
+
+	it('anuncia a gravação em andamento numa região status enquanto a confirmação pende', async () => {
+		get.mockResolvedValue(preview([row(2, 'creates')]));
+		post.mockReturnValue(new Promise(() => {}));
+		render(Page);
+
+		await fireEvent.click(await screen.findByRole('button', { name: 'Confirmar e gravar na minha coleção' }));
+
+		await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Gravando na sua coleção…'));
+	});
+
+	it('falha de rede na confirmação move o foco para o alerta', async () => {
+		get.mockResolvedValue(preview([row(2, 'creates')]));
+		post.mockRejectedValue(networkError());
+		render(Page);
+
+		await fireEvent.click(await screen.findByRole('button', { name: 'Confirmar e gravar na minha coleção' }));
+
+		await waitFor(() => expect(screen.getByRole('alert')).toHaveFocus());
+	});
+
+	it('falha do GET anuncia a mensagem como alerta', async () => {
+		get.mockRejectedValue(new ApiError(500, 'internal_error', 'Algo deu errado.'));
+		render(Page);
+
+		expect(await screen.findByRole('alert')).toHaveTextContent('Algo deu errado.');
 	});
 
 	it('network_error na confirmação mostra a frase de resultado desconhecido, sem reenviar', async () => {

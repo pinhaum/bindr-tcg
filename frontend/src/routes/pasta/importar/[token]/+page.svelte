@@ -23,6 +23,7 @@
 	let confirmAlert = $state<string | null>(null);
 	let outcomeUnknown = $state(false);
 	let summaryView: ImportSummary | undefined = $state();
+	let alertBlock: FormError | undefined = $state();
 
 	const preview = $derived(loader.state.result);
 	const error = $derived(loader.state.error);
@@ -67,6 +68,8 @@
 			if (cause.code === 'unauthenticated' || cause.code === 'session_changed') return;
 			if (cause.status === 0) outcomeUnknown = true;
 			else confirmAlert = cause.message;
+			await tick();
+			alertBlock?.focus();
 		} finally {
 			confirming = false;
 		}
@@ -79,6 +82,7 @@
 	<ImportSummary bind:this={summaryView} {summary} />
 {:else}
 	<h1>Confira o que vai mudar</h1>
+	<p class="visually-hidden" role="status">{confirming ? 'Gravando na sua coleção…' : ''}</p>
 
 	<section aria-busy={loader.state.slow}>
 		{#if loader.state.slow}
@@ -91,7 +95,7 @@
 				<p><a href={appPath('/pasta/importar')}>Enviar um arquivo</a></p>
 			{:else}
 				<form class="message" onsubmit={retry}>
-					<p>{error.message}</p>
+					<p role="alert">{error.message}</p>
 					<Button>Tentar novamente</Button>
 				</form>
 			{/if}
@@ -115,10 +119,10 @@
 			{/each}
 
 			{#if outcomeUnknown}
-				<p role="alert">
+				<FormError bind:this={alertBlock}>
 					Não foi possível saber se a importação foi gravada. Confira a sua pasta antes de enviar o
 					arquivo de novo.
-				</p>
+				</FormError>
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href parte de appPath -->
 				<p><a href={appPath('/pasta')}>Ver minha coleção</a></p>
 			{:else}
@@ -129,7 +133,7 @@
 					</p>
 				{/if}
 				{#if confirmAlert}
-					<FormError>{confirmAlert}</FormError>
+					<FormError bind:this={alertBlock}>{confirmAlert}</FormError>
 				{/if}
 				<form onsubmit={confirm}>
 					<Button pending={confirming}>Confirmar e gravar na minha coleção</Button>
