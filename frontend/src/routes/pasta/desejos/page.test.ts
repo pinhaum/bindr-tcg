@@ -215,4 +215,22 @@ describe('pasta/desejos/+page.svelte', () => {
 		await vi.waitFor(() => expect(removeButton(2)).toHaveFocus());
 		expect(toast.notifySuccess).not.toHaveBeenCalled();
 	});
+
+	it.each([
+		['401 unauthenticated', new ApiError(401, 'unauthenticated', 'Entre para continuar.', {})],
+		['422 session_changed', new ApiError(422, 'session_changed', 'A sessão mudou.', {})]
+	])('%s mantém o item e não mostra mensagem da página (SPAS-36)', async (_name, failure) => {
+		apiMock.delete.mockRejectedValueOnce(failure);
+		render(Page);
+		await screen.findByText('3 itens');
+
+		await fireEvent.click(removeButton(2));
+
+		await vi.waitFor(() => expect(apiMock.delete).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(removeButton(2)).toBeEnabled());
+		expect(toast.notifyError).not.toHaveBeenCalled();
+		expect(toast.notifySuccess).not.toHaveBeenCalled();
+		expect(screen.getByText('3 itens')).toBeInTheDocument();
+		expect(screen.getByText('Carta 2')).toBeInTheDocument();
+	});
 });
