@@ -575,15 +575,15 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `<title>` "<nome> (<card_number>) — Bindr"; 404 → `message`, "Voltar ao catálogo" e "Carta não encontrada — Bindr" (SCAR-01, SCAR-05)
-- [ ] Erro → `message` + "Tentar novamente" que repete a consulta (SCAR-06); `aria-busy` e "Carregando carta…" só após 200 ms (SCAR-07)
-- [ ] Troca de `card_number` refaz a consulta e descarta filas; troca de sessão (e-mail) refaz a consulta (SCAR-08, SCAR-09)
-- [ ] "Voltar ao catálogo": botão bordado sem seta para `/app`, em `shell.aside` com `wide`, no topo sem ele (SCAR-04)
-- [ ] Clique na miniatura muda destaque, selo, ilustração e chips, chama `replaceState` com `?variant=` e não chama o cliente de novo (SCAR-23); `variant` inválido usa a regra da T7 (SCAR-24)
-- [ ] Selo do cabeçalho segue o `displayed` da fila da variante em destaque (SCAR-15)
-- [ ] Sair com operações pendentes: filas descartadas, convite no lugar dos steppers, sem selo (edge cases de sessão); trocar de variante não interrompe a fila de outra
-- [ ] Carta sem variantes: cabeçalho, campos e efeito, sem imagem nem "Variantes na pasta"
-- [ ] Gate check passes: Front quick
+- [x] `<title>` "<nome> (<card_number>) — Bindr"; 404 → `message`, "Voltar ao catálogo" e "Carta não encontrada — Bindr" (SCAR-01, SCAR-05)
+- [x] Erro → `message` + "Tentar novamente" que repete a consulta (SCAR-06); `aria-busy` e "Carregando carta…" só após 200 ms (SCAR-07)
+- [x] Troca de `card_number` refaz a consulta e descarta filas; troca de sessão (e-mail) refaz a consulta (SCAR-08, SCAR-09)
+- [x] "Voltar ao catálogo": botão bordado sem seta para `/app`, em `shell.aside` com `wide`, no topo sem ele (SCAR-04)
+- [x] Clique na miniatura muda destaque, selo, ilustração e chips, chama `replaceState` com `?variant=` e não chama o cliente de novo (SCAR-23); `variant` inválido usa a regra da T7 (SCAR-24)
+- [x] Selo do cabeçalho segue o `displayed` da fila da variante em destaque (SCAR-15)
+- [x] Sair com operações pendentes: filas descartadas, convite no lugar dos steppers, sem selo (edge cases de sessão); trocar de variante não interrompe a fila de outra
+- [x] Carta sem variantes: cabeçalho, campos e efeito, sem imagem nem "Variantes na pasta"
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
