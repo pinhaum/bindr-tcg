@@ -746,10 +746,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Cada query dá a mesma lista de `card_number` na mesma ordem e o mesmo total nas duas telas (sem catálogo importado, vazio bate com vazio)
-- [ ] `scrollWidth <= clientWidth` a 360px e cinco colunas a 1280px, nos dois temas (SCAT-14)
-- [ ] Gate check passes: full
-- [ ] Test count: e2e anteriores + novos
+- [x] Cada query dá a mesma lista de `card_number` na mesma ordem e o mesmo total nas duas telas (sem catálogo importado, vazio bate com vazio)
+- [x] `scrollWidth <= clientWidth` a 360px e cinco colunas a 1280px, nos dois temas (SCAT-14)
+- [x] Gate check passes: full
+- [x] Test count: e2e anteriores + novos
 
 **Tests**: e2e
 **Gate**: full
