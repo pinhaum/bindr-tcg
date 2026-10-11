@@ -631,11 +631,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Sem sessão, o `load` redireciona para `/app/entrar?return_to=%2Fapp%2Fbaralhos` sem chamar o cliente (SDEC-03)
-- [ ] Título "Baralhos — Bindr" e `h1` "Baralhos" (SDEC-01)
-- [ ] Deck com e sem Leader, os três status, "N / 50", `h2` com link para `/app/baralhos/<id>` (SDEC-07); lista vazia (SDEC-08); links das ações (SDEC-09)
-- [ ] Antes de 200 ms nada muda; depois, `aria-busy="true"` e "Carregando baralhos…"; resposta antiga descartada; erro com "Tentar novamente" (SDEC-04..06)
-- [ ] Gate check passes: Front quick
+- [x] Sem sessão, o `load` redireciona para `/app/entrar?return_to=%2Fapp%2Fbaralhos` sem chamar o cliente (SDEC-03)
+- [x] Título "Baralhos — Bindr" e `h1` "Baralhos" (SDEC-01)
+- [x] Deck com e sem Leader, os três status, "N / 50", `h2` com link para `/app/baralhos/<id>` (SDEC-07); lista vazia (SDEC-08); links das ações (SDEC-09)
+- [x] Antes de 200 ms nada muda; depois, `aria-busy="true"` e "Carregando baralhos…"; resposta antiga descartada; erro com "Tentar novamente" (SDEC-04..06)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
