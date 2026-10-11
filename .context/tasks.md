@@ -427,6 +427,23 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [x] **13.4 Página, ponta a ponta e fechamento** — T20–T25
   - _Requisitos: 18.1, 18.4, 18.5, 18.7, 18.9, 18.13, 18.14, 18.16, 18.17, 18.25–18.27, 18.29–18.45_
 
+## 14 — Detalhe da carta na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-carta/tasks.md` (T1–T22, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [ ] **14.1 API de posse e desejo** — T1–T4 da `spa-carta`
+  - SQL atômico de posse movido para `CollectionItem` (abordagem A), endpoints
+    de incremento, decremento e desejo por `card_number` + `variant_code`
+    (AD-027) e teste de corrida.
+  - _Requisitos: 19.42–19.49_
+- [ ] **14.2 Funções puras e estado do front** — T5–T10
+  - _Requisitos: 19.2, 19.5–19.8, 19.15, 19.21, 19.24, 19.25, 19.27–19.33, 19.36, 19.39–19.41_
+- [ ] **14.3 Componentes do detalhe** — T11–T16
+  - _Requisitos: 19.1, 19.10–19.29, 19.32–19.39_
+- [ ] **14.4 Página, tile, ponta a ponta e fechamento** — T17–T22
+  - _Requisitos: 19.1–19.13, 19.15, 19.17, 19.19, 19.21–19.27, 19.29–19.31, 19.36, 19.39–19.41, 19.49_
+
 ---
 
 ## Fora do escopo da Fase 1
