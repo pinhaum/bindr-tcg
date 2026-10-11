@@ -458,10 +458,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] O componente renderiza com `aria-hidden="true"` e sem texto lido
-- [ ] `guard.test.ts` verde (só `opacity` animada, sem px de token nem hex)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] O componente renderiza com `aria-hidden="true"` e sem texto lido
+- [x] `guard.test.ts` verde (só `opacity` animada, sem px de token nem hex)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
