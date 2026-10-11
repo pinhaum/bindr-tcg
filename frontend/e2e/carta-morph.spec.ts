@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-type Recorded = { groups: string[]; skipped: boolean; finished: boolean };
+type Recorded = { groups: string[]; skipped: boolean; finished: boolean; readyMs?: number };
 type ProbeWindow = { __transitions: Recorded[] };
 
 const PIXEL_PNG = Buffer.from(
@@ -44,9 +44,11 @@ async function trackTransitions(page: Page) {
 		document.startViewTransition = ((callback) => {
 			const entry: Recorded = { groups: [], skipped: false, finished: false };
 			w.__transitions.push(entry);
+			const startedAt = performance.now();
 			const transition = original(callback);
 			transition.ready.then(
 				() => {
+					entry.readyMs = performance.now() - startedAt;
 					const prefix = '::view-transition-group(';
 					entry.groups = document
 						.getAnimations()
@@ -168,6 +170,34 @@ for (const viewport of VIEWPORTS) {
 			await waitForCatalog(page, number);
 
 			await expectMorph(page, number, 'na volta pelo navegador');
+			expect(errors, 'nenhum erro no console').toEqual([]);
+		});
+
+		test('depois de abrir uma carta, navegar para fora das cartas não espera a chegada (G1)', async ({
+			page
+		}) => {
+			const errors = trackConsoleErrors(page);
+			const number = await openCatalog(page);
+			await openDetailFromTile(page, number);
+			await backLink(page).click();
+			await waitForCatalog(page, number);
+			await expect.poll(() => allFinished(page)).toBe(true);
+			await resetTransitions(page);
+
+			const nav = page.getByRole('navigation', { name: 'Principal' });
+			await nav.getByRole('link', { name: 'Entrar', exact: true }).click();
+			await expect(page).toHaveURL(/\/app\/entrar/);
+			await expect.poll(() => allFinished(page)).toBe(true);
+			await nav.getByRole('link', { name: 'Criar conta', exact: true }).click();
+			await expect(page).toHaveURL(/\/app\/criar-conta/);
+			await expect.poll(() => allFinished(page)).toBe(true);
+
+			const recorded = await transitions(page);
+			expect(recorded.length, 'uma transição por navegação').toBeGreaterThanOrEqual(2);
+			for (const item of recorded) {
+				expect(item.skipped, 'transição não descartada').toBe(false);
+				expect(item.readyMs, 'transition.ready sem esperar a chegada de uma carta').toBeLessThan(200);
+			}
 			expect(errors, 'nenhum erro no console').toEqual([]);
 		});
 

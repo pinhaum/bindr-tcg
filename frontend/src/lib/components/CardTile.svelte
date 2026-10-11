@@ -13,6 +13,10 @@
 	const imageUrl = $derived(card.variants[0]?.image_url ?? null);
 	const quantity = $derived(card.variants.reduce((sum, v) => sum + (v.owned_quantity ?? 0), 0));
 	const transitionName = $derived(isMarked(card.card_number) ? morphName(card.card_number) : undefined);
+	function onclick(event: MouseEvent) {
+		const plain = event.button === 0 && !(event.ctrlKey || event.metaKey || event.shiftKey || event.altKey);
+		if (plain) markCard(card.card_number);
+	}
 	const rarity = $derived(
 		card.variants.length > 1 ? `${card.variants.length} impressões` : (card.variants[0]?.rarity ?? '')
 	);
@@ -20,7 +24,7 @@
 
 <li class="tile">
 	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href já vem resolvido por cardDetailHref -->
-	<a class="link" href={cardDetailHref(card.card_number)} onclick={() => markCard(card.card_number)}>
+	<a class="link" href={cardDetailHref(card.card_number)} {onclick}>
 		<div class="art" style:view-transition-name={transitionName}>
 			<div class="placeholder" aria-hidden="true">
 				<span class="placeholder-name">{card.name}</span>

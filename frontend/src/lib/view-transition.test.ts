@@ -32,7 +32,7 @@ describe('viewTransitionOnNavigate', () => {
 	const between = (from: string, to: string) =>
 		({
 			from: { url: new URL(from, 'http://localhost') },
-			to: { url: new URL(to, 'http://localhost') },
+			to: { url: new URL(to, 'http://localhost'), route: { id: null } },
 			complete: Promise.resolve()
 		}) as unknown as Parameters<typeof viewTransitionOnNavigate>[0];
 
@@ -81,14 +81,20 @@ describe('viewTransitionOnNavigate', () => {
 			void promise.then(() => (state.done = true));
 			return state;
 		};
-		const startUpdate = async () => {
+		const toRoute = (routeId: string | null) =>
+			({
+				from: { url: new URL('/app/cartas/OP01-001', 'http://localhost') },
+				to: { url: new URL('/app/x', 'http://localhost'), route: { id: routeId } },
+				complete: Promise.resolve()
+			}) as unknown as Parameters<typeof viewTransitionOnNavigate>[0];
+		const startUpdate = async (routeId: string | null = '/cartas/[card_number]') => {
 			let update!: Promise<void>;
 			Object.assign(document, {
 				startViewTransition: vi.fn((callback: () => Promise<void>) => {
 					update = callback();
 				})
 			});
-			await viewTransitionOnNavigate(navigation());
+			await viewTransitionOnNavigate(toRoute(routeId));
 			return settled(update);
 		};
 
@@ -138,7 +144,40 @@ describe('viewTransitionOnNavigate', () => {
 			expect(update.done).toBe(true);
 		});
 
+		it('espera a chegada também quando o destino é o catálogo', async () => {
+			vi.useFakeTimers();
+			markCard('OP01-001');
+			const update = await startUpdate('/');
+			await vi.advanceTimersByTimeAsync(499);
+			expect(update.done).toBe(false);
+
+			await vi.advanceTimersByTimeAsync(1);
+			expect(update.done).toBe(true);
+		});
+
+		it.each([['/entrar'], ['/criar-conta'], [null]])(
+			'destino %s com carta marcada não espera chegada (G1)',
+			async (routeId) => {
+				vi.useFakeTimers();
+				markCard('OP01-001');
+				const update = await startUpdate(routeId);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(update.done).toBe(true);
+			}
+		);
+
 		it('sem carta marcada não espera chegada nenhuma', async () => {
+			vi.useFakeTimers();
+			markCard(null);
+			armArrival();
+			const update = await startUpdate('/');
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(update.done).toBe(true);
+		});
+
+		it('sem carta marcada não espera chegada nenhuma (tempo real)', async () => {
 			markCard(null);
 			armArrival();
 			const update = await startUpdate();

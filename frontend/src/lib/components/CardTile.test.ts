@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { markCard, morphName } from '../cards/morph.svelte';
+import { hasMark, isMarked, markCard, morphName } from '../cards/morph.svelte';
 import type { CatalogCard, CatalogVariant } from '../api/types';
 import CardTile from './CardTile.svelte';
 
@@ -47,6 +47,28 @@ const owned = (...quantities: (number | null)[]) =>
 	quantities.map((q, i) => variant({ variant_code: `tcgplayer:${i + 1}`, owned_quantity: q }));
 
 describe('CardTile', () => {
+	it.each([
+		['Ctrl', { ctrlKey: true }],
+		['Meta', { metaKey: true }],
+		['Shift', { shiftKey: true }],
+		['Alt', { altKey: true }],
+		['botão do meio', { button: 1 }]
+	])('clique com %s não marca a carta para o morph (G2)', async (_, init) => {
+		render(CardTile, { card: card(), signedIn: false });
+		const link = screen.getByRole('link');
+		link.addEventListener('click', (event) => event.preventDefault());
+		await fireEvent.click(link, init);
+		expect(hasMark()).toBe(false);
+	});
+
+	it('clique simples marca a carta para o morph', async () => {
+		render(CardTile, { card: card(), signedIn: false });
+		const link = screen.getByRole('link');
+		link.addEventListener('click', (event) => event.preventDefault());
+		await fireEvent.click(link);
+		expect(isMarked('OP01-001')).toBe(true);
+	});
+
 	// SCAR-03 emenda o SCAT-03: o tile leva ao detalhe da SPA, sem recarregar a página.
 	it('é um <li> com link para /app/cartas/<card_number> na SPA (SCAR-03)', () => {
 		const { container } = render(CardTile, { card: card(), signedIn: false });
