@@ -311,11 +311,11 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Cada classificação mostra o rótulo e a frase do SPOR-15 (`creates` sem "antes"; recusada com a `message`), com antes e depois em elementos próprios (SPOR-14, SPOR-15)
-- [ ] `card_number` ou `variant_code` nulos aparecem como "—"; `variant_code` em `<code>` (SPOR-14)
-- [ ] `<script>alert(1)</script>` no nome aparece como texto e nenhum `<script>` nasce no DOM (SPOR-17)
-- [ ] Nome de 120 caracteres e `tcgplayer:1234567890` com `overflow-wrap: anywhere`; o estilo passa no `guard.test.ts`; a marca do grupo usa forma ou peso além da cor (SPOR-16)
-- [ ] Gate check passes: Front quick
+- [x] Cada classificação mostra o rótulo e a frase do SPOR-15 (`creates` sem "antes"; recusada com a `message`), com antes e depois em elementos próprios (SPOR-14, SPOR-15)
+- [x] `card_number` ou `variant_code` nulos aparecem como "—"; `variant_code` em `<code>` (SPOR-14)
+- [x] `<script>alert(1)</script>` no nome aparece como texto e nenhum `<script>` nasce no DOM (SPOR-17)
+- [x] Nome de 120 caracteres e `tcgplayer:1234567890` com `overflow-wrap: anywhere`; o estilo passa no `guard.test.ts`; a marca do grupo usa forma ou peso além da cor (SPOR-16)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
@@ -339,11 +339,11 @@ T14 → T15
 
 **Done when**:
 
-- [ ] "Importadas", "Atualizadas", "Recusadas" nesta ordem, número e rótulo em elementos próprios, com zero (SPOR-23); `updated` 3 e `removed` 1 → 3 em "Atualizadas" e a frase de remoção com 1 (SPOR-24)
-- [ ] Frases de inalteradas (SPOR-25), recusas com `card_number`, `variant_code`, nome, linha e motivo (SPOR-26) e falhas separadas (SPOR-27) só quando há
-- [ ] Sem recusa nem falha, o texto não contém "rejeitada", "falha" nem "erro" (SPOR-28)
-- [ ] "Ver minha coleção" → `/app/pasta` e "importar outro arquivo" → `/app/pasta/importar`, sem `data-sveltekit-reload` (SPOR-29); `focus()` põe o foco no `h1` (SPOR-22)
-- [ ] Gate check passes: Front quick
+- [x] "Importadas", "Atualizadas", "Recusadas" nesta ordem, número e rótulo em elementos próprios, com zero (SPOR-23); `updated` 3 e `removed` 1 → 3 em "Atualizadas" e a frase de remoção com 1 (SPOR-24)
+- [x] Frases de inalteradas (SPOR-25), recusas com `card_number`, `variant_code`, nome, linha e motivo (SPOR-26) e falhas separadas (SPOR-27) só quando há
+- [x] Sem recusa nem falha, o texto não contém "rejeitada", "falha" nem "erro" (SPOR-28)
+- [x] "Ver minha coleção" → `/app/pasta` e "importar outro arquivo" → `/app/pasta/importar`, sem `data-sveltekit-reload` (SPOR-29); `focus()` põe o foco no `h1` (SPOR-22)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
