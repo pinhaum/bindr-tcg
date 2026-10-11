@@ -282,10 +282,10 @@ T14 → T15
 
 **Done when**:
 
-- [ ] `importPath('abc')` = `/api/collection/imports/abc`; `confirmPath('abc')` = `/api/collection/imports/abc/confirm`
-- [ ] Token com `/`, `?`, `#` e `%` sai codificado e o caminho continua começando por uma barra só (Edge Case de token com caractere reservado)
-- [ ] `IMPORT_TIMEOUT_MS` é 60000
-- [ ] Gate check passes: Front quick
+- [x] `importPath('abc')` = `/api/collection/imports/abc`; `confirmPath('abc')` = `/api/collection/imports/abc/confirm`
+- [x] Token com `/`, `?`, `#` e `%` sai codificado e o caminho continua começando por uma barra só (Edge Case de token com caractere reservado)
+- [x] `IMPORT_TIMEOUT_MS` é 60000
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
