@@ -371,18 +371,20 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Rótulos com 0, 1 e 2: "cartas na pasta"/"carta na pasta"; "cartas diferentes"/"carta diferente"; "valor estimado" (SPAS-08)
-- [ ] Nota "1 cópia sem preço" e "2 cópias sem preço"; ausente com zero (SPAS-09)
-- [ ] `amount` `"0.00"` → `US$ 0,00` (SPAS-10)
-- [ ] O texto acessível de cada cartão é o valor final seguido do rótulo (SPAS-15)
-- [ ] CSS declara `grid-template-columns: repeat(4, 1fr)` a partir de `64rem` (a medida fica na T15)
-- [ ] Gate check passes: Front quick
+- [x] Rótulos com 0, 1 e 2: "cartas na pasta"/"carta na pasta"; "cartas diferentes"/"carta diferente"; "valor estimado" (SPAS-08)
+- [x] Nota "1 cópia sem preço" e "2 cópias sem preço"; ausente com zero (SPAS-09)
+- [x] `amount` `"0.00"` → `US$ 0,00` (SPAS-10)
+- [x] O texto acessível de cada cartão é o valor final seguido do rótulo (SPAS-15)
+- [x] CSS declara `grid-template-columns: repeat(4, 1fr)` a partir de `64rem` (a medida fica na T15)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): indicadores da pasta`
 
+
+**Registro**: Revisão: 1 MAJOR (valor interpolado em dólares, não em centavos) corrigido por worker novo, com teste de quadro intermediário; Front quick da fase 3 (826 testes) verde antes da correção, focado (83 testes) depois.
 ---
 
 ### T11: `SetProgressRow`

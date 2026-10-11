@@ -456,7 +456,7 @@ Só abre depois do fechamento da §14 (`spa-carta`).
   - _Requisitos: 20.37–20.46_
 - [x] **15.2 Funções puras, estado e navegação do front** — T4–T8
   - _Requisitos: 20.2–20.7, 20.12, 20.30, 20.43_
-- [ ] **15.3 Componentes** — T9–T12
+- [x] **15.3 Componentes** — T9–T12
   - _Requisitos: 20.8–20.16, 20.19–20.23, 20.30–20.32, 20.35_
 - [ ] **15.4 Páginas, ponta a ponta e fechamento** — T13–T17
   - _Requisitos: 20.1, 20.3–20.7, 20.11, 20.12, 20.14, 20.16–20.18, 20.24–20.29, 20.33–20.36, 20.43, 20.46_
