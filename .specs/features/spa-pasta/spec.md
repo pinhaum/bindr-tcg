@@ -241,52 +241,52 @@ nela: o número interpolado dos indicadores.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| SPAS-01 | P1: Pasta — rota e título (Req. 20.1) | T13, T15 | Pending |
-| SPAS-02 | P1: Pasta — entrada da navegação (Req. 20.2) | T8, T15 | Pending |
-| SPAS-03 | P1: Pasta — sessão anônima (Req. 20.3) | T5, T13, T14, T15 | Pending |
-| SPAS-04 | P1: Pasta — consulta do progresso (Req. 20.4) | T4, T13 | Pending |
-| SPAS-05 | P1: Pasta — resposta antiga descartada (Req. 20.5) | T4, T13 | Pending |
-| SPAS-06 | P1: Pasta — carga lenta (Req. 20.6) | T4, T13, T14 | Pending |
-| SPAS-07 | P1: Pasta — erro de carga (Req. 20.7) | T4, T13, T14 | Pending |
-| SPAS-08 | P1: Indicadores — três cartões (Req. 20.8) | T10 | Pending |
-| SPAS-09 | P1: Indicadores — cópias sem preço (Req. 20.9) | T10 | Pending |
-| SPAS-10 | P1: Indicadores — valor zero (Req. 20.10) | T10 | Pending |
-| SPAS-11 | P1: Indicadores — largura em 64rem (Req. 20.11) | T10, T15 | Pending |
-| SPAS-12 | P1: Número interpolado — primeira exibição (Req. 20.12) | T6, T9, T15 | Pending |
-| SPAS-13 | P1: Número interpolado — mudança de valor (Req. 20.13) | T9 | Pending |
-| SPAS-14 | P1: Número interpolado — reduced motion (Req. 20.14) | T9, T15 | Pending |
-| SPAS-15 | P1: Número interpolado — acessibilidade (Req. 20.15) | T9, T10 | Pending |
-| SPAS-16 | P1: Número interpolado — formato e estabilidade (Req. 20.16) | T9, T15 | Pending |
-| SPAS-17 | P1: Progresso — chips de ordem (Req. 20.17) | T13, T15 | Pending |
-| SPAS-18 | P1: Progresso — lista de sets (Req. 20.18) | T13, T15 | Pending |
-| SPAS-19 | P1: Progresso — linha e link do set (Req. 20.19) | T11 | Pending |
-| SPAS-20 | P1: Progresso — set com `base_size` (Req. 20.20) | T11 | Pending |
-| SPAS-21 | P1: Progresso — set sem `base_size` (Req. 20.21) | T11 | Pending |
-| SPAS-22 | P1: Progresso — parallels à parte (Req. 20.22) | T11 | Pending |
-| SPAS-23 | P1: Progresso — subtotal do set (Req. 20.23) | T11 | Pending |
-| SPAS-24 | P1: Ações — adicionar cartas (Req. 20.24) | T13, T15 | Pending |
-| SPAS-25 | P1: Ações — ações secundárias (Req. 20.25) | T13 | Pending |
-| SPAS-26 | P1: Ações — composição dos artboards (Req. 20.26) | T15 | Pending |
-| SPAS-27 | P1: Desejos — rota e título (Req. 20.27) | T14, T16 | Pending |
-| SPAS-28 | P1: Desejos — lista vazia (Req. 20.28) | T14 | Pending |
-| SPAS-29 | P1: Desejos — contagem e ordem (Req. 20.29) | T14, T16 | Pending |
-| SPAS-30 | P1: Desejos — linha do item (Req. 20.30) | T7, T12, T16 | Pending |
-| SPAS-31 | P1: Desejos — atendido (Req. 20.31) | T12, T16 | Pending |
-| SPAS-32 | P1: Desejos — botão remover (Req. 20.32) | T12 | Pending |
-| SPAS-33 | P1: Desejos — remoção com sucesso (Req. 20.33) | T14, T16 | Pending |
-| SPAS-34 | P1: Desejos — foco após remoção (Req. 20.34) | T14, T16 | Pending |
-| SPAS-35 | P1: Desejos — remoção pendente (Req. 20.35) | T12, T14 | Pending |
-| SPAS-36 | P1: Desejos — falha na remoção (Req. 20.36) | T14 | Pending |
-| SPAS-37 | P1: API — progresso (Req. 20.37) | T1 | Pending |
-| SPAS-38 | P1: API — ordem (Req. 20.38) | T1 | Pending |
-| SPAS-39 | P1: API — resumo e valor (Req. 20.39) | T1 | Pending |
-| SPAS-40 | P1: API — linha do set (Req. 20.40) | T1 | Pending |
-| SPAS-41 | P1: API — consultas constantes no progresso (Req. 20.41) | T1 | Pending |
-| SPAS-42 | P1: API — lista de desejos (Req. 20.42) | T2 | Pending |
-| SPAS-43 | P1: API — remoção de desejo (Req. 20.43) | T3, T7, T16 | Pending |
-| SPAS-44 | P1: API — carta ou variante inexistente (Req. 20.44) | T3 | Pending |
-| SPAS-45 | P1: API — sessão, CSRF e isolamento (Req. 20.45) | T1, T2, T3 | Pending |
-| SPAS-46 | P1: API — HTML inalterado (Req. 20.46) | T3, T17 | Pending |
+| SPAS-01 | P1: Pasta — rota e título (Req. 20.1) | T13, T15 | Implemented |
+| SPAS-02 | P1: Pasta — entrada da navegação (Req. 20.2) | T8, T15 | Implemented |
+| SPAS-03 | P1: Pasta — sessão anônima (Req. 20.3) | T5, T13, T14, T15 | Implemented |
+| SPAS-04 | P1: Pasta — consulta do progresso (Req. 20.4) | T4, T13 | Implemented |
+| SPAS-05 | P1: Pasta — resposta antiga descartada (Req. 20.5) | T4, T13 | Implemented |
+| SPAS-06 | P1: Pasta — carga lenta (Req. 20.6) | T4, T13, T14 | Implemented |
+| SPAS-07 | P1: Pasta — erro de carga (Req. 20.7) | T4, T13, T14 | Implemented |
+| SPAS-08 | P1: Indicadores — três cartões (Req. 20.8) | T10 | Implemented |
+| SPAS-09 | P1: Indicadores — cópias sem preço (Req. 20.9) | T10 | Implemented |
+| SPAS-10 | P1: Indicadores — valor zero (Req. 20.10) | T10 | Implemented |
+| SPAS-11 | P1: Indicadores — largura em 64rem (Req. 20.11) | T10, T15 | Implemented |
+| SPAS-12 | P1: Número interpolado — primeira exibição (Req. 20.12) | T6, T9, T15 | Implemented |
+| SPAS-13 | P1: Número interpolado — mudança de valor (Req. 20.13) | T9 | Implemented |
+| SPAS-14 | P1: Número interpolado — reduced motion (Req. 20.14) | T9, T15 | Implemented |
+| SPAS-15 | P1: Número interpolado — acessibilidade (Req. 20.15) | T9, T10 | Implemented |
+| SPAS-16 | P1: Número interpolado — formato e estabilidade (Req. 20.16) | T9, T15 | Implemented |
+| SPAS-17 | P1: Progresso — chips de ordem (Req. 20.17) | T13, T15 | Implemented |
+| SPAS-18 | P1: Progresso — lista de sets (Req. 20.18) | T13, T15 | Implemented |
+| SPAS-19 | P1: Progresso — linha e link do set (Req. 20.19) | T11 | Implemented |
+| SPAS-20 | P1: Progresso — set com `base_size` (Req. 20.20) | T11 | Implemented |
+| SPAS-21 | P1: Progresso — set sem `base_size` (Req. 20.21) | T11 | Implemented |
+| SPAS-22 | P1: Progresso — parallels à parte (Req. 20.22) | T11 | Implemented |
+| SPAS-23 | P1: Progresso — subtotal do set (Req. 20.23) | T11 | Implemented |
+| SPAS-24 | P1: Ações — adicionar cartas (Req. 20.24) | T13, T15 | Implemented |
+| SPAS-25 | P1: Ações — ações secundárias (Req. 20.25) | T13 | Implemented |
+| SPAS-26 | P1: Ações — composição dos artboards (Req. 20.26) | T15 | Implemented |
+| SPAS-27 | P1: Desejos — rota e título (Req. 20.27) | T14, T16 | Implemented |
+| SPAS-28 | P1: Desejos — lista vazia (Req. 20.28) | T14 | Implemented |
+| SPAS-29 | P1: Desejos — contagem e ordem (Req. 20.29) | T14, T16 | Implemented |
+| SPAS-30 | P1: Desejos — linha do item (Req. 20.30) | T7, T12, T16 | Implemented |
+| SPAS-31 | P1: Desejos — atendido (Req. 20.31) | T12, T16 | Implemented |
+| SPAS-32 | P1: Desejos — botão remover (Req. 20.32) | T12 | Implemented |
+| SPAS-33 | P1: Desejos — remoção com sucesso (Req. 20.33) | T14, T16 | Implemented |
+| SPAS-34 | P1: Desejos — foco após remoção (Req. 20.34) | T14, T16 | Implemented |
+| SPAS-35 | P1: Desejos — remoção pendente (Req. 20.35) | T12, T14 | Implemented |
+| SPAS-36 | P1: Desejos — falha na remoção (Req. 20.36) | T14 | Implemented |
+| SPAS-37 | P1: API — progresso (Req. 20.37) | T1 | Implemented |
+| SPAS-38 | P1: API — ordem (Req. 20.38) | T1 | Implemented |
+| SPAS-39 | P1: API — resumo e valor (Req. 20.39) | T1 | Implemented |
+| SPAS-40 | P1: API — linha do set (Req. 20.40) | T1 | Implemented |
+| SPAS-41 | P1: API — consultas constantes no progresso (Req. 20.41) | T1 | Implemented |
+| SPAS-42 | P1: API — lista de desejos (Req. 20.42) | T2 | Implemented |
+| SPAS-43 | P1: API — remoção de desejo (Req. 20.43) | T3, T7, T16 | Implemented |
+| SPAS-44 | P1: API — carta ou variante inexistente (Req. 20.44) | T3 | Implemented |
+| SPAS-45 | P1: API — sessão, CSRF e isolamento (Req. 20.45) | T1, T2, T3 | Implemented |
+| SPAS-46 | P1: API — HTML inalterado (Req. 20.46) | T3, T17 | Implemented |
 
 **Coverage:** 46 total, 46 mapped to tasks (T1–T17), 0 unmapped
 

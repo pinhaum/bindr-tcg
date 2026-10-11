@@ -596,17 +596,19 @@ T16 → T17
 
 **Done when**:
 
-- [ ] `CLAUDE.md` lista `GET /api/progress`, `GET /api/wishlist` e `DELETE …/wishlist` na tabela da API e o estado da feature
-- [ ] Traceability SPAS-01..46 em `Implemented` com a task de cada um; §15 do `.context/tasks.md` marcada
-- [ ] *Handoff* registra a dívida: migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`
-- [ ] `git diff --name-status <base>..HEAD -- test/` só com `A`; controllers e views HTML da pasta e da wishlist intocados (SPAS-46)
-- [ ] Gate check passes: Build
+- [x] `CLAUDE.md` lista `GET /api/progress`, `GET /api/wishlist` e `DELETE …/wishlist` na tabela da API e o estado da feature
+- [x] Traceability SPAS-01..46 em `Implemented` com a task de cada um; §15 do `.context/tasks.md` marcada
+- [x] *Handoff* registra a dívida: migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`
+- [x] `git diff --name-status <base>..HEAD -- test/` só com `A`; controllers e views HTML da pasta e da wishlist intocados (SPAS-46)
+- [x] Gate check passes: Build
 
 **Tests**: none
 **Gate**: build
 
 **Commit**: `docs(spa-pasta): registrar a pasta na SPA`
 
+
+**Registro**: Gate Build: `docker build -f Dockerfile .` ok (com `DOCKER_CONFIG` temporário por causa do `credsStore`), rubocop limpo, brakeman só com o aviso de calendário do Rails 8.0.5.1; `git diff --name-status 8e6c92d..HEAD -- test/` só com `A` (3 arquivos novos) e a diff dos controllers e views HTML da pasta e da wishlist vazia (SPAS-46).
 ---
 
 ## Phase Execution Map

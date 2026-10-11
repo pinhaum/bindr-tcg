@@ -58,6 +58,14 @@ mutação em `Api::CardVariantsController` e `CollectionItem.increment_for!`/`de
 respostas, mensagens nem rotas HTML; SCAR-49: nenhum teste Rails existente foi editado).
 Design em `.specs/features/spa-carta/design.md`.
 
+A **`spa-pasta`** (Req. 20, SPAS-01..46) está **implementada (T1–T16) e aguarda o
+Verifier**: `/app/pasta` (indicadores com número interpolado, progresso por set, chips de
+ordem, ações) e `/app/pasta/desejos` (lista e remoção não otimista, com foco) são SPA e
+leem só `GET /api/progress` e `GET /api/wishlist`, além de `DELETE …/wishlist`.
+`app/views/progress`, `app/views/wishlist_items` e os controllers HTML ficam intocados
+(SPAS-46). A entrada "Minha pasta" da navegação aponta para `/app/pasta`. Design em
+`.specs/features/spa-pasta/design.md`.
+
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
@@ -77,7 +85,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **1966 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **1995 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
@@ -99,6 +107,9 @@ HTML). Rotas no `scope "api"` de `config/routes.rb` (`format: false` +
 | `POST /api/cards/:card_number/variants/:variant_code/increment` | `CardVariantsController` | exige sessão e CSRF |
 | `POST /api/cards/:card_number/variants/:variant_code/decrement` | `CardVariantsController` | exige sessão e CSRF; em zero é `200` com `owned_quantity: 0` |
 | `PUT /api/cards/:card_number/variants/:variant_code/wishlist` | `CardVariantsController` | exige sessão e CSRF; alvo inteiro ≥ 1 e ≤ 2147483647, senão `422 validation_failed` com mensagem pt-BR |
+| `GET /api/progress` | `ProgressController` | exige sessão; `{ data: { order, summary, sets } }`; `order` inválido cai em `recent`; `base_size` e `completion_percent` nulos quando o set não tem base; número de consultas constante |
+| `GET /api/wishlist` | `WishlistController` | exige sessão; itens por ordem de criação e id, com `owned_quantity` e `fulfilled` |
+| `DELETE /api/cards/:card_number/variants/:variant_code/wishlist` | `CardVariantsController` | exige sessão e CSRF; `200` com `{ variant_code, wishlist_target: null }`, idempotente; `404` para carta ou variante inexistente |
 | `* /api/*path` | `NotFoundController` | catch-all |
 
 Sucesso é `{ "data": ... }` (a lista traz `meta`); erro é sempre
@@ -165,7 +176,7 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   entrada "Catálogo" da navegação aponta para ele (ver "Estado atual").
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens atuais: Vitest 737 testes, e2e 143, Rails 1966 (rubocop limpo).
+Contagens atuais: Vitest 856 testes, e2e 193, Rails 1995 (rubocop limpo).
 
 ```bash
 # quick
@@ -241,6 +252,33 @@ Módulos do detalhe da carta (`spa-carta`): `lib/format.ts`; `lib/cards/url.ts`,
 `CardFields`, `OwnershipStepper`, `WishlistForm`, `VariantRow`; rota
 `src/routes/cartas/[card_number]/+page.svelte`. `OwnershipResult` está em `api/types.ts` e,
 em versão parcial, em `ownership-queue.svelte.ts`.
+
+Módulos da pasta (`spa-pasta`): `lib/api/loader.svelte.ts` (`createLoader<T>(fetch,
+slowMs = 200)`), `lib/navigation/require-session.ts`, `easeStandard`/`cubicBezier` em
+`motion.ts`; componentes `AnimatedNumber`, `PastaSummary`, `SetProgressRow`,
+`WishlistItem`; rotas `src/routes/pasta/+page.svelte` e
+`src/routes/pasta/desejos/+page.svelte`.
+
+Armadilhas da pasta (`spa-pasta`):
+
+- **`api.get` já devolve o `data` desempacotado:** não leia `result.data`. O mock do teste
+  de página deve devolver o dado sem envelope; um teste unitário com envelope escondeu
+  isso e só o e2e pegou.
+- **`AnimatedNumber` interpola o valor monetário em CENTAVOS** e reserva a largura com uma
+  cópia invisível do texto final (`inline-grid`). O `Tween` nasce no valor final quando
+  `duration()` é 0. Teste com animação em curso precisa avançar os timers falsos no fim,
+  senão envenena o loop de rAF.
+- **`disabled` num botão focado manda o foco ao `body`:** a página de desejos devolve o
+  foco ao botão na falha.
+- **A remoção de desejo usa `variantApiPath(card, variant, 'wishlist')`**, a mesma rota do
+  `PUT`.
+- **A reserva de espaço da ação fixa abaixo de `64rem`** fica no contêiner que termina a
+  página.
+- **"Um quarto da coluna" (SPAS-11)** é medido como a trilha de `repeat(4, 1fr)`
+  descontados os vãos.
+- **A ação "Adicionar cartas" mora em `shell.aside` com `wide`** (AD-028).
+- **Dívida:** migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`
+  (hoje só a pasta e a lista de desejos o usam).
 
 Armadilhas do detalhe (`spa-carta`):
 
