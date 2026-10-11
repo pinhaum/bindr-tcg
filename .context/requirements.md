@@ -1042,6 +1042,343 @@ que o usa.
 
 ---
 
+## Requisito 18 — Catálogo na SPA
+
+**User story:** Como colecionador, quero navegar, buscar e filtrar o catálogo
+na SPA, com a mesma URL compartilhável do HTML e a minha posse à vista, para
+achar uma carta de relance sem as páginas Hotwire.
+
+Requisito da troca de front (AD-023), escrito em 2026-10-10 sem o dono
+presente. Recorte em `.specs/features/spa-catalogo/spec.md` (SCAT-NN, mesma
+numeração destes critérios). A régua é a paridade com a grade Hotwire (Req. 2,
+3, 4, 12 e 13.5, 13.9–13.12, 13.17, 13.18, 13.21–13.29); o que for além dela
+fica fora. Consome `GET /api/catalog` e `GET /api/catalog/filters` do Req. 16
+(16.18–16.22, 16.26, 16.31) sem mudar o contrato, e herda cliente, sessão,
+casco, temas e mensagens do Req. 17. Onde o Req. 13 diz "sem JavaScript"
+(13.11), na SPA vale o equivalente: controle que é link com `href` real. O
+detalhe da carta continua Hotwire até a `spa-carta`.
+
+### Critérios de aceitação
+
+**Rota e casco**
+
+1. A SPA DEVE exibir o catálogo em `/app`, com o título de página "Catálogo —
+   Bindr" e o cabeçalho "Catálogo", no lugar da página de início do Req. 17.
+2. A entrada "Catálogo" da navegação DEVE levar a `/app` sem recarregar a
+   página e ficar marcada como atual em `/app` (Req. 17.25, 17.27).
+3. O tile DEVE levar ao detalhe Hotwire `/cards/<card_number>`, com navegação
+   de página inteira, até o detalhe migrar.
+
+**Consulta e URL**
+
+4. QUANDO `/app` abrir ou sua query mudar ENTÃO o sistema DEVE pedir
+   `GET /api/catalog` com a query da URL repassada sem alteração.
+5. A URL DEVE usar os parâmetros e o formato do design §4.2 (`colors[]=Red`),
+   de forma que a query de uma URL `/catalog` aplicada a `/app` reproduza o
+   mesmo resultado (Req. 4.7).
+6. Todo link que a tela gera DEVE partir dos filtros ativos normalizados da
+   última resposta, nunca da query crua: parâmetro descartado pela API não
+   reaparece em link.
+7. QUANDO a URL mudar por voltar ou avançar do navegador ENTÃO a tela DEVE
+   exibir o resultado, o campo de busca e os controles da URL nova.
+8. SE chegar a resposta de uma URL que já não é a atual ENTÃO o sistema DEVE
+   descartá-la.
+9. QUANDO a sessão mudar com o catálogo aberto ENTÃO o sistema DEVE repetir a
+   consulta da URL atual.
+
+**Grade e tile**
+
+10. A grade DEVE exibir, por carta, a imagem da primeira variante, o nome e o
+    `card_number` em estilo `code` (Req. 2.1, 12.7).
+11. Atrás da imagem, o tile DEVE ter um placeholder com nome e `card_number`,
+    visível quando a variante não tem imagem ou a imagem falha, sem mudar as
+    dimensões do tile (Req. 2.3).
+12. O tile DEVE exibir a raridade ao lado do código quando a carta tem uma
+    variante, e "N impressões" quando tem mais (Req. 13.24).
+13. Com sessão e posse maior que zero, o tile DEVE exibir sobre o canto
+    superior direito da arte um selo com a soma das cópias das variantes,
+    anunciado como "1 cópia" ou "N cópias"; o tile NÃO DEVE ter controle de
+    posse (Req. 13.22).
+14. A grade DEVE ter cinco colunas em 1280px e funcionar em 360px sem scroll
+    horizontal (Req. 2.5, 13.25).
+
+**Busca**
+
+15. O campo de busca DEVE ter o rótulo "Buscar por nome ou card_number", o
+    exemplo "OP01-024" no placeholder e o botão "Buscar", com alvo de 44px
+    (Req. 13.18, 13.27).
+16. QUANDO o usuário enviar a busca ENTÃO o sistema DEVE navegar com o termo
+    em `q`, preservando os demais filtros e a ordenação e descartando `page`.
+17. O campo DEVE exibir o termo da busca ativa.
+
+**Filtros**
+
+18. O sistema DEVE oferecer chips de cor, tipo e raridade com os valores de
+    `GET /api/catalog/filters`, na ordem devolvida, com o tipo exibido com
+    inicial maiúscula e enviado cru (Req. 4.9, 13.29).
+19. Cada chip DEVE ser um link para a URL com o valor alternado, preservando
+    os demais filtros e descartando `page` (Req. 4.3, 4.4).
+20. O chip ativo DEVE exibir sinal de remoção visível, anel de 2px em
+    `accent` e nome acessível "Remover filtro <categoria>: <valor>"; o de cor
+    NÃO DEVE ser preenchido com `accent` (Req. 12.11, 13.11).
+21. Os chips de cor DEVEM usar tratamento neutro enquanto a pendência P8
+    estiver aberta.
+22. Todo chip e controle de filtro DEVE ter alvo de 44px.
+23. O set DEVE ser escolhido num seletor com "Todos os sets" e os sets por
+    nome, aplicado pelo botão "Aplicar": um set substitui o filtro de set,
+    "Todos os sets" o remove, e os demais filtros ficam.
+24. Com mais de um set ativo, o seletor DEVE exibir "N sets selecionados", e
+    "Aplicar" com essa opção NÃO DEVE mudar o filtro de set.
+25. Com sessão, o sistema DEVE oferecer os chips de posse "Todas", "Tenho" e
+    "Não tenho"; "Todas" sem filtro de posse é o atual, sem sinal de remoção.
+26. Sem sessão, o sistema NÃO DEVE exibir controle nem chip de posse.
+27. Faixas de custo, power e counter, attribute, trait e ordenação DEVEM
+    valer pela URL, sem controle, e ser preservados em todo link (Req. 4.9).
+
+**Filtros ativos e linha de status**
+
+28. O sistema DEVE listar os filtros ativos como chips, um por valor, com os
+    rótulos do HTML e "Posse", cada um removível sozinho; ordenação e página
+    NÃO DEVEM virar chip (Req. 4.6).
+29. A linha de status DEVE ser a frase "N cartas", acrescida de " · M filtros
+    ativos" com filtro, M igual ao número de chips (Req. 4.8, 13.26).
+30. Com filtro e resultado, a linha DEVE oferecer "Limpar filtros", que remove
+    todo filtro e mantém a ordenação (Req. 13.12).
+31. Sem sessão, a linha DEVE oferecer uma única vez "Entrar para registrar
+    posse", levando a `/app/entrar` com retorno à URL atual (Req. 13.23).
+32. A partir de 64rem, a linha de status DEVE ficar na mesma linha da busca.
+
+**Disposição dos filtros**
+
+33. A partir de 64rem, os controles DEVEM ficar na coluna lateral, abaixo da
+    navegação, numa superfície contínua e sempre visíveis (Req. 13.10, 13.16).
+34. Abaixo de 64rem, os controles DEVEM ficar acima da grade, recolhidos por
+    padrão num controle "Filtros" que diz quantos estão ativos, com os chips
+    ativos visíveis com ele recolhido (Req. 13.5, 13.17).
+35. O painel aberto DEVE continuar aberto enquanto o usuário navega dentro do
+    catálogo.
+
+**Paginação**
+
+36. Com mais de uma página, o sistema DEVE exibir "Anterior", "Página X de Y"
+    e "Próxima", cada link preservando os filtros ativos (Req. 2.2).
+
+**Estados**
+
+37. Sem resultado, o sistema DEVE exibir "Nenhuma carta encontrada para
+    <termo>." quando há busca, ou "Nenhuma carta corresponde aos filtros
+    aplicados." quando não há, com "Limpar filtros" (Req. 3.5).
+38. Enquanto a consulta da URL atual estiver pendente por mais de 200 ms, a
+    grade DEVE exibir dez tiles esqueleto, marcada como ocupada e anunciando
+    "Carregando cartas…".
+39. SE a consulta do catálogo falhar ENTÃO o sistema DEVE exibir no lugar da
+    grade a mensagem do erro e "Tentar novamente", mantendo busca e filtros
+    utilizáveis.
+40. SE a consulta das opções de filtro falhar ENTÃO o sistema DEVE exibir no
+    painel a mensagem do erro e "Tentar novamente", mantendo a grade e os
+    chips ativos.
+
+**Foco e anúncio**
+
+41. Navegação que só muda a query de `/app` NÃO DEVE mover o foco para o
+    conteúdo principal; chip do painel, "Aplicar" e "Buscar" DEVEM manter o
+    foco no controle acionado.
+42. QUANDO um chip da lista de filtros ativos for removido ENTÃO o foco DEVE
+    ir ao chip seguinte, ou ao anterior, ou à linha de status.
+43. QUANDO o usuário trocar de página ENTÃO o foco DEVE ir à linha de status.
+44. A contagem de resultados DEVE ser anunciada em região `aria-live="polite"`
+    a cada resposta.
+
+**API**
+
+45. A fatia NÃO DEVE criar nem mudar endpoint: consome só `GET /api/catalog` e
+    `GET /api/catalog/filters` como o Req. 16 os define.
+
+---
+
+## Requisito 19 — Detalhe da carta na SPA
+
+**User story:** Como colecionador, quero abrir uma carta na SPA, ver todas as
+impressões com preço e registrar quantas cópias tenho de cada uma num toque,
+com o número mudando na hora, para montar a pasta pelo celular sem as páginas
+Hotwire.
+
+Requisito da troca de front (AD-023), escrito em 2026-10-10 sem o dono
+presente. Recorte em `.specs/features/spa-carta/spec.md` (SCAR-NN, mesma
+numeração destes critérios). A régua é a paridade com o detalhe Hotwire (Req.
+5, 7.1–7.5, 8.1, 13.6, 13.19, 13.30–13.35, 13.40 e 15.8–15.10); o que for além
+dela fica fora. É fatia vertical: consome `GET /api/cards/:card_number` do Req.
+16 (16.23–16.25, 16.27–16.32) sem mudar o contrato e cria os endpoints de posse
+e de desejo que a tela precisa, no padrão do Req. 16. Herda cliente, sessão,
+casco, temas, movimento e mensagens do Req. 17 e o tile do Req. 18. O controle
+do deck em edição (Req. 14, DCK-03..05) fica para a `spa-decks`, dona do estado
+de deck em edição; durante a transição ele continua no detalhe Hotwire. A
+remoção de desejo e a lista de desejos (Req. 8.2–8.4) ficam com a fatia que
+migrar a lista.
+
+As duas escolhas de contrato marcadas DECISÃO PENDENTE abaixo (P9 e P10) têm
+opção recomendada e estão no *Rastreamento de pendências*.
+
+### Critérios de aceitação
+
+**Rota e carga**
+
+1. A SPA DEVE exibir o detalhe em `/app/cartas/<card_number>`, com o título de
+   página "<nome> (<card_number>) — Bindr" e o nome da carta como cabeçalho de
+   nível 1.
+2. QUANDO a rota abrir ou o `card_number` da URL mudar ENTÃO o sistema DEVE
+   pedir `GET /api/cards/:card_number` com o `card_number` codificado e o
+   `variant` da URL repassado.
+3. O tile do catálogo DEVE levar a `/app/cartas/<card_number>` sem recarregar a
+   página. Este critério substitui o destino Hotwire do Req. 18.3.
+4. "Voltar ao catálogo" DEVE ser um botão bordado de no mínimo 44px, sem seta,
+   que leva a `/app` sem recarregar a página; em viewport larga, na coluna
+   lateral abaixo de um divisor (Req. 13.34).
+5. SE a API responder `404 not_found` ENTÃO o sistema DEVE exibir no lugar do
+   detalhe o título de página "Carta não encontrada — Bindr", a mensagem da API
+   e "Voltar ao catálogo".
+6. SE a consulta falhar com outro erro ENTÃO o sistema DEVE exibir a mensagem
+   do erro e "Tentar novamente", que repete a consulta.
+7. Enquanto a consulta estiver pendente por mais de 200 ms, o detalhe DEVE ser
+   marcado como ocupado e anunciar "Carregando carta…".
+8. SE chegar a resposta de uma carta que já não é a da URL ENTÃO o sistema DEVE
+   descartá-la.
+9. QUANDO a sessão mudar com o detalhe aberto ENTÃO o sistema DEVE repetir a
+   consulta da carta atual.
+
+**Cabeçalho e dados**
+
+10. A imagem principal DEVE ser a da variante em destaque, com texto
+    alternativo "<nome> <variant_code>" e, atrás dela, um placeholder com nome
+    e `card_number`, visível sem imagem ou com falha, sem mudar as dimensões.
+11. Abaixo de 64rem, o detalhe DEVE exibir a miniatura da arte ao lado do
+    título e a imagem maior num controle "Ver imagem maior" que expande no
+    lugar, fechado por padrão (Req. 13.30).
+12. A partir de 64rem, a imagem maior DEVE ficar numa coluna própria ao lado
+    dos dados, sempre visível (Req. 13.6, 13.19).
+13. O cabeçalho DEVE exibir como chips o tipo com inicial maiúscula, a
+    raridade da variante em destaque, uma entrada por cor e, a partir de 64rem,
+    "Counter N" quando o counter se aplica e existe; e a linha "<nome do set> ·
+    <código do set>" da variante em destaque (Req. 13.31).
+14. QUANDO a variante em destaque estiver ausente da fonte ENTÃO o cabeçalho
+    DEVE exibir "Variante fora da fonte".
+15. Com sessão e quantidade da variante em destaque maior que zero, a imagem
+    principal DEVE ter o selo "1 cópia" ou "N cópias", com o mesmo valor
+    exibido no controle de posse dessa variante (Req. 13.35).
+16. QUANDO a variante em destaque tiver ilustrador ENTÃO o detalhe DEVE exibir
+    "Ilustração: <nome>" (Req. 13.35).
+17. O detalhe DEVE exibir Custo, Power, Life, Attribute, Traits e Block só
+    quando o campo se aplica ao tipo da carta e tem valor; `0` é valor e
+    aparece (Req. 5.1, 5.5).
+18. QUANDO a carta tiver efeito ou trigger ENTÃO o detalhe DEVE exibir a seção
+    "Efeito" com o texto como texto puro, preservando as quebras de linha, e o
+    trigger dentro dela, depois do efeito, sob o rótulo "Trigger" (Req. 5.4,
+    13.32).
+
+**Variantes**
+
+19. A seção "Variantes na pasta" DEVE listar as variantes na ordem da API, cada
+    uma com miniatura própria, código, "<raridade> · <tipo de arte>" e
+    "<nome do set> (<código do set>)" (Req. 5.2, 13.33).
+20. A variante ausente da fonte DEVE exibir "fora da fonte".
+21. Cada variante DEVE exibir o preço como `US$ 1.234,56` com o rótulo
+    "TCGplayer · market · <dd/mm/aaaa>", a data no fuso de São Paulo, ou "Sem
+    preço" sem preço, com ou sem sessão (Req. 15.8–15.10).
+22. A miniatura DEVE ser link para a própria carta com `?variant=<variant_code>`,
+    com nome acessível "Mostrar <variant_code> na imagem principal" e
+    `aria-current="true"` na variante em destaque.
+23. QUANDO o usuário escolher uma variante ENTÃO imagem principal, selo,
+    ilustração, raridade e set do cabeçalho DEVEM passar a ser os dela, com a
+    URL trocada sem novo item no histórico e sem nova consulta (Req. 13.40).
+24. Com `variant` ausente ou fora das variantes listadas, a variante em
+    destaque DEVE ser a primeira presente na fonte, ou a primeira listada se
+    nenhuma estiver presente.
+
+**Posse**
+
+25. Com sessão, cada variante DEVE exibir a quantidade possuída ("não tenho"
+    em zero) e o controle `−` `[n]` `+`, em que `[n]` só exibe; botões de no
+    mínimo 44px, com os nomes acessíveis "Remover uma cópia de <nome>
+    <variant_code>" e "Adicionar uma cópia de <nome> <variant_code>"
+    (Req. 7.2, 13.19, 13.33).
+26. Sem sessão, cada variante DEVE exibir "Entrar para registrar posse" no
+    lugar do controle, levando a `/app/entrar` com retorno à URL atual.
+27. QUANDO o usuário acionar `+` ENTÃO o valor exibido DEVE subir 1 antes da
+    resposta da API, e o sistema DEVE enviar um incremento daquela variante.
+28. QUANDO o usuário acionar `−` com o valor exibido maior que zero ENTÃO o
+    valor exibido DEVE descer 1 antes da resposta, e o sistema DEVE enviar um
+    decremento.
+29. Com o valor exibido em zero, o `−` DEVE ter `aria-disabled="true"`,
+    continuar focável e, acionado, não enviar nada e anunciar "Você não tem
+    cópias desta variante para remover." (Req. 7.4).
+30. Cada toque DEVE gerar exatamente uma operação na API, enviada na ordem dos
+    toques, cada uma depois da resposta da anterior na mesma variante.
+31. QUANDO não houver operação pendente na variante ENTÃO o valor exibido DEVE
+    ser o `owned_quantity` da última resposta.
+32. SE uma operação falhar ENTÃO o sistema DEVE descartar as operações ainda
+    não enviadas da variante, voltar o valor à última quantidade confirmada e
+    exibir a mensagem do erro como veio.
+33. QUANDO a última operação pendente da variante terminar com sucesso ENTÃO a
+    quantidade DEVE ser anunciada em região `aria-live="polite"`, com o nome da
+    carta e o código da variante.
+34. O foco DEVE continuar no botão acionado durante e depois da operação.
+
+**Desejo**
+
+35. Com sessão, cada variante DEVE ter um grupo com nome acessível "Marcar
+    <nome> <variant_code> como desejada", o campo numérico de rótulo visível
+    "Quero" com o alvo atual e o botão "Quero esta", ou "Atualizar desejo"
+    quando já há desejo (Req. 8.1).
+36. QUANDO o alvo for aceito ENTÃO o sistema DEVE avisar "<nome> <variant_code>
+    na lista de desejos: 1 cópia." (ou "N cópias.") e o botão DEVE passar a
+    "Atualizar desejo".
+37. SE o alvo for recusado com `validation_failed` ENTÃO a mensagem DEVE
+    aparecer junto do campo, ligada por `aria-describedby`, com `aria-invalid`,
+    foco no campo e o valor digitado mantido.
+38. Enquanto o envio estiver pendente, o botão DEVE ficar desabilitado e novo
+    envio DEVE ser ignorado (Req. 17.21).
+
+**Transição grade → detalhe**
+
+39. QUANDO o usuário for de um tile ao detalhe ENTÃO a arte do tile DEVE se
+    transformar na imagem principal visível do detalhe dentro da transição de
+    rota do Req. 17.43.
+40. QUANDO o usuário voltar do detalhe ao catálogo e o tile da carta estiver na
+    grade ENTÃO a imagem principal DEVE se transformar na arte do tile.
+41. Com `prefers-reduced-motion: reduce` ou sem View Transitions, a troca DEVE
+    acontecer sem transformação e sem erro (Req. 17.42, 17.43).
+
+**API de posse e de desejo**
+
+42. QUANDO `POST /api/cards/:card_number/variants/:variant_code/increment`
+    chegar com sessão ENTÃO o sistema DEVE somar 1 à posse do usuário da sessão
+    naquela variante, criando o registro se faltar, e responder `200` com
+    `{ data: { variant_code, owned_quantity } }`. *(Formato da rota: DECISÃO
+    PENDENTE P9.)*
+43. QUANDO `POST /api/cards/:card_number/variants/:variant_code/decrement`
+    chegar com sessão ENTÃO o sistema DEVE subtrair 1 se a posse for maior que
+    zero e responder `200` com a quantidade resultante; em zero ou sem
+    registro, DEVE responder `200` com `owned_quantity: 0`, sem criar registro.
+    *(Resposta em zero: DECISÃO PENDENTE P10.)*
+44. Incrementos e decrementos simultâneos da mesma variante DEVEM somar todos,
+    sem perder operação e sem chegar a quantidade negativa (Req. 7.4, 7.8).
+45. QUANDO `PUT /api/cards/:card_number/variants/:variant_code/wishlist`
+    chegar com sessão e `target_quantity` inteiro maior ou igual a 1 ENTÃO o
+    sistema DEVE criar ou atualizar o desejo do usuário da sessão e responder
+    `200` com `{ data: { variant_code, wishlist_target } }`.
+46. SE `target_quantity` faltar ou não for inteiro maior ou igual a 1 ENTÃO o
+    sistema DEVE responder `422` `validation_failed` com `fields.target_quantity`
+    igual a `["Informe um número inteiro maior ou igual a 1."]`, sem gravar.
+47. SE a carta não existir ou a variante não for dela ENTÃO os três endpoints
+    DEVEM responder `404` `not_found`, sem gravar.
+48. Os três endpoints DEVEM exigir sessão (`401 unauthenticated`) e CSRF
+    (`422 invalid_csrf_token`), e ler e gravar só o usuário da sessão: um
+    `user_id` no corpo ou na query nunca muda o registro tocado (Req. 6.5).
+49. Os controllers e as rotas HTML DEVEM continuar inalterados: a suíte
+    existente passa sem edição.
+
+---
+
 ## Rastreamento de pendências
 
 ### Resolvidas
@@ -1057,4 +1394,6 @@ que o usa.
 
 | # | Pendência | Onde |
 |---|---|---|
-| P8 | Hexadecimais das seis cores do jogo (Req. 12.11) | Req. 12 (emenda de 2026-09-29) |
+| P8 | Hexadecimais das seis cores do jogo (Req. 12.11) | Req. 12 (emenda de 2026-09-29); Req. 18.21 (chip de cor da SPA, neutro até a decisão) |
+| P9 | DECISÃO PENDENTE — chave das rotas de posse e desejo da API: `card_number` + `variant_code` no caminho (recomendada; o payload não expõe id e o `variant_code` só é único dentro da carta) ou o id da variante, como o HTML | Req. 19.42–19.47; `.specs/features/spa-carta/spec.md` |
+| P10 | DECISÃO PENDENTE — decremento em zero na API: `200` com `owned_quantity: 0` (recomendada; reconcilia o valor otimista sem caso especial) ou `422` com "Você não tem cópias desta variante para remover.", como o alerta do HTML | Req. 19.43; `.specs/features/spa-carta/spec.md` |
