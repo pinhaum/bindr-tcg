@@ -122,11 +122,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Teste novo de model: `increment_for!` sem registro devolve 1 e cria; com 3 devolve 4
-- [ ] `decrement_for!` com 2 devolve 1; com 0 e sem registro devolve `nil` e não cria nem altera registro
-- [ ] Os métodos só tocam o registro do `user` e da `variant` passados (outro usuário com a mesma variante fica intacto)
-- [ ] `CollectionItemsController` não contém mais SQL; nenhum teste Rails existente editado e todos passam
-- [ ] Gate check passes: Rails quick + `docker compose exec app bin/rails test` (suíte inteira, SCAR-49)
+- [x] Teste novo de model: `increment_for!` sem registro devolve 1 e cria; com 3 devolve 4
+- [x] `decrement_for!` com 2 devolve 1; com 0 e sem registro devolve `nil` e não cria nem altera registro
+- [x] Os métodos só tocam o registro do `user` e da `variant` passados (outro usuário com a mesma variante fica intacto)
+- [x] `CollectionItemsController` não contém mais SQL; nenhum teste Rails existente editado e todos passam
+- [x] Gate check passes: Rails quick + `docker compose exec app bin/rails test` (suíte inteira, SCAR-49)
 
 **Tests**: unit
 **Gate**: full
