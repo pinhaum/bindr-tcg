@@ -400,18 +400,20 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Link `href` `/app?sets[]=OP01` com `aria-label` "Romance Dawn (OP01): ver no catálogo"; `code` com caractere reservado codificado (SPAS-19)
-- [ ] Com `base_size`: "3 / 7 · 43%", `<progress aria-hidden="true" value="3" max="7">` e "3 de 7 do set base" (SPAS-20)
-- [ ] Com `base_size` nulo: só `owned_numbers`, sem `<progress>` nem `%`, e a frase de indisponível; nem "0%" nem "100%" (SPAS-21)
-- [ ] "1 de 1 parallel" e "0 de 2 parallels", num `<p>` que não está dentro do elemento do percentual (SPAS-22)
-- [ ] "valor US$ 0,00" e "valor US$ 1.234,56" (SPAS-23)
-- [ ] Gate check passes: Front quick
+- [x] Link `href` `/app?sets[]=OP01` com `aria-label` "Romance Dawn (OP01): ver no catálogo"; `code` com caractere reservado codificado (SPAS-19)
+- [x] Com `base_size`: "3 / 7 · 43%", `<progress aria-hidden="true" value="3" max="7">` e "3 de 7 do set base" (SPAS-20)
+- [x] Com `base_size` nulo: só `owned_numbers`, sem `<progress>` nem `%`, e a frase de indisponível; nem "0%" nem "100%" (SPAS-21)
+- [x] "1 de 1 parallel" e "0 de 2 parallels", num `<p>` que não está dentro do elemento do percentual (SPAS-22)
+- [x] "valor US$ 0,00" e "valor US$ 1.234,56" (SPAS-23)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): linha de progresso por set`
 
+
+**Registro**: Achados MINOR da revisão (teste de borda `owned_numbers > base_size` é da API; asserção redundante) registrados no relatório, sem correção.
 ---
 
 ### T12: `WishlistItem`
