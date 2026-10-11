@@ -230,9 +230,9 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Sem usuário e URL `/app/pasta?order=code` → redirect 307 para `/app/entrar?return_to=%2Fapp%2Fpasta%3Forder%3Dcode` (SPAS-03)
-- [ ] Com usuário → não lança
-- [ ] Gate check passes: Front quick
+- [x] Sem usuário e URL `/app/pasta?order=code` → redirect 307 para `/app/entrar?return_to=%2Fapp%2Fpasta%3Forder%3Dcode` (SPAS-03)
+- [x] Com usuário → não lança
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
