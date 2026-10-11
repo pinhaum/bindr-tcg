@@ -161,6 +161,14 @@ Rails.application.routes.draw do
       member { post :select }
     end
 
+    # Entradas do deck (SDEC-51..55): o deck vai no caminho e a carta por
+    # `card_number`; o Leader leva a carta no corpo.
+    post "decks/:id/cards/:card_number/increment" => "deck_entries#increment",
+         as: :api_increment_deck_card, constraints: { card_number: /[^\/]+/ }
+    post "decks/:id/cards/:card_number/decrement" => "deck_entries#decrement",
+         as: :api_decrement_deck_card, constraints: { card_number: /[^\/]+/ }
+    put "decks/:id/leader" => "deck_entries#leader", as: :api_deck_leader
+
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
     # Posse por variante (SCAR-42, SCAR-43). O `variant_code` tem `:` e chega

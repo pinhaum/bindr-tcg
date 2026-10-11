@@ -281,11 +281,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] `increment` cria com 1 e soma → `200 { card_number, quantity }`; em 50 → `422` "O máximo é 50 cópias por carta no deck." sem gravar; carta Leader → `422` "<card_number> é um Leader; use “Usar como Leader” em vez de somar cópias." (SDEC-51, SDEC-53, SDEC-54)
-- [ ] `decrement` → `200` com N-1; em 1 apaga a linha e responde `0`; sem entrada → `200` com `quantity: 0` sem gravar (SDEC-52)
-- [ ] `leader` com Leader grava ou troca sem tocar entradas → `200 { leader_card_number }`; com não-Leader → `422` "<card_number> não é um Leader; use “+” para somar cópias ao deck."; `card_number` ausente ou não-`String` → `404` (SDEC-55)
-- [ ] `card_number` `P-117` e com ponto codificados no caminho funcionam; carta inexistente `404`; deck alheio `404`; sem sessão `401`; sem token `422 invalid_csrf_token`; nada gravado nos casos de erro (SDEC-60)
-- [ ] Gate check passes: Rails quick
+- [x] `increment` cria com 1 e soma → `200 { card_number, quantity }`; em 50 → `422` "O máximo é 50 cópias por carta no deck." sem gravar; carta Leader → `422` "<card_number> é um Leader; use “Usar como Leader” em vez de somar cópias." (SDEC-51, SDEC-53, SDEC-54)
+- [x] `decrement` → `200` com N-1; em 1 apaga a linha e responde `0`; sem entrada → `200` com `quantity: 0` sem gravar (SDEC-52)
+- [x] `leader` com Leader grava ou troca sem tocar entradas → `200 { leader_card_number }`; com não-Leader → `422` "<card_number> não é um Leader; use “+” para somar cópias ao deck."; `card_number` ausente ou não-`String` → `404` (SDEC-55)
+- [x] `card_number` `P-117` e com ponto codificados no caminho funcionam; carta inexistente `404`; deck alheio `404`; sem sessão `401`; sem token `422 invalid_csrf_token`; nada gravado nos casos de erro (SDEC-60)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
