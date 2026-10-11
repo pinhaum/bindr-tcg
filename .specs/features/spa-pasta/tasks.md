@@ -310,10 +310,10 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Com usuário, "Minha pasta" é `{ href: '/app/pasta', reload: false }`
-- [ ] Teste do `MainNav`: `aria-current="page"` em "Minha pasta" com `page.url` `/app/pasta` e `/app/pasta?order=code`, e ausente em `/app/pasta/desejos` (SPAS-02)
-- [ ] Testes existentes do front que esperavam `/progress` atualizados para o novo destino (a suíte Rails não é tocada)
-- [ ] Gate check passes: Front quick
+- [x] Com usuário, "Minha pasta" é `{ href: '/app/pasta', reload: false }`
+- [x] Teste do `MainNav`: `aria-current="page"` em "Minha pasta" com `page.url` `/app/pasta` e `/app/pasta?order=code`, e ausente em `/app/pasta/desejos` (SPAS-02)
+- [x] Testes existentes do front que esperavam `/progress` atualizados para o novo destino (a suíte Rails não é tocada)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick

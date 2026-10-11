@@ -70,19 +70,41 @@ describe("MainNav", () => {
     },
   );
 
-  it("never marks Hotwire entries as current", () => {
+  it.each(["/app/pasta", "/app/pasta?order=code"])(
+    "marks Minha pasta as current at %s",
+    (path) => {
+      session.user = { email: "a@b.c" };
+      mocks.pathname = path;
+      render(MainNav);
+      expect(screen.getByRole("link", { name: "Minha pasta" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+    },
+  );
+
+  it("does not mark Minha pasta as current at /app/pasta/desejos", () => {
     session.user = { email: "a@b.c" };
-    mocks.pathname = "/progress";
+    mocks.pathname = "/app/pasta/desejos";
     render(MainNav);
     expect(
       screen.getByRole("link", { name: "Minha pasta" }),
     ).not.toHaveAttribute("aria-current");
   });
 
+  it("never marks Hotwire entries as current", () => {
+    session.user = { email: "a@b.c" };
+    mocks.pathname = "/decks";
+    render(MainNav);
+    expect(screen.getByRole("link", { name: "Baralhos" })).not.toHaveAttribute(
+      "aria-current",
+    );
+  });
+
   it("reloads the page on Hotwire links only", () => {
     session.user = { email: "a@b.c" };
     render(MainNav);
-    expect(screen.getByRole("link", { name: "Minha pasta" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Minha pasta" })).not.toHaveAttribute(
       "data-sveltekit-reload",
     );
     expect(screen.getByRole("link", { name: "Catálogo" })).not.toHaveAttribute(

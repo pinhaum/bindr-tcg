@@ -31,12 +31,22 @@ describe("navEntries", () => {
     expect(navEntries(null)[0]).toEqual(catalog);
   });
 
-  it("points the Hotwire destinations at their paths with reload", () => {
-    const entries = navEntries({ email: "a@b.c" });
-    expect(entries.slice(1, 3)).toEqual([
-      { kind: "link", label: "Minha pasta", href: "/progress", reload: true },
-      { kind: "link", label: "Baralhos", href: "/decks", reload: true },
-    ]);
+  it("points Minha pasta at the app route without reload", () => {
+    expect(navEntries({ email: "a@b.c" })[1]).toEqual({
+      kind: "link",
+      label: "Minha pasta",
+      href: "/app/pasta",
+      reload: false,
+    });
+  });
+
+  it("points Baralhos at its Hotwire path with reload", () => {
+    expect(navEntries({ email: "a@b.c" })[2]).toEqual({
+      kind: "link",
+      label: "Baralhos",
+      href: "/decks",
+      reload: true,
+    });
   });
 
   it("points Entrar and Criar conta at app routes without reload", () => {

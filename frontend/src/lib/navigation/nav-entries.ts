@@ -31,7 +31,7 @@ export function navEntries(user: SessionUser | null): NavEntry[] {
     ];
   return [
     catalog,
-    hotwire("Minha pasta", "/progress"),
+    inApp("Minha pasta", "/pasta"),
     hotwire("Baralhos", "/decks"),
     { kind: "action", label: "Sair" },
   ];
