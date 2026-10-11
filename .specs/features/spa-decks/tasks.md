@@ -659,9 +659,9 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Título e `h1` "Novo deck"; campo vazio (SDEC-10); sem sessão redireciona (SDEC-03)
-- [ ] Sucesso chama `POST /api/decks` com `{ name }`, navega a `/app/baralhos/<id>` e mostra "Deck criado." (SDEC-11)
-- [ ] Gate check passes: Front quick
+- [x] Título e `h1` "Novo deck"; campo vazio (SDEC-10); sem sessão redireciona (SDEC-03)
+- [x] Sucesso chama `POST /api/decks` com `{ name }`, navega a `/app/baralhos/<id>` e mostra "Deck criado." (SDEC-11)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
