@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { shell, wide } from '../shell.svelte';
 	import MainNav from './MainNav.svelte';
 	import ThemeSelect from './ThemeSelect.svelte';
 
@@ -15,6 +16,9 @@
 	</header>
 	<div class="nav">
 		<MainNav />
+		{#if wide.current && shell.aside}
+			<div class="aside">{@render shell.aside()}</div>
+		{/if}
 	</div>
 	<main id="conteudo" tabindex="-1">
 		{@render children()}
@@ -109,6 +113,15 @@
 
 		.nav :global(ul) {
 			flex-direction: column;
+		}
+
+		.aside {
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-4);
+			margin-block-start: var(--space-3);
+			padding-block-start: var(--space-3);
+			border-block-start: 1px solid var(--border);
 		}
 
 		main {

@@ -373,11 +373,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Com `matchMedia` casando e um snippet em `shell.aside`, o conteúdo aparece dentro de `.nav`, depois da navegação
-- [ ] Sem casar (abaixo de 64rem) ou com `shell.aside` nulo, nada é renderizado
-- [ ] Testes antigos do `AppShell` passam sem edição; `guard.test.ts` verde
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Com `matchMedia` casando e um snippet em `shell.aside`, o conteúdo aparece dentro de `.nav`, depois da navegação
+- [x] Sem casar (abaixo de 64rem) ou com `shell.aside` nulo, nada é renderizado
+- [x] Testes antigos do `AppShell` passam sem edição; `guard.test.ts` verde
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
