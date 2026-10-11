@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const reduced = vi.hoisted(() => ({ current: false }));
 vi.mock('svelte/motion', () => ({ prefersReducedMotion: reduced }));
 
+import { armArrival, markCard, signalArrival } from './cards/morph.svelte';
 import { viewTransitionOnNavigate } from './view-transition';
 
 const navigation = (complete: Promise<void> = Promise.resolve()) =>
@@ -72,5 +73,77 @@ describe('viewTransitionOnNavigate', () => {
 		finish();
 		await update;
 		expect(settled).toBe(true);
+	});
+
+	describe('com carta marcada (morph)', () => {
+		const settled = (promise: Promise<void>) => {
+			const state = { done: false };
+			void promise.then(() => (state.done = true));
+			return state;
+		};
+		const startUpdate = async () => {
+			let update!: Promise<void>;
+			Object.assign(document, {
+				startViewTransition: vi.fn((callback: () => Promise<void>) => {
+					update = callback();
+				})
+			});
+			await viewTransitionOnNavigate(navigation());
+			return settled(update);
+		};
+
+		afterEach(() => {
+			markCard(null);
+			vi.useRealTimers();
+		});
+
+		it('espera a chegada do destino depois de navigation.complete', async () => {
+			markCard('OP01-001');
+			const update = await startUpdate();
+			await Promise.resolve();
+			await Promise.resolve();
+			expect(update.done).toBe(false);
+
+			signalArrival();
+			await vi.waitFor(() => expect(update.done).toBe(true));
+		});
+
+		it('não espera se o destino chegou antes de o callback consumir a espera', async () => {
+			markCard('OP01-001');
+			const update = await startUpdate();
+			signalArrival();
+
+			await vi.waitFor(() => expect(update.done).toBe(true));
+		});
+
+		it('descarta a chegada de uma navegação anterior', async () => {
+			markCard('OP01-001');
+			signalArrival();
+			const update = await startUpdate();
+			await Promise.resolve();
+			await Promise.resolve();
+
+			expect(update.done).toBe(false);
+			signalArrival();
+		});
+
+		it('libera a transição no teto de 500 ms quando o destino não chega', async () => {
+			vi.useFakeTimers();
+			markCard('OP01-001');
+			const update = await startUpdate();
+			await vi.advanceTimersByTimeAsync(499);
+			expect(update.done).toBe(false);
+
+			await vi.advanceTimersByTimeAsync(1);
+			expect(update.done).toBe(true);
+		});
+
+		it('sem carta marcada não espera chegada nenhuma', async () => {
+			markCard(null);
+			armArrival();
+			const update = await startUpdate();
+
+			await vi.waitFor(() => expect(update.done).toBe(true));
+		});
 	});
 });

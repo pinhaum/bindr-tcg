@@ -35,6 +35,7 @@ vi.mock('../lib/api/index', () => ({ api: { getEnvelope, get: vi.fn() } }));
 
 import { page } from '$app/state';
 import AppShell from '../lib/components/AppShell.svelte';
+import { armArrival, awaitArrival, signalArrival } from '../lib/cards/morph.svelte';
 import { filterOptions } from '../lib/catalog/filter-options.svelte';
 import { session } from '../lib/session.svelte';
 import { shell } from '../lib/shell.svelte';
@@ -788,6 +789,52 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 			expect(statusLine()).toBeNull();
 			expect(document.activeElement).toBe(search);
+		});
+	});
+
+	describe('SCAT/SCAR-40: chegada para a View Transition', () => {
+		const arrival = () => {
+			armArrival();
+			const state = { done: false };
+			void awaitArrival(60_000).then(() => (state.done = true));
+			return state;
+		};
+		afterEach(() => signalArrival());
+
+		it('sinaliza a chegada só depois de a grade mostrar as cartas', async () => {
+			const pending = deferred<ReturnType<typeof envelope>>();
+			getEnvelope.mockReturnValue(pending.promise);
+			const state = arrival();
+			render(Page);
+			await tick();
+			expect(state.done).toBe(false);
+
+			pending.resolve(envelope([card('OP01-001', 'Zoro')]));
+			await findTile('Zoro');
+
+			await waitFor(() => expect(state.done).toBe(true));
+		});
+
+		it('sinaliza de novo quando a consulta se repete ao voltar', async () => {
+			render(Page);
+			await findTile('Zoro');
+			const state = arrival();
+
+			getEnvelope.mockResolvedValue(envelope([card('OP01-002', 'Nami')]));
+			await goTo('/app?q=nami');
+			await findTile('Nami');
+
+			await waitFor(() => expect(state.done).toBe(true));
+		});
+
+		it('não sinaliza com a consulta pendente em skeleton nem com erro', async () => {
+			getEnvelope.mockRejectedValue(new ApiError(500, 'internal_error', 'Algo deu errado.'));
+			const state = arrival();
+			render(Page);
+			await screen.findByRole('button', { name: 'Tentar novamente' });
+			await new Promise((resolve) => setTimeout(resolve, 20));
+
+			expect(state.done).toBe(false);
 		});
 	});
 });

@@ -4,6 +4,7 @@
 	import { tick, untrack } from 'svelte';
 	import { api } from '../lib/api/index';
 	import type { CatalogCard, CatalogMeta } from '../lib/api/types';
+	import { signalArrival } from '../lib/cards/morph.svelte';
 	import { createCatalogLoader } from '../lib/catalog/catalog.svelte';
 	import { clearHref, filterChips, searchHref } from '../lib/catalog/url';
 	import ActiveFilters from '../lib/components/ActiveFilters.svelte';
@@ -65,6 +66,18 @@
 		announcement = '';
 		tick().then(() => {
 			if (current) announcement = text;
+		});
+		return () => {
+			current = false;
+		};
+	});
+
+	// A View Transition de volta só captura o estado novo com os tiles da grade no DOM.
+	$effect(() => {
+		if (!result || error || loader.state.skeleton) return;
+		let current = true;
+		tick().then(() => {
+			if (current) signalArrival();
 		});
 		return () => {
 			current = false;

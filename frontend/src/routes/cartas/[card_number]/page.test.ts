@@ -44,7 +44,7 @@ vi.mock('../../../lib/api', () => ({ api: client }));
 
 import { page } from '$app/state';
 import AppShell from '../../../lib/components/AppShell.svelte';
-import { isMarked, markCard } from '../../../lib/cards/morph.svelte';
+import { armArrival, awaitArrival, isMarked, markCard, signalArrival } from '../../../lib/cards/morph.svelte';
 import { session } from '../../../lib/session.svelte';
 import { shell } from '../../../lib/shell.svelte';
 import { toasts } from '../../../lib/toasts.svelte';
@@ -249,6 +249,40 @@ describe('cartas/[card_number]/+page.svelte', () => {
 
 		expect(within(rowOf('tcgplayer:25')).getByText('não tenho')).toBeInTheDocument();
 		expect(screen.queryByText('9 cópias')).not.toBeInTheDocument();
+	});
+
+	describe('SCAR-39: chegada para a View Transition', () => {
+		const arrival = () => {
+			armArrival();
+			const state = { done: false };
+			void awaitArrival(60_000).then(() => (state.done = true));
+			return state;
+		};
+		afterEach(() => signalArrival());
+
+		it('sinaliza a chegada depois de o cabeçalho da carta estar no DOM', async () => {
+			const pending = deferred<CardDetailPayload>();
+			client.get.mockReturnValue(pending.promise);
+			const state = arrival();
+			render(Page);
+			await tick();
+			expect(state.done).toBe(false);
+
+			pending.resolve(detail('OP01-001', 'Luffy'));
+			await h1('Luffy');
+
+			await waitFor(() => expect(state.done).toBe(true));
+		});
+
+		it('não sinaliza enquanto a resposta falha ou a carta não existe', async () => {
+			client.get.mockRejectedValue(notFound());
+			const state = arrival();
+			render(Page);
+			await screen.findByText('Carta não encontrada.');
+			await new Promise((resolve) => setTimeout(resolve, 20));
+
+			expect(state.done).toBe(false);
+		});
 	});
 
 	it('SCAR-40: com a carta carregada, marca o card_number para o morph de volta', async () => {
