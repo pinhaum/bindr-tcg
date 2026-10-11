@@ -471,9 +471,9 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Teste do `QuantityStepper`: rótulos e frase de recusa vêm das props; `−` em zero tem `aria-disabled="true"`, é focável, não chama `send` e anuncia a recusa; cinco `+` rápidos mostram 1..5 e chamam `send` cinco vezes em série; falha no 3º volta ao confirmado e chama o erro
-- [ ] Os testes de `OwnershipStepper`, `VariantRow`, da fila e da página da carta passam sem edição de asserção (só o mock do `send` pode mudar de forma, registrado na task)
-- [ ] Gate check passes: Front quick
+- [x] Teste do `QuantityStepper`: rótulos e frase de recusa vêm das props; `−` em zero tem `aria-disabled="true"`, é focável, não chama `send` e anuncia a recusa; cinco `+` rápidos mostram 1..5 e chamam `send` cinco vezes em série; falha no 3º volta ao confirmado e chama o erro
+- [x] Os testes de `OwnershipStepper`, `VariantRow`, da fila e da página da carta passam sem edição de asserção (só o mock do `send` pode mudar de forma, registrado na task)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick

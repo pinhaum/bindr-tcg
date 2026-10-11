@@ -5,7 +5,6 @@ import { resolve } from 'node:path';
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/errors';
-import type { OwnershipResult } from '../api/types';
 import type { OwnershipOp } from '../cards/ownership-queue.svelte';
 import { toasts } from '../toasts.svelte';
 import OwnershipStepper from './OwnershipStepper.svelte';
@@ -24,8 +23,8 @@ function setup(confirmed: number) {
 	const calls: Deferred[] = [];
 	const send = vi.fn(
 		(op: OwnershipOp) =>
-			new Promise<OwnershipResult>((resolve, reject) => {
-				calls.push({ op, resolve: (quantity) => resolve({ variant_code: CODE, owned_quantity: quantity }), reject });
+			new Promise<number>((resolve, reject) => {
+				calls.push({ op, resolve, reject });
 			})
 	);
 	const view = render(OwnershipStepper, { name: NAME, variantCode: CODE, confirmed, send });
@@ -66,7 +65,7 @@ describe('OwnershipStepper', () => {
 
 	it('usa o token de alvo de toque nos botões (SCAR-25)', () => {
 		const source = readFileSync(
-			resolve(process.cwd(), 'src/lib/components/OwnershipStepper.svelte'),
+			resolve(process.cwd(), 'src/lib/components/QuantityStepper.svelte'),
 			'utf8'
 		);
 		expect(source).toContain('min-block-size: var(--touch-target)');
@@ -165,7 +164,7 @@ describe('OwnershipStepper', () => {
 	it('reflete a quantidade exibida na prop vinculável displayed', async () => {
 		let displayed = 0;
 		const target = document.body.appendChild(document.createElement('div'));
-		const send = vi.fn(() => new Promise<OwnershipResult>(() => {}));
+		const send = vi.fn(() => new Promise<number>(() => {}));
 		const component = mount(OwnershipStepper, {
 			target,
 			props: {
