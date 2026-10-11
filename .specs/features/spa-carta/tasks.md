@@ -319,12 +319,12 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `load('P-029', 'tcgplayer:1')` chama `client.get('/api/cards/P-029?variant=tcgplayer%3A1')` (SCAR-02)
-- [ ] `skeleton` só vira `true` depois de 200 ms pendentes; antes disso `result` anterior continua (SCAR-07)
-- [ ] Resposta de `load` superada por outro `load` não altera `state` (SCAR-08)
-- [ ] `404 not_found` → `notFound` com a `message`; outro `ApiError` → `error`; `retry()` repete a última consulta (SCAR-05, SCAR-06)
-- [ ] Erro que não é `ApiError` é relançado
-- [ ] Gate check passes: Front quick
+- [x] `load('P-029', 'tcgplayer:1')` chama `client.get('/api/cards/P-029?variant=tcgplayer%3A1')` (SCAR-02)
+- [x] `skeleton` só vira `true` depois de 200 ms pendentes; antes disso `result` anterior continua (SCAR-07)
+- [x] Resposta de `load` superada por outro `load` não altera `state` (SCAR-08)
+- [x] `404 not_found` → `notFound` com a `message`; outro `ApiError` → `error`; `retry()` repete a última consulta (SCAR-05, SCAR-06)
+- [x] Erro que não é `ApiError` é relançado
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
