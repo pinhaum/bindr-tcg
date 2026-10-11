@@ -685,12 +685,12 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Título "<nome> — Bindr" e `h1` (SDEC-17); `404` → `DeckNotFound` (SDEC-18); outro erro → "Tentar novamente"; carga lenta "Carregando deck…"; resposta de outro id descartada (SDEC-04..06)
-- [ ] `editing: true` → "Em edição"; senão "Editar este deck" envia `POST …/select` e troca para "Em edição" com "Agora as cartas vão para o deck “<nome>”." (SDEC-19, SDEC-20)
-- [ ] "Status: <rótulo>", motivos só fora de `valid`, aviso com cabeçalho e `<blockquote>`, "A lista de banidas não é verificada" sempre (SDEC-21..23)
-- [ ] As quatro frases de "Na sua pasta" (SDEC-24); Leader com link ou "Sem Leader" (SDEC-25); "Deck principal: N / 50", `h3` por troca de tipo, "N×", link, "custo N" só com `cost` (SDEC-26); "carta fora da fonte" (SDEC-27); "pedida N, possuída N, falta N" (SDEC-28)
-- [ ] "Exportar lista" com `href` `/decks/<id>.txt` e recarga; "Renomear", "Excluir" e "Voltar aos baralhos" sem recarga (SDEC-29)
-- [ ] Gate check passes: Front quick
+- [x] Título "<nome> — Bindr" e `h1` (SDEC-17); `404` → `DeckNotFound` (SDEC-18); outro erro → "Tentar novamente"; carga lenta "Carregando deck…"; resposta de outro id descartada (SDEC-04..06)
+- [x] `editing: true` → "Em edição"; senão "Editar este deck" envia `POST …/select` e troca para "Em edição" com "Agora as cartas vão para o deck “<nome>”." (SDEC-19, SDEC-20)
+- [x] "Status: <rótulo>", motivos só fora de `valid`, aviso com cabeçalho e `<blockquote>`, "A lista de banidas não é verificada" sempre (SDEC-21..23)
+- [x] As quatro frases de "Na sua pasta" (SDEC-24); Leader com link ou "Sem Leader" (SDEC-25); "Deck principal: N / 50", `h3` por troca de tipo, "N×", link, "custo N" só com `cost` (SDEC-26); "carta fora da fonte" (SDEC-27); "pedida N, possuída N, falta N" (SDEC-28)
+- [x] "Exportar lista" com `href` `/decks/<id>.txt` e recarga; "Renomear", "Excluir" e "Voltar aos baralhos" sem recarga (SDEC-29)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
