@@ -137,5 +137,42 @@ describe('+layout.svelte', () => {
 
 			expect(inner).toHaveFocus();
 		});
+
+		describe('com origem e destino', () => {
+			const at = (url: string) => ({ url: new URL(url) });
+			const renderWithOutsideFocus = () => {
+				session.status = 'ready';
+				const { container } = renderLayout();
+				const outside = document.createElement('button');
+				container.appendChild(outside);
+				outside.focus();
+				return { main: container.querySelector<HTMLElement>('main#conteudo')!, outside };
+			};
+
+			it('só a query muda: mantém o foco fora do main', () => {
+				const { main, outside } = renderWithOutsideFocus();
+
+				nav.afterNavigate.mock.calls[0][0]({
+					type: 'goto',
+					from: at('http://localhost/app/?a=1'),
+					to: at('http://localhost/app/?a=2')
+				});
+
+				expect(outside).toHaveFocus();
+				expect(main).not.toHaveFocus();
+			});
+
+			it('rota diferente: o foco vai para o main', () => {
+				const { main } = renderWithOutsideFocus();
+
+				nav.afterNavigate.mock.calls[0][0]({
+					type: 'link',
+					from: at('http://localhost/app/'),
+					to: at('http://localhost/app/entrar')
+				});
+
+				expect(main).toHaveFocus();
+			});
+		});
 	});
 });

@@ -14,6 +14,8 @@
 
 	afterNavigate((navigation) => {
 		if (navigation.type === 'enter') return;
+		const from = navigation.from?.url.pathname;
+		if (from !== undefined && from === navigation.to?.url.pathname) return;
 		const main = document.getElementById('conteudo');
 		const active = document.activeElement;
 		if (!main || (active && active !== document.body && main.contains(active))) return;

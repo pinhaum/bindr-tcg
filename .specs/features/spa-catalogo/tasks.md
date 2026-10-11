@@ -401,10 +401,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Navegação `/app?a` → `/app?b` com o foco num elemento fora de `main` mantém o foco nele
-- [ ] Navegação `/app` → `/app/entrar` continua focando `main#conteudo`; testes antigos passam sem edição
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Navegação `/app?a` → `/app?b` com o foco num elemento fora de `main` mantém o foco nele
+- [x] Navegação `/app` → `/app/entrar` continua focando `main#conteudo`; testes antigos passam sem edição
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
