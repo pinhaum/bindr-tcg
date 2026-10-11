@@ -358,6 +358,23 @@ describe('+page.svelte (/app, catálogo)', () => {
 			expect(getEnvelope).toHaveBeenLastCalledWith('/api/catalog?colors%5B%5D=Red&page=2');
 		});
 
+		it('com erro e "Tentar novamente" pendente, o esqueleto aparece após 200 ms e a message some (SCAT-38, 39)', async () => {
+			vi.useFakeTimers();
+			getEnvelope.mockRejectedValueOnce(networkError());
+			const { container } = render(Page);
+			await vi.advanceTimersByTimeAsync(0);
+			expect(screen.getByText(networkError().message, { selector: 'section *' })).toBeInTheDocument();
+
+			const retry = deferred<ReturnType<typeof envelope>>();
+			getEnvelope.mockReturnValue(retry.promise);
+			await fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+			await vi.advanceTimersByTimeAsync(200);
+
+			expect(skeletons(container)).toHaveLength(10);
+			expect(container.querySelector('section')).toHaveAttribute('aria-busy', 'true');
+			expect(screen.queryByText(networkError().message, { selector: 'section *' })).not.toBeInTheDocument();
+		});
+
 		it('mostra a message de um erro da API como veio', async () => {
 			getEnvelope.mockRejectedValue(new ApiError(500, 'internal_error', 'Algo deu errado.'));
 			render(Page);

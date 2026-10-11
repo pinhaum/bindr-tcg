@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/spa-catalogo/design.md`
-**Status**: Executed (T1–T25); Verifier it.1 FAIL → fase 5 (T26–T28)
+**Status**: Executed (T1–T25); Verifier it.1 FAIL → fase 5 (T26–T28); it.2 FAIL → fase 6 (T29–T31)
 
 ---
 
@@ -106,6 +106,14 @@ T24 → T25
 T25 → T26
 T26 → T27
 T25 → T28
+```
+
+### Phase 6: Correções do Verifier (iteração 2)
+
+```
+T28 → T29
+T27 → T30
+T30 → T31
 ```
 
 ---
@@ -899,6 +907,89 @@ T25 → T28
 
 ---
 
+### T29: Testes de unidade para duas impressões e esqueleto sobre o erro (G8, G9)
+
+**What**: Em `CardTile.test.ts`, um caso com exatamente duas variantes (a legenda mostra "2 impressões") e a variante única continua mostrando a raridade. Em `page.test.ts`, depois de "Tentar novamente" com a resposta pendente, avançar 200 ms e afirmar dez tiles esqueleto, `aria-busy="true"` e a `message` do erro ausente.
+**Where**: `frontend/src/lib/components/CardTile.test.ts`
+**Depends on**: T28
+**Reuses**: fábricas de carta e mocks de `page.test.ts`
+**Requirement**: SCAT-12, SCAT-38, SCAT-39
+
+**Tools**:
+
+- MCP: NONE
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [x] Duas variantes dão "2 impressões" na legenda; uma variante mostra a raridade
+- [x] Com erro e retry pendente, depois de 200 ms há dez tiles esqueleto, `aria-busy="true"` e a `message` do erro some
+- [x] A mutação "'N impressões' só com 3 ou mais variantes" e a mutação "erro antes do esqueleto" matam o teste (provadas numa cópia isolada)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
+
+**Tests**: unit
+**Gate**: quick
+
+**Commit**: `test(spa-catalogo): provar duas impressões e o esqueleto sobre o erro`
+
+---
+
+### T30: E2E de layout para a amostra de cor e o link à direita abaixo de 64rem (G10, G11)
+
+**What**: Em `catalogo-layout.spec.ts`, no teste do anel, ler `getComputedStyle` da `.swatch` do chip de cor (fundo transparente ou diferente de `accent`, borda em `--border-strong`); no ramo abaixo de 1024px do teste da linha de status, afirmar que o canto direito dos links ("Limpar filtros") encosta na borda direita da linha de status.
+**Where**: `frontend/e2e/catalogo-layout.spec.ts`
+**Depends on**: T27
+**Reuses**: helpers do próprio `catalogo-layout.spec.ts`
+**Requirement**: SCAT-20, SCAT-21, SCAT-30
+
+**Tools**:
+
+- MCP: `playwright` (depuração local, se preciso)
+- Skill: `ecc:e2e-testing`
+
+**Done when**:
+
+- [ ] A `.swatch` não é preenchida com `accent` e a borda usa `--border-strong`
+- [ ] Abaixo de 64rem, "Limpar filtros" fica à direita da linha de status
+- [ ] A mutação "amostra preenchida com accent" e a mutação "links com `flex-start`" matam o teste (provadas numa cópia isolada)
+- [ ] Gate check passes: full
+- [ ] Test count: e2e anteriores + novos, nenhum removido
+
+**Tests**: e2e
+**Gate**: full
+
+**Commit**: `test(spa-catalogo): medir a amostra de cor e o link à direita no layout`
+
+---
+
+### T31: "Limpar filtros" à direita também quando os links quebram de linha (SCAT-30)
+
+**What**: Em `CatalogStatus.svelte`, os links ("Limpar filtros" e "Entrar para registrar posse") ficam alinhados à direita da linha de status mesmo quando quebram para uma segunda linha (a 360px deslogado não cabem ao lado da frase). Em `catalogo-layout.spec.ts`, no ramo estreito do teste da linha de status, afirmar que o canto direito dos links encosta na borda direita da linha (a 360px, com os dois links).
+**Where**: `frontend/src/lib/components/CatalogStatus.svelte`
+**Depends on**: T30
+**Reuses**: medição de `status`/`links` que a T30 acrescentou ao `catalogo-layout.spec.ts`
+**Requirement**: SCAT-30
+
+**Tools**:
+
+- MCP: `plugin:svelte` (`svelte-autofixer`)
+- Skill: `superpowers:test-driven-development`
+
+**Done when**:
+
+- [ ] A 360px deslogado com filtro ativo, os links encostam na borda direita da linha de status (asserção de e2e que falha antes da correção)
+- [ ] A 768px, 1023px e 1280px continuam à direita; `CatalogStatus.test.ts` e `guard.test.ts` verdes
+- [ ] Gate check passes: full
+- [ ] Test count: anteriores + novos, nenhum removido
+
+**Tests**: e2e
+**Gate**: full
+
+**Commit**: `fix(spa-catalogo): alinhar à direita os links da linha de status ao quebrar`
+
+---
+
 ## Phase Execution Map
 
 Phase 1 → Phase 2 → Phase 3 → Phase 4, em série; dentro de cada phase, as tasks rodam na ordem numérica.
@@ -910,6 +1001,7 @@ Phase 1 → Phase 2 → Phase 3 → Phase 4, em série; dentro de cada phase, as
 | 3 | T14, T15, T16, T17, T18, T19 |
 | 4 | T20, T21, T22, T23, T24, T25 |
 | 5 | T26, T27, T28 |
+| 6 | T29, T30, T31 |
 
 Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2 (T8–T13), **C** = Phase 3 (T14–T19), **D** = Phase 4 (T20–T25). Os lotes rodam em série.
 
@@ -947,6 +1039,9 @@ Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2
 | T26: E2E de layout | 1 spec | ✅ Granular |
 | T27: E2E residuais | 3 emendas de spec do mesmo tema | ⚠️ Coeso (mesma jornada de e2e) |
 | T28: Página com opções falhando | 1 teste | ✅ Granular |
+| T29: Duas impressões e esqueleto sobre erro | 2 testes de unidade | ✅ Granular |
+| T30: Amostra de cor e link à direita | 2 asserções de e2e | ✅ Granular |
+| T31: Links da linha de status à direita | 1 regra de CSS + 1 asserção | ✅ Granular |
 
 ---
 
@@ -982,6 +1077,9 @@ Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2
 | T26 | T25 | T25 → T26 | ✅ Match |
 | T27 | T26 | T26 → T27 | ✅ Match |
 | T28 | T25 | T25 → T28 | ✅ Match |
+| T29 | T28 | T28 → T29 | ✅ Match |
+| T30 | T27 | T27 → T30 | ✅ Match |
+| T31 | T30 | T30 → T31 | ✅ Match |
 
 ---
 
@@ -1009,6 +1107,9 @@ Lotes de ~7 tasks em phases inteiras: **A** = Phase 1 (T1–T7), **B** = Phase 2
 | T25: Fechamento | docs | none | none | ✅ OK |
 | T26–T27: E2E | Jornada | e2e | e2e | ✅ OK |
 | T28: Página | Página | unit | unit | ✅ OK |
+| T29: Testes de unidade | Componente/página | unit | unit | ✅ OK |
+| T30: E2E de layout | Jornada | e2e | e2e | ✅ OK |
+| T31: Links da linha de status | Componente + jornada | e2e | e2e | ✅ OK |
 
 ---
 

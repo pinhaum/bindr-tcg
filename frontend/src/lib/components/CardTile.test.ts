@@ -115,6 +115,15 @@ describe('CardTile', () => {
 		expect(container.querySelector('.rarity')?.textContent?.trim() ?? '').toBe('');
 	});
 
+	it('duas variantes mostram "2 impressões" no lugar da raridade (SCAT-12)', () => {
+		const { container } = render(CardTile, {
+			card: card({ variants: owned(null, null) }),
+			signedIn: false
+		});
+		expect(container.querySelector('.rarity')).toHaveTextContent('2 impressões');
+		expect(container.textContent).not.toContain('SR');
+	});
+
 	it('três variantes mostram "3 impressões" no lugar da raridade (SCAT-12)', () => {
 		const { container } = render(CardTile, {
 			card: card({ variants: owned(null, null, null) }),
