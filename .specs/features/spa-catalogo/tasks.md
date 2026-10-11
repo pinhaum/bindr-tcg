@@ -346,10 +346,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Duas chamadas a `ensureFilterOptions` (antes e depois da resposta) fazem um único `GET /api/catalog/filters`
-- [ ] Falha grava `error` com a `message` da API e zera `loading`; `retryFilterOptions` refaz a chamada e, com sucesso, zera `error`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Duas chamadas a `ensureFilterOptions` (antes e depois da resposta) fazem um único `GET /api/catalog/filters`
+- [x] Falha grava `error` com a `message` da API e zera `loading`; `retryFilterOptions` refaz a chamada e, com sucesso, zera `error`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
