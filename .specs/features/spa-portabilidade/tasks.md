@@ -513,11 +513,11 @@ T14 → T15
 
 **Done when**:
 
-- [ ] `CLAUDE.md` lista `POST /api/collection/imports`, `GET …/:token`, `POST …/:token/confirm` e `409 import_closed`, e o estado da feature
-- [ ] Traceability SPOR-01..46 em `Implemented` com a task de cada um; §17 do `.context/tasks.md` marcada
-- [ ] *Handoff* registra a duplicação temporária entre `CollectionCsv::Upload` e o controller HTML (sai na `spa-troca`), a P13 aberta e os tempos medidos nas T4 e T13
-- [ ] `git diff --name-status <base>..HEAD -- test/` só com `A`; controller, views e serviços HTML do import intocados (SPOR-45)
-- [ ] Gate check passes: Build
+- [x] `CLAUDE.md` lista `POST /api/collection/imports`, `GET …/:token`, `POST …/:token/confirm` e `409 import_closed`, e o estado da feature
+- [x] Traceability SPOR-01..46 em `Implemented` com a task de cada um; §17 do `.context/tasks.md` marcada
+- [x] *Handoff* registra a duplicação temporária entre `CollectionCsv::Upload` e o controller HTML (sai na `spa-troca`), a P13 aberta e os tempos medidos nas T4 e T13
+- [x] `git diff --name-status <base>..HEAD -- test/` só com `A`; controller, views e serviços HTML do import intocados (SPOR-45)
+- [x] Gate check passes: Build
 
 **Tests**: none
 **Gate**: build

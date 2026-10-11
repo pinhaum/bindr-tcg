@@ -58,6 +58,15 @@ mutação em `Api::CardVariantsController` e `CollectionItem.increment_for!`/`de
 respostas, mensagens nem rotas HTML; SCAR-49: nenhum teste Rails existente foi editado).
 Design em `.specs/features/spa-carta/design.md`.
 
+A **`spa-portabilidade`** (Req. 22, SPOR-01..46) está **implementada (T1–T14) e aguarda o
+Verifier**: o import da coleção saiu do HTML e é SPA em `/app/pasta/importar` (envio do CSV) e
+`/app/pasta/importar/[token]` (pré-visualização em cinco grupos, confirmação e resumo); o
+export segue pelo link da pasta, para `GET /collection/export` do Rails, e a ida e volta é
+provada no e2e. Rails ganhou três rotas em `Api::CollectionImportsController` e o serviço
+`CollectionCsv::Upload`; o controller, as views e os serviços HTML do import ficam intocados
+(SPOR-45: `git diff --name-status d5f13c6..HEAD -- test/` só com `A`). Design em
+`.specs/features/spa-portabilidade/design.md`.
+
 A **`spa-pasta`** (Req. 20, SPAS-01..46) está **encerrada e verificada** (T1–T17, `validation.md` PASS): `/app/pasta` (indicadores com número interpolado, progresso por set, chips de
 ordem, ações) e `/app/pasta/desejos` (lista e remoção não otimista, com foco) são SPA e
 leem só `GET /api/progress` e `GET /api/wishlist`, além de `DELETE …/wishlist`.
@@ -109,12 +118,15 @@ HTML). Rotas no `scope "api"` de `config/routes.rb` (`format: false` +
 | `GET /api/progress` | `ProgressController` | exige sessão; `{ data: { order, summary, sets } }`; `order` inválido cai em `recent`; `base_size` e `completion_percent` nulos quando o set não tem base; número de consultas constante |
 | `GET /api/wishlist` | `WishlistController` | exige sessão; itens por ordem de criação e id, com `owned_quantity` e `fulfilled` |
 | `DELETE /api/cards/:card_number/variants/:variant_code/wishlist` | `CardVariantsController` | exige sessão e CSRF; `200` com `{ variant_code, wishlist_target: null }`, idempotente; `404` para carta ou variante inexistente |
+| `POST /api/collection/imports` | `CollectionImportsController` | exige sessão e CSRF; multipart com `file`; `201` com a pré-visualização `{ token, filename, rows[] }`; recusa do arquivo é `422 validation_failed` com `fields.file`; não escreve em `collection_items` |
+| `GET /api/collection/imports/:token` | `CollectionImportsController` | exige sessão; pré-visualização do staging do próprio usuário (`quantity_before` `null` sem registro); token alheio, inexistente ou vencido é `404` |
+| `POST /api/collection/imports/:token/confirm` | `CollectionImportsController` | exige sessão e CSRF; `200` com `{ filename, created, updated, removed, unchanged, rejected[], failures[] }` (`updated` inclui `removed`); já confirmada ou vencida é `409 import_closed` |
 | `* /api/*path` | `NotFoundController` | catch-all |
 
 Sucesso é `{ "data": ... }` (a lista traz `meta`); erro é sempre
 `{ "error": { "code", "message", "fields" } }` com mensagem em pt-BR. Códigos:
 `unauthenticated` 401, `invalid_credentials` 401, `invalid_csrf_token` 422,
-`validation_failed` 422, `bad_request` 400, `invalid_json` 400, `not_found` 404,
+`validation_failed` 422, `bad_request` 400, `invalid_json` 400, `not_found` 404, `import_closed` 409,
 `not_acceptable` 406, `unsupported_browser` 406, `internal_error` 500 (genérico,
 a exceção só vai para o log). Nenhuma resposta sob `/api` é HTML ou redirect;
 `end_to_end_test.rb` varre isso. As peças reaproveitadas pelo HTML e pela API:
@@ -278,6 +290,35 @@ Armadilhas da pasta (`spa-pasta`):
 - **A ação "Adicionar cartas" mora em `shell.aside` com `wide`** (AD-028).
 - **Dívida:** migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`
   (hoje só a pasta e a lista de desejos o usam).
+
+Módulos do import (`spa-portabilidade`): `lib/imports/api.ts` (caminhos e chamadas),
+`lib/imports/groups.ts` (cinco grupos da pré-visualização), tipos em `api/types.ts`;
+componentes `ImportRowItem` e `ImportSummary`; rotas `src/routes/pasta/importar/+page.svelte`
+e `src/routes/pasta/importar/[token]/+page.svelte`. O cliente HTTP (`api/client.ts`) agora
+aceita `FormData` (sem `Content-Type` próprio, com CSRF e o mesmo reenvio único) e
+`timeoutMs` por chamada: 60 s no envio e na confirmação, 15 s nas demais (SPOR-32).
+
+Armadilhas do import (`spa-portabilidade`):
+
+- **Confirmação com resposta perdida (P13, aberta):** rede ou tempo limite na confirmação
+  não reenvia; a SPA mostra "Não foi possível saber se a importação foi gravada…" com link
+  para a pasta (SPOR-31). O resumo não é persistido, como no HTML; uma segunda tentativa
+  recebe `409 import_closed`. Persistir o `Commit::Result` exige migração e é do dono.
+- **`409 import_closed` junta dois casos** (já confirmada e vencida), com a frase do HTML;
+  a pré-visualização continua na tela com alerta (SPOR-30).
+- **O teto do upload é imposto antes de ler o arquivo** (`CollectionCsv::Upload`, fix
+  `b02dcc1`): `content_length` acima do limite de 8 MB recusa sem chamar `read`.
+- **`line` da pré-visualização já vem somado (+2) do servidor**; a SPA não refaz a conta.
+- **Texto do arquivo entra como texto** (`card_name`, `message`): nada de `{@html}` (SPOR-17).
+- **Foco e anúncio no envio e na pendência** (fix `4d338c2`): o foco volta ao controle e a
+  pendência é anunciada em região viva; `disabled` num botão focado manda o foco ao `body`.
+- **Duplicação temporária:** `CollectionCsv::Upload` repete a validação e o saneamento do
+  nome do `CollectionImportsController` HTML; a duplicação sai na `spa-troca`, quando o
+  HTML do import for removido. Não unificar antes, para não editar o HTML (SPOR-45).
+- **Medições:** `Commit` de 10.000 linhas levou 7,91 s no container (T4, abaixo do teto de
+  30 s); a pré-visualização de 10.000 linhas leva ≈3,0 s no envio e 1,9 s para abrir a
+  360px (T13), sem virtualização.
+- **O e2e escreve contas** `e2e-<timestamp>@exemplo.test` e coleção no banco de dev, como os demais.
 
 Armadilhas do detalhe (`spa-carta`):
 

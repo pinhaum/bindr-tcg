@@ -483,7 +483,7 @@ fica reservada à `spa-decks` (Req. 21). Só abre depois do fechamento da §15 (
   - _Requisitos: 22.14–22.17, 22.22–22.29_
 - [x] **17.4 Páginas** — T10–T12
   - _Requisitos: 22.1–22.13, 22.16, 22.18, 22.19, 22.21, 22.22, 22.30–22.33_
-- [ ] **17.5 Ponta a ponta e fechamento** — T13–T15
+- [x] **17.5 Ponta a ponta e fechamento** — T13–T15
   - _Requisitos: 22.20, 22.33, 22.34, 22.45, 22.46_
 
 ---
