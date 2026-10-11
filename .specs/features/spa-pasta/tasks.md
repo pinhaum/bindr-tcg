@@ -339,19 +339,21 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Primeiro passo registrado na task: qual relógio avança o `Tween` no jsdom (`vi.useFakeTimers` com `requestAnimationFrame` e `performance`, ou espera real com `vi.waitFor`)
-- [ ] Aos 0 ms o visível é `0` e o acessível já é o `finalText`; aos 320 ms o visível é o `finalText` (SPAS-12, SPAS-15)
-- [ ] Troca de `value` de 1000 para 1250 centavos anima de `US$ 10,00` a `US$ 12,50`; o mesmo `value` não produz quadro intermediário (SPAS-13)
-- [ ] Com `prefersReducedMotion` verdadeiro, o primeiro quadro já é o final (SPAS-14)
-- [ ] `amount` `"1234.56"` termina em `US$ 1.234,56` (SPAS-16)
-- [ ] O visível tem `aria-hidden="true"`, nenhum elemento tem `aria-live` nem `role="status"`, e o estilo declara `font-variant-numeric: tabular-nums` (SPAS-15, SPAS-16)
-- [ ] Gate check passes: Front quick
+- [x] Primeiro passo registrado na task: qual relógio avança o `Tween` no jsdom (`vi.useFakeTimers` com `requestAnimationFrame` e `performance`, ou espera real com `vi.waitFor`)
+- [x] Aos 0 ms o visível é `0` e o acessível já é o `finalText`; aos 320 ms o visível é o `finalText` (SPAS-12, SPAS-15)
+- [x] Troca de `value` de 1000 para 1250 centavos anima de `US$ 10,00` a `US$ 12,50`; o mesmo `value` não produz quadro intermediário (SPAS-13)
+- [x] Com `prefersReducedMotion` verdadeiro, o primeiro quadro já é o final (SPAS-14)
+- [x] `amount` `"1234.56"` termina em `US$ 1.234,56` (SPAS-16)
+- [x] O visível tem `aria-hidden="true"`, nenhum elemento tem `aria-live` nem `role="status"`, e o estilo declara `font-variant-numeric: tabular-nums` (SPAS-15, SPAS-16)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): número interpolado dos indicadores`
 
+
+**Registro**: Relógio do `Tween` no jsdom: `vi.useFakeTimers({ toFake: ["requestAnimationFrame", "cancelAnimationFrame", "performance"] })`. Revisão a11y: 2 MAJOR (primeiro quadro com reduced motion; largura reservada) corrigidos por worker novo antes do commit; MINOR de `untrack` e testes de `value` 0 e retarget também tratados.
 ---
 
 ### T10: `PastaSummary` (três indicadores)
