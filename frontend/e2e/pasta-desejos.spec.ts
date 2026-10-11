@@ -125,7 +125,7 @@ function spaSnapshot(page: Page): Promise<Snapshot> {
 		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
 		const rows = [...document.querySelectorAll('main section ul > li')].map((li) => ({
 			name: squash(li.querySelector('a')?.textContent),
-			code: squash(li.querySelector('code')?.textContent),
+			code: squash(li.querySelector('a code')?.textContent),
 			quantity: squash(li.querySelector('.quantity')?.textContent),
 			status: squash(li.querySelector('.status')?.textContent),
 			label: li.querySelector('button')?.getAttribute('aria-label') ?? ''
@@ -143,14 +143,12 @@ async function htmlSnapshot(page: Page): Promise<Snapshot> {
 		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
 		const doc = new DOMParser().parseFromString(source, 'text/html');
 		const rows = [...doc.querySelectorAll('li.wishlist-item')].map((li) => {
-			const code = squash(li.querySelector('.wishlist-item__link code')?.textContent);
-			const link = li.querySelector('.wishlist-item__link')!.cloneNode(true) as Element;
-			link.querySelector('code')?.remove();
+			const link = li.querySelector('.wishlist-item__link');
 			const owned = squash(li.querySelector('.wishlist-item__owned')?.textContent);
 			const target = squash(li.querySelector('.wishlist-item__target')?.textContent);
 			return {
-				name: squash(link.textContent),
-				code,
+				name: squash(link?.textContent),
+				code: squash(link?.querySelector('code')?.textContent),
 				quantity: `${owned} de ${target === '1' ? '1 cópia' : `${target} cópias`}`,
 				status: squash(li.querySelector('.wishlist-item__status')?.textContent),
 				label: li.querySelector('button')?.getAttribute('aria-label') ?? ''

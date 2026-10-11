@@ -20,14 +20,16 @@ afterEach(cleanup);
 describe('WishlistItem', () => {
 	it('liga ao detalhe da carta com o nome e o código da variante (SPAS-30)', () => {
 		render(WishlistItem, { ...base, onremove: vi.fn() });
-		const link = screen.getByRole('link', { name: 'Luffy' });
+		const link = screen.getByRole('link', { name: 'Luffy tcgplayer:1' });
 		expect(link).toHaveAttribute('href', '/app/cartas/OP01-001');
-		expect(screen.getByText('tcgplayer:1').tagName).toBe('CODE');
+		const code = screen.getByText('tcgplayer:1');
+		expect(code.tagName).toBe('CODE');
+		expect(link).toContainElement(code);
 	});
 
 	it('codifica o card_number reservado no href (SPAS-30)', () => {
 		render(WishlistItem, { ...base, cardNumber: 'A/B?C', onremove: vi.fn() });
-		expect(screen.getByRole('link', { name: 'Luffy' })).toHaveAttribute(
+		expect(screen.getByRole('link', { name: 'Luffy tcgplayer:1' })).toHaveAttribute(
 			'href',
 			'/app/cartas/A%2FB%3FC'
 		);

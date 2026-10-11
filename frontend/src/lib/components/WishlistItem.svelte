@@ -36,8 +36,7 @@
 <div class="item">
 	<div class="identity">
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href já vem resolvido por cardDetailHref -->
-		<a href={cardDetailHref(cardNumber)}>{cardName}</a>
-		<code>{variantCode}</code>
+		<a href={cardDetailHref(cardNumber)}>{cardName} <code>{variantCode}</code></a>
 	</div>
 	<p class="quantity">{ownedQuantity} de {copies(targetQuantity)}</p>
 	<p class="status" class:fulfilled>{status}</p>

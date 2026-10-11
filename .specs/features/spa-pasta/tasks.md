@@ -90,6 +90,16 @@ T15 → T16
 T16 → T17
 ```
 
+### Correções da iteração 4 (T18, T19)
+
+```
+T12 → T18
+T16 → T18
+T9 → T19
+```
+
+T18 e T19 têm `Where` disjuntos e podem rodar em paralelo.
+
 ---
 
 ## Task Breakdown
@@ -611,6 +621,59 @@ T16 → T17
 **Registro**: Gate Build: `docker build -f Dockerfile .` ok (com `DOCKER_CONFIG` temporário por causa do `credsStore`), rubocop limpo, brakeman só com o aviso de calendário do Rails 8.0.5.1; `git diff --name-status 8e6c92d..HEAD -- test/` só com `A` (3 arquivos novos) e a diff dos controllers e views HTML da pasta e da wishlist vazia (SPAS-46).
 ---
 
+### T18: SPAS-30 — `variant_code` dentro do link do item
+
+**What**: Mover o `<code>{variantCode}</code>` para dentro do `<a>` do item da lista de desejos, como pedem o spec e o HTML (`link_to card_path(...)`), e tirar do e2e a normalização que escondia o desvio. Correção da iteração 4 do Verifier (Fix 1).
+**Where**: `frontend/src/lib/components/WishlistItem.svelte`, `frontend/src/lib/components/WishlistItem.test.ts`, `frontend/e2e/pasta-desejos.spec.ts`
+**Depends on**: T12, T16
+**Reuses**: o `href` e a codificação de `lib/cards/url.ts` já usados pelo item
+**Requirement**: SPAS-30
+
+**Tools**:
+
+- MCP: Svelte (`svelte-autofixer`)
+- Skill: NONE
+
+**Done when**:
+
+- [x] O `<a>` do item contém o nome da carta e o `<code>` com o `variant_code`; nome acessível do link "Luffy tcgplayer:1"
+- [x] `WishlistItem.test.ts` afirma `getByRole('link', { name: 'Luffy tcgplayer:1' })` com o `<code>` dentro dele; o `href` continua `/app/cartas/<card_number codificado>`
+- [x] `pasta-desejos.spec.ts` compara o texto inteiro do link nos dois lados, sem remover o `<code>` do HTML
+- [x] Gate check passes: Front quick + e2e de `pasta-desejos.spec.ts` (o e2e completo antes do fechamento)
+
+**Tests**: unit + e2e
+**Gate**: quick
+
+**Commit**: `fix(spa-pasta): colocar o variant_code dentro do link do item da lista de desejos`
+
+---
+
+### T19: SPAS-12/13 — curva provada no componente
+
+**What**: Provar no `AnimatedNumber` que a interpolação usa `--ease-standard` e não a linear: com relógio falso, amostrar num ponto onde as curvas divergem e afirmar o valor. Correção da iteração 4 do Verifier (Fix 2).
+**Where**: `frontend/src/lib/components/AnimatedNumber.test.ts`
+**Depends on**: T9
+**Reuses**: o relógio falso e os helpers já usados em `AnimatedNumber.test.ts`
+**Requirement**: SPAS-12, SPAS-13
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Um teste amostra o texto visível a 80 ms (t = 0,25) com `value: 1000` e `format: String` e afirma o valor da curva (`easeStandard(0,25)` ≈ 0,64, bem acima do 0,25 linear)
+- [ ] O mutante F4 (`easing: easeStandard` → `(t) => t`), aplicado numa cópia do repo em `tmp/` (nunca no checkout), reprova o teste
+- [ ] Gate check passes: Front quick
+
+**Tests**: unit
+**Gate**: quick
+
+**Commit**: `test(spa-pasta): provar a curva ease-standard no número interpolado`
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -620,6 +683,7 @@ Phase 1:  T1, T2, T3
 Phase 2:  T4, T5, T6, T7, T8
 Phase 3:  T9, T10, T11, T12
 Phase 4:  T13, T14, T15, T16, T17
+Correções (iteração 4): T18, T19
 ```
 
 Execução estritamente sequencial, na ordem numérica dentro de cada phase; as dependências reais estão nos diagramas de cada phase.
@@ -643,6 +707,8 @@ Execução estritamente sequencial, na ordem numérica dentro de cada phase; as 
 | T14 | 1 rota (página + guarda de 3 linhas) | ⚠️ coeso |
 | T15, T16 | 1 spec e2e cada | ✅ |
 | T17 | docs | ✅ |
+| T18 | 1 componente + teste + e2e | ✅ |
+| T19 | 1 teste | ✅ |
 
 ## Diagram-Definition Cross-Check
 
@@ -665,6 +731,8 @@ Execução estritamente sequencial, na ordem numérica dentro de cada phase; as 
 | T15 | T1, T13, T14 | as três setas | ✅ |
 | T16 | T2, T3, T15 | as três setas | ✅ |
 | T17 | T16 | T16 → T17 | ✅ |
+| T18 | T12, T16 | T12 → T18, T16 → T18 | ✅ |
+| T19 | T9 | T9 → T19 | ✅ |
 
 ## Test Co-location Validation
 
@@ -676,6 +744,8 @@ Execução estritamente sequencial, na ordem numérica dentro de cada phase; as 
 | T9–T14 | Componentes e páginas | unit | unit | ✅ |
 | T15, T16 | Jornadas no navegador | e2e | e2e | ✅ |
 | T17 | Docs | none | none | ✅ |
+| T18 | Componente + jornada | unit + e2e | unit + e2e | ✅ |
+| T19 | Componente | unit | unit | ✅ |
 
 ## Requirement Coverage
 
