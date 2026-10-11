@@ -150,13 +150,13 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Request test: `increment` sem registro → `200` `{ data: { variant_code, owned_quantity: 1 } }`; segundo → `2` (SCAR-42)
-- [ ] `decrement` com 2 → `1`; com 0 e sem registro → `200` `owned_quantity: 0` sem criar registro (SCAR-43, P10)
-- [ ] `variant_code` `tcgplayer:123` enviado como `tcgplayer%3A123` é encontrado; `card_number` com `.` é aceito
-- [ ] Carta inexistente e `variant_code` de outra carta → `404 not_found` sem gravar (SCAR-47)
-- [ ] Sem sessão → `401 unauthenticated`; sem `X-CSRF-Token` com `allow_forgery_protection` ligado → `422 invalid_csrf_token`; `user_id` alheio no corpo e na query é ignorado (SCAR-48)
-- [ ] Toda resposta dos dois endpoints é `application/json` e nenhuma é redirect (API-17)
-- [ ] Gate check passes: Rails quick
+- [x] Request test: `increment` sem registro → `200` `{ data: { variant_code, owned_quantity: 1 } }`; segundo → `2` (SCAR-42)
+- [x] `decrement` com 2 → `1`; com 0 e sem registro → `200` `owned_quantity: 0` sem criar registro (SCAR-43, P10)
+- [x] `variant_code` `tcgplayer:123` enviado como `tcgplayer%3A123` é encontrado; `card_number` com `.` é aceito
+- [x] Carta inexistente e `variant_code` de outra carta → `404 not_found` sem gravar (SCAR-47)
+- [x] Sem sessão → `401 unauthenticated`; sem `X-CSRF-Token` com `allow_forgery_protection` ligado → `422 invalid_csrf_token`; `user_id` alheio no corpo e na query é ignorado (SCAR-48)
+- [x] Toda resposta dos dois endpoints é `application/json` e nenhuma é redirect (API-17)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick

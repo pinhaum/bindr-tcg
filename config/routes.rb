@@ -155,6 +155,15 @@ Rails.application.routes.draw do
 
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
+    # Posse por variante (SCAR-42, SCAR-43). O `variant_code` tem `:` e chega
+    # codificado (`tcgplayer%3A123`); a constraint aceita tudo até a próxima barra.
+    post "cards/:card_number/variants/:variant_code/increment" => "card_variants#increment",
+         as: :api_increment_card_variant,
+         constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+    post "cards/:card_number/variants/:variant_code/decrement" => "card_variants#decrement",
+         as: :api_decrement_card_variant,
+         constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+
     match "*path", to: "not_found#show", via: :all
   end
 
