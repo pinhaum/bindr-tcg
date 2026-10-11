@@ -488,13 +488,13 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Texto "não tenho" / "1 cópia" / "N cópias"; `[n]` com `aria-hidden`; botões com os nomes acessíveis exatos do SCAR-25 e mínimo de 44px (token)
-- [ ] Clique em `+` muda o número antes da resposta do `send` falso (SCAR-27); `−` acima de zero idem (SCAR-28)
-- [ ] Em zero, `−` tem `aria-disabled="true"`, não tem `disabled`, não chama `send` e a região viva anuncia "Você não tem cópias desta variante para remover." (SCAR-29)
-- [ ] Ao esvaziar a fila a região anuncia "2 cópias <nome> <variant_code>" ou "não tenho <nome> <variant_code>" (SCAR-33)
-- [ ] Falha: valor volta e um toast de erro com a `message` é empurrado (SCAR-32)
-- [ ] Foco continua no botão acionado depois da resposta e nenhum botão recebe `disabled` (SCAR-34)
-- [ ] Gate check passes: Front quick
+- [x] Texto "não tenho" / "1 cópia" / "N cópias"; `[n]` com `aria-hidden`; botões com os nomes acessíveis exatos do SCAR-25 e mínimo de 44px (token)
+- [x] Clique em `+` muda o número antes da resposta do `send` falso (SCAR-27); `−` acima de zero idem (SCAR-28)
+- [x] Em zero, `−` tem `aria-disabled="true"`, não tem `disabled`, não chama `send` e a região viva anuncia "Você não tem cópias desta variante para remover." (SCAR-29)
+- [x] Ao esvaziar a fila a região anuncia "2 cópias <nome> <variant_code>" ou "não tenho <nome> <variant_code>" (SCAR-33)
+- [x] Falha: valor volta e um toast de erro com a `message` é empurrado (SCAR-32)
+- [x] Foco continua no botão acionado depois da resposta e nenhum botão recebe `disabled` (SCAR-34)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
