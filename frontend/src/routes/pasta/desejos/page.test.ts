@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../lib/api/errors';
 import type { WishlistEntry } from '../../../lib/api/types';
@@ -175,6 +176,25 @@ describe('pasta/desejos/+page.svelte', () => {
 		await vi.waitFor(() =>
 			expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
 		);
+	});
+
+	it('foco já levado a outro controle não é roubado (SPAS-34)', async () => {
+		const pending = deferred<unknown>();
+		apiMock.delete.mockReturnValueOnce(pending.promise);
+		render(Page);
+		await screen.findByText('3 itens');
+
+		await fireEvent.click(removeButton(2));
+		removeButton(1).focus();
+		expect(removeButton(1)).toHaveFocus();
+
+		pending.resolve({ data: {} });
+		await screen.findByText('2 itens');
+		await tick();
+
+		expect(screen.queryByText('Carta 2')).not.toBeInTheDocument();
+		expect(removeButton(1)).toHaveFocus();
+		expect(removeButton(3)).not.toHaveFocus();
 	});
 
 	it('pendência bloqueia só o próprio item (SPAS-35)', async () => {
