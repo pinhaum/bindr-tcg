@@ -428,13 +428,13 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `href` é `/cards/OP01-001`; `card_number` com `#` ou `?` sai codificado (edge case)
-- [ ] Placeholder presente com e sem `image_url`; sem `image_url` não há `<img>`; o evento `error` da imagem não troca nenhum elemento nem classe (SCAT-11)
-- [ ] Uma variante com raridade "SR" mostra "SR"; com `rarity` `null` não mostra texto de raridade; três variantes mostram "3 impressões" (SCAT-12)
-- [ ] Selo "3 cópias" com sessão e soma 3; "1 cópia" com soma 1; sem selo com soma 0, com `owned_quantity` `null` ou sem sessão; nenhum botão no tile (SCAT-13)
-- [ ] `guard.test.ts` verde
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `href` é `/cards/OP01-001`; `card_number` com `#` ou `?` sai codificado (edge case)
+- [x] Placeholder presente com e sem `image_url`; sem `image_url` não há `<img>`; o evento `error` da imagem não troca nenhum elemento nem classe (SCAT-11)
+- [x] Uma variante com raridade "SR" mostra "SR"; com `rarity` `null` não mostra texto de raridade; três variantes mostram "3 impressões" (SCAT-12)
+- [x] Selo "3 cópias" com sessão e soma 3; "1 cópia" com soma 1; sem selo com soma 0, com `owned_quantity` `null` ou sem sessão; nenhum botão no tile (SCAT-13)
+- [x] `guard.test.ts` verde
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
