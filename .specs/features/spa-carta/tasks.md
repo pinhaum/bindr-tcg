@@ -662,12 +662,12 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Cinco cliques rápidos em `+`: o número passa por 1..5 antes das respostas e, depois, `GET /api/cards/X` devolve `owned_quantity` 5 (SCAR-27, SCAR-30, SCAR-31)
-- [ ] Exatamente cinco `POST …/increment` observados, em série (SCAR-30)
-- [ ] `−` em zero não gera requisição (SCAR-29)
-- [ ] Marcar 2 em "Quero", recarregar: campo com 2 e botão "Atualizar desejo" (SCAR-36)
-- [ ] Sair pelo casco com o detalhe aberto: convite "Entrar para registrar posse" no lugar dos controles e sem selo (SCAR-09, SCAR-26)
-- [ ] Gate check passes: Full
+- [x] Cinco cliques rápidos em `+`: o número passa por 1..5 antes das respostas e, depois, `GET /api/cards/X` devolve `owned_quantity` 5 (SCAR-27, SCAR-30, SCAR-31)
+- [x] Exatamente cinco `POST …/increment` observados, em série (SCAR-30)
+- [x] `−` em zero não gera requisição (SCAR-29)
+- [x] Marcar 2 em "Quero", recarregar: campo com 2 e botão "Atualizar desejo" (SCAR-36)
+- [x] Sair pelo casco com o detalhe aberto: convite "Entrar para registrar posse" no lugar dos controles e sem selo (SCAR-09, SCAR-26)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
