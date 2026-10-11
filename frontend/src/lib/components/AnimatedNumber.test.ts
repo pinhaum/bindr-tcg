@@ -143,6 +143,25 @@ describe('AnimatedNumber', () => {
 		expect(hidden(container)).toHaveTextContent('US$ 1.234,56');
 	});
 
+	it('segue a curva --ease-standard, não a linear, durante os 320 ms', () => {
+		const { container } = render(AnimatedNumber, {
+			value: 1000,
+			format: String,
+			finalText: '1000'
+		});
+		flushSync();
+
+		advance(80);
+		const early = Number(visible(container).textContent);
+		expect(early).toBeGreaterThan(550);
+		expect(early).toBeLessThan(680);
+
+		advance(160);
+		const late = Number(visible(container).textContent);
+		expect(late).toBeGreaterThan(930);
+		expect(late).toBeLessThan(1000);
+	});
+
 	it('esconde o visível da árvore de acessibilidade e não declara região viva', () => {
 		const { container } = render(AnimatedNumber, props('10.00'));
 		expect(visible(container)).toHaveAttribute('aria-hidden', 'true');

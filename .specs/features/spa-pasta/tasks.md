@@ -663,9 +663,9 @@ T18 e T19 têm `Where` disjuntos e podem rodar em paralelo.
 
 **Done when**:
 
-- [ ] Um teste amostra o texto visível a 80 ms (t = 0,25) com `value: 1000` e `format: String` e afirma o valor da curva (`easeStandard(0,25)` ≈ 0,64, bem acima do 0,25 linear)
-- [ ] O mutante F4 (`easing: easeStandard` → `(t) => t`), aplicado numa cópia do repo em `tmp/` (nunca no checkout), reprova o teste
-- [ ] Gate check passes: Front quick
+- [x] Um teste amostra o texto visível a 80 ms (t = 0,25) com `value: 1000` e `format: String` e afirma o valor da curva (`easeStandard(0,25)` ≈ 0,64, bem acima do 0,25 linear)
+- [x] O mutante F4 (`easing: easeStandard` → `(t) => t`), aplicado numa cópia do repo em `tmp/` (nunca no checkout), reprova o teste
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
