@@ -860,11 +860,11 @@ T25 → T28
 
 **Done when**:
 
-- [ ] A paridade `/app` × `/catalog` passa nos quatro combos
-- [ ] Três chips seguidos pelo teclado dão `colors[]` com três valores, foco no painel e anúncio a cada resposta
-- [ ] A prova do SPA-46 compara a caixa inteira de `main` depois de a grade estabilizar
-- [ ] Gate check passes: full
-- [ ] Test count: e2e anteriores + novos, nenhum removido
+- [x] A paridade `/app` × `/catalog` passa nos quatro combos
+- [x] Três chips seguidos pelo teclado dão `colors[]` com três valores, foco no painel e anúncio a cada resposta
+- [x] A prova do SPA-46 compara a caixa inteira de `main` depois de a grade estabilizar
+- [x] Gate check passes: full
+- [x] Test count: e2e anteriores + novos, nenhum removido
 
 **Tests**: e2e
 **Gate**: full

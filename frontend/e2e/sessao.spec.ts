@@ -108,15 +108,15 @@ for (const combo of COMBOS) {
 				await expectSignedOut(page);
 				await expectLayout(page, combo, '/ após sair');
 
-				// Só posição e largura: a altura de main acompanha a grade do catálogo, que recarrega ao sair.
-				const anchor = async () => {
-					const { x, y, width } = (await page.locator('main#conteudo').boundingBox())!;
-					return { x, y, width };
+				// Sair refaz a consulta do catálogo: a altura de main só vale com a grade estável.
+				const settledBox = async () => {
+					await expect(page.locator('section[aria-busy="false"]')).toBeVisible();
+					return (await page.locator('main#conteudo').boundingBox())!;
 				};
 				await expect(page.locator('.layer')).toHaveCSS('position', 'fixed');
-				const withMessage = await anchor();
+				const withMessage = await settledBox();
 				await expect(message).toHaveCount(0, { timeout: 10_000 });
-				expect(await anchor(), 'a mensagem não desloca o conteúdo (SPA-46)').toEqual(withMessage);
+				expect(await settledBox(), 'a mensagem não desloca o conteúdo (SPA-46)').toEqual(withMessage);
 			});
 
 			await test.step('senha errada mostra o erro, mantém o e-mail e foca o bloco (SPA-17)', async () => {

@@ -69,68 +69,72 @@ async function expectNoHorizontalScroll(page: Page, where: string) {
 	expect(scrollWidth, `scroll horizontal em ${where}`).toBeLessThanOrEqual(clientWidth);
 }
 
-test.describe('paridade entre /app e /catalog (SCAT-05, SCAT-27)', () => {
-	const queries: { name: string; query: string }[] = [
-		{ name: 'busca por card_number', query: encode([['q', 'OP01-024']]) },
-		{
-			name: 'duas cores',
-			query: encode([
-				['colors[]', 'Red'],
-				['colors[]', 'Green']
-			])
-		},
-		{ name: 'um set', query: encode([['sets[]', SET_CODE]]) },
-		{
-			name: 'faixa de custo',
-			query: encode([
-				['cost_min', '2'],
-				['cost_max', '4']
-			])
-		},
-		{
-			name: 'ordenação por nome decrescente',
-			query: encode([
-				['sort', 'name'],
-				['dir', 'desc']
-			])
-		},
-		{ name: 'segunda página', query: encode([['page', '2']]) },
-		{
-			name: 'filtros combinados com ordenação e página',
-			query: encode([
-				['colors[]', 'Red'],
-				['sets[]', SET_CODE],
-				['cost_min', '1'],
-				['cost_max', '9'],
-				['sort', 'name'],
-				['dir', 'desc'],
-				['per_page', '5'],
-				['page', '2']
-			])
-		}
-	];
+for (const combo of COMBOS) {
+	test.describe(`paridade entre /app e /catalog a ${combo.name} (SCAT-05, SCAT-27)`, () => {
+		test.use({ viewport: { width: combo.width, height: combo.height }, colorScheme: combo.scheme });
 
-	for (const { name, query } of queries) {
-		test(`${name}: mesma lista, mesma ordem e mesmo total`, async ({ page }) => {
+		const queries: { name: string; query: string }[] = [
+			{ name: 'busca por card_number', query: encode([['q', 'OP01-024']]) },
+			{
+				name: 'duas cores',
+				query: encode([
+					['colors[]', 'Red'],
+					['colors[]', 'Green']
+				])
+			},
+			{ name: 'um set', query: encode([['sets[]', SET_CODE]]) },
+			{
+				name: 'faixa de custo',
+				query: encode([
+					['cost_min', '2'],
+					['cost_max', '4']
+				])
+			},
+			{
+				name: 'ordenação por nome decrescente',
+				query: encode([
+					['sort', 'name'],
+					['dir', 'desc']
+				])
+			},
+			{ name: 'segunda página', query: encode([['page', '2']]) },
+			{
+				name: 'filtros combinados com ordenação e página',
+				query: encode([
+					['colors[]', 'Red'],
+					['sets[]', SET_CODE],
+					['cost_min', '1'],
+					['cost_max', '9'],
+					['sort', 'name'],
+					['dir', 'desc'],
+					['per_page', '5'],
+					['page', '2']
+				])
+			}
+		];
+
+		for (const { name, query } of queries) {
+			test(`${name}: mesma lista, mesma ordem e mesmo total`, async ({ page }) => {
+				const hotwire = await readHotwire(page, query);
+				const spa = await readSpa(page, query);
+
+				expect(hotwire.total, 'total de /catalog (catálogo importado)').toBeGreaterThan(0);
+				expect(hotwire.tiles.length, 'cartas em /catalog').toBeGreaterThan(0);
+				expect(spa.total, `total de /app?${query}`).toBe(hotwire.total);
+				expect(spa.tiles, `cartas de /app?${query}`).toEqual(hotwire.tiles);
+			});
+		}
+
+		test('busca por OP01-024 traz a carta exata em primeiro', async ({ page }) => {
+			const query = encode([['q', 'OP01-024']]);
 			const hotwire = await readHotwire(page, query);
 			const spa = await readSpa(page, query);
 
-			expect(hotwire.total, 'total de /catalog (catálogo importado)').toBeGreaterThan(0);
-			expect(hotwire.tiles.length, 'cartas em /catalog').toBeGreaterThan(0);
-			expect(spa.total, `total de /app?${query}`).toBe(hotwire.total);
-			expect(spa.tiles, `cartas de /app?${query}`).toEqual(hotwire.tiles);
+			expect(hotwire.tiles[0]).toMatch(/^OP01-024 \|/);
+			expect(spa.tiles[0]).toMatch(/^OP01-024 \|/);
 		});
-	}
-
-	test('busca por OP01-024 traz a carta exata em primeiro', async ({ page }) => {
-		const query = encode([['q', 'OP01-024']]);
-		const hotwire = await readHotwire(page, query);
-		const spa = await readSpa(page, query);
-
-		expect(hotwire.tiles[0]).toMatch(/^OP01-024 \|/);
-		expect(spa.tiles[0]).toMatch(/^OP01-024 \|/);
 	});
-});
+}
 
 test.describe('busca e paginação pela URL (SCAT-16, SCAT-27, SCAT-36)', () => {
 	test('enviar a busca apara o termo, mantém filtros e ordenação e descarta a página', async ({

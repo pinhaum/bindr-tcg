@@ -130,6 +130,42 @@ test.describe('teclado e foco a 1280px (SCAT-41, SCAT-42, SCAT-43, SCAT-44)', ()
 		expect(bad, 'nenhuma resposta 406 nem 5xx').toEqual([]);
 	});
 
+	test('três chips de cor seguidos pelo teclado: foco no painel e um anúncio a cada resposta', async ({
+		page
+	}) => {
+		const bad = trackBadResponses(page);
+		await openCatalog(page);
+		await expect(page.getByRole('link', { name: 'Red', exact: true })).toBeVisible();
+
+		const steps: { color: string; sentence: RegExp }[] = [
+			{ color: 'Red', sentence: /^\d+ cartas? · 1 filtro ativo$/ },
+			{ color: 'Green', sentence: /^\d+ cartas? · 2 filtros ativos$/ },
+			{ color: 'Blue', sentence: /^\d+ cartas? · 3 filtros ativos$/ }
+		];
+		const applied: string[] = [];
+
+		for (const { color, sentence } of steps) {
+			await tabTo(page, color);
+			await page.keyboard.press('Enter');
+			applied.push(color);
+
+			await expect.poll(() => searchParams(page).getAll('colors[]')).toEqual(applied);
+			// Os hrefs dos chips nascem da última resposta: o próximo Tab só vale depois dela.
+			await expect(activeChip(page, `Cor: ${color}`)).toBeVisible();
+			await expect(spaStatus(page)).toHaveText(sentence);
+			await expect(spaAnnouncement(page)).toHaveText(sentence);
+
+			const focused = page.locator(':focus');
+			await expect(focused).toHaveAttribute('aria-label', `Remover filtro Cor: ${color}`);
+			expect(await inPanel(focused), `o foco continua no chip "${color}" do painel`).toBe(true);
+			await expect(page.locator('main#conteudo')).not.toBeFocused();
+		}
+
+		expect(searchParams(page).getAll('colors[]')).toEqual(['Red', 'Green', 'Blue']);
+		await expectSamePage(page, 'três chips seguidos');
+		expect(bad, 'nenhuma resposta 406 nem 5xx').toEqual([]);
+	});
+
 	test('"Aplicar" e "Buscar" acionados pelo teclado mantêm o foco', async ({ page }) => {
 		await openCatalog(page);
 
