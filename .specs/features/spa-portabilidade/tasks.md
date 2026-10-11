@@ -256,9 +256,9 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Linhas das cinco classificações em ordem embaralhada → grupos `removes, creates, updates, rejected, unchanged` com títulos, frases de apoio do Req. 22.13 e rótulos do SPOR-14, linhas na ordem da resposta dentro do grupo; grupo vazio ausente (SPOR-13, SPOR-14)
-- [ ] "linha analisada"/"linhas analisadas" com 0, 1 e 2 (SPOR-12); aviso de remoção com 1 e 2 (SPOR-18); frases de removidas, inalteradas, recusas e falhas com 1 e 2, exatas do spec (SPOR-24–27)
-- [ ] Gate check passes: Front quick
+- [x] Linhas das cinco classificações em ordem embaralhada → grupos `removes, creates, updates, rejected, unchanged` com títulos, frases de apoio do Req. 22.13 e rótulos do SPOR-14, linhas na ordem da resposta dentro do grupo; grupo vazio ausente (SPOR-13, SPOR-14)
+- [x] "linha analisada"/"linhas analisadas" com 0, 1 e 2 (SPOR-12); aviso de remoção com 1 e 2 (SPOR-18); frases de removidas, inalteradas, recusas e falhas com 1 e 2, exatas do spec (SPOR-24–27)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick

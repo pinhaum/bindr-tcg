@@ -118,3 +118,30 @@ export type WishlistEntry = {
 	owned_quantity: number;
 	fulfilled: boolean;
 };
+
+export type ImportClassification = 'removes' | 'creates' | 'updates' | 'rejected' | 'unchanged';
+
+export type ImportRow = {
+	line: number;
+	classification: ImportClassification;
+	card_number: string | null;
+	variant_code: string | null;
+	card_name: string | null;
+	quantity_before: number | null;
+	quantity_after: number | null;
+	message: string | null;
+};
+
+export type ImportPreview = { token: string; filename: string; rows: ImportRow[] };
+
+export type ImportSummary = {
+	filename: string;
+	created: number;
+	updated: number;
+	removed: number;
+	unchanged: number;
+	rejected: Array<
+		Pick<ImportRow, 'line' | 'card_number' | 'variant_code' | 'card_name'> & { message: string }
+	>;
+	failures: Array<Pick<ImportRow, 'line' | 'card_number' | 'variant_code'>>;
+};
