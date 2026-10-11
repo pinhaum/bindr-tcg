@@ -23,7 +23,9 @@ export function safeReturnTo(raw: string | null): string {
 		return base;
 	}
 
-	const isInsideApp = raw.startsWith(`${base}/`) && decoded.startsWith(`${base}/`);
+	const isAppPath = (value: string) =>
+		value === base || value.startsWith(`${base}/`) || value.startsWith(`${base}?`);
+	const isInsideApp = isAppPath(raw) && isAppPath(decoded);
 	const isSuspicious = decoded.includes('//') || decoded.includes('\\') || hasControlCharacter(decoded);
 	return isInsideApp && !isSuspicious && !hasDotSegment(raw) ? raw : base;
 }

@@ -148,10 +148,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `/app?colors%5B%5D=Red&owned=owned` e `/app` voltam como vieram
-- [ ] `/appx`, `/app?x=//evil`, `/app?\\`, `/app?` com caractere de controle e todas as recusas anteriores continuam devolvendo `/app` (o teste antigo passa sem edição)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `/app?colors%5B%5D=Red&owned=owned` e `/app` voltam como vieram
+- [x] `/appx`, `/app?x=//evil`, `/app?\\`, `/app?` com caractere de controle e todas as recusas anteriores continuam devolvendo `/app` (o teste antigo passa sem edição)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick

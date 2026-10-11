@@ -14,7 +14,10 @@ describe('safeReturnTo', () => {
 		['/app/x..y'],
 		['/app/a.b/c'],
 		['/app/x?y=..'],
-		['/app/x#/../y']
+		['/app/x#/../y'],
+		['/app'],
+		['/app?x=1'],
+		['/app?colors%5B%5D=Red&owned=owned']
 	])('aceita %s', (raw) => {
 		expect(safeReturnTo(raw)).toBe(raw);
 	});
@@ -22,8 +25,14 @@ describe('safeReturnTo', () => {
 	it.each([
 		['null', null],
 		['vazio', ''],
-		['/app sozinho', '/app'],
-		['/app?x=1 sem barra', '/app?x=1'],
+		['/appx', '/appx'],
+		['/appx?y=1', '/appx?y=1'],
+		['query com //', '/app?x=//evil'],
+		['query com %2F%2F', '/app?x=%2F%2Fevil'],
+		['query com barra invertida', '/app?\\'],
+		['query com %5C', '/app?x=%5C'],
+		['query com controle', '/app?x=\n1'],
+		['query com %0A', '/app?x=%0A1'],
 		['/catalog', '/catalog'],
 		['/application/x', '/application/x'],
 		['//evil.com', '//evil.com'],
