@@ -523,10 +523,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Rótulo, `required` e `maxlength="60"`; valor inicial preenchido (SDEC-10)
-- [ ] `submit` que rejeita com `validation_failed` e `fields.name` mostra a mensagem ligada por `aria-describedby`, `aria-invalid="true"`, foco no campo depois de `tick()` e valor mantido; outro erro vai para `FormError` (SDEC-13)
-- [ ] Segundo envio com o primeiro pendente não chama `submit` e o botão fica desabilitado (SDEC-14)
-- [ ] Gate check passes: Front quick
+- [x] Rótulo, `required` e `maxlength="60"`; valor inicial preenchido (SDEC-10)
+- [x] `submit` que rejeita com `validation_failed` e `fields.name` mostra a mensagem ligada por `aria-describedby`, `aria-invalid="true"`, foco no campo depois de `tick()` e valor mantido; outro erro vai para `FormError` (SDEC-13)
+- [x] Segundo envio com o primeiro pendente não chama `submit` e o botão fica desabilitado (SDEC-14)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
