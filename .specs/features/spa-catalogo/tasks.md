@@ -316,13 +316,13 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `load('?colors%5B%5D=Red')` chama `get('/api/catalog?colors%5B%5D=Red')`; `load('')` chama `get('/api/catalog')`
-- [ ] Duas cargas com a primeira resolvendo por último: só a segunda vira `result`, e `seq` sobe uma vez (SCAT-08)
-- [ ] Com timer falso, `skeleton` é falso em 199 ms e verdadeiro em 200 ms; a resposta zera `skeleton` e `pending` e cancela o timer; o `result` anterior fica até a resposta (SCAT-38)
-- [ ] `ApiError` grava `error`, mantém `result` e sobe `seq`; sucesso seguinte zera `error`; erro que não é `ApiError` é relançado (SCAT-39)
-- [ ] `retry()` repete a última `search`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `load('?colors%5B%5D=Red')` chama `get('/api/catalog?colors%5B%5D=Red')`; `load('')` chama `get('/api/catalog')`
+- [x] Duas cargas com a primeira resolvendo por último: só a segunda vira `result`, e `seq` sobe uma vez (SCAT-08)
+- [x] Com timer falso, `skeleton` é falso em 199 ms e verdadeiro em 200 ms; a resposta zera `skeleton` e `pending` e cancela o timer; o `result` anterior fica até a resposta (SCAT-38)
+- [x] `ApiError` grava `error`, mantém `result` e sobe `seq`; sucesso seguinte zera `error`; erro que não é `ApiError` é relançado (SCAT-39)
+- [x] `retry()` repete a última `search`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
