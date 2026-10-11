@@ -598,12 +598,12 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Página 1 de 3: sem "Anterior", "Página 1 de 3", "Próxima" com `page=2` e os filtros ativos
-- [ ] Página 2 de 3: os dois links; página 3 de 3: só "Anterior"; `total_pages` 1: nada renderizado
-- [ ] Página 5 com `total_pages` 3 (além da última): "Anterior" presente (edge case)
-- [ ] Clique chama `onpage()`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Página 1 de 3: sem "Anterior", "Página 1 de 3", "Próxima" com `page=2` e os filtros ativos
+- [x] Página 2 de 3: os dois links; página 3 de 3: só "Anterior"; `total_pages` 1: nada renderizado
+- [x] Página 5 com `total_pages` 3 (além da última): "Anterior" presente (edge case)
+- [x] Clique chama `onpage()`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
