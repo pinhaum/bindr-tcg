@@ -143,13 +143,15 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Model test: incremento cria com 1, soma até 50 e devolve `nil` em 50 sem gravar; decremento devolve N-1, devolve `0` e apaga a linha em 1, devolve `nil` sem entrada
-- [ ] `DeckEntriesController` HTML só chama os dois métodos; nenhum SQL de entrada fica no controller
-- [ ] `deck_entries_test.rb`, `deck_leader_test.rb` e `deck_entries_concurrency_test.rb` passam sem edição
-- [ ] Gate check passes: Rails quick
+- [x] Model test: incremento cria com 1, soma até 50 e devolve `nil` em 50 sem gravar; decremento devolve N-1, devolve `0` e apaga a linha em 1, devolve `nil` sem entrada
+- [x] `DeckEntriesController` HTML só chama os dois métodos; nenhum SQL de entrada fica no controller
+- [x] `deck_entries_test.rb`, `deck_leader_test.rb` e `deck_entries_concurrency_test.rb` passam sem edição
+- [x] Gate check passes: Rails quick
 
 **Tests**: unit
 **Gate**: quick
+
+**Base da feature (commit-pai da T1)**: `3beb228` (o plano aprovado; o commit `1238386` desenha a feature). `git diff --name-status 1238386..HEAD -- test/` só pode ter `A` (SDEC-61).
 
 **Commit**: `refactor(spa-decks): mover o SQL atômico de entrada de deck para o model`
 
