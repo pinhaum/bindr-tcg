@@ -21,6 +21,12 @@ describe('CatalogStatus', () => {
 		expect(container.querySelector('p')).toHaveAttribute('tabindex', '-1');
 	});
 
+	it('focus() põe o foco no parágrafo da frase', () => {
+		const { container, component } = render(CatalogStatus, { total: 5, chipCount: 0 });
+		(component as unknown as { focus: () => void }).focus();
+		expect(document.activeElement).toBe(container.querySelector('p'));
+	});
+
 	it('sem props de link não mostra links', () => {
 		render(CatalogStatus, { total: 5, chipCount: 0 });
 		expect(screen.queryByRole('link')).toBeNull();

@@ -6,13 +6,15 @@
 		current?: boolean;
 		swatch?: boolean;
 		removeName?: string;
+		onclick?: (event: MouseEvent) => void;
 	}
 
-	let { href, label, active, current = false, swatch = false, removeName }: Props = $props();
+	let { href, label, active, current = false, swatch = false, removeName, onclick }: Props = $props();
 </script>
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href já vem resolvido pelo chamador -->
 <a {href}
+	{onclick}
 	class="chip"
 	class:active
 	data-sveltekit-reset="false"

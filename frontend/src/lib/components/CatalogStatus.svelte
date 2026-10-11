@@ -8,6 +8,12 @@
 
 	let { total, chipCount, clearHref, signInHref }: Props = $props();
 
+	let sentenceEl: HTMLParagraphElement | undefined;
+
+	export function focus() {
+		sentenceEl?.focus();
+	}
+
 	const sentence = $derived(
 		`${total} ${total === 1 ? 'carta' : 'cartas'}` +
 			(chipCount > 0 ? ` · ${chipCount} ${chipCount === 1 ? 'filtro ativo' : 'filtros ativos'}` : '')
@@ -15,7 +21,7 @@
 </script>
 
 <div class="status">
-	<p tabindex="-1">{sentence}</p>
+	<p bind:this={sentenceEl} tabindex="-1">{sentence}</p>
 	{#if clearHref || signInHref}
 		<div class="links">
 			{#if clearHref}
