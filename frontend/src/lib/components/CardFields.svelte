@@ -4,10 +4,10 @@
 	let { card }: { card: CatalogCard } = $props();
 
 	const FIELDS_BY_TYPE: Record<string, string[]> = {
-		Leader: ['power', 'life', 'attribute', 'traits', 'block'],
-		Character: ['cost', 'power', 'counter', 'attribute', 'traits', 'block'],
-		Event: ['cost', 'attribute', 'traits', 'block'],
-		Stage: ['cost', 'attribute', 'traits', 'block']
+		leader: ['power', 'life', 'attribute', 'traits', 'block'],
+		character: ['cost', 'power', 'counter', 'attribute', 'traits', 'block'],
+		event: ['cost', 'attribute', 'traits', 'block'],
+		stage: ['cost', 'attribute', 'traits', 'block']
 	};
 
 	const fields = $derived.by(() => {
