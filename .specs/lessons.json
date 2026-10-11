@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 70,
+  "next_id": 74,
   "lessons": [
     {
       "id": "L-001",
@@ -1246,6 +1246,78 @@
       ],
       "created": "2026-10-11T12:25:24Z",
       "last_seen": "2026-10-11T12:25:24Z"
+    },
+    {
+      "id": "L-070",
+      "key": "surviving_mutant::test every conditional error branch that suppresses a message 401 session changed not only the generic failure path",
+      "text": "Test every conditional error branch that suppresses a message (401, session_changed), not only the generic failure path",
+      "signal": "surviving_mutant",
+      "scope": "frontend-tests",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M3 frontend/src/routes/pasta/desejos/+page.svelte:72 (SPAS-36) (frontend-tests)"
+      ],
+      "created": "2026-10-11T17:09:15Z",
+      "last_seen": "2026-10-11T17:09:15Z"
+    },
+    {
+      "id": "L-071",
+      "key": "spec_precision_gap::state in the spec whether grid gaps count when a criterion says a share of the column width",
+      "text": "State in the spec whether grid gaps count when a criterion says a share of the column width",
+      "signal": "spec_precision_gap",
+      "scope": "layout-specs",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SPAS-11 frontend/e2e/pasta.spec.ts:376-379 (layout-specs)"
+      ],
+      "created": "2026-10-11T17:09:15Z",
+      "last_seen": "2026-10-11T17:09:15Z"
+    },
+    {
+      "id": "L-072",
+      "key": "spec_precision_gap::name the comparator and tolerance when a criterion asks for captures compared against another screen",
+      "text": "Name the comparator and tolerance when a criterion asks for captures compared against another screen",
+      "signal": "spec_precision_gap",
+      "scope": "visual-parity-specs",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SPAS-26 frontend/e2e/pasta.spec.ts:516-530 (visual-parity-specs)"
+      ],
+      "created": "2026-10-11T17:09:15Z",
+      "last_seen": "2026-10-11T17:09:15Z"
+    },
+    {
+      "id": "L-073",
+      "key": "surviving_mutant::test the guard a spec clause adds to an action only move focus when it was lost not only the unguarded happy path",
+      "text": "Test the guard a spec clause adds to an action (only move focus when it was lost), not only the unguarded happy path",
+      "signal": "surviving_mutant",
+      "scope": "frontend-tests",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M7 frontend/src/routes/pasta/desejos/+page.svelte:62 (SPAS-34) (frontend-tests)"
+      ],
+      "created": "2026-10-11T17:14:14Z",
+      "last_seen": "2026-10-11T17:14:14Z"
     }
   ]
 }

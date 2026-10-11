@@ -58,8 +58,7 @@ mutação em `Api::CardVariantsController` e `CollectionItem.increment_for!`/`de
 respostas, mensagens nem rotas HTML; SCAR-49: nenhum teste Rails existente foi editado).
 Design em `.specs/features/spa-carta/design.md`.
 
-A **`spa-pasta`** (Req. 20, SPAS-01..46) está **implementada (T1–T16) e aguarda o
-Verifier**: `/app/pasta` (indicadores com número interpolado, progresso por set, chips de
+A **`spa-pasta`** (Req. 20, SPAS-01..46) está **encerrada e verificada** (T1–T17, `validation.md` PASS): `/app/pasta` (indicadores com número interpolado, progresso por set, chips de
 ordem, ações) e `/app/pasta/desejos` (lista e remoção não otimista, com foco) são SPA e
 leem só `GET /api/progress` e `GET /api/wishlist`, além de `DELETE …/wishlist`.
 `app/views/progress`, `app/views/wishlist_items` e os controllers HTML ficam intocados
@@ -176,7 +175,7 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   entrada "Catálogo" da navegação aponta para ele (ver "Estado atual").
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens atuais: Vitest 856 testes, e2e 193, Rails 1995 (rubocop limpo).
+Contagens atuais: Vitest 859 testes, e2e 193, Rails 1995 (rubocop limpo).
 
 ```bash
 # quick

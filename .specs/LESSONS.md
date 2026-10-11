@@ -428,6 +428,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: frontend/e2e/sessao.spec.ts:112-119 (G12) (frontend/e2e)
 - last seen: 2026-10-11T12:25:24Z
 
+### L-070 - Test every conditional error branch that suppresses a message (401, session_changed), not only the generic failure path
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend-tests` · harmful: 0
+- features: spa-pasta
+- evidence: M3 frontend/src/routes/pasta/desejos/+page.svelte:72 (SPAS-36) (frontend-tests)
+- last seen: 2026-10-11T17:09:15Z
+
+### L-071 - State in the spec whether grid gaps count when a criterion says a share of the column width
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `layout-specs` · harmful: 0
+- features: spa-pasta
+- evidence: SPAS-11 frontend/e2e/pasta.spec.ts:376-379 (layout-specs)
+- last seen: 2026-10-11T17:09:15Z
+
+### L-072 - Name the comparator and tolerance when a criterion asks for captures compared against another screen
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `visual-parity-specs` · harmful: 0
+- features: spa-pasta
+- evidence: SPAS-26 frontend/e2e/pasta.spec.ts:516-530 (visual-parity-specs)
+- last seen: 2026-10-11T17:09:15Z
+
+### L-073 - Test the guard a spec clause adds to an action (only move focus when it was lost), not only the unguarded happy path
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend-tests` · harmful: 0
+- features: spa-pasta
+- evidence: M7 frontend/src/routes/pasta/desejos/+page.svelte:62 (SPAS-34) (frontend-tests)
+- last seen: 2026-10-11T17:14:14Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

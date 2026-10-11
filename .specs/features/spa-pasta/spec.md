@@ -111,9 +111,9 @@ nela: o número interpolado dos indicadores.
 8. The system SHALL exibir três cartões de indicador, nesta ordem: `summary.total_copies` com "carta na pasta" quando 1 e "cartas na pasta" nos demais; `summary.distinct_variants` com "carta diferente" quando 1 e "cartas diferentes" nos demais; e `summary.estimated_value` no formato `US$ 1.234,56` com "valor estimado".
 9. WHEN `summary.unpriced_copies` for maior que zero THEN the system SHALL exibir no cartão de valor "1 cópia sem preço" ou "N cópias sem preço", e com zero SHALL omitir a nota.
 10. WHEN `summary.estimated_value.amount` for `"0.00"` THEN the system SHALL exibir o valor estimado como `US$ 0,00`.
-11. WHILE a viewport tiver 64rem ou mais the system SHALL dar a cada cartão de indicador um quarto da largura da coluna de conteúdo, sem esticar.
+11. WHILE a viewport tiver 64rem ou mais the system SHALL dar a cada cartão de indicador um quarto da largura da coluna de conteúdo, descontados os vãos entre os quatro cartões (trilha de `repeat(4, 1fr)`), sem esticar.
 
-**Independent Test**: Vitest renderiza a pasta com `summary` falso: textos e plurais com 0, 1 e 2; nota de cópias sem preço só com `unpriced_copies > 0`; `US$ 0,00` com `"0.00"`; Playwright a 1280px mede a largura de cada cartão igual a um quarto da coluna (tolerância de 1px).
+**Independent Test**: Vitest renderiza a pasta com `summary` falso: textos e plurais com 0, 1 e 2; nota de cópias sem preço só com `unpriced_copies > 0`; `US$ 0,00` com `"0.00"`; Playwright a 1280px mede a largura de cada cartão igual a um quarto da coluna descontados os vãos (tolerância de 1px).
 
 ---
 
@@ -165,7 +165,7 @@ nela: o número interpolado dos indicadores.
 
 24. The system SHALL oferecer "Adicionar cartas à pasta", que leva a `/app` sem recarga, fixa acima da barra inferior sem cobrir o fim da lista abaixo de 64rem, e na coluna lateral, abaixo de um divisor, com o texto "Adicionar cartas", a partir de 64rem.
 25. The system SHALL oferecer, num grupo de ações secundárias separado de "Adicionar cartas", os links "Baixar minha coleção (CSV)" para `/collection/export` com página inteira, "Lista de desejos" para `/app/pasta/desejos` sem recarga e "Importar coleção" para `/collection/import` com página inteira.
-26. WHEN a pasta for exibida a 390px e a 1280px THEN the system SHALL ter a composição da página `/progress` do Hotwire, que segue os artboards "Mobile-Pasta" e "Desktop-Pasta" de `.specs/features/navegacao/canvas/`, sem scroll horizontal a 360px (SPA-30).
+26. WHEN a pasta for exibida a 390px e a 1280px THEN the system SHALL ter a composição da página `/progress` do Hotwire, que segue os artboards "Mobile-Pasta" e "Desktop-Pasta" de `.specs/features/navegacao/canvas/`, sem scroll horizontal a 360px (SPA-30); as capturas a 390px e 1280px são geradas pelo e2e e a comparação com a `/progress` é feita pelo dono.
 
 **Independent Test**: Vitest: `href` e modo de navegação de cada link; Playwright a 390px: a ação fica acima da barra inferior e o último set rola até ficar visível acima dela; a 1280px: a ação está na coluna lateral, abaixo do divisor, com o texto "Adicionar cartas"; capturas a 390px e 1280px comparadas com as da `/progress`.
 
@@ -186,7 +186,7 @@ nela: o número interpolado dos indicadores.
 31. WHEN `fulfilled` for verdadeiro THEN the system SHALL exibir o rótulo escrito "Atendido", e com `fulfilled` falso SHALL exibir "Faltam N", com N igual a `target_quantity − owned_quantity`.
 32. The system SHALL dar a cada item o botão "Remover", com alvo de no mínimo 44px e nome acessível "Remover <card_name> <variant_code> da lista de desejos (atendido)" ou "(faltam N)".
 33. WHEN o usuário acionar "Remover" THEN the system SHALL chamar a remoção de desejo da API (SPAS-43) e, com `200`, SHALL tirar o item da lista, atualizar a contagem e anunciar "Item removido da lista de desejos." como mensagem de sucesso (SPA-44).
-34. WHEN um item for removido THEN the system SHALL mover o foco para o "Remover" do item seguinte; sem seguinte, para o do anterior; com a lista vazia, para o cabeçalho "Lista de desejos".
+34. WHEN um item for removido THEN the system SHALL mover o foco para o "Remover" do item seguinte; sem seguinte, para o do anterior; com a lista vazia, para o cabeçalho "Lista de desejos"; o foco só é movido quando ficou no `body` (quem já levou o foco a outro controle não o perde).
 35. WHILE a remoção de um item estiver pendente the system SHALL manter o botão daquele item desabilitado e ignorar novo acionamento dele, mantendo os demais itens acionáveis.
 36. IF a remoção falhar THEN the system SHALL manter o item na lista e exibir a `message` do erro como veio numa mensagem de erro (SPA-45), e com `401` ou sessão trocada SHALL seguir o SPA-09 e o SPA-10.
 
@@ -241,52 +241,52 @@ nela: o número interpolado dos indicadores.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| SPAS-01 | P1: Pasta — rota e título (Req. 20.1) | T13, T15 | Implemented |
-| SPAS-02 | P1: Pasta — entrada da navegação (Req. 20.2) | T8, T15 | Implemented |
-| SPAS-03 | P1: Pasta — sessão anônima (Req. 20.3) | T5, T13, T14, T15 | Implemented |
-| SPAS-04 | P1: Pasta — consulta do progresso (Req. 20.4) | T4, T13 | Implemented |
-| SPAS-05 | P1: Pasta — resposta antiga descartada (Req. 20.5) | T4, T13 | Implemented |
-| SPAS-06 | P1: Pasta — carga lenta (Req. 20.6) | T4, T13, T14 | Implemented |
-| SPAS-07 | P1: Pasta — erro de carga (Req. 20.7) | T4, T13, T14 | Implemented |
-| SPAS-08 | P1: Indicadores — três cartões (Req. 20.8) | T10 | Implemented |
-| SPAS-09 | P1: Indicadores — cópias sem preço (Req. 20.9) | T10 | Implemented |
-| SPAS-10 | P1: Indicadores — valor zero (Req. 20.10) | T10 | Implemented |
-| SPAS-11 | P1: Indicadores — largura em 64rem (Req. 20.11) | T10, T15 | Implemented |
-| SPAS-12 | P1: Número interpolado — primeira exibição (Req. 20.12) | T6, T9, T15 | Implemented |
-| SPAS-13 | P1: Número interpolado — mudança de valor (Req. 20.13) | T9 | Implemented |
-| SPAS-14 | P1: Número interpolado — reduced motion (Req. 20.14) | T9, T15 | Implemented |
-| SPAS-15 | P1: Número interpolado — acessibilidade (Req. 20.15) | T9, T10 | Implemented |
-| SPAS-16 | P1: Número interpolado — formato e estabilidade (Req. 20.16) | T9, T15 | Implemented |
-| SPAS-17 | P1: Progresso — chips de ordem (Req. 20.17) | T13, T15 | Implemented |
-| SPAS-18 | P1: Progresso — lista de sets (Req. 20.18) | T13, T15 | Implemented |
-| SPAS-19 | P1: Progresso — linha e link do set (Req. 20.19) | T11 | Implemented |
-| SPAS-20 | P1: Progresso — set com `base_size` (Req. 20.20) | T11 | Implemented |
-| SPAS-21 | P1: Progresso — set sem `base_size` (Req. 20.21) | T11 | Implemented |
-| SPAS-22 | P1: Progresso — parallels à parte (Req. 20.22) | T11 | Implemented |
-| SPAS-23 | P1: Progresso — subtotal do set (Req. 20.23) | T11 | Implemented |
-| SPAS-24 | P1: Ações — adicionar cartas (Req. 20.24) | T13, T15 | Implemented |
-| SPAS-25 | P1: Ações — ações secundárias (Req. 20.25) | T13 | Implemented |
-| SPAS-26 | P1: Ações — composição dos artboards (Req. 20.26) | T15 | Implemented |
-| SPAS-27 | P1: Desejos — rota e título (Req. 20.27) | T14, T16 | Implemented |
-| SPAS-28 | P1: Desejos — lista vazia (Req. 20.28) | T14 | Implemented |
-| SPAS-29 | P1: Desejos — contagem e ordem (Req. 20.29) | T14, T16 | Implemented |
-| SPAS-30 | P1: Desejos — linha do item (Req. 20.30) | T7, T12, T16 | Implemented |
-| SPAS-31 | P1: Desejos — atendido (Req. 20.31) | T12, T16 | Implemented |
-| SPAS-32 | P1: Desejos — botão remover (Req. 20.32) | T12 | Implemented |
-| SPAS-33 | P1: Desejos — remoção com sucesso (Req. 20.33) | T14, T16 | Implemented |
-| SPAS-34 | P1: Desejos — foco após remoção (Req. 20.34) | T14, T16 | Implemented |
-| SPAS-35 | P1: Desejos — remoção pendente (Req. 20.35) | T12, T14 | Implemented |
-| SPAS-36 | P1: Desejos — falha na remoção (Req. 20.36) | T14 | Implemented |
-| SPAS-37 | P1: API — progresso (Req. 20.37) | T1 | Implemented |
-| SPAS-38 | P1: API — ordem (Req. 20.38) | T1 | Implemented |
-| SPAS-39 | P1: API — resumo e valor (Req. 20.39) | T1 | Implemented |
-| SPAS-40 | P1: API — linha do set (Req. 20.40) | T1 | Implemented |
-| SPAS-41 | P1: API — consultas constantes no progresso (Req. 20.41) | T1 | Implemented |
-| SPAS-42 | P1: API — lista de desejos (Req. 20.42) | T2 | Implemented |
-| SPAS-43 | P1: API — remoção de desejo (Req. 20.43) | T3, T7, T16 | Implemented |
-| SPAS-44 | P1: API — carta ou variante inexistente (Req. 20.44) | T3 | Implemented |
-| SPAS-45 | P1: API — sessão, CSRF e isolamento (Req. 20.45) | T1, T2, T3 | Implemented |
-| SPAS-46 | P1: API — HTML inalterado (Req. 20.46) | T3, T17 | Implemented |
+| SPAS-01 | P1: Pasta — rota e título (Req. 20.1) | T13, T15 | Verified |
+| SPAS-02 | P1: Pasta — entrada da navegação (Req. 20.2) | T8, T15 | Verified |
+| SPAS-03 | P1: Pasta — sessão anônima (Req. 20.3) | T5, T13, T14, T15 | Verified |
+| SPAS-04 | P1: Pasta — consulta do progresso (Req. 20.4) | T4, T13 | Verified |
+| SPAS-05 | P1: Pasta — resposta antiga descartada (Req. 20.5) | T4, T13 | Verified |
+| SPAS-06 | P1: Pasta — carga lenta (Req. 20.6) | T4, T13, T14 | Verified |
+| SPAS-07 | P1: Pasta — erro de carga (Req. 20.7) | T4, T13, T14 | Verified |
+| SPAS-08 | P1: Indicadores — três cartões (Req. 20.8) | T10 | Verified |
+| SPAS-09 | P1: Indicadores — cópias sem preço (Req. 20.9) | T10 | Verified |
+| SPAS-10 | P1: Indicadores — valor zero (Req. 20.10) | T10 | Verified |
+| SPAS-11 | P1: Indicadores — largura em 64rem (Req. 20.11) | T10, T15 | Verified |
+| SPAS-12 | P1: Número interpolado — primeira exibição (Req. 20.12) | T6, T9, T15 | Verified |
+| SPAS-13 | P1: Número interpolado — mudança de valor (Req. 20.13) | T9 | Verified |
+| SPAS-14 | P1: Número interpolado — reduced motion (Req. 20.14) | T9, T15 | Verified |
+| SPAS-15 | P1: Número interpolado — acessibilidade (Req. 20.15) | T9, T10 | Verified |
+| SPAS-16 | P1: Número interpolado — formato e estabilidade (Req. 20.16) | T9, T15 | Verified |
+| SPAS-17 | P1: Progresso — chips de ordem (Req. 20.17) | T13, T15 | Verified |
+| SPAS-18 | P1: Progresso — lista de sets (Req. 20.18) | T13, T15 | Verified |
+| SPAS-19 | P1: Progresso — linha e link do set (Req. 20.19) | T11 | Verified |
+| SPAS-20 | P1: Progresso — set com `base_size` (Req. 20.20) | T11 | Verified |
+| SPAS-21 | P1: Progresso — set sem `base_size` (Req. 20.21) | T11 | Verified |
+| SPAS-22 | P1: Progresso — parallels à parte (Req. 20.22) | T11 | Verified |
+| SPAS-23 | P1: Progresso — subtotal do set (Req. 20.23) | T11 | Verified |
+| SPAS-24 | P1: Ações — adicionar cartas (Req. 20.24) | T13, T15 | Verified |
+| SPAS-25 | P1: Ações — ações secundárias (Req. 20.25) | T13 | Verified |
+| SPAS-26 | P1: Ações — composição dos artboards (Req. 20.26) | T15 | Verified |
+| SPAS-27 | P1: Desejos — rota e título (Req. 20.27) | T14, T16 | Verified |
+| SPAS-28 | P1: Desejos — lista vazia (Req. 20.28) | T14 | Verified |
+| SPAS-29 | P1: Desejos — contagem e ordem (Req. 20.29) | T14, T16 | Verified |
+| SPAS-30 | P1: Desejos — linha do item (Req. 20.30) | T7, T12, T16 | Verified |
+| SPAS-31 | P1: Desejos — atendido (Req. 20.31) | T12, T16 | Verified |
+| SPAS-32 | P1: Desejos — botão remover (Req. 20.32) | T12 | Verified |
+| SPAS-33 | P1: Desejos — remoção com sucesso (Req. 20.33) | T14, T16 | Verified |
+| SPAS-34 | P1: Desejos — foco após remoção (Req. 20.34) | T14, T16 | Verified |
+| SPAS-35 | P1: Desejos — remoção pendente (Req. 20.35) | T12, T14 | Verified |
+| SPAS-36 | P1: Desejos — falha na remoção (Req. 20.36) | T14 | Verified |
+| SPAS-37 | P1: API — progresso (Req. 20.37) | T1 | Verified |
+| SPAS-38 | P1: API — ordem (Req. 20.38) | T1 | Verified |
+| SPAS-39 | P1: API — resumo e valor (Req. 20.39) | T1 | Verified |
+| SPAS-40 | P1: API — linha do set (Req. 20.40) | T1 | Verified |
+| SPAS-41 | P1: API — consultas constantes no progresso (Req. 20.41) | T1 | Verified |
+| SPAS-42 | P1: API — lista de desejos (Req. 20.42) | T2 | Verified |
+| SPAS-43 | P1: API — remoção de desejo (Req. 20.43) | T3, T7, T16 | Verified |
+| SPAS-44 | P1: API — carta ou variante inexistente (Req. 20.44) | T3 | Verified |
+| SPAS-45 | P1: API — sessão, CSRF e isolamento (Req. 20.45) | T1, T2, T3 | Verified |
+| SPAS-46 | P1: API — HTML inalterado (Req. 20.46) | T3, T17 | Verified |
 
 **Coverage:** 46 total, 46 mapped to tasks (T1–T17), 0 unmapped
 
