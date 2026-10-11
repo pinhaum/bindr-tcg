@@ -485,12 +485,12 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Inativo: link com o `href` dado, nome acessível = rótulo, sem `×`
-- [ ] Ativo: nome acessível "Remover filtro Cor: Red", `×` com `aria-hidden`, rótulo escrito visível (SCAT-20)
-- [ ] `current`: `aria-current="true"` e sem `×` (SCAT-25)
-- [ ] Todo chip tem `data-sveltekit-reset="false"`; `guard.test.ts` verde (sem hex de cor do jogo, SCAT-21)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Inativo: link com o `href` dado, nome acessível = rótulo, sem `×`
+- [x] Ativo: nome acessível "Remover filtro Cor: Red", `×` com `aria-hidden`, rótulo escrito visível (SCAT-20)
+- [x] `current`: `aria-current="true"` e sem `×` (SCAT-25)
+- [x] Todo chip tem `data-sveltekit-reset="false"`; `guard.test.ts` verde (sem hex de cor do jogo, SCAT-21)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
