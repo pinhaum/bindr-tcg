@@ -228,11 +228,11 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Mutação com `FormData` sai sem header `Content-Type`, com `X-CSRF-Token` e com o mesmo objeto `FormData` no `body` (SPOR-35)
-- [ ] `422 invalid_csrf_token` renova por `GET /api/session` e reenvia o mesmo `FormData` (com `file`) e o mesmo tempo limite uma vez; com outro e-mail na renovação não reenvia e lança `session_changed` (SPOR-35)
-- [ ] Relógio falso: `post` com `{ timeoutMs: 60000 }` não aborta em 15 s e aborta em 60 s como `network_error`; `get` continua abortando em 15 s (SPOR-32)
-- [ ] Corpo JSON segue com `Content-Type: application/json`; o ESLint continua recusando `fetch` fora de `client.ts`
-- [ ] Gate check passes: Front quick
+- [x] Mutação com `FormData` sai sem header `Content-Type`, com `X-CSRF-Token` e com o mesmo objeto `FormData` no `body` (SPOR-35)
+- [x] `422 invalid_csrf_token` renova por `GET /api/session` e reenvia o mesmo `FormData` (com `file`) e o mesmo tempo limite uma vez; com outro e-mail na renovação não reenvia e lança `session_changed` (SPOR-35)
+- [x] Relógio falso: `post` com `{ timeoutMs: 60000 }` não aborta em 15 s e aborta em 60 s como `network_error`; `get` continua abortando em 15 s (SPOR-32)
+- [x] Corpo JSON segue com `Content-Type: application/json`; o ESLint continua recusando `fetch` fora de `client.ts`
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick

@@ -13,10 +13,12 @@ export type ApiClientDeps = {
 	timeoutMs?: number;
 };
 
+export type RequestOptions = { timeoutMs?: number };
+
 export type ApiClient = {
 	get<T>(path: string, query?: Query): Promise<T>;
 	getEnvelope<T, M>(path: string): Promise<{ data: T; meta: M }>;
-	post<T>(path: string, body?: unknown): Promise<T>;
+	post<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T>;
 	patch<T>(path: string, body?: unknown): Promise<T>;
 	put<T>(path: string, body?: unknown): Promise<T>;
 	delete<T>(path: string): Promise<T>;
@@ -71,11 +73,17 @@ export const createApiClient = ({
 }: ApiClientDeps): ApiClient => {
 	let csrfToken: string | null = null;
 
-	const send = async (method: Method, url: string, body?: unknown): Promise<{ status: number; payload: unknown }> => {
+	const send = async (
+		method: Method,
+		url: string,
+		body: unknown,
+		callTimeoutMs: number
+	): Promise<{ status: number; payload: unknown }> => {
 		const headers: Record<string, string> = { Accept: 'application/json' };
-		if (body !== undefined) headers['Content-Type'] = 'application/json';
+		const multipart = body instanceof FormData;
+		if (body !== undefined && !multipart) headers['Content-Type'] = 'application/json';
 		if (method !== 'GET' && csrfToken !== null) headers['X-CSRF-Token'] = csrfToken;
-		const serialized = body === undefined ? undefined : JSON.stringify(body);
+		const serialized = body === undefined || multipart ? body : JSON.stringify(body);
 
 		try {
 			const response = await fetch(url, {
@@ -83,7 +91,7 @@ export const createApiClient = ({
 				headers,
 				credentials: 'same-origin',
 				body: serialized,
-				signal: AbortSignal.timeout(timeoutMs)
+				signal: AbortSignal.timeout(callTimeoutMs)
 			});
 			return { status: response.status, payload: await readJson(response) };
 		} catch (error) {
@@ -96,10 +104,11 @@ export const createApiClient = ({
 		method: Method,
 		url: string,
 		body?: unknown,
+		callTimeoutMs = timeoutMs,
 		retried = false
 	): Promise<Envelope> => {
 		if (!isLocalPath(url)) throw new Error(`O caminho da API deve começar com "/" (recebido: ${String(url)}).`);
-		const { status, payload } = await send(method, url, body);
+		const { status, payload } = await send(method, url, body, callTimeoutMs);
 		const ok = status >= 200 && status < 300;
 
 		if (!ok && isRecord(payload) && isErrorBody(payload)) {
@@ -111,7 +120,7 @@ export const createApiClient = ({
 				throw error;
 			}
 			if (status === 422 && error.code === 'invalid_csrf_token' && method !== 'GET' && !retried) {
-				return recoverFromStaleCsrf(method, url, body, signingOut);
+				return recoverFromStaleCsrf(method, url, body, callTimeoutMs, signingOut);
 			}
 			throw error;
 		}
@@ -122,15 +131,21 @@ export const createApiClient = ({
 		return payload as Envelope;
 	};
 
-	const request = async <T>(method: Method, url: string, body?: unknown): Promise<T> =>
-		(await requestEnvelope(method, url, body)).data as T;
+	const request = async <T>(method: Method, url: string, body?: unknown, callTimeoutMs?: number): Promise<T> =>
+		(await requestEnvelope(method, url, body, callTimeoutMs)).data as T;
 
-	const recoverFromStaleCsrf = async (method: Method, url: string, body: unknown, signingOut: boolean): Promise<Envelope> => {
+	const recoverFromStaleCsrf = async (
+		method: Method,
+		url: string,
+		body: unknown,
+		callTimeoutMs: number,
+		signingOut: boolean
+	): Promise<Envelope> => {
 		const session = await request<unknown>('GET', SESSION_PATH);
 		if (!isSessionPayload(session)) throw unexpectedResponse();
 		const { user } = session;
 
-		if ((user?.email ?? null) === currentUserEmail()) return requestEnvelope(method, url, body, true);
+		if ((user?.email ?? null) === currentUserEmail()) return requestEnvelope(method, url, body, callTimeoutMs, true);
 
 		if (user === null) {
 			if (!signingOut) onUnauthenticated();
@@ -147,7 +162,7 @@ export const createApiClient = ({
 			if (!isRecord(meta)) throw unexpectedResponse();
 			return { data: data as T, meta: meta as M };
 		},
-		post: (path, body) => request('POST', path, body),
+		post: (path, body, options) => request('POST', path, body, options?.timeoutMs),
 		patch: (path, body) => request('PATCH', path, body),
 		put: (path, body) => request('PUT', path, body),
 		delete: (path) => request('DELETE', path),
