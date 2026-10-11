@@ -22,7 +22,7 @@ const inApp = (label: string, path: string): NavEntry => ({
 });
 
 export function navEntries(user: SessionUser | null): NavEntry[] {
-  const catalog = hotwire("Catálogo", "/catalog");
+  const catalog = inApp("Catálogo", "");
   if (!user)
     return [
       catalog,

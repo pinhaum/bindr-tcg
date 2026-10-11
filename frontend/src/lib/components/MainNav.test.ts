@@ -56,20 +56,39 @@ describe("MainNav", () => {
     );
   });
 
+  it.each(["/app", "/app?colors%5B%5D=Red"])(
+    "marks only Catálogo as current at %s",
+    (path) => {
+      mocks.pathname = path;
+      render(MainNav);
+      const current = screen
+        .getAllByRole("link")
+        .filter((link) => link.hasAttribute("aria-current"));
+      expect(current).toHaveLength(1);
+      expect(current[0]).toHaveTextContent("Catálogo");
+      expect(current[0]).toHaveAttribute("aria-current", "page");
+    },
+  );
+
   it("never marks Hotwire entries as current", () => {
-    mocks.pathname = "/catalog";
+    session.user = { email: "a@b.c" };
+    mocks.pathname = "/progress";
     render(MainNav);
-    expect(screen.getByRole("link", { name: "Catálogo" })).not.toHaveAttribute(
-      "aria-current",
-    );
+    expect(
+      screen.getByRole("link", { name: "Minha pasta" }),
+    ).not.toHaveAttribute("aria-current");
   });
 
   it("reloads the page on Hotwire links only", () => {
+    session.user = { email: "a@b.c" };
     render(MainNav);
-    expect(screen.getByRole("link", { name: "Catálogo" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Minha pasta" })).toHaveAttribute(
       "data-sveltekit-reload",
     );
-    expect(screen.getByRole("link", { name: "Entrar" })).not.toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Catálogo" })).not.toHaveAttribute(
+      "data-sveltekit-reload",
+    );
+    expect(screen.getByRole("link", { name: "Baralhos" })).toHaveAttribute(
       "data-sveltekit-reload",
     );
   });

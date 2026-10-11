@@ -175,10 +175,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] "Catálogo" tem `href` `/app` e não recarrega a página, com e sem sessão; as demais entradas e a ordem não mudam
-- [ ] Em `/app` e em `/app?colors%5B%5D=Red`, só "Catálogo" tem `aria-current="page"`
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos; asserções antigas de `/catalog` trocadas, não apagadas
+- [x] "Catálogo" tem `href` `/app` e não recarrega a página, com e sem sessão; as demais entradas e a ordem não mudam
+- [x] Em `/app` e em `/app?colors%5B%5D=Red`, só "Catálogo" tem `aria-current="page"`
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos; asserções antigas de `/catalog` trocadas, não apagadas
 
 **Tests**: unit
 **Gate**: quick

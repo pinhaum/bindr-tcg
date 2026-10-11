@@ -20,10 +20,20 @@ describe("navEntries", () => {
     expect(labels(null)).toEqual(["Catálogo", "Entrar", "Criar conta"]);
   });
 
+  it("points Catálogo at /app without reload, with and without a session", () => {
+    const catalog = {
+      kind: "link",
+      label: "Catálogo",
+      href: "/app",
+      reload: false,
+    };
+    expect(navEntries({ email: "a@b.c" })[0]).toEqual(catalog);
+    expect(navEntries(null)[0]).toEqual(catalog);
+  });
+
   it("points the Hotwire destinations at their paths with reload", () => {
     const entries = navEntries({ email: "a@b.c" });
-    expect(entries.slice(0, 3)).toEqual([
-      { kind: "link", label: "Catálogo", href: "/catalog", reload: true },
+    expect(entries.slice(1, 3)).toEqual([
       { kind: "link", label: "Minha pasta", href: "/progress", reload: true },
       { kind: "link", label: "Baralhos", href: "/decks", reload: true },
     ]);
