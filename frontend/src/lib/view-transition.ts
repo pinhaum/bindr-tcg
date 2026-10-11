@@ -11,7 +11,10 @@ export function viewTransitionOnNavigate(navigation: OnNavigate): Promise<void> 
 	const from = navigation.from?.url.pathname;
 	if (from !== undefined && from === navigation.to?.url.pathname) return;
 
-	const awaitsArrival = MORPH_ROUTES.has(navigation.to?.route.id);
+	// O morph só existe no par grade <-> detalhe; origem fora dele (ex.: /entrar) não espera.
+	const fromId = navigation.from?.route?.id;
+	const toId = navigation.to?.route?.id;
+	const awaitsArrival = MORPH_ROUTES.has(fromId) && MORPH_ROUTES.has(toId) && fromId !== toId;
 
 	return new Promise((resolve) => {
 		armArrival();

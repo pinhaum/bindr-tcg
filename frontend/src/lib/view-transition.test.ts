@@ -81,20 +81,26 @@ describe('viewTransitionOnNavigate', () => {
 			void promise.then(() => (state.done = true));
 			return state;
 		};
-		const toRoute = (routeId: string | null) =>
+		const toRoute = (routeId: string | null, fromRouteId: string | null = '/') =>
 			({
-				from: { url: new URL('/app/cartas/OP01-001', 'http://localhost') },
+				from: {
+					url: new URL('/app/cartas/OP01-001', 'http://localhost'),
+					route: { id: fromRouteId }
+				},
 				to: { url: new URL('/app/x', 'http://localhost'), route: { id: routeId } },
 				complete: Promise.resolve()
 			}) as unknown as Parameters<typeof viewTransitionOnNavigate>[0];
-		const startUpdate = async (routeId: string | null = '/cartas/[card_number]') => {
+		const startUpdate = async (
+			routeId: string | null = '/cartas/[card_number]',
+			fromRouteId: string | null = '/'
+		) => {
 			let update!: Promise<void>;
 			Object.assign(document, {
 				startViewTransition: vi.fn((callback: () => Promise<void>) => {
 					update = callback();
 				})
 			});
-			await viewTransitionOnNavigate(toRoute(routeId));
+			await viewTransitionOnNavigate(toRoute(routeId, fromRouteId));
 			return settled(update);
 		};
 
@@ -147,11 +153,32 @@ describe('viewTransitionOnNavigate', () => {
 		it('espera a chegada também quando o destino é o catálogo', async () => {
 			vi.useFakeTimers();
 			markCard('OP01-001');
-			const update = await startUpdate('/');
+			const update = await startUpdate('/', '/cartas/[card_number]');
 			await vi.advanceTimersByTimeAsync(499);
 			expect(update.done).toBe(false);
 
 			await vi.advanceTimersByTimeAsync(1);
+			expect(update.done).toBe(true);
+		});
+
+		it.each([['/entrar'], ['/criar-conta'], [null]])(
+			'origem %s com carta marcada e destino catálogo não espera chegada',
+			async (fromRouteId) => {
+				vi.useFakeTimers();
+				markCard('OP01-001');
+				const update = await startUpdate('/', fromRouteId);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(update.done).toBe(true);
+			}
+		);
+
+		it('origem entrar com carta marcada e destino detalhe não espera chegada', async () => {
+			vi.useFakeTimers();
+			markCard('OP01-001');
+			const update = await startUpdate('/cartas/[card_number]', '/entrar');
+			await vi.advanceTimersByTimeAsync(0);
+
 			expect(update.done).toBe(true);
 		});
 
