@@ -215,6 +215,48 @@ const expectedFeatured = (card: Card, variant?: string) =>
 		card.variants[0]
 	).variant_code;
 
+const parityCases: { name: string; pick: (card: Card) => string | undefined }[] = [
+	{ name: 'sem ?variant=', pick: () => undefined },
+	{
+		name: 'com ?variant= válido',
+		pick: (card) => card.variants[card.variants.length - 1].variant_code
+	},
+	{ name: 'com ?variant= inválido', pick: () => 'tcgplayer:0-inexistente' }
+];
+
+
+// Abaixo de 64rem o SPA não mostra o chip "Counter" (SCAR-12; o valor vai nos campos), o /cards sim.
+function registerParityTests(narrow = false) {
+	for (const key of ['leader', 'character', 'event'] as const) {
+		for (const { name, pick } of parityCases) {
+			test(`${key}, ${name}: mesmos campos, chips, variantes, preços e destaque`, async ({
+				page,
+				request
+			}) => {
+				const card = (await sample(request))[key];
+				const variant = pick(card);
+
+				const hotwire = await readHotwire(page, card, variant);
+				const spa = await readSpa(page, card, variant);
+
+				expect(hotwire.variants.length, 'variantes em /cards').toBe(card.variants.length);
+				expect(spa.variants, 'variantes (código, rótulo, set, preço)').toEqual(hotwire.variants);
+				expect(spa.fields, 'campos').toEqual(hotwire.fields);
+				const hotwireChips = narrow
+					? hotwire.chips.filter((chip) => !chip.startsWith('Counter '))
+					: hotwire.chips;
+				expect(spa.chips, 'chips do cabeçalho').toEqual(hotwireChips);
+				expect(spa.set, 'linha do set').toEqual(hotwire.set);
+				expect(spa.illustrator, 'ilustração').toEqual(hotwire.illustrator);
+
+				const featured = expectedFeatured(card, variant);
+				expect(hotwire.featured, 'destaque em /cards').toEqual([featured]);
+				expect(spa.featured, 'destaque em /app/cartas').toEqual([featured]);
+			});
+		}
+	}
+}
+
 test.describe('navegação entre catálogo e detalhe sem recarregar a página (SCAR-3, SCAR-4)', () => {
 	for (const viewport of VIEWPORTS) {
 		test(`tile abre o detalhe e "Voltar ao catálogo" volta, a ${viewport.name}`, async ({
@@ -253,40 +295,7 @@ test.describe('navegação entre catálogo e detalhe sem recarregar a página (S
 test.describe('paridade do detalhe entre /app/cartas e /cards a 1280px (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)', () => {
 	test.use({ viewport: { width: 1280, height: 800 } });
 
-	const cases: { name: string; pick: (card: Card) => string | undefined }[] = [
-		{ name: 'sem ?variant=', pick: () => undefined },
-		{
-			name: 'com ?variant= válido',
-			pick: (card) => card.variants[card.variants.length - 1].variant_code
-		},
-		{ name: 'com ?variant= inválido', pick: () => 'tcgplayer:0-inexistente' }
-	];
-
-	for (const key of ['leader', 'character', 'event'] as const) {
-		for (const { name, pick } of cases) {
-			test(`${key}, ${name}: mesmos campos, chips, variantes, preços e destaque`, async ({
-				page,
-				request
-			}) => {
-				const card = (await sample(request))[key];
-				const variant = pick(card);
-
-				const hotwire = await readHotwire(page, card, variant);
-				const spa = await readSpa(page, card, variant);
-
-				expect(hotwire.variants.length, 'variantes em /cards').toBe(card.variants.length);
-				expect(spa.variants, 'variantes (código, rótulo, set, preço)').toEqual(hotwire.variants);
-				expect(spa.fields, 'campos').toEqual(hotwire.fields);
-				expect(spa.chips, 'chips do cabeçalho').toEqual(hotwire.chips);
-				expect(spa.set, 'linha do set').toEqual(hotwire.set);
-				expect(spa.illustrator, 'ilustração').toEqual(hotwire.illustrator);
-
-				const featured = expectedFeatured(card, variant);
-				expect(hotwire.featured, 'destaque em /cards').toEqual([featured]);
-				expect(spa.featured, 'destaque em /app/cartas').toEqual([featured]);
-			});
-		}
-	}
+	registerParityTests();
 
 	test('preço e "Sem preço" no formato do SCAR-21, sem sessão', async ({ page, request }) => {
 		const { character } = await sample(request);
@@ -339,6 +348,12 @@ test.describe('paridade do detalhe entre /app/cartas e /cards a 1280px (SCAR-13,
 	});
 });
 
+test.describe('paridade do detalhe entre /app/cartas e /cards a 360px (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)', () => {
+	test.use({ viewport: { width: 360, height: 740 } });
+
+	registerParityTests(true);
+});
+
 for (const combo of COMBOS) {
 	test.describe(`layout do detalhe a ${combo.label} (SCAR-4, SCAR-5, SCAR-11, SCAR-12, SCAR-13)`, () => {
 		test.use({ viewport: { width: combo.width, height: combo.height }, colorScheme: combo.scheme });
@@ -381,6 +396,18 @@ for (const combo of COMBOS) {
 			await expectNoHorizontalScroll(page, `detalhe a ${combo.label}`);
 		});
 
+		for (const key of ['leader', 'character', 'event'] as const) {
+			test(`${key} não rola na horizontal`, async ({
+				page,
+				request
+			}) => {
+				const card = (await sample(request))[key];
+				await stubImages(page);
+				await openDetail(page, card);
+				await expectNoHorizontalScroll(page, `${key} a ${combo.label}`);
+			});
+		}
+
 		test('"Voltar ao catálogo" é um botão bordado de 44px ou mais, sem seta (SCAR-4)', async ({
 			page,
 			request
@@ -395,6 +422,7 @@ for (const combo of COMBOS) {
 			const found = await back.boundingBox();
 			expect(found, 'botão com caixa').not.toBeNull();
 			expect(found!.height, 'altura do botão').toBeGreaterThanOrEqual(44);
+			expect(found!.width, 'largura do botão').toBeGreaterThanOrEqual(44);
 			expect(await back.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe('solid');
 		});
 
@@ -469,5 +497,33 @@ test.describe('variante em destaque pela miniatura (SCAR-10, SCAR-22, SCAR-23)',
 		expect(await readDocumentMark(page), 'o clique recarregou o documento').toBe(
 			'mesmo-documento'
 		);
+	});
+});
+
+test.describe('quadro da arte igual com e sem imagem (SCAR-10)', () => {
+	test.use({ viewport: { width: 1280, height: 800 } });
+
+	const artBox = async (page: Page, card: Card) => {
+		await openDetail(page, card);
+		const art = page.locator('.media .art');
+		await expect(art).toBeVisible();
+		return art.boundingBox();
+	};
+
+	test('o quadro mede o mesmo com imagem e com a imagem recusada', async ({ page, request }) => {
+		const { character } = await sample(request);
+
+		await stubImages(page);
+		const withImage = await artBox(page, character);
+		await expect(page.locator('.media img')).toBeVisible();
+
+		await page.unroute('**/card_images/**');
+		await page.route('**/card_images/**', (route) => route.fulfill({ status: 403, body: '' }));
+		const withoutImage = await artBox(page, character);
+		await expect(page.locator('.media img')).toHaveCount(0);
+		await expect(page.locator('.media .placeholder')).toBeAttached();
+
+		expect(withImage, 'quadro com imagem').not.toBeNull();
+		expect(withoutImage, 'quadro sem imagem').toEqual(withImage);
 	});
 });

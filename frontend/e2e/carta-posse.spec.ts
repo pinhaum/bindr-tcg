@@ -117,6 +117,25 @@ function trackVariantCalls(page: Page) {
 }
 
 test.describe('posse e desejo no detalhe da carta contra a API real', () => {
+	test('"−" e "+" medem 44 px ou mais no navegador (SCAR-25)', async ({ page, request }) => {
+		const picked = await pickCard(request);
+		await stubImages(page);
+		await createAccount(page);
+		await openDetail(page, picked);
+		const row = variantRow(page, picked);
+
+		for (const [name, button] of [
+			['Remover', minus(row, picked)],
+			['Adicionar', plus(row, picked)]
+		] as const) {
+			await expect(button).toBeVisible();
+			const box = await button.boundingBox();
+			expect(box, `caixa do botão ${name}`).not.toBeNull();
+			expect(box!.height, `altura do botão ${name}`).toBeGreaterThanOrEqual(44);
+			expect(box!.width, `largura do botão ${name}`).toBeGreaterThanOrEqual(44);
+		}
+	});
+
 	test('"−" em zero não envia; cinco "+" rápidos gravam 5 em série (SCAR-27, 29, 30, 31)', async ({
 		page,
 		request
