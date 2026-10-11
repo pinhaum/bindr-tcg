@@ -74,3 +74,14 @@ export type FilterOptions = {
 	rarities: string[];
 	sets: { code: string; name: string }[];
 };
+
+export type DetailVariant = CatalogVariant;
+
+export type CardDetailPayload = Omit<CatalogCard, 'variants'> & {
+	featured_variant_code: string | null;
+	variants: DetailVariant[];
+};
+
+export type OwnershipResult = { variant_code: string; owned_quantity: number };
+
+export type WishlistResult = { variant_code: string; wishlist_target: number };

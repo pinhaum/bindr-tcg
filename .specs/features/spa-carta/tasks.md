@@ -292,10 +292,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `variantParam` presente na lista → essa variante
-- [ ] Ausente ou desconhecido → primeira com `in_source: true`; nenhuma na fonte → primeira listada; lista vazia → `null`, sem erro
-- [ ] `npm run check` aceita os tipos novos
-- [ ] Gate check passes: Front quick
+- [x] `variantParam` presente na lista → essa variante
+- [x] Ausente ou desconhecido → primeira com `in_source: true`; nenhuma na fonte → primeira listada; lista vazia → `null`, sem erro
+- [x] `npm run check` aceita os tipos novos
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
