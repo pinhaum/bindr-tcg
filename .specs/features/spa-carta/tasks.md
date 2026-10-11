@@ -431,11 +431,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Leader mostra Power, Life, Attribute, Traits, Block e não Custo; Character com counter `null` não mostra Counter e com `0` mostra `0`; Event e Stage mostram Custo, Attribute, Traits, Block
-- [ ] `0` aparece como valor; lista vazia omite o campo; listas unidas por ", "
-- [ ] `effect_text` com `<script>` aparece como texto; quebras de linha preservadas
-- [ ] Trigger sem efeito exibe a seção "Efeito" com "Trigger" em `<strong>`; sem efeito nem trigger, sem a seção
-- [ ] Gate check passes: Front quick
+- [x] Leader mostra Power, Life, Attribute, Traits, Block e não Custo; Character com counter `null` não mostra Counter e com `0` mostra `0`; Event e Stage mostram Custo, Attribute, Traits, Block
+- [x] `0` aparece como valor; lista vazia omite o campo; listas unidas por ", "
+- [x] `effect_text` com `<script>` aparece como texto; quebras de linha preservadas
+- [x] Trigger sem efeito exibe a seção "Efeito" com "Trigger" em `<strong>`; sem efeito nem trigger, sem a seção
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
