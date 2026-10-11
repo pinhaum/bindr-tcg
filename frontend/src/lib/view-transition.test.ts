@@ -28,6 +28,31 @@ describe('viewTransitionOnNavigate', () => {
 		expect(start).not.toHaveBeenCalled();
 	});
 
+	const between = (from: string, to: string) =>
+		({
+			from: { url: new URL(from, 'http://localhost') },
+			to: { url: new URL(to, 'http://localhost') },
+			complete: Promise.resolve()
+		}) as unknown as Parameters<typeof viewTransitionOnNavigate>[0];
+
+	it('não chama startViewTransition quando só a query muda', () => {
+		const start = vi.fn();
+		Object.assign(document, { startViewTransition: start });
+
+		expect(
+			viewTransitionOnNavigate(between('/app?colors%5B%5D=Red', '/app?colors%5B%5D=Green'))
+		).toBeUndefined();
+		expect(start).not.toHaveBeenCalled();
+	});
+
+	it('chama startViewTransition entre rotas diferentes', () => {
+		const start = vi.fn();
+		Object.assign(document, { startViewTransition: start });
+
+		void viewTransitionOnNavigate(between('/app', '/app/entrar'));
+		expect(start).toHaveBeenCalledOnce();
+	});
+
 	it('envolve a troca de rota na transição e mantém a atualização até navigation.complete', async () => {
 		let finish!: () => void;
 		const complete = new Promise<void>((resolve) => (finish = resolve));

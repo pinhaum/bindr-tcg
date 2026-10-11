@@ -289,10 +289,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `/app?colors%5B%5D=Red` → `/app?colors%5B%5D=Green` não chama `startViewTransition`
-- [ ] `/app` → `/app/entrar` chama, como antes; os testes antigos passam sem edição
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `/app?colors%5B%5D=Red` → `/app?colors%5B%5D=Green` não chama `startViewTransition`
+- [x] `/app` → `/app/entrar` chama, como antes; os testes antigos passam sem edição
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
