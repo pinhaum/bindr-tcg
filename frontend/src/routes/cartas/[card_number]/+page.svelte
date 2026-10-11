@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { replaceState } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
 	import { api } from '../../../lib/api/index';
@@ -23,9 +23,21 @@
 	const signedIn = $derived(session.user !== null);
 
 	// Variante escolhida pelo clique vale só para a resposta em que foi feita.
-	let chosen = $state<{ seq: number; code: string } | null>(null);
+	let chosen = $state<{ seq: number; card: string; code: string } | null>(null);
 	const wanted = $derived(
-		chosen && chosen.seq === loader.state.seq ? chosen.code : page.url.searchParams.get('variant')
+		chosen && chosen.seq === loader.state.seq && chosen.card === page.params.card_number
+			? chosen.code
+			: page.url.searchParams.get('variant')
+	);
+
+	// Sessão cuja consulta gerou o `result` atual; até a resposta da sessão atual chegar, a posse é de outra.
+	let requested = $state<{ email: string; seq: number } | null>(null);
+	let lastAnswered = $state<string | null>(null);
+	const answeredEmail = $derived(
+		requested && loader.state.seq > requested.seq ? requested.email : lastAnswered
+	);
+	const staleOwnership = $derived(
+		session.user !== null && answeredEmail !== null && answeredEmail !== session.user.email
 	);
 	const featured = $derived(result ? pickFeatured(result.variants, wanted) : null);
 
@@ -47,11 +59,18 @@
 				: 'Carta — Bindr'
 	);
 
+	// Valor primitivo: o `goto` da troca de variante renova `page.params` sem mudar a carta.
+	const cardNumber = $derived(page.params.card_number);
+
 	$effect(() => {
 		void session.user?.email;
-		const cardNumber = page.params.card_number;
+		const email = session.user?.email ?? '';
 		if (!cardNumber) return;
-		untrack(() => loader.load(cardNumber, page.url.searchParams.get('variant') ?? undefined));
+		untrack(() => {
+			lastAnswered = answeredEmail;
+			requested = { email, seq: loader.state.seq };
+			loader.load(cardNumber, wanted ?? undefined);
+		});
 	});
 
 	$effect(() => {
@@ -76,14 +95,16 @@
 
 	function select(variantCode: string) {
 		if (!result) return;
-		chosen = { seq: loader.state.seq, code: variantCode };
+		chosen = { seq: loader.state.seq, card: result.card_number, code: variantCode };
+		// Navegação de verdade na mesma rota: `replaceState` é rasa e deixa `page.url` com a variante antiga.
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- cardDetailHref parte de appPath
-		replaceState(cardDetailHref(result.card_number, variantCode), {});
+		void goto(cardDetailHref(result.card_number, variantCode), { replace: true, reset: false });
 	}
 
 	function retry(event: SubmitEvent) {
 		event.preventDefault();
-		loader.retry();
+		const cardNumber = page.params.card_number;
+		if (cardNumber) loader.load(cardNumber, wanted ?? undefined);
 	}
 </script>
 
@@ -98,7 +119,7 @@
 	{@render back()}
 {/if}
 
-<section class="detail" aria-busy={loader.state.skeleton}>
+<section class="detail" aria-busy={loader.state.skeleton || (!!result && staleOwnership)}>
 	{#if loader.state.skeleton}
 		<p class="visually-hidden">Carregando carta…</p>
 		<div class="skeleton" aria-hidden="true"></div>
@@ -109,6 +130,9 @@
 			<p role="alert">{error.message}</p>
 			<Button>Tentar novamente</Button>
 		</form>
+	{:else if result && staleOwnership}
+		<p class="visually-hidden">Carregando carta…</p>
+		<div class="skeleton" aria-hidden="true"></div>
 	{:else if result}
 		{#key detailKey}
 			<CardHeader card={result} {featured} {owned} {signedIn} />

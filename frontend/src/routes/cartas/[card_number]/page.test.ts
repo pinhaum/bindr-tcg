@@ -20,17 +20,27 @@ const wideQuery = vi.hoisted(() => {
 	return query;
 });
 
-const nav = vi.hoisted(() => ({ goto: vi.fn(), replaceState: vi.fn() }));
+const nav = vi.hoisted(() => ({ goto: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
 
 vi.mock('$app/state', async () => {
 	const { SvelteMap, SvelteURL } = await import('svelte/reactivity');
 	const params = new SvelteMap<string, string>();
+	const version = new SvelteMap<string, number>();
 	return {
 		page: {
 			url: new SvelteURL('http://localhost/app/cartas/OP01-001'),
-			params: new Proxy({}, { get: (_, key) => params.get(String(key)) }),
-			setParam: (value: string) => params.set('card_number', value)
+			params: new Proxy(
+				{},
+				{
+					get: (_, key) => {
+						version.get('v');
+						return params.get(String(key));
+					}
+				}
+			),
+			setParam: (value: string) => params.set('card_number', value),
+			touchParams: () => version.set('v', (version.get('v') ?? 0) + 1)
 		},
 		navigating: { to: null }
 	};
@@ -50,7 +60,11 @@ import { shell } from '../../../lib/shell.svelte';
 import { toasts } from '../../../lib/toasts.svelte';
 import Page from './+page.svelte';
 
-const mockPage = page as unknown as { url: { href: string }; setParam: (value: string) => void };
+const mockPage = page as unknown as {
+	url: { href: string };
+	setParam: (value: string) => void;
+	touchParams: () => void;
+};
 
 const variant = (code: string, overrides: Partial<DetailVariant> = {}): DetailVariant => ({
 	variant_code: code,
@@ -122,7 +136,6 @@ describe('cartas/[card_number]/+page.svelte', () => {
 		client.post.mockReset();
 		client.put.mockReset();
 		nav.goto.mockReset();
-		nav.replaceState.mockReset();
 		toasts.splice(0);
 		session.user = null;
 		wideQuery.matches = false;
@@ -483,9 +496,11 @@ describe('cartas/[card_number]/+page.svelte', () => {
 			expect(chips().queryByText('R')).not.toBeInTheDocument();
 			expect(screen.getByText('Ilustração: Autor Dois')).toBeInTheDocument();
 			expect(screen.getByText('Paramount War · OP02')).toBeInTheDocument();
-			expect(nav.replaceState).toHaveBeenCalledTimes(1);
-			expect(nav.replaceState).toHaveBeenCalledWith('/app/cartas/OP01-001?variant=tcgplayer%3A2', {});
-			expect(nav.goto).not.toHaveBeenCalled();
+			expect(nav.goto).toHaveBeenCalledTimes(1);
+			expect(nav.goto).toHaveBeenCalledWith('/app/cartas/OP01-001?variant=tcgplayer%3A2', {
+				replace: true,
+				reset: false
+			});
 			expect(client.get).toHaveBeenCalledTimes(1);
 		});
 
@@ -497,7 +512,88 @@ describe('cartas/[card_number]/+page.svelte', () => {
 			await pick('tcgplayer:1');
 
 			expect(screen.getByRole('img', { name: '2 cópias' })).toBeInTheDocument();
-			expect(nav.replaceState).toHaveBeenLastCalledWith('/app/cartas/OP01-001?variant=tcgplayer%3A1', {});
+			expect(nav.goto).toHaveBeenLastCalledWith('/app/cartas/OP01-001?variant=tcgplayer%3A1', {
+				replace: true,
+				reset: false
+			});
+		});
+
+		it('SCAR-23: o goto da troca renova page.params e mesmo assim não refaz a consulta', async () => {
+			nav.goto.mockImplementation(async (url: string) => {
+				mockPage.url.href = `http://localhost${url}`;
+				mockPage.touchParams();
+			});
+			render(Page);
+			await h1('Luffy');
+
+			await pick('tcgplayer:2');
+			await tick();
+
+			expect(client.get).toHaveBeenCalledTimes(1);
+		});
+
+		it('SCAR-23: a variante escolhida sobrevive à troca de sessão e vai na nova consulta', async () => {
+			nav.goto.mockImplementation(async (url: string) => {
+				mockPage.url.href = `http://localhost${url}`;
+			});
+			render(Page);
+			await h1('Luffy');
+			await pick('tcgplayer:2');
+
+			client.get.mockResolvedValue(detail('OP01-001', 'Luffy', variants));
+			session.user = { email: 'bia@example.com' };
+			await waitFor(() => expect(client.get).toHaveBeenCalledTimes(2));
+			await h1('Luffy');
+
+			expect(client.get).toHaveBeenLastCalledWith('/api/cards/OP01-001?variant=tcgplayer%3A2');
+			expect(screen.getByRole('link', { name: 'Mostrar tcgplayer:2 na imagem principal' })).toHaveAttribute(
+				'aria-current',
+				'true'
+			);
+		});
+
+		it('SCAR-23: Tentar novamente pede a variante escolhida', async () => {
+			nav.goto.mockImplementation(async (url: string) => {
+				mockPage.url.href = `http://localhost${url}`;
+			});
+			render(Page);
+			await h1('Luffy');
+			await pick('tcgplayer:2');
+
+			client.get.mockRejectedValueOnce(networkError());
+			session.user = { email: 'bia@example.com' };
+			await screen.findByRole('alert');
+			await fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+			await h1('Luffy');
+
+			expect(client.get).toHaveBeenLastCalledWith('/api/cards/OP01-001?variant=tcgplayer%3A2');
+			expect(screen.getByRole('link', { name: 'Mostrar tcgplayer:2 na imagem principal' })).toHaveAttribute(
+				'aria-current',
+				'true'
+			);
+		});
+
+		it('SCAR-8: troca de sessão não mostra nem aceita posse do usuário anterior até a resposta nova', async () => {
+			render(Page);
+			await h1('Luffy');
+			expect(screen.getByRole('img', { name: '2 cópias' })).toBeInTheDocument();
+			const removeName = 'Remover uma cópia de Luffy tcgplayer:1';
+			const addName = 'Adicionar uma cópia de Luffy tcgplayer:1';
+			expect(screen.getByRole('button', { name: removeName })).toBeInTheDocument();
+
+			const pending = deferred<CardDetailPayload>();
+			client.get.mockReturnValue(pending.promise);
+			session.user = { email: 'bia@example.com' };
+			await tick();
+
+			expect(screen.queryByRole('img', { name: /cópia/ })).not.toBeInTheDocument();
+			expect(screen.queryByRole('button', { name: addName })).not.toBeInTheDocument();
+			expect(screen.queryByRole('button', { name: removeName })).not.toBeInTheDocument();
+
+			pending.resolve(detail('OP01-001', 'Luffy', [variant('tcgplayer:1', { owned_quantity: 0 }), variants[1]]));
+			await h1('Luffy');
+			expect(screen.queryByRole('img', { name: /cópia/ })).not.toBeInTheDocument();
+			expect(addCopy('tcgplayer:1')).toBeInTheDocument();
 		});
 
 		it('SCAR-24: variant da URL que existe vira o destaque', async () => {
