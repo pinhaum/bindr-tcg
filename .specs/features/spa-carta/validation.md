@@ -326,3 +326,17 @@ Siglas: **RT** = `frontend/src/routes/cartas/[card_number]/page.test.ts`; **CH**
 - [x] Mesmo alvo de desejo — R-W:89-99 `assert_no_difference WishlistItem.count`.
 - [x] `PUT` com JSON malformado → `400 invalid_json` — R-W:145-153.
 - [~] Viewport cruza 64rem sem refazer consulta nem perder operações pendentes — RT:367-381 só prova o botão "Voltar" e `client.get` 1×; o movimento da imagem e as filas pendentes não têm teste (as linhas ficam fora do `{#if wide.current}`, então o comportamento é correto por construção). **G6 (Minor)**.
+
+## Pós-verificação: code review do orquestrador (2026-10-11)
+
+Code review de `7b84e6c..8e6c92d` depois do PASS. Três achados major, corrigidos com teste que falha antes da correção:
+
+| Achado | Correção | Commit |
+|---|---|---|
+| A marca do morph nunca era limpa; depois de ver uma carta, toda navegação para `/` ou `/cartas/*`, venha de onde vier, esperava até 500 ms | A espera só vale quando a origem e o destino são catálogo/detalhe e diferentes entre si | 3975705 |
+| `replaceState` (depreciado no Kit 3.0.1) não atualiza `page.url`: retry ou troca de sessão voltavam à variante antiga, e o `return_to` também | `goto(url, { replace: true, reset: false })`; `cardNumber` derivado evita nova consulta (SCAR-23) | f8efbdc |
+| Na troca de sessão, o selo e os steppers mostravam e aceitavam a posse do usuário anterior até a resposta nova | Esqueleto até chegar a resposta da sessão atual | f8efbdc |
+
+Gates depois das correções: Vitest 53 arquivos, e2e 168/168, Rails 1977/0 (com trabalho não commitado de outra sessão no checkout), check e lint limpos.
+
+Ficaram como estão, por exigência do spec ou por serem de menor gravidade: a carta anterior visível por até 200 ms (SCAR-07); erro que não é `ApiError` relançado (T8); a fila depois de timeout de rede (SCAR-32); `pickFeatured` duplicando `featured_variant_code` (SCAR-24); `RecordInvalid` genérico vira 500 no desejo; `increment` sem teto, com 500 acima de 2^31-1.
