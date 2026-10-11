@@ -575,12 +575,12 @@ T28 → T29
 
 **Done when**:
 
-- [ ] "As cartas vão para o deck <nome>" com link para `/app/baralhos/<id>` (SDEC-33)
-- [ ] Carta comum com 0, 1 e 2: "0 cópias de X no deck", "1 cópia…", "2 cópias…" na região viva; nomes acessíveis dos botões exatos; alvos com `min-block-size`/`min-inline-size` de 44px (SDEC-35)
-- [ ] Três `+` enviam três `POST` em série a `/api/decks/<id do payload>/cards/<cn>/increment`; falha `422` do teto volta ao confirmado e mostra a `message` (SDEC-36)
-- [ ] `−` em 0 não chama o cliente e anuncia "<cn> não está no deck “<deck>”." (SDEC-37)
-- [ ] Leader sem `is_leader`: botão com nome acessível "Usar <nome> como Leader do deck <deck>"; sucesso envia `PUT …/leader` com `{ card_number }`, troca para "<nome> é o Leader deste deck" `aria-disabled` focável sem envio e mostra "<cn> é o Leader do deck “<deck>”." (SDEC-38, SDEC-39)
-- [ ] Gate check passes: Front quick
+- [x] "As cartas vão para o deck <nome>" com link para `/app/baralhos/<id>` (SDEC-33)
+- [x] Carta comum com 0, 1 e 2: "0 cópias de X no deck", "1 cópia…", "2 cópias…" na região viva; nomes acessíveis dos botões exatos; alvos com `min-block-size`/`min-inline-size` de 44px (SDEC-35)
+- [x] Três `+` enviam três `POST` em série a `/api/decks/<id do payload>/cards/<cn>/increment`; falha `422` do teto volta ao confirmado e mostra a `message` (SDEC-36)
+- [x] `−` em 0 não chama o cliente e anuncia "<cn> não está no deck “<deck>”." (SDEC-37)
+- [x] Leader sem `is_leader`: botão com nome acessível "Usar <nome> como Leader do deck <deck>"; sucesso envia `PUT …/leader` com `{ card_number }`, troca para "<nome> é o Leader deste deck" `aria-disabled` focável sem envio e mostra "<cn> é o Leader do deck “<deck>”." (SDEC-38, SDEC-39)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
