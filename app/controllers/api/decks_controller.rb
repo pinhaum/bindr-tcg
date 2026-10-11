@@ -34,6 +34,24 @@ class Api::DecksController < Api::BaseController
     render_deck(deck.id)
   end
 
+  # SDEC-48 — apaga o deck e as entradas; coleção e wishlist não têm FK para
+  # `decks`. Se era o deck em edição, `editing_deck` o descarta da sessão na
+  # leitura seguinte (a chave é revalidada por `Current.user.decks`).
+  def destroy
+    deck = Current.user.decks.find(params[:id])
+    deck.destroy!
+
+    render json: { data: { id: deck.id, name: deck.name } }
+  end
+
+  # SDEC-49 — grava a mesma chave de sessão que o Hotwire lê; idempotente.
+  def select
+    deck = Current.user.decks.find(params[:id])
+    start_editing(deck)
+
+    render json: { data: { id: deck.id, name: deck.name } }
+  end
+
   private
     # Nome ausente ou que não é texto vale como vazio: a mesma frase de SDEC-46.
     def name_param

@@ -157,7 +157,9 @@ Rails.application.routes.draw do
     get "wishlist" => "wishlist#index", as: :api_wishlist
 
     # `as:` evita colidir com os nomes `decks` e `deck` das rotas HTML.
-    resources :decks, only: %i[index show create update], as: :api_decks
+    resources :decks, only: %i[index show create update destroy], as: :api_decks do
+      member { post :select }
+    end
 
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 

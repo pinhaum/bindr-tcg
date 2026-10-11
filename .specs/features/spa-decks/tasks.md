@@ -254,10 +254,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Excluir apaga deck e entradas, mantém coleção e wishlist do usuário; o deck excluído some do `/decks` HTML e o `/decks/:id` HTML seguinte não mostra "Em edição" para nenhum deck (SDEC-48)
-- [ ] `select` grava a chave que o Hotwire lê: depois dele, `/decks/:id` HTML mostra "Em edição"; repetir não muda nada (SDEC-49)
-- [ ] Sem sessão `401`, sem token `422 invalid_csrf_token`, deck alheio `404` nos dois, sem gravar (SDEC-60)
-- [ ] Gate check passes: Rails quick
+- [x] Excluir apaga deck e entradas, mantém coleção e wishlist do usuário; o deck excluído some do `/decks` HTML e o `/decks/:id` HTML seguinte não mostra "Em edição" para nenhum deck (SDEC-48)
+- [x] `select` grava a chave que o Hotwire lê: depois dele, `/decks/:id` HTML mostra "Em edição"; repetir não muda nada (SDEC-49)
+- [x] Sem sessão `401`, sem token `422 invalid_csrf_token`, deck alheio `404` nos dois, sem gravar (SDEC-60)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
