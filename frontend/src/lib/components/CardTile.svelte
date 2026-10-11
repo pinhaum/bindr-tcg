@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { CatalogCard } from '../api/types';
+	import { cardDetailHref } from '../cards/url';
+	import { isMarked, markCard, morphName } from '../cards/morph.svelte';
 
 	interface Props {
 		card: CatalogCard;
@@ -10,19 +12,16 @@
 
 	const imageUrl = $derived(card.variants[0]?.image_url ?? null);
 	const quantity = $derived(card.variants.reduce((sum, v) => sum + (v.owned_quantity ?? 0), 0));
+	const transitionName = $derived(isMarked(card.card_number) ? morphName(card.card_number) : undefined);
 	const rarity = $derived(
 		card.variants.length > 1 ? `${card.variants.length} impressões` : (card.variants[0]?.rarity ?? '')
 	);
 </script>
 
 <li class="tile">
-	<a
-		class="link"
-		href="/cards/{encodeURIComponent(card.card_number)}"
-		rel="external"
-		data-sveltekit-reload
-	>
-		<div class="art">
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href já vem resolvido por cardDetailHref -->
+	<a class="link" href={cardDetailHref(card.card_number)} onclick={() => markCard(card.card_number)}>
+		<div class="art" style:view-transition-name={transitionName}>
 			<div class="placeholder" aria-hidden="true">
 				<span class="placeholder-name">{card.name}</span>
 				<span class="placeholder-number">{card.card_number}</span>

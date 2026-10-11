@@ -1066,8 +1066,8 @@ detalhe da carta continua Hotwire até a `spa-carta`.
    Bindr" e o cabeçalho "Catálogo", no lugar da página de início do Req. 17.
 2. A entrada "Catálogo" da navegação DEVE levar a `/app` sem recarregar a
    página e ficar marcada como atual em `/app` (Req. 17.25, 17.27).
-3. O tile DEVE levar ao detalhe Hotwire `/cards/<card_number>`, com navegação
-   de página inteira, até o detalhe migrar.
+3. O tile DEVE levar a `/app/cartas/<card_number>`, sem recarregar a página
+   (emenda da `spa-carta`, Req. 19.3).
 
 **Consulta e URL**
 

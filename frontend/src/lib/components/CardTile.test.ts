@@ -1,9 +1,13 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { markCard, morphName } from '../cards/morph.svelte';
 import type { CatalogCard, CatalogVariant } from '../api/types';
 import CardTile from './CardTile.svelte';
 
+vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+
+beforeEach(() => markCard(null));
 afterEach(cleanup);
 
 const variant = (over: Partial<CatalogVariant> = {}): CatalogVariant => ({
@@ -43,18 +47,41 @@ const owned = (...quantities: (number | null)[]) =>
 	quantities.map((q, i) => variant({ variant_code: `tcgplayer:${i + 1}`, owned_quantity: q }));
 
 describe('CardTile', () => {
-	it('é um <li> com link de página inteira para /cards/<card_number> (SCAT-03)', () => {
+	// SCAR-03 emenda o SCAT-03: o tile leva ao detalhe da SPA, sem recarregar a página.
+	it('é um <li> com link para /app/cartas/<card_number> na SPA (SCAR-03)', () => {
 		const { container } = render(CardTile, { card: card(), signedIn: false });
 		expect(container.querySelector('li')).not.toBeNull();
 		const link = screen.getByRole('link');
-		expect(link).toHaveAttribute('href', '/cards/OP01-001');
-		expect(link).toHaveAttribute('rel', 'external');
-		expect(link).toHaveAttribute('data-sveltekit-reload');
+		expect(link).toHaveAttribute('href', '/app/cartas/OP01-001');
+		expect(link).not.toHaveAttribute('rel', 'external');
+		expect(link).not.toHaveAttribute('data-sveltekit-reload');
 	});
 
 	it('codifica o card_number com # ou ? no href', () => {
 		render(CardTile, { card: card({ card_number: 'OP01-0#1?x' }), signedIn: false });
-		expect(screen.getByRole('link')).toHaveAttribute('href', '/cards/OP01-0%231%3Fx');
+		expect(screen.getByRole('link')).toHaveAttribute('href', '/app/cartas/OP01-0%231%3Fx');
+	});
+
+	it('o clique marca a carta e só a arte do tile marcado recebe view-transition-name (SCAR-39)', async () => {
+		const { container } = render(CardTile, { card: card(), signedIn: false });
+		const art = container.querySelector<HTMLElement>('.art')!;
+		expect(art.style.viewTransitionName).toBe('');
+		await fireEvent.click(screen.getByRole('link'));
+		expect(art.style.viewTransitionName).toBe(morphName('OP01-001'));
+	});
+
+	it('tile de outra carta marcada não recebe o nome (SCAR-40: um só na grade)', () => {
+		markCard('OP01-002');
+		const { container } = render(CardTile, { card: card(), signedIn: false });
+		expect(container.querySelector<HTMLElement>('.art')!.style.viewTransitionName).toBe('');
+	});
+
+	it('carta já marcada (volta do detalhe) mostra o nome na arte (SCAR-40)', () => {
+		markCard('OP01-001');
+		const { container } = render(CardTile, { card: card(), signedIn: false });
+		expect(container.querySelector<HTMLElement>('.art')!.style.viewTransitionName).toBe(
+			morphName('OP01-001')
+		);
 	});
 
 	it('mostra nome e card_number, e a imagem da primeira variante (SCAT-10)', () => {

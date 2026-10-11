@@ -85,7 +85,7 @@ chip de filtro e skeleton.
 
 1. WHEN o usuário abrir `/app` THEN the system SHALL exibir o catálogo com o título de página "Catálogo — Bindr" e o cabeçalho de nível 1 "Catálogo", no lugar da página de início da `spa-fundacao`.
 2. The system SHALL apontar a entrada "Catálogo" da navegação para `/app`, com navegação sem recarga, e marcá-la com `aria-current="page"` em `/app` com qualquer query (Req. 17.25, 17.27).
-3. WHEN o usuário acionar um tile THEN the system SHALL navegar com página inteira para `/cards/<card_number>` (detalhe Hotwire), com o `card_number` codificado para URL.
+3. WHEN o usuário acionar um tile THEN the system SHALL navegar, sem recarregar a página, para `/app/cartas/<card_number>` (detalhe da SPA, emenda da `spa-carta`, SCAR-03), com o `card_number` codificado para URL.
 4. WHEN `/app` abrir ou sua query mudar THEN the system SHALL chamar `GET /api/catalog` pelo cliente da `spa-fundacao` com a query da URL repassada sem alteração.
 5. The system SHALL usar na URL os nomes e o formato de parâmetro do design §4.2 (`q`, `colors[]`, `card_types[]`, `sets[]`, `rarities[]`, `attributes[]`, `traits[]`, `cost_min` … `counter_max`, `owned`, `sort`, `dir`, `page`, `per_page`), de forma que `/app?<query>` mostre as mesmas cartas, na mesma ordem, que `/catalog?<query>`.
 6. The system SHALL montar todo link e toda navegação da tela a partir de `meta.active_filters` da última resposta, nunca da query crua, de modo que um parâmetro descartado pela API não apareça em link nenhum.
@@ -258,7 +258,7 @@ chip de filtro e skeleton.
 |---|---|---|---|
 | SCAT-01 | P1: Catálogo em `/app` — rota (Req. 18.1) | Tasks (T20, T22) | Verified |
 | SCAT-02 | P1: Catálogo em `/app` — entrada da navegação (Req. 18.2) | Tasks (T3) | Verified |
-| SCAT-03 | P1: Catálogo em `/app` — tile leva ao detalhe Hotwire (Req. 18.3) | Tasks (T12) | Verified |
+| SCAT-03 | P1: Catálogo em `/app` — tile leva ao detalhe da SPA (Req. 18.3, emendado) | Tasks (T12) | Verified |
 | SCAT-04 | P1: Catálogo em `/app` — query repassada (Req. 18.4) | Tasks (T1, T8, T20) | Verified |
 | SCAT-05 | P1: Catálogo em `/app` — formato da URL (Req. 18.5) | Tasks (T4, T23) | Verified |
 | SCAT-06 | P1: Catálogo em `/app` — links dos filtros normalizados (Req. 18.6) | Tasks (T4) | Verified |

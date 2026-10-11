@@ -607,10 +607,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `href` do tile é `/app/cartas/<card_number codificado>`; os testes de front que afirmavam o destino Hotwire (`CardTile.test.ts`, `page.test.ts`, e2e do catálogo) passam a afirmar o novo, citando a emenda do SCAT-03
-- [ ] Clique marca a carta; só o tile marcado tem `view-transition-name`, e só um na grade
-- [ ] SCAT-03 (spec da `spa-catalogo`) e Req. 18.3 emendados para o detalhe da SPA
-- [ ] Gate check passes: Front quick
+- [x] `href` do tile é `/app/cartas/<card_number codificado>`; os testes de front que afirmavam o destino Hotwire (`CardTile.test.ts`, `page.test.ts`, e2e do catálogo) passam a afirmar o novo, citando a emenda do SCAT-03
+- [x] Clique marca a carta; só o tile marcado tem `view-transition-name`, e só um na grade
+- [x] SCAT-03 (spec da `spa-catalogo`) e Req. 18.3 emendados para o detalhe da SPA
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
