@@ -514,11 +514,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Campo encontrado pelo rótulo exato, com placeholder e `type="search"`; botão "Buscar"
-- [ ] Enviar "  zoro " chama `onsearch` com o texto digitado (o `trim` é do `searchHref`) e previne o envio nativo
-- [ ] Trocar a prop `value` de "zoro" para "" esvazia o campo (SCAT-17, voltar/avançar)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Campo encontrado pelo rótulo exato, com placeholder e `type="search"`; botão "Buscar"
+- [x] Enviar "  zoro " chama `onsearch` com o texto digitado (o `trim` é do `searchHref`) e previne o envio nativo
+- [x] Trocar a prop `value` de "zoro" para "" esvazia o campo (SCAT-17, voltar/avançar)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick
