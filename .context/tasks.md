@@ -410,6 +410,25 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 
 ---
 
+## 13 — Catálogo na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-catalogo/tasks.md` (T1–T25, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [ ] **13.1 Funções puras, cliente e guardas** — T1–T7 da `spa-catalogo`
+  - `getEnvelope` no cliente, `safeReturnTo` com `/app?…`, "Catálogo" em `/app`,
+    links e chips a partir de `active_filters`, `visually-hidden` e View
+    Transition só entre rotas.
+  - _Requisitos: 18.2, 18.4–18.6, 18.16, 18.19, 18.20, 18.23–18.25, 18.27–18.31, 18.36, 18.41, 18.44, 18.45_
+- [ ] **13.2 Estado, casco e tile** — T8–T13
+  - _Requisitos: 18.3, 18.4, 18.8, 18.10–18.13, 18.18, 18.33, 18.38–18.41_
+- [ ] **13.3 Componentes de busca, status e filtro** — T14–T19
+  - _Requisitos: 18.15–18.31, 18.36, 18.40, 18.42, 18.43_
+- [ ] **13.4 Página, ponta a ponta e fechamento** — T20–T25
+  - _Requisitos: 18.1, 18.4, 18.5, 18.7, 18.9, 18.13, 18.14, 18.16, 18.17, 18.25–18.27, 18.29–18.45_
+
+---
+
 ## Fora do escopo da Fase 1
 
 Não implemente, mesmo que pareça rápido — cada um destes precisa passar por

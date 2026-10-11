@@ -256,53 +256,53 @@ chip de filtro e skeleton.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| SCAT-01 | P1: Catálogo em `/app` — rota (Req. 18.1) | - | Pending |
-| SCAT-02 | P1: Catálogo em `/app` — entrada da navegação (Req. 18.2) | - | Pending |
-| SCAT-03 | P1: Catálogo em `/app` — tile leva ao detalhe Hotwire (Req. 18.3) | - | Pending |
-| SCAT-04 | P1: Catálogo em `/app` — query repassada (Req. 18.4) | - | Pending |
-| SCAT-05 | P1: Catálogo em `/app` — formato da URL (Req. 18.5) | - | Pending |
-| SCAT-06 | P1: Catálogo em `/app` — links dos filtros normalizados (Req. 18.6) | - | Pending |
-| SCAT-07 | P1: Catálogo em `/app` — voltar e avançar (Req. 18.7) | - | Pending |
-| SCAT-08 | P1: Catálogo em `/app` — resposta antiga descartada (Req. 18.8) | - | Pending |
-| SCAT-09 | P1: Catálogo em `/app` — troca de sessão (Req. 18.9) | - | Pending |
-| SCAT-10 | P1: Grade — tile (Req. 18.10) | - | Pending |
-| SCAT-11 | P1: Grade — placeholder (Req. 18.11) | - | Pending |
-| SCAT-12 | P1: Grade — raridade ou impressões (Req. 18.12) | - | Pending |
-| SCAT-13 | P1: Grade — selo de posse (Req. 18.13) | - | Pending |
-| SCAT-14 | P1: Grade — colunas e 360px (Req. 18.14) | - | Pending |
-| SCAT-15 | P1: Busca — campo (Req. 18.15) | - | Pending |
-| SCAT-16 | P1: Busca — envio preserva filtros (Req. 18.16) | - | Pending |
-| SCAT-17 | P1: Busca — termo ativo no campo (Req. 18.17) | - | Pending |
-| SCAT-18 | P1: Filtros — chips de cor, tipo e raridade (Req. 18.18) | - | Pending |
-| SCAT-19 | P1: Filtros — chip como link alternado (Req. 18.19) | - | Pending |
-| SCAT-20 | P1: Filtros — chip ativo (Req. 18.20) | - | Pending |
-| SCAT-21 | P1: Filtros — cor neutra até a P8 (Req. 18.21) | - | Pending |
-| SCAT-22 | P1: Filtros — alvo de 44px (Req. 18.22) | - | Pending |
-| SCAT-23 | P1: Filtros — seletor de set (Req. 18.23) | - | Pending |
-| SCAT-24 | P1: Filtros — vários sets (Req. 18.24) | - | Pending |
-| SCAT-25 | P1: Filtros — posse com sessão (Req. 18.25) | - | Pending |
-| SCAT-26 | P1: Filtros — posse sem sessão (Req. 18.26) | - | Pending |
-| SCAT-27 | P1: Filtros — filtros só da URL (Req. 18.27) | - | Pending |
-| SCAT-28 | P1: Ativos e status — lista de filtros ativos (Req. 18.28) | - | Pending |
-| SCAT-29 | P1: Ativos e status — frase de contagem (Req. 18.29) | - | Pending |
-| SCAT-30 | P1: Ativos e status — limpar filtros (Req. 18.30) | - | Pending |
-| SCAT-31 | P1: Ativos e status — convite ao anônimo (Req. 18.31) | - | Pending |
-| SCAT-32 | P1: Ativos e status — status ao lado da busca (Req. 18.32) | - | Pending |
-| SCAT-33 | P1: Disposição — coluna lateral (Req. 18.33) | - | Pending |
-| SCAT-34 | P1: Disposição — painel recolhido (Req. 18.34) | - | Pending |
-| SCAT-35 | P1: Disposição — painel persiste (Req. 18.35) | - | Pending |
-| SCAT-36 | P1: Paginação (Req. 18.36) | - | Pending |
-| SCAT-37 | P1: Estados — vazio (Req. 18.37) | - | Pending |
-| SCAT-38 | P1: Estados — skeleton (Req. 18.38) | - | Pending |
-| SCAT-39 | P1: Estados — erro do catálogo (Req. 18.39) | - | Pending |
-| SCAT-40 | P1: Estados — erro das opções (Req. 18.40) | - | Pending |
-| SCAT-41 | P1: Foco — query não move o foco (Req. 18.41) | - | Pending |
-| SCAT-42 | P1: Foco — remoção de chip ativo (Req. 18.42) | - | Pending |
-| SCAT-43 | P1: Foco — paginação (Req. 18.43) | - | Pending |
-| SCAT-44 | P1: Foco — contagem anunciada (Req. 18.44) | - | Pending |
-| SCAT-45 | P1: Catálogo em `/app` — sem endpoint novo (Req. 18.45) | - | Pending |
+| SCAT-01 | P1: Catálogo em `/app` — rota (Req. 18.1) | Tasks (T20, T22) | Pending |
+| SCAT-02 | P1: Catálogo em `/app` — entrada da navegação (Req. 18.2) | Tasks (T3) | Pending |
+| SCAT-03 | P1: Catálogo em `/app` — tile leva ao detalhe Hotwire (Req. 18.3) | Tasks (T12) | Pending |
+| SCAT-04 | P1: Catálogo em `/app` — query repassada (Req. 18.4) | Tasks (T1, T8, T20) | Pending |
+| SCAT-05 | P1: Catálogo em `/app` — formato da URL (Req. 18.5) | Tasks (T4, T23) | Pending |
+| SCAT-06 | P1: Catálogo em `/app` — links dos filtros normalizados (Req. 18.6) | Tasks (T4) | Pending |
+| SCAT-07 | P1: Catálogo em `/app` — voltar e avançar (Req. 18.7) | Tasks (T20, T24) | Pending |
+| SCAT-08 | P1: Catálogo em `/app` — resposta antiga descartada (Req. 18.8) | Tasks (T8) | Pending |
+| SCAT-09 | P1: Catálogo em `/app` — troca de sessão (Req. 18.9) | Tasks (T20, T24) | Pending |
+| SCAT-10 | P1: Grade — tile (Req. 18.10) | Tasks (T12) | Pending |
+| SCAT-11 | P1: Grade — placeholder (Req. 18.11) | Tasks (T12) | Pending |
+| SCAT-12 | P1: Grade — raridade ou impressões (Req. 18.12) | Tasks (T12) | Pending |
+| SCAT-13 | P1: Grade — selo de posse (Req. 18.13) | Tasks (T12, T24) | Pending |
+| SCAT-14 | P1: Grade — colunas e 360px (Req. 18.14) | Tasks (T20, T23) | Pending |
+| SCAT-15 | P1: Busca — campo (Req. 18.15) | Tasks (T15) | Pending |
+| SCAT-16 | P1: Busca — envio preserva filtros (Req. 18.16) | Tasks (T4, T15, T23) | Pending |
+| SCAT-17 | P1: Busca — termo ativo no campo (Req. 18.17) | Tasks (T15, T20) | Pending |
+| SCAT-18 | P1: Filtros — chips de cor, tipo e raridade (Req. 18.18) | Tasks (T9, T19) | Pending |
+| SCAT-19 | P1: Filtros — chip como link alternado (Req. 18.19) | Tasks (T4, T14) | Pending |
+| SCAT-20 | P1: Filtros — chip ativo (Req. 18.20) | Tasks (T5, T14) | Pending |
+| SCAT-21 | P1: Filtros — cor neutra até a P8 (Req. 18.21) | Tasks (T14, T19) | Pending |
+| SCAT-22 | P1: Filtros — alvo de 44px (Req. 18.22) | Tasks (T14, T19) | Pending |
+| SCAT-23 | P1: Filtros — seletor de set (Req. 18.23) | Tasks (T4, T19) | Pending |
+| SCAT-24 | P1: Filtros — vários sets (Req. 18.24) | Tasks (T4, T19) | Pending |
+| SCAT-25 | P1: Filtros — posse com sessão (Req. 18.25) | Tasks (T4, T14, T19, T24) | Pending |
+| SCAT-26 | P1: Filtros — posse sem sessão (Req. 18.26) | Tasks (T19, T24) | Pending |
+| SCAT-27 | P1: Filtros — filtros só da URL (Req. 18.27) | Tasks (T4, T23) | Pending |
+| SCAT-28 | P1: Ativos e status — lista de filtros ativos (Req. 18.28) | Tasks (T5, T17) | Pending |
+| SCAT-29 | P1: Ativos e status — frase de contagem (Req. 18.29) | Tasks (T5, T16, T20) | Pending |
+| SCAT-30 | P1: Ativos e status — limpar filtros (Req. 18.30) | Tasks (T4, T16, T20) | Pending |
+| SCAT-31 | P1: Ativos e status — convite ao anônimo (Req. 18.31) | Tasks (T2, T16, T20, T24) | Pending |
+| SCAT-32 | P1: Ativos e status — status ao lado da busca (Req. 18.32) | Tasks (T20) | Pending |
+| SCAT-33 | P1: Disposição — coluna lateral (Req. 18.33) | Tasks (T10, T21, T24) | Pending |
+| SCAT-34 | P1: Disposição — painel recolhido (Req. 18.34) | Tasks (T21, T24) | Pending |
+| SCAT-35 | P1: Disposição — painel persiste (Req. 18.35) | Tasks (T21, T24) | Pending |
+| SCAT-36 | P1: Paginação (Req. 18.36) | Tasks (T4, T18, T23) | Pending |
+| SCAT-37 | P1: Estados — vazio (Req. 18.37) | Tasks (T20) | Pending |
+| SCAT-38 | P1: Estados — skeleton (Req. 18.38) | Tasks (T8, T13, T20) | Pending |
+| SCAT-39 | P1: Estados — erro do catálogo (Req. 18.39) | Tasks (T8, T20) | Pending |
+| SCAT-40 | P1: Estados — erro das opções (Req. 18.40) | Tasks (T9, T19) | Pending |
+| SCAT-41 | P1: Foco — query não move o foco (Req. 18.41) | Tasks (T7, T11, T21, T24) | Pending |
+| SCAT-42 | P1: Foco — remoção de chip ativo (Req. 18.42) | Tasks (T17, T21, T24) | Pending |
+| SCAT-43 | P1: Foco — paginação (Req. 18.43) | Tasks (T18, T21, T24) | Pending |
+| SCAT-44 | P1: Foco — contagem anunciada (Req. 18.44) | Tasks (T6, T20, T24) | Pending |
+| SCAT-45 | P1: Catálogo em `/app` — sem endpoint novo (Req. 18.45) | Tasks (T1, T25) | Pending |
 
-**Coverage:** 45 total, 0 mapped to tasks, 45 unmapped ⚠️ (Design e Tasks ainda não escritos)
+**Coverage:** 45 total, 45 mapped to tasks, 0 unmapped
 
 ## Implicit-Requirement Dimensions
 
