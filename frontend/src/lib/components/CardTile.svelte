@@ -2,6 +2,8 @@
 	import type { CatalogCard } from '../api/types';
 	import { cardDetailHref } from '../cards/url';
 	import { isMarked, markCard, morphName } from '../cards/morph.svelte';
+	import { copies } from '../format';
+	import { isPlainClick } from '../plain-click';
 
 	interface Props {
 		card: CatalogCard;
@@ -13,13 +15,13 @@
 	const imageUrl = $derived(card.variants[0]?.image_url ?? null);
 	const quantity = $derived(card.variants.reduce((sum, v) => sum + (v.owned_quantity ?? 0), 0));
 	const transitionName = $derived(isMarked(card.card_number) ? morphName(card.card_number) : undefined);
-	function onclick(event: MouseEvent) {
-		const plain = event.button === 0 && !(event.ctrlKey || event.metaKey || event.shiftKey || event.altKey);
-		if (plain) markCard(card.card_number);
-	}
 	const rarity = $derived(
 		card.variants.length > 1 ? `${card.variants.length} impressões` : (card.variants[0]?.rarity ?? '')
 	);
+
+	function onclick(event: MouseEvent) {
+		if (isPlainClick(event)) markCard(card.card_number);
+	}
 </script>
 
 <li class="tile">
@@ -43,7 +45,7 @@
 		</span>
 
 		{#if signedIn && quantity > 0}
-			<span class="badge" role="img" aria-label={quantity === 1 ? '1 cópia' : `${quantity} cópias`}>
+			<span class="badge" role="img" aria-label={copies(quantity)}>
 				{quantity}
 			</span>
 		{/if}

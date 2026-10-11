@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CatalogMeta } from '../api/types';
 	import { pageHref } from '../catalog/url';
+	import { isPlainClick } from '../plain-click';
 
 	interface Props {
 		meta: CatalogMeta;
@@ -8,10 +9,6 @@
 	}
 
 	let { meta, onpage }: Props = $props();
-
-	function isPlainClick(event: MouseEvent) {
-		return event.button === 0 && !(event.ctrlKey || event.metaKey || event.shiftKey || event.altKey);
-	}
 
 	function handleClick(event: MouseEvent) {
 		if (isPlainClick(event)) onpage();

@@ -1,3 +1,5 @@
+import { tick } from 'svelte';
+
 let marked = $state<string | null>(null);
 
 export function markCard(cardNumber: string | null): void {
@@ -33,6 +35,21 @@ export function armArrival(): void {
 export function signalArrival(): void {
 	arrived = true;
 	release?.();
+}
+
+// Chamar na inicialização do componente: sinaliza a chegada quando `isReady` vira verdadeiro, já
+// com o DOM da tela atualizado.
+export function signalArrivalWhen(isReady: () => boolean): void {
+	$effect(() => {
+		if (!isReady()) return;
+		let current = true;
+		tick().then(() => {
+			if (current) signalArrival();
+		});
+		return () => {
+			current = false;
+		};
+	});
 }
 
 export function awaitArrival(timeoutMs: number): Promise<void> {

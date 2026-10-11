@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Chip } from '../catalog/url';
+	import { isPlainClick } from '../plain-click';
 	import FilterChip from './FilterChip.svelte';
 
 	interface Props {
@@ -8,10 +9,6 @@
 	}
 
 	let { chips, onremove }: Props = $props();
-
-	function isPlainClick(event: MouseEvent) {
-		return event.button === 0 && !(event.ctrlKey || event.metaKey || event.shiftKey || event.altKey);
-	}
 </script>
 
 {#if chips.length > 0}

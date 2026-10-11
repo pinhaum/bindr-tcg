@@ -1,6 +1,6 @@
 const CURRENCY_UNITS: Record<string, string> = { USD: 'US$' };
 
-const decimal = new Intl.NumberFormat('en-US', {
+const decimal = new Intl.NumberFormat('pt-BR', {
 	minimumFractionDigits: 2,
 	maximumFractionDigits: 2
 });
@@ -13,8 +13,7 @@ const observedDate = new Intl.DateTimeFormat('pt-BR', {
 });
 
 export function formatPrice(amount: string, currency: string): string {
-	const number = decimal.format(Number(amount)).replace(/[,.]/g, (c) => (c === ',' ? '.' : ','));
-	return `${CURRENCY_UNITS[currency] ?? currency} ${number}`;
+	return `${CURRENCY_UNITS[currency] ?? currency} ${decimal.format(Number(amount))}`;
 }
 
 export function formatObservedDate(iso: string): string {

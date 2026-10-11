@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { replaceState } from '$app/navigation';
 	import { page } from '$app/state';
-	import { tick, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { api } from '../../../lib/api/index';
 	import { createCardDetailLoader } from '../../../lib/cards/card-detail.svelte';
 	import { pickFeatured } from '../../../lib/cards/featured';
-	import { markCard, signalArrival } from '../../../lib/cards/morph.svelte';
+	import { markCard, signalArrivalWhen } from '../../../lib/cards/morph.svelte';
 	import { cardDetailHref } from '../../../lib/cards/url';
 	import Button from '../../../lib/components/Button.svelte';
 	import CardFields from '../../../lib/components/CardFields.svelte';
@@ -59,16 +59,7 @@
 	});
 
 	// A View Transition só captura o estado novo com a arte do cabeçalho no DOM.
-	$effect(() => {
-		if (!result || error || notFound !== null || loader.state.skeleton) return;
-		let current = true;
-		tick().then(() => {
-			if (current) signalArrival();
-		});
-		return () => {
-			current = false;
-		};
-	});
+	signalArrivalWhen(() => !!result && !error && notFound === null && !loader.state.skeleton);
 
 	$effect.pre(() => {
 		void detailKey;

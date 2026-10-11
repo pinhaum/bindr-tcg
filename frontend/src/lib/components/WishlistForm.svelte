@@ -4,6 +4,7 @@
 	import { ApiError } from '../api/errors';
 	import type { WishlistResult } from '../api/types';
 	import { variantApiPath } from '../cards/url';
+	import { copies } from '../format';
 	import { notifyError, notifySuccess } from '../toasts.svelte';
 	import Button from './Button.svelte';
 
@@ -38,9 +39,7 @@
 			});
 			saved = result.wishlist_target;
 			quantity = result.wishlist_target;
-			notifySuccess(
-				`${label} na lista de desejos: ${saved} ${saved === 1 ? 'cópia' : 'cópias'}.`
-			);
+			notifySuccess(`${label} na lista de desejos: ${copies(saved)}.`);
 		} catch (error) {
 			if (!(error instanceof ApiError)) throw error;
 			const messages = error.code === 'validation_failed' ? error.fields.target_quantity : undefined;

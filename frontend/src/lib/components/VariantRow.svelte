@@ -7,6 +7,7 @@
 	import { formatObservedDate, formatPrice } from '../format';
 	import { appPath } from '../navigation/nav-entries';
 	import { safeReturnTo } from '../navigation/return-to';
+	import { isPlainClick } from '../plain-click';
 	import OwnershipStepper from './OwnershipStepper.svelte';
 	import WishlistForm from './WishlistForm.svelte';
 
@@ -19,22 +20,22 @@
 		displayed?: number;
 	}
 
+	const ART_LABELS: Record<string, string> = { base: 'arte base', parallel: 'parallel' };
+
 	let { card, variant, featured, signedIn, onSelect, displayed = $bindable() }: Props = $props();
 
 	let failedUrl = $state<string | null>(null);
 	const showImage = $derived(variant.image_url !== null && variant.image_url !== failedUrl);
 
-	const artLabel = (kind: string) =>
-		kind === 'base' ? 'arte base' : kind === 'parallel' ? 'parallel' : 'alternativa';
 	const kindText = $derived(
-		variant.rarity ? `${variant.rarity} · ${artLabel(variant.art_kind)}` : null
+		variant.rarity ? `${variant.rarity} · ${ART_LABELS[variant.art_kind] ?? 'alternativa'}` : null
 	);
 	const loginHref = $derived(
 		`${appPath('/entrar')}?return_to=${encodeURIComponent(safeReturnTo(page.url.pathname + page.url.search))}`
 	);
 
 	function select(event: MouseEvent) {
-		if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		if (!isPlainClick(event)) return;
 		event.preventDefault();
 		onSelect(variant.variant_code);
 	}
