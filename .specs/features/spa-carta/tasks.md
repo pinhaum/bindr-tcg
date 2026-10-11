@@ -718,10 +718,10 @@ T21 → T22
 
 **Done when**:
 
-- [ ] `CLAUDE.md` lista `POST …/increment`, `…/decrement`, `PUT …/wishlist` na tabela da API e o estado da feature
-- [ ] Traceability SCAR-01..49 em `Implemented` com a task de cada um; §14 do `.context/tasks.md` marcada
-- [ ] `git diff --name-status 213f0bc..HEAD -- test/` só com `A` (SCAR-49)
-- [ ] Gate check passes: Build
+- [x] `CLAUDE.md` lista `POST …/increment`, `…/decrement`, `PUT …/wishlist` na tabela da API e o estado da feature
+- [x] Traceability SCAR-01..49 em `Implemented` com a task de cada um; §14 do `.context/tasks.md` marcada
+- [x] `git diff --name-status 213f0bc..HEAD -- test/` só com `A` (SCAR-49)
+- [x] Gate check passes: Build
 
 **Tests**: none
 **Gate**: build

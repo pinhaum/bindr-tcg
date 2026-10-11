@@ -76,7 +76,7 @@ desenho não muda; só a task de extração deixa de tocar no controller HTML.
 | Cliente HTTP | `frontend/src/lib/api/client.ts` | `get`, `post`, `put`; CSRF, `401` e `session_changed` já tratados |
 | Padrão do carregador | `frontend/src/lib/catalog/catalog.svelte.ts` | Mesmo formato (`state`, `load`, `retry`, token, skeleton) num carregador novo para o detalhe |
 | `CardTile` | `frontend/src/lib/components/CardTile.svelte:19-46` | Troca o `href` Hotwire pelo da SPA (SCAR-03) e ganha o nome de transição; placeholder e selo servem de modelo para o detalhe |
-| `viewTransitionOnNavigate` | `frontend/src/lib/view-transition.ts` | Já abre a transição em troca de pathname; o morph só põe `view-transition-name` nos dois elementos |
+| `viewTransitionOnNavigate` | `frontend/src/lib/view-transition.ts` | Já abre a transição em troca de pathname; o morph põe `view-transition-name` nos dois elementos. **Emenda (T22)**: o arquivo mudou, ganhou `armArrival` (ver *Morph*) |
 | `shell.aside` + `wide` | `frontend/src/lib/shell.svelte.ts` | "Voltar ao catálogo" e a coluna da imagem a partir de 64rem (SCAR-04, SCAR-12) |
 | `toasts`, `Button`, `motion.ts`, `safeReturnTo` | `frontend/src/lib/` | Erro de posse (toast), botões de desejo, `return_to` do convite (SCAR-26) |
 | Formato de preço e data do HTML | `app/helpers/prices_helper.rb:10-17` | Referência de paridade para o formatador novo do front |
@@ -158,7 +158,7 @@ desenho não muda; só a task de extração deixa de tocar no controller HTML.
 |---|---|---|
 | `CardArt` | Quadro fixo com placeholder (nome + `card_number`) por trás da imagem; esconde a imagem no `error`; aceita `transitionName` | SCAR-10, edge case 403 |
 | `CardHeader` | Miniatura + `<details>` "Ver imagem maior" abaixo de 64rem; `h1`, chips, linha do set, "Variante fora da fonte", selo, ilustração | SCAR-11..16 |
-| `CardFields` | Campos por tipo e seção "Efeito" com texto puro e `white-space: pre-line` | SCAR-17, 18 |
+| `CardFields` | Campos por tipo e seção "Efeito" com texto puro e `white-space: pre-line`. **Emenda (T22)**: indexado pelo `card_type` da API em **minúsculo** (`leader`, `character`, `event`, `stage`) | SCAR-17, 18 |
 | `VariantRow` | Miniatura-link (`replaceState`), código, raridade e tipo de arte, set, preço, posse ou convite, desejo | SCAR-19..26 |
 | `OwnershipStepper` | `−` `[n]` `+` sobre a fila, região `aria-live="polite"`, `aria-disabled` no zero, foco preservado | SCAR-25, 27..34 |
 | `WishlistForm` | `role="group"`, campo "Quero", envio pendente, erro de campo com `aria-describedby` | SCAR-35..38 |
@@ -167,14 +167,16 @@ desenho não muda; só a task de extração deixa de tocar no controller HTML.
 
 - Lê `page.params.card_number` e `page.url.searchParams.get('variant')`; o `$effect` depende do `card_number` e de `session.user?.email` (SCAR-02, SCAR-09). Trocar só o `variant` não refaz a consulta.
 - Destaque: `variant` da URL se for de `variants[]`, senão primeira `in_source`, senão primeira (SCAR-24). A troca chama `replaceState` do `$app/navigation` e só muda o estado local (SCAR-23).
-- Mantém um `Map<variant_code, OwnershipQueue>` criado a partir de cada resposta aplicada; troca de carta ou de sessão chama `discard()` em todas antes de recriar.
+- ~~Mantém um `Map<variant_code, OwnershipQueue>` criado a partir de cada resposta aplicada; troca de carta ou de sessão chama `discard()` em todas antes de recriar.~~
+- **Emenda (T22)**: não há `Map` na página. Cada `OwnershipStepper` cria a própria fila; a página envolve a lista em `{#key}` por `card_number` + e-mail da sessão, o que recria os steppers, e a fila descarta as operações não enviadas ao desmontar. O valor exibido sobe por `bind:displayed` para o selo do cabeçalho.
 - `<title>` por estado (SCAR-01, SCAR-05); "Voltar ao catálogo" em `shell.aside` a partir de 64rem e no topo abaixo dele (SCAR-04).
 
 #### Morph grade → detalhe (SCAR-39..41)
 
 - Um estado de módulo `lib/cards/morph.svelte.ts` guarda o `card_number` da última navegação tile → detalhe ou detalhe → catálogo.
 - O `CardTile` aplica `view-transition-name` à arte só quando o `card_number` dele é o marcado; o detalhe aplica o mesmo nome à imagem principal **visível** (miniatura abaixo de 64rem, coluna a partir dele), nunca às duas.
-- `viewTransitionOnNavigate` não muda: já abre a transição em troca de pathname e já sai cedo sem suporte ou com movimento reduzido.
+- ~~`viewTransitionOnNavigate` não muda.~~ **Emenda (T22)**: mudou. A View Transition captura o novo estado antes de o detalhe renderizar a arte de destino, e o morph não acontecia. `morph.svelte.ts` ganhou o rendezvous `awaitArrival`/`signalArrival` (teto de 500 ms), e `viewTransitionOnNavigate` chama `armArrival` para esperar o destino renderizado antes de a captura terminar. Continua saindo cedo sem suporte ou com movimento reduzido.
+- **Emenda (T22)**: a marca do morph é posta pelo tile e também pela página do detalhe (`markCard`), para a volta.
 - O nome é derivado de `card_number` com escape para o conjunto de caracteres de `<custom-ident>` (`P-029`, ponto).
 
 ---

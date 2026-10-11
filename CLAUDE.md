@@ -39,7 +39,7 @@ A **`spa-catalogo`** (Req. 18, SCAT-01..45) está **implementada (T1–T25) e ag
 Verifier**: `/app` deixou de ser o início da fundação e é o catálogo (busca, chips de
 filtro, painel de filtros, grade, paginação, estados vazio/skeleton/erro), lendo só
 `GET /api/catalog` e `GET /api/catalog/filters` (SCAT-45: nenhum arquivo sob `app/`
-mudou desde `751e553`). O detalhe da carta continua no Hotwire (o tile leva a ele).
+mudou desde `751e553`). O detalhe da carta era Hotwire na época (hoje é SPA: ver `spa-carta`).
 Módulos novos em `frontend/src/lib/`: `catalog/url.ts` (links a partir de
 `active_filters`), `catalog/catalog.svelte.ts` (carregador com token),
 `catalog/filter-options.svelte.ts` (opções de filtro, uma vez por carga do app) e
@@ -47,6 +47,16 @@ Módulos novos em `frontend/src/lib/`: `catalog/url.ts` (links a partir de
 `CardTile`, `CardTileSkeleton`, `FilterChip`, `CatalogSearch`, `CatalogStatus`,
 `ActiveFilters`, `CatalogPagination` e `FilterPanel`; a página é `src/routes/+page.svelte`.
 Design em `.specs/features/spa-catalogo/design.md`.
+
+A **`spa-carta`** (Req. 19, SCAR-01..49) está **implementada (T1–T22) e aguarda o
+Verifier**: o detalhe da carta saiu do Hotwire e é a rota `/app/cartas/[card_number]`
+(cabeçalho com arte e campos por tipo, linhas de variante com troca local do destaque,
+posse otimista com `−`/`+` em fila por variante, desejo por variante e morph da arte entre
+grade e detalhe). O tile do catálogo leva a ela (SCAR-03). Rails ganhou três rotas de
+mutação em `Api::CardVariantsController` e `CollectionItem.increment_for!`/`decrement_for!`
+(o SQL atômico de posse passou do `CollectionItemsController` para o model, sem mudar
+respostas, mensagens nem rotas HTML; SCAR-49: nenhum teste Rails existente foi editado).
+Design em `.specs/features/spa-carta/design.md`.
 
 O que existe hoje:
 
@@ -67,7 +77,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **145 arquivos de teste, 1912 testes**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **1966 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
@@ -86,6 +96,9 @@ HTML). Rotas no `scope "api"` de `config/routes.rb` (`format: false` +
 | `POST /api/registration` | `RegistrationsController` | público |
 | `GET /api/catalog`, `GET /api/catalog/filters` | `CatalogController` | público (posse só com sessão) |
 | `GET /api/cards/:card_number` | `CardsController` | público (posse só com sessão) |
+| `POST /api/cards/:card_number/variants/:variant_code/increment` | `CardVariantsController` | exige sessão e CSRF |
+| `POST /api/cards/:card_number/variants/:variant_code/decrement` | `CardVariantsController` | exige sessão e CSRF; em zero é `200` com `owned_quantity: 0` |
+| `PUT /api/cards/:card_number/variants/:variant_code/wishlist` | `CardVariantsController` | exige sessão e CSRF; alvo inteiro ≥ 1 e ≤ 2147483647, senão `422 validation_failed` com mensagem pt-BR |
 | `* /api/*path` | `NotFoundController` | catch-all |
 
 Sucesso é `{ "data": ... }` (a lista traz `meta`); erro é sempre
@@ -152,7 +165,7 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   entrada "Catálogo" da navegação aponta para ele (ver "Estado atual").
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens atuais: Vitest 548 testes, e2e 58, Rails 1912.
+Contagens atuais: Vitest 737 testes, e2e 143, Rails 1966 (rubocop limpo).
 
 ```bash
 # quick
@@ -221,6 +234,32 @@ Armadilhas do catálogo (`spa-catalogo`):
   ficar acima do tile da grade. O `Toaster` segue com `100` literal.
 - **`signOut` vai a `/app` e descarta a query:** sair em `/app?owned=owned` não preserva
   o resto dos filtros; a consulta é refeita por causa da troca de sessão (SCAT-09).
+
+Módulos do detalhe da carta (`spa-carta`): `lib/format.ts`; `lib/cards/url.ts`,
+`featured.ts`, `card-detail.svelte.ts` (carregador com token), `ownership-queue.svelte.ts`
+(fila de posse por variante), `morph.svelte.ts`; componentes `CardArt`, `CardHeader`,
+`CardFields`, `OwnershipStepper`, `WishlistForm`, `VariantRow`; rota
+`src/routes/cartas/[card_number]/+page.svelte`. `OwnershipResult` está em `api/types.ts` e,
+em versão parcial, em `ownership-queue.svelte.ts`.
+
+Armadilhas do detalhe (`spa-carta`):
+
+- **`card_type` da API é minúsculo** (`leader`, `character`, `event`, `stage`): indexar os
+  campos por tipo em `CardFields` com a caixa errada some com a seção sem erro.
+- **O `OwnershipStepper` cria a própria fila.** Não há `Map` na página: o `{#key}` por
+  `card_number` + e-mail da sessão recria os steppers, e a fila descarta o que não foi
+  enviado ao desmontar. O valor exibido sobe por `bind:displayed` para o selo.
+- **O morph exige o destino renderizado quando a View Transition captura o novo estado.**
+  `awaitArrival`/`signalArrival` em `morph.svelte.ts` (teto de 500 ms) e `armArrival` em
+  `viewTransitionOnNavigate`; sem isso a transição roda sem a arte de destino.
+- **A marca do morph** (`view-transition-name`) é posta pelo tile e pela página do detalhe
+  (`markCard`), só no elemento visível; nome duplicado anula a transição.
+- **`WishlistForm` usa `novalidate`**: a regra do alvo é da API (422), não do navegador.
+- **Dívidas fora do escopo:** o `CardImagesController` busca a variante só por
+  `variant_code` (`card_images_controller.rb:23`); o `WishlistItemsController` HTML tem a
+  mesma corrida de criação que a API trata (500 no HTML); flake e2e de `sessao.spec.ts`
+  ("a mensagem não desloca o conteúdo", SPA-46) quando a altura do catálogo muda por carga
+  assíncrona.
 
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção
