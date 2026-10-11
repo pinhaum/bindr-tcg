@@ -634,11 +634,11 @@ T21 → T22
 
 **Done when**:
 
-- [ ] Clique no tile abre `/app/cartas/X` sem carregar documento novo; "Voltar ao catálogo" volta a `/app` idem (SCAR-03, SCAR-04)
-- [ ] Para uma carta com várias variantes, nomes dos campos, lista de variantes (código, rótulo, set, preço) e destaque iguais aos do HTML, com `?variant=` válido, inválido e ausente (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)
-- [ ] 360px: miniatura + "Ver imagem maior" fechado; 1280px: coluna visível e chip "Counter"; `scrollWidth <= clientWidth` nos dois temas (SCAR-11, SCAR-12)
-- [ ] Clique na miniatura de variante muda a URL sem item novo no histórico (SCAR-23); `/app/cartas/NAO-EXISTE` mostra a mensagem e o título do 404 (SCAR-05)
-- [ ] Gate check passes: Full
+- [x] Clique no tile abre `/app/cartas/X` sem carregar documento novo; "Voltar ao catálogo" volta a `/app` idem (SCAR-03, SCAR-04)
+- [x] Para uma carta com várias variantes, nomes dos campos, lista de variantes (código, rótulo, set, preço) e destaque iguais aos do HTML, com `?variant=` válido, inválido e ausente (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)
+- [x] 360px: miniatura + "Ver imagem maior" fechado; 1280px: coluna visível e chip "Counter"; `scrollWidth <= clientWidth` nos dois temas (SCAR-11, SCAR-12)
+- [x] Clique na miniatura de variante muda a URL sem item novo no histórico (SCAR-23); `/app/cartas/NAO-EXISTE` mostra a mensagem e o título do 404 (SCAR-05)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
