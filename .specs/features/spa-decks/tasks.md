@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/spa-decks/design.md`
-**Status**: Draft
+**Status**: Approved
 
 **Pré-condição:** `spa-carta` e `spa-pasta` encerradas (estão) e nenhuma outra fatia
 executando neste checkout. O commit-pai da T1 é a **base da feature** (`<base>` abaixo) e
