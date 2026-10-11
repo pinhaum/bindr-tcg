@@ -101,6 +101,7 @@ T14 → T15
 **Depends on**: None
 **Reuses**: `CollectionCsv::Parser`, `CollectionCsv::Resolver`, `CollectionImport.create!`; regras e frases de `CollectionImportsController#create` (`MAX_CORPO_BYTES`, `MENSAGEM_SEM_ARQUIVO`, `MENSAGEM_CORPO_GRANDE`, `conteudo_utf8`, `nome_para_exibicao`)
 **Requirement**: SPOR-36, SPOR-37
+**Base da feature (`<base>`)**: `d5f13c6` (commit-pai da T1)
 
 **Tools**:
 
@@ -109,12 +110,12 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Arquivo aceito cria um `collection_imports` do usuário com `linhas` iguais às do `Resolver` para o mesmo conteúdo e não muda o retrato de `collection_items` (SPOR-36)
-- [ ] `content_length` acima de 12 MB → frase do limite de 8 MB sem chamar `read` no arquivo (dublê que falha se lido); `nil`, string e objeto sem `read` → frase de arquivo ausente; `;`, vazio, Latin-1 e 10.001 linhas → frase do `Parser`; nenhum staging em recusa (SPOR-37, Edge Cases)
-- [ ] Nome: `..\x/../Minha Coleção!.csv` vira o mesmo valor que o controller HTML grava; nome só com caracteres descartados vira `colecao.csv`; 200 caracteres viram 120
-- [ ] Paridade: `MAX_BODY_BYTES`, `MISSING_FILE_MESSAGE` e `BODY_TOO_LARGE_MESSAGE` iguais às constantes do `CollectionImportsController`
-- [ ] Usuário que não é `User` levanta `ArgumentError` (herdado de `for_user`)
-- [ ] Gate check passes: Rails quick
+- [x] Arquivo aceito cria um `collection_imports` do usuário com `linhas` iguais às do `Resolver` para o mesmo conteúdo e não muda o retrato de `collection_items` (SPOR-36)
+- [x] `content_length` acima de 12 MB → frase do limite de 8 MB sem chamar `read` no arquivo (dublê que falha se lido); `nil`, string e objeto sem `read` → frase de arquivo ausente; `;`, vazio, Latin-1 e 10.001 linhas → frase do `Parser`; nenhum staging em recusa (SPOR-37, Edge Cases)
+- [x] Nome: `..\x/../Minha Coleção!.csv` vira o mesmo valor que o controller HTML grava; nome só com caracteres descartados vira `colecao.csv`; 200 caracteres viram 120
+- [x] Paridade: `MAX_BODY_BYTES`, `MISSING_FILE_MESSAGE` e `BODY_TOO_LARGE_MESSAGE` iguais às constantes do `CollectionImportsController`
+- [x] Usuário que não é `User` levanta `ArgumentError` (herdado de `for_user`)
+- [x] Gate check passes: Rails quick
 
 **Tests**: unit
 **Gate**: quick
