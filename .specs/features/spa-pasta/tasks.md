@@ -531,21 +531,23 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Para cada usuário e cada `order`: os três indicadores e a sequência de `code` com `owned_numbers`, `base_size`, percentual, parallels e valor de cada linha iguais aos de `/progress` (SPAS-18, SPAS-26)
-- [ ] Anônimo em `/app/pasta?order=code` termina em `/app/entrar?return_to=…` sem `GET /api/progress` observado (SPAS-03)
-- [ ] "Minha pasta" do casco navega sem recarga e fica `aria-current` (SPAS-01, SPAS-02)
-- [ ] 360px e 1280px, temas claro e escuro: `scrollWidth <= clientWidth` com todos os sets (SPAS-26)
-- [ ] 1280px: cada indicador mede um quarto da coluna de conteúdo (±1px); a ação está na coluna lateral, abaixo do divisor, com "Adicionar cartas" (SPAS-11, SPAS-24)
-- [ ] 390px: a ação fica acima da barra inferior e o último set rola até ficar visível acima dela (SPAS-24)
-- [ ] A largura do cartão de valor não muda durante a animação; ao fim, o texto é o valor de `/progress`; com `reducedMotion: 'reduce'`, o primeiro quadro já é o final (SPAS-12, SPAS-14, SPAS-16)
-- [ ] Capturas a 390px e 1280px de `/app/pasta` e `/progress` salvas para comparação do dono (SPAS-26)
-- [ ] Gate check passes: Full
+- [x] Para cada usuário e cada `order`: os três indicadores e a sequência de `code` com `owned_numbers`, `base_size`, percentual, parallels e valor de cada linha iguais aos de `/progress` (SPAS-18, SPAS-26)
+- [x] Anônimo em `/app/pasta?order=code` termina em `/app/entrar?return_to=…` sem `GET /api/progress` observado (SPAS-03)
+- [x] "Minha pasta" do casco navega sem recarga e fica `aria-current` (SPAS-01, SPAS-02)
+- [x] 360px e 1280px, temas claro e escuro: `scrollWidth <= clientWidth` com todos os sets (SPAS-26)
+- [x] 1280px: cada indicador mede um quarto da coluna de conteúdo (±1px); a ação está na coluna lateral, abaixo do divisor, com "Adicionar cartas" (SPAS-11, SPAS-24)
+- [x] 390px: a ação fica acima da barra inferior e o último set rola até ficar visível acima dela (SPAS-24)
+- [x] A largura do cartão de valor não muda durante a animação; ao fim, o texto é o valor de `/progress`; com `reducedMotion: 'reduce'`, o primeiro quadro já é o final (SPAS-12, SPAS-14, SPAS-16)
+- [x] Capturas a 390px e 1280px de `/app/pasta` e `/progress` salvas para comparação do dono (SPAS-26)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
 
 **Commit**: `test(spa-pasta): paridade e layout da pasta contra a API real`
 
+
+**Registro**: Gate Full: e2e completo 185 testes verdes (antes da correção) e `pasta.spec.ts` 17 verdes depois; Front quick 856. Decisão (SPAS-11): "um quarto da coluna" medido como a trilha `1fr` do `repeat(4, 1fr)` já descontados os vãos (cartão = (coluna − 3·gap)/4), o que o design adotou; confirmar com o dono. Revisão: 1 MAJOR (`waitForTimeout`) e MINORs corrigidos por worker novo; seletores por classe estrutural mantidos. Capturas em `frontend/test-results/pasta-capturas/` (não versionado).
 ---
 
 ### T16: E2E da lista de desejos
