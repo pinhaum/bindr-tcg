@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/spa-catalogo/design.md`
-**Status**: Executed (T1–T25); Verifier it.1 FAIL → fase 5 (T26–T28); it.2 FAIL → fase 6 (T29–T31)
+**Status**: Verified (Verifier it.3 PASS em 2026-10-11; it.1 FAIL → fase 5 T26–T28; it.2 FAIL → fase 6 T29–T31)
 
 ---
 

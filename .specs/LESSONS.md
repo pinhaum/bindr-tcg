@@ -398,6 +398,36 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md G2 / API-12 / cards_test.rb:155 (routes)
 - last seen: 2026-10-10T19:11:03Z
 
+### L-065 - Assert any AC that fixes a pixel size or visual position with boundingBox or getComputedStyle in an e2e test, because DOM-level tests cannot kill a CSS mutant
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/e2e` · harmful: 0
+- features: spa-catalogo
+- evidence: C01 FilterChip.svelte:34 (validation.md it.1 G1; morto na it.2 por e2e/catalogo-layout.spec.ts:92-97) (frontend/e2e)
+- last seen: 2026-10-11T03:29:12Z
+
+### L-066 - Test the exact boundary value of a count threshold such as exactly two items for a more-than-one rule, not only a larger count
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/tests` · harmful: 0
+- features: spa-catalogo
+- evidence: N09 CardTile.svelte:14 (validation.md it.2 G8) (frontend/tests)
+- last seen: 2026-10-11T03:29:12Z
+
+### L-067 - When two UI states can hold at once such as a stale error and a pending retry, test which one wins instead of testing each alone
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/tests` · harmful: 0
+- features: spa-catalogo
+- evidence: N18 +page.svelte:142 (validation.md it.2 G9) (frontend/tests)
+- last seen: 2026-10-11T03:29:12Z
+
+### L-068 - Assert a layout position also in the wrapped state, at the narrowest viewport with the longest content combination where flex rows break
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `frontend/e2e` · harmful: 0
+- features: spa-catalogo
+- evidence: SCAT-30 / cde8011 CatalogStatus.svelte:58-59 (D11, K2/K3) (frontend/e2e)
+- last seen: 2026-10-11T11:51:08Z
+
+### L-069 - In e2e, check the settled state and read the measurement in the same evaluate call, since a reload triggered by the action can start between two separate calls
+- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `frontend/e2e` · harmful: 0
+- features: spa-catalogo
+- evidence: frontend/e2e/sessao.spec.ts:112-119 (G12) (frontend/e2e)
+- last seen: 2026-10-11T12:25:24Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
