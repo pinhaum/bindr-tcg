@@ -668,3 +668,84 @@ describe('createApiClient CSRF renewal', () => {
 		expect(calls()).toHaveLength(2);
 	});
 });
+
+describe('createApiClient getEnvelope', () => {
+	it('calls fetch with the exact path, keeping the raw query untouched', async () => {
+		const { fetch, client } = setup(() => json({ data: [], meta: { page: 1 } }));
+
+		await client.getEnvelope('/api/catalog?colors%5B%5D=Red&q=zoro');
+
+		const call = lastCall(fetch);
+		expect(call.url).toBe('/api/catalog?colors%5B%5D=Red&q=zoro');
+		expect(call.init.method).toBe('GET');
+		expect(call.init.body).toBeUndefined();
+	});
+
+	it('returns data and meta as they came', async () => {
+		const meta = { page: 2, total_count: 10, active_filters: { q: 'zoro' } };
+		const { client } = setup(() => json({ data: [{ card_number: 'OP01-001' }], meta }));
+
+		await expect(client.getEnvelope('/api/catalog')).resolves.toEqual({ data: [{ card_number: 'OP01-001' }], meta });
+	});
+
+	it('accepts falsy data when meta is an object', async () => {
+		const { client } = setup(() => json({ data: null, meta: {} }));
+
+		await expect(client.getEnvelope('/api/x')).resolves.toEqual({ data: null, meta: {} });
+	});
+
+	it.each([
+		['without meta', { data: [] }],
+		['with null meta', { data: [], meta: null }],
+		['with array meta', { data: [], meta: [] }],
+		['with string meta', { data: [], meta: 'x' }],
+		['without data', { meta: {} }]
+	])('throws unexpected_response on an envelope %s', async (_name, body) => {
+		const { client } = setup(() => json(body));
+
+		const error = await caught(client.getEnvelope('/api/x'));
+
+		expect(error.status).toBe(0);
+		expect(error.code).toBe('unexpected_response');
+	});
+
+	it('calls onUnauthenticated and throws on 401 unauthenticated', async () => {
+		const { client, onUnauthenticated } = setup(() => apiError(401, 'unauthenticated', 'Faça login para continuar.'));
+
+		const error = await caught(client.getEnvelope('/api/x'));
+
+		expect(onUnauthenticated).toHaveBeenCalledTimes(1);
+		expect(error.code).toBe('unauthenticated');
+	});
+
+	it('keeps the API error code and message for other errors', async () => {
+		const { client } = setup(() => apiError(400, 'bad_request', 'Parâmetro inválido.'));
+
+		const error = await caught(client.getEnvelope('/api/x'));
+
+		expect(error.status).toBe(400);
+		expect(error.code).toBe('bad_request');
+		expect(error.message).toBe('Parâmetro inválido.');
+	});
+
+	it.each(['TimeoutError', 'AbortError'])('turns a %s into network_error', async (name) => {
+		const { client } = setup(() => Promise.reject(new DOMException('aborted', name)));
+
+		expect((await caught(client.getEnvelope('/api/x'))).code).toBe('network_error');
+	});
+
+	it('turns a fetch TypeError into network_error', async () => {
+		const { client } = setup(() => {
+			throw new TypeError('Failed to fetch');
+		});
+
+		expect((await caught(client.getEnvelope('/api/x'))).code).toBe('network_error');
+	});
+
+	it('rejects a path that does not start with a single slash', async () => {
+		const { client, fetch } = setup();
+
+		await expect(client.getEnvelope('//evil.test/api')).rejects.toThrow();
+		expect(fetch).not.toHaveBeenCalled();
+	});
+});

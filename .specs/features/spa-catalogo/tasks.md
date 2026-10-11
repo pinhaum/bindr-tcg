@@ -119,12 +119,12 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `getEnvelope('/api/catalog?colors%5B%5D=Red&q=zoro')` chama `fetch` com esse caminho exato, sem reordenar nem recodificar a query (SCAT-04)
-- [ ] Sucesso devolve `{ data, meta }` como vieram; sem `data` ou sem `meta` objeto → `ApiError` `unexpected_response`
-- [ ] `401 unauthenticated` chama `onUnauthenticated`; rede e tempo limite dão `network_error` (mesmos casos do `get`)
-- [ ] `fetch` continua só em `client.ts` (lint verde)
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] `getEnvelope('/api/catalog?colors%5B%5D=Red&q=zoro')` chama `fetch` com esse caminho exato, sem reordenar nem recodificar a query (SCAT-04)
+- [x] Sucesso devolve `{ data, meta }` como vieram; sem `data` ou sem `meta` objeto → `ApiError` `unexpected_response`
+- [x] `401 unauthenticated` chama `onUnauthenticated`; rede e tempo limite dão `network_error` (mesmos casos do `get`)
+- [x] `fetch` continua só em `client.ts` (lint verde)
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick

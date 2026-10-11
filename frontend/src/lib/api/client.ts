@@ -3,6 +3,7 @@ import type { ApiErrorBody, SessionPayload, SessionUser } from './types';
 
 type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 type Query = Record<string, string | number | boolean | undefined>;
+type Envelope = Record<string, unknown> & { data: unknown };
 
 export type ApiClientDeps = {
 	fetch: typeof fetch;
@@ -14,6 +15,7 @@ export type ApiClientDeps = {
 
 export type ApiClient = {
 	get<T>(path: string, query?: Query): Promise<T>;
+	getEnvelope<T, M>(path: string): Promise<{ data: T; meta: M }>;
 	post<T>(path: string, body?: unknown): Promise<T>;
 	patch<T>(path: string, body?: unknown): Promise<T>;
 	put<T>(path: string, body?: unknown): Promise<T>;
@@ -90,7 +92,12 @@ export const createApiClient = ({
 		}
 	};
 
-	const request = async <T>(method: Method, url: string, body?: unknown, retried = false): Promise<T> => {
+	const requestEnvelope = async (
+		method: Method,
+		url: string,
+		body?: unknown,
+		retried = false
+	): Promise<Envelope> => {
 		if (!isLocalPath(url)) throw new Error(`O caminho da API deve começar com "/" (recebido: ${String(url)}).`);
 		const { status, payload } = await send(method, url, body);
 		const ok = status >= 200 && status < 300;
@@ -104,7 +111,7 @@ export const createApiClient = ({
 				throw error;
 			}
 			if (status === 422 && error.code === 'invalid_csrf_token' && method !== 'GET' && !retried) {
-				return recoverFromStaleCsrf<T>(method, url, body, signingOut);
+				return recoverFromStaleCsrf(method, url, body, signingOut);
 			}
 			throw error;
 		}
@@ -112,15 +119,18 @@ export const createApiClient = ({
 
 		const { data } = payload;
 		if (isRecord(data) && typeof data.csrf_token === 'string') csrfToken = data.csrf_token;
-		return data as T;
+		return payload as Envelope;
 	};
 
-	const recoverFromStaleCsrf = async <T>(method: Method, url: string, body: unknown, signingOut: boolean): Promise<T> => {
+	const request = async <T>(method: Method, url: string, body?: unknown): Promise<T> =>
+		(await requestEnvelope(method, url, body)).data as T;
+
+	const recoverFromStaleCsrf = async (method: Method, url: string, body: unknown, signingOut: boolean): Promise<Envelope> => {
 		const session = await request<unknown>('GET', SESSION_PATH);
 		if (!isSessionPayload(session)) throw unexpectedResponse();
 		const { user } = session;
 
-		if ((user?.email ?? null) === currentUserEmail()) return request<T>(method, url, body, true);
+		if ((user?.email ?? null) === currentUserEmail()) return requestEnvelope(method, url, body, true);
 
 		if (user === null) {
 			if (!signingOut) onUnauthenticated();
@@ -132,6 +142,11 @@ export const createApiClient = ({
 
 	return {
 		get: (path, query) => request('GET', withQuery(path, query)),
+		getEnvelope: async <T, M>(path: string) => {
+			const { data, meta } = await requestEnvelope('GET', path);
+			if (!isRecord(meta)) throw unexpectedResponse();
+			return { data: data as T, meta: meta as M };
+		},
 		post: (path, body) => request('POST', path, body),
 		patch: (path, body) => request('PATCH', path, body),
 		put: (path, body) => request('PUT', path, body),
