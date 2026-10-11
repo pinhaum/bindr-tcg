@@ -154,6 +154,7 @@ Rails.application.routes.draw do
     get "catalog/filters" => "catalog#filters", as: :api_catalog_filters
 
     get "progress" => "progress#show", as: :api_progress
+    get "wishlist" => "wishlist#index", as: :api_wishlist
 
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 

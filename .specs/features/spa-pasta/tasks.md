@@ -142,17 +142,19 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Request test: itens na ordem de criação e id; atendido com 3 de 2 e 2 de 2; não atendido com 0 de 2 e `owned_quantity: 0` sem registro de coleção; lista vazia → `data: []` (SPAS-42)
-- [ ] A posse de outro usuário na mesma variante não entra em `owned_quantity`; desejos de outro usuário não aparecem; `user_id` alheio na query é ignorado (SPAS-45)
-- [ ] Número de consultas SQL igual com 1 e com 10 itens (SPAS-42)
-- [ ] Sem sessão → `401 unauthenticated`; resposta `application/json`, nunca redirect
-- [ ] Gate check passes: Rails quick
+- [x] Request test: itens na ordem de criação e id; atendido com 3 de 2 e 2 de 2; não atendido com 0 de 2 e `owned_quantity: 0` sem registro de coleção; lista vazia → `data: []` (SPAS-42)
+- [x] A posse de outro usuário na mesma variante não entra em `owned_quantity`; desejos de outro usuário não aparecem; `user_id` alheio na query é ignorado (SPAS-45)
+- [x] Número de consultas SQL igual com 1 e com 10 itens (SPAS-42)
+- [x] Sem sessão → `401 unauthenticated`; resposta `application/json`, nunca redirect
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): expor a lista de desejos na API`
 
+
+**Registro**: Achado MINOR da revisão (desempate por id sem teste de created_at igual) registrado no relatório, sem correção.
 ---
 
 ### T3: `DELETE /api/cards/:card_number/variants/:variant_code/wishlist`
