@@ -23,10 +23,10 @@ atualização otimista e o morph grade → detalhe.
 
 ## Goals
 
-- [ ] `/app/cartas/<card_number>?variant=<código>` mostra os mesmos campos, variantes, preços e variante em destaque que `/cards/<card_number>?variant=<código>`, verificado por Playwright contra a API real, a 360px e a 1280px, nos dois temas, sem scroll horizontal.
-- [ ] Com sessão, cinco toques rápidos em `+` deixam a coleção do usuário com exatamente +5 cópias da variante, e o número na tela muda a cada toque antes da resposta.
-- [ ] Marcar e atualizar um desejo pela SPA grava o mesmo `wishlist_items` que o formulário Hotwire grava.
-- [ ] A suíte Rails existente passa sem edição; os três endpoints novos têm request test de sessão, CSRF, isolamento entre usuários e concorrência.
+- [x] `/app/cartas/<card_number>?variant=<código>` mostra os mesmos campos, variantes, preços e variante em destaque que `/cards/<card_number>?variant=<código>`, verificado por Playwright contra a API real, a 360px e a 1280px, nos dois temas, sem scroll horizontal.
+- [x] Com sessão, cinco toques rápidos em `+` deixam a coleção do usuário com exatamente +5 cópias da variante, e o número na tela muda a cada toque antes da resposta.
+- [x] Marcar e atualizar um desejo pela SPA grava o mesmo `wishlist_items` que o formulário Hotwire grava.
+- [x] A suíte Rails existente passa sem edição; os três endpoints novos têm request test de sessão, CSRF, isolamento entre usuários e concorrência.
 
 ## Out of Scope
 
@@ -237,55 +237,55 @@ atualização otimista e o morph grade → detalhe.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| SCAR-01 | P1: Detalhe — rota e título (Req. 19.1) | T13, T17, T19 | Implemented |
-| SCAR-02 | P1: Detalhe — consulta da carta (Req. 19.2) | T6, T8, T17 | Implemented |
-| SCAR-03 | P1: Detalhe — tile leva à SPA (Req. 19.3) | T6, T18, T19 | Implemented |
-| SCAR-04 | P1: Detalhe — voltar ao catálogo (Req. 19.4) | T17, T19 | Implemented |
-| SCAR-05 | P1: Detalhe — carta não encontrada (Req. 19.5) | T8, T17, T19 | Implemented |
-| SCAR-06 | P1: Detalhe — erro de carga (Req. 19.6) | T8, T17 | Implemented |
-| SCAR-07 | P1: Detalhe — carga lenta (Req. 19.7) | T8, T17 | Implemented |
-| SCAR-08 | P1: Detalhe — resposta antiga descartada (Req. 19.8) | T8, T17 | Implemented |
-| SCAR-09 | P1: Detalhe — troca de sessão (Req. 19.9) | T17, T20 | Implemented |
-| SCAR-10 | P1: Cabeçalho — imagem principal e placeholder (Req. 19.10) | T11, T19 | Implemented |
-| SCAR-11 | P1: Cabeçalho — miniatura abaixo de 64rem (Req. 19.11) | T13, T19 | Implemented |
-| SCAR-12 | P1: Cabeçalho — coluna a partir de 64rem (Req. 19.12) | T13, T19 | Implemented |
-| SCAR-13 | P1: Cabeçalho — chips e set (Req. 19.13) | T13, T19 | Implemented |
-| SCAR-14 | P1: Cabeçalho — variante fora da fonte (Req. 19.14) | T13 | Implemented |
-| SCAR-15 | P1: Cabeçalho — selo de quantidade (Req. 19.15) | T5, T13, T17 | Implemented |
-| SCAR-16 | P1: Cabeçalho — ilustração (Req. 19.16) | T13 | Implemented |
-| SCAR-17 | P1: Cabeçalho — campos por tipo (Req. 19.17) | T12, T19 | Implemented |
-| SCAR-18 | P1: Cabeçalho — efeito e trigger (Req. 19.18) | T12 | Implemented |
-| SCAR-19 | P1: Variantes — linha da variante (Req. 19.19) | T16, T19 | Implemented |
-| SCAR-20 | P1: Variantes — fora da fonte (Req. 19.20) | T16 | Implemented |
-| SCAR-21 | P1: Variantes — preço (Req. 19.21) | T5, T16, T19 | Implemented |
-| SCAR-22 | P1: Variantes — miniatura como link (Req. 19.22) | T6, T16, T19 | Implemented |
-| SCAR-23 | P1: Variantes — troca local do destaque (Req. 19.23) | T16, T17, T19 | Implemented |
-| SCAR-24 | P1: Variantes — destaque padrão (Req. 19.24) | T7, T17, T19 | Implemented |
-| SCAR-25 | P1: Posse — controle com sessão (Req. 19.25) | T5, T14, T16, T20 | Implemented |
-| SCAR-26 | P1: Posse — convite sem sessão (Req. 19.26) | T16, T20 | Implemented |
-| SCAR-27 | P1: Posse — incremento otimista (Req. 19.27) | T9, T14, T20 | Implemented |
-| SCAR-28 | P1: Posse — decremento otimista (Req. 19.28) | T9, T14 | Implemented |
-| SCAR-29 | P1: Posse — `−` em zero (Req. 19.29) | T9, T14, T20 | Implemented |
-| SCAR-30 | P1: Posse — uma operação por toque, em série (Req. 19.30) | T9, T20 | Implemented |
-| SCAR-31 | P1: Posse — reconciliação (Req. 19.31) | T9, T20 | Implemented |
-| SCAR-32 | P1: Posse — falha volta ao confirmado (Req. 19.32) | T9, T14 | Implemented |
-| SCAR-33 | P1: Posse — anúncio (Req. 19.33) | T9, T14 | Implemented |
-| SCAR-34 | P1: Posse — foco preservado (Req. 19.34) | T14 | Implemented |
-| SCAR-35 | P1: Desejo — formulário (Req. 19.35) | T15, T16 | Implemented |
-| SCAR-36 | P1: Desejo — sucesso (Req. 19.36) | T5, T15, T20 | Implemented |
-| SCAR-37 | P1: Desejo — alvo recusado (Req. 19.37) | T15 | Implemented |
-| SCAR-38 | P1: Desejo — envio pendente (Req. 19.38) | T15 | Implemented |
-| SCAR-39 | P2: Transição — ida (Req. 19.39) | T10, T13, T18, T21 | Implemented |
-| SCAR-40 | P2: Transição — volta (Req. 19.40) | T10, T18, T21 | Implemented |
-| SCAR-41 | P2: Transição — sem suporte ou movimento reduzido (Req. 19.41) | T10, T21 | Implemented |
-| SCAR-42 | P1: API — incremento (Req. 19.42) | T2, T6 | Implemented |
-| SCAR-43 | P1: API — decremento (Req. 19.43) | T2 | Implemented |
-| SCAR-44 | P1: API — concorrência (Req. 19.44) | T1, T4 | Implemented |
-| SCAR-45 | P1: API — desejo (Req. 19.45) | T3, T6 | Implemented |
-| SCAR-46 | P1: API — alvo inválido (Req. 19.46) | T3 | Implemented |
-| SCAR-47 | P1: API — carta ou variante inexistente (Req. 19.47) | T2, T3 | Implemented |
-| SCAR-48 | P1: API — sessão, CSRF e isolamento (Req. 19.48) | T2, T3 | Implemented |
-| SCAR-49 | P1: API — HTML inalterado (Req. 19.49) | T1, T22 | Implemented |
+| SCAR-01 | P1: Detalhe — rota e título (Req. 19.1) | T13, T17, T19 | Verified |
+| SCAR-02 | P1: Detalhe — consulta da carta (Req. 19.2) | T6, T8, T17 | Verified |
+| SCAR-03 | P1: Detalhe — tile leva à SPA (Req. 19.3) | T6, T18, T19 | Verified |
+| SCAR-04 | P1: Detalhe — voltar ao catálogo (Req. 19.4) | T17, T19 | Verified |
+| SCAR-05 | P1: Detalhe — carta não encontrada (Req. 19.5) | T8, T17, T19 | Verified |
+| SCAR-06 | P1: Detalhe — erro de carga (Req. 19.6) | T8, T17 | Verified |
+| SCAR-07 | P1: Detalhe — carga lenta (Req. 19.7) | T8, T17 | Verified |
+| SCAR-08 | P1: Detalhe — resposta antiga descartada (Req. 19.8) | T8, T17 | Verified |
+| SCAR-09 | P1: Detalhe — troca de sessão (Req. 19.9) | T17, T20 | Verified |
+| SCAR-10 | P1: Cabeçalho — imagem principal e placeholder (Req. 19.10) | T11, T19 | Verified |
+| SCAR-11 | P1: Cabeçalho — miniatura abaixo de 64rem (Req. 19.11) | T13, T19 | Verified |
+| SCAR-12 | P1: Cabeçalho — coluna a partir de 64rem (Req. 19.12) | T13, T19 | Verified |
+| SCAR-13 | P1: Cabeçalho — chips e set (Req. 19.13) | T13, T19 | Verified |
+| SCAR-14 | P1: Cabeçalho — variante fora da fonte (Req. 19.14) | T13 | Verified |
+| SCAR-15 | P1: Cabeçalho — selo de quantidade (Req. 19.15) | T5, T13, T17 | Verified |
+| SCAR-16 | P1: Cabeçalho — ilustração (Req. 19.16) | T13 | Verified |
+| SCAR-17 | P1: Cabeçalho — campos por tipo (Req. 19.17) | T12, T19 | Verified |
+| SCAR-18 | P1: Cabeçalho — efeito e trigger (Req. 19.18) | T12 | Verified |
+| SCAR-19 | P1: Variantes — linha da variante (Req. 19.19) | T16, T19 | Verified |
+| SCAR-20 | P1: Variantes — fora da fonte (Req. 19.20) | T16 | Verified |
+| SCAR-21 | P1: Variantes — preço (Req. 19.21) | T5, T16, T19 | Verified |
+| SCAR-22 | P1: Variantes — miniatura como link (Req. 19.22) | T6, T16, T19 | Verified |
+| SCAR-23 | P1: Variantes — troca local do destaque (Req. 19.23) | T16, T17, T19 | Verified |
+| SCAR-24 | P1: Variantes — destaque padrão (Req. 19.24) | T7, T17, T19 | Verified |
+| SCAR-25 | P1: Posse — controle com sessão (Req. 19.25) | T5, T14, T16, T20 | Verified |
+| SCAR-26 | P1: Posse — convite sem sessão (Req. 19.26) | T16, T20 | Verified |
+| SCAR-27 | P1: Posse — incremento otimista (Req. 19.27) | T9, T14, T20 | Verified |
+| SCAR-28 | P1: Posse — decremento otimista (Req. 19.28) | T9, T14 | Verified |
+| SCAR-29 | P1: Posse — `−` em zero (Req. 19.29) | T9, T14, T20 | Verified |
+| SCAR-30 | P1: Posse — uma operação por toque, em série (Req. 19.30) | T9, T20 | Verified |
+| SCAR-31 | P1: Posse — reconciliação (Req. 19.31) | T9, T20 | Verified |
+| SCAR-32 | P1: Posse — falha volta ao confirmado (Req. 19.32) | T9, T14 | Verified |
+| SCAR-33 | P1: Posse — anúncio (Req. 19.33) | T9, T14 | Verified |
+| SCAR-34 | P1: Posse — foco preservado (Req. 19.34) | T14 | Verified |
+| SCAR-35 | P1: Desejo — formulário (Req. 19.35) | T15, T16 | Verified |
+| SCAR-36 | P1: Desejo — sucesso (Req. 19.36) | T5, T15, T20 | Verified |
+| SCAR-37 | P1: Desejo — alvo recusado (Req. 19.37) | T15 | Verified |
+| SCAR-38 | P1: Desejo — envio pendente (Req. 19.38) | T15 | Verified |
+| SCAR-39 | P2: Transição — ida (Req. 19.39) | T10, T13, T18, T21 | Verified |
+| SCAR-40 | P2: Transição — volta (Req. 19.40) | T10, T18, T21 | Verified |
+| SCAR-41 | P2: Transição — sem suporte ou movimento reduzido (Req. 19.41) | T10, T21 | Verified |
+| SCAR-42 | P1: API — incremento (Req. 19.42) | T2, T6 | Verified |
+| SCAR-43 | P1: API — decremento (Req. 19.43) | T2 | Verified |
+| SCAR-44 | P1: API — concorrência (Req. 19.44) | T1, T4 | Verified |
+| SCAR-45 | P1: API — desejo (Req. 19.45) | T3, T6 | Verified |
+| SCAR-46 | P1: API — alvo inválido (Req. 19.46) | T3 | Verified |
+| SCAR-47 | P1: API — carta ou variante inexistente (Req. 19.47) | T2, T3 | Verified |
+| SCAR-48 | P1: API — sessão, CSRF e isolamento (Req. 19.48) | T2, T3 | Verified |
+| SCAR-49 | P1: API — HTML inalterado (Req. 19.49) | T1, T22 | Verified |
 
 **Coverage:** 49 total, 49 mapped to tasks, 0 unmapped
 
@@ -305,7 +305,7 @@ atualização otimista e o morph grade → detalhe.
 
 ## Success Criteria
 
-- [ ] Playwright contra a API real compara `/app/cartas/X?variant=Y` com `/cards/X?variant=Y` (campos, variantes, preços, destaque) para um Leader, um Character com três variantes e um Event, a 360px e a 1280px, nos dois temas, sem scroll horizontal.
-- [ ] Cinco toques rápidos em `+` gravam exatamente +5 e o número final na tela é igual ao do `GET` seguinte; com a rede cortada no 3º, a tela volta ao último valor confirmado e mostra "Sem conexão com o servidor. Tente novamente.".
-- [ ] Um desejo marcado na SPA aparece em `/wishlist` (Hotwire) com o mesmo alvo.
-- [ ] A suíte Rails passa sem edição, com os request tests novos dos três endpoints, e o teste de corrida da API soma todas as operações simultâneas.
+- [x] Playwright contra a API real compara `/app/cartas/X?variant=Y` com `/cards/X?variant=Y` (campos, variantes, preços, destaque) para um Leader, um Character com três variantes e um Event, a 360px e a 1280px, nos dois temas, sem scroll horizontal.
+- [x] Cinco toques rápidos em `+` gravam exatamente +5 e o número final na tela é igual ao do `GET` seguinte; com a rede cortada no 3º, a tela volta ao último valor confirmado e mostra "Sem conexão com o servidor. Tente novamente.".
+- [x] Um desejo marcado na SPA aparece em `/wishlist` (Hotwire) com o mesmo alvo.
+- [x] A suíte Rails passa sem edição, com os request tests novos dos três endpoints, e o teste de corrida da API soma todas as operações simultâneas.
