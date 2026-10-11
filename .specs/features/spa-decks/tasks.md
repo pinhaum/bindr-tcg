@@ -604,10 +604,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Lista vazia → nada no DOM, nem cabeçalho (SDEC-41)
-- [ ] "falta 1" e "faltam 2"; carta em dois decks com dois links na ordem da API separados por ", " (SDEC-40)
-- [ ] Erro → `message` + "Tentar novamente", que repete a consulta (SDEC-42)
-- [ ] Gate check passes: Front quick
+- [x] Lista vazia → nada no DOM, nem cabeçalho (SDEC-41)
+- [x] "falta 1" e "faltam 2"; carta em dois decks com dois links na ordem da API separados por ", " (SDEC-40)
+- [x] Erro → `message` + "Tentar novamente", que repete a consulta (SDEC-42)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
