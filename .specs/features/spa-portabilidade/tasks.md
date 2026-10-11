@@ -367,13 +367,13 @@ T14 → T15
 
 **Done when**:
 
-- [ ] Título "Importar coleção — Bindr", `h1` e texto do SPOR-01; campo "Arquivo CSV" `required` com `accept="text/csv,.csv"` e botão "Pré-visualizar importação" (SPOR-01, SPOR-04)
-- [ ] Sessão anônima no `load` → redirect para `/app/entrar?return_to=%2Fapp%2Fpasta%2Fimportar` sem chamar a API (SPOR-03)
-- [ ] Envio chama `api.post('/api/collection/imports', FormData com file, { timeoutMs: 60000 })` uma vez em duplo clique, com o botão pendente (SPOR-05, SPOR-32)
-- [ ] `201` com token `a/b` → `goto` para `/app/pasta/importar/a%2Fb` (SPOR-06)
-- [ ] `422` com `fields.file` de duas frases → `role="alert"` com a `message` e as duas frases na ordem, foco nele depois de `tick()`, input com `aria-invalid="true"` e `aria-describedby` apontando para ele, URL mantida (SPOR-07)
-- [ ] `network_error` → a `message` como veio; `401` não mostra erro local (o cliente cuida) (SPOR-08)
-- [ ] Gate check passes: Front quick
+- [x] Título "Importar coleção — Bindr", `h1` e texto do SPOR-01; campo "Arquivo CSV" `required` com `accept="text/csv,.csv"` e botão "Pré-visualizar importação" (SPOR-01, SPOR-04)
+- [x] Sessão anônima no `load` → redirect para `/app/entrar?return_to=%2Fapp%2Fpasta%2Fimportar` sem chamar a API (SPOR-03)
+- [x] Envio chama `api.post('/api/collection/imports', FormData com file, { timeoutMs: 60000 })` uma vez em duplo clique, com o botão pendente (SPOR-05, SPOR-32)
+- [x] `201` com token `a/b` → `goto` para `/app/pasta/importar/a%2Fb` (SPOR-06)
+- [x] `422` com `fields.file` de duas frases → `role="alert"` com a `message` e as duas frases na ordem, foco nele depois de `tick()`, input com `aria-invalid="true"` e `aria-describedby` apontando para ele, URL mantida (SPOR-07)
+- [x] `network_error` → a `message` como veio; `401` não mostra erro local (o cliente cuida) (SPOR-08)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
