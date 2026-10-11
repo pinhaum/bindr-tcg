@@ -799,9 +799,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `git diff --stat 751e553..HEAD -- app/` vazio (SCAT-45)
-- [ ] `validate_spec.py` e `validate_tasks.py` da feature saem 0
-- [ ] Gate check passes: build
+- [x] `git diff --stat 751e553..HEAD -- app/` vazio (SCAT-45)
+- [x] `validate_spec.py` e `validate_tasks.py` da feature saem 0
+- [x] Gate check passes: build
 
 **Tests**: none
 **Gate**: build

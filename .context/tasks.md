@@ -424,7 +424,7 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
   - _Requisitos: 18.3, 18.4, 18.8, 18.10–18.13, 18.18, 18.33, 18.38–18.41_
 - [x] **13.3 Componentes de busca, status e filtro** — T14–T19
   - _Requisitos: 18.15–18.31, 18.36, 18.40, 18.42, 18.43_
-- [ ] **13.4 Página, ponta a ponta e fechamento** — T20–T25
+- [x] **13.4 Página, ponta a ponta e fechamento** — T20–T25
   - _Requisitos: 18.1, 18.4, 18.5, 18.7, 18.9, 18.13, 18.14, 18.16, 18.17, 18.25–18.27, 18.29–18.45_
 
 ---

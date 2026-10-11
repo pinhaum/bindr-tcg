@@ -35,6 +35,19 @@ A **`spa-fundacao`** (Req. 17, SPA-01..46) está **encerrada e verificada** (T1�
 `frontend/`: SvelteKit + Svelte 5, entrega em `/app`, cliente HTTP da API, sessão,
 temas, casco e mensagens; `validation.md` PASS na iteração 2); `STATE.md` (*Handoff*) tem o retrato.
 
+A **`spa-catalogo`** (Req. 18, SCAT-01..45) está **implementada (T1–T25) e aguarda o
+Verifier**: `/app` deixou de ser o início da fundação e é o catálogo (busca, chips de
+filtro, painel de filtros, grade, paginação, estados vazio/skeleton/erro), lendo só
+`GET /api/catalog` e `GET /api/catalog/filters` (SCAT-45: nenhum arquivo sob `app/`
+mudou desde `751e553`). O detalhe da carta continua no Hotwire (o tile leva a ele).
+Módulos novos em `frontend/src/lib/`: `catalog/url.ts` (links a partir de
+`active_filters`), `catalog/catalog.svelte.ts` (carregador com token),
+`catalog/filter-options.svelte.ts` (opções de filtro, uma vez por carga do app) e
+`shell.svelte.ts` (slot `shell.aside` e `wide`). Componentes em `src/lib/components/`:
+`CardTile`, `CardTileSkeleton`, `FilterChip`, `CatalogSearch`, `CatalogStatus`,
+`ActiveFilters`, `CatalogPagination` e `FilterPanel`; a página é `src/routes/+page.svelte`.
+Design em `.specs/features/spa-catalogo/design.md`.
+
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
@@ -135,9 +148,11 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   inferior abaixo de `64rem`, coluna lateral a partir dele, mesmo DOM. `<title>` por
   rota; `afterNavigate` move o foco para `main#conteudo` (não na carga inicial). Tokens
   dos dois temas verificados por contraste em `tokens.test.ts` (porta de
-  `test/design/contrast_test.rb`).
+  `test/design/contrast_test.rb`). Desde a `spa-catalogo`, `/app` é o catálogo e a
+  entrada "Catálogo" da navegação aponta para ele (ver "Estado atual").
 
-Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura):
+Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
+Contagens atuais: Vitest 548 testes, e2e 58, Rails 1912.
 
 ```bash
 # quick
@@ -145,6 +160,12 @@ docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm
 # e2e (Playwright contra a API real; não sobe no `docker compose up`)
 docker compose up -d app frontend && docker compose --profile e2e run --rm e2e
 ```
+
+O e2e agora **exige o catálogo importado no banco de dev** (a paridade `/app` × `/catalog`
+e o selo de posse leem cartas reais): `docker compose exec app bin/rails ingestion:import
+SNAPSHOT=storage/ingestion/apitcg-<UTC>.json`, offline, a partir de um snapshot em disco.
+As imagens `/card_images/*` respondem 502 porque o CDN responde 403 (AD-019); os e2e
+ignoram essas respostas.
 
 Armadilhas:
 
@@ -177,6 +198,29 @@ Armadilhas:
   e não é anunciado; `aria-disabled` exigiria emendar o SPA-21); dica de formato da
   senha só no erro; chave desconhecida de `fields` vira `chave: mensagem`; e-mail como
   identidade da sessão; login sem limite de tentativas (dívida da API).
+
+Armadilhas do catálogo (`spa-catalogo`):
+
+- **Foco e rolagem na mesma rota:** o Kit 3.0.1 não tem `keepFocus` nem `noScroll`. Use
+  `goto(url, { reset: false })` e `data-sveltekit-reset="false"` nos links (chips,
+  paginação). O `afterNavigate` do layout e o `viewTransitionOnNavigate` retornam cedo
+  quando só a query muda (mesmo `pathname`).
+- **Um único painel de filtros, dois lugares:** o slot `shell.aside` (snippet) e `wide`
+  (`MediaQuery` de `64rem`) decidem onde ele monta. A partir de `64rem` vai para a coluna
+  lateral do `AppShell`, abaixo disso para um `<details>` acima da grade. Nunca há duas
+  instâncias (sem id duplicado). O `open` do `<details>` é `$state` da página.
+- **Os hrefs nascem de `meta.active_filters` da última resposta** (SCAT-06), não da URL.
+  Logo, um segundo clique antes de a resposta chegar usa href obsoleto; e, se a
+  **primeira** carga falha, busca e chips ficam vazios até o "Tentar novamente"
+  (limitação aceita).
+- **Foco e anúncio:** `CatalogStatus` expõe `focus()` e exporta `statusSentence`. A
+  região `role="status"` (com a classe `.visually-hidden`) é esvaziada e regravada depois
+  de `tick()`, senão uma frase igual à anterior não é anunciada. `pendingFocus` (chip ou
+  status) não expira: dívida conhecida.
+- **`--z-nav` (10)** em `tokens.css`: a barra inferior fixa (abaixo de `64rem`) tem de
+  ficar acima do tile da grade. O `Toaster` segue com `100` literal.
+- **`signOut` vai a `/app` e descarta a query:** sair em `/app?owned=owned` não preserva
+  o resto dos filtros; a consulta é refeita por causa da troca de sessão (SCAT-09).
 
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção
