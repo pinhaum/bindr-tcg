@@ -487,9 +487,9 @@ T14 → T15
 
 **Done when**:
 
-- [ ] O download sai do link "Baixar minha coleção (CSV)" da pasta, sem chamada a `/api` (SPOR-33)
-- [ ] Pré-visualização só com o grupo "Já está assim (N)", N = linhas do CSV; depois de confirmar, export idêntico byte a byte ao anterior (SPOR-34)
-- [ ] Gate check passes: Full
+- [x] O download sai do link "Baixar minha coleção (CSV)" da pasta, sem chamada a `/api` (SPOR-33)
+- [x] Pré-visualização só com o grupo "Já está assim (N)", N = linhas do CSV; depois de confirmar, export idêntico byte a byte ao anterior (SPOR-34)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
