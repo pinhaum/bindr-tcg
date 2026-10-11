@@ -46,4 +46,13 @@ describe('variantApiPath', () => {
 			'/api/cards/A%20B%2FC/variants/x%2Fy/increment',
 		);
 	});
+
+	it('o caminho de wishlist serve ao PUT e à remoção, com card_number codificado', () => {
+		expect(variantApiPath('OP01-001', 'tcgplayer:1', 'wishlist')).toBe(
+			'/api/cards/OP01-001/variants/tcgplayer%3A1/wishlist',
+		);
+		expect(variantApiPath('A B/C', 'tcgplayer:1', 'wishlist')).toBe(
+			'/api/cards/A%20B%2FC/variants/tcgplayer%3A1/wishlist',
+		);
+	});
 });

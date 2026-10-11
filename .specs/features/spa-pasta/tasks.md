@@ -283,14 +283,16 @@ T16 → T17
 
 **Done when**:
 
-- [ ] `variantWishlistPath('OP01-001', 'tcgplayer:1')` → `/api/cards/OP01-001/variants/tcgplayer%3A1/wishlist`; `card_number` com espaço e `/` codificados
-- [ ] Gate check passes: Front quick
+- [x] `variantWishlistPath('OP01-001', 'tcgplayer:1')` → `/api/cards/OP01-001/variants/tcgplayer%3A1/wishlist`; `card_number` com espaço e `/` codificados
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
 
 **Commit**: `feat(spa-pasta): montar o caminho da remoção de desejo`
 
+
+**Registro**: Reusado `variantApiPath(card, variant, 'wishlist')` de `cards/url.ts`, que já serve ao `PUT`; `variantWishlistPath` não foi criado (a T14 usa `variantApiPath`).
 ---
 
 ### T8: "Minha pasta" na navegação da SPA
