@@ -169,6 +169,8 @@ Rails.application.routes.draw do
     put "cards/:card_number/variants/:variant_code/wishlist" => "card_variants#wishlist",
         as: :api_wishlist_card_variant,
         constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+    delete "cards/:card_number/variants/:variant_code/wishlist" => "card_variants#unwish",
+           constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
 
     match "*path", to: "not_found#show", via: :all
   end

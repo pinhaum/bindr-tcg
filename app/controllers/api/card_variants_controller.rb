@@ -25,6 +25,11 @@ class Api::CardVariantsController < Api::BaseController
     @wishlist_target = save_wishlist_target(target)
   end
 
+  # Idempotente (AD-027): sem desejo, nada a apagar e a resposta é a mesma.
+  def unwish
+    WishlistItem.for_user(Current.user).where(card_variant: @card_variant).delete_all
+  end
+
   private
     # Variante de outra carta e carta inexistente caem igual no 404 do base.
     def set_card_variant

@@ -172,18 +172,20 @@ T16 → T17
 
 **Done when**:
 
-- [ ] Request test em arquivo novo: com desejo → `200` com o corpo exato e o registro apagado; sem desejo → o mesmo `200` sem apagar nada (SPAS-43, AD-027)
-- [ ] O desejo de outro usuário na mesma variante continua gravado; `user_id` alheio no corpo e na query é ignorado (SPAS-45)
-- [ ] Carta inexistente e `variant_code` de outra carta → `404 not_found` sem apagar (SPAS-44)
-- [ ] `variant_code` `tcgplayer:123` enviado como `tcgplayer%3A123` é encontrado
-- [ ] Sem sessão → `401`; sem `X-CSRF-Token` com `allow_forgery_protection` ligado → `422 invalid_csrf_token` sem apagar; corpo JSON malformado → `400 invalid_json`
-- [ ] Gate check passes: Rails quick + `docker compose exec app bin/rails test` (suíte inteira sem edição, SPAS-46)
+- [x] Request test em arquivo novo: com desejo → `200` com o corpo exato e o registro apagado; sem desejo → o mesmo `200` sem apagar nada (SPAS-43, AD-027)
+- [x] O desejo de outro usuário na mesma variante continua gravado; `user_id` alheio no corpo e na query é ignorado (SPAS-45)
+- [x] Carta inexistente e `variant_code` de outra carta → `404 not_found` sem apagar (SPAS-44)
+- [x] `variant_code` `tcgplayer:123` enviado como `tcgplayer%3A123` é encontrado
+- [x] Sem sessão → `401`; sem `X-CSRF-Token` com `allow_forgery_protection` ligado → `422 invalid_csrf_token` sem apagar; corpo JSON malformado → `400 invalid_json`
+- [x] Gate check passes: Rails quick + `docker compose exec app bin/rails test` (suíte inteira sem edição, SPAS-46)
 
 **Tests**: integration
 **Gate**: full
 
 **Commit**: `feat(spa-pasta): remover desejo por variante na API`
 
+
+**Registro**: Achados MINOR da revisão de segurança (401/422 com carta inexistente sem teste; `user_id` alheio sem conta; 400 de corpo vazio) registrados no relatório, sem correção. Suíte Rails inteira: 1995 testes, 0 falhas.
 ---
 
 ### T4: Carregador genérico e tipos da pasta

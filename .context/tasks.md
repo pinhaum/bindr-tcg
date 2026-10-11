@@ -450,7 +450,7 @@ Plano da feature em `.specs/features/spa-pasta/tasks.md` (T1–T17, numeração
 própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
 Só abre depois do fechamento da §14 (`spa-carta`).
 
-- [ ] **15.1 API da pasta e da lista de desejos** — T1–T3 da `spa-pasta`
+- [x] **15.1 API da pasta e da lista de desejos** — T1–T3 da `spa-pasta`
   - `GET /api/progress`, `GET /api/wishlist` e `DELETE …/variants/:variant_code/wishlist`
     (AD-027), sobre as consultas da pasta e da lista Hotwire.
   - _Requisitos: 20.37–20.46_
