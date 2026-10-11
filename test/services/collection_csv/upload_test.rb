@@ -6,7 +6,10 @@ module CollectionCsv
   # `CollectionImportsController#create`, num objeto testável fora do request.
   class UploadTest < ActiveSupport::TestCase
     Arquivo = Struct.new(:conteudo, :original_filename) do
-      def read = conteudo.dup.force_encoding(Encoding::BINARY)
+      def read(limite = nil)
+        bytes = conteudo.b
+        limite ? bytes.byteslice(0, limite) : bytes
+      end
     end
 
     class ArquivoIntocavel
@@ -65,6 +68,42 @@ module CollectionCsv
         assert_equal Upload::BODY_TOO_LARGE_MESSAGE, resultado.error
         assert_includes resultado.error, "8 MB"
       end
+    end
+
+    test "content_length ausente (0) não burla o teto: o corpo lido acima de 8 MB é recusado" do
+      user = create_user
+      grande = "card_number,variant_code,card_name,quantity\n" + ("a" * Parser::MAX_BYTES)
+
+      assert_no_difference -> { CollectionImport.count } do
+        resultado = enviar(user, grande, length: 0)
+
+        assert_equal Upload::BODY_TOO_LARGE_MESSAGE, resultado.error
+        assert_nil resultado.preview
+      end
+    end
+
+    test "8 MB de linhas curtas são recusados por contagem sem chamar o Parser" do
+      user = create_user
+      curtas = "card_number,variant_code,card_name,quantity\n" + ("1\n" * ((Parser::MAX_BYTES - 100) / 2))
+
+      chamadas = 0
+      original = Parser.method(:new)
+      Parser.define_singleton_method(:new) { |*args| (chamadas += 1) && original.call(*args) }
+
+      begin
+        assert_no_difference -> { CollectionImport.count } do
+          inicio = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          resultado = enviar(user, curtas)
+
+          assert_operator Process.clock_gettime(Process::CLOCK_MONOTONIC) - inicio, :<, 2
+          assert_not_predicate resultado, :aceito?
+          assert_includes resultado.error, "linhas de dados e o limite é de 10.000 linhas"
+        end
+      ensure
+        Parser.singleton_class.send(:remove_method, :new)
+      end
+
+      assert_equal 0, chamadas
     end
 
     test "arquivo ausente para nil, string e objeto sem read" do

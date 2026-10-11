@@ -14,6 +14,11 @@ module CollectionCsv
     BODY_TOO_LARGE_MESSAGE = "O arquivo é grande demais: o limite é de 8 MB. " \
       "Envie o CSV exportado da sua coleção, sem colunas ou textos extras.".freeze
 
+    # Folga sobre `Parser::MAX_LINHAS` para quebras de linha dentro de células
+    # entre aspas: acima disto o arquivo tem linhas demais mesmo assim, e a
+    # recusa vem antes de o `CSV.parse` materializar milhões de linhas.
+    MAX_NEWLINES = Parser::MAX_LINHAS * 2
+
     Result = Struct.new(:preview, :error) do
       def aceito?
         error.nil?
@@ -30,7 +35,13 @@ module CollectionCsv
       return refuse(BODY_TOO_LARGE_MESSAGE) if @content_length.to_i > MAX_BODY_BYTES
       return refuse(MISSING_FILE_MESSAGE) unless @file.respond_to?(:read)
 
-      parsed = Parser.new(utf8_content).call
+      content = utf8_content
+      return refuse(BODY_TOO_LARGE_MESSAGE) if content.bytesize > Parser::MAX_BYTES
+
+      newlines = content.b.count("\n")
+      return refuse(too_many_rows_message(newlines)) if newlines > MAX_NEWLINES
+
+      parsed = Parser.new(content).call
       return refuse(parsed.erro) unless parsed.aceito?
 
       Result.new(
@@ -45,10 +56,18 @@ module CollectionCsv
 
     private
 
-      # Os bytes do Rack chegam em ASCII-8BIT; quem decide se são UTF-8 válido é
-      # o `Parser`, então só se reinterpreta, sem converter.
+      # Lê no máximo um byte além do teto: o Content-Length pode faltar ou mentir
+      # (chunked), então o limite é imposto na leitura. Os bytes do Rack chegam em
+      # ASCII-8BIT; quem decide se são UTF-8 válido é o `Parser`, então só se
+      # reinterpreta, sem converter.
       def utf8_content
-        @file.read.to_s.force_encoding(Encoding::UTF_8)
+        @file.read(Parser::MAX_BYTES + 1).to_s.dup.force_encoding(Encoding::UTF_8)
+      end
+
+      # Mesma frase do `Parser`; o número é a contagem de quebras, aproximada.
+      def too_many_rows_message(newlines)
+        "O arquivo tem #{newlines.to_s.reverse.scan(/\d{1,3}/).join(".").reverse} linhas de dados e o limite é de " \
+          "#{Parser::MAX_LINHAS.to_s.reverse.scan(/\d{1,3}/).join(".").reverse} linhas. Divida a importação em arquivos menores."
       end
 
       def refuse(message)
