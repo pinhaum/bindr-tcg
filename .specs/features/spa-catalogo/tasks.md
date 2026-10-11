@@ -234,11 +234,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Cada rótulo do SCAT-28 sai exato (Busca, Cor, Tipo, Set, Raridade, Attribute, Trait, Custo mín., Custo máx., Power mín., Power máx., Counter mín., Counter máx., Posse)
-- [ ] `{ colors: ['Red', 'Green'], owned: 'missing', sort: 'name', page: 2 }` dá três chips: "Cor: Red", "Cor: Green", "Posse: Não tenho", cada `href` sem o próprio valor, sem `page` e com `sort=name`
-- [ ] Sem filtro, `filterChips` devolve lista vazia
-- [ ] Gate check passes: quick
-- [ ] Test count: anteriores + novos, nenhum removido
+- [x] Cada rótulo do SCAT-28 sai exato (Busca, Cor, Tipo, Set, Raridade, Attribute, Trait, Custo mín., Custo máx., Power mín., Power máx., Counter mín., Counter máx., Posse)
+- [x] `{ colors: ['Red', 'Green'], owned: 'missing', sort: 'name', page: 2 }` dá três chips: "Cor: Red", "Cor: Green", "Posse: Não tenho", cada `href` sem o próprio valor, sem `page` e com `sort=name`
+- [x] Sem filtro, `filterChips` devolve lista vazia
+- [x] Gate check passes: quick
+- [x] Test count: anteriores + novos, nenhum removido
 
 **Tests**: unit
 **Gate**: quick

@@ -6,6 +6,8 @@ vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
 import {
 	catalogHref,
 	clearHref,
+	FILTER_LABELS,
+	filterChips,
 	pageHref,
 	searchHref,
 	setHref,
@@ -169,5 +171,58 @@ describe('preservação (SCAT-27)', () => {
 		keep(pageHref({ ...all }, 2));
 		keep(searchHref({ ...all }, 'x'));
 		keep(setHref({ ...all }, 'OP01'));
+	});
+});
+
+describe('chips de filtros ativos (SCAT-28)', () => {
+	it('rótulos exatos', () => {
+		expect(FILTER_LABELS).toEqual({
+			q: 'Busca',
+			colors: 'Cor',
+			card_types: 'Tipo',
+			sets: 'Set',
+			rarities: 'Raridade',
+			attributes: 'Attribute',
+			traits: 'Trait',
+			cost_min: 'Custo mín.',
+			cost_max: 'Custo máx.',
+			power_min: 'Power mín.',
+			power_max: 'Power máx.',
+			counter_min: 'Counter mín.',
+			counter_max: 'Counter máx.',
+			owned: 'Posse',
+		});
+	});
+
+	it('um chip por valor, sem sort, dir, page e per_page', () => {
+		const chips = filterChips({
+			colors: ['Red', 'Green'],
+			owned: 'missing',
+			sort: 'name',
+			page: 2,
+		});
+		expect(chips.map((chip) => chip.text)).toEqual([
+			'Cor: Red',
+			'Cor: Green',
+			'Posse: Não tenho',
+		]);
+		expect(chips[0]).toMatchObject({ key: 'colors', value: 'Red', label: 'Cor' });
+		expect(chips[0].href).toBe(enc('/app?colors[]=Green&owned=missing&sort=name'));
+		expect(chips[1].href).toBe(enc('/app?colors[]=Red&owned=missing&sort=name'));
+		expect(chips[2].href).toBe(enc('/app?colors[]=Red&colors[]=Green&sort=name'));
+	});
+
+	it('posse "owned" sai como Tenho', () => {
+		expect(filterChips({ owned: 'owned' })[0].text).toBe('Posse: Tenho');
+	});
+
+	it('valores numéricos e busca viram texto', () => {
+		const texts = filterChips({ q: 'luffy', cost_min: 2, power_max: 9000 }).map((c) => c.text);
+		expect(texts).toEqual(['Busca: luffy', 'Custo mín.: 2', 'Power máx.: 9000']);
+	});
+
+	it('sem filtro devolve lista vazia', () => {
+		expect(filterChips({})).toEqual([]);
+		expect(filterChips({ sort: 'name', dir: 'desc', page: 3, per_page: 24 })).toEqual([]);
 	});
 });
