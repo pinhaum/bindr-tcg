@@ -12,7 +12,7 @@
 	import { session } from '../../../lib/session.svelte';
 	import { notifyError, notifySuccess } from '../../../lib/toasts.svelte';
 
-	const loader = createLoader(() => api.get<{ data: WishlistEntry[] }>('/api/wishlist'));
+	const loader = createLoader(() => api.get<WishlistEntry[]>('/api/wishlist'));
 
 	const key = (entry: WishlistEntry) => `${entry.card_number}|${entry.variant_code}`;
 
@@ -33,7 +33,7 @@
 	$effect(() => {
 		void loader.state.seq;
 		const result = untrack(() => loader.state.result);
-		if (result) items = result.data;
+		if (result) items = result;
 	});
 
 	function retry(event: SubmitEvent) {

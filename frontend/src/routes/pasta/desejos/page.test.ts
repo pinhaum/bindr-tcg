@@ -72,7 +72,7 @@ describe('pasta/desejos/+page.svelte', () => {
 		apiMock.delete.mockReset();
 		toast.notifySuccess.mockReset();
 		toast.notifyError.mockReset();
-		apiMock.get.mockResolvedValue({ data: [entry(1), entry(2), entry(3)] });
+		apiMock.get.mockResolvedValue([entry(1), entry(2), entry(3)]);
 		apiMock.delete.mockResolvedValue({ data: {} });
 		sessionState.user = { email: 'ana@example.com' };
 	});
@@ -102,7 +102,7 @@ describe('pasta/desejos/+page.svelte', () => {
 		await vi.advanceTimersByTimeAsync(250);
 		expect(screen.getByText('Carregando lista de desejos…')).toBeInTheDocument();
 		expect(section()).toHaveAttribute('aria-busy', 'true');
-		slow.resolve({ data: [entry(1)] });
+		slow.resolve([entry(1)]);
 		await vi.advanceTimersByTimeAsync(0);
 		expect(section()).toHaveAttribute('aria-busy', 'false');
 	});
@@ -118,7 +118,7 @@ describe('pasta/desejos/+page.svelte', () => {
 	});
 
 	it('lista vazia com link para o catálogo (SPAS-28)', async () => {
-		apiMock.get.mockResolvedValue({ data: [] });
+		apiMock.get.mockResolvedValue([]);
 		render(Page);
 
 		expect(
@@ -131,12 +131,12 @@ describe('pasta/desejos/+page.svelte', () => {
 	});
 
 	it('contagem no singular e no plural, na ordem de data (SPAS-29)', async () => {
-		apiMock.get.mockResolvedValue({ data: [entry(2)] });
+		apiMock.get.mockResolvedValue([entry(2)]);
 		render(Page);
 		expect(await screen.findByText('1 item')).toBeInTheDocument();
 		cleanup();
 
-		apiMock.get.mockResolvedValue({ data: [entry(2), entry(1)] });
+		apiMock.get.mockResolvedValue([entry(2), entry(1)]);
 		render(Page);
 		expect(await screen.findByText('2 itens')).toBeInTheDocument();
 		const names = screen.getAllByRole('listitem').map((li) => li.textContent);
