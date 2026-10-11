@@ -73,7 +73,7 @@ const detail = (
 ): CardDetailPayload => ({
 	card_number: number,
 	name,
-	card_type: 'Character',
+	card_type: 'character',
 	colors: ['Red'],
 	cost: 1,
 	life: null,
@@ -209,6 +209,67 @@ describe('cartas/[card_number]/+page.svelte', () => {
 		expect(screen.getByRole('heading', { level: 1, name: 'Zoro' })).toBeInTheDocument();
 		expect(region).toHaveAttribute('aria-busy', 'false');
 		expect(screen.queryByText('Carregando carta…')).not.toBeInTheDocument();
+	});
+
+	it('SCAR-5: 404 da carta B mostra a message da API e esconde a carta A já carregada', async () => {
+		render(Page);
+		await h1('Luffy');
+		client.get.mockRejectedValueOnce(notFound());
+
+		await goTo('OP01-025');
+
+		expect(await h1('Carta não encontrada.')).toBeInTheDocument();
+		expect(screen.queryByRole('heading', { level: 1, name: 'Luffy' })).not.toBeInTheDocument();
+		expect(document.title).toBe('Carta não encontrada — Bindr');
+	});
+
+	it('SCAR-6: erro da carta B mostra a message e esconde a carta A já carregada', async () => {
+		render(Page);
+		await h1('Luffy');
+		client.get.mockRejectedValueOnce(networkError());
+
+		await goTo('OP01-025');
+
+		expect(await screen.findByRole('button', { name: 'Tentar novamente' })).toBeInTheDocument();
+		expect(screen.queryByRole('heading', { level: 1, name: 'Luffy' })).not.toBeInTheDocument();
+	});
+
+	it('SCAR-7: depois de 200 ms, "Tentar novamente" troca o erro pelo skeleton até a resposta', async () => {
+		client.get.mockRejectedValueOnce(networkError());
+		render(Page);
+		const retry = await screen.findByRole('button', { name: 'Tentar novamente' });
+		vi.useFakeTimers();
+		const pending = deferred<CardDetailPayload>();
+		client.get.mockReturnValue(pending.promise);
+
+		await fireEvent.click(retry);
+		await vi.advanceTimersByTimeAsync(199);
+		expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeInTheDocument();
+		expect(screen.queryByText('Carregando carta…')).not.toBeInTheDocument();
+
+		await vi.advanceTimersByTimeAsync(1);
+		expect(document.querySelector('[aria-busy]')).toHaveAttribute('aria-busy', 'true');
+		expect(screen.getByText('Carregando carta…')).toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument();
+
+		pending.resolve(detail('OP01-001', 'Luffy'));
+		await vi.advanceTimersByTimeAsync(0);
+		expect(screen.getByRole('heading', { level: 1, name: 'Luffy' })).toBeInTheDocument();
+	});
+
+	it('SCAR-7: depois de 200 ms, trocar de carta vindo de 404 mostra o skeleton no lugar da mensagem', async () => {
+		client.get.mockRejectedValueOnce(notFound());
+		render(Page);
+		await screen.findByText('Carta não encontrada.');
+		vi.useFakeTimers();
+		const pending = deferred<CardDetailPayload>();
+		client.get.mockReturnValue(pending.promise);
+
+		await goTo('OP01-025');
+		await vi.advanceTimersByTimeAsync(200);
+
+		expect(screen.getByText('Carregando carta…')).toBeInTheDocument();
+		expect(screen.queryByText('Carta não encontrada.')).not.toBeInTheDocument();
 	});
 
 	it('SCAR-8: troca de card_number refaz a consulta e descarta resposta da carta antiga', async () => {
@@ -544,6 +605,61 @@ describe('cartas/[card_number]/+page.svelte', () => {
 			await tick();
 			expect(screen.queryByRole('img', { name: /cópia/ })).not.toBeInTheDocument();
 			expect(screen.queryByText('9 cópias')).not.toBeInTheDocument();
+		});
+
+		it('SCAR-9: troca direta de A para B descarta a fila de A e exibe o owned_quantity de B', async () => {
+			session.user = { email: 'ana@example.com' };
+			const pending = deferred<{ variant_code: string; owned_quantity: number }>();
+			client.post.mockReturnValue(pending.promise);
+			render(Page);
+			await h1('Luffy');
+			await fireEvent.click(addCopy('tcgplayer:1'));
+
+			session.user = { email: 'bia@example.com' };
+			await waitFor(() => expect(client.get).toHaveBeenCalledTimes(2));
+			await tick();
+			pending.resolve({ variant_code: 'tcgplayer:1', owned_quantity: 9 });
+			await tick();
+			await tick();
+
+			expect(within(rowOf('tcgplayer:1')).getByText('2 cópias')).toBeInTheDocument();
+			expect(screen.queryByText('9 cópias')).not.toBeInTheDocument();
+		});
+
+		it('cruzar 64rem com "+" pendente mantém a fila, aplica a resposta e mantém uma só imagem', async () => {
+			const withImage = variants.map((v) => ({ ...v, image_url: `/card_images/${v.variant_code}` }));
+			client.get.mockResolvedValue(detail('OP01-001', 'Luffy', withImage));
+			const pending = deferred<{ variant_code: string; owned_quantity: number }>();
+			client.post.mockReturnValue(pending.promise);
+			const { container } = render(Page);
+			await h1('Luffy');
+			const artIn = (selector: string) =>
+				container.querySelectorAll(`${selector} img[alt="Luffy tcgplayer:1"]`).length;
+			const total = () => container.querySelectorAll('img[alt="Luffy tcgplayer:1"]').length;
+			const expectNarrowArt = () => {
+				expect([artIn('.thumb'), artIn('.expand'), artIn('.media'), total()]).toEqual([1, 1, 0, 2]);
+			};
+			const expectWideArt = () => {
+				expect([artIn('.thumb'), artIn('.expand'), artIn('.media'), total()]).toEqual([0, 0, 1, 1]);
+			};
+			expectNarrowArt();
+			await fireEvent.click(addCopy('tcgplayer:1'));
+			expect(within(rowOf('tcgplayer:1')).getByText('3 cópias')).toBeInTheDocument();
+
+			wideQuery.cross(true);
+			await tick();
+			expect(within(rowOf('tcgplayer:1')).getByText('3 cópias')).toBeInTheDocument();
+			expectWideArt();
+
+			pending.resolve({ variant_code: 'tcgplayer:1', owned_quantity: 4 });
+			expect(await within(rowOf('tcgplayer:1')).findByText('4 cópias')).toBeInTheDocument();
+
+			wideQuery.cross(false);
+			await tick();
+			expect(within(rowOf('tcgplayer:1')).getByText('4 cópias')).toBeInTheDocument();
+			expectNarrowArt();
+			expect(client.get).toHaveBeenCalledTimes(1);
+			expect(client.post).toHaveBeenCalledTimes(1);
 		});
 
 		it('sem sessão não há selo nem steppers, mesmo com owned_quantity na resposta', async () => {

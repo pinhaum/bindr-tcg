@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup, render, screen } from '@testing-library/svelte';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { CatalogCard } from '../api/types';
 import CardFields from './CardFields.svelte';
@@ -91,6 +93,9 @@ describe('CardFields — seção Efeito (SCAR-18)', () => {
 		const { container } = render(CardFields, { card: card({ effect_text: 'a\nb' }) });
 		const p = container.querySelector('.effect-text') as HTMLElement;
 		expect(p.textContent).toBe('a\nb');
+		const source = readFileSync(resolve(process.cwd(), 'src/lib/components/CardFields.svelte'), 'utf8');
+		const rule = source.match(/\.effect-text\s*\{([^}]*)\}/);
+		expect(rule?.[1]).toMatch(/white-space:\s*pre-line/);
 	});
 
 	it('trigger depois do efeito, sob o rótulo Trigger em <strong>', () => {

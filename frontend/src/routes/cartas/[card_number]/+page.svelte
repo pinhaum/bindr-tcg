@@ -108,16 +108,16 @@
 {/if}
 
 <section class="detail" aria-busy={loader.state.skeleton}>
-	{#if notFound !== null}
+	{#if loader.state.skeleton}
+		<p class="visually-hidden">Carregando carta…</p>
+		<div class="skeleton" aria-hidden="true"></div>
+	{:else if notFound !== null}
 		<h1>{notFound}</h1>
 	{:else if error}
 		<form class="message" onsubmit={retry}>
 			<p role="alert">{error.message}</p>
 			<Button>Tentar novamente</Button>
 		</form>
-	{:else if loader.state.skeleton}
-		<p class="visually-hidden">Carregando carta…</p>
-		<div class="skeleton" aria-hidden="true"></div>
 	{:else if result}
 		{#key detailKey}
 			<CardHeader card={result} {featured} {owned} {signedIn} />

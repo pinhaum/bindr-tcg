@@ -2,11 +2,8 @@
 	import { tick, untrack } from 'svelte';
 	import { ApiError } from '../api/errors';
 	import { copies } from '../format';
-	import {
-		createOwnershipQueue,
-		type OwnershipOp,
-		type OwnershipResult
-	} from '../cards/ownership-queue.svelte';
+	import type { OwnershipResult } from '../api/types';
+	import { createOwnershipQueue, type OwnershipOp } from '../cards/ownership-queue.svelte';
 	import { notifyError } from '../toasts.svelte';
 
 	interface Props {

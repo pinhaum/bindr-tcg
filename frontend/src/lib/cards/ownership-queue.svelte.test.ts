@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/errors';
-import { createOwnershipQueue, type OwnershipOp, type OwnershipResult } from './ownership-queue.svelte';
+import type { OwnershipResult } from '../api/types';
+import { createOwnershipQueue, type OwnershipOp } from './ownership-queue.svelte';
 
 type Deferred = {
 	op: OwnershipOp;
@@ -15,7 +16,7 @@ function setup(confirmed = 0) {
 			new Promise<OwnershipResult>((resolve, reject) => {
 				calls.push({
 					op,
-					resolve: (quantity) => resolve({ owned_quantity: quantity }),
+					resolve: (quantity) => resolve({ variant_code: 'tcgplayer:1', owned_quantity: quantity }),
 					reject
 				});
 			})

@@ -100,7 +100,7 @@
 				target={variant.wishlist_target}
 			/>
 		{:else}
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- loginHref parte de appPath -->
 			<a class="login" href={loginHref}>Entrar para registrar posse</a>
 		{/if}
 	</div>

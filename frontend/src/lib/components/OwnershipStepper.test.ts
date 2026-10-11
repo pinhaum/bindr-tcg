@@ -5,7 +5,8 @@ import { resolve } from 'node:path';
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/errors';
-import type { OwnershipOp, OwnershipResult } from '../cards/ownership-queue.svelte';
+import type { OwnershipResult } from '../api/types';
+import type { OwnershipOp } from '../cards/ownership-queue.svelte';
 import { toasts } from '../toasts.svelte';
 import OwnershipStepper from './OwnershipStepper.svelte';
 
@@ -24,7 +25,7 @@ function setup(confirmed: number) {
 	const send = vi.fn(
 		(op: OwnershipOp) =>
 			new Promise<OwnershipResult>((resolve, reject) => {
-				calls.push({ op, resolve: (quantity) => resolve({ owned_quantity: quantity }), reject });
+				calls.push({ op, resolve: (quantity) => resolve({ variant_code: CODE, owned_quantity: quantity }), reject });
 			})
 	);
 	const view = render(OwnershipStepper, { name: NAME, variantCode: CODE, confirmed, send });

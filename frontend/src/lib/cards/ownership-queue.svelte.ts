@@ -1,6 +1,6 @@
-export type OwnershipOp = 'increment' | 'decrement';
+import type { OwnershipResult } from '../api/types';
 
-export type OwnershipResult = { owned_quantity: number };
+export type OwnershipOp = 'increment' | 'decrement';
 
 export type OwnershipQueueOptions = {
 	confirmed: number;

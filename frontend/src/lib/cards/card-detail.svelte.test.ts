@@ -190,6 +190,51 @@ describe('createCardDetailLoader', () => {
 		expect(loader.state.result).toEqual(card('P-029'));
 	});
 
+	it('durante o retry o erro permanece até a resposta e o skeleton liga depois de 200 ms', async () => {
+		const failure = new ApiError(0, 'network_error', 'Sem conexão.');
+		const second = deferred<CardDetailPayload>();
+		const get = vi.fn().mockRejectedValueOnce(failure).mockReturnValueOnce(second.promise);
+		const loader = createCardDetailLoader(clientWith(get));
+		loader.load('P-029', undefined);
+		await flush();
+
+		loader.retry();
+		await vi.advanceTimersByTimeAsync(199);
+		expect(loader.state.skeleton).toBe(false);
+		expect(loader.state.error).toBe(failure);
+
+		await vi.advanceTimersByTimeAsync(1);
+		expect(loader.state.skeleton).toBe(true);
+		expect(loader.state.pending).toBe(true);
+
+		second.resolve(card('P-029'));
+		await flush();
+		expect(loader.state.skeleton).toBe(false);
+		expect(loader.state.error).toBeNull();
+		expect(loader.state.result).toEqual(card('P-029'));
+	});
+
+	it('ao trocar de carta vindo de notFound, o skeleton liga depois de 200 ms e notFound sai com a resposta', async () => {
+		const second = deferred<CardDetailPayload>();
+		const get = vi
+			.fn()
+			.mockRejectedValueOnce(new ApiError(404, 'not_found', 'Carta não encontrada.'))
+			.mockReturnValueOnce(second.promise);
+		const loader = createCardDetailLoader(clientWith(get));
+		loader.load('X-999', undefined);
+		await flush();
+
+		loader.load('P-029', undefined);
+		await vi.advanceTimersByTimeAsync(200);
+		expect(loader.state.skeleton).toBe(true);
+		expect(loader.state.notFound).toBe('Carta não encontrada.');
+
+		second.resolve(card('P-029'));
+		await flush();
+		expect(loader.state.skeleton).toBe(false);
+		expect(loader.state.notFound).toBeNull();
+	});
+
 	it('retry repete a última consulta', async () => {
 		const get = vi
 			.fn()
