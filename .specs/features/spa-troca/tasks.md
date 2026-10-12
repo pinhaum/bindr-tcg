@@ -316,11 +316,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Cada linha da tabela do design casa, inclusive `/cards/P.029`, `/cards/OP01-001` com query `variant=tcgplayer%3A123`, `/collection/import/<token>` e `/decks/7/edit`
-- [ ] Query devolvida crua (`colors[]=Red&colors[]=Green&sort=name` igual); sem query, sem `?`
-- [ ] Segmento codificado passa igual (`%2E`, `%3A`)
-- [ ] `/app` → `/`; `/app/pasta/desejos` → `/pasta/desejos`; `/app//evil.com` → `nil`; `/app/%2F%2Fevil.com` → `/%2F%2Fevil.com`; caminho sem regra (`/decks/1/x`) → `nil`
-- [ ] Gate check passes: Rails quick
+- [x] Cada linha da tabela do design casa, inclusive `/cards/P.029`, `/cards/OP01-001` com query `variant=tcgplayer%3A123`, `/collection/import/<token>` e `/decks/7/edit`
+- [x] Query devolvida crua (`colors[]=Red&colors[]=Green&sort=name` igual); sem query, sem `?`
+- [x] Segmento codificado passa igual (`%2E`, `%3A`)
+- [x] `/app` → `/`; `/app/pasta/desejos` → `/pasta/desejos`; `/app//evil.com` → `nil`; `/app/%2F%2Fevil.com` → `/%2F%2Fevil.com`; caminho sem regra (`/decks/1/x`) → `nil`
+- [x] Gate check passes: Rails quick
 
 **Tests**: unit
 **Gate**: quick
