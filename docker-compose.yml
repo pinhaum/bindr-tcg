@@ -56,9 +56,9 @@ services:
       - "5173:5173"
     depends_on:
       - app
-    # `npm ci` + Vite demoram; o e2e espera o dev server responder em /app/.
+    # `npm ci` + Vite demoram; o e2e espera o dev server responder em /.
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:5173/app/').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5173/').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
       interval: 3s
       timeout: 5s
       retries: 100

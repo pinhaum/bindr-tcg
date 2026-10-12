@@ -7,7 +7,7 @@ export default defineConfig({
 	forbidOnly: true,
 	reporter: 'list',
 	use: {
-		baseURL: 'http://frontend:5173/app/',
+		baseURL: 'http://frontend:5173/',
 		locale: 'pt-BR',
 		trace: 'retain-on-failure'
 	}

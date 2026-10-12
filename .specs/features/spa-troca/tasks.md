@@ -372,9 +372,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Vitest: o padrão casa `/api/session`, `/card_images/x`, `/up`, `/collection/export`, `/decks/5.txt`, `/catalog?x=1`, `/cards/OP01-001`, `/app`, `/app/pasta`, `/collection_items/1/increment`, `/icon.png`, `/404.html`; não casa `/`, `/entrar`, `/cartas/OP01-001`, `/pasta`, `/baralhos/novo`, `/@vite/client`, `/src/app.html`, `/cardsx`
-- [ ] `curl` pela porta do Vite: `/` responde a SPA e `/api/session` responde JSON do Rails
-- [ ] Gate check passes: Front quick
+- [x] Vitest: o padrão casa `/api/session`, `/card_images/x`, `/up`, `/collection/export`, `/decks/5.txt`, `/catalog?x=1`, `/cards/OP01-001`, `/app`, `/app/pasta`, `/collection_items/1/increment`, `/icon.png`, `/404.html`; não casa `/`, `/entrar`, `/cartas/OP01-001`, `/pasta`, `/baralhos/novo`, `/@vite/client`, `/src/app.html`, `/cardsx`
+- [x] `curl` pela porta do Vite: `/` responde a SPA e `/api/session` responde JSON do Rails
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
