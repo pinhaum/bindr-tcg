@@ -10,6 +10,7 @@
 	import Button from '../../../lib/components/Button.svelte';
 	import CardFields from '../../../lib/components/CardFields.svelte';
 	import CardHeader from '../../../lib/components/CardHeader.svelte';
+	import EditingDeckPanel from '../../../lib/components/EditingDeckPanel.svelte';
 	import VariantRow from '../../../lib/components/VariantRow.svelte';
 	import { appPath } from '../../../lib/navigation/nav-entries';
 	import { session } from '../../../lib/session.svelte';
@@ -153,6 +154,14 @@
 						{/each}
 					</ul>
 				</section>
+			{/if}
+			{#if signedIn && result.editing_deck}
+				<EditingDeckPanel
+					deck={result.editing_deck}
+					cardNumber={result.card_number}
+					name={result.name}
+					cardType={result.card_type}
+				/>
 			{/if}
 		{/key}
 	{/if}

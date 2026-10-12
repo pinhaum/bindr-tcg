@@ -795,10 +795,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Payload com `editing_deck: null` ou sem sessão → sem seção "Deck em edição" (SDEC-34); com deck → seção presente (SDEC-33)
-- [ ] Trocar de carta com `+` pendente descarta o não enviado e não aplica a resposta antiga à carta nova (edge case)
-- [ ] Testes existentes da página da carta passam sem edição
-- [ ] Gate check passes: Front quick
+- [x] Payload com `editing_deck: null` ou sem sessão → sem seção "Deck em edição" (SDEC-34); com deck → seção presente (SDEC-33)
+- [x] Trocar de carta com `+` pendente descarta o não enviado e não aplica a resposta antiga à carta nova (edge case)
+- [x] Testes existentes da página da carta passam sem edição
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
