@@ -114,7 +114,7 @@ T24 → T25
 **Depends on**: None
 **Reuses**: helpers de login e CSRF de `test/integration/api/card_variants_wishlist_test.rb`; origens no inventário (authentication:152,160,169; collection_authorization:258; progress_authorization:252,294,319; collection_imports:274; sessions:114,166)
 **Requirement**: STRO-23, STRO-24, STRO-31
-**Base da feature (`<base>`)**: _a registrar_
+**Base da feature (`<base>`)**: `880f3c0`
 
 **Tools**:
 
@@ -123,12 +123,12 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `session_id` em params, cookie `session_id` não assinado e cookie de sessão destruída → `401` em `GET /api/progress`
-- [ ] Login de A, `increment`, login de B no mesmo cookie jar, `increment` → a gravação vai para B e A fica intacta; `GET /api/progress` reflete B
-- [ ] Header `X-User-Id` com id alheio ignorado em `GET /api/progress` e `POST /api/collection/imports`
-- [ ] Login com o e-mail em outra caixa aceito
-- [ ] `select` de deck, logout e login (mesma conta e outra conta) → `editing_deck` nulo em `GET /api/cards/:n` (STRO-23)
-- [ ] Gate check passes: Rails quick
+- [x] `session_id` em params, cookie `session_id` não assinado e cookie de sessão destruída → `401` em `GET /api/progress`
+- [x] Login de A, `increment`, login de B no mesmo cookie jar, `increment` → a gravação vai para B e A fica intacta; `GET /api/progress` reflete B
+- [x] Header `X-User-Id` com id alheio ignorado em `GET /api/progress` e `POST /api/collection/imports`
+- [x] Login com o e-mail em outra caixa aceito
+- [x] `select` de deck, logout e login (mesma conta e outra conta) → `editing_deck` nulo em `GET /api/cards/:n` (STRO-23)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
