@@ -214,7 +214,7 @@ sem perder nenhuma garantia de autorização, concorrência ou dado.
 
 30. The system SHALL remover cada teste cujo objeto é só markup, CSS, Turbo ou helper de view do HTML junto com o código que ele testa.
 31. The system SHALL ter, antes de remover um teste HTML que prove garantia que continua valendo (isolamento entre usuários do Req. 6.5, corrida de posse e de deck, ida e volta do CSV, confirmação única do import, números da pasta e do que falta), um teste equivalente sobre a API, o model ou o query object, com o destino de cada arquivo removido registrado num inventário.
-32. The system SHALL manter passando sem edição os testes de model, query, service, lib, API e imagem, e o teste de entrega da SPA SHALL mudar só para a raiz.
+32. The system SHALL manter passando sem edição os testes de model, query, service, lib, API e imagem, e o teste de entrega da SPA SHALL mudar só para a raiz; IF um desses testes autenticar pelo login HTML ou comparar com página ou CSS do Hotwire THEN the system SHALL admitir só a troca do login por `POST /api/session` e a retirada das partes que leem HTML ou CSS, sem mudar asserção sobre a API, o model ou o query, com cada edição no inventário (STRO-31). *(emendado em 2026-10-12, aprovado pelo dono)*
 33. The system SHALL ter teste para cada redirecionamento do STRO-11 e do STRO-12 (status e `Location` com query) e para o `404` do STRO-15.
 34. The system SHALL rodar o e2e contra a raiz, e todo teste que hoje compara a SPA com página Hotwire SHALL comparar com a resposta da API ou com o banco.
 35. WHEN a troca terminar THEN the system SHALL passar `bin/rails test`, `bin/rubocop`, `bin/brakeman`, os gates quick e e2e do front e `docker build -f Dockerfile .`.
@@ -293,7 +293,7 @@ sem perder nenhuma garantia de autorização, concorrência ou dado.
 | STRO-29 | P1: Remoção — sem migração nem dado alterado (Req. 23.29) | - | Pending |
 | STRO-30 | P1: Suíte — testes só de HTML saem (Req. 23.30) | - | Pending |
 | STRO-31 | P1: Suíte — garantias com equivalente e inventário (Req. 23.31) | - | Pending |
-| STRO-32 | P1: Suíte — testes de domínio sem edição (Req. 23.32) | - | Pending |
+| STRO-32 | P1: Suíte — testes de domínio sem edição, salvo login e HTML (Req. 23.32, emendado) | - | Pending |
 | STRO-33 | P1: Suíte — testes dos redirecionamentos (Req. 23.33) | - | Pending |
 | STRO-34 | P1: Suíte — e2e na raiz e sem Hotwire (Req. 23.34) | - | Pending |
 | STRO-35 | P1: Suíte — gates finais (Req. 23.35) | - | Pending |

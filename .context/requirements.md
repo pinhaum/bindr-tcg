@@ -2234,7 +2234,13 @@ nos Req. 17 a 22 passa a ler `/<caminho>`.
     equivalente sobre a API, o model ou o query object antes de sair, com o
     destino de cada arquivo removido registrado num inventário.
 32. Os testes de model, query, service, lib, API e imagem DEVEM passar sem
-    edição; o teste da entrega da SPA muda só para a raiz.
+    edição; o teste da entrega da SPA muda só para a raiz. Exceção: o teste
+    desses grupos que autentica pelo login HTML ou compara com página ou CSS
+    do Hotwire PODE trocar o login por `POST /api/session` e perder as partes
+    que leem HTML ou CSS, sem mudar asserção sobre a API, o model ou o query,
+    com cada edição registrada no inventário do critério 31.
+    *(emendado em 2026-10-12, spa-troca: oito arquivos de API e de query
+    dependiam do HTML, ver `design.md` da `spa-troca`, Risks)*
 33. Cada redirecionamento dos critérios 11 e 12 DEVE ter teste do status, do
     `Location` com query e do `404` de método diferente de `GET`/`HEAD`.
 34. O e2e DEVE rodar contra a raiz; teste que compara a SPA com página Hotwire
