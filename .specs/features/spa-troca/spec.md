@@ -9,7 +9,7 @@ especificadas nesta rodada e ainda não implementadas: `spa-catalogo` (Req. 18),
 `spa-portabilidade` (Req. 22). Não cria tela nem endpoint de `/api`. Escrita em
 2026-10-10 sem o dono presente; as escolhas dele estão marcadas `Confirmed? não`
 abaixo. As duas de contrato público, P14 (rotas de arquivo) e P15 (status dos
-redirecionamentos), foram decididas pelo dono em 2026-10-11 (AD-030); segue
+redirecionamentos), foram decididas pelo dono em 2026-10-11 (AD-031); segue
 aberto o `⚠️ VERIFICAR` do `propshaft` em P16.
 
 ## Problem Statement
@@ -36,7 +36,7 @@ sem perder nenhuma garantia de autorização, concorrência ou dado.
 | Feature | Reason |
 |---|---|
 | Tela nova ou mudança de comportamento de tela | A régua é a paridade (AD-023); cada tela pertence à sua fatia. O estado "Página não encontrada" (STRO-10) é o substituto do `404` do Rails, não tela de produto. |
-| Endpoint novo em `/api` | Todas as telas da checklist já têm seus endpoints nas fatias; os downloads ficam fora de `/api` pelo P14 (AD-030). |
+| Endpoint novo em `/api` | Todas as telas da checklist já têm seus endpoints nas fatias; os downloads ficam fora de `/api` pelo P14 (AD-031). |
 | Implementar as fatias que faltam ou emendar seus specs | Cada fatia é dona do seu spec. A emenda do SCAT-03 (`spa-catalogo`) é pré-condição desta feature (STRO-02), feita no spec da `spa-catalogo`, não aqui. |
 | Botão "Copiar lista" do deck, download do texto pela SPA | Melhoria além da paridade, já fora da `spa-decks`. |
 | Status `404` HTTP para caminho desconhecido sob a raiz | O fallback do adapter-static responde `200` para todo caminho; dar `404` exigiria o Rails conhecer as rotas da SPA. A tela mostra "Página não encontrada" (STRO-10). |
@@ -53,8 +53,8 @@ sem perder nenhuma garantia de autorização, concorrência ou dado.
 
 | Assumption / decision | Chosen default | Rationale | Confirmed? |
 |---|---|---|---|
-| **P14** — destino de `GET /collection/export` e `GET /decks/<id>.txt` | Manter nas URLs atuais, como rotas do Rails fora de `/api`, com sessão e `302` para `/entrar?return_to=` sem ela (STRO-16..19, 22). Alternativa: movê-las para `/api`, emendando o Req. 16.14 para admitir `text/csv` e `text/plain` | Download não é tela; o Req. 16.14 ("todo endpoint de `/api` responde JSON") e a varredura do `end_to_end_test.rb` continuam simples; a URL `/decks/<id>.txt` já foi usada no simulador (T21 da `decks`) e as fatias `spa-pasta`, `spa-decks` e `spa-portabilidade` já linkam para as duas. Mover para `/api` mudaria contrato público e invariante do Req. 16 | Sim — dono, 2026-10-11 (AD-030) |
-| **P15** — status dos redirecionamentos | `301` (STRO-11, STRO-12). Alternativa: `302` | A AD-023 torna a troca definitiva e o Req. 4.7 pede URL estável; `301` atualiza favoritos e buscadores. O custo é de reversão: o navegador guarda o `301`, e um rollback para a imagem com Hotwire deixaria favoritos apontando para rotas que ela não tem. O dono aceitou esse custo | Sim — dono, 2026-10-11 (AD-030) |
+| **P14** — destino de `GET /collection/export` e `GET /decks/<id>.txt` | Manter nas URLs atuais, como rotas do Rails fora de `/api`, com sessão e `302` para `/entrar?return_to=` sem ela (STRO-16..19, 22). Alternativa: movê-las para `/api`, emendando o Req. 16.14 para admitir `text/csv` e `text/plain` | Download não é tela; o Req. 16.14 ("todo endpoint de `/api` responde JSON") e a varredura do `end_to_end_test.rb` continuam simples; a URL `/decks/<id>.txt` já foi usada no simulador (T21 da `decks`) e as fatias `spa-pasta`, `spa-decks` e `spa-portabilidade` já linkam para as duas. Mover para `/api` mudaria contrato público e invariante do Req. 16 | Sim — dono, 2026-10-11 (AD-031) |
+| **P15** — status dos redirecionamentos | `301` (STRO-11, STRO-12). Alternativa: `302` | A AD-023 torna a troca definitiva e o Req. 4.7 pede URL estável; `301` atualiza favoritos e buscadores. O custo é de reversão: o navegador guarda o `301`, e um rollback para a imagem com Hotwire deixaria favoritos apontando para rotas que ela não tem. O dono aceitou esse custo | Sim — dono, 2026-10-11 (AD-031) |
 | **⚠️ VERIFICAR P16** — Rails 8.0 sem `propshaft` | Retirar a gem junto com `config/initializers/assets.rb` e as referências a `config.assets` (STRO-27) | Depois da troca não resta arquivo em `app/assets/` para servir; o build da SPA vem do estágio Node. Não confirmei que o Rails 8.0.5 sobe sem a gem nem que nenhum ambiente (`production.rb`, `Dockerfile` com `assets:precompile`) depende dela; o design confirma antes da task | Não — ⚠️ VERIFICAR |
 | Pré-condição de paridade | A troca só começa com as cinco fatias encerradas e verificadas (`validation.md` PASS) e o SCAT-03 emendado (STRO-01, STRO-02) | É a regra da AD-023 ("ele sai quando a SPA atingir paridade"); remover antes deixaria o usuário sem uma tela | Não — escolha do agente, segue a AD-023 |
 | Remoção em bloco | O Hotwire sai de uma vez, numa feature, e não tela a tela junto de cada fatia | As fatias decidiram manter o HTML intacto (Req. 16.17, 17.4, 19.49, 20.46, 21.61, 22.45); a remoção depende de rotas, concerns e suíte compartilhados | Não — escolha do agente |
@@ -74,7 +74,7 @@ sem perder nenhuma garantia de autorização, concorrência ou dado.
 | Notas de emenda nos critérios superados | Uma linha em itálico em cada critério superado, como a emenda do Req. 12.2 (STRO-36) | Padrão de emenda já usado no `.context/requirements.md`; o Req. 23 lista os superados para a task não precisar redescobrir | Não — escolha do agente |
 | Imagens | `/card_images/<variant_code>` continua igual: rota, `Cache-Control` de um ano, `404` e `502` (STRO-28) | A API devolve `card_image_path` no payload (`_variant.json.jbuilder`); o controller hoje herda do `ApplicationController` do HTML, e o design escolhe a nova base sem mudar a resposta | Não — escolha do agente |
 
-**Open questions:** none - all resolved or logged above. P14 e P15 decididos pelo dono em 2026-10-11 (AD-030); o P16 é verificado no design.
+**Open questions:** none - all resolved or logged above. P14 e P15 decididos pelo dono em 2026-10-11 (AD-031); o P16 é verificado no design.
 
 ---
 
@@ -141,8 +141,8 @@ sem perder nenhuma garantia de autorização, concorrência ou dado.
 
 **Acceptance Criteria**:
 
-11. WHEN chegar `GET` numa URL Hotwire da checklist, salvo `/`, THEN the system SHALL redirecionar para o destino da mesma linha na SPA, com `301` (P15, AD-030) e a query string preservada sem alteração.
-12. WHEN chegar `GET /app` ou `GET /app/<caminho>` THEN the system SHALL redirecionar para `/` ou `/<caminho>`, com `301` (P15, AD-030) e a query preservada.
+11. WHEN chegar `GET` numa URL Hotwire da checklist, salvo `/`, THEN the system SHALL redirecionar para o destino da mesma linha na SPA, com `301` (P15, AD-031) e a query string preservada sem alteração.
+12. WHEN chegar `GET /app` ou `GET /app/<caminho>` THEN the system SHALL redirecionar para `/` ou `/<caminho>`, com `301` (P15, AD-031) e a query preservada.
 13. The system SHALL derivar o destino do redirecionamento só do caminho, sem exigir sessão e sem consultar o banco.
 14. The system SHALL repassar o segmento dinâmico (`card_number`, `id`, `token`) ao destino com a mesma codificação percentual da URL pedida.
 15. IF chegar requisição de método diferente de `GET` e `HEAD` a uma rota HTML removida THEN the system SHALL responder `404` sem gravar nada, nunca a página de entrada nem `500`.

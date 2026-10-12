@@ -2088,7 +2088,7 @@ Hotwire só sai quando cada linha dela estiver coberta por uma fatia SPA
 encerrada e verificada.
 
 As escolhas do P14 (rotas de arquivo nas URLs atuais) e do P15 (`301`) foram
-decididas pelo dono em 2026-10-11 (AD-030); o `⚠️ VERIFICAR` do critério 27
+decididas pelo dono em 2026-10-11 (AD-031); o `⚠️ VERIFICAR` do critério 27
 segue no *Rastreamento de pendências* (P16).
 
 **Checklist de paridade.** Cada tela Hotwire e a fatia SPA que a cobre:
@@ -2264,8 +2264,8 @@ nos Req. 17 a 22 passa a ler `/<caminho>`.
 | P9 | Chave das rotas de posse e desejo da API | `card_number` + `variant_code` no caminho (AD-027, 2026-10-11) | Req. 19.42–19.47; `.specs/features/spa-carta/spec.md` |
 | P10 | Decremento em zero na API | `200` com `owned_quantity: 0`, sem gravar (AD-027, 2026-10-11) | Req. 19.43; `.specs/features/spa-carta/spec.md` |
 | P11 | Remoção de desejo na API | `DELETE /api/cards/:card_number/variants/:variant_code/wishlist`, `200` também sem desejo (AD-027, 2026-10-11) | Req. 20.43; `.specs/features/spa-pasta/spec.md` |
-| P14 | Destino das rotas de arquivo `GET /collection/export` e `GET /decks/<id>.txt` depois da troca | Ficam nas URLs atuais, como rotas do Rails fora de `/api`, com sessão e `302` para `/entrar?return_to=` sem ela; o Req. 16.14 continua valendo (AD-030, 2026-10-11) | Req. 23.16–23.19, 23.22; `.specs/features/spa-troca/spec.md` |
-| P15 | Status dos redirecionamentos das URLs Hotwire e de `/app` | `301` permanente; aceito o custo de que um rollback para a imagem com Hotwire encontra favoritos com o `301` em cache (AD-030, 2026-10-11) | Req. 23.11, 23.12; `.specs/features/spa-troca/spec.md` |
+| P14 | Destino das rotas de arquivo `GET /collection/export` e `GET /decks/<id>.txt` depois da troca | Ficam nas URLs atuais, como rotas do Rails fora de `/api`, com sessão e `302` para `/entrar?return_to=` sem ela; o Req. 16.14 continua valendo (AD-031, 2026-10-11) | Req. 23.16–23.19, 23.22; `.specs/features/spa-troca/spec.md` |
+| P15 | Status dos redirecionamentos das URLs Hotwire e de `/app` | `301` permanente; aceito o custo de que um rollback para a imagem com Hotwire encontra favoritos com o `301` em cache (AD-031, 2026-10-11) | Req. 23.11, 23.12; `.specs/features/spa-troca/spec.md` |
 
 ### Em aberto
 
