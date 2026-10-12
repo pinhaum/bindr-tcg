@@ -582,16 +582,16 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Por linha da checklist, `/app`, `/app/pasta?order=code`, `/app/cartas/P-029`, `/app/entrar?return_to=%2Fapp%2Fpasta`, `/catalog?colors[]=Red&colors[]=Green&sort=name`, `/cards/P.029`: `301` e `Location` exato; zero consultas SQL; `HEAD` igual
-- [ ] `/decks/<id>` de deck alheio redireciona sem consultar
-- [ ] `/app//evil.com` → `404`; `/app/_app/x.js` → `404`
-- [ ] `POST /collection_items/1/increment`, `DELETE /wishlist/1`, `DELETE /session`, `PATCH /decks/1` → `404` com `collection_items`, `wishlist_items`, `decks` e `sessions` iguais
-- [ ] Anônimo em `/collection/export` → `302` para `/entrar?return_to=%2Fcollection%2Fexport`; em `/decks/5.txt` → `/entrar?return_to=%2Fdecks%2F5.txt`
-- [ ] Sessão aberta antes do corte lida pelo mesmo cookie em `GET /api/session` (STRO-24)
-- [ ] `/`, `/catalog` já não respondem HTML do Rails; `GET /` é a entrada da SPA
-- [ ] Nenhum `new_session_path`, `return_to_after_authenticating` nem `after_authentication_url` em `app/`
-- [ ] Cada arquivo removido consta do inventário; os testes de `api/`, `models/`, `queries/`, `services/`, `lib/` e de imagem não mudam nesta task
-- [ ] Gate check passes: Rails quick
+- [x] Por linha da checklist, `/app`, `/app/pasta?order=code`, `/app/cartas/P-029`, `/app/entrar?return_to=%2Fapp%2Fpasta`, `/catalog?colors[]=Red&colors[]=Green&sort=name`, `/cards/P.029`: `301` e `Location` exato; zero consultas SQL; `HEAD` igual
+- [x] `/decks/<id>` de deck alheio redireciona sem consultar
+- [x] `/app//evil.com` → `404`; `/app/_app/x.js` → `404`
+- [x] `POST /collection_items/1/increment`, `DELETE /wishlist/1`, `DELETE /session`, `PATCH /decks/1` → `404` com `collection_items`, `wishlist_items`, `decks` e `sessions` iguais
+- [x] Anônimo em `/collection/export` → `302` para `/entrar?return_to=%2Fcollection%2Fexport`; em `/decks/5.txt` → `/entrar?return_to=%2Fdecks%2F5.txt`
+- [x] Sessão aberta antes do corte lida pelo mesmo cookie em `GET /api/session` (STRO-24)
+- [x] `/`, `/catalog` já não respondem HTML do Rails; `GET /` é a entrada da SPA
+- [x] Nenhum `new_session_path`, `return_to_after_authenticating` nem `after_authentication_url` em `app/`
+- [x] Cada arquivo removido consta do inventário; os testes de `api/`, `models/`, `queries/`, `services/`, `lib/` e de imagem não mudam nesta task
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
@@ -615,8 +615,8 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `git ls-files app/helpers app/assets app/javascript vendor/javascript test/design test/helpers app/views | grep -v '^app/views/api/'` vazio
-- [ ] Gate check passes: Rails quick
+- [x] `git ls-files app/helpers app/assets app/javascript vendor/javascript test/design test/helpers app/views | grep -v '^app/views/api/'` vazio
+- [x] Gate check passes: Rails quick
 
 **Tests**: none
 **Gate**: quick
