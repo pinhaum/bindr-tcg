@@ -714,9 +714,9 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Título e `h1` "Renomear deck"; campo com o nome atual (SDEC-10); `404` → `DeckNotFound` (SDEC-18)
-- [ ] Sucesso envia `PATCH` com `{ name }`, navega à página do deck e mostra "Deck renomeado." (SDEC-12)
-- [ ] Gate check passes: Front quick
+- [x] Título e `h1` "Renomear deck"; campo com o nome atual (SDEC-10); `404` → `DeckNotFound` (SDEC-18)
+- [x] Sucesso envia `PATCH` com `{ name }`, navega à página do deck e mostra "Deck renomeado." (SDEC-12)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
