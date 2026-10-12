@@ -179,14 +179,14 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Linha rejeitada (duplicada, resolvida mas rejeitada) não escreve, por decisão do `Commit`
-- [ ] Staging adulterado muda o que é gravado (staging é a única entrada)
-- [ ] Reivindicação: um `UPDATE` condicional, sem `SELECT` antes; segunda chamada afeta zero linhas e devolve não reivindicado; reivindicação e escrita na mesma transação com savepoint por linha
-- [ ] Falha de uma linha (AR, não-AR, erro cru do driver) não desfaz as anteriores nem impede o fechamento; `SignalException` propaga
-- [ ] `LoteGrandeDemais` antes de gravar qualquer linha
-- [ ] Registro criado depois da prévia é absorvido; registro apagado é recriado
-- [ ] `Result`: rejeitadas = as que não tocaram a coleção; contagens sem a linha que falhou; `falhas` vazio sem falha
-- [ ] Gate check passes: Rails quick
+- [x] Linha rejeitada (duplicada, resolvida mas rejeitada) não escreve, por decisão do `Commit`
+- [x] Staging adulterado muda o que é gravado (staging é a única entrada)
+- [x] Reivindicação: um `UPDATE` condicional, sem `SELECT` antes; segunda chamada afeta zero linhas e devolve não reivindicado; reivindicação e escrita na mesma transação com savepoint por linha
+- [x] Falha de uma linha (AR, não-AR, erro cru do driver) não desfaz as anteriores nem impede o fechamento; `SignalException` propaga
+- [x] `LoteGrandeDemais` antes de gravar qualquer linha
+- [x] Registro criado depois da prévia é absorvido; registro apagado é recriado
+- [x] `Result`: rejeitadas = as que não tocaram a coleção; contagens sem a linha que falhou; `falhas` vazio sem falha
+- [x] Gate check passes: Rails quick
 
 **Tests**: unit
 **Gate**: quick
