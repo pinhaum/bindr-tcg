@@ -530,9 +530,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Nenhum `progress_path`, `session_path`, `collection_imports_path` nem leitura de `catalog.css` nos dois arquivos
-- [ ] `collection_csv_plan_test` mede por `POST /api/collection/imports`; as asserções de `EXPLAIN` não mudam
-- [ ] Gate check passes: Rails quick
+- [x] Nenhum `progress_path`, `session_path`, `collection_imports_path` nem leitura de `catalog.css` nos dois arquivos
+- [x] `collection_csv_plan_test` mede por `POST /api/collection/imports`; as asserções de `EXPLAIN` não mudam
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
