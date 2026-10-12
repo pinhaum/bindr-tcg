@@ -290,9 +290,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Nenhuma rota de `/api/progress`, `/api/wishlist` e `/api/collection/imports*` tem segmento de usuário (leitura de `Rails.application.routes`)
-- [ ] Token do import tem ≥ 32 bytes urlsafe e dois uploads seguidos não dão tokens sequenciais
-- [ ] Gate check passes: Rails quick
+- [x] Nenhuma rota de `/api/progress`, `/api/wishlist` e `/api/collection/imports*` tem segmento de usuário (leitura de `Rails.application.routes`)
+- [x] Token do import tem ≥ 32 bytes urlsafe e dois uploads seguidos não dão tokens sequenciais
+- [x] Gate check passes: Rails quick
 
 **Tests**: unit
 **Gate**: quick
