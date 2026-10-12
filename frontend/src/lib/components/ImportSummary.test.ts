@@ -3,7 +3,7 @@ import { cleanup, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ImportSummary as Summary } from '../api/types';
 
-vi.mock('$app/paths', () => ({ resolve: () => '/app/' }));
+vi.mock('$app/paths', () => ({ resolve: () => '/' }));
 
 import ImportSummary from './ImportSummary.svelte';
 
@@ -103,8 +103,8 @@ describe('ImportSummary', () => {
 		render(ImportSummary, { summary: summary() });
 		const collection = screen.getByRole('link', { name: 'Ver minha coleção' });
 		const another = screen.getByRole('link', { name: 'importar outro arquivo' });
-		expect(collection).toHaveAttribute('href', '/app/pasta');
-		expect(another).toHaveAttribute('href', '/app/pasta/importar');
+		expect(collection).toHaveAttribute('href', '/pasta');
+		expect(another).toHaveAttribute('href', '/pasta/importar');
 		expect(collection).not.toHaveAttribute('data-sveltekit-reload');
 		expect(another).not.toHaveAttribute('data-sveltekit-reload');
 	});

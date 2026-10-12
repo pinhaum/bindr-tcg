@@ -15,9 +15,9 @@ vi.hoisted(() => {
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
 vi.mock('$app/state', async () => {
 	const { SvelteURL } = await import('svelte/reactivity');
-	return { page: { url: new SvelteURL('http://localhost/app/pasta') } };
+	return { page: { url: new SvelteURL('http://localhost/pasta') } };
 });
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const apiMock = vi.hoisted(() => ({ get: vi.fn() }));
 vi.mock('../../lib/api/index', () => ({ api: apiMock }));

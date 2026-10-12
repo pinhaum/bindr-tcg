@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../lib/api/errors';
 import type { DeckPayload } from '../../../lib/api/types';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const apiMock = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }));
 const pageState = vi.hoisted(() => ({ params: { id: '7' } }));
@@ -87,10 +87,10 @@ const deferred = <T,>() => {
 describe('baralhos/[id]/+page.ts', () => {
 	it('sem sessão redireciona para entrar', async () => {
 		sessionState.user = null;
-		const url = new URL('http://localhost/app/baralhos/7');
+		const url = new URL('http://localhost/baralhos/7');
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fbaralhos%2F7'
+			location: '/entrar?return_to=%2Fbaralhos%2F7'
 		});
 	});
 });
@@ -119,7 +119,7 @@ describe('baralhos/[id]/+page.svelte', () => {
 		apiMock.get.mockRejectedValue(new ApiError(404, 'not_found', 'Deck não encontrado.'));
 		render(Page);
 		expect(await screen.findByRole('heading', { level: 1, name: 'Deck não encontrado.' })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Voltar aos baralhos' })).toHaveAttribute('href', '/app/baralhos');
+		expect(screen.getByRole('link', { name: 'Voltar aos baralhos' })).toHaveAttribute('href', '/baralhos');
 		expect(document.title).toBe('Deck não encontrado — Bindr');
 	});
 
@@ -221,7 +221,7 @@ describe('baralhos/[id]/+page.svelte', () => {
 
 	it('Leader com link e sem Leader (SDEC-25)', async () => {
 		const { unmount } = render(Page);
-		expect(await screen.findByRole('link', { name: 'Roronoa Zoro (OP01-001)' })).toHaveAttribute('href', '/app/cartas/OP01-001');
+		expect(await screen.findByRole('link', { name: 'Roronoa Zoro (OP01-001)' })).toHaveAttribute('href', '/cartas/OP01-001');
 		unmount();
 		apiMock.get.mockResolvedValue(deck({ leader: null }));
 		render(Page);
@@ -252,8 +252,8 @@ describe('baralhos/[id]/+page.svelte', () => {
 		const exportLink = await screen.findByRole('link', { name: 'Exportar lista' });
 		expect(exportLink).toHaveAttribute('href', '/decks/7.txt');
 		expect(exportLink).toHaveAttribute('data-sveltekit-reload');
-		expect(screen.getByRole('link', { name: 'Renomear' })).toHaveAttribute('href', '/app/baralhos/7/renomear');
-		expect(screen.getByRole('link', { name: 'Excluir' })).toHaveAttribute('href', '/app/baralhos/7/excluir');
-		expect(screen.getByRole('link', { name: 'Voltar aos baralhos' })).toHaveAttribute('href', '/app/baralhos');
+		expect(screen.getByRole('link', { name: 'Renomear' })).toHaveAttribute('href', '/baralhos/7/renomear');
+		expect(screen.getByRole('link', { name: 'Excluir' })).toHaveAttribute('href', '/baralhos/7/excluir');
+		expect(screen.getByRole('link', { name: 'Voltar aos baralhos' })).toHaveAttribute('href', '/baralhos');
 	});
 });

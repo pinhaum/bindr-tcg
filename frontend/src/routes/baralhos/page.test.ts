@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../lib/api/errors';
 import type { DeckSummary } from '../../lib/api/types';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const apiMock = vi.hoisted(() => ({ get: vi.fn() }));
 vi.mock('../../lib/api/index', () => ({ api: apiMock }));
@@ -74,17 +74,17 @@ describe('baralhos/+page.ts', () => {
 	it('sem sessão redireciona para entrar com return_to, sem chamar o cliente (SDEC-03)', async () => {
 		sessionState.user = null;
 		apiMock.get.mockReset();
-		const url = new URL('http://localhost/app/baralhos');
+		const url = new URL('http://localhost/baralhos');
 
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fbaralhos'
+			location: '/entrar?return_to=%2Fbaralhos'
 		});
 		expect(apiMock.get).not.toHaveBeenCalled();
 	});
 
 	it('com sessão não redireciona', async () => {
-		const url = new URL('http://localhost/app/baralhos');
+		const url = new URL('http://localhost/baralhos');
 		await expect(load({ parent: async () => ({}), url } as never)).resolves.toBeUndefined();
 	});
 });
@@ -116,7 +116,7 @@ describe('baralhos/+page.svelte', () => {
 		expect(headings.map((h) => h.textContent?.trim())).toEqual(['Red Zoro', 'Rascunho', 'Quebrado']);
 
 		const [first, second, third] = screen.getAllByRole('listitem').filter((li) => li.querySelector('h2'));
-		expect(within(first).getByRole('link', { name: 'Red Zoro' })).toHaveAttribute('href', '/app/baralhos/7');
+		expect(within(first).getByRole('link', { name: 'Red Zoro' })).toHaveAttribute('href', '/baralhos/7');
 		expect(within(first).getByText('Roronoa Zoro (OP01-001)')).toBeInTheDocument();
 		expect(within(first).getByText('50 / 50')).toBeInTheDocument();
 		expect(within(first).getByText('válido')).toBeInTheDocument();
@@ -141,10 +141,10 @@ describe('baralhos/+page.svelte', () => {
 		apiMock.get.mockResolvedValue([]);
 		render(Page);
 
-		expect(screen.getByRole('link', { name: 'Novo deck' })).toHaveAttribute('href', '/app/baralhos/novo');
+		expect(screen.getByRole('link', { name: 'Novo deck' })).toHaveAttribute('href', '/baralhos/novo');
 		expect(screen.getByRole('link', { name: 'Importar lista' })).toHaveAttribute(
 			'href',
-			'/app/baralhos/importar'
+			'/baralhos/importar'
 		);
 		await screen.findByText('Você ainda não tem decks.');
 	});

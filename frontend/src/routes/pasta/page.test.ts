@@ -22,10 +22,10 @@ vi.mock('$app/navigation', () => nav);
 
 vi.mock('$app/state', async () => {
 	const { SvelteURL } = await import('svelte/reactivity');
-	return { page: { url: new SvelteURL('http://localhost/app/pasta') } };
+	return { page: { url: new SvelteURL('http://localhost/pasta') } };
 });
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const apiMock = vi.hoisted(() => ({ get: vi.fn() }));
 vi.mock('../../lib/api/index', () => ({ api: apiMock }));
@@ -102,17 +102,17 @@ describe('pasta/+page.ts', () => {
 	it('sem sessão redireciona para entrar com return_to, sem chamar o cliente (SPAS-03)', async () => {
 		sessionState.user = null;
 		apiMock.get.mockReset();
-		const url = new URL('http://localhost/app/pasta?order=code');
+		const url = new URL('http://localhost/pasta?order=code');
 
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fpasta%3Forder%3Dcode'
+			location: '/entrar?return_to=%2Fpasta%3Forder%3Dcode'
 		});
 		expect(apiMock.get).not.toHaveBeenCalled();
 	});
 
 	it('com sessão não redireciona', async () => {
-		const url = new URL('http://localhost/app/pasta');
+		const url = new URL('http://localhost/pasta');
 		await expect(load({ parent: async () => ({}), url } as never)).resolves.toBeUndefined();
 	});
 });
@@ -219,8 +219,8 @@ describe('pasta/+page.svelte', () => {
 
 		expect(recent).toHaveAttribute('aria-current', 'page');
 		expect(byCode).not.toHaveAttribute('aria-current');
-		expect(recent).toHaveAttribute('href', '/app/pasta?order=recent');
-		expect(byCode).toHaveAttribute('href', '/app/pasta?order=code');
+		expect(recent).toHaveAttribute('href', '/pasta?order=recent');
+		expect(byCode).toHaveAttribute('href', '/pasta?order=code');
 		expect(recent).toHaveAttribute('data-sveltekit-reset', 'false');
 	});
 
@@ -247,11 +247,11 @@ describe('pasta/+page.svelte', () => {
 
 		expect(csv).toHaveAttribute('href', '/collection/export');
 		expect(csv).toHaveAttribute('data-sveltekit-reload');
-		expect(imp).toHaveAttribute('href', '/app/pasta/importar');
+		expect(imp).toHaveAttribute('href', '/pasta/importar');
 		expect(imp).not.toHaveAttribute('data-sveltekit-reload');
-		expect(wishlist).toHaveAttribute('href', '/app/pasta/desejos');
+		expect(wishlist).toHaveAttribute('href', '/pasta/desejos');
 		expect(wishlist).not.toHaveAttribute('data-sveltekit-reload');
-		expect(add).toHaveAttribute('href', '/app');
+		expect(add).toHaveAttribute('href', '/');
 		expect(add).not.toHaveAttribute('data-sveltekit-reload');
 	});
 

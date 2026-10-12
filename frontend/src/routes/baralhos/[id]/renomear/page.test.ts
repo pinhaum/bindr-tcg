@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../../lib/api/errors';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const nav = vi.hoisted(() => ({ goto: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
@@ -30,15 +30,15 @@ describe('baralhos/[id]/renomear/+page.ts', () => {
 
 	it('sem sessão redireciona para entrar com return_to (SDEC-03)', async () => {
 		sessionState.user = null;
-		const url = new URL('http://localhost/app/baralhos/7/renomear');
+		const url = new URL('http://localhost/baralhos/7/renomear');
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fbaralhos%2F7%2Frenomear'
+			location: '/entrar?return_to=%2Fbaralhos%2F7%2Frenomear'
 		});
 	});
 
 	it('com sessão não redireciona', async () => {
-		const url = new URL('http://localhost/app/baralhos/7/renomear');
+		const url = new URL('http://localhost/baralhos/7/renomear');
 		await expect(load({ parent: async () => ({}), url } as never)).resolves.toBeUndefined();
 	});
 });
@@ -78,7 +78,7 @@ describe('baralhos/[id]/renomear/+page.svelte', () => {
 
 		await vi.waitFor(() => expect(toast.notifySuccess).toHaveBeenCalledWith('Deck renomeado.'));
 		expect(apiMock.patch).toHaveBeenCalledWith('/api/decks/7', { name: 'Green Law' });
-		expect(nav.goto).toHaveBeenCalledWith('/app/baralhos/7');
+		expect(nav.goto).toHaveBeenCalledWith('/baralhos/7');
 	});
 
 	it('recusa da API mostra o erro e não navega', async () => {

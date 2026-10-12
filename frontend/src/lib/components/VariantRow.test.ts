@@ -4,10 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DetailVariant } from '../api/types';
 import { toasts } from '../toasts.svelte';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 vi.mock('$app/state', async () => {
 	const { SvelteURL } = await import('svelte/reactivity');
-	return { page: { url: new SvelteURL('http://localhost/app/cartas/OP01-001?variant=tcgplayer:1') } };
+	return { page: { url: new SvelteURL('http://localhost/cartas/OP01-001?variant=tcgplayer:1') } };
 });
 
 const post = vi.hoisted(() => vi.fn());
@@ -104,7 +104,7 @@ describe('VariantRow', () => {
 	it('SCAR-22: miniatura é link nomeado com aria-current só no destaque', () => {
 		setup({ featured: true });
 		const link = screen.getByRole('link', { name: 'Mostrar tcgplayer:1 na imagem principal' });
-		expect(link).toHaveAttribute('href', '/app/cartas/OP01-001?variant=tcgplayer%3A1');
+		expect(link).toHaveAttribute('href', '/cartas/OP01-001?variant=tcgplayer%3A1');
 		expect(link).toHaveAttribute('aria-current', 'true');
 		cleanup();
 		setup({ featured: false });
@@ -143,7 +143,7 @@ describe('VariantRow', () => {
 		const link = screen.getByRole('link', { name: 'Entrar para registrar posse' });
 		expect(link).toHaveAttribute(
 			'href',
-			`/app/entrar?return_to=${encodeURIComponent('/app/cartas/OP01-001?variant=tcgplayer:1')}`
+			`/entrar?return_to=${encodeURIComponent('/cartas/OP01-001?variant=tcgplayer:1')}`
 		);
 		expect(screen.queryByRole('group')).not.toBeInTheDocument();
 		expect(screen.queryByRole('button')).not.toBeInTheDocument();

@@ -5,7 +5,7 @@ import { hasMark, isMarked, markCard, morphName } from '../cards/morph.svelte';
 import type { CatalogCard, CatalogVariant } from '../api/types';
 import CardTile from './CardTile.svelte';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 beforeEach(() => markCard(null));
 afterEach(cleanup);
@@ -70,18 +70,18 @@ describe('CardTile', () => {
 	});
 
 	// SCAR-03 emenda o SCAT-03: o tile leva ao detalhe da SPA, sem recarregar a página.
-	it('é um <li> com link para /app/cartas/<card_number> na SPA (SCAR-03)', () => {
+	it('é um <li> com link para /cartas/<card_number> na SPA (SCAR-03)', () => {
 		const { container } = render(CardTile, { card: card(), signedIn: false });
 		expect(container.querySelector('li')).not.toBeNull();
 		const link = screen.getByRole('link');
-		expect(link).toHaveAttribute('href', '/app/cartas/OP01-001');
+		expect(link).toHaveAttribute('href', '/cartas/OP01-001');
 		expect(link).not.toHaveAttribute('rel', 'external');
 		expect(link).not.toHaveAttribute('data-sveltekit-reload');
 	});
 
 	it('codifica o card_number com # ou ? no href', () => {
 		render(CardTile, { card: card({ card_number: 'OP01-0#1?x' }), signedIn: false });
-		expect(screen.getByRole('link')).toHaveAttribute('href', '/app/cartas/OP01-0%231%3Fx');
+		expect(screen.getByRole('link')).toHaveAttribute('href', '/cartas/OP01-0%231%3Fx');
 	});
 
 	it('o clique marca a carta e só a arte do tile marcado recebe view-transition-name (SCAR-39)', async () => {

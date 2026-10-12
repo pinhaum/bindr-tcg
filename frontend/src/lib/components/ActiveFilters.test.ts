@@ -7,9 +7,9 @@ import ActiveFilters from './ActiveFilters.svelte';
 afterEach(cleanup);
 
 const chips: Chip[] = [
-	{ key: 'colors', value: 'Red', label: 'Cor', text: 'Cor: Red', href: '/app?types[]=Leader' },
-	{ key: 'card_types', value: 'Leader', label: 'Tipo', text: 'Tipo: Leader', href: '/app?colors[]=Red' },
-	{ key: 'owned', value: 'owned', label: 'Posse', text: 'Posse: Tenho', href: '/app?q=luffy' }
+	{ key: 'colors', value: 'Red', label: 'Cor', text: 'Cor: Red', href: '/?types[]=Leader' },
+	{ key: 'card_types', value: 'Leader', label: 'Tipo', text: 'Tipo: Leader', href: '/?colors[]=Red' },
+	{ key: 'owned', value: 'owned', label: 'Posse', text: 'Posse: Tenho', href: '/?q=luffy' }
 ];
 
 describe('ActiveFilters', () => {

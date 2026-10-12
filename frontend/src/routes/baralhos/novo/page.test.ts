@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../lib/api/errors';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const nav = vi.hoisted(() => ({ goto: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
@@ -31,15 +31,15 @@ describe('baralhos/novo/+page.ts', () => {
 
 	it('sem sessão redireciona para entrar com return_to (SDEC-03)', async () => {
 		sessionState.user = null;
-		const url = new URL('http://localhost/app/baralhos/novo');
+		const url = new URL('http://localhost/baralhos/novo');
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fbaralhos%2Fnovo'
+			location: '/entrar?return_to=%2Fbaralhos%2Fnovo'
 		});
 	});
 
 	it('com sessão não redireciona', async () => {
-		const url = new URL('http://localhost/app/baralhos/novo');
+		const url = new URL('http://localhost/baralhos/novo');
 		await expect(load({ parent: async () => ({}), url } as never)).resolves.toBeUndefined();
 	});
 });
@@ -68,7 +68,7 @@ describe('baralhos/novo/+page.svelte', () => {
 
 		await vi.waitFor(() => expect(toast.notifySuccess).toHaveBeenCalledWith('Deck criado.'));
 		expect(apiMock.post).toHaveBeenCalledWith('/api/decks', { name: 'Red Zoro' });
-		expect(nav.goto).toHaveBeenCalledWith('/app/baralhos/12');
+		expect(nav.goto).toHaveBeenCalledWith('/baralhos/12');
 	});
 
 	it('recusa da API mostra o erro e não navega', async () => {

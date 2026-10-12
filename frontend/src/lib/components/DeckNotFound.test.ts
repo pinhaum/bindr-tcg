@@ -3,7 +3,7 @@ import { cleanup, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import DeckNotFound from './DeckNotFound.svelte';
 
-vi.mock('$app/paths', () => ({ resolve: () => '/app/' }));
+vi.mock('$app/paths', () => ({ resolve: () => '/' }));
 
 afterEach(cleanup);
 
@@ -22,7 +22,7 @@ describe('DeckNotFound', () => {
 		render(DeckNotFound, { message: 'x' });
 		expect(screen.getByRole('link', { name: 'Voltar aos baralhos' })).toHaveAttribute(
 			'href',
-			'/app/baralhos'
+			'/baralhos'
 		);
 	});
 });

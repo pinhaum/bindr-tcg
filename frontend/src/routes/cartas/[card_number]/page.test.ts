@@ -29,7 +29,7 @@ vi.mock('$app/state', async () => {
 	const version = new SvelteMap<string, number>();
 	return {
 		page: {
-			url: new SvelteURL('http://localhost/app/cartas/OP01-001'),
+			url: new SvelteURL('http://localhost/cartas/OP01-001'),
 			params: new Proxy(
 				{},
 				{
@@ -46,7 +46,7 @@ vi.mock('$app/state', async () => {
 	};
 });
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const client = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn() }));
 vi.mock('../../../lib/api/index', () => ({ api: client }));
@@ -115,7 +115,7 @@ const deferred = <T>() => {
 };
 
 const goTo = async (number: string, search = '') => {
-	mockPage.url.href = `http://localhost/app/cartas/${encodeURIComponent(number)}${search}`;
+	mockPage.url.href = `http://localhost/cartas/${encodeURIComponent(number)}${search}`;
 	mockPage.setParam(number);
 	await tick();
 };
@@ -140,7 +140,7 @@ describe('cartas/[card_number]/+page.svelte', () => {
 		toasts.splice(0);
 		session.user = null;
 		wideQuery.matches = false;
-		mockPage.url.href = 'http://localhost/app/cartas/OP01-001';
+		mockPage.url.href = 'http://localhost/cartas/OP01-001';
 		mockPage.setParam('OP01-001');
 		client.get.mockResolvedValue(detail('OP01-001', 'Luffy'));
 	});
@@ -182,7 +182,7 @@ describe('cartas/[card_number]/+page.svelte', () => {
 		render(Page);
 
 		expect(await screen.findByText('Carta não encontrada.')).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Voltar ao catálogo' })).toHaveAttribute('href', '/app');
+		expect(screen.getByRole('link', { name: 'Voltar ao catálogo' })).toHaveAttribute('href', '/');
 		expect(document.title).toBe('Carta não encontrada — Bindr');
 		expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument();
 	});
@@ -406,19 +406,19 @@ describe('cartas/[card_number]/+page.svelte', () => {
 		render(Page);
 		await h1('Luffy');
 
-		mockPage.url.href = 'http://localhost/app/cartas/OP01-001?variant=tcgplayer:2';
+		mockPage.url.href = 'http://localhost/cartas/OP01-001?variant=tcgplayer:2';
 		await tick();
 
 		expect(client.get).toHaveBeenCalledTimes(1);
 	});
 
 	describe('SCAR-4: Voltar ao catálogo', () => {
-		it('abaixo de 64rem fica no topo da página, sem seta, e vai para /app', async () => {
+		it('abaixo de 64rem fica no topo da página, sem seta, e vai para /', async () => {
 			const { container } = render(Page);
 			await h1('Luffy');
 
 			const back = within(container).getByRole('link', { name: 'Voltar ao catálogo' });
-			expect(back).toHaveAttribute('href', '/app');
+			expect(back).toHaveAttribute('href', '/');
 			expect(back).toHaveTextContent(/^Voltar ao catálogo$/);
 			expect(shell.aside).toBeNull();
 		});
@@ -436,7 +436,7 @@ describe('cartas/[card_number]/+page.svelte', () => {
 				'link',
 				{ name: 'Voltar ao catálogo' }
 			);
-			expect(asideBack).toHaveAttribute('href', '/app');
+			expect(asideBack).toHaveAttribute('href', '/');
 		});
 
 		it('cruzar 64rem troca o lugar do botão sem refazer a consulta', async () => {
@@ -498,7 +498,7 @@ describe('cartas/[card_number]/+page.svelte', () => {
 			expect(screen.getByText('Ilustração: Autor Dois')).toBeInTheDocument();
 			expect(screen.getByText('Paramount War · OP02')).toBeInTheDocument();
 			expect(nav.goto).toHaveBeenCalledTimes(1);
-			expect(nav.goto).toHaveBeenCalledWith('/app/cartas/OP01-001?variant=tcgplayer%3A2', {
+			expect(nav.goto).toHaveBeenCalledWith('/cartas/OP01-001?variant=tcgplayer%3A2', {
 				replace: true,
 				reset: false
 			});
@@ -513,7 +513,7 @@ describe('cartas/[card_number]/+page.svelte', () => {
 			await pick('tcgplayer:1');
 
 			expect(screen.getByRole('img', { name: '2 cópias' })).toBeInTheDocument();
-			expect(nav.goto).toHaveBeenLastCalledWith('/app/cartas/OP01-001?variant=tcgplayer%3A1', {
+			expect(nav.goto).toHaveBeenLastCalledWith('/cartas/OP01-001?variant=tcgplayer%3A1', {
 				replace: true,
 				reset: false
 			});

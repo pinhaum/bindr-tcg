@@ -1,17 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 import type { DeckEntryResult, DeckPayload, DeckSummary, EditingDeck, ShortfallCard } from '../api/types';
 import { deckApiPath, deckCardApiPath, deckHref } from './url';
 
 describe('deckHref', () => {
 	it('sem sub leva só o id', () => {
-		expect(deckHref(7)).toBe('/app/baralhos/7');
+		expect(deckHref(7)).toBe('/baralhos/7');
 	});
 
 	it('com sub acrescenta o segmento', () => {
-		expect(deckHref(7, 'renomear')).toBe('/app/baralhos/7/renomear');
+		expect(deckHref(7, 'renomear')).toBe('/baralhos/7/renomear');
 	});
 });
 

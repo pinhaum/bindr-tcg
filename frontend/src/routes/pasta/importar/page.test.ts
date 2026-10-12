@@ -5,7 +5,7 @@ import { ApiError, networkError } from '../../../lib/api/errors';
 
 const nav = vi.hoisted(() => ({ goto: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const post = vi.hoisted(() => vi.fn());
 vi.mock('../../../lib/api/index', () => ({ api: { post } }));
@@ -54,8 +54,8 @@ describe('pasta/importar/+page.svelte', () => {
 		(session as { user: unknown }).user = null;
 		try {
 			await expect(
-				load({ parent: async () => ({}), url: new URL('http://localhost/app/pasta/importar') } as never)
-			).rejects.toMatchObject({ status: 307, location: '/app/entrar?return_to=%2Fapp%2Fpasta%2Fimportar' });
+				load({ parent: async () => ({}), url: new URL('http://localhost/pasta/importar') } as never)
+			).rejects.toMatchObject({ status: 307, location: '/entrar?return_to=%2Fpasta%2Fimportar' });
 		} finally {
 			(session as { user: unknown }).user = original;
 		}
@@ -88,7 +88,7 @@ describe('pasta/importar/+page.svelte', () => {
 		await pick();
 		await submit();
 
-		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/app/pasta/importar/a%2Fb'));
+		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/pasta/importar/a%2Fb'));
 	});
 
 	it('no 422 mostra a mensagem e as frases do arquivo no alerta focado e liga o campo', async () => {

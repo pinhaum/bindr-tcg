@@ -1,22 +1,22 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 import { cardApiPath, cardDetailHref, variantApiPath } from './url';
 
 describe('cardDetailHref', () => {
 	it('sem variante leva só o card_number', () => {
-		expect(cardDetailHref('P-029')).toBe('/app/cartas/P-029');
+		expect(cardDetailHref('P-029')).toBe('/cartas/P-029');
 	});
 
 	it('codifica a variante na query', () => {
 		expect(cardDetailHref('OP01-001', 'tcgplayer:1')).toBe(
-			'/app/cartas/OP01-001?variant=tcgplayer%3A1',
+			'/cartas/OP01-001?variant=tcgplayer%3A1',
 		);
 	});
 
 	it('codifica espaço e barra no card_number', () => {
-		expect(cardDetailHref('A B/C')).toBe('/app/cartas/A%20B%2FC');
+		expect(cardDetailHref('A B/C')).toBe('/cartas/A%20B%2FC');
 	});
 });
 

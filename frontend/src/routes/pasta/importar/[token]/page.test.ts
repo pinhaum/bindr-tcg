@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, networkError } from '../../../../lib/api/errors';
 import type { ImportPreview, ImportRow, ImportSummary } from '../../../../lib/api/types';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 vi.mock('$app/state', () => ({
-	page: { params: { token: 'abc' }, url: new URL('http://localhost/app/pasta/importar/abc') }
+	page: { params: { token: 'abc' }, url: new URL('http://localhost/pasta/importar/abc') }
 }));
 
 const get = vi.hoisted(() => vi.fn());
@@ -59,10 +59,10 @@ describe('pasta/importar/[token]/+page.svelte', () => {
 
 	it('sessão anônima redireciona com return_to sem chamar a API', async () => {
 		sessionState.user = null;
-		const url = new URL('http://localhost/app/pasta/importar/abc');
+		const url = new URL('http://localhost/pasta/importar/abc');
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fpasta%2Fimportar%2Fabc'
+			location: '/entrar?return_to=%2Fpasta%2Fimportar%2Fabc'
 		});
 		expect(get).not.toHaveBeenCalled();
 	});
@@ -101,7 +101,7 @@ describe('pasta/importar/[token]/+page.svelte', () => {
 		expect(screen.getByRole('button', { name: 'Confirmar e gravar na minha coleção' })).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'envie outro arquivo' })).toHaveAttribute(
 			'href',
-			'/app/pasta/importar'
+			'/pasta/importar'
 		);
 	});
 
@@ -132,7 +132,7 @@ describe('pasta/importar/[token]/+page.svelte', () => {
 		expect(await screen.findByText('Importação não encontrada.')).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'Enviar um arquivo' })).toHaveAttribute(
 			'href',
-			'/app/pasta/importar'
+			'/pasta/importar'
 		);
 		expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument();
 	});
@@ -226,7 +226,7 @@ describe('pasta/importar/[token]/+page.svelte', () => {
 				'Não foi possível saber se a importação foi gravada. Confira a sua pasta antes de enviar o arquivo de novo.'
 			)
 		).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Ver minha coleção' })).toHaveAttribute('href', '/app/pasta');
+		expect(screen.getByRole('link', { name: 'Ver minha coleção' })).toHaveAttribute('href', '/pasta');
 		expect(screen.queryByRole('button', { name: 'Confirmar e gravar na minha coleção' })).not.toBeInTheDocument();
 		expect(post).toHaveBeenCalledTimes(1);
 	});

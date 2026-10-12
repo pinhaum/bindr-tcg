@@ -3,12 +3,12 @@ import { ApiError } from './api/errors';
 import { toasts } from './toasts.svelte';
 
 // `base` saiu dos tipos do SvelteKit 3 e chega `undefined` no Vitest; `resolve` é a API tipada.
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const goto = vi.hoisted(() => vi.fn());
 vi.mock('$app/navigation', () => ({ goto }));
 
-const currentPage = vi.hoisted(() => ({ url: new URL('http://localhost/app/') }));
+const currentPage = vi.hoisted(() => ({ url: new URL('http://localhost/') }));
 const navigation = vi.hoisted(() => ({ navigating: { to: null as { url: URL } | null } }));
 vi.mock('$app/state', () => ({ page: currentPage, navigating: navigation.navigating }));
 
@@ -36,7 +36,7 @@ describe('session', () => {
 		session.status = 'loading';
 		session.user = null;
 		session.error = null;
-		visit('/app/');
+		visit('/');
 		navigation.navigating.to = null;
 	});
 
@@ -131,7 +131,7 @@ describe('session', () => {
 			expect(api.delete).toHaveBeenCalledWith('/api/session');
 			expect(session.user).toBeNull();
 			expect(goto).toHaveBeenCalledTimes(1);
-			expect(goto).toHaveBeenCalledWith('/app');
+			expect(goto).toHaveBeenCalledWith('/');
 			expect(toasts).toHaveLength(1);
 			expect(toasts[0]).toMatchObject({ kind: 'success', message: 'Sessão encerrada.' });
 		};
@@ -188,7 +188,7 @@ describe('session', () => {
 
 			expect(session.user).toEqual(ana);
 			expect(goto).toHaveBeenCalledTimes(1);
-			expect(goto).toHaveBeenCalledWith('/app');
+			expect(goto).toHaveBeenCalledWith('/');
 		});
 	});
 
@@ -198,15 +198,15 @@ describe('session', () => {
 		});
 
 		it('limpa o usuário e vai para entrar com o caminho atual codificado', () => {
-			visit('/app/x?y=1');
+			visit('/x?y=1');
 
 			handleUnauthenticated();
 
 			expect(session.user).toBeNull();
-			expect(goto).toHaveBeenCalledWith('/app/entrar?return_to=%2Fapp%2Fx%3Fy%3D1');
+			expect(goto).toHaveBeenCalledWith('/entrar?return_to=%2Fx%3Fy%3D1');
 		});
 
-		it.each([['/app/entrar'], ['/app/entrar?return_to=%2Fapp%2Fx'], ['/app/criar-conta'], ['/app/criar-conta?x=1']])('não navega a partir de %s, mas limpa o usuário', (path) => {
+		it.each([['/entrar'], ['/entrar?return_to=%2Fx'], ['/criar-conta'], ['/criar-conta?x=1']])('não navega a partir de %s, mas limpa o usuário', (path) => {
 			visit(path);
 
 			handleUnauthenticated();

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../../lib/api/errors';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const nav = vi.hoisted(() => ({ goto: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
@@ -30,15 +30,15 @@ describe('baralhos/[id]/excluir/+page.ts', () => {
 
 	it('sem sessão redireciona para entrar com return_to (SDEC-03)', async () => {
 		sessionState.user = null;
-		const url = new URL('http://localhost/app/baralhos/7/excluir');
+		const url = new URL('http://localhost/baralhos/7/excluir');
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fbaralhos%2F7%2Fexcluir'
+			location: '/entrar?return_to=%2Fbaralhos%2F7%2Fexcluir'
 		});
 	});
 
 	it('com sessão não redireciona', async () => {
-		const url = new URL('http://localhost/app/baralhos/7/excluir');
+		const url = new URL('http://localhost/baralhos/7/excluir');
 		await expect(load({ parent: async () => ({}), url } as never)).resolves.toBeUndefined();
 	});
 });
@@ -65,7 +65,7 @@ describe('baralhos/[id]/excluir/+page.svelte', () => {
 			screen.getByText('O deck e as cartas dele somem. Sua coleção e sua wishlist não mudam.')
 		).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Excluir deck' })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Cancelar' })).toHaveAttribute('href', '/app/baralhos/7');
+		expect(screen.getByRole('link', { name: 'Cancelar' })).toHaveAttribute('href', '/baralhos/7');
 		expect(apiMock.get).toHaveBeenCalledWith('/api/decks/7');
 		expect(apiMock.delete).not.toHaveBeenCalled();
 	});
@@ -78,7 +78,7 @@ describe('baralhos/[id]/excluir/+page.svelte', () => {
 			expect(toast.notifySuccess).toHaveBeenCalledWith('Deck “Red Zoro” excluído.')
 		);
 		expect(apiMock.delete).toHaveBeenCalledWith('/api/decks/7');
-		expect(nav.goto).toHaveBeenCalledWith('/app/baralhos');
+		expect(nav.goto).toHaveBeenCalledWith('/baralhos');
 		expect(nav.goto.mock.invocationCallOrder[0]).toBeLessThan(
 			toast.notifySuccess.mock.invocationCallOrder[0]
 		);

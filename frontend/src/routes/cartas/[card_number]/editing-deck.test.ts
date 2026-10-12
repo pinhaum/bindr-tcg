@@ -16,7 +16,7 @@ vi.mock('$app/state', async () => {
 	const params = new SvelteMap<string, string>();
 	return {
 		page: {
-			url: new SvelteURL('http://localhost/app/cartas/OP01-001'),
+			url: new SvelteURL('http://localhost/cartas/OP01-001'),
 			params: new Proxy({}, { get: (_, key) => params.get(String(key)) }),
 			setParam: (value: string) => params.set('card_number', value)
 		},
@@ -24,7 +24,7 @@ vi.mock('$app/state', async () => {
 	};
 });
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const client = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn() }));
 vi.mock('../../../lib/api/index', () => ({ api: client }));

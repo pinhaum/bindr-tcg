@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // `base` saiu dos tipos do SvelteKit 3 e chega `undefined` no Vitest; `resolve` é a API tipada.
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const goto = vi.hoisted(() => vi.fn());
 vi.mock('$app/navigation', () => ({ goto }));
 
-const currentPage = vi.hoisted(() => ({ url: new URL('http://localhost/app/x?y=1') }));
+const currentPage = vi.hoisted(() => ({ url: new URL('http://localhost/x?y=1') }));
 vi.mock('$app/state', () => ({ page: currentPage, navigating: { to: null } }));
 
 // Importa `api` antes de `session`: exercita o ciclo entre os dois módulos nessa ordem.
@@ -55,7 +55,7 @@ describe('api (instância ligada à sessão)', () => {
 		await expect(api.get('/api/catalog')).rejects.toMatchObject({ code: 'unauthenticated' });
 
 		expect(session.user).toBeNull();
-		expect(goto).toHaveBeenCalledWith('/app/entrar?return_to=%2Fapp%2Fx%3Fy%3D1');
+		expect(goto).toHaveBeenCalledWith('/entrar?return_to=%2Fx%3Fy%3D1');
 	});
 
 	it('CSRF desatualizado com o mesmo usuário reenvia a mutação uma vez (currentUserEmail)', async () => {
@@ -81,7 +81,7 @@ describe('api (instância ligada à sessão)', () => {
 		});
 
 		expect(session.user).toEqual(bia);
-		expect(goto).toHaveBeenCalledWith('/app');
+		expect(goto).toHaveBeenCalledWith('/');
 		expect(fetchMock).toHaveBeenCalledTimes(2);
 	});
 });

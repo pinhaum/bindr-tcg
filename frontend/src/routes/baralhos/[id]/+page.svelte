@@ -161,7 +161,7 @@
 			</section>
 
 			<p class="actions">
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- arquivo do Rails fora de /app, com recarga -->
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- arquivo do Rails fora da SPA, com recarga -->
 				<a href="/decks/{deck.id}.txt" data-sveltekit-reload>Exportar lista</a>
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href já vem resolvido por deckHref -->
 				<a href={deckHref(deck.id, 'renomear')}>Renomear</a>

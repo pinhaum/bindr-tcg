@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CatalogMeta } from '../api/types';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 import CatalogPagination from './CatalogPagination.svelte';
 
@@ -26,7 +26,7 @@ describe('CatalogPagination', () => {
 		expect(screen.queryByRole('link', { name: 'Anterior' })).toBeNull();
 		expect(screen.getByText('Página 1 de 3')).toBeInTheDocument();
 		const next = screen.getByRole('link', { name: 'Próxima' });
-		expect(next).toHaveAttribute('href', '/app?colors%5B%5D=Red&sort=name&page=2');
+		expect(next).toHaveAttribute('href', '/?colors%5B%5D=Red&sort=name&page=2');
 		expect(next).toHaveAttribute('rel', 'next');
 		expect(next).toHaveAttribute('data-sveltekit-reset', 'false');
 	});
@@ -34,7 +34,7 @@ describe('CatalogPagination', () => {
 	it('página 2 de 3: os dois links', () => {
 		render(CatalogPagination, props(2, 3));
 		const prev = screen.getByRole('link', { name: 'Anterior' });
-		expect(prev).toHaveAttribute('href', '/app?colors%5B%5D=Red&sort=name&page=1');
+		expect(prev).toHaveAttribute('href', '/?colors%5B%5D=Red&sort=name&page=1');
 		expect(prev).toHaveAttribute('rel', 'prev');
 		expect(prev).toHaveAttribute('data-sveltekit-reset', 'false');
 		expect(screen.getByRole('link', { name: 'Próxima' })).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('CatalogPagination', () => {
 		render(CatalogPagination, props(5, 3));
 		expect(screen.getByRole('link', { name: 'Anterior' })).toHaveAttribute(
 			'href',
-			'/app?colors%5B%5D=Red&sort=name&page=4'
+			'/?colors%5B%5D=Red&sort=name&page=4'
 		);
 		expect(screen.queryByRole('link', { name: 'Próxima' })).toBeNull();
 	});

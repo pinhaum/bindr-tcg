@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
 	retryFilterOptions: vi.fn()
 }));
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 vi.mock('$app/navigation', () => ({ goto: mocks.goto }));
 vi.mock('../catalog/filter-options.svelte', async (importActual) => ({
 	...(await importActual<typeof import('../catalog/filter-options.svelte')>()),
@@ -59,7 +59,7 @@ describe('FilterPanel', () => {
 		expect(colors.map((a) => a.textContent?.trim())).toEqual(['Red', 'Green', 'Blue']);
 		const types = within(screen.getByRole('group', { name: 'Tipo' })).getAllByRole('link');
 		expect(types.map((a) => a.textContent?.trim())).toEqual(['Character', 'Event']);
-		expect(types[0]).toHaveAttribute('href', `/app?${enc('card_types[]')}=CHARACTER`);
+		expect(types[0]).toHaveAttribute('href', `/?${enc('card_types[]')}=CHARACTER`);
 		const rarities = within(screen.getByRole('group', { name: 'Raridade' })).getAllByRole('link');
 		expect(rarities.map((a) => a.textContent?.trim())).toEqual(['C', 'SR']);
 	});
@@ -75,10 +75,10 @@ describe('FilterPanel', () => {
 	it('chip ativo leva ao href sem o valor; inativo, com o valor acrescentado', () => {
 		setup({ colors: ['Red'] });
 		const group = within(screen.getByRole('group', { name: 'Cor' }));
-		expect(group.getByRole('link', { name: 'Remover filtro Cor: Red' })).toHaveAttribute('href', '/app');
+		expect(group.getByRole('link', { name: 'Remover filtro Cor: Red' })).toHaveAttribute('href', '/');
 		expect(group.getByRole('link', { name: 'Green' })).toHaveAttribute(
 			'href',
-			`/app?${enc('colors[]')}=Red&${enc('colors[]')}=Green`
+			`/?${enc('colors[]')}=Red&${enc('colors[]')}=Green`
 		);
 	});
 
@@ -104,7 +104,7 @@ describe('FilterPanel', () => {
 			await fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 			expect(mocks.goto).toHaveBeenCalledTimes(1);
 			const [href, opts] = mocks.goto.mock.calls[0];
-			expect(href).toBe(`/app?${enc('sets[]')}=OP02&${enc('colors[]')}=Red&sort=name`);
+			expect(href).toBe(`/?${enc('sets[]')}=OP02&${enc('colors[]')}=Red&sort=name`);
 			expect(href).not.toContain('page');
 			expect(opts).toEqual({ reset: false });
 		});
@@ -113,7 +113,7 @@ describe('FilterPanel', () => {
 			setup({ sets: ['OP01'], colors: ['Red'] });
 			await fireEvent.change(select(), { target: { value: '' } });
 			await fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
-			expect(mocks.goto).toHaveBeenCalledWith(`/app?${enc('colors[]')}=Red`, { reset: false });
+			expect(mocks.goto).toHaveBeenCalledWith(`/?${enc('colors[]')}=Red`, { reset: false });
 		});
 
 		it('dois sets ativos mostram "2 sets selecionados" e "Aplicar" os mantém, sem page', async () => {
@@ -121,7 +121,7 @@ describe('FilterPanel', () => {
 			expect(selectedText()).toBe('2 sets selecionados');
 			await fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 			expect(mocks.goto).toHaveBeenCalledWith(
-				`/app?${enc('sets[]')}=OP01&${enc('sets[]')}=OP02`,
+				`/?${enc('sets[]')}=OP01&${enc('sets[]')}=OP02`,
 				{ reset: false }
 			);
 		});
@@ -151,16 +151,16 @@ describe('FilterPanel', () => {
 			const all = group.getByRole('link', { name: 'Todas' });
 			expect(all).toHaveAttribute('aria-current', 'true');
 			expect(all.textContent).not.toContain('×');
-			expect(group.getByRole('link', { name: 'Tenho' })).toHaveAttribute('href', '/app?owned=owned');
-			expect(group.getByRole('link', { name: 'Não tenho' })).toHaveAttribute('href', '/app?owned=missing');
+			expect(group.getByRole('link', { name: 'Tenho' })).toHaveAttribute('href', '/?owned=owned');
+			expect(group.getByRole('link', { name: 'Não tenho' })).toHaveAttribute('href', '/?owned=missing');
 		});
 
 		it('com filtro, o chip ativo remove owned e "Todas" também', () => {
 			setup({ owned: 'owned' }, true);
 			const group = within(screen.getByRole('group', { name: 'Posse' }));
-			expect(group.getByRole('link', { name: 'Remover filtro Posse: Tenho' })).toHaveAttribute('href', '/app');
+			expect(group.getByRole('link', { name: 'Remover filtro Posse: Tenho' })).toHaveAttribute('href', '/');
 			const all = group.getByRole('link', { name: 'Todas' });
-			expect(all).toHaveAttribute('href', '/app');
+			expect(all).toHaveAttribute('href', '/');
 			expect(all).not.toHaveAttribute('aria-current');
 		});
 

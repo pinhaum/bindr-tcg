@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/errors';
 import type { ShortfallCard } from '../api/types';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const apiMock = vi.hoisted(() => ({ get: vi.fn() }));
 vi.mock('../api/index', () => ({ api: apiMock }));
@@ -47,13 +47,13 @@ describe('DeckShortfall', () => {
 		]);
 		const { container } = render(DeckShortfall);
 		expect(await screen.findByRole('heading', { name: 'Faltando para os baralhos' })).toBeVisible();
-		expect(screen.getByRole('link', { name: 'Luffy' })).toHaveAttribute('href', '/app/cartas/OP01-001');
+		expect(screen.getByRole('link', { name: 'Luffy' })).toHaveAttribute('href', '/cartas/OP01-001');
 		expect(screen.getByText('OP01-001').tagName).toBe('CODE');
 		expect(screen.getByText('falta 1')).toBeVisible();
 		expect(screen.getByText('faltam 2')).toBeVisible();
-		expect(screen.getByRole('link', { name: 'Chapéus' })).toHaveAttribute('href', '/app/baralhos/7');
-		expect(screen.getByRole('link', { name: 'Alfa' })).toHaveAttribute('href', '/app/baralhos/3');
-		expect(screen.getByRole('link', { name: 'Beta' })).toHaveAttribute('href', '/app/baralhos/9');
+		expect(screen.getByRole('link', { name: 'Chapéus' })).toHaveAttribute('href', '/baralhos/7');
+		expect(screen.getByRole('link', { name: 'Alfa' })).toHaveAttribute('href', '/baralhos/3');
+		expect(screen.getByRole('link', { name: 'Beta' })).toHaveAttribute('href', '/baralhos/9');
 		const second = container.querySelectorAll('li')[1];
 		expect(second.textContent?.replace(/\s+/g, ' ')).toContain('Em Alfa, Beta');
 	});

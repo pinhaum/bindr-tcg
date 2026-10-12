@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { navEntries } from "./nav-entries";
 
-vi.mock("$app/paths", () => ({ resolve: () => "/app/" }));
+vi.mock("$app/paths", () => ({ resolve: () => "/" }));
 
 const labels = (user: { email: string } | null) =>
   navEntries(user).map((entry) => entry.label);
@@ -20,11 +20,11 @@ describe("navEntries", () => {
     expect(labels(null)).toEqual(["Catálogo", "Entrar", "Criar conta"]);
   });
 
-  it("points Catálogo at /app without reload, with and without a session", () => {
+  it("points Catálogo at / without reload, with and without a session", () => {
     const catalog = {
       kind: "link",
       label: "Catálogo",
-      href: "/app",
+      href: "/",
       reload: false,
     };
     expect(navEntries({ email: "a@b.c" })[0]).toEqual(catalog);
@@ -35,7 +35,7 @@ describe("navEntries", () => {
     expect(navEntries({ email: "a@b.c" })[1]).toEqual({
       kind: "link",
       label: "Minha pasta",
-      href: "/app/pasta",
+      href: "/pasta",
       reload: false,
     });
   });
@@ -44,18 +44,18 @@ describe("navEntries", () => {
     expect(navEntries({ email: "a@b.c" })[2]).toEqual({
       kind: "link",
       label: "Baralhos",
-      href: "/app/baralhos",
+      href: "/baralhos",
       reload: false,
     });
   });
 
   it("points Entrar and Criar conta at app routes without reload", () => {
     expect(navEntries(null).slice(1)).toEqual([
-      { kind: "link", label: "Entrar", href: "/app/entrar", reload: false },
+      { kind: "link", label: "Entrar", href: "/entrar", reload: false },
       {
         kind: "link",
         label: "Criar conta",
-        href: "/app/criar-conta",
+        href: "/criar-conta",
         reload: false,
       },
     ]);

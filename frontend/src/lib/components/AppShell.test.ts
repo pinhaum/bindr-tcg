@@ -12,8 +12,8 @@ const wideQuery = vi.hoisted(() => {
 	return query;
 });
 
-vi.mock('$app/paths', () => ({ resolve: () => '/app/' }));
-vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/app/') } }));
+vi.mock('$app/paths', () => ({ resolve: () => '/' }));
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/') } }));
 
 import { shell } from '../shell.svelte';
 import AppShell from './AppShell.svelte';

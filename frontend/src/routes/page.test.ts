@@ -25,10 +25,10 @@ vi.mock('$app/navigation', () => nav);
 
 vi.mock('$app/state', async () => {
 	const { SvelteURL } = await import('svelte/reactivity');
-	return { page: { url: new SvelteURL('http://localhost/app') }, navigating: { to: null } };
+	return { page: { url: new SvelteURL('http://localhost/') }, navigating: { to: null } };
 });
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const getEnvelope = vi.hoisted(() => vi.fn());
 vi.mock('../lib/api/index', () => ({ api: { getEnvelope, get: vi.fn() } }));
@@ -108,12 +108,12 @@ const statusLine = () => document.querySelector('p[tabindex="-1"]');
 
 const skeletons = (container: HTMLElement) => container.querySelectorAll('ul li[aria-hidden="true"]');
 
-describe('+page.svelte (/app, catálogo)', () => {
+describe('+page.svelte (/, catálogo)', () => {
 	beforeEach(() => {
 		getEnvelope.mockReset();
 		getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')]));
 		nav.goto.mockReset();
-		mockUrl.href = 'http://localhost/app';
+		mockUrl.href = 'http://localhost/';
 		session.user = null;
 		wideQuery.matches = false;
 		filterOptions.error = null;
@@ -146,10 +146,10 @@ describe('+page.svelte (/app, catálogo)', () => {
 	});
 
 	it.each([
-		['/app?colors%5B%5D=Red', '?colors%5B%5D=Red'],
-		['/app?colors=Red', '?colors=Red'],
-		['/app?q=a+b%20c', '?q=a+b%20c'],
-		['/app?zzz=1', '?zzz=1']
+		['/?colors%5B%5D=Red', '?colors%5B%5D=Red'],
+		['/?colors=Red', '?colors=Red'],
+		['/?q=a+b%20c', '?q=a+b%20c'],
+		['/?zzz=1', '?zzz=1']
 	])('repassa a query crua de %s para /api/catalog, sem normalizar', async (href, search) => {
 		await goTo(href);
 		render(Page);
@@ -164,7 +164,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 		await findTile('Zoro');
 		getEnvelope.mockResolvedValue(envelope([card('OP01-025', 'Roronoa Zoro')], { q: 'zoro' }));
 
-		await goTo('/app?q=zoro');
+		await goTo('/?q=zoro');
 
 		await findTile('Roronoa Zoro');
 		expect(getEnvelope).toHaveBeenLastCalledWith('/api/catalog?q=zoro');
@@ -217,7 +217,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 		});
 		await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
-		expect(nav.goto).toHaveBeenCalledWith('/app?q=luffy&colors%5B%5D=Red', { reset: false });
+		expect(nav.goto).toHaveBeenCalledWith('/?q=luffy&colors%5B%5D=Red', { reset: false });
 	});
 
 	describe('vazio', () => {
@@ -245,7 +245,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			expect(await screen.findByText('Nenhuma carta corresponde aos filtros aplicados.')).toBeInTheDocument();
 			const clear = screen.getAllByRole('link', { name: 'Limpar filtros' });
 			expect(clear).toHaveLength(1);
-			expect(clear[0]).toHaveAttribute('href', '/app?sort=name&dir=desc');
+			expect(clear[0]).toHaveAttribute('href', '/?sort=name&dir=desc');
 		});
 
 		it('com page além de total_pages mostra o vazio, o total e a paginação com "Anterior"', async () => {
@@ -255,7 +255,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			expect(await screen.findByText('Nenhuma carta corresponde aos filtros aplicados.')).toBeInTheDocument();
 			expect(screen.getByText('60 cartas')).toBeInTheDocument();
 			expect(screen.getByRole('navigation', { name: 'Paginação do catálogo' })).toBeInTheDocument();
-			expect(screen.getByRole('link', { name: 'Anterior' })).toHaveAttribute('href', '/app?page=4');
+			expect(screen.getByRole('link', { name: 'Anterior' })).toHaveAttribute('href', '/?page=4');
 		});
 
 		it('com uma só página não mostra a paginação', async () => {
@@ -276,7 +276,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 			const second = deferred<ReturnType<typeof envelope>>();
 			getEnvelope.mockReturnValue(second.promise);
-			await goTo('/app?page=2');
+			await goTo('/?page=2');
 
 			await vi.advanceTimersByTimeAsync(199);
 			expect(getTile('Zoro')).toBeInTheDocument();
@@ -315,12 +315,12 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('em erro mostra a message e "Tentar novamente" refaz a consulta, com busca e filtros', async () => {
 			getEnvelope.mockResolvedValueOnce(envelope([card('OP01-001', 'Zoro')], { colors: ['Red'] }));
-			await goTo('/app?colors%5B%5D=Red');
+			await goTo('/?colors%5B%5D=Red');
 			render(Page);
 			await findTile('Zoro');
 
 			getEnvelope.mockRejectedValueOnce(networkError());
-			await goTo('/app?colors%5B%5D=Red&page=2');
+			await goTo('/?colors%5B%5D=Red&page=2');
 
 			expect(await screen.findByText(networkError().message, { selector: 'section *' })).toBeInTheDocument();
 			expect(queryTile('Zoro')).not.toBeInTheDocument();
@@ -337,14 +337,14 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('em erro oculta a linha de status e o convite; "Tentar novamente" faz uma só chamada com a mesma query', async () => {
 			getEnvelope.mockResolvedValueOnce(envelope([card('OP01-001', 'Zoro')], { colors: ['Red'] }));
-			await goTo('/app?colors%5B%5D=Red');
+			await goTo('/?colors%5B%5D=Red');
 			render(Page);
 			await findTile('Zoro');
 			expect(screen.getByText('1 carta · 1 filtro ativo')).toBeInTheDocument();
 			expect(screen.getByRole('link', { name: 'Entrar para registrar posse' })).toBeInTheDocument();
 
 			getEnvelope.mockRejectedValueOnce(networkError());
-			await goTo('/app?colors%5B%5D=Red&page=2');
+			await goTo('/?colors%5B%5D=Red&page=2');
 			await screen.findByRole('button', { name: 'Tentar novamente' });
 
 			expect(screen.queryByText('1 carta · 1 filtro ativo')).not.toBeInTheDocument();
@@ -386,37 +386,37 @@ describe('+page.svelte (/app, catálogo)', () => {
 	});
 
 	describe('convite para entrar', () => {
-		it('sem sessão leva a /app/entrar com o caminho e a query atuais', async () => {
-			await goTo('/app?colors%5B%5D=Red');
+		it('sem sessão leva a /entrar com o caminho e a query atuais', async () => {
+			await goTo('/?colors%5B%5D=Red');
 			render(Page);
 			await findTile('Zoro');
 
 			const link = screen.getByRole('link', { name: 'Entrar para registrar posse' });
 			expect(link).toHaveAttribute(
 				'href',
-				`/app/entrar?return_to=${encodeURIComponent('/app?colors%5B%5D=Red')}`
+				`/entrar?return_to=${encodeURIComponent('/?colors%5B%5D=Red')}`
 			);
 		});
 
-		it('acompanha a troca de page.url, inclusive para /app sem query', async () => {
-			await goTo('/app?q=zoro');
+		it('acompanha a troca de page.url, inclusive para / sem query', async () => {
+			await goTo('/?q=zoro');
 			render(Page);
 			const link = await screen.findByRole('link', { name: 'Entrar para registrar posse' });
-			expect(link).toHaveAttribute('href', `/app/entrar?return_to=${encodeURIComponent('/app?q=zoro')}`);
+			expect(link).toHaveAttribute('href', `/entrar?return_to=${encodeURIComponent('/?q=zoro')}`);
 
-			await goTo('/app?colors%5B%5D=Red');
+			await goTo('/?colors%5B%5D=Red');
 			await waitFor(() =>
 				expect(screen.getByRole('link', { name: 'Entrar para registrar posse' })).toHaveAttribute(
 					'href',
-					`/app/entrar?return_to=${encodeURIComponent('/app?colors%5B%5D=Red')}`
+					`/entrar?return_to=${encodeURIComponent('/?colors%5B%5D=Red')}`
 				)
 			);
 
-			await goTo('/app');
+			await goTo('/');
 			await waitFor(() =>
 				expect(screen.getByRole('link', { name: 'Entrar para registrar posse' })).toHaveAttribute(
 					'href',
-					`/app/entrar?return_to=${encodeURIComponent('/app')}`
+					`/entrar?return_to=${encodeURIComponent('/')}`
 				)
 			);
 		});
@@ -464,7 +464,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			const seen: string[] = [];
 			const observer = new MutationObserver(() => seen.push(region.textContent ?? ''));
 			observer.observe(region, { childList: true, characterData: true, subtree: true });
-			await goTo('/app?page=2');
+			await goTo('/?page=2');
 			await waitFor(() => expect(seen).toContain('1 carta'));
 			observer.disconnect();
 
@@ -528,7 +528,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			expect(summary.textContent?.trim()).toBe('Filtros');
 
 			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], { colors: ['Red'] }));
-			await goTo('/app?colors%5B%5D=Red');
+			await goTo('/?colors%5B%5D=Red');
 			await waitFor(() => expect(summary).toHaveTextContent('Filtros · 1 filtro ativo'));
 		});
 
@@ -554,7 +554,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			await fireEvent(details, new Event('toggle'));
 
 			getEnvelope.mockResolvedValue(envelope([card('OP01-025', 'Roronoa Zoro')], { q: 'zoro' }));
-			await goTo('/app?q=zoro');
+			await goTo('/?q=zoro');
 			await findTile('Roronoa Zoro');
 
 			expect(container.querySelector('details')).toBe(details);
@@ -573,7 +573,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 			const second = deferred<ReturnType<typeof envelope>>();
 			getEnvelope.mockReturnValue(second.promise);
-			await goTo('/app?page=2');
+			await goTo('/?page=2');
 			await vi.advanceTimersByTimeAsync(200);
 			expect(skeletons(container)).toHaveLength(10);
 			expect(container.querySelector('details')).toBe(details);
@@ -644,7 +644,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('remover o 2º de 3 chips foca o novo 2º', async () => {
 			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], threeChips, 1));
-			await goTo('/app?colors%5B%5D=Red&colors%5B%5D=Blue&rarities%5B%5D=SR');
+			await goTo('/?colors%5B%5D=Red&colors%5B%5D=Blue&rarities%5B%5D=SR');
 			render(Page);
 			await findTile('Zoro');
 			expect(chipLinks()).toHaveLength(3);
@@ -654,7 +654,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			await removeChip(
 				1,
 				envelope([card('OP01-001', 'Zoro')], { colors: ['Red'], rarities: ['SR'] }),
-				'/app?colors%5B%5D=Red&rarities%5B%5D=SR'
+				'/?colors%5B%5D=Red&rarities%5B%5D=SR'
 			);
 
 			await waitFor(() => expect(chipLinks()).toHaveLength(2));
@@ -666,7 +666,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('remover o último de 2 chips foca o anterior', async () => {
 			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], { colors: ['Red', 'Blue'] }, 1));
-			await goTo('/app?colors%5B%5D=Red&colors%5B%5D=Blue');
+			await goTo('/?colors%5B%5D=Red&colors%5B%5D=Blue');
 			render(Page);
 			await findTile('Zoro');
 
@@ -675,7 +675,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			await removeChip(
 				1,
 				envelope([card('OP01-001', 'Zoro')], { colors: ['Red'] }),
-				'/app?colors%5B%5D=Red'
+				'/?colors%5B%5D=Red'
 			);
 
 			await waitFor(() => expect(chipLinks()).toHaveLength(1));
@@ -686,11 +686,11 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('remover o único chip foca a linha de status', async () => {
 			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], { colors: ['Red'] }, 1));
-			await goTo('/app?colors%5B%5D=Red');
+			await goTo('/?colors%5B%5D=Red');
 			render(Page);
 			await findTile('Zoro');
 
-			await removeChip(0, envelope([card('OP01-001', 'Zoro')]), '/app');
+			await removeChip(0, envelope([card('OP01-001', 'Zoro')]), '/');
 
 			await waitFor(() =>
 				expect(document.activeElement).toBe(statusLine())
@@ -710,7 +710,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 				meta: { page: 2, per_page: 24, total_count: 50, total_pages: 3, active_filters: {} }
 			});
 			await fireEvent.click(screen.getByRole('link', { name: 'Próxima' }));
-			await goTo('/app?page=2');
+			await goTo('/?page=2');
 
 			await findTile('Nami');
 			await waitFor(() =>
@@ -725,7 +725,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			search.focus();
 
 			getEnvelope.mockResolvedValue(envelope([card('OP01-025', 'Roronoa Zoro')], { q: 'zoro' }));
-			await goTo('/app?q=zoro');
+			await goTo('/?q=zoro');
 			await findTile('Roronoa Zoro');
 
 			expect(document.activeElement).toBe(search);
@@ -733,7 +733,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('clique com modificador no chip não registra foco pendente', async () => {
 			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], { colors: ['Red'] }, 1));
-			await goTo('/app?colors%5B%5D=Red');
+			await goTo('/?colors%5B%5D=Red');
 			render(Page);
 			await findTile('Zoro');
 			const search = screen.getByLabelText('Buscar por nome ou card_number');
@@ -741,7 +741,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			await fireEvent.click(chipLinks()[0], { ctrlKey: true });
 			search.focus();
 			getEnvelope.mockResolvedValue(envelope([card('OP01-009', 'Nami')]));
-			await goTo('/app');
+			await goTo('/');
 			await findTile('Nami');
 
 			expect(document.activeElement).toBe(search);
@@ -749,14 +749,14 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('o foco pendente é consumido: uma resposta seguinte não puxa o foco de volta', async () => {
 			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], { colors: ['Red', 'Blue'] }, 1));
-			await goTo('/app?colors%5B%5D=Red&colors%5B%5D=Blue');
+			await goTo('/?colors%5B%5D=Red&colors%5B%5D=Blue');
 			render(Page);
 			await findTile('Zoro');
 
 			await removeChip(
 				1,
 				envelope([card('OP01-001', 'Zoro')], { colors: ['Red'] }),
-				'/app?colors%5B%5D=Red'
+				'/?colors%5B%5D=Red'
 			);
 			await waitFor(() => expect(document.activeElement).toBe(chipLinks()[0]));
 
@@ -765,7 +765,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			getEnvelope.mockResolvedValue(
 				envelope([card('OP01-025', 'Roronoa Zoro')], { colors: ['Red'], q: 'zoro' })
 			);
-			await goTo('/app?colors%5B%5D=Red&q=zoro');
+			await goTo('/?colors%5B%5D=Red&q=zoro');
 			await findTile('Roronoa Zoro');
 			await tick();
 
@@ -774,7 +774,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 		it('remover um chip e a resposta falhar não move o foco nem o leva à linha de status', async () => {
 			getEnvelope.mockResolvedValue(envelope([card('OP01-001', 'Zoro')], { colors: ['Red', 'Blue'] }, 1));
-			await goTo('/app?colors%5B%5D=Red&colors%5B%5D=Blue');
+			await goTo('/?colors%5B%5D=Red&colors%5B%5D=Blue');
 			render(Page);
 			await findTile('Zoro');
 			const search = screen.getByLabelText('Buscar por nome ou card_number');
@@ -782,7 +782,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 
 			getEnvelope.mockRejectedValue(new ApiError(500, 'internal_error', 'Algo deu errado.'));
 			await fireEvent.click(chipLinks()[1]);
-			await goTo('/app?colors%5B%5D=Red');
+			await goTo('/?colors%5B%5D=Red');
 			await screen.findByRole('button', { name: 'Tentar novamente' });
 			await new Promise((resolve) => setTimeout(resolve, 0));
 			await tick();
@@ -821,7 +821,7 @@ describe('+page.svelte (/app, catálogo)', () => {
 			const state = arrival();
 
 			getEnvelope.mockResolvedValue(envelope([card('OP01-002', 'Nami')]));
-			await goTo('/app?q=nami');
+			await goTo('/?q=nami');
 			await findTile('Nami');
 
 			await waitFor(() => expect(state.done).toBe(true));

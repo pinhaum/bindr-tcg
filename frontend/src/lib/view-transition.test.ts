@@ -41,7 +41,7 @@ describe('viewTransitionOnNavigate', () => {
 		Object.assign(document, { startViewTransition: start });
 
 		expect(
-			viewTransitionOnNavigate(between('/app?colors%5B%5D=Red', '/app?colors%5B%5D=Green'))
+			viewTransitionOnNavigate(between('/?colors%5B%5D=Red', '/?colors%5B%5D=Green'))
 		).toBeUndefined();
 		expect(start).not.toHaveBeenCalled();
 	});
@@ -50,7 +50,7 @@ describe('viewTransitionOnNavigate', () => {
 		const start = vi.fn();
 		Object.assign(document, { startViewTransition: start });
 
-		void viewTransitionOnNavigate(between('/app', '/app/entrar'));
+		void viewTransitionOnNavigate(between('/', '/entrar'));
 		expect(start).toHaveBeenCalledOnce();
 	});
 
@@ -84,10 +84,10 @@ describe('viewTransitionOnNavigate', () => {
 		const toRoute = (routeId: string | null, fromRouteId: string | null = '/') =>
 			({
 				from: {
-					url: new URL('/app/cartas/OP01-001', 'http://localhost'),
+					url: new URL('/cartas/OP01-001', 'http://localhost'),
 					route: { id: fromRouteId }
 				},
-				to: { url: new URL('/app/x', 'http://localhost'), route: { id: routeId } },
+				to: { url: new URL('/x', 'http://localhost'), route: { id: routeId } },
 				complete: Promise.resolve()
 			}) as unknown as Parameters<typeof viewTransitionOnNavigate>[0];
 		const startUpdate = async (

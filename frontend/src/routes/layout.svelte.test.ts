@@ -10,8 +10,8 @@ vi.hoisted(() => {
 
 const nav = vi.hoisted(() => ({ refreshAll: vi.fn(), onNavigate: vi.fn(), afterNavigate: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
-vi.mock('$app/paths', () => ({ resolve: () => '/app/' }));
-vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/app/') } }));
+vi.mock('$app/paths', () => ({ resolve: () => '/' }));
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/') } }));
 
 const reduced = vi.hoisted(() => ({ current: false }));
 vi.mock('svelte/motion', () => ({ prefersReducedMotion: reduced }));
@@ -154,8 +154,8 @@ describe('+layout.svelte', () => {
 
 				nav.afterNavigate.mock.calls[0][0]({
 					type: 'goto',
-					from: at('http://localhost/app/?a=1'),
-					to: at('http://localhost/app/?a=2')
+					from: at('http://localhost/?a=1'),
+					to: at('http://localhost/?a=2')
 				});
 
 				expect(outside).toHaveFocus();
@@ -167,8 +167,8 @@ describe('+layout.svelte', () => {
 
 				nav.afterNavigate.mock.calls[0][0]({
 					type: 'link',
-					from: at('http://localhost/app/'),
-					to: at('http://localhost/app/entrar')
+					from: at('http://localhost/'),
+					to: at('http://localhost/entrar')
 				});
 
 				expect(main).toHaveFocus();

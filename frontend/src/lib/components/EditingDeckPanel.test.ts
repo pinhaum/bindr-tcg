@@ -38,7 +38,7 @@ describe('EditingDeckPanel', () => {
 	it('SDEC-33: título e link para o deck', () => {
 		render(EditingDeckPanel, props());
 		expect(screen.getByRole('heading', { name: 'Deck em edição' })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: DECK })).toHaveAttribute('href', '/app/baralhos/7');
+		expect(screen.getByRole('link', { name: DECK })).toHaveAttribute('href', '/baralhos/7');
 		expect(screen.getByText(/As cartas vão para o deck/)).toBeInTheDocument();
 	});
 

@@ -40,9 +40,9 @@ describe('CatalogStatus', () => {
 	});
 
 	it('clearHref mostra "Limpar filtros" com o href e sem reset de scroll', () => {
-		render(CatalogStatus, { total: 5, chipCount: 1, clearHref: '/app?sort=name' });
+		render(CatalogStatus, { total: 5, chipCount: 1, clearHref: '/?sort=name' });
 		const link = screen.getByRole('link', { name: 'Limpar filtros' });
-		expect(link).toHaveAttribute('href', '/app?sort=name');
+		expect(link).toHaveAttribute('href', '/?sort=name');
 		expect(link).toHaveAttribute('data-sveltekit-reset', 'false');
 	});
 
@@ -50,11 +50,11 @@ describe('CatalogStatus', () => {
 		render(CatalogStatus, {
 			total: 5,
 			chipCount: 0,
-			signInHref: '/app/entrar?return_to=%2Fapp%3Fq%3Dluffy'
+			signInHref: '/entrar?return_to=%2F%3Fq%3Dluffy'
 		});
 		expect(screen.getByRole('link', { name: 'Entrar para registrar posse' })).toHaveAttribute(
 			'href',
-			'/app/entrar?return_to=%2Fapp%3Fq%3Dluffy'
+			'/entrar?return_to=%2F%3Fq%3Dluffy'
 		);
 		expect(screen.queryByRole('link', { name: 'Limpar filtros' })).toBeNull();
 	});

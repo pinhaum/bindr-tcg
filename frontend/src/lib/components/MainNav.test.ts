@@ -6,9 +6,9 @@ import { session } from "../session.svelte";
 import { toasts } from "../toasts.svelte";
 import MainNav from "./MainNav.svelte";
 
-const mocks = vi.hoisted(() => ({ pathname: "/app/entrar", signOut: vi.fn() }));
+const mocks = vi.hoisted(() => ({ pathname: "/entrar", signOut: vi.fn() }));
 
-vi.mock("$app/paths", () => ({ resolve: () => "/app/" }));
+vi.mock("$app/paths", () => ({ resolve: () => "/" }));
 vi.mock("$app/state", () => ({
   page: {
     get url() {
@@ -23,7 +23,7 @@ vi.mock("../session.svelte", async (importOriginal) => ({
 
 describe("MainNav", () => {
   beforeEach(() => {
-    mocks.pathname = "/app/entrar";
+    mocks.pathname = "/entrar";
     mocks.signOut.mockReset();
     session.user = null;
     toasts.length = 0;
@@ -48,7 +48,7 @@ describe("MainNav", () => {
   });
 
   it("ignores a trailing slash when marking the current route", () => {
-    mocks.pathname = "/app/entrar/";
+    mocks.pathname = "/entrar/";
     render(MainNav);
     expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute(
       "aria-current",
@@ -56,7 +56,7 @@ describe("MainNav", () => {
     );
   });
 
-  it.each(["/app", "/app?colors%5B%5D=Red"])(
+  it.each(["/", "/?colors%5B%5D=Red"])(
     "marks only Catálogo as current at %s",
     (path) => {
       mocks.pathname = path;
@@ -70,7 +70,7 @@ describe("MainNav", () => {
     },
   );
 
-  it.each(["/app/pasta", "/app/pasta?order=code"])(
+  it.each(["/pasta", "/pasta?order=code"])(
     "marks Minha pasta as current at %s",
     (path) => {
       session.user = { email: "a@b.c" };
@@ -83,16 +83,16 @@ describe("MainNav", () => {
     },
   );
 
-  it("does not mark Minha pasta as current at /app/pasta/desejos", () => {
+  it("does not mark Minha pasta as current at /pasta/desejos", () => {
     session.user = { email: "a@b.c" };
-    mocks.pathname = "/app/pasta/desejos";
+    mocks.pathname = "/pasta/desejos";
     render(MainNav);
     expect(
       screen.getByRole("link", { name: "Minha pasta" }),
     ).not.toHaveAttribute("aria-current");
   });
 
-  it.each(["/app/baralhos", "/app/baralhos?x=1"])(
+  it.each(["/baralhos", "/baralhos?x=1"])(
     "marks Baralhos as current at %s",
     (path) => {
       session.user = { email: "a@b.c" };
@@ -105,9 +105,9 @@ describe("MainNav", () => {
     },
   );
 
-  it("does not mark Baralhos as current at /app/baralhos/7", () => {
+  it("does not mark Baralhos as current at /baralhos/7", () => {
     session.user = { email: "a@b.c" };
-    mocks.pathname = "/app/baralhos/7";
+    mocks.pathname = "/baralhos/7";
     render(MainNav);
     expect(screen.getByRole("link", { name: "Baralhos" })).not.toHaveAttribute(
       "aria-current",

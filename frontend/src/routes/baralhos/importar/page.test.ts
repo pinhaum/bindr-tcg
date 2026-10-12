@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../lib/api/errors';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const nav = vi.hoisted(() => ({ goto: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
@@ -34,15 +34,15 @@ describe('baralhos/importar/+page.ts', () => {
 
 	it('sem sessão redireciona para entrar com return_to (SDEC-03)', async () => {
 		sessionState.user = null;
-		const url = new URL('http://localhost/app/baralhos/importar');
+		const url = new URL('http://localhost/baralhos/importar');
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fbaralhos%2Fimportar'
+			location: '/entrar?return_to=%2Fbaralhos%2Fimportar'
 		});
 	});
 
 	it('com sessão não redireciona', async () => {
-		const url = new URL('http://localhost/app/baralhos/importar');
+		const url = new URL('http://localhost/baralhos/importar');
 		await expect(load({ parent: async () => ({}), url } as never)).resolves.toBeUndefined();
 	});
 });
@@ -76,7 +76,7 @@ describe('baralhos/importar/+page.svelte', () => {
 		expect(name).not.toBeRequired();
 		expect(screen.getByLabelText('Lista (até 200 linhas e 10.000 caracteres)')).toBeRequired();
 		expect(screen.getByRole('button', { name: 'Importar lista' })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Voltar aos baralhos' })).toHaveAttribute('href', '/app/baralhos');
+		expect(screen.getByRole('link', { name: 'Voltar aos baralhos' })).toHaveAttribute('href', '/baralhos');
 	});
 
 	it('envia { name, list }, navega ao deck e avisa "Deck importado." (SDEC-31)', async () => {
@@ -89,7 +89,7 @@ describe('baralhos/importar/+page.svelte', () => {
 			name: 'Red Zoro',
 			list: '1x OP01-001\n4x OP01-016'
 		});
-		expect(nav.goto).toHaveBeenCalledWith('/app/baralhos/7');
+		expect(nav.goto).toHaveBeenCalledWith('/baralhos/7');
 	});
 
 	it('recusa mostra resumo focado com as três linhas na ordem e liga a área (SDEC-32)', async () => {

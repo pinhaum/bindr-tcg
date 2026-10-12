@@ -3,7 +3,7 @@ import { cleanup, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ProgressSet } from '../api/types';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 import SetProgressRow from './SetProgressRow.svelte';
 
@@ -25,14 +25,14 @@ describe('SetProgressRow', () => {
 	it('link do nome para o catálogo do set, com nome acessível e code em <code> (SPAS-19)', () => {
 		const { container } = render(SetProgressRow, { set: makeSet() });
 		const link = screen.getByRole('link', { name: 'Romance Dawn (OP01): ver no catálogo' });
-		expect(link).toHaveAttribute('href', '/app?sets[]=OP01');
+		expect(link).toHaveAttribute('href', '/?sets[]=OP01');
 		expect(link).toHaveTextContent('Romance Dawn');
 		expect(container.querySelector('code')).toHaveTextContent('OP01');
 	});
 
 	it('codifica caractere reservado do code no href (SPAS-19)', () => {
 		render(SetProgressRow, { set: makeSet({ code: 'A&B#1', name: 'X' }) });
-		expect(screen.getByRole('link')).toHaveAttribute('href', '/app?sets[]=A%26B%231');
+		expect(screen.getByRole('link')).toHaveAttribute('href', '/?sets[]=A%26B%231');
 	});
 
 	it('com base_size: números, barra aria-hidden e legenda (SPAS-20)', () => {

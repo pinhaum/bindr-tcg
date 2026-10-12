@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../lib/api/errors';
 import type { WishlistEntry } from '../../../lib/api/types';
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const apiMock = vi.hoisted(() => ({ get: vi.fn(), delete: vi.fn() }));
 vi.mock('../../../lib/api/index', () => ({ api: apiMock }));
@@ -52,17 +52,17 @@ describe('pasta/desejos/+page.ts', () => {
 	it('sem sessão redireciona sem chamar o cliente (SPAS-03)', async () => {
 		sessionState.user = null;
 		apiMock.get.mockReset();
-		const url = new URL('http://localhost/app/pasta/desejos');
+		const url = new URL('http://localhost/pasta/desejos');
 
 		await expect(load({ parent: async () => ({}), url } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app/entrar?return_to=%2Fapp%2Fpasta%2Fdesejos'
+			location: '/entrar?return_to=%2Fpasta%2Fdesejos'
 		});
 		expect(apiMock.get).not.toHaveBeenCalled();
 	});
 
 	it('com sessão não redireciona', async () => {
-		const url = new URL('http://localhost/app/pasta/desejos');
+		const url = new URL('http://localhost/pasta/desejos');
 		await expect(load({ parent: async () => ({}), url } as never)).resolves.toBeUndefined();
 	});
 });
@@ -125,7 +125,7 @@ describe('pasta/desejos/+page.svelte', () => {
 		expect(
 			await screen.findByText('Você ainda não marcou nenhuma carta como desejada.')
 		).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'catálogo' })).toHaveAttribute('href', '/app');
+		expect(screen.getByRole('link', { name: 'catálogo' })).toHaveAttribute('href', '/');
 		expect(
 			screen.getByText(/Abra o detalhe de uma carta no/).textContent
 		).toBe('Abra o detalhe de uma carta no catálogo e escolha a impressão que quer adquirir.');
