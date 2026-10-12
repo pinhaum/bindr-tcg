@@ -152,10 +152,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Coleção com acento, vírgula, aspas, vários sets: export → import → confirm deixa `collection_items` idêntica; o segundo export é igual byte a byte ao primeiro; três ciclos seguidos estáveis
-- [ ] Quantidade zero não é escrita nem altera registro
-- [ ] Dois usuários importam o mesmo arquivo: coleções independentes; a confirmação de A não muda nenhuma linha de B, inclusive nos casos com escrita
-- [ ] Gate check passes: Rails quick
+- [x] Coleção com acento, vírgula, aspas, vários sets: export → import → confirm deixa `collection_items` idêntica; o segundo export é igual byte a byte ao primeiro; três ciclos seguidos estáveis
+- [x] Quantidade zero não é escrita nem altera registro
+- [x] Dois usuários importam o mesmo arquivo: coleções independentes; a confirmação de A não muda nenhuma linha de B, inclusive nos casos com escrita
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
