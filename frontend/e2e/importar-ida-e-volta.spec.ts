@@ -5,7 +5,7 @@ type Variant = { variant_code: string; in_source: boolean };
 type Card = { card_number: string; name: string; variants: Variant[] };
 
 const PASSWORD = "senha-correta-1";
-const BASE_URL = "http://frontend:5173/app/";
+const BASE_URL = "http://frontend:5173/";
 const CONFIRM = "Confirmar e gravar na minha coleção";
 const setOf = (cardNumber: string) => cardNumber.split("-")[0];
 
@@ -111,7 +111,7 @@ test("baixar o CSV pelo link da pasta, enviar sem edição e confirmar deixa a c
     buffer: Buffer.from(downloaded, "utf-8"),
   });
   await page.getByRole("button", { name: "Pré-visualizar importação" }).click();
-  await page.waitForURL(/\/app\/pasta\/importar\/[^/]+$/);
+  await page.waitForURL(/\/pasta\/importar\/[^/]+$/);
   await expect(page.getByRole("button", { name: CONFIRM })).toBeVisible();
   expect(
     await page.locator("main section.group h2").allTextContents(),

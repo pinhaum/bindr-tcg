@@ -12,6 +12,34 @@ type Owner = { email: string; state: Awaited<ReturnType<BrowserContext['storageS
 type DeckIds = { empty: number; incomplete: number; invalidColor: number; valid: number };
 type DeckRow = { name: string; leader: string; cards: string; status: string };
 type Entry = { text: string };
+type ApiLine = {
+	card_number: string;
+	name: string;
+	card_type: string;
+	cost: number | null;
+	in_source: boolean;
+	required: number;
+	owned: number;
+	missing: number;
+};
+type ApiDeck = {
+	id: number;
+	name: string;
+	status: 'valid' | 'incomplete' | 'invalid';
+	reasons: string[];
+	warnings: string[];
+	main_total: number;
+	missing_total: number;
+	leader: ApiLine | null;
+	entries: (ApiLine & { quantity: number })[];
+};
+type ApiSummary = {
+	id: number;
+	name: string;
+	leader: { card_number: string; name: string } | null;
+	main_total: number;
+	status: ApiDeck['status'];
+};
 type DeckView = {
 	title: string;
 	status: string;
@@ -25,7 +53,7 @@ type DeckView = {
 };
 
 const PASSWORD = 'senha-correta-1';
-const BASE_URL = 'http://frontend:5173/app/';
+const BASE_URL = 'http://frontend:5173/';
 const PIXEL_PNG = Buffer.from(
 	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
 	'base64'
@@ -162,21 +190,39 @@ async function expectNoHorizontalScroll(page: Page, where: string) {
 	expect(scrollWidth, `scroll horizontal em ${where}`).toBeLessThanOrEqual(clientWidth);
 }
 
-async function hotwireHtml(page: Page, path: string) {
+async function fetchText(page: Page, path: string) {
 	const response = await page.context().request.get(path);
 	expect(response.ok(), `GET ${path}`).toBe(true);
 	return response.text();
 }
 
+const STATUS_LABELS = { valid: 'válido', incomplete: 'incompleto', invalid: 'inválido' } as const;
+const GROUP_LABELS: Record<string, string> = {
+	character: 'Personagens',
+	event: 'Eventos',
+	stage: 'Locais'
+};
+
 const mine = (rows: DeckRow[]) => rows.filter((row) => row.name.endsWith(suffix));
 
-// Lê a lista de decks: `source` é o HTML do Hotwire; sem ele, o DOM da SPA.
-function deckRows(page: Page, source: string | null): Promise<DeckRow[]> {
-	return page.evaluate((html) => {
+// A lista de decks que a tela deve mostrar, calculada de `GET /api/decks` (a fonte dos números).
+async function apiDeckRows(context: BrowserContext): Promise<DeckRow[]> {
+	const response = await context.request.get('/api/decks');
+	expect(response.ok(), 'GET /api/decks').toBe(true);
+	const { data } = (await response.json()) as { data: ApiSummary[] };
+	return data.map((deck) => ({
+		name: deck.name,
+		leader: deck.leader ? `${deck.leader.name} (${deck.leader.card_number})` : 'Sem Leader',
+		cards: `${deck.main_total} / 50`,
+		status: STATUS_LABELS[deck.status]
+	}));
+}
+
+// A lista de decks da SPA, lida do DOM.
+function spaDeckRows(page: Page): Promise<DeckRow[]> {
+	return page.evaluate(() => {
 		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
-		const root = html ? new DOMParser().parseFromString(html, 'text/html') : document;
-		const items = root.querySelectorAll(html ? 'li.deck__item' : 'ul.decks > li');
-		return [...items].map((li) => {
+		return [...document.querySelectorAll('ul.decks > li')].map((li) => {
 			const facts = [...li.querySelectorAll('dd')].map((dd) => squash(dd.textContent));
 			return {
 				name: squash(li.querySelector('h2')?.textContent),
@@ -185,54 +231,84 @@ function deckRows(page: Page, source: string | null): Promise<DeckRow[]> {
 				status: facts[2]
 			};
 		});
-	}, source);
+	});
 }
 
-// Lê a página de um deck. As duas telas têm os mesmos blocos, com marcação própria.
-function deckView(page: Page, source: string | null): Promise<DeckView> {
-	return page.evaluate((html) => {
+const lineCounts = (line: ApiLine) =>
+	`pedida ${line.required}, possuída ${line.owned}, falta ${line.missing}`;
+
+// A página de um deck que a tela deve mostrar, calculada de `GET /api/decks/<id>`.
+async function apiDeckView(context: BrowserContext, id: number): Promise<DeckView> {
+	const response = await context.request.get(`/api/decks/${id}`);
+	expect(response.ok(), `GET /api/decks/${id}`).toBe(true);
+	const { data: deck } = (await response.json()) as { data: ApiDeck };
+
+	const groups: DeckView['groups'] = [];
+	for (const entry of deck.entries) {
+		const title = GROUP_LABELS[entry.card_type] ?? entry.card_type;
+		if (groups.at(-1)?.title !== title) groups.push({ title, entries: [] });
+		groups.at(-1)!.entries.push({
+			text: [
+				`${entry.quantity}×`,
+				`${entry.name} (${entry.card_number})`,
+				entry.cost !== null ? `custo ${entry.cost}` : null,
+				entry.in_source ? null : 'carta fora da fonte',
+				lineCounts(entry)
+			]
+				.filter(Boolean)
+				.join(' ')
+		});
+	}
+
+	let shortfall = 'Você tem todas as cartas deste deck';
+	if (deck.leader === null && deck.entries.length === 0) shortfall = 'Este deck ainda não tem cartas';
+	else if (deck.missing_total === 1) shortfall = 'Falta 1 cópia para montar este deck';
+	else if (deck.missing_total > 1) shortfall = `Faltam ${deck.missing_total} cópias para montar este deck`;
+
+	return {
+		title: deck.name,
+		status: `Status: ${STATUS_LABELS[deck.status]}`,
+		reasons: deck.status === 'valid' ? [] : deck.reasons,
+		warnings: deck.warnings,
+		note: 'A lista de banidas não é verificada',
+		shortfall,
+		leader: deck.leader
+			? [
+					`${deck.leader.name} (${deck.leader.card_number})`,
+					deck.leader.in_source ? null : 'carta fora da fonte',
+					lineCounts(deck.leader)
+				]
+					.filter(Boolean)
+					.join(' ')
+			: 'Sem Leader',
+		main: `Deck principal: ${deck.main_total} / 50`,
+		groups
+	};
+}
+
+// A página de um deck da SPA, lida do DOM.
+function spaDeckView(page: Page): Promise<DeckView> {
+	return page.evaluate(() => {
 		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
-		const root = html ? new DOMParser().parseFromString(html, 'text/html') : document;
-		const sel = html
-			? {
-					reasons: '.deck__reason',
-					warning: '.deck__warning blockquote',
-					note: '.deck__note',
-					summary: '.deck__summary',
-					entry: '.deck__entry',
-					group: 'section.deck__group'
-				}
-			: {
-					reasons: 'section[aria-labelledby="deck-status-title"] ul li',
-					warning: '.warning blockquote',
-					note: 'section[aria-labelledby="deck-status-title"] > p',
-					summary: 'p',
-					entry: 'p.entry',
-					group: 'section.group'
-				};
-		const section = (id: string) => root.querySelector(`section[aria-labelledby="${id}"]`)!;
+		const section = (id: string) => document.querySelector(`section[aria-labelledby="${id}"]`)!;
 		const all = (scope: ParentNode, query: string) =>
 			[...scope.querySelectorAll(query)].map((node) => squash(node.textContent));
-		const notes = all(section('deck-status-title'), sel.note);
 		const leaderSection = section('deck-leader-title');
 		return {
-			title: squash(root.querySelector('main h1')?.textContent),
-			status: squash(root.querySelector('#deck-status-title')?.textContent),
-			reasons: all(root, sel.reasons),
-			warnings: all(root, sel.warning),
-			note: notes[notes.length - 1],
-			shortfall: squash(section('deck-shortfall-title').querySelector(sel.summary)?.textContent),
-			leader: squash(
-				(leaderSection.querySelector(sel.entry) ?? leaderSection.querySelector(sel.summary))
-					?.textContent
-			),
-			main: squash(root.querySelector('#deck-main-title')?.textContent),
-			groups: [...section('deck-main-title').querySelectorAll(sel.group)].map((group) => ({
+			title: squash(document.querySelector('main h1')?.textContent),
+			status: squash(document.querySelector('#deck-status-title')?.textContent),
+			reasons: all(document, 'section[aria-labelledby="deck-status-title"] ul li'),
+			warnings: all(document, '.warning blockquote'),
+			note: all(section('deck-status-title'), ':scope > p').at(-1) ?? '',
+			shortfall: squash(section('deck-shortfall-title').querySelector('p')?.textContent),
+			leader: squash((leaderSection.querySelector('p.entry') ?? leaderSection.querySelector('p'))?.textContent),
+			main: squash(document.querySelector('#deck-main-title')?.textContent),
+			groups: [...section('deck-main-title').querySelectorAll('section.group')].map((group) => ({
 				title: squash(group.querySelector('h3')?.textContent),
 				entries: [...group.querySelectorAll('li')].map((li) => ({ text: squash(li.textContent) }))
 			}))
 		};
-	}, source);
+	});
 }
 
 test.describe.configure({ mode: 'serial' });
@@ -243,7 +319,7 @@ test.beforeAll(async ({ browser }) => {
 });
 
 test.describe('lista de baralhos (SDEC-01, SDEC-02, SDEC-07)', () => {
-	test('"Baralhos" do casco abre a lista sem recarga, igual à /decks', async ({ browser }) => {
+	test('"Baralhos" do casco abre a lista sem recarga, igual a GET /api/decks', async ({ browser }) => {
 		const { context, page } = await openAs(browser);
 		await page.goto('');
 		await expect(page.getByRole('heading', { name: 'Catálogo', level: 1 })).toBeVisible();
@@ -255,7 +331,7 @@ test.describe('lista de baralhos (SDEC-01, SDEC-02, SDEC-07)', () => {
 		await expect(link).not.toHaveAttribute('aria-current', 'page');
 		await link.click();
 
-		await expect(page).toHaveURL(/\/app\/baralhos\/?$/);
+		await expect(page).toHaveURL(/\/baralhos\/?$/);
 		await expect(page.getByRole('heading', { name: 'Baralhos', level: 1 })).toBeVisible();
 		await expect(page).toHaveTitle('Baralhos — Bindr');
 		await expect(mainNav(page).getByRole('link', { name: 'Baralhos' })).toHaveAttribute(
@@ -268,17 +344,17 @@ test.describe('lista de baralhos (SDEC-01, SDEC-02, SDEC-07)', () => {
 			'a página não recarregou'
 		).toBe(true);
 
-		const spa = await deckRows(page, null);
-		const html = await deckRows(page, await hotwireHtml(page, '/decks'));
-		expect(mine(html), 'o Hotwire lista os quatro decks').toHaveLength(4);
-		expect(spa, 'mesma sequência de nomes, Leaders, totais e status').toEqual(html);
+		const spa = await spaDeckRows(page);
+		const api = await apiDeckRows(context);
+		expect(mine(api), 'a API lista os quatro decks').toHaveLength(4);
+		expect(spa, 'mesma sequência de nomes, Leaders, totais e status').toEqual(api);
 		expect(new Set(spa.map((row) => row.status)).size, 'status variados').toBeGreaterThan(1);
 		await context.close();
 	});
 });
 
 test.describe('criar, renomear e excluir (SDEC-11, SDEC-12, SDEC-16)', () => {
-	test('cada operação pela SPA aparece em /decks', async ({ browser }) => {
+	test('cada operação pela SPA aparece em GET /api/decks', async ({ browser }) => {
 		const { context, page } = await openAs(browser);
 		const name = `Novo ${suffix}`;
 		const renamed = `Renomeado ${suffix}`;
@@ -288,7 +364,7 @@ test.describe('criar, renomear e excluir (SDEC-11, SDEC-12, SDEC-16)', () => {
 		await page.getByRole('button', { name: 'Criar deck' }).click();
 		await expect(page.getByRole('heading', { name, level: 1 })).toBeVisible();
 		await expect(page.getByText('Deck criado.')).toBeVisible();
-		expect(await hotwireHtml(page, '/decks')).toContain(name);
+		expect((await apiDeckRows(context)).map((row) => row.name)).toContain(name);
 
 		await page.getByRole('link', { name: 'Renomear' }).click();
 		const field = page.getByLabel('Nome do deck (até 60 caracteres)');
@@ -297,21 +373,21 @@ test.describe('criar, renomear e excluir (SDEC-11, SDEC-12, SDEC-16)', () => {
 		await page.getByRole('button', { name: 'Renomear deck' }).click();
 		await expect(page.getByRole('heading', { name: renamed, level: 1 })).toBeVisible();
 		await expect(page.getByText('Deck renomeado.')).toBeVisible();
-		const afterRename = await hotwireHtml(page, '/decks');
+		const afterRename = (await apiDeckRows(context)).map((row) => row.name);
 		expect(afterRename).toContain(renamed);
-		expect(afterRename).not.toContain(`>${name}<`);
+		expect(afterRename).not.toContain(name);
 
 		await page.getByRole('link', { name: 'Excluir', exact: true }).click();
 		await expect(page.getByRole('heading', { name: `Excluir o deck “${renamed}”?` })).toBeVisible();
 		await page.getByRole('button', { name: 'Excluir deck' }).click();
-		await expect(page).toHaveURL(/\/app\/baralhos\/?$/);
+		await expect(page).toHaveURL(/\/baralhos\/?$/);
 		await expect(page.getByText(`Deck “${renamed}” excluído.`)).toBeVisible();
-		expect(await hotwireHtml(page, '/decks')).not.toContain(renamed);
+		expect((await apiDeckRows(context)).map((row) => row.name)).not.toContain(renamed);
 		await context.close();
 	});
 });
 
-test.describe('página do deck igual à /decks/<id> (SDEC-17, SDEC-21, SDEC-24, SDEC-26, SDEC-28)', () => {
+test.describe('página do deck igual a GET /api/decks/<id> (SDEC-17, SDEC-21, SDEC-24, SDEC-26, SDEC-28)', () => {
 	for (const viewport of VIEWPORTS) {
 		for (const scheme of SCHEMES) {
 			test(`quatro decks a ${viewport.name}, tema ${scheme}`, async ({ browser }) => {
@@ -327,9 +403,9 @@ test.describe('página do deck igual à /decks/<id> (SDEC-17, SDEC-21, SDEC-24, 
 					await expect(page.locator('#deck-main-title')).toBeVisible();
 					expect(await page.locator('html').getAttribute('data-theme')).toBe(scheme);
 
-					const spa = await deckView(page, null);
-					const html = await deckView(page, await hotwireHtml(page, `/decks/${id}`));
-					expect(spa, `deck ${key}`).toEqual(html);
+					const spa = await spaDeckView(page);
+					const api = await apiDeckView(context, id);
+					expect(spa, `deck ${key}`).toEqual(api);
 					await expectNoHorizontalScroll(page, `${key}, ${viewport.name}, ${scheme}`);
 					seen.add(spa.status.replace('Status: ', ''));
 
@@ -350,7 +426,7 @@ test.describe('página do deck igual à /decks/<id> (SDEC-17, SDEC-21, SDEC-24, 
 test.describe('importar lista (SDEC-31, SDEC-32)', () => {
 	test('o texto exportado reproduz o deck; linhas ruins não criam nada', async ({ browser }) => {
 		const { context, page } = await openAs(browser);
-		const text = await hotwireHtml(page, `/decks/${decks.valid}.txt`);
+		const text = await fetchText(page, `/decks/${decks.valid}.txt`);
 		expect(text.trim().length, 'lista exportada').toBeGreaterThan(0);
 
 		await page.goto('baralhos/importar');
@@ -358,16 +434,16 @@ test.describe('importar lista (SDEC-31, SDEC-32)', () => {
 		await page.getByLabel(/^Lista/).fill(text);
 		await page.getByRole('button', { name: 'Importar lista' }).click();
 		await expect(page.getByText('Deck importado.')).toBeVisible();
-		await expect(page).toHaveURL(/\/app\/baralhos\/\d+\/?$/);
+		await expect(page).toHaveURL(/\/baralhos\/\d+\/?$/);
 		const importedId = Number(/baralhos\/(\d+)/.exec(page.url())![1]);
 
-		const original = await deckView(page, await hotwireHtml(page, `/decks/${decks.valid}`));
-		const imported = await deckView(page, await hotwireHtml(page, `/decks/${importedId}`));
+		const original = await apiDeckView(context, decks.valid);
+		const imported = await apiDeckView(context, importedId);
 		expect(imported.leader, 'mesmo Leader').toBe(original.leader);
 		expect(imported.groups, 'mesmas entradas').toEqual(original.groups);
 		expect(imported.status).toBe('Status: válido');
 
-		const before = mine(await deckRows(page, await hotwireHtml(page, '/decks'))).length;
+		const before = mine(await apiDeckRows(context)).length;
 		await page.goto('baralhos/importar');
 		await page.getByLabel(/^Lista/).fill('isto não é uma linha\n4xOP01-016\nlixo 2');
 		await page.getByRole('button', { name: 'Importar lista' }).click();
@@ -377,10 +453,75 @@ test.describe('importar lista (SDEC-31, SDEC-32)', () => {
 		expect(lines, 'as duas linhas ruins, com número e motivo').toHaveLength(2);
 		expect(lines[0]).toMatch(/^Linha 1:/);
 		expect(lines[1]).toMatch(/^Linha 3:/);
-		await expect(page).toHaveURL(/\/app\/baralhos\/importar\/?$/);
+		await expect(page).toHaveURL(/\/baralhos\/importar\/?$/);
 
-		const after = mine(await deckRows(page, await hotwireHtml(page, '/decks'))).length;
+		const after = mine(await apiDeckRows(context)).length;
 		expect(after, 'nenhum deck criado').toBe(before);
+		await context.close();
+	});
+});
+
+test.describe('URLs antigas e download pós-login (STRO-11, STRO-19, STRO-22, STRO-34)', () => {
+	test('/decks e /decks/<id> redirecionam para /baralhos com o mesmo conteúdo da API', async ({
+		browser
+	}) => {
+		const { context, page } = await openAs(browser);
+
+		await page.goto('decks');
+		await expect(page).toHaveURL(/^https?:\/\/[^/]+\/baralhos$/);
+		await expect(page.getByRole('heading', { name: 'Baralhos', level: 1 })).toBeVisible();
+		await expect(page.locator('ul.decks > li')).not.toHaveCount(0);
+		expect(await spaDeckRows(page), 'lista depois de /decks').toEqual(await apiDeckRows(context));
+
+		await page.goto(`decks/${decks.valid}`);
+		await expect(page).toHaveURL(new RegExp(`^https?://[^/]+/baralhos/${decks.valid}$`));
+		await expect(page.locator('#deck-main-title')).toBeVisible();
+		expect(await spaDeckView(page), 'deck depois de /decks/<id>').toEqual(
+			await apiDeckView(context, decks.valid)
+		);
+		await context.close();
+	});
+
+	test('anônimo em /decks/<id>.txt entra e baixa a lista por página inteira', async ({
+		browser
+	}) => {
+		const { context: ownerContext, page: ownerPage } = await openAs(browser);
+		const expected = await fetchText(ownerPage, `/decks/${decks.valid}.txt`);
+		expect(expected.trim().length, 'lista do deck').toBeGreaterThan(0);
+		await ownerContext.close();
+
+		const context = await browser.newContext({ baseURL: BASE_URL, locale: 'pt-BR' });
+		const page = await context.newPage();
+		const filePath = `/decks/${decks.valid}.txt`;
+
+		await page.goto(filePath.slice(1));
+		await expect(page).toHaveURL(
+			new RegExp(`/entrar\\?return_to=${encodeURIComponent(filePath).replace(/\./g, '\\.')}$`)
+		);
+		await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
+		await page.evaluate(() => {
+			(window as unknown as { __kept: boolean }).__kept = true;
+		});
+
+		await page.getByLabel('E-mail').fill(owner.email);
+		await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
+		const [download] = await Promise.all([
+			page.waitForResponse(
+				(response) =>
+					new URL(response.url()).pathname === filePath &&
+					response.request().resourceType() === 'document'
+			),
+			page.getByRole('button', { name: 'Entrar' }).click()
+		]);
+
+		expect(download.status(), 'GET do arquivo depois do login').toBe(200);
+		expect(download.headers()['content-type']).toContain('text/plain');
+		expect(await download.text(), 'o corpo do .txt chega').toBe(expected);
+		await expect(page).toHaveURL(new RegExp(`${filePath.replace('.', '\\.')}$`));
+		expect(
+			await page.evaluate(() => (window as unknown as { __kept?: boolean }).__kept),
+			'navegação de página inteira, não do roteador da SPA'
+		).toBeUndefined();
 		await context.close();
 	});
 });

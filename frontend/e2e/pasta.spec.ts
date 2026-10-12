@@ -24,7 +24,7 @@ type Snapshot = { stats: { value: string; label: string; note: string | null }[]
 type Order = 'recent' | 'code';
 
 const PASSWORD = 'senha-correta-1';
-const BASE_URL = 'http://frontend:5173/app/';
+const BASE_URL = 'http://frontend:5173/';
 const ORDERS: Order[] = ['recent', 'code'];
 const CAPTURES_DIR = 'test-results/pasta-capturas';
 const PIXEL_PNG = Buffer.from(
@@ -147,7 +147,7 @@ async function openPasta(page: Page, order: Order) {
 	await waitForPasta(page, order);
 }
 
-// O DOM da pasta da SPA, no mesmo formato de `htmlSnapshot`.
+// O DOM da pasta da SPA, no mesmo formato de `apiSnapshot`.
 function spaSnapshot(page: Page): Promise<Snapshot> {
 	return page.evaluate(() => {
 		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
@@ -176,37 +176,78 @@ function spaSnapshot(page: Page): Promise<Snapshot> {
 	});
 }
 
-// O DOM da `/progress` do Hotwire, lido do HTML que o servidor entrega à mesma sessão.
-async function htmlSnapshot(page: Page, order: Order): Promise<Snapshot> {
-	const response = await page.context().request.get(`/progress?order=${order}`);
-	expect(response.ok(), `GET /progress?order=${order}`).toBe(true);
-	const html = await response.text();
-	return page.evaluate((source) => {
-		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
-		const doc = new DOMParser().parseFromString(source, 'text/html');
-		const stats = [...doc.querySelectorAll('.progress__stat')].map((stat) => ({
-			value: squash(stat.querySelector('.progress__stat-value')?.textContent),
-			label: squash(stat.querySelector('.progress__stat-label')?.textContent),
-			note: stat.querySelector('.progress__stat-note')
-				? squash(stat.querySelector('.progress__stat-note')?.textContent)
-				: null
-		}));
-		const sets = [...doc.querySelectorAll('li.progress-set')].map((li) => {
-			const total = li.querySelector('.progress-set__total');
-			const percent = li.querySelector('.progress-set__percent-value');
-			return {
-				code: squash(li.querySelector('.progress-set__code')?.textContent),
-				name: squash(li.querySelector('.progress-set__catalog-link')?.textContent),
-				owned: squash(li.querySelector('.progress-set__owned')?.textContent),
-				total: total ? squash(total.textContent) : null,
-				percent: percent ? squash(percent.textContent) : null,
-				basis: squash(li.querySelector('.progress-set__percent')?.textContent),
-				parallels: squash(li.querySelector('.progress-set__parallels')?.textContent),
-				value: `valor ${squash(li.querySelector('.progress-set__value')?.textContent)}`
-			};
-		});
-		return { stats, sets };
-	}, html);
+type ProgressData = {
+	summary: {
+		total_copies: number;
+		distinct_variants: number;
+		estimated_value: { amount: string; currency: string };
+		unpriced_copies: number;
+	};
+	sets: {
+		code: string;
+		name: string;
+		owned_numbers: number;
+		base_size: number | null;
+		completion_percent: number | null;
+		parallel_owned: number;
+		parallel_total: number;
+		value: { amount: string; currency: string };
+	}[];
+};
+
+const moneyFormat = new Intl.NumberFormat('pt-BR', {
+	minimumFractionDigits: 2,
+	maximumFractionDigits: 2
+});
+const money = ({ amount, currency }: { amount: string; currency: string }) => {
+	expect(currency, 'moeda da API').toBe('USD');
+	return `US$ ${moneyFormat.format(Number(amount))}`;
+};
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+
+// O que a tela deve mostrar, calculado de `GET /api/progress` (a fonte dos números), com a sessão da página.
+async function apiSnapshot(page: Page, order: Order): Promise<Snapshot> {
+	const path = `/api/progress?order=${order}`;
+	const response = await page.context().request.get(path);
+	expect(response.ok(), `GET ${path}`).toBe(true);
+	const { data } = (await response.json()) as { data: ProgressData };
+	const { summary } = data;
+
+	return {
+		stats: [
+			{
+				value: String(summary.total_copies),
+				label: plural(summary.total_copies, 'carta na pasta', 'cartas na pasta'),
+				note: null
+			},
+			{
+				value: String(summary.distinct_variants),
+				label: plural(summary.distinct_variants, 'carta diferente', 'cartas diferentes'),
+				note: null
+			},
+			{
+				value: money(summary.estimated_value),
+				label: 'valor estimado',
+				note:
+					summary.unpriced_copies > 0
+						? `${summary.unpriced_copies} ${plural(summary.unpriced_copies, 'cópia', 'cópias')} sem preço`
+						: null
+			}
+		],
+		sets: data.sets.map((set) => ({
+			code: set.code,
+			name: set.name,
+			owned: String(set.owned_numbers),
+			total: set.base_size === null ? null : String(set.base_size),
+			percent: set.base_size === null ? null : `${set.completion_percent}%`,
+			basis:
+				set.base_size === null
+					? 'Percentual indisponível: este set não informa o tamanho do set base.'
+					: `${set.owned_numbers} de ${set.base_size} do set base`,
+			parallels: `${set.parallel_owned} de ${set.parallel_total} ${plural(set.parallel_total, 'parallel', 'parallels')}`,
+			value: `valor ${money(set.value)}`
+		}))
+	};
 }
 
 async function expectNoHorizontalScroll(page: Page, where: string) {
@@ -226,10 +267,10 @@ test.beforeAll(async ({ browser }) => {
 	for (const [index, plan] of PLANS.entries()) owners[index] = await createOwner(browser, plan);
 });
 
-test.describe('paridade da pasta com a /progress (SPAS-17, SPAS-18, SPAS-26)', () => {
+test.describe('paridade da pasta com GET /api/progress (SPAS-17, SPAS-18, SPAS-26)', () => {
 	for (const [index, plan] of PLANS.entries()) {
 		for (const order of ORDERS) {
-			test(`usuário ${plan.label}, ordem ${order}: indicadores e sets iguais aos do HTML`, async ({
+			test(`usuário ${plan.label}, ordem ${order}: indicadores e sets iguais aos da API`, async ({
 				browser
 			}) => {
 				const { context, page } = await openAs(browser, owners[index], {
@@ -237,16 +278,16 @@ test.describe('paridade da pasta com a /progress (SPAS-17, SPAS-18, SPAS-26)', (
 				});
 				await openPasta(page, order);
 
-				const html = await htmlSnapshot(page, order);
+				const api = await apiSnapshot(page, order);
 				const spa = await spaSnapshot(page);
 
-				expect(html.sets.length, 'a /progress lista sets').toBeGreaterThan(0);
-				expect(spa.stats, 'três indicadores, com rótulo e nota').toEqual(html.stats);
+				expect(api.sets.length, 'a /api/progress lista sets').toBeGreaterThan(0);
+				expect(spa.stats, 'três indicadores, com rótulo e nota').toEqual(api.stats);
 				expect(
 					spa.sets.map((set) => set.code),
 					'sequência de `code`'
-				).toEqual(html.sets.map((set) => set.code));
-				for (const [position, expected] of html.sets.entries()) {
+				).toEqual(api.sets.map((set) => set.code));
+				for (const [position, expected] of api.sets.entries()) {
 					expect(spa.sets[position], `set ${expected.code}`).toEqual(expected);
 				}
 				expect(
@@ -281,7 +322,7 @@ test.describe('paridade da pasta com a /progress (SPAS-17, SPAS-18, SPAS-26)', (
 });
 
 test.describe('sessão e navegação (SPAS-01, SPAS-02, SPAS-03)', () => {
-	test('anônimo em /app/pasta?order=code termina em /app/entrar?return_to=… sem chamar /api/progress', async ({
+	test('anônimo em /pasta?order=code termina em /entrar?return_to=… sem chamar /api/progress', async ({
 		browser
 	}) => {
 		const { context, page } = await openAs(browser, null);
@@ -291,11 +332,48 @@ test.describe('sessão e navegação (SPAS-01, SPAS-02, SPAS-03)', () => {
 		});
 
 		await page.goto('pasta?order=code');
-		await expect(page).toHaveURL(/\/app\/entrar\?return_to=/);
-		expect(new URL(page.url()).searchParams.get('return_to')).toBe('/app/pasta?order=code');
+		await expect(page).toHaveURL(/\/entrar\?return_to=/);
+		expect(new URL(page.url()).searchParams.get('return_to')).toBe('/pasta?order=code');
 		await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible();
 		expect(calls, 'GET /api/progress observados').toEqual([]);
+		await context.close();
+	});
+
+	test('/app/entrar?return_to=%2Fapp%2Fpasta redireciona, entra e termina em /pasta (STRO-11, STRO-21)', async ({
+		browser
+	}) => {
+		const { context, page } = await openAs(browser, null);
+
+		await page.goto('app/entrar?return_to=%2Fapp%2Fpasta');
+		await expect(page).toHaveURL(/\/entrar\?return_to=%2Fapp%2Fpasta$/);
+		expect(new URL(page.url()).pathname, 'o prefixo /app saiu do caminho').toBe('/entrar');
+		await expect(page.getByRole('heading', { name: 'Entrar', level: 1 })).toBeVisible();
+
+		await page.getByLabel('E-mail').fill(owners[0].email);
+		await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
+		await page.getByRole('button', { name: 'Entrar' }).click();
+
+		await expect(page).toHaveURL(/^https?:\/\/[^/]+\/pasta$/);
+		await waitForPasta(page);
+		await expect(mainNav(page).getByRole('button', { name: 'Sair' })).toBeVisible();
+		await context.close();
+	});
+
+	test('/progress e /app/pasta?order=code redirecionam para /pasta preservando a query (STRO-11, STRO-12)', async ({
+		browser
+	}) => {
+		const { context, page } = await openAs(browser, owners[0], {
+			viewport: { width: 1280, height: 800 }
+		});
+
+		await page.goto('progress?order=code');
+		await expect(page).toHaveURL(/^https?:\/\/[^/]+\/pasta\?order=code$/);
+		await waitForPasta(page, 'code');
+
+		await page.goto('app/pasta?order=recent');
+		await expect(page).toHaveURL(/^https?:\/\/[^/]+\/pasta\?order=recent$/);
+		await waitForPasta(page, 'recent');
 		await context.close();
 	});
 
@@ -313,7 +391,7 @@ test.describe('sessão e navegação (SPAS-01, SPAS-02, SPAS-03)', () => {
 		await expect(link).not.toHaveAttribute('aria-current', 'page');
 		await link.click();
 
-		await expect(page).toHaveURL(/\/app\/pasta\/?$/);
+		await expect(page).toHaveURL(/\/pasta\/?$/);
 		await waitForPasta(page);
 		await expect(page).toHaveTitle('Minha pasta — Bindr');
 		await expect(mainNav(page).getByRole('link', { name: 'Minha pasta' })).toHaveAttribute(
@@ -457,7 +535,7 @@ test.describe('animação dos indicadores (SPAS-12, SPAS-14, SPAS-16)', () => {
 	const readSamples = (page: Page) =>
 		page.evaluate(() => (window as unknown as { __samples: Samples }).__samples);
 
-	test('a largura do cartão não muda e o texto final é o valor da /progress', async ({
+	test('a largura do cartão não muda e o texto final é o valor da API', async ({
 		browser
 	}) => {
 		const { context, page } = await openAs(browser, owners[1], {
@@ -466,7 +544,7 @@ test.describe('animação dos indicadores (SPAS-12, SPAS-14, SPAS-16)', () => {
 		});
 		await page.addInitScript(sampler);
 		await openPasta(page, 'recent');
-		const finals = (await htmlSnapshot(page, 'recent')).stats.map((stat) => stat.value);
+		const finals = (await apiSnapshot(page, 'recent')).stats.map((stat) => stat.value);
 
 		await expect
 			.poll(async () => (await page.locator('main .summary .card .number').allTextContents()).map(squash))
@@ -502,7 +580,7 @@ test.describe('animação dos indicadores (SPAS-12, SPAS-14, SPAS-16)', () => {
 		});
 		await page.addInitScript(sampler);
 		await openPasta(page, 'recent');
-		const finals = (await htmlSnapshot(page, 'recent')).stats.map((stat) => stat.value);
+		const finals = (await apiSnapshot(page, 'recent')).stats.map((stat) => stat.value);
 
 		const samples = await readSamples(page);
 		expect(samples.length, 'quadros amostrados').toBeGreaterThan(0);
@@ -514,19 +592,13 @@ test.describe('animação dos indicadores (SPAS-12, SPAS-14, SPAS-16)', () => {
 });
 
 for (const width of [390, 1280]) {
-	test(`capturas de /app/pasta e /progress a ${width}px para o dono (SPAS-26)`, async ({
-		browser
-	}) => {
+	test(`captura de /pasta a ${width}px para o dono (SPAS-26)`, async ({ browser }) => {
 		const { context, page } = await openAs(browser, owners[0], {
 			viewport: { width, height: width === 390 ? 844 : 800 },
 			reducedMotion: 'reduce'
 		});
 		await openPasta(page, 'recent');
 		await page.screenshot({ path: `${CAPTURES_DIR}/spa-pasta-${width}.png`, fullPage: true });
-
-		await page.goto('/progress?order=recent');
-		await expect(page.getByRole('heading', { name: 'Minha pasta', level: 1 })).toBeVisible();
-		await page.screenshot({ path: `${CAPTURES_DIR}/hotwire-progress-${width}.png`, fullPage: true });
 		await context.close();
 	});
 }

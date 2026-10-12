@@ -3,11 +3,16 @@ import { expect, test, type Browser, type BrowserContext, type Page } from '@pla
 type Variant = { variant_code: string; in_source: boolean };
 type Card = { card_number: string; colors: string[]; variants: Variant[] };
 type Owner = { state: Awaited<ReturnType<BrowserContext['storageState']>> };
-type DeckApi = { entries: { card_number: string; quantity: number }[] };
+type DeckApi = {
+	status: string;
+	main_total: number;
+	entries: { card_number: string; quantity: number }[];
+};
+type ShortfallApi = { card_number: string; name: string; missing: number; decks: { name: string }[] };
 type ShortfallRow = { name: string; number: string; missing: string; decks: string[] };
 
 const PASSWORD = 'senha-correta-1';
-const BASE_URL = 'http://frontend:5173/app/';
+const BASE_URL = 'http://frontend:5173/';
 const PIXEL_PNG = Buffer.from(
 	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
 	'base64'
@@ -67,12 +72,14 @@ async function ownCopy(context: BrowserContext, card: Card) {
 	);
 }
 
-async function deckEntries(page: Page, deckId: number) {
+async function deckApi(page: Page, deckId: number) {
 	const response = await page.context().request.get(`/api/decks/${deckId}`);
 	expect(response.ok(), `GET /api/decks/${deckId}`).toBe(true);
 	const { data } = (await response.json()) as { data: DeckApi };
-	return data.entries;
+	return data;
 }
+
+const deckEntries = async (page: Page, deckId: number) => (await deckApi(page, deckId)).entries;
 
 async function openAs(browser: Browser) {
 	const context = await browser.newContext({
@@ -142,7 +149,7 @@ test.describe('montagem pelo detalhe da carta (SDEC-20, SDEC-33, SDEC-35, SDEC-3
 		}).toPass();
 
 		await deckPanel(page).getByRole('link', { name: deckName }).click();
-		await expect(page).toHaveURL(new RegExp(`/app/baralhos/${deckId}/?$`));
+		await expect(page).toHaveURL(new RegExp(`/baralhos/${deckId}/?$`));
 		await expect(page.locator('li.entry', { hasText: card.card_number }).locator('.quantity')).toHaveText(
 			'3×'
 		);
@@ -168,7 +175,7 @@ test.describe('montagem pelo detalhe da carta (SDEC-20, SDEC-33, SDEC-35, SDEC-3
 		await context.close();
 	});
 
-	test('Leader pela SPA e cópias até 50: válido na SPA e em /decks/<id>', async ({ browser }) => {
+	test('Leader pela SPA e cópias até 50: válido na SPA e em GET /api/decks/<id>', async ({ browser }) => {
 		const { context, page } = await openAs(browser);
 		const deckId = await createDeck(context, 'Montagem válido');
 		for (const card of reds.slice(0, 12)) await addCopies(context, deckId, card, 4);
@@ -191,37 +198,42 @@ test.describe('montagem pelo detalhe da carta (SDEC-20, SDEC-33, SDEC-35, SDEC-3
 		await expect(page.locator('#deck-status-title')).toHaveText('Status: válido');
 		await expect(page.locator('#deck-main-title')).toHaveText('Deck principal: 50 / 50');
 
-		const html = await (await context.request.get(`/decks/${deckId}`)).text();
-		const hotwire = await page.evaluate((source) => {
-			const doc = new DOMParser().parseFromString(source, 'text/html');
-			return (doc.querySelector('#deck-status-title')?.textContent ?? '').replace(/\s+/g, ' ').trim();
-		}, html);
-		expect(hotwire).toBe('Status: válido');
+		const api = await deckApi(page, deckId);
+		expect(api.status, 'status na API').toBe('valid');
+		expect(api.main_total, 'total do deck principal na API').toBe(50);
 		await context.close();
 	});
 });
 
-// Lê o bloco "Faltando para os baralhos": `source` é o HTML do Hotwire; sem ele, o DOM da SPA.
-function shortfall(page: Page, source: string | null): Promise<ShortfallRow[]> {
-	return page.evaluate((html) => {
+// Lê o bloco "Faltando para os baralhos" do DOM da SPA.
+function shortfall(page: Page): Promise<ShortfallRow[]> {
+	return page.evaluate(() => {
 		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
-		const root = html ? new DOMParser().parseFromString(html, 'text/html') : document;
-		const section = root.querySelector(
-			html
-				? 'section[aria-labelledby="deck-folder-shortfall-title"]'
-				: 'section[aria-labelledby="deck-shortfall-title"]'
-		);
+		const section = document.querySelector('section[aria-labelledby="deck-shortfall-title"]');
 		return [...(section?.querySelectorAll('li') ?? [])].map((li) => ({
 			name: squash(li.querySelector('a')?.textContent),
 			number: squash(li.querySelector('code')?.textContent),
 			missing: squash(li.querySelector('code')?.nextElementSibling?.textContent),
 			decks: [...li.querySelectorAll('a')].slice(1).map((a) => squash(a.textContent))
 		}));
-	}, source);
+	});
+}
+
+// O bloco que a tela deve mostrar, calculado de `GET /api/decks/shortfall`.
+async function apiShortfall(context: BrowserContext): Promise<ShortfallRow[]> {
+	const response = await context.request.get('/api/decks/shortfall');
+	expect(response.ok(), 'GET /api/decks/shortfall').toBe(true);
+	const { data } = (await response.json()) as { data: ShortfallApi[] };
+	return data.map((card) => ({
+		name: card.name,
+		number: card.card_number,
+		missing: card.missing === 1 ? 'falta 1' : `faltam ${card.missing}`,
+		decks: card.decks.map((deck) => deck.name)
+	}));
 }
 
 test.describe('"Faltando para os baralhos" na pasta (SDEC-40)', () => {
-	test('o bloco da /app/pasta traz as mesmas cartas, faltas e decks da /progress', async ({
+	test('o bloco da /pasta traz as mesmas cartas, faltas e decks de GET /api/decks/shortfall', async ({
 		browser
 	}) => {
 		const { context, page } = await openAs(browser);
@@ -238,10 +250,10 @@ test.describe('"Faltando para os baralhos" na pasta (SDEC-40)', () => {
 			page.getByRole('heading', { name: 'Faltando para os baralhos', level: 2 })
 		).toBeVisible();
 
-		const spa = await shortfall(page, null);
-		const html = await shortfall(page, await (await context.request.get('/progress')).text());
-		expect(html.length, 'o Hotwire lista as cartas que faltam').toBeGreaterThan(0);
-		expect(spa, 'mesmas cartas, faltas e decks').toEqual(html);
+		const spa = await shortfall(page);
+		const api = await apiShortfall(context);
+		expect(api.length, 'a API lista as cartas que faltam').toBeGreaterThan(0);
+		expect(spa, 'mesmas cartas, faltas e decks').toEqual(api);
 		const row = spa.find((item) => item.number === reds[2].card_number);
 		// maior uso entre os decks do dono (4, no deck válido) menos 1 possuída
 		expect(row?.missing).toBe('faltam 3');

@@ -718,9 +718,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Nenhum `goto` para `/progress`, `/wishlist`, `/decks` (salvo `.txt`), `/collection/import`
-- [ ] `/app/entrar?return_to=%2Fapp%2Fpasta` → login → `/pasta`; anônimo em `/decks/<id>.txt` → login → download por página inteira
-- [ ] Gate check passes: Full
+- [x] Nenhum `goto` para `/progress`, `/wishlist`, `/decks` (salvo `.txt`), `/collection/import`
+- [x] `/app/entrar?return_to=%2Fapp%2Fpasta` → login → `/pasta`; anônimo em `/decks/<id>.txt` → login → download por página inteira
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full

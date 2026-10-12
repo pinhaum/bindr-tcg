@@ -16,7 +16,7 @@ type Snapshot = { count: string; rows: Row[] };
 type Owner = { email: string; state: Awaited<ReturnType<BrowserContext['storageState']>> };
 
 const PASSWORD = 'senha-correta-1';
-const BASE_URL = 'http://frontend:5173/app/';
+const BASE_URL = 'http://frontend:5173/';
 const EMPTY_MESSAGE = 'Você ainda não marcou nenhuma carta como desejada.';
 const PIXEL_PNG = Buffer.from(
 	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
@@ -119,7 +119,7 @@ async function openWishlist(page: Page, expected: number) {
 	await expect(removeButtons(page)).toHaveCount(expected);
 }
 
-// O DOM da lista da SPA, no mesmo formato de `htmlSnapshot`.
+// O DOM da lista da SPA, no mesmo formato de `apiSnapshot`.
 function spaSnapshot(page: Page): Promise<Snapshot> {
 	return page.evaluate(() => {
 		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
@@ -134,35 +134,34 @@ function spaSnapshot(page: Page): Promise<Snapshot> {
 	});
 }
 
-// O DOM da `/wishlist` do Hotwire, lido do HTML que o servidor entrega à mesma sessão.
-async function htmlSnapshot(page: Page): Promise<Snapshot> {
-	const response = await page.context().request.get('/wishlist');
-	expect(response.ok(), 'GET /wishlist').toBe(true);
-	const html = await response.text();
-	return page.evaluate((source) => {
-		const squash = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
-		const doc = new DOMParser().parseFromString(source, 'text/html');
-		const rows = [...doc.querySelectorAll('li.wishlist-item')].map((li) => {
-			const link = li.querySelector('.wishlist-item__link');
-			const owned = squash(li.querySelector('.wishlist-item__owned')?.textContent);
-			const target = squash(li.querySelector('.wishlist-item__target')?.textContent);
-			return {
-				name: squash(link?.textContent),
-				code: squash(link?.querySelector('code')?.textContent),
-				quantity: `${owned} de ${target === '1' ? '1 cópia' : `${target} cópias`}`,
-				status: squash(li.querySelector('.wishlist-item__status')?.textContent),
-				label: li.querySelector('button')?.getAttribute('aria-label') ?? ''
-			};
-		});
-		return { count: squash(doc.querySelector('.wishlist__count')?.textContent), rows };
-	}, html);
-}
-
 async function listWishes(context: BrowserContext) {
 	const response = await context.request.get('/api/wishlist');
 	expect(response.ok(), 'GET /api/wishlist').toBe(true);
 	const { data } = (await response.json()) as { data: Wish[] };
 	return data;
+}
+
+const copiesOf = (n: number) => (n === 1 ? '1 cópia' : `${n} cópias`);
+
+// O que a tela deve mostrar, calculado de `GET /api/wishlist` (a fonte dos números), com a sessão da página.
+async function apiSnapshot(context: BrowserContext): Promise<Snapshot> {
+	const wishes = await listWishes(context);
+	return {
+		count: wishes.length === 1 ? '1 item' : `${wishes.length} itens`,
+		rows: wishes.map((item) => {
+			const missing = Math.max(item.target_quantity - item.owned_quantity, 0);
+			expect(item.fulfilled, `fulfilled de ${item.variant_code} da API`).toBe(missing === 0);
+			return {
+				name: `${item.card_name} ${item.variant_code}`,
+				code: item.variant_code,
+				quantity: `${item.owned_quantity} de ${copiesOf(item.target_quantity)}`,
+				status: item.fulfilled ? 'Atendido' : `Faltam ${missing}`,
+				label: `Remover ${item.card_name} ${item.variant_code} da lista de desejos (${
+					item.fulfilled ? 'atendido' : `faltam ${missing}`
+				})`
+			};
+		})
+	};
 }
 
 let picks: Pick[] = [];
@@ -183,29 +182,46 @@ test.beforeAll(async ({ browser }) => {
 	other = await createOwner(browser, 'b', (context) => wish(context, picks[1], 1, 0));
 });
 
-test('paridade com a /wishlist: nomes, variant_code, contagens, estados e ordem (SPAS-29, SPAS-31)', async ({
+test('paridade com GET /api/wishlist: nomes, variant_code, contagens, estados e ordem (SPAS-29, SPAS-31)', async ({
 	browser
 }) => {
 	const { context, page } = await openAs(browser, owner);
 	await openWishlist(page, PLAN.length);
 	await expect(page).toHaveTitle('Lista de desejos — Bindr');
 
-	const html = await htmlSnapshot(page);
+	const api = await apiSnapshot(context);
 	const spa = await spaSnapshot(page);
 
-	expect(html.rows.length, 'a /wishlist lista os três desejos').toBe(PLAN.length);
+	expect(api.rows.length, 'a /api/wishlist lista os três desejos').toBe(PLAN.length);
 	expect(
 		spa.rows.map((row) => row.code),
 		'ordem de criação'
 	).toEqual(picks.map((pick) => pick.code));
 	expect(spa.count).toBe('3 itens');
-	expect(spa.count).toBe(html.count);
-	expect(spa.rows).toEqual(html.rows);
+	expect(spa.count).toBe(api.count);
+	expect(spa.rows).toEqual(api.rows);
 	expect(spa.rows.map((row) => row.status)).toEqual(['Atendido', 'Faltam 2', 'Faltam 2']);
 	await context.close();
 });
 
-test('o link do item abre /app/cartas/<card_number> sem recarga (SPAS-30)', async ({ browser }) => {
+test('/wishlist e /app/pasta/desejos redirecionam para /pasta/desejos com a mesma lista (STRO-11, STRO-12, STRO-34)', async ({
+	browser
+}) => {
+	const { context, page } = await openAs(browser, owner);
+	const expected = await apiSnapshot(context);
+	expect(expected.rows.length, 'a /api/wishlist tem desejos').toBe(PLAN.length);
+
+	for (const legacy of ['wishlist', 'app/pasta/desejos']) {
+		await page.goto(legacy);
+		await expect(page).toHaveURL(/^https?:\/\/[^/]+\/pasta\/desejos$/);
+		await expect(page.getByRole('heading', { name: 'Lista de desejos', level: 1 })).toBeVisible();
+		await expect(removeButtons(page)).toHaveCount(PLAN.length);
+		expect((await spaSnapshot(page)).rows, `lista depois de ${legacy}`).toEqual(expected.rows);
+	}
+	await context.close();
+});
+
+test('o link do item abre /cartas/<card_number> sem recarga (SPAS-30)', async ({ browser }) => {
 	const { context, page } = await openAs(browser, owner);
 	await openWishlist(page, PLAN.length);
 	await page.evaluate(() => {
@@ -215,7 +231,7 @@ test('o link do item abre /app/cartas/<card_number> sem recarga (SPAS-30)', asyn
 	const [first] = await listWishes(context);
 	await page.locator('main section ul > li').first().getByRole('link').click();
 
-	await expect(page).toHaveURL(new RegExp(`/app/cartas/${encodeURIComponent(first.card_number)}$`));
+	await expect(page).toHaveURL(new RegExp(`/cartas/${encodeURIComponent(first.card_number)}$`));
 	await expect(page.getByRole('heading', { level: 1 })).toContainText(first.card_name);
 	expect(
 		await page.evaluate(() => (window as unknown as { __kept?: boolean }).__kept),
@@ -264,9 +280,9 @@ test('remover o do meio leva o foco ao seguinte e não toca o desejo de outro us
 	);
 	expect((await spaSnapshot(page)).count).toBe('2 itens');
 
-	const html = await htmlSnapshot(page);
-	expect(html.rows.map((row) => row.code)).toEqual([picks[0].code, picks[2].code]);
-	expect(html.count).toBe('2 itens');
+	const api = await apiSnapshot(context);
+	expect(api.rows.map((row) => row.code)).toEqual([picks[0].code, picks[2].code]);
+	expect(api.count).toBe('2 itens');
 
 	const { context: otherContext, page: otherPage } = await openAs(browser, other);
 	const theirs = await listWishes(otherContext);
@@ -292,7 +308,7 @@ test('remover todos leva o foco ao h1 e mostra a lista vazia (SPAS-34)', async (
 	await expect(page.getByText(EMPTY_MESSAGE)).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'Lista de desejos', level: 1 })).toBeFocused();
 
-	expect((await htmlSnapshot(page)).rows, '/wishlist vazia').toEqual([]);
+	expect((await apiSnapshot(context)).rows, '/api/wishlist vazia').toEqual([]);
 	expect(await listWishes(context)).toEqual([]);
 	await context.close();
 });

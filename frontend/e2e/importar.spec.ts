@@ -24,9 +24,26 @@ type Row = {
 };
 type Group = { title: string; support: string; rows: Row[] };
 type Preview = { file: string; warning: string | null; groups: Group[] };
+type Classification =
+  | "removes"
+  | "creates"
+  | "updates"
+  | "rejected"
+  | "unchanged";
+type ApiRow = {
+  line: number;
+  classification: Classification;
+  card_number: string | null;
+  variant_code: string | null;
+  card_name: string | null;
+  quantity_before: number | null;
+  quantity_after: number | null;
+  message: string | null;
+};
+type ApiImport = { token: string; filename: string; rows: ApiRow[] };
 
 const PASSWORD = "senha-correta-1";
-const BASE_URL = "http://frontend:5173/app/";
+const BASE_URL = "http://frontend:5173/";
 const CONFIRM = "Confirmar e gravar na minha coleção";
 const SUBMIT = "Pré-visualizar importação";
 const LONG_NAME = "Nome".padEnd(120, "x");
@@ -162,13 +179,6 @@ async function exportCsv(context: BrowserContext) {
   return response.text();
 }
 
-async function uploadHtml(page: Page, content: string) {
-  await page.goto("/collection/import");
-  await page.locator('input[name="arquivo"]').setInputFiles(csvFile(content));
-  await page.getByRole("button", { name: SUBMIT }).click();
-  await page.waitForURL(/\/collection\/import\/[^/]+$/);
-}
-
 async function uploadSpa(page: Page, content: string) {
   await page.goto("pasta/importar");
   await expect(
@@ -176,46 +186,117 @@ async function uploadSpa(page: Page, content: string) {
   ).toBeVisible();
   await page.locator('input[type="file"]').setInputFiles(csvFile(content));
   await page.getByRole("button", { name: SUBMIT }).click();
-  await page.waitForURL(/\/app\/pasta\/importar\/[^/]+$/);
+  await page.waitForURL(/\/pasta\/importar\/[^/]+$/);
 }
 
-// Mesma forma para as duas telas; só os seletores mudam.
-function htmlPreview(page: Page): Promise<Preview> {
-  return page.evaluate(() => {
-    const squash = (text: string | null | undefined) =>
-      (text ?? "").replace(/\s+/g, " ").trim();
-    const text = (root: Element, selector: string) =>
-      squash(root.querySelector(selector)?.textContent);
-    const groups = [
-      ...document.querySelectorAll("section.import-preview__group"),
-    ].map((group) => ({
-      title: text(group, ".import-preview__group-title"),
-      support: text(group, ".import-preview__group-help"),
-      rows: [...group.querySelectorAll("li.import-preview__row")].map(
-        (row) => ({
-          label: text(row, ".import-preview__badge"),
-          number: text(row, ".import-preview__number"),
-          variant: text(row, ".import-preview__variant"),
-          name: text(row, ".import-preview__name"),
-          line: text(row, ".import-preview__origin"),
-          numbers: [
-            ...row.querySelectorAll(
-              ".import-preview__antes, .import-preview__depois",
-            ),
-          ].map((node) => squash(node.textContent)),
-          reason: row.querySelector(".import-preview__motivo")
-            ? text(row, ".import-preview__motivo")
-            : null,
-        }),
-      ),
-    }));
-    const warning = document.querySelector(".import-preview__warning");
-    return {
-      file: text(document.body, ".import-preview__file"),
-      warning: warning ? squash(warning.textContent) : null,
-      groups,
-    };
-  });
+const tokenOf = (page: Page) =>
+  decodeURIComponent(new URL(page.url()).pathname.split("/").at(-1)!);
+
+async function fetchImport(
+  context: BrowserContext,
+  token: string,
+): Promise<ApiImport> {
+  const path = `/api/collection/imports/${encodeURIComponent(token)}`;
+  const response = await context.request.get(path);
+  expect(response.ok(), `GET ${path}`).toBe(true);
+  const { data } = (await response.json()) as { data: ApiImport };
+  return data;
+}
+
+const GROUP_COPY: Record<
+  Classification,
+  { title: string; support: string; label: string }
+> = {
+  removes: {
+    title: "Remove da coleção",
+    support:
+      "Estas cartas você possui hoje e o arquivo traz zero: a posse desaparece na confirmação.",
+    label: "Remove da coleção",
+  },
+  creates: {
+    title: "Passa a constar",
+    support:
+      "Estas variantes ainda não estão na sua coleção e passarão a constar.",
+    label: "Cria",
+  },
+  updates: {
+    title: "Altera a quantidade",
+    support:
+      "A quantidade do arquivo substitui a que está na sua coleção hoje.",
+    label: "Altera",
+  },
+  rejected: {
+    title: "Não será importada",
+    support:
+      "Estas linhas do arquivo não serão aplicadas. O motivo de cada uma está abaixo.",
+    label: "Recusada",
+  },
+  unchanged: {
+    title: "Já está assim",
+    support:
+      "A quantidade do arquivo é a que você já tem: nada muda nestas linhas.",
+    label: "Sem alteração",
+  },
+};
+const GROUP_ORDER = Object.keys(GROUP_COPY) as Classification[];
+
+// O que a tela deve mostrar, calculado de `GET /api/collection/imports/<token>` (a fonte dos números).
+function previewOf(data: ApiImport): Preview {
+  const lines = data.rows.length;
+  const removes = data.rows.filter(
+    (row) => row.classification === "removes",
+  ).length;
+  return {
+    file: `Arquivo: ${data.filename} — ${lines} ${lines === 1 ? "linha analisada" : "linhas analisadas"}.`,
+    warning:
+      removes === 0
+        ? null
+        : `${
+            removes === 1
+              ? "Atenção: 1 carta que você possui hoje sai da sua coleção se você confirmar."
+              : `Atenção: ${removes} cartas que você possui hoje saem da sua coleção se você confirmar.`
+          } Veja quais em “Remove da coleção”, no topo desta página.`,
+    groups: GROUP_ORDER.map((classification) => ({
+      classification,
+      rows: data.rows.filter((row) => row.classification === classification),
+    }))
+      .filter(({ rows }) => rows.length > 0)
+      .map(({ classification, rows }) => ({
+        title: `${GROUP_COPY[classification].title} (${rows.length})`,
+        support: GROUP_COPY[classification].support,
+        rows: rows.map((row) => ({
+          label: GROUP_COPY[classification].label,
+          number: row.card_number ?? "—",
+          variant: row.variant_code ?? "—",
+          name: row.card_name ?? "",
+          line: `Linha ${row.line} do arquivo`,
+          numbers:
+            classification === "rejected"
+              ? []
+              : classification === "creates"
+                ? [String(row.quantity_after)]
+                : [String(row.quantity_before), String(row.quantity_after)],
+          reason: classification === "rejected" ? (row.message ?? "") : null,
+        })),
+      })),
+  };
+}
+
+// Quantidade possuída de uma variante, lida de `GET /api/cards/<n>` (o banco pela API).
+async function ownedQuantity(
+  context: BrowserContext,
+  cardNumber: string,
+  variantCode: string,
+) {
+  const path = `/api/cards/${encodeURIComponent(cardNumber)}`;
+  const response = await context.request.get(path);
+  expect(response.ok(), `GET ${path}`).toBe(true);
+  const { data } = (await response.json()) as {
+    data: { variants: { variant_code: string; owned_quantity: number | null }[] };
+  };
+  const variant = data.variants.find((item) => item.variant_code === variantCode);
+  expect(variant, `variante ${variantCode} em ${cardNumber}`).toBeDefined();
+  return variant!.owned_quantity ?? 0;
 }
 
 function spaPreview(page: Page): Promise<Preview> {
@@ -298,8 +379,8 @@ const countsOf = (page: Page, selector: string) =>
 
 let picks: Pick[] = [];
 let fiveClasses = "";
-// A não confirma nada; B confirma pelo HTML e C pela SPA, com a mesma coleção inicial.
-const owners = {} as Record<"A" | "B" | "C", Owner>;
+// A não confirma nada; C confirma pela SPA.
+const owners = {} as Record<"A" | "C", Owner>;
 
 test.describe.configure({ mode: "serial" });
 
@@ -325,13 +406,13 @@ test.beforeAll(async ({ browser }) => {
     [owned3.number, owned3.code, owned3.name, 5],
   ]);
 
-  for (const label of ["A", "B", "C"] as const) {
+  for (const label of ["A", "C"] as const) {
     owners[label] = await createOwner(browser, label, seed);
   }
 });
 
-test.describe("pré-visualização igual à do HTML e coleção intacta (Goal 1, SPOR-13..15, SPOR-20)", () => {
-  test("o mesmo arquivo dá os mesmos grupos, linhas, antes, depois e motivos", async ({
+test.describe("pré-visualização igual à da API e coleção intacta (Goal 1, SPOR-13..15, SPOR-20)", () => {
+  test("o mesmo arquivo dá os mesmos grupos, linhas, antes, depois e motivos da API", async ({
     browser,
   }) => {
     const { context, page } = await openAs(browser, owners.A);
@@ -340,15 +421,13 @@ test.describe("pré-visualização igual à do HTML e coleção intacta (Goal 1,
       "cabeçalho e três variantes",
     ).toBe(4);
 
-    await uploadHtml(page, fiveClasses);
-    const html = await htmlPreview(page);
-
     await uploadSpa(page, fiveClasses);
     await expect(confirmButton(page)).toBeVisible();
     const spa = await spaPreview(page);
+    const api = previewOf(await fetchImport(context, tokenOf(page)));
 
     expect(
-      html.groups.map((group) => group.title.replace(/ \(\d+\)$/, "")),
+      api.groups.map((group) => group.title.replace(/ \(\d+\)$/, "")),
       "as cinco classificações, na ordem de consequência",
     ).toEqual([
       "Remove da coleção",
@@ -360,14 +439,14 @@ test.describe("pré-visualização igual à do HTML e coleção intacta (Goal 1,
     expect(
       spa.groups,
       "grupos, ordem, linhas, números de linha, antes, depois e motivos",
-    ).toEqual(html.groups);
-    expect(spa.file, "arquivo e linhas analisadas").toBe(html.file);
-    expect(spa.warning, "aviso de remoção").toBe(html.warning);
+    ).toEqual(api.groups);
+    expect(spa.file, "arquivo e linhas analisadas").toBe(api.file);
+    expect(spa.warning, "aviso de remoção").toBe(api.warning);
     expect(spa.warning).toContain(
       "Atenção: 1 carta que você possui hoje sai da sua coleção",
     );
     expect(
-      html.groups.flatMap((group) => group.rows).map((row) => row.line),
+      api.groups.flatMap((group) => group.rows).map((row) => row.line),
       "números de linha do arquivo (o cabeçalho é a linha 1)",
     ).toEqual(
       expect.arrayContaining(["Linha 2 do arquivo", "Linha 6 do arquivo"]),
@@ -382,6 +461,35 @@ test.describe("pré-visualização igual à do HTML e coleção intacta (Goal 1,
       creates.rows[0].name,
       "o HTML do arquivo aparece como texto",
     ).toContain("<i>");
+
+    await context.close();
+  });
+
+  test("/collection/import e /collection/import/<token> redirecionam para a SPA, com a pré-visualização da API (STRO-11, STRO-14)", async ({
+    browser,
+  }) => {
+    const { context, page } = await openAs(browser, owners.A);
+
+    await page.goto("collection/import");
+    await expect(page).toHaveURL(/^https?:\/\/[^/]+\/pasta\/importar$/);
+    await expect(
+      page.getByRole("heading", { name: "Importar coleção", level: 1 }),
+    ).toBeVisible();
+
+    await uploadSpa(page, fiveClasses);
+    await expect(confirmButton(page)).toBeVisible();
+    const token = tokenOf(page);
+    const expected = previewOf(await fetchImport(context, token));
+
+    await page.goto(`collection/import/${encodeURIComponent(token)}`);
+    await expect(page).toHaveURL(
+      new RegExp(`^https?://[^/]+/pasta/importar/${encodeURIComponent(token)}$`),
+    );
+    await expect(confirmButton(page)).toBeVisible();
+    expect(
+      (await spaPreview(page)).groups,
+      "pré-visualização depois do redirecionamento",
+    ).toEqual(expected.groups);
 
     await context.close();
   });
@@ -401,7 +509,7 @@ test.describe("pré-visualização igual à do HTML e coleção intacta (Goal 1,
     expect(await exportCsv(context), "depois de recarregar").toBe(before);
 
     await page.getByRole("link", { name: "envie outro arquivo" }).click();
-    await expect(page).toHaveURL(/\/app\/pasta\/importar$/);
+    await expect(page).toHaveURL(/\/pasta\/importar$/);
     await page.goto("pasta");
     await expect(
       page.getByRole("heading", { name: "Minha pasta", level: 1 }),
@@ -438,41 +546,51 @@ test.describe("pré-visualização igual à do HTML e coleção intacta (Goal 1,
 });
 
 test.describe("confirmação (Goal 2, SPOR-22, SPOR-30)", () => {
-  test("confirmar pela SPA grava o mesmo que o HTML e recarregar dá 409", async ({
+  test("confirmar pela SPA grava o que a pré-visualização prometeu e recarregar dá 409", async ({
     browser,
   }) => {
-    const html = await openAs(browser, owners.B);
-    const spa = await openAs(browser, owners.C);
-    const initial = await exportCsv(html.context);
-    expect(await exportCsv(spa.context), "mesma coleção inicial").toBe(initial);
+    const { context, page } = await openAs(browser, owners.C);
+    const initial = await exportCsv(context);
 
-    await uploadHtml(html.page, fiveClasses);
-    // O HTML responde 200 sem redirect: com Turbo a resposta seria descartada, então o form vai nativo.
-    await html.page.locator("form.import-preview__form").evaluate((form) => {
-      form.setAttribute("data-turbo", "false");
-    });
-    await confirmButton(html.page).click();
-    await expect(doneHeading(html.page)).toBeVisible();
-    const htmlCounts = await countsOf(html.page, ".import-summary__count");
-    const afterHtml = await exportCsv(html.context);
-    expect(afterHtml, "o HTML mudou a coleção").not.toBe(initial);
+    await uploadSpa(page, fiveClasses);
+    await expect(confirmButton(page)).toBeVisible();
+    const promised = await fetchImport(context, tokenOf(page));
+    const applicable = promised.rows.filter(
+      (row) => row.classification !== "rejected",
+    );
+    expect(applicable.length, "linhas que a confirmação aplica").toBe(4);
+    for (const row of applicable) {
+      expect(
+        await ownedQuantity(context, row.card_number!, row.variant_code!),
+        `posse antes, linha ${row.line}`,
+      ).toBe(row.quantity_before ?? 0);
+    }
 
-    await uploadSpa(spa.page, fiveClasses);
-    await confirmButton(spa.page).click();
-    await expect(doneHeading(spa.page)).toBeVisible();
+    await confirmButton(page).click();
+    await expect(doneHeading(page)).toBeVisible();
     await expect(
-      doneHeading(spa.page),
+      doneHeading(page),
       "foco no h1 do resumo (SPOR-22)",
     ).toBeFocused();
-    await expect(spa.page).toHaveTitle("Importação concluída — Bindr");
+    await expect(page).toHaveTitle("Importação concluída — Bindr");
 
-    const spaCounts = await countsOf(spa.page, "main .stat");
-    expect(spaCounts, "mesmas contagens do HTML").toEqual(htmlCounts);
+    const count = (classification: Classification) =>
+      promised.rows.filter((row) => row.classification === classification)
+        .length;
+    const spaCounts = await countsOf(page, "main .stat");
+    expect(
+      spaCounts,
+      "importadas, atualizadas (com a remoção) e recusadas, como na pré-visualização",
+    ).toEqual([
+      String(count("creates")),
+      String(count("updates") + count("removes")),
+      String(count("rejected")),
+    ]);
     expect(
       spaCounts,
       "importadas, atualizadas (com a remoção) e recusadas",
     ).toEqual(["1", "2", "1"]);
-    const summary = squash(await spa.page.locator("main").innerText());
+    const summary = squash(await page.locator("main").innerText());
     expect(summary).toContain(
       "1 dessas atualizações removeu a carta da sua coleção: o arquivo trazia zero para uma variante que você possuía.",
     );
@@ -483,26 +601,30 @@ test.describe("confirmação (Goal 2, SPOR-22, SPOR-30)", () => {
       "Confira estas linhas: 1 linha do arquivo não foi aplicada.",
     );
 
-    const afterSpa = await exportCsv(spa.context);
-    expect(afterSpa, "a SPA grava o mesmo que o HTML").toBe(afterHtml);
+    for (const row of applicable) {
+      expect(
+        await ownedQuantity(context, row.card_number!, row.variant_code!),
+        `posse depois, linha ${row.line}`,
+      ).toBe(row.quantity_after);
+    }
+    const afterSpa = await exportCsv(context);
+    expect(afterSpa, "a confirmação mudou a coleção").not.toBe(initial);
 
-    await spa.page.reload();
-    await expect(confirmButton(spa.page)).toBeVisible();
-    await confirmButton(spa.page).click();
-    await expect(alertBlock(spa.page)).toContainText(
+    await page.reload();
+    await expect(confirmButton(page)).toBeVisible();
+    await confirmButton(page).click();
+    await expect(alertBlock(page)).toContainText(
       "Esta importação já foi confirmada ou expirou",
     );
     await expect(
-      confirmButton(spa.page),
+      confirmButton(page),
       "a pré-visualização continua",
     ).toBeVisible();
-    expect(
-      await exportCsv(spa.context),
-      "a segunda confirmação não grava",
-    ).toBe(afterSpa);
+    expect(await exportCsv(context), "a segunda confirmação não grava").toBe(
+      afterSpa,
+    );
 
-    await html.context.close();
-    await spa.context.close();
+    await context.close();
   });
 });
 
@@ -531,7 +653,7 @@ test.describe("recusa do arquivo (SPOR-07)", () => {
       "aria-invalid",
       "true",
     );
-    await expect(page).toHaveURL(/\/app\/pasta\/importar$/);
+    await expect(page).toHaveURL(/\/pasta\/importar$/);
     expect(await exportCsv(context)).toBe(before);
 
     await context.close();
@@ -566,7 +688,7 @@ test.describe("360px e 1280px nos dois temas (SPOR-46)", () => {
 
         await page.locator('input[type="file"]').setInputFiles(csvFile(file));
         await page.getByRole("button", { name: SUBMIT }).click();
-        await page.waitForURL(/\/app\/pasta\/importar\/[^/]+$/);
+        await page.waitForURL(/\/pasta\/importar\/[^/]+$/);
         await expect(confirmButton(page)).toBeVisible();
         await expect(page.getByText(LONG_NAME).first()).toBeVisible();
         await expect(page.getByText(LONG_CODE).first()).toBeVisible();
@@ -610,7 +732,7 @@ test.describe("10.000 linhas (tempo de renderização)", () => {
         .setInputFiles(csvFile(csv(rows)));
       const sentAt = Date.now();
       await page.getByRole("button", { name: SUBMIT }).click();
-      await page.waitForURL(/\/app\/pasta\/importar\/[^/]+$/, {
+      await page.waitForURL(/\/pasta\/importar\/[^/]+$/, {
         timeout: 120_000,
       });
       await expect(confirmButton(page)).toBeVisible({ timeout: 120_000 });
