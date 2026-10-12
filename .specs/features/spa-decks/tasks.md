@@ -877,11 +877,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] "Editar este deck" na SPA, depois a carta: seção "Deck em edição" com o deck; três `+` → `3×` na página do deck (SDEC-20, SDEC-33, SDEC-35)
-- [ ] Cinco toques rápidos → `+5` e o número igual ao do `GET /api/decks/:id` seguinte (SDEC-36)
-- [ ] "Usar como Leader" na carta Leader e entradas até 50 → `válido` em `/app/baralhos/<id>` e em `/decks/<id>` (SDEC-38, SDEC-39)
-- [ ] O bloco da `/app/pasta` traz as mesmas cartas, faltas e decks que o da `/progress` (SDEC-40)
-- [ ] Gate check passes: Full
+- [x] "Editar este deck" na SPA, depois a carta: seção "Deck em edição" com o deck; três `+` → `3×` na página do deck (SDEC-20, SDEC-33, SDEC-35)
+- [x] Cinco toques rápidos → `+5` e o número igual ao do `GET /api/decks/:id` seguinte (SDEC-36)
+- [x] "Usar como Leader" na carta Leader e entradas até 50 → `válido` em `/app/baralhos/<id>` e em `/decks/<id>` (SDEC-38, SDEC-39)
+- [x] O bloco da `/app/pasta` traz as mesmas cartas, faltas e decks que o da `/progress` (SDEC-40)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
