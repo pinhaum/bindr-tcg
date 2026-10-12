@@ -265,7 +265,7 @@ T24 → T25
 
 **Done when**:
 
-- [x] `GET /api/progress` faz três agregações além da sessão, uma delas `-- listDeckShortfall` (AD-021), com e sem decks
+- [x] `GET /api/progress` faz as agregações de progresso e `GET /api/decks/shortfall` a `-- listDeckShortfall`, com e sem decks (*emenda do supervisor, 2026-10-12: na API a falta por deck é outra requisição; o HTML pagava as três na mesma; a AD-021 vale para a soma das duas*)
 - [x] Gate check passes: Rails quick
 
 **Tests**: integration

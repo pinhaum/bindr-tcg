@@ -181,7 +181,7 @@ class Api::CollectionCsvRoundtripTest < ActionDispatch::IntegrationTest
     assert_equal versao, registro.updated_at, "a volta não pode reescrever o registro zerado"
   end
 
-  test "linha com quantidade zero no arquivo zera quem existia e não cria posse" do
+  test "linha com quantidade zero zera quem existia e cria só registro zerado, sem posse" do
     sign_in(@nami)
     arquivo = alterar_quantidade(exportar, @simples.card.card_number, 0)
     inexistente = variant(@paramount, "B31", "p4", "Franky")
@@ -190,9 +190,14 @@ class Api::CollectionCsvRoundtripTest < ActionDispatch::IntegrationTest
     resumo = ciclo(arquivo)
 
     assert_equal 0, CollectionItem.for_user(@nami).find_by!(card_variant: @simples).quantity
-    assert_equal 0, CollectionItem.for_user(@nami).find_by(card_variant: inexistente)&.quantity.to_i,
-                 "quantidade zero não cria posse"
+    criado = CollectionItem.for_user(@nami).find_by(card_variant: inexistente)
+    assert_not_nil criado, "a linha zero sobre variante sem registro cria o registro zerado (:cria, como no HTML)"
+    assert_equal 0, criado.quantity
     assert_not_includes CollectionItem.for_user(@nami).owned.pluck(:card_variant_id), inexistente.id
+    assert_not_includes linhas_do_csv(exportar).map { |l| [ l["card_number"], l["variant_code"] ] },
+                        [ inexistente.card.card_number, inexistente.variant_code ],
+                        "o registro zerado não aparece no export"
+    assert_equal 1, resumo["created"]
     assert_equal 1, resumo["removed"]
   end
 
