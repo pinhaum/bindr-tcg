@@ -94,7 +94,8 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
   test "anônimo é redirecionado para a autenticação e não recebe arquivo" do
     get collection_export_path
 
-    assert_redirected_to "/entrar?return_to=%2Fcollection%2Fexport"
+    assert_response :found
+    assert_equal "#{request.base_url}/entrar?return_to=%2Fcollection%2Fexport", response.headers["Location"]
     assert_nil response.headers["Content-Disposition"],
                "um redirect não pode vir com instrução de download"
   end

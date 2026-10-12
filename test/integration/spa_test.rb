@@ -51,6 +51,24 @@ class SpaTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "root build assets that exist are served by the file server with a max-age cache" do
+    immutable_dir = Rails.public_path.join("_app", "immutable")
+    asset = immutable_dir.join("spa-test-asset.js")
+    created_dirs = [ Rails.public_path.join("_app"), immutable_dir ].reject(&:exist?)
+    FileUtils.mkdir_p(immutable_dir)
+    File.write(asset, "export default 1;")
+
+    get "/_app/immutable/spa-test-asset.js"
+
+    assert_response :success
+    assert_equal "export default 1;", response.body
+    assert_match(/max-age=\d+/, response.headers["Cache-Control"])
+    assert_no_match(/no-cache/, response.headers["Cache-Control"])
+  ensure
+    FileUtils.rm_f(asset)
+    created_dirs.reverse_each { |dir| FileUtils.rmdir(dir) if dir.exist? && dir.empty? }
+  end
+
   test "/api and /api/ answer the JSON 404 of the API, never the entry page" do
     [ "/api", "/api/", "/api?x=1" ].each do |path|
       get path

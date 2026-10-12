@@ -11,6 +11,7 @@ class LegacyRedirectsTest < ActionDispatch::IntegrationTest
   REDIRECTS = {
     "/app" => "/",
     "/app/pasta?order=code" => "/pasta?order=code",
+    "/app/200.html" => "/200.html",
     "/app/cartas/P-029" => "/cartas/P-029",
     "/app/entrar?return_to=%2Fapp%2Fpasta" => "/entrar?return_to=%2Fapp%2Fpasta",
     "/app/pasta/importar/abc123" => "/pasta/importar/abc123",

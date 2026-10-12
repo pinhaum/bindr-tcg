@@ -75,6 +75,7 @@ class DeckExportTest < ActionDispatch::IntegrationTest
   test "sem sessão, o .txt redireciona para o login" do
     get deck_export_path(@deck)
 
-    assert_redirected_to "/entrar?return_to=%2Fdecks%2F#{@deck.id}.txt"
+    assert_response :found
+    assert_equal "#{request.base_url}/entrar?return_to=%2Fdecks%2F#{@deck.id}.txt", response.headers["Location"]
   end
 end

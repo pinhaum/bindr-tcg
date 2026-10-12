@@ -107,6 +107,17 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
     assert_nil variant_json(body, "tcgplayer:2")["wishlist_target"]
   end
 
+  test "user_id nos parâmetros não muda a posse lida" do
+    CollectionItem.create!(user: @user, card_variant: @base, quantity: 2)
+    CollectionItem.create!(user: @other, card_variant: @base, quantity: 7)
+
+    sign_in(@user)
+    assert_equal 2, variant_json(fetch(user_id: @other.id), "tcgplayer:1")["owned_quantity"]
+
+    delete "/api/session"
+    assert_nil variant_json(fetch(user_id: @other.id), "tcgplayer:1")["owned_quantity"]
+  end
+
   test "variante ausente da fonte só aparece, com in_source false, para quem a retém" do
     absent = variant!("tcgplayer:9", last_seen_at: CATALOG_SEEN_AT - 1.day)
     CollectionItem.create!(user: @user, card_variant: absent, quantity: 1)

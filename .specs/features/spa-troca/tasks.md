@@ -859,3 +859,45 @@ Phase 6:  T22 → T23 → T24 → T25
 ## Plano de delegação
 
 25 tasks → 4 lotes de phases inteiras: lote 1 = Phase 1 (T1–T7, garantias; tier alto na T3 e na T4 pela corrida e pela atomicidade), lote 2 = Phases 2 e 3 (T8–T14, raiz no Rails e no front; tier alto), lote 3 = Phases 4 e 5 (T15–T21, corte; tier alto, a T18 é a mais arriscada), lote 4 = Phase 6 (T22–T25, e2e e fechamento; tier alto). Revisões: `ecc:security-reviewer` na T8 e na T18 (redirecionamento aberto, `return_to`, `404` sem escrita) e na T12 (`safeReturnTo`); `ecc:pr-test-analyzer` no fim da Phase 1 (força das garantias migradas contra o inventário). O Verifier roda depois da T25, em contexto novo, e confere o inventário por amostragem com mutação nas regras de isolamento e de corrida.
+
+---
+
+## Tasks de correção (iteração 1 do Verifier, 2026-10-12)
+
+### T26: Teste do proxy de dev que roda e discrimina (G2)
+
+**What**: Mover `frontend/rails-paths.test.ts` para `frontend/src/rails-paths.test.ts` (import ajustado) e cobrir cada caminho do STRO-08 e cada rota do STRO-09.
+**Where**: `frontend/src/rails-paths.test.ts` (remove `frontend/rails-paths.test.ts`)
+**Depends on**: T10
+**Requirement**: STRO-04, STRO-08, STRO-09
+
+**Done when**:
+
+- [x] O teste entra no `npm test` (82 → 83 arquivos) e encaminha ao Rails `/progress`, `/wishlist`, `/session/new`, `/registration/new`, `/collection/import`, `/robots.txt`, `/icon.svg`, `/200.html`, `/decks`, `/decks/5/edit`
+- [x] As 14 rotas do STRO-09 ficam na SPA
+- [x] Remover qualquer prefixo do padrão faz algum teste falhar
+- [x] Gate check passes: Front quick
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `test(spa-troca): fazer o teste do proxy de dev rodar e discriminar`
+
+### T27: Lacunas Minor do Verifier (G3, G4, G5, G6)
+
+**What**: Teste de `user_id` em `GET /api/cards/:card_number`; cache de `/_app/immutable/*` por request test; `302` exato nos downloads; `/app/200.html` em `REDIRECTS`; tirar "(a confirmar no T25 da `spa-troca`)" do `CLAUDE.md`.
+**Where**: `test/integration/api/cards_test.rb`, `test/integration/spa_test.rb`, `test/integration/collection_exports_test.rb`, `test/integration/deck_export_test.rb`, `test/integration/legacy_redirects_test.rb`, `CLAUDE.md`
+**Depends on**: T25
+**Requirement**: STRO-06, STRO-11, STRO-18, STRO-31
+
+**Done when**:
+
+- [x] `?user_id=` em `GET /api/cards/:n` não muda a posse (a mutação I11c morre)
+- [x] `/_app/immutable/*` com `Cache-Control` de `max-age` longo em teste
+- [x] Downloads anônimos afirmam `302` e `Location` exatos
+- [x] `/app/200.html` → `/200.html` no request test
+- [x] `CLAUDE.md` sem "a confirmar no T25"
+- [x] Gate check passes: Rails quick
+
+**Tests**: integration
+**Gate**: quick
+**Commit**: `test(spa-troca): fechar as lacunas Minor do Verifier`
