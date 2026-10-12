@@ -38,7 +38,7 @@ class DeckExportTest < ActionDispatch::IntegrationTest
   test "o .txt responde text/plain em utf-8 com o corpo de Deck::ListText.format, sem CR" do
     sign_in
 
-    get deck_path(@deck, format: :txt)
+    get deck_export_path(@deck)
 
     assert_response :success
     assert_equal "text/plain", response.media_type
@@ -55,19 +55,11 @@ class DeckExportTest < ActionDispatch::IntegrationTest
     assert_equal "show", route[:action]
   end
 
-  test "a página do deck tem o link Exportar lista para o .txt" do
-    sign_in
-
-    get deck_path(@deck)
-
-    assert_select "a[href='#{deck_path(@deck, format: :txt)}']", text: "Exportar lista"
-  end
-
   test "o .txt de deck de outro usuário dá 404" do
     alien = Deck.create!(user: @other, name: "Alheio", leader: @leader)
     sign_in
 
-    get deck_path(alien, format: :txt)
+    get deck_export_path(alien)
 
     assert_response :not_found
   end
@@ -81,8 +73,8 @@ class DeckExportTest < ActionDispatch::IntegrationTest
   end
 
   test "sem sessão, o .txt redireciona para o login" do
-    get deck_path(@deck, format: :txt)
+    get deck_export_path(@deck)
 
-    assert_redirected_to new_session_path
+    assert_redirected_to "/entrar?return_to=%2Fdecks%2F#{@deck.id}.txt"
   end
 end

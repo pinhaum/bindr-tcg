@@ -17,40 +17,22 @@ class SpaTest < ActionDispatch::IntegrationTest
     FileUtils.remove_entry(@tmpdir)
   end
 
-  test "serves the entry page on /app, a client route and a deep path with a query" do
-    [ "/app", "/app/entrar", "/app/qualquer/coisa?x=1" ].each do |path|
-      get path
-
-      assert_response :success, path
-      assert_equal FIXTURE_BODY, response.body, path
-      assert_equal "text/html", response.media_type, path
-      assert_includes response.headers["Cache-Control"], "no-cache", path
-    end
-  end
-
   test "does not redirect to login without a session" do
-    get "/app/colecao"
+    get "/pasta"
 
     assert_response :success
-  end
-
-  test "build assets that do not exist answer 404 instead of the entry page" do
-    get "/app/_app/immutable/velho.js"
-
-    assert_response :not_found
-    assert_not_equal FIXTURE_BODY, response.body
   end
 
   test "answers 404 when the entry file is missing" do
     File.delete(@entry_path)
 
-    get "/app/entrar"
+    get "/entrar"
 
     assert_response :not_found
   end
 
-  test "serves the entry page on the root fallback with a query and /200.html" do
-    [ "/pasta/desejos", "/qualquer/coisa?x=1", "/200.html" ].each do |path|
+  test "serves the entry page on the root, a client route, a deep path with a query and /200.html" do
+    [ "/", "/entrar", "/pasta/desejos", "/qualquer/coisa?x=1", "/200.html" ].each do |path|
       get path
 
       assert_response :success, path

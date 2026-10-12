@@ -159,12 +159,6 @@ module CollectionCsv
       end
     end
 
-    test "as constantes são as do controller HTML" do
-      assert_equal CollectionImportsController::MAX_CORPO_BYTES, Upload::MAX_BODY_BYTES
-      assert_equal CollectionImportsController::MENSAGEM_SEM_ARQUIVO, Upload::MISSING_FILE_MESSAGE
-      assert_equal CollectionImportsController::MENSAGEM_CORPO_GRANDE, Upload::BODY_TOO_LARGE_MESSAGE
-    end
-
     test "usuário que não é User levanta ArgumentError" do
       conteudo = csv_para(create_variant)
 

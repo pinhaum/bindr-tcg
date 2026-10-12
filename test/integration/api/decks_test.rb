@@ -166,7 +166,7 @@ class Api::DecksTest < ActionDispatch::IntegrationTest
     editing = deck!(name: "Editando")
     other = deck!(name: "Outro")
     sign_in
-    post "/decks/#{editing.id}/select"
+    post "/api/decks/#{editing.id}/select"
 
     get "/api/decks/#{editing.id}"
     assert_equal true, body.dig("data", "editing")

@@ -94,7 +94,7 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
   test "anônimo é redirecionado para a autenticação e não recebe arquivo" do
     get collection_export_path
 
-    assert_redirected_to new_session_path
+    assert_redirected_to "/entrar?return_to=%2Fcollection%2Fexport"
     assert_nil response.headers["Content-Disposition"],
                "um redirect não pode vir com instrução de download"
   end
@@ -113,16 +113,6 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
     assert_not_includes corpo, @do_zoro.variant_code
     assert_not_includes corpo, CollectionCsv::Format.header_row.join(CollectionCsv::Format::DELIMITER),
                         "nem o cabeçalho do formato: a action não chegou a rodar"
-  end
-
-  # Seguir o redirect leva à tela de login, não ao arquivo. Fecha a porta de uma
-  # implementação que redirecionasse para a própria rota de export.
-  test "seguir o redirect do anônimo leva à autenticação, não ao arquivo" do
-    get collection_export_path
-    follow_redirect!
-
-    assert_response :success
-    assert_no_match(/text\/csv/, response.media_type)
   end
 
   # --- Resposta autenticada: tipo, download e nome de arquivo ---

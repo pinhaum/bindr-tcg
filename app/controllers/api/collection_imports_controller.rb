@@ -5,7 +5,8 @@
 class Api::CollectionImportsController < Api::BaseController
   REFUSAL_MESSAGE = "O arquivo não foi importado. Sua coleção não foi alterada.".freeze
 
-  CLOSED_MESSAGE = CollectionImportsController::MENSAGEM_JA_CONFIRMADA
+  CLOSED_MESSAGE = ("Esta importação já foi confirmada ou expirou. " \
+    "Sua coleção não foi alterada; envie o arquivo de novo se quiser importar.").freeze
 
   CLASSIFICATIONS = {
     zera: "removes",
