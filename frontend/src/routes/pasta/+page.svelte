@@ -5,6 +5,7 @@
 	import { createLoader } from '../../lib/api/loader.svelte';
 	import type { ProgressPayload } from '../../lib/api/types';
 	import Button from '../../lib/components/Button.svelte';
+	import DeckShortfall from '../../lib/components/DeckShortfall.svelte';
 	import PastaSummary from '../../lib/components/PastaSummary.svelte';
 	import SetProgressRow from '../../lib/components/SetProgressRow.svelte';
 	import { appPath } from '../../lib/navigation/nav-entries';
@@ -81,7 +82,11 @@
 				<li><SetProgressRow {set} /></li>
 			{/each}
 		</ul>
+	{/if}
 
+	<DeckShortfall />
+
+	{#if result && !error}
 		<ul class="actions" aria-label="Ações da pasta">
 			<li>
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- endpoint HTML fora da SPA -->

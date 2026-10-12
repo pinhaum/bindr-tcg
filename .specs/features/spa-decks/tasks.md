@@ -822,10 +822,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Com o progresso e o shortfall respondendo em ordens diferentes, cada parte aparece quando a sua chega (edge case); falha do shortfall não altera indicadores nem sets (SDEC-42)
-- [ ] O bloco fica antes do primeiro link de ação; sem cartas, nada (SDEC-40, SDEC-41)
-- [ ] Testes existentes da página da pasta passam sem edição de asserção (o mock do cliente passa a responder também ao shortfall)
-- [ ] Gate check passes: Front quick
+- [x] Com o progresso e o shortfall respondendo em ordens diferentes, cada parte aparece quando a sua chega (edge case); falha do shortfall não altera indicadores nem sets (SDEC-42)
+- [x] O bloco fica antes do primeiro link de ação; sem cartas, nada (SDEC-40, SDEC-41)
+- [x] Testes existentes da página da pasta passam sem edição de asserção (o mock do cliente passa a responder também ao shortfall)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
