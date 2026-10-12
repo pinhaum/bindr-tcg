@@ -16,7 +16,7 @@
 # recusado pelo `LegacyPath`.
 class LegacyRedirectsController < ActionController::Base
   def show
-    path = request.original_fullpath.partition("?").first
+    path = request.original_fullpath.b.partition("?").first
     destination = LegacyPath.destination(path, request.query_string)
 
     if destination

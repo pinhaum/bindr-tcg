@@ -51,6 +51,17 @@ class SpaTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "/api and /api/ answer the JSON 404 of the API, never the entry page" do
+    [ "/api", "/api/", "/api?x=1" ].each do |path|
+      get path
+
+      assert_response :not_found, path
+      assert_equal "application/json", response.media_type, path
+      assert_equal "not_found", response.parsed_body.dig("error", "code"), path
+      assert_not_equal FIXTURE_BODY, response.body, path
+    end
+  end
+
   test "non-GET methods on an unknown path answer 404" do
     post "/qualquer"
 

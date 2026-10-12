@@ -25,11 +25,23 @@ module LegacyPath
   CONTROL = /[[:cntrl:]]/
 
   def self.destination(path, query)
+    path = utf8(path)
+    query = utf8(query)
+    return if path.nil? || query.nil?
+
     target = translate(path)
     return if target.nil? || unsafe?(target) || query.match?(CONTROL)
 
     query.empty? ? target : "#{target}?#{query}"
   end
+
+  # Bytes que não formam UTF-8 válido fariam o `match?` e o `redirect_to`
+  # levantar `ArgumentError` (500): o destino é recusado (404).
+  def self.utf8(string)
+    text = string.dup.force_encoding(Encoding::UTF_8)
+    text if text.valid_encoding?
+  end
+  private_class_method :utf8
 
   def self.unsafe?(target)
     target.match?(PROTOCOL_RELATIVE) || target.match?(CONTROL)

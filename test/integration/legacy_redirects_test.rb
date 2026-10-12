@@ -120,6 +120,46 @@ class LegacyRedirectsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # O cliente de integração recusa URI não ASCII; o servidor real a aceita, então
+  # o pedido vai direto ao Rack com o byte cru na query ou no caminho.
+  def raw_env(path, query = "")
+    full = query.empty? ? path : "#{path}?#{query}"
+    Rack::MockRequest.env_for("/").merge!(
+      "PATH_INFO" => path.b, "QUERY_STRING" => query.b, "REQUEST_URI" => full.b, "ORIGINAL_FULLPATH" => full.b
+    )
+  end
+
+  # Pela pilha completa, o parser de parâmetros do Rack já recusa o byte inválido
+  # com `400` antes do controller; o que importa é nunca chegar a `500`.
+  test "bytes inválidos em UTF-8 na query ou no caminho nunca dão 500 pela pilha completa" do
+    [ [ "/catalog", "x=\xFF" ], [ "/cards/\xFF", "" ], [ "/app/\xFF", "" ], [ "/app//\xFF", "" ] ].each do |path, query|
+      status, = Rails.application.call(raw_env(path, query))
+
+      assert_includes [ 301, 400, 404 ], status, "#{path}?#{query}"
+    end
+  end
+
+  # O controller sozinho prova a garantia: sem o tratamento, `partition`,
+  # `match?` ou `redirect_to` levantariam `ArgumentError`.
+  test "o controller com bytes inválidos no caminho dá 404, sem Location" do
+    [ "/cards/\xFF", "/app/\xFF", "/app//\xFF", "/catalog/\xFF" ].each do |path|
+      status, headers, = LegacyRedirectsController.action(:show).call(raw_env(path))
+
+      assert_equal 404, status, path
+      assert_nil headers["Location"], path
+    end
+  end
+
+  test "anônimo em /collection/export com CRLF e // na query leva return_to codificado" do
+    get "/collection/export?x=%0D%0A//y"
+
+    assert_response :found
+    location = response.headers["Location"]
+    assert_equal "#{request.base_url}/entrar?return_to=%2Fcollection%2Fexport%3Fx%3D%250D%250A%2F%2Fy", location
+    assert_no_match(/[\r\n]/, location)
+    assert_no_match(%r{//y}, location.delete_prefix(request.base_url))
+  end
+
   test "/app/_app/x.js é 404, não redirecionamento" do
     get "/app/_app/x.js"
 

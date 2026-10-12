@@ -86,6 +86,8 @@ Rails.application.routes.draw do
     post "collection/imports/:token/confirm" => "collection_imports#confirm",
          as: :confirm_api_collection_import, constraints: { token: /[^\/]+/ }
 
+    # `*path` não casa `/api` nem `/api/`; sem esta linha eles cairiam na SPA.
+    match "/", to: "not_found#show", via: :all
     match "*path", to: "not_found#show", via: :all
   end
 

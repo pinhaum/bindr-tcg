@@ -53,6 +53,20 @@ class LegacyPathTest < ActiveSupport::TestCase
     assert_nil LegacyPath.destination("/catalog", "a=\tb")
   end
 
+  test "bytes inválidos em UTF-8 na query ou no caminho são recusados sem levantar" do
+    [ "x=\xFF", "x=\xFF".b, "x=\xC3(" ].each do |query|
+      assert_nil LegacyPath.destination("/catalog", query), query.inspect
+    end
+    [ "/cards/\xFF", "/cards/\xFF".b, "/app/\xFF", "/app//\xFF" ].each do |path|
+      assert_nil LegacyPath.destination(path, ""), path.inspect
+    end
+  end
+
+  test "UTF-8 válido não ASCII na query continua passando" do
+    assert_equal "/?q=çà", LegacyPath.destination("/catalog", "q=çà")
+    assert_equal "/?q=çà", LegacyPath.destination("/catalog", "q=çà".b)
+  end
+
   test "/app/ com barra final e query não tem regra" do
     assert_nil LegacyPath.destination("/app/", "")
     assert_nil LegacyPath.destination("/app/", "x=1")
