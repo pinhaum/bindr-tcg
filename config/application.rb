@@ -27,7 +27,7 @@ module Bindr
 
     # Página de entrada da SPA, gerada pelo build do frontend e servida por
     # `SpaController`. Os testes apontam para um arquivo temporário.
-    config.x.spa_entry_path = Rails.public_path.join("app/200.html")
+    config.x.spa_entry_path = Rails.root.join("spa/200.html")
 
     # Configuration for the application, engines, and railties goes here.
     #

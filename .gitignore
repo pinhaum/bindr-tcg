@@ -31,3 +31,6 @@
 # Editor / SO
 .DS_Store
 *.swp
+
+/spa
+/public/_app

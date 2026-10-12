@@ -344,11 +344,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `GET /pasta/desejos`, `/qualquer/coisa?x=1` e `/200.html` → `200`, `text/html`, `Cache-Control: no-cache`, corpo da entrada de fixture
-- [ ] `GET /_app/immutable/inexistente.js` e `/app/_app/immutable/x.js` → `404`, nunca a entrada
-- [ ] `POST /qualquer` → `404`
-- [ ] As rotas HTML existentes continuam respondendo (a suíte inteira passa)
-- [ ] Gate check passes: Rails quick
+- [x] `GET /pasta/desejos`, `/qualquer/coisa?x=1` e `/200.html` → `200`, `text/html`, `Cache-Control: no-cache`, corpo da entrada de fixture
+- [x] `GET /_app/immutable/inexistente.js` e `/app/_app/immutable/x.js` → `404`, nunca a entrada
+- [x] `POST /qualquer` → `404`
+- [x] As rotas HTML existentes continuam respondendo (a suíte inteira passa)
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick

@@ -207,4 +207,10 @@ Rails.application.routes.draw do
   # HTML da SPA.
   get "app(/*path)", to: "spa#show", format: false,
       constraints: ->(request) { !request.path.start_with?("/app/_app/") }
+
+  # Fallback da SPA na raiz (STRO-05): qualquer GET fora das rotas acima recebe a
+  # entrada. Só `GET`, então os demais métodos caem no 404 do Rails. Os
+  # arquivos do build (`/_app/`, `/app/_app/`) nunca devolvem a entrada.
+  get "*path", to: "spa#show", format: false,
+      constraints: ->(request) { !request.path.start_with?("/_app/", "/app/_app/") }
 end
