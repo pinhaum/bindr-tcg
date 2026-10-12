@@ -30,6 +30,8 @@ vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? 
 const apiMock = vi.hoisted(() => ({ get: vi.fn() }));
 vi.mock('../../lib/api/index', () => ({ api: apiMock }));
 
+vi.mock('../../lib/components/DeckShortfall.svelte', () => ({ default: () => {} }));
+
 const sessionState = vi.hoisted(() => ({
 	status: 'ready',
 	user: { email: 'ana@example.com' } as { email: string } | null,

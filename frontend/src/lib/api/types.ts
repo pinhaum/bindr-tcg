@@ -80,6 +80,7 @@ export type DetailVariant = CatalogVariant;
 export type CardDetailPayload = Omit<CatalogCard, 'variants'> & {
 	featured_variant_code: string | null;
 	variants: DetailVariant[];
+	editing_deck: EditingDeck | null;
 };
 
 export type OwnershipResult = { variant_code: string; owned_quantity: number };
@@ -118,3 +119,43 @@ export type WishlistEntry = {
 	owned_quantity: number;
 	fulfilled: boolean;
 };
+
+export type DeckStatus = 'valid' | 'incomplete' | 'invalid';
+
+export type DeckRef = { id: number; name: string };
+
+export type DeckSummary = DeckRef & {
+	leader: { card_number: string; name: string } | null;
+	main_total: number;
+	status: DeckStatus;
+};
+
+export type DeckLine = {
+	card_number: string;
+	name: string;
+	card_type: string;
+	cost: number | null;
+	in_source: boolean;
+	required: number;
+	owned: number;
+	missing: number;
+};
+
+export type DeckEntryLine = DeckLine & { quantity: number };
+
+export type DeckPayload = DeckRef & {
+	editing: boolean;
+	status: DeckStatus;
+	reasons: string[];
+	warnings: string[];
+	main_total: number;
+	missing_total: number;
+	leader: DeckLine | null;
+	entries: DeckEntryLine[];
+};
+
+export type ShortfallCard = { card_number: string; name: string; missing: number; decks: DeckRef[] };
+
+export type DeckEntryResult = { card_number: string; quantity: number };
+
+export type EditingDeck = DeckRef & { quantity: number; is_leader: boolean };

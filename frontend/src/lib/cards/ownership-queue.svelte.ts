@@ -1,10 +1,8 @@
-import type { OwnershipResult } from '../api/types';
-
 export type OwnershipOp = 'increment' | 'decrement';
 
 export type OwnershipQueueOptions = {
 	confirmed: number;
-	send: (op: OwnershipOp) => Promise<OwnershipResult>;
+	send: (op: OwnershipOp) => Promise<number>;
 	onSettled: (quantity: number) => void;
 	onError: (error: unknown) => void;
 };
@@ -31,10 +29,10 @@ export function createOwnershipQueue({ confirmed, send, onSettled, onError }: Ow
 		state.inFlight = op;
 		const mine = generation;
 
-		new Promise<OwnershipResult>((resolve) => resolve(send(op))).then(
-			(result) => {
+		new Promise<number>((resolve) => resolve(send(op))).then(
+			(quantity) => {
 				if (mine !== generation) return;
-				state.confirmed = result.owned_quantity;
+				state.confirmed = quantity;
 				state.inFlight = null;
 				if (state.pending.length > 0) pump();
 				else onSettled(state.confirmed);

@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/errors';
-import type { OwnershipResult } from '../api/types';
 import { createOwnershipQueue, type OwnershipOp } from './ownership-queue.svelte';
 
 type Deferred = {
@@ -13,10 +12,10 @@ function setup(confirmed = 0) {
 	const calls: Deferred[] = [];
 	const send = vi.fn(
 		(op: OwnershipOp) =>
-			new Promise<OwnershipResult>((resolve, reject) => {
+			new Promise<number>((resolve, reject) => {
 				calls.push({
 					op,
-					resolve: (quantity) => resolve({ variant_code: 'tcgplayer:1', owned_quantity: quantity }),
+					resolve,
 					reject
 				});
 			})

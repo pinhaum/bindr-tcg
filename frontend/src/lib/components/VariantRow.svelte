@@ -41,7 +41,9 @@
 	}
 
 	const send = (op: OwnershipOp) =>
-		api.post<OwnershipResult>(variantApiPath(card.card_number, variant.variant_code, op));
+		api
+			.post<OwnershipResult>(variantApiPath(card.card_number, variant.variant_code, op))
+			.then((result) => result.owned_quantity);
 </script>
 
 <li class="row">

@@ -156,6 +156,24 @@ Rails.application.routes.draw do
     get "progress" => "progress#show", as: :api_progress
     get "wishlist" => "wishlist#index", as: :api_wishlist
 
+    # Antes de `resources :decks`: depois dele, `import` e `shortfall` casariam
+    # com `decks#show`.
+    get "decks/shortfall" => "decks#shortfall", as: :api_decks_shortfall
+    post "decks/import" => "deck_imports#create", as: :api_deck_imports
+
+    # `as:` evita colidir com os nomes `decks` e `deck` das rotas HTML.
+    resources :decks, only: %i[index show create update destroy], as: :api_decks do
+      member { post :select }
+    end
+
+    # Entradas do deck (SDEC-51..55): o deck vai no caminho e a carta por
+    # `card_number`; o Leader leva a carta no corpo.
+    post "decks/:id/cards/:card_number/increment" => "deck_entries#increment",
+         as: :api_increment_deck_card, constraints: { card_number: /[^\/]+/ }
+    post "decks/:id/cards/:card_number/decrement" => "deck_entries#decrement",
+         as: :api_decrement_deck_card, constraints: { card_number: /[^\/]+/ }
+    put "decks/:id/leader" => "deck_entries#leader", as: :api_deck_leader
+
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
     # Posse por variante (SCAR-42, SCAR-43). O `variant_code` tem `:` e chega

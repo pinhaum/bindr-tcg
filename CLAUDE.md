@@ -65,6 +65,18 @@ leem só `GET /api/progress` e `GET /api/wishlist`, além de `DELETE …/wishlis
 (SPAS-46). A entrada "Minha pasta" da navegação aponta para `/app/pasta`. Design em
 `.specs/features/spa-pasta/design.md`.
 
+A **`spa-decks`** (Req. 21, SDEC-01..61) está **implementada (T1–T29) e aguarda o
+Verifier**: os decks saíram do Hotwire. Rotas SPA `/app/baralhos` (lista), `/novo`,
+`/importar`, `/[id]` (página do deck: status, motivos, grupos, falta por carta),
+`/[id]/renomear` e `/[id]/excluir`; o detalhe da carta ganhou o painel do deck em edição
+(`EditingDeckPanel`, com `−`/`+` e "Usar como Leader") e `/app/pasta` o bloco "Faltando
+para os baralhos" (`DeckShortfall`). A API `/api/decks` é nova (tabela abaixo) e reusa
+`DeckDetail` e `DeckEntry.increment_for!`/`decrement_for!` (o SQL atômico passou do
+`DeckEntriesController` para o model, sem mudar o HTML). As rotas, controllers e views
+HTML de deck ficam intocados (SDEC-61); a única emenda em teste Rails existente é uma
+linha de `test/integration/api/cards_test.rb` (`except` também `editing_deck`, T10; ver
+`tmp/orchestration-decisions.md`). Design em `.specs/features/spa-decks/design.md`.
+
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
@@ -84,7 +96,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **1995 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **2069 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
@@ -109,6 +121,13 @@ HTML). Rotas no `scope "api"` de `config/routes.rb` (`format: false` +
 | `GET /api/progress` | `ProgressController` | exige sessão; `{ data: { order, summary, sets } }`; `order` inválido cai em `recent`; `base_size` e `completion_percent` nulos quando o set não tem base; número de consultas constante |
 | `GET /api/wishlist` | `WishlistController` | exige sessão; itens por ordem de criação e id, com `owned_quantity` e `fulfilled` |
 | `DELETE /api/cards/:card_number/variants/:variant_code/wishlist` | `CardVariantsController` | exige sessão e CSRF; `200` com `{ variant_code, wishlist_target: null }`, idempotente; `404` para carta ou variante inexistente |
+| `GET /api/decks`, `GET /api/decks/:id` | `DecksController` | exige sessão; deck de outra conta é `404` |
+| `POST /api/decks`, `PATCH /api/decks/:id` | `DecksController` | exige sessão e CSRF; nome 1–60, senão `422 validation_failed` com `fields.name`; criar torna o deck o em edição |
+| `DELETE /api/decks/:id`, `POST /api/decks/:id/select` | `DecksController` | exige sessão e CSRF; `select` é idempotente e grava `session[:editing_deck_id]` |
+| `POST /api/decks/:id/cards/:card_number/increment` e `…/decrement` | `DeckEntriesController` | exige sessão e CSRF; teto de 50 e Leader como entrada são `422`; `decrement` sem entrada é `200` com `quantity: 0` |
+| `PUT /api/decks/:id/leader` | `DeckEntriesController` | exige sessão e CSRF; carta que não é Leader é `422` |
+| `POST /api/decks/import` | `DeckImportsController` | exige sessão e CSRF; `201` com o deck ou `422` com `fields.list` ("Linha N: …"), tudo ou nada |
+| `GET /api/decks/shortfall` | `DecksController` | exige sessão; linhas com falta positiva e os decks citados |
 | `* /api/*path` | `NotFoundController` | catch-all |
 
 Sucesso é `{ "data": ... }` (a lista traz `meta`); erro é sempre
@@ -175,7 +194,7 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   entrada "Catálogo" da navegação aponta para ele (ver "Estado atual").
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens atuais: Vitest 859 testes, e2e 193, Rails 1995 (rubocop limpo).
+Contagens atuais: Vitest 982 testes, e2e 204, Rails 2069 (rubocop limpo).
 
 ```bash
 # quick
@@ -278,6 +297,28 @@ Armadilhas da pasta (`spa-pasta`):
 - **A ação "Adicionar cartas" mora em `shell.aside` com `wide`** (AD-028).
 - **Dívida:** migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`
   (hoje só a pasta e a lista de desejos o usam).
+
+Módulos dos decks (`spa-decks`): `components/QuantityStepper.svelte` (o stepper otimista
+generalizado: `send` devolve o número confirmado; `OwnershipStepper` e o `EditingDeckPanel`
+o usam), `DeckNameForm`, `DeckNotFound`, `EditingDeckPanel`, `DeckShortfall` (todos em `components/`); rótulos e
+grupos em `lib/decks/`, tipos e caminhos em `api/types.ts`; rotas `src/routes/baralhos/**`.
+
+Armadilhas dos decks (`spa-decks`):
+
+- **Criar e importar tornam o deck o em edição** (sessão do Rails): o botão "Editar este
+  deck" não aparece para ele. Teste que precise do botão cria outro deck logo depois.
+- **O deck vai por `id` e a carta por `card_number`** (`/api/decks/:id/cards/:card_number/…`),
+  não por `variant_code`: deck referencia `cards`, coleção referencia `card_variants`.
+- **`decks/import` e `decks/shortfall` vêm antes de `resources :decks`** em `routes.rb`
+  (senão casam com `show`), e os nomes levam `as: :api_…` para não colidir com o HTML.
+- **A falta é o maior uso entre os decks menos o possuído**, não a soma; `shortfall` só
+  traz linhas com falta positiva e o bloco some quando não há nenhuma (SDEC-41).
+- **`−` em zero não envia**: é `aria-disabled` e anuncia o texto do HTML (SDEC-37); a API
+  responde `200` com `quantity: 0` só por corrida entre abas.
+- **`editing_deck` no detalhe é `null` sem deck em edição ou sem sessão** e vem de uma
+  consulta só; o `OwnershipStepper.test.ts` lê o CSS agora em `QuantityStepper.svelte`.
+- **`pasta/page.test.ts` stuba `DeckShortfall`**: um mock do cliente com contagem de
+  chamadas quebra com a segunda chamada (`/api/decks/shortfall`).
 
 Armadilhas do detalhe (`spa-carta`):
 

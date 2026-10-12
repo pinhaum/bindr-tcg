@@ -8,12 +8,6 @@ export type NavEntry =
 // `resolve('/entrar')` só tipa quando a rota existir (T16/T17); o prefixo vem de `resolve('/')`.
 export const appPath = (path: string) => `${resolve("/").replace(/\/$/, "")}${path}`;
 
-const hotwire = (label: string, href: string): NavEntry => ({
-  kind: "link",
-  label,
-  href,
-  reload: true,
-});
 const inApp = (label: string, path: string): NavEntry => ({
   kind: "link",
   label,
@@ -32,7 +26,7 @@ export function navEntries(user: SessionUser | null): NavEntry[] {
   return [
     catalog,
     inApp("Minha pasta", "/pasta"),
-    hotwire("Baralhos", "/decks"),
+    inApp("Baralhos", "/baralhos"),
     { kind: "action", label: "Sair" },
   ];
 }

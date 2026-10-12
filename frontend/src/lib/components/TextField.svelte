@@ -8,6 +8,7 @@
 		autocomplete?: HTMLInputAttributes['autocomplete'];
 		value?: string;
 		required?: boolean;
+		maxlength?: number;
 		errors?: string[];
 	}
 
@@ -18,6 +19,7 @@
 		autocomplete,
 		value = $bindable(''),
 		required = false,
+		maxlength,
 		errors = []
 	}: Props = $props();
 
@@ -42,6 +44,7 @@
 		{type}
 		{autocomplete}
 		{required}
+		{maxlength}
 		aria-invalid={invalid ? 'true' : undefined}
 		aria-describedby={invalid ? errorsId : undefined}
 	/>
