@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { ownOneCopy } from './helpers/ownership';
 
 const PASSWORD = 'senha-correta-1';
 const STATUS_SENTENCE = /^\d+ cartas?( · \d+ filtros? ativos?)?$/;
@@ -30,7 +31,7 @@ async function waitForCatalog(page: Page) {
 
 async function openCatalog(page: Page, pairs: [string, string][] = []) {
 	const query = new URLSearchParams(pairs).toString();
-	await page.goto(query ? `/app/?${query}` : '/app/');
+	await page.goto(query ? `/?${query}` : '/');
 	await waitForCatalog(page);
 }
 
@@ -308,21 +309,10 @@ for (const viewport of VIEWPORTS) {
 			await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
 			await page.getByLabel('Confirmação da senha').fill(PASSWORD);
 			await page.getByRole('button', { name: 'Criar conta' }).click();
-			await expect(page).toHaveURL(/\/app\/?$/);
+			await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 			await expect(mainNav(page).getByRole('button', { name: 'Sair' })).toBeVisible();
 
-			// A SPA ainda não registra posse: usa o "+" do detalhe em HTML, na mesma sessão.
-			await page.goto(`/cards/${CARD_NUMBER}`);
-			await Promise.all([
-				page.waitForResponse(
-					(response) =>
-						response.url().includes('/increment') && response.request().method() === 'POST'
-				),
-				page
-					.getByRole('button', { name: /^Adicionar uma cópia de/ })
-					.first()
-					.click()
-			]);
+			await ownOneCopy(page, CARD_NUMBER);
 
 			await openCatalog(page, [['owned', 'owned']]);
 			const tile = tiles(page).first();

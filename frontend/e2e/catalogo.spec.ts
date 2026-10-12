@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 type Combo = { name: string; width: number; height: number; scheme: 'light' | 'dark' };
 
@@ -17,20 +17,18 @@ const SET_CODE = 'OP01';
 
 const totalFrom = (text: string | null) => Number(/(\d+)\s+cartas?/.exec(text ?? '')?.[1] ?? NaN);
 
-// Número e nome de cada tile, na ordem em que aparecem, mais o total da linha de status.
-async function readHotwire(page: Page, query: string): Promise<Listing> {
-	await page.goto(`/catalog?${query}`);
-	await expect(page.locator('main.catalog h1')).toBeVisible();
-	const total = totalFrom(await page.locator('.catalog__count').textContent());
-	const tiles = await page
-		.locator('.card-tile')
-		.evaluateAll((items) =>
-			items.map(
-				(item) =>
-					`${item.querySelector('.card-tile__number')?.textContent?.trim()} | ${item.querySelector('.card-tile__name')?.textContent?.trim()}`
-			)
-		);
-	return { total, tiles };
+// Número e nome de cada carta, na ordem da API, mais o total, com a mesma query da tela.
+async function readApi(request: APIRequestContext, query: string): Promise<Listing> {
+	const response = await request.get(`/api/catalog?${query}`);
+	expect(response.ok(), `GET /api/catalog?${query}`).toBe(true);
+	const { data, meta } = (await response.json()) as {
+		data: { card_number: string; name: string }[];
+		meta: { total_count: number };
+	};
+	return {
+		total: meta.total_count,
+		tiles: data.map((card) => `${card.card_number} | ${card.name}`)
+	};
 }
 
 const STATUS_SENTENCE = /^\d+ cartas?( · \d+ filtros? ativos?)?$/;
@@ -46,9 +44,7 @@ async function waitForSpaCatalog(page: Page) {
 	await expect(page.locator('section[aria-busy="false"]')).toBeVisible();
 }
 
-async function readSpa(page: Page, query: string): Promise<Listing> {
-	await page.goto(`/app/?${query}`);
-	await waitForSpaCatalog(page);
+async function readSpaListing(page: Page): Promise<Listing> {
 	const total = totalFrom(await spaStatus(page).textContent());
 	const tiles = await page
 		.locator('ul.grid li')
@@ -61,6 +57,12 @@ async function readSpa(page: Page, query: string): Promise<Listing> {
 	return { total, tiles };
 }
 
+async function readSpa(page: Page, query: string): Promise<Listing> {
+	await page.goto(`/?${query}`);
+	await waitForSpaCatalog(page);
+	return readSpaListing(page);
+}
+
 async function expectNoHorizontalScroll(page: Page, where: string) {
 	const { scrollWidth, clientWidth } = await page.evaluate(() => ({
 		scrollWidth: document.documentElement.scrollWidth,
@@ -70,7 +72,7 @@ async function expectNoHorizontalScroll(page: Page, where: string) {
 }
 
 for (const combo of COMBOS) {
-	test.describe(`paridade entre /app e /catalog a ${combo.name} (SCAT-05, SCAT-27)`, () => {
+	test.describe(`paridade entre a tela e GET /api/catalog a ${combo.name} (SCAT-05, SCAT-27)`, () => {
 		test.use({ viewport: { width: combo.width, height: combo.height }, colorScheme: combo.scheme });
 
 		const queries: { name: string; query: string }[] = [
@@ -115,33 +117,57 @@ for (const combo of COMBOS) {
 
 		for (const { name, query } of queries) {
 			test(`${name}: mesma lista, mesma ordem e mesmo total`, async ({ page }) => {
-				const hotwire = await readHotwire(page, query);
+				const api = await readApi(page.request, query);
 				const spa = await readSpa(page, query);
 
-				expect(hotwire.total, 'total de /catalog (catálogo importado)').toBeGreaterThan(0);
-				expect(hotwire.tiles.length, 'cartas em /catalog').toBeGreaterThan(0);
-				expect(spa.total, `total de /app?${query}`).toBe(hotwire.total);
-				expect(spa.tiles, `cartas de /app?${query}`).toEqual(hotwire.tiles);
+				expect(api.total, 'total de /api/catalog (catálogo importado)').toBeGreaterThan(0);
+				expect(api.tiles.length, 'cartas em /api/catalog').toBeGreaterThan(0);
+				expect(spa.total, `total de /?${query}`).toBe(api.total);
+				expect(spa.tiles, `cartas de /?${query}`).toEqual(api.tiles);
 			});
 		}
 
 		test('busca por OP01-024 traz a carta exata em primeiro', async ({ page }) => {
 			const query = encode([['q', 'OP01-024']]);
-			const hotwire = await readHotwire(page, query);
+			const api = await readApi(page.request, query);
 			const spa = await readSpa(page, query);
 
-			expect(hotwire.tiles[0]).toMatch(/^OP01-024 \|/);
+			expect(api.tiles[0]).toMatch(/^OP01-024 \|/);
 			expect(spa.tiles[0]).toMatch(/^OP01-024 \|/);
 		});
 	});
 }
+
+test.describe('URL antiga do catálogo (STRO-11, STRO-34)', () => {
+	test('/catalog?colors[]=Red&sort=name abre a tela na raiz com o resultado da API', async ({
+		page
+	}) => {
+		const query = encode([
+			['colors[]', 'Red'],
+			['sort', 'name']
+		]);
+		await page.goto(`/catalog?${query}`);
+		await waitForSpaCatalog(page);
+
+		const url = new URL(page.url());
+		expect(url.pathname, 'caminho depois do redirecionamento').toBe('/');
+		expect(url.searchParams.getAll('colors[]')).toEqual(['Red']);
+		expect(url.searchParams.get('sort')).toBe('name');
+
+		const api = await readApi(page.request, query);
+		const spa = await readSpaListing(page);
+		expect(api.tiles.length, 'cartas em /api/catalog').toBeGreaterThan(0);
+		expect(spa.total, 'total na tela').toBe(api.total);
+		expect(spa.tiles, 'cartas na tela').toEqual(api.tiles);
+	});
+});
 
 test.describe('busca e paginação pela URL (SCAT-16, SCAT-27, SCAT-36)', () => {
 	test('enviar a busca apara o termo, mantém filtros e ordenação e descarta a página', async ({
 		page
 	}) => {
 		await page.goto(
-			`/app/?${encode([
+			`/?${encode([
 				['colors[]', 'Red'],
 				['sort', 'name'],
 				['dir', 'desc'],
@@ -189,7 +215,7 @@ test.describe('busca e paginação pela URL (SCAT-16, SCAT-27, SCAT-36)', () => 
 
 	for (const { name, params } of paginationCases) {
 		test(`a paginação leva os filtros a cada link: ${name}`, async ({ page }) => {
-			await page.goto(`/app/?${encode([...params, ['page', '2']])}`);
+			await page.goto(`/?${encode([...params, ['page', '2']])}`);
 			await waitForSpaCatalog(page);
 
 			const pagination = page.getByRole('navigation', { name: 'Paginação do catálogo' });
@@ -225,11 +251,11 @@ for (const combo of COMBOS) {
 			page
 		}) => {
 			for (const query of ['', encode([['colors[]', 'Red']]), encode([['q', 'zzzz-sem-resultado']])]) {
-				await page.goto(`/app/?${query}`);
+				await page.goto(`/?${query}`);
 				await waitForSpaCatalog(page);
 
 				expect(await page.locator('html').getAttribute('data-theme')).toBe(combo.scheme);
-				await expectNoHorizontalScroll(page, `/app?${query} a ${combo.name}`);
+				await expectNoHorizontalScroll(page, `/?${query} a ${combo.name}`);
 			}
 
 			const announcement = spaAnnouncement(page);
@@ -242,7 +268,7 @@ for (const combo of COMBOS) {
 		});
 
 		test('grade com a quantidade de colunas do viewport (SCAT-14)', async ({ page }) => {
-			await page.goto('/app/');
+			await page.goto('/');
 			await waitForSpaCatalog(page);
 
 			const grid = page.locator('ul.grid');

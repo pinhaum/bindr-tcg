@@ -85,7 +85,7 @@ for (const combo of COMBOS) {
 			const email = `e2e-${Date.now()}-${combo.width}-${combo.scheme}@exemplo.test`;
 			const bad = trackBadResponses(page);
 
-			await test.step('criar conta leva a /app com o e-mail (SPA-14, SPA-18, SPA-23)', async () => {
+			await test.step('criar conta leva à raiz com o e-mail (SPA-14, SPA-18, SPA-23)', async () => {
 				await page.goto('criar-conta');
 				await expectLayout(page, combo, '/criar-conta');
 				await page.getByLabel('E-mail').fill(email);
@@ -93,7 +93,7 @@ for (const combo of COMBOS) {
 				await page.getByLabel('Confirmação da senha').fill(PASSWORD);
 				await page.getByRole('button', { name: 'Criar conta' }).click();
 
-				await expect(page).toHaveURL(/\/app\/?$/);
+				await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 				await expectSignedIn(page);
 				await expectLayout(page, combo, '/ com sessão');
 				await expectNavOnTop(page, 'Sair');
@@ -104,7 +104,7 @@ for (const combo of COMBOS) {
 
 				const message = page.getByText('Sessão encerrada.', { exact: true });
 				await expect(message).toBeVisible();
-				await expect(page).toHaveURL(/\/app\/?$/);
+				await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 				await expectSignedOut(page);
 				await expectLayout(page, combo, '/ após sair');
 
@@ -129,26 +129,26 @@ for (const combo of COMBOS) {
 				await expect(alert).toBeFocused();
 				await expect(page.getByLabel('E-mail')).toHaveValue(email);
 				await expect(page.getByLabel('Senha', { exact: true })).toHaveValue('');
-				await expect(page).toHaveURL(/\/app\/entrar$/);
+				await expect(page).toHaveURL(/\/entrar$/);
 				await expectLayout(page, combo, '/entrar com erro');
 			});
 
-			await test.step('senha certa leva a /app com o e-mail (SPA-16)', async () => {
+			await test.step('senha certa leva à raiz com o e-mail (SPA-16)', async () => {
 				await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
 				await page.getByRole('button', { name: 'Entrar' }).click();
 
-				await expect(page).toHaveURL(/\/app\/?$/);
+				await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 				await expectSignedIn(page);
 				await expectLayout(page, combo, '/ após entrar');
 			});
 
-			await test.step('com sessão, /entrar e /criar-conta voltam a /app sem formulário (SPA-24)', async () => {
-				await page.goto('entrar?return_to=/app/criar-conta');
-				await expect(page).toHaveURL(/\/app\/?$/);
+			await test.step('com sessão, /entrar e /criar-conta voltam à raiz sem formulário (SPA-24)', async () => {
+				await page.goto('entrar?return_to=/criar-conta');
+				await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 				await expectSignedIn(page);
 
 				await page.goto('criar-conta');
-				await expect(page).toHaveURL(/\/app\/?$/);
+				await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 				await expect(page.getByLabel('Confirmação da senha')).toHaveCount(0);
 				await expectLayout(page, combo, '/ após redirecionar de /criar-conta');
 			});
@@ -172,7 +172,7 @@ for (const combo of COMBOS) {
 	});
 }
 
-test('return_to externo é descartado e o destino é /app (SPA-23)', async ({ page }) => {
+test('return_to externo é descartado e o destino é a raiz (SPA-23)', async ({ page }) => {
 	const email = `e2e-${Date.now()}-rt@exemplo.test`;
 	const bad = trackBadResponses(page);
 
@@ -187,7 +187,7 @@ test('return_to externo é descartado e o destino é /app (SPA-23)', async ({ pa
 
 	await page.goto('entrar?return_to=%2F%2Fexemplo.test%2Fapp');
 	await signIn(page, email, PASSWORD);
-	await expect(page).toHaveURL(/^http:\/\/frontend:5173\/app\/?$/);
+	await expect(page).toHaveURL(/^http:\/\/frontend:5173\/$/);
 	await expectSignedIn(page);
 
 	expect(bad, 'nenhuma resposta 406 nem 5xx').toEqual([]);

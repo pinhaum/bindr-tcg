@@ -109,7 +109,7 @@ for (const viewport of [
 					scrollWidth: document.documentElement.scrollWidth,
 					clientWidth: document.documentElement.clientWidth
 				}));
-				expect(overflow.scrollWidth, `scroll horizontal em /app/${path}`).toBeLessThanOrEqual(overflow.clientWidth);
+				expect(overflow.scrollWidth, `scroll horizontal em /${path}`).toBeLessThanOrEqual(overflow.clientWidth);
 			}
 
 			await openApp(page);
@@ -168,7 +168,7 @@ for (const viewport of [
 			await expect(nav.getByRole('link', { name: 'Catálogo' })).not.toHaveAttribute('aria-current');
 
 			await nav.getByRole('link', { name: 'Criar conta' }).click();
-			await expect(page).toHaveURL(/\/app\/criar-conta$/);
+			await expect(page).toHaveURL(/\/criar-conta$/);
 			await expect(nav.getByRole('link', { name: 'Criar conta' })).toHaveAttribute('aria-current', 'page');
 			await expect(nav.getByRole('link', { name: 'Entrar' })).not.toHaveAttribute('aria-current');
 
@@ -334,7 +334,7 @@ test.describe('movimento', () => {
 		expect(await page.evaluate(() => typeof document.startViewTransition)).toBe('function');
 
 		await mainNav(page).getByRole('link', { name: 'Criar conta' }).click();
-		await expect(page).toHaveURL(/\/app\/criar-conta$/);
+		await expect(page).toHaveURL(/\/criar-conta$/);
 		await expect(page.getByRole('heading', { name: 'Criar conta' })).toBeVisible();
 
 		expect(await viewTransitions(page)).toBeGreaterThanOrEqual(1);
@@ -349,7 +349,7 @@ test.describe('movimento', () => {
 		await openApp(page, 'entrar');
 
 		await mainNav(page).getByRole('link', { name: 'Criar conta' }).click();
-		await expect(page).toHaveURL(/\/app\/criar-conta$/);
+		await expect(page).toHaveURL(/\/criar-conta$/);
 		await expect(page.getByRole('heading', { name: 'Criar conta' })).toBeVisible();
 
 		expect(await viewTransitions(page)).toBe(0);
@@ -366,7 +366,7 @@ test.describe('movimento', () => {
 		expect(await page.evaluate(() => document.startViewTransition)).toBeUndefined();
 
 		await mainNav(page).getByRole('link', { name: 'Criar conta' }).click();
-		await expect(page).toHaveURL(/\/app\/criar-conta$/);
+		await expect(page).toHaveURL(/\/criar-conta$/);
 		await expect(page.getByRole('heading', { name: 'Criar conta' })).toBeVisible();
 
 		expect(errors, 'nenhum erro no console').toEqual([]);

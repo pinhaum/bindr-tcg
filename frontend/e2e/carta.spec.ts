@@ -89,9 +89,9 @@ const stubImages = (page: Page) =>
 const variantQuery = (variant?: string) =>
 	variant === undefined ? '' : `?variant=${encodeURIComponent(variant)}`;
 const detailPath = (card: Card, variant?: string) =>
-	`/app/cartas/${encodeURIComponent(card.card_number)}${variantQuery(variant)}`;
-const hotwirePath = (card: Card, variant?: string) =>
-	`/cards/${encodeURIComponent(card.card_number)}${variantQuery(variant)}`;
+	`/cartas/${encodeURIComponent(card.card_number)}${variantQuery(variant)}`;
+const apiPath = (card: Card, variant?: string) =>
+	`/api/cards/${encodeURIComponent(card.card_number)}${variantQuery(variant)}`;
 
 const backLink = (page: Page) => page.getByRole('link', { name: 'Voltar ao catálogo', exact: true });
 const variantThumb = (page: Page, code: string) =>
@@ -133,47 +133,98 @@ type Detail = {
 	featured: string[];
 };
 
-// Nomes e valores dos campos, chips, linhas de variante e destaque, em texto normalizado: é o que
-// o usuário lê, e o que as duas telas têm de dizer igual.
-async function readHotwire(page: Page, card: Card, variant?: string): Promise<Detail> {
-	await stubImages(page);
-	await page.goto(hotwirePath(card, variant));
-	await expect(page.locator('main.card-detail h1')).toBeVisible();
-	return page.evaluate(() => {
-		const text = (el: Element | null | undefined) =>
-			el?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
-		const optional = (selector: string) => {
-			const el = document.querySelector(selector);
-			return el ? text(el) : null;
-		};
-		const items = [...document.querySelectorAll('.variant')];
-		return {
-			fields: [...document.querySelectorAll('.card-detail__fields .field')].map(
-				(field) => `${text(field.querySelector('dt'))}: ${text(field.querySelector('dd'))}`
-			),
-			chips: [...document.querySelectorAll('.card-detail__chips li')].map((chip) => text(chip)),
-			set: text(document.querySelector('.card-detail__set')),
-			illustrator: optional('.card-detail__illustrator'),
-			variants: items.map((item) => {
-				const kind = item.querySelector('.variant__rarity');
-				return {
-					code: text(item.querySelector('.variant__code')),
-					kind: kind ? text(kind) : null,
-					set: text(item.querySelector('.variant__set')),
-					price: text(item.querySelector('.variant__price'))
-				};
-			}),
-			featured: items
-				.filter((item) => item.classList.contains('variant--current'))
-				.map((item) => text(item.querySelector('.variant__code')))
-		};
-	});
+type ApiVariant = Omit<Variant, 'price'> & {
+	art_kind: string;
+	illustrator: string | null;
+	price: { amount: string; currency: string; observed_at: string } | null;
+};
+type ApiCard = Omit<Card, 'variants'> & {
+	colors: string[];
+	cost: number | null;
+	power: number | null;
+	life: number | null;
+	block_icon: number | null;
+	attributes: string[];
+	traits: string[];
+	featured_variant_code: string;
+	variants: ApiVariant[];
+};
+
+const ART_LABELS: Record<string, string> = { base: 'arte base', parallel: 'parallel' };
+type FieldKey = 'cost' | 'power' | 'life' | 'counter' | 'attributes' | 'traits' | 'block_icon';
+const FIELD_LABELS: [FieldKey, string][] = [
+	['cost', 'Custo'],
+	['power', 'Power'],
+	['life', 'Life'],
+	['counter', 'Counter'],
+	['attributes', 'Attribute'],
+	['traits', 'Traits'],
+	['block_icon', 'Block']
+];
+const FIELDS_BY_TYPE: Record<string, FieldKey[]> = {
+	leader: ['power', 'life', 'attributes', 'traits', 'block_icon'],
+	character: ['cost', 'power', 'counter', 'attributes', 'traits', 'block_icon'],
+	event: ['cost', 'attributes', 'traits', 'block_icon']
+};
+const money = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const observedOn = new Intl.DateTimeFormat('pt-BR', {
+	timeZone: 'America/Sao_Paulo',
+	day: '2-digit',
+	month: '2-digit',
+	year: 'numeric'
+});
+const priceText = (price: ApiVariant['price']) =>
+	price === null
+		? 'Sem preço'
+		: `US$ ${money.format(Number(price.amount))} TCGplayer · market · ${observedOn.format(new Date(price.observed_at))}`;
+
+// O que a tela tem de dizer, escrito a partir de `GET /api/cards/:n?variant=` (STRO-34): nomes e
+// valores dos campos, chips, linhas de variante e destaque, em texto normalizado.
+async function readApi(
+	request: APIRequestContext,
+	card: Card,
+	variant?: string,
+	narrow = false
+): Promise<Detail> {
+	const response = await request.get(apiPath(card, variant));
+	expect(response.ok(), `GET ${apiPath(card, variant)}`).toBe(true);
+	const { data } = (await response.json()) as { data: ApiCard };
+	const featured = data.variants.find((item) => item.variant_code === data.featured_variant_code)!;
+	expect(featured, 'a variante em destaque está entre as variantes').toBeDefined();
+
+	const fields = FIELD_LABELS.filter(([key]) => FIELDS_BY_TYPE[data.card_type]?.includes(key))
+		.map(([key, label]) => ({ label, value: data[key] }))
+		.filter(({ value }) => (Array.isArray(value) ? value.length > 0 : value !== null))
+		.map(({ label, value }) => `${label}: ${Array.isArray(value) ? value.join(', ') : value}`);
+	const showCounter = !narrow && data.card_type === 'character' && data.counter !== null;
+	return {
+		fields,
+		chips: [
+			data.card_type.charAt(0).toUpperCase() + data.card_type.slice(1),
+			...(featured.rarity ? [featured.rarity] : []),
+			...data.colors,
+			...(showCounter ? [`Counter ${data.counter}`] : [])
+		],
+		set: `${featured.set.name} · ${featured.set.code}`,
+		illustrator: featured.illustrator ? `Ilustração: ${featured.illustrator}` : null,
+		variants: data.variants.map((item) => ({
+			code: item.variant_code,
+			kind: item.rarity ? `${item.rarity} · ${ART_LABELS[item.art_kind] ?? 'alternativa'}` : null,
+			set: `${item.set.name} (${item.set.code})`,
+			price: priceText(item.price)
+		})),
+		featured: [data.featured_variant_code]
+	};
 }
 
 async function readSpa(page: Page, card: Card, variant?: string): Promise<Detail> {
 	await stubImages(page);
 	await openDetail(page, card, variant);
-	return page.evaluate(() => {
+	return readRenderedDetail(page);
+}
+
+const readRenderedDetail = (page: Page): Promise<Detail> =>
+	page.evaluate(() => {
 		const text = (el: Element | null | undefined) =>
 			el?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 		const optional = (selector: string) => {
@@ -182,11 +233,9 @@ async function readSpa(page: Page, card: Card, variant?: string): Promise<Detail
 		};
 		const rows = [...document.querySelectorAll('section.variants li.row')];
 		return {
-			// O Hotwire não lista o Counter entre os campos (só como chip, a partir de 64rem); o SPA o
-			// lista por SCAR-17, e a checagem dele fica num teste próprio.
-			fields: [...document.querySelectorAll('dl.fields .field')]
-				.map((field) => `${text(field.querySelector('dt'))}: ${text(field.querySelector('dd'))}`)
-				.filter((field) => !field.startsWith('Counter: ')),
+			fields: [...document.querySelectorAll('dl.fields .field')].map(
+				(field) => `${text(field.querySelector('dt'))}: ${text(field.querySelector('dd'))}`
+			),
 			chips: [...document.querySelectorAll('ul.chips li')].map((chip) => text(chip)),
 			set: text(document.querySelector('header p.set')),
 			illustrator: optional('header p.illustrator'),
@@ -206,7 +255,6 @@ async function readSpa(page: Page, card: Card, variant?: string): Promise<Detail
 				.map((row) => text(row.querySelector('.info p.code')))
 		};
 	});
-}
 
 const expectedFeatured = (card: Card, variant?: string) =>
 	(
@@ -225,7 +273,7 @@ const parityCases: { name: string; pick: (card: Card) => string | undefined }[] 
 ];
 
 
-// Abaixo de 64rem o SPA não mostra o chip "Counter" (SCAR-12; o valor vai nos campos), o /cards sim.
+// Abaixo de 64rem a tela não mostra o chip "Counter" (SCAR-12; o valor vai nos campos).
 function registerParityTests(narrow = false) {
 	for (const key of ['leader', 'character', 'event'] as const) {
 		for (const { name, pick } of parityCases) {
@@ -236,26 +284,49 @@ function registerParityTests(narrow = false) {
 				const card = (await sample(request))[key];
 				const variant = pick(card);
 
-				const hotwire = await readHotwire(page, card, variant);
+				const api = await readApi(request, card, variant, narrow);
 				const spa = await readSpa(page, card, variant);
 
-				expect(hotwire.variants.length, 'variantes em /cards').toBe(card.variants.length);
-				expect(spa.variants, 'variantes (código, rótulo, set, preço)').toEqual(hotwire.variants);
-				expect(spa.fields, 'campos').toEqual(hotwire.fields);
-				const hotwireChips = narrow
-					? hotwire.chips.filter((chip) => !chip.startsWith('Counter '))
-					: hotwire.chips;
-				expect(spa.chips, 'chips do cabeçalho').toEqual(hotwireChips);
-				expect(spa.set, 'linha do set').toEqual(hotwire.set);
-				expect(spa.illustrator, 'ilustração').toEqual(hotwire.illustrator);
+				expect(api.variants.length, 'variantes em /api/cards').toBe(card.variants.length);
+				expect(spa.variants, 'variantes (código, rótulo, set, preço)').toEqual(api.variants);
+				expect(spa.fields, 'campos').toEqual(api.fields);
+				expect(spa.chips, 'chips do cabeçalho').toEqual(api.chips);
+				expect(spa.set, 'linha do set').toEqual(api.set);
+				expect(spa.illustrator, 'ilustração').toEqual(api.illustrator);
 
 				const featured = expectedFeatured(card, variant);
-				expect(hotwire.featured, 'destaque em /cards').toEqual([featured]);
-				expect(spa.featured, 'destaque em /app/cartas').toEqual([featured]);
+				expect(api.featured, 'destaque em /api/cards').toEqual([featured]);
+				expect(spa.featured, 'destaque na tela').toEqual([featured]);
 			});
 		}
 	}
 }
+
+test.describe('URL antiga do detalhe (STRO-12, STRO-34)', () => {
+	test.use({ viewport: { width: 1280, height: 800 } });
+
+	test('/cards/OP01-001?variant= abre a tela na raiz com o resultado da API', async ({
+		page,
+		request
+	}) => {
+		const response = await request.get('/api/cards/OP01-001');
+		expect(response.ok(), 'GET /api/cards/OP01-001 (catálogo importado)').toBe(true);
+		const { data: card } = (await response.json()) as { data: ApiCard };
+		const variant = card.variants[card.variants.length - 1].variant_code;
+		await stubImages(page);
+
+		await page.goto(`/cards/OP01-001${variantQuery(variant)}`);
+		await waitForDetail(page, card);
+
+		const url = new URL(page.url());
+		expect(url.pathname, 'caminho depois do redirecionamento').toBe('/cartas/OP01-001');
+		expect(url.searchParams.get('variant')).toBe(variant);
+
+		const api = await readApi(request, card, variant);
+		expect(await readRenderedDetail(page)).toEqual(api);
+		expect(api.featured, 'a variante pedida é a do destaque').toEqual([variant]);
+	});
+});
 
 test.describe('navegação entre catálogo e detalhe sem recarregar a página (SCAR-3, SCAR-4)', () => {
 	for (const viewport of VIEWPORTS) {
@@ -267,13 +338,13 @@ test.describe('navegação entre catálogo e detalhe sem recarregar a página (S
 			await page.setViewportSize({ width: viewport.width, height: viewport.height });
 			await stubImages(page);
 
-			await page.goto(`/app/?${new URLSearchParams([['q', character.card_number]])}`);
+			await page.goto(`/?${new URLSearchParams([['q', character.card_number]])}`);
 			const tile = page.locator(`ul.grid a[href$="/cartas/${character.card_number}"]`);
 			await expect(tile).toBeVisible();
 			await markDocument(page);
 
 			await tile.click();
-			await expect(page).toHaveURL(new RegExp(`/app/cartas/${character.card_number}$`));
+			await expect(page).toHaveURL(new RegExp(`/cartas/${character.card_number}$`));
 			await waitForDetail(page, character);
 			expect(await readDocumentMark(page), 'o clique no tile recarregou o documento').toBe(
 				'mesmo-documento'
@@ -282,7 +353,7 @@ test.describe('navegação entre catálogo e detalhe sem recarregar a página (S
 
 			await expect(backLink(page)).toHaveCount(1);
 			await backLink(page).click();
-			await expect(page).toHaveURL(/\/app\/?$/);
+			await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 			await expect(page.getByRole('heading', { name: 'Catálogo', level: 1 })).toBeVisible();
 			await expect(page.locator('ul.grid li').first()).toBeVisible();
 			expect(await readDocumentMark(page), '"Voltar ao catálogo" recarregou o documento').toBe(
@@ -292,7 +363,7 @@ test.describe('navegação entre catálogo e detalhe sem recarregar a página (S
 	}
 });
 
-test.describe('paridade do detalhe entre /app/cartas e /cards a 1280px (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)', () => {
+test.describe('paridade do detalhe entre a tela e GET /api/cards a 1280px (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)', () => {
 	test.use({ viewport: { width: 1280, height: 800 } });
 
 	registerParityTests();
@@ -348,7 +419,7 @@ test.describe('paridade do detalhe entre /app/cartas e /cards a 1280px (SCAR-13,
 	});
 });
 
-test.describe('paridade do detalhe entre /app/cartas e /cards a 360px (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)', () => {
+test.describe('paridade do detalhe entre a tela e GET /api/cards a 360px (SCAR-13, SCAR-17, SCAR-19, SCAR-21, SCAR-24)', () => {
 	test.use({ viewport: { width: 360, height: 740 } });
 
 	registerParityTests(true);
@@ -435,7 +506,7 @@ for (const combo of COMBOS) {
 			const { error } = (await response.json()) as { error: { code: string; message: string } };
 			expect(error.code).toBe('not_found');
 
-			await page.goto('/app/cartas/NAO-EXISTE');
+			await page.goto('/cartas/NAO-EXISTE');
 			await expect(page.getByRole('heading', { name: error.message, level: 1 })).toBeVisible();
 			await expect(page).toHaveTitle('Carta não encontrada — Bindr');
 			await expect(backLink(page)).toBeVisible();

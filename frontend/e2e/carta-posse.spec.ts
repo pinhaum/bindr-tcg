@@ -46,12 +46,12 @@ async function createAccount(page: Page) {
 	await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
 	await page.getByLabel('Confirmação da senha').fill(PASSWORD);
 	await page.getByRole('button', { name: 'Criar conta' }).click();
-	await expect(page).toHaveURL(/\/app\/?$/);
+	await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 	await expect(mainNav(page).getByRole('button', { name: 'Sair' })).toBeVisible();
 }
 
 const detailPath = ({ card, code }: Picked) =>
-	`/app/cartas/${encodeURIComponent(card.card_number)}?variant=${encodeURIComponent(code)}`;
+	`/cartas/${encodeURIComponent(card.card_number)}?variant=${encodeURIComponent(code)}`;
 
 async function waitForDetail(page: Page, { card }: Picked) {
 	await expect(page.getByRole('heading', { name: card.name, level: 1, exact: true })).toBeVisible();
@@ -255,7 +255,7 @@ test.describe('posse e desejo no detalhe da carta contra a API real', () => {
 		// O "Sair" do casco leva ao catálogo; voltar reabre o detalhe já sem sessão.
 		await mainNav(page).getByRole('button', { name: 'Sair' }).click();
 		await expect(page.getByText('Sessão encerrada.', { exact: true })).toBeVisible();
-		await expect(page).toHaveURL(/\/app\/?$/);
+		await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 		await page.goBack();
 		await expect(page).toHaveURL(detailUrl.href);
 		await waitForDetail(page, picked);
@@ -263,7 +263,7 @@ test.describe('posse e desejo no detalhe da carta contra a API real', () => {
 		const invite = row.getByRole('link', { name: 'Entrar para registrar posse' });
 		await expect(invite).toBeVisible();
 		const href = new URL((await invite.getAttribute('href'))!, page.url());
-		expect(href.pathname).toBe('/app/entrar');
+		expect(href.pathname).toBe('/entrar');
 		expect(href.searchParams.get('return_to'), 'return_to = caminho e query atuais').toBe(
 			detailUrl.pathname + detailUrl.search
 		);

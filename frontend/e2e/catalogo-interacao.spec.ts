@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { ownOneCopy } from './helpers/ownership';
 
 const PASSWORD = 'senha-correta-1';
 const STATUS_SENTENCE = /^\d+ cartas?( · \d+ filtros? ativos?)?$/;
@@ -35,7 +36,7 @@ async function waitForCatalog(page: Page) {
 }
 
 async function openCatalog(page: Page, pairs: [string, string][] = []) {
-	await page.goto(pairs.length > 0 ? `/app/?${encode(pairs)}` : '/app/');
+	await page.goto(pairs.length > 0 ? `/?${encode(pairs)}` : '/');
 	await waitForCatalog(page);
 	await setMarker(page);
 }
@@ -78,7 +79,7 @@ async function signUp(page: Page, email: string) {
 	await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
 	await page.getByLabel('Confirmação da senha').fill(PASSWORD);
 	await page.getByRole('button', { name: 'Criar conta' }).click();
-	await expect(page).toHaveURL(/\/app\/?$/);
+	await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 	await expect(mainNav(page).getByRole('button', { name: 'Sair' })).toBeVisible();
 }
 
@@ -88,19 +89,6 @@ async function signIn(page: Page, email: string) {
 	await page.getByRole('button', { name: 'Entrar' }).click();
 }
 
-// A SPA ainda não registra posse: usa o botão "+" do detalhe em HTML, na mesma sessão do navegador.
-async function ownOneCopy(page: Page, cardNumber: string) {
-	await page.goto(`/cards/${cardNumber}`);
-	const add = page.getByRole('button', { name: /^Adicionar uma cópia de/ }).first();
-	await Promise.all([
-		page.waitForResponse(
-			(response) =>
-				response.url().includes('/increment') && response.request().method() === 'POST'
-		),
-		add.click()
-	]);
-}
-
 test.describe('teclado e foco a 1280px (SCAT-41, SCAT-42, SCAT-43, SCAT-44)', () => {
 	test.use({ viewport: { width: 1280, height: 800 } });
 
@@ -108,7 +96,7 @@ test.describe('teclado e foco a 1280px (SCAT-41, SCAT-42, SCAT-43, SCAT-44)', ()
 		page
 	}) => {
 		const bad = trackBadResponses(page);
-		await page.goto('/app/');
+		await page.goto('/');
 		await waitForCatalog(page);
 		await expect(page.getByRole('link', { name: 'Red', exact: true })).toBeVisible();
 		await setMarker(page);
@@ -442,13 +430,13 @@ test.describe('sem sessão (SCAT-26, SCAT-31)', () => {
 		).toHaveCount(1);
 
 		const href = new URL((await invite.getAttribute('href'))!, page.url());
-		expect(href.pathname).toBe('/app/entrar');
+		expect(href.pathname).toBe('/entrar');
 		const returnTo = new URL(href.searchParams.get('return_to')!, page.url());
-		expect(returnTo.pathname).toMatch(/^\/app\/?$/);
+		expect(returnTo.pathname).toBe('/');
 		expect(returnTo.searchParams.getAll('colors[]')).toEqual(['Red']);
 
 		await invite.click();
-		await expect(page).toHaveURL(/\/app\/entrar\?return_to=/);
+		await expect(page).toHaveURL(/\/entrar\?return_to=/);
 		await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible();
 		await expectSamePage(page, 'convite para entrar');
 		expect(bad, 'nenhuma resposta 406 nem 5xx').toEqual([]);
@@ -561,18 +549,18 @@ test.describe('com sessão a 1280px (SCAT-9, SCAT-13, SCAT-25, SCAT-31)', () => 
 		});
 
 		await test.step('o convite leva a /entrar com a query e o login volta a ela (SCAT-31)', async () => {
-			// Sair volta o catálogo a /app (SPA-22): a busca é refeita para o convite carregar a query.
+			// Sair volta o catálogo a / (SPA-22): a busca é refeita para o convite carregar a query.
 			await page.getByLabel('Buscar por nome ou card_number').fill(CARD_NUMBER);
 			await page.getByRole('button', { name: 'Buscar' }).click();
 			await expect(activeChip(page, `Busca: ${CARD_NUMBER}`)).toBeVisible();
 			await page.getByRole('link', { name: 'Entrar para registrar posse' }).click();
-			await expect(page).toHaveURL(/\/app\/entrar\?return_to=/);
+			await expect(page).toHaveURL(/\/entrar\?return_to=/);
 			const returnTo = new URL(searchParams(page).get('return_to')!, page.url());
-			expect(returnTo.pathname).toMatch(/^\/app\/?$/);
+			expect(returnTo.pathname).toBe('/');
 			expect(returnTo.searchParams.get('q')).toBe(CARD_NUMBER);
 
 			await signIn(page, email);
-			await expect(page).toHaveURL(/\/app\/?\?q=OP01-024$/);
+			await expect(page).toHaveURL(/\/\?q=OP01-024$/);
 			await expect(
 				tiles(page).filter({ hasText: CARD_NUMBER }).getByRole('img', { name: '1 cópia' })
 			).toBeVisible();

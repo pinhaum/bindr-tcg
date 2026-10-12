@@ -692,9 +692,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Nenhum `goto('/catalog…')` ou `/cards/` nesses specs; paridade contra a API com a mesma query
-- [ ] Teste novo: `/catalog?colors[]=Red&sort=name` e `/cards/OP01-001?variant=…` abrem a tela da SPA na raiz com o mesmo resultado
-- [ ] Gate check passes: Full
+- [x] Nenhum `goto('/catalog…')` ou `/cards/` nesses specs; paridade contra a API com a mesma query
+- [x] Teste novo: `/catalog?colors[]=Red&sort=name` e `/cards/OP01-001?variant=…` abrem a tela da SPA na raiz com o mesmo resultado
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full

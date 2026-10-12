@@ -94,13 +94,13 @@ async function openCatalog(page: Page) {
 }
 
 async function waitForDetail(page: Page, number: string) {
-	await expect(page).toHaveURL(new RegExp(`/app/cartas/${encodeURIComponent(number)}`));
+	await expect(page).toHaveURL(new RegExp(`/cartas/${encodeURIComponent(number)}`));
 	await expect(page.locator('section.detail[aria-busy="false"]')).toBeVisible();
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 }
 
 async function waitForCatalog(page: Page, number: string) {
-	await expect(page).toHaveURL(/\/app\/?(\?.*)?$/);
+	await expect(page).toHaveURL(/^https?:\/\/[^/]+\/(\?.*)?$/);
 	await expect(page.locator('li.tile', { hasText: number }).first()).toBeVisible();
 }
 
@@ -186,10 +186,10 @@ for (const viewport of VIEWPORTS) {
 
 			const nav = page.getByRole('navigation', { name: 'Principal' });
 			await nav.getByRole('link', { name: 'Entrar', exact: true }).click();
-			await expect(page).toHaveURL(/\/app\/entrar/);
+			await expect(page).toHaveURL(/\/entrar/);
 			await expect.poll(() => allFinished(page)).toBe(true);
 			await nav.getByRole('link', { name: 'Criar conta', exact: true }).click();
-			await expect(page).toHaveURL(/\/app\/criar-conta/);
+			await expect(page).toHaveURL(/\/criar-conta/);
 			await expect.poll(() => allFinished(page)).toBe(true);
 
 			const recorded = await transitions(page);
