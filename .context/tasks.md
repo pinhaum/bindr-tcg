@@ -514,13 +514,13 @@ Plano da feature em `.specs/features/spa-troca/tasks.md` (T1–T25, numeração 
 Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham. Só abre com as
 §13 a §17 fechadas (STRO-01).
 
-- [ ] **18.1 Garantias migradas antes da remoção** — T1–T7 da `spa-troca`
+- [x] **18.1 Garantias migradas antes da remoção** — T1–T7 da `spa-troca`
   - _Requisitos: 23.23, 23.24, 23.31_
-- [ ] **18.2 Rails servindo a raiz** — T8–T9
+- [x] **18.2 Rails servindo a raiz** — T8–T9
   - _Requisitos: 23.5–23.7, 23.10–23.14_
-- [ ] **18.3 SPA na raiz** — T10–T14
+- [x] **18.3 SPA na raiz** — T10–T14
   - _Requisitos: 23.3, 23.4, 23.8–23.10, 23.20–23.22_
-- [ ] **18.4 Corte do Hotwire** — T15–T19
+- [x] **18.4 Corte do Hotwire** — T15–T19
   - URLs antigas com `301`, downloads fora de `/api`, remoção do HTML pelo inventário.
   - _Requisitos: 23.11–23.19, 23.24–23.26, 23.28, 23.30–23.33_
 - [ ] **18.5 Dependências e build** — T20–T21
