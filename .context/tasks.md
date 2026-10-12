@@ -467,6 +467,29 @@ Só abre depois do fechamento da §14 (`spa-carta`).
 
 ---
 
+## 16 — Decks na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-decks/tasks.md` (T1–T29, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+Só abre depois do fechamento da §15 (`spa-pasta`).
+
+- [x] **16.1 API de decks** — T1–T10 da `spa-decks`
+  - `/api/decks` (lista, criar, renomear, excluir, escolher o deck em edição,
+    entradas, Leader, importar, `shortfall`) e `editing_deck` no detalhe da carta,
+    sobre `DeckEntry.increment_for!`/`decrement_for!` e `DeckDetail`; rotas HTML
+    intocadas (SDEC-61).
+  - _Requisitos: 21.43–21.61_
+- [x] **16.2 Tipos, rótulos, `QuantityStepper` e navegação do front** — T11–T14
+  - _Requisitos: 21.2, 21.7, 21.21, 21.24, 21.26, 21.35–21.37, 21.51_
+- [x] **16.3 Componentes** — T15–T18
+  - _Requisitos: 21.10, 21.13, 21.14, 21.18, 21.33, 21.35–21.42_
+- [x] **16.4 Telas de deck, detalhe da carta e pasta** — T19–T26
+  - _Requisitos: 21.1, 21.3–21.9, 21.10–21.12, 21.15–21.18, 21.19–21.32, 21.33, 21.34, 21.36, 21.40–21.42_
+- [x] **16.5 Ponta a ponta e fechamento** — T27–T29
+  - _Requisitos: 21.1, 21.2, 21.7, 21.11, 21.12, 21.16, 21.17, 21.20, 21.21, 21.24, 21.26, 21.28, 21.31–21.33, 21.35, 21.36, 21.38–21.40, 21.56, 21.61_
+
+---
+
 ## Fora do escopo da Fase 1
 
 Não implemente, mesmo que pareça rápido — cada um destes precisa passar por

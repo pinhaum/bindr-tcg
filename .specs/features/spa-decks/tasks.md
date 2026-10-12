@@ -905,10 +905,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] `CLAUDE.md` lista as rotas de deck da API e o estado da feature
-- [ ] Traceability SDEC-01..61 em `Implemented` com a task de cada um; §16 do `.context/tasks.md` criada e marcada
-- [ ] `git diff --name-status <base>..HEAD -- test/` só com `A`; rotas HTML de deck intocadas em `config/routes.rb` (SDEC-61)
-- [ ] Gate check passes: Build
+- [x] `CLAUDE.md` lista as rotas de deck da API e o estado da feature
+- [x] Traceability SDEC-01..61 em `Implemented` com a task de cada um; §16 do `.context/tasks.md` criada e marcada
+- [x] `git diff --name-status <base>..HEAD -- test/` só com `A`; rotas HTML de deck intocadas em `config/routes.rb` (SDEC-61)
+- [x] Gate check passes: Build
 
 **Tests**: none
 **Gate**: build

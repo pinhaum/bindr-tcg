@@ -250,67 +250,67 @@ As regras de montagem continuam nos objetos do Req. 14; a SPA só exibe.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| SDEC-01 | P1: Lista — rota e título (Req. 21.1) | - | Pending |
-| SDEC-02 | P1: Lista — entrada do casco (Req. 21.2) | - | Pending |
-| SDEC-03 | P1: Lista — sessão anônima (Req. 21.3) | - | Pending |
-| SDEC-04 | P1: Lista — carga lenta (Req. 21.4) | - | Pending |
-| SDEC-05 | P1: Lista — resposta antiga descartada (Req. 21.5) | - | Pending |
-| SDEC-06 | P1: Lista — erro de carga (Req. 21.6) | - | Pending |
-| SDEC-07 | P1: Lista — linha do deck (Req. 21.7) | - | Pending |
-| SDEC-08 | P1: Lista — sem decks (Req. 21.8) | - | Pending |
-| SDEC-09 | P1: Lista — ações (Req. 21.9) | - | Pending |
-| SDEC-10 | P1: Criar/renomear — formulário (Req. 21.10) | - | Pending |
-| SDEC-11 | P1: Criar/renomear — criado (Req. 21.11) | - | Pending |
-| SDEC-12 | P1: Criar/renomear — renomeado (Req. 21.12) | - | Pending |
-| SDEC-13 | P1: Criar/renomear — nome recusado (Req. 21.13) | - | Pending |
-| SDEC-14 | P1: Criar/renomear — envio pendente (Req. 21.14) | - | Pending |
-| SDEC-15 | P1: Excluir — confirmação (Req. 21.15) | - | Pending |
-| SDEC-16 | P1: Excluir — excluído (Req. 21.16) | - | Pending |
-| SDEC-17 | P1: Página — rota e título (Req. 21.17) | - | Pending |
-| SDEC-18 | P1: Página — deck não encontrado (Req. 21.18) | - | Pending |
-| SDEC-19 | P1: Página — em edição (Req. 21.19) | - | Pending |
-| SDEC-20 | P1: Página — escolher deck em edição (Req. 21.20) | - | Pending |
-| SDEC-21 | P1: Página — status e motivos (Req. 21.21) | - | Pending |
-| SDEC-22 | P1: Página — aviso de Leader (Req. 21.22) | - | Pending |
-| SDEC-23 | P1: Página — banidas (Req. 21.23) | - | Pending |
-| SDEC-24 | P1: Página — na sua pasta (Req. 21.24) | - | Pending |
-| SDEC-25 | P1: Página — Leader (Req. 21.25) | - | Pending |
-| SDEC-26 | P1: Página — deck principal (Req. 21.26) | - | Pending |
-| SDEC-27 | P1: Página — fora da fonte (Req. 21.27) | - | Pending |
-| SDEC-28 | P1: Página — pedida, possuída, falta (Req. 21.28) | - | Pending |
-| SDEC-29 | P1: Página — ações (Req. 21.29) | - | Pending |
-| SDEC-30 | P1: Importar — formulário (Req. 21.30) | - | Pending |
-| SDEC-31 | P1: Importar — importado (Req. 21.31) | - | Pending |
-| SDEC-32 | P1: Importar — lista recusada (Req. 21.32) | - | Pending |
-| SDEC-33 | P1: Detalhe — seção do deck em edição (Req. 21.33) | - | Pending |
-| SDEC-34 | P1: Detalhe — sem deck em edição (Req. 21.34) | - | Pending |
-| SDEC-35 | P1: Detalhe — quantidade e stepper (Req. 21.35) | - | Pending |
-| SDEC-36 | P1: Detalhe — stepper otimista (Req. 21.36) | - | Pending |
-| SDEC-37 | P1: Detalhe — `−` em zero (Req. 21.37) | - | Pending |
-| SDEC-38 | P1: Detalhe — usar como Leader (Req. 21.38) | - | Pending |
-| SDEC-39 | P1: Detalhe — Leader trocado (Req. 21.39) | - | Pending |
-| SDEC-40 | P1: Pasta — bloco de falta (Req. 21.40) | - | Pending |
-| SDEC-41 | P1: Pasta — bloco omitido (Req. 21.41) | - | Pending |
-| SDEC-42 | P1: Pasta — falha do bloco (Req. 21.42) | - | Pending |
-| SDEC-43 | P1: API — lista (Req. 21.43) | - | Pending |
-| SDEC-44 | P1: API — criar (Req. 21.44) | - | Pending |
-| SDEC-45 | P1: API — renomear (Req. 21.45) | - | Pending |
-| SDEC-46 | P1: API — nome inválido (Req. 21.46) | - | Pending |
-| SDEC-47 | P1: API — deck (Req. 21.47) | - | Pending |
-| SDEC-48 | P1: API — excluir (Req. 21.48) | - | Pending |
-| SDEC-49 | P1: API — escolher deck em edição (Req. 21.49) | - | Pending |
-| SDEC-50 | P1: API — deck em edição no detalhe (Req. 21.50) | - | Pending |
-| SDEC-51 | P1: API — incremento (Req. 21.51) | - | Pending |
-| SDEC-52 | P1: API — decremento (Req. 21.52) | - | Pending |
-| SDEC-53 | P1: API — teto de 50 (Req. 21.53) | - | Pending |
-| SDEC-54 | P1: API — Leader no incremento (Req. 21.54) | - | Pending |
-| SDEC-55 | P1: API — Leader do deck (Req. 21.55) | - | Pending |
-| SDEC-56 | P1: API — concorrência (Req. 21.56) | - | Pending |
-| SDEC-57 | P1: API — importar (Req. 21.57) | - | Pending |
-| SDEC-58 | P1: API — lista recusada (Req. 21.58) | - | Pending |
-| SDEC-59 | P1: API — o que falta (Req. 21.59) | - | Pending |
-| SDEC-60 | P1: API — sessão, CSRF e isolamento (Req. 21.60) | - | Pending |
-| SDEC-61 | P1: API — HTML inalterado (Req. 21.61) | - | Pending |
+| SDEC-01 | P1: Lista — rota e título (Req. 21.1) | T19, T27 | Implemented |
+| SDEC-02 | P1: Lista — entrada do casco (Req. 21.2) | T14, T27 | Implemented |
+| SDEC-03 | P1: Lista — sessão anônima (Req. 21.3) | T19, T20, T21, T22, T23, T24 | Implemented |
+| SDEC-04 | P1: Lista — carga lenta (Req. 21.4) | T19, T21 | Implemented |
+| SDEC-05 | P1: Lista — resposta antiga descartada (Req. 21.5) | T19, T21 | Implemented |
+| SDEC-06 | P1: Lista — erro de carga (Req. 21.6) | T19, T21 | Implemented |
+| SDEC-07 | P1: Lista — linha do deck (Req. 21.7) | T11, T12, T19, T27 | Implemented |
+| SDEC-08 | P1: Lista — sem decks (Req. 21.8) | T19 | Implemented |
+| SDEC-09 | P1: Lista — ações (Req. 21.9) | T19 | Implemented |
+| SDEC-10 | P1: Criar/renomear — formulário (Req. 21.10) | T15, T20, T22 | Implemented |
+| SDEC-11 | P1: Criar/renomear — criado (Req. 21.11) | T20, T27 | Implemented |
+| SDEC-12 | P1: Criar/renomear — renomeado (Req. 21.12) | T22, T27 | Implemented |
+| SDEC-13 | P1: Criar/renomear — nome recusado (Req. 21.13) | T15 | Implemented |
+| SDEC-14 | P1: Criar/renomear — envio pendente (Req. 21.14) | T15 | Implemented |
+| SDEC-15 | P1: Excluir — confirmação (Req. 21.15) | T23 | Implemented |
+| SDEC-16 | P1: Excluir — excluído (Req. 21.16) | T23, T27 | Implemented |
+| SDEC-17 | P1: Página — rota e título (Req. 21.17) | T21, T27 | Implemented |
+| SDEC-18 | P1: Página — deck não encontrado (Req. 21.18) | T16, T21, T22, T23 | Implemented |
+| SDEC-19 | P1: Página — em edição (Req. 21.19) | T21 | Implemented |
+| SDEC-20 | P1: Página — escolher deck em edição (Req. 21.20) | T21, T28 | Implemented |
+| SDEC-21 | P1: Página — status e motivos (Req. 21.21) | T12, T21, T27 | Implemented |
+| SDEC-22 | P1: Página — aviso de Leader (Req. 21.22) | T21 | Implemented |
+| SDEC-23 | P1: Página — banidas (Req. 21.23) | T21 | Implemented |
+| SDEC-24 | P1: Página — na sua pasta (Req. 21.24) | T12, T21, T27 | Implemented |
+| SDEC-25 | P1: Página — Leader (Req. 21.25) | T11, T21 | Implemented |
+| SDEC-26 | P1: Página — deck principal (Req. 21.26) | T11, T12, T21, T27 | Implemented |
+| SDEC-27 | P1: Página — fora da fonte (Req. 21.27) | T21 | Implemented |
+| SDEC-28 | P1: Página — pedida, possuída, falta (Req. 21.28) | T21, T27 | Implemented |
+| SDEC-29 | P1: Página — ações (Req. 21.29) | T21 | Implemented |
+| SDEC-30 | P1: Importar — formulário (Req. 21.30) | T24 | Implemented |
+| SDEC-31 | P1: Importar — importado (Req. 21.31) | T24, T27 | Implemented |
+| SDEC-32 | P1: Importar — lista recusada (Req. 21.32) | T24, T27 | Implemented |
+| SDEC-33 | P1: Detalhe — seção do deck em edição (Req. 21.33) | T17, T25, T28 | Implemented |
+| SDEC-34 | P1: Detalhe — sem deck em edição (Req. 21.34) | T25 | Implemented |
+| SDEC-35 | P1: Detalhe — quantidade e stepper (Req. 21.35) | T13, T17, T28 | Implemented |
+| SDEC-36 | P1: Detalhe — stepper otimista (Req. 21.36) | T13, T17, T25, T28 | Implemented |
+| SDEC-37 | P1: Detalhe — `−` em zero (Req. 21.37) | T13, T17 | Implemented |
+| SDEC-38 | P1: Detalhe — usar como Leader (Req. 21.38) | T17, T28 | Implemented |
+| SDEC-39 | P1: Detalhe — Leader trocado (Req. 21.39) | T17, T28 | Implemented |
+| SDEC-40 | P1: Pasta — bloco de falta (Req. 21.40) | T18, T26, T28 | Implemented |
+| SDEC-41 | P1: Pasta — bloco omitido (Req. 21.41) | T18, T26 | Implemented |
+| SDEC-42 | P1: Pasta — falha do bloco (Req. 21.42) | T18, T26 | Implemented |
+| SDEC-43 | P1: API — lista (Req. 21.43) | T3 | Implemented |
+| SDEC-44 | P1: API — criar (Req. 21.44) | T4 | Implemented |
+| SDEC-45 | P1: API — renomear (Req. 21.45) | T4 | Implemented |
+| SDEC-46 | P1: API — nome inválido (Req. 21.46) | T4, T8 | Implemented |
+| SDEC-47 | P1: API — deck (Req. 21.47) | T2, T3 | Implemented |
+| SDEC-48 | P1: API — excluir (Req. 21.48) | T5 | Implemented |
+| SDEC-49 | P1: API — escolher deck em edição (Req. 21.49) | T5 | Implemented |
+| SDEC-50 | P1: API — deck em edição no detalhe (Req. 21.50) | T10 | Implemented |
+| SDEC-51 | P1: API — incremento (Req. 21.51) | T1, T6, T11 | Implemented |
+| SDEC-52 | P1: API — decremento (Req. 21.52) | T1, T6 | Implemented |
+| SDEC-53 | P1: API — teto de 50 (Req. 21.53) | T1, T6 | Implemented |
+| SDEC-54 | P1: API — Leader no incremento (Req. 21.54) | T6 | Implemented |
+| SDEC-55 | P1: API — Leader do deck (Req. 21.55) | T6 | Implemented |
+| SDEC-56 | P1: API — concorrência (Req. 21.56) | T1, T7, T28 | Implemented |
+| SDEC-57 | P1: API — importar (Req. 21.57) | T8 | Implemented |
+| SDEC-58 | P1: API — lista recusada (Req. 21.58) | T8 | Implemented |
+| SDEC-59 | P1: API — o que falta (Req. 21.59) | T9 | Implemented |
+| SDEC-60 | P1: API — sessão, CSRF e isolamento (Req. 21.60) | T3, T4, T5, T6, T8, T9 | Implemented |
+| SDEC-61 | P1: API — HTML inalterado (Req. 21.61) | T1, T2, T29 | Implemented |
 
 **Coverage:** 61 total, 0 mapped to tasks, 61 unmapped ⚠️ (Design e Tasks ainda não escritos)
 
