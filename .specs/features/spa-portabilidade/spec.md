@@ -3,8 +3,8 @@
 Recorte da feature `spa-portabilidade` sobre `.context/requirements.md` Req. 22
 (SPOR-NN, mesma numeração dos critérios). Em divergência, `.context/` vence
 (AD-005). Depende da `api-fundacao` (Req. 16) e da `spa-fundacao` (Req. 17),
-encerradas e verificadas, e da `spa-pasta` (Req. 20), especificada e ainda não
-implementada, dona da tela de onde se chega ao import e ao export. A regra do
+encerradas e verificadas, e da `spa-pasta` (Req. 20), encerrada e verificada
+em 2026-10-11, dona da tela de onde se chega ao import e ao export. A regra do
 CSV é da feature `portabilidade` (Req. 10, POR-01..13), encerrada e verificada:
 formato, parser, resolvedor, staging (AD-007), substituição (AD-006), teto de
 10.000 linhas (AD-008) e gravação atômica por reivindicação continuam nos
@@ -241,52 +241,52 @@ mandar arquivo, e fecha a ida e volta com o download que já existe.
 
 | Requirement ID | Story | Phase | Status |
 |---|---|---|---|
-| SPOR-01 | P1: Envio — rota, título e texto (Req. 22.1) | - | Pending |
-| SPOR-02 | P1: Envio — ação da pasta (Req. 22.2) | - | Pending |
-| SPOR-03 | P1: Envio — sessão anônima (Req. 22.3) | - | Pending |
-| SPOR-04 | P1: Envio — campo e botão (Req. 22.4) | - | Pending |
-| SPOR-05 | P1: Envio — chamada multipart e pendência (Req. 22.5) | - | Pending |
-| SPOR-06 | P1: Envio — aceito leva à pré-visualização (Req. 22.6) | - | Pending |
-| SPOR-07 | P1: Envio — recusa com resumo e foco (Req. 22.7) | - | Pending |
-| SPOR-08 | P1: Envio — outros erros (Req. 22.8) | - | Pending |
-| SPOR-09 | P1: Pré-visualização — consulta e título (Req. 22.9) | - | Pending |
-| SPOR-10 | P1: Pré-visualização — carga lenta (Req. 22.10) | - | Pending |
-| SPOR-11 | P1: Pré-visualização — 404 e erro (Req. 22.11) | - | Pending |
-| SPOR-12 | P1: Pré-visualização — arquivo e aviso (Req. 22.12) | - | Pending |
-| SPOR-13 | P1: Pré-visualização — cinco grupos (Req. 22.13) | - | Pending |
-| SPOR-14 | P1: Pré-visualização — linha (Req. 22.14) | - | Pending |
-| SPOR-15 | P1: Pré-visualização — antes, depois e motivo (Req. 22.15) | - | Pending |
-| SPOR-16 | P1: Pré-visualização — não só por cor (Req. 22.16) | - | Pending |
-| SPOR-17 | P1: Pré-visualização — texto do arquivo como texto (Req. 22.17) | - | Pending |
-| SPOR-18 | P1: Pré-visualização — aviso de remoção (Req. 22.18) | - | Pending |
-| SPOR-19 | P1: Pré-visualização — confirmar e abandonar (Req. 22.19) | - | Pending |
-| SPOR-20 | P1: Pré-visualização — nada gravado (Req. 22.20) | - | Pending |
-| SPOR-21 | P1: Confirmação — chamada e pendência (Req. 22.21) | - | Pending |
-| SPOR-22 | P1: Resumo — troca, título e foco (Req. 22.22) | - | Pending |
-| SPOR-23 | P1: Resumo — três contagens (Req. 22.23) | - | Pending |
-| SPOR-24 | P1: Resumo — removidas (Req. 22.24) | - | Pending |
-| SPOR-25 | P1: Resumo — inalteradas (Req. 22.25) | - | Pending |
-| SPOR-26 | P1: Resumo — recusas (Req. 22.26) | - | Pending |
-| SPOR-27 | P1: Resumo — falhas de gravação (Req. 22.27) | - | Pending |
-| SPOR-28 | P1: Resumo — sem vocabulário de erro (Req. 22.28) | - | Pending |
-| SPOR-29 | P1: Resumo — links finais (Req. 22.29) | - | Pending |
-| SPOR-30 | P1: Confirmação — 409 (Req. 22.30) | - | Pending |
-| SPOR-31 | P1: Confirmação — resposta perdida (Req. 22.31, P13) | - | Pending |
-| SPOR-32 | P1: Tempo limite de 60 s (Req. 22.32) | - | Pending |
-| SPOR-33 | P1: Export pelo link da pasta (Req. 22.33) | - | Pending |
-| SPOR-34 | P1: Ida e volta idempotente (Req. 22.34) | - | Pending |
-| SPOR-35 | P1: Cliente com `FormData` (Req. 22.35) | - | Pending |
-| SPOR-36 | P1: API — envio aceito (Req. 22.36) | - | Pending |
-| SPOR-37 | P1: API — envio recusado (Req. 22.37) | - | Pending |
-| SPOR-38 | P1: API — leitura da pré-visualização (Req. 22.38) | - | Pending |
-| SPOR-39 | P1: API — token alheio ou inexistente (Req. 22.39) | - | Pending |
-| SPOR-40 | P1: API — confirmação e resumo (Req. 22.40) | - | Pending |
-| SPOR-41 | P1: API — já confirmada ou vencida (Req. 22.41) | - | Pending |
-| SPOR-42 | P1: API — corrida de confirmação (Req. 22.42) | - | Pending |
-| SPOR-43 | P1: API — sessão, CSRF e isolamento (Req. 22.43) | - | Pending |
-| SPOR-44 | P1: API — consultas constantes (Req. 22.44) | - | Pending |
-| SPOR-45 | P1: API — HTML inalterado (Req. 22.45) | - | Pending |
-| SPOR-46 | P2: Tela em 360px e alvos de 44px (Req. 22.46) | - | Pending |
+| SPOR-01 | P1: Envio — rota, título e texto (Req. 22.1) | T10, T13 | Implemented |
+| SPOR-02 | P1: Envio — ação da pasta (Req. 22.2) | T12, T13 | Implemented |
+| SPOR-03 | P1: Envio — sessão anônima (Req. 22.3) | T10, T11 | Implemented |
+| SPOR-04 | P1: Envio — campo e botão (Req. 22.4) | T10 | Implemented |
+| SPOR-05 | P1: Envio — chamada multipart e pendência (Req. 22.5) | T10 | Implemented |
+| SPOR-06 | P1: Envio — aceito leva à pré-visualização (Req. 22.6) | T10 | Implemented |
+| SPOR-07 | P1: Envio — recusa com resumo e foco (Req. 22.7) | T10, T13 | Implemented |
+| SPOR-08 | P1: Envio — outros erros (Req. 22.8) | T10 | Implemented |
+| SPOR-09 | P1: Pré-visualização — consulta e título (Req. 22.9) | T11 | Implemented |
+| SPOR-10 | P1: Pré-visualização — carga lenta (Req. 22.10) | T11 | Implemented |
+| SPOR-11 | P1: Pré-visualização — 404 e erro (Req. 22.11) | T11 | Implemented |
+| SPOR-12 | P1: Pré-visualização — arquivo e aviso (Req. 22.12) | T6, T11 | Implemented |
+| SPOR-13 | P1: Pré-visualização — cinco grupos (Req. 22.13) | T6, T11, T13 | Implemented |
+| SPOR-14 | P1: Pré-visualização — linha (Req. 22.14) | T6, T8, T13 | Implemented |
+| SPOR-15 | P1: Pré-visualização — antes, depois e motivo (Req. 22.15) | T8, T13 | Implemented |
+| SPOR-16 | P1: Pré-visualização — não só por cor (Req. 22.16) | T8, T11 | Implemented |
+| SPOR-17 | P1: Pré-visualização — texto do arquivo como texto (Req. 22.17) | T8 | Implemented |
+| SPOR-18 | P1: Pré-visualização — aviso de remoção (Req. 22.18) | T6, T11 | Implemented |
+| SPOR-19 | P1: Pré-visualização — confirmar e abandonar (Req. 22.19) | T11 | Implemented |
+| SPOR-20 | P1: Pré-visualização — nada gravado (Req. 22.20) | T13 | Implemented |
+| SPOR-21 | P1: Confirmação — chamada e pendência (Req. 22.21) | T11 | Implemented |
+| SPOR-22 | P1: Resumo — troca, título e foco (Req. 22.22) | T9, T11, T13 | Implemented |
+| SPOR-23 | P1: Resumo — três contagens (Req. 22.23) | T9, T13 | Implemented |
+| SPOR-24 | P1: Resumo — removidas (Req. 22.24) | T6, T9 | Implemented |
+| SPOR-25 | P1: Resumo — inalteradas (Req. 22.25) | T6, T9 | Implemented |
+| SPOR-26 | P1: Resumo — recusas (Req. 22.26) | T6, T9 | Implemented |
+| SPOR-27 | P1: Resumo — falhas de gravação (Req. 22.27) | T6, T9 | Implemented |
+| SPOR-28 | P1: Resumo — sem vocabulário de erro (Req. 22.28) | T9 | Implemented |
+| SPOR-29 | P1: Resumo — links finais (Req. 22.29) | T9 | Implemented |
+| SPOR-30 | P1: Confirmação — 409 (Req. 22.30) | T11, T13 | Implemented |
+| SPOR-31 | P1: Confirmação — resposta perdida (Req. 22.31, P13) | T11 | Implemented |
+| SPOR-32 | P1: Tempo limite de 60 s (Req. 22.32) | T5, T7, T10, T11 | Implemented |
+| SPOR-33 | P1: Export pelo link da pasta (Req. 22.33) | T12, T14 | Implemented |
+| SPOR-34 | P1: Ida e volta idempotente (Req. 22.34) | T14 | Implemented |
+| SPOR-35 | P1: Cliente com `FormData` (Req. 22.35) | T5 | Implemented |
+| SPOR-36 | P1: API — envio aceito (Req. 22.36) | T1, T2 | Implemented |
+| SPOR-37 | P1: API — envio recusado (Req. 22.37) | T1, T2 | Implemented |
+| SPOR-38 | P1: API — leitura da pré-visualização (Req. 22.38) | T2, T3, T7 | Implemented |
+| SPOR-39 | P1: API — token alheio ou inexistente (Req. 22.39) | T3, T4 | Implemented |
+| SPOR-40 | P1: API — confirmação e resumo (Req. 22.40) | T4 | Implemented |
+| SPOR-41 | P1: API — já confirmada ou vencida (Req. 22.41) | T4 | Implemented |
+| SPOR-42 | P1: API — corrida de confirmação (Req. 22.42) | T4 | Implemented |
+| SPOR-43 | P1: API — sessão, CSRF e isolamento (Req. 22.43) | T2, T3, T4 | Implemented |
+| SPOR-44 | P1: API — consultas constantes (Req. 22.44) | T2, T3 | Implemented |
+| SPOR-45 | P1: API — HTML inalterado (Req. 22.45) | T4, T15 | Implemented |
+| SPOR-46 | P2: Tela em 360px e alvos de 44px (Req. 22.46) | T13 | Implemented |
 
 **Coverage:** 46 total, 0 mapped to tasks, 46 unmapped ⚠️ (`design.md` e `tasks.md` ainda não escritos).
 

@@ -749,3 +749,99 @@ describe('createApiClient getEnvelope', () => {
 		expect(fetch).not.toHaveBeenCalled();
 	});
 });
+
+describe('createApiClient FormData uploads', () => {
+	const upload = () => {
+		const form = new FormData();
+		form.append('file', new File(['a,b'], 'colecao.csv', { type: 'text/csv' }));
+		return form;
+	};
+
+	it('sends FormData as-is, without Content-Type, with the CSRF token', async () => {
+		const { fetch, client } = setup();
+		client.setCsrfToken('tok');
+		const form = upload();
+
+		await client.post('/api/collection/import', form);
+
+		const call = lastCall(fetch);
+		expect(call.init.body).toBe(form);
+		expect(call.headers.has('Content-Type')).toBe(false);
+		expect(call.headers.get('X-CSRF-Token')).toBe('tok');
+	});
+
+	it('keeps Content-Type application/json for plain objects', async () => {
+		const { fetch, client } = setup();
+
+		await client.post('/api/x', { a: 1 });
+
+		expect(lastCall(fetch).headers.get('Content-Type')).toBe('application/json');
+	});
+
+	it('on a stale CSRF token, renews and resends the same FormData with the same timeout once', async () => {
+		const timeout = vi.spyOn(AbortSignal, 'timeout');
+		const { client, fetch } = scripted('a@b.c', csrfInvalid(), sessionOf('a@b.c', 'tok-new'), json({ data: { ok: 1 } }));
+		client.setCsrfToken('tok-old');
+		const form = upload();
+
+		await expect(client.post('/api/collection/import', form, { timeoutMs: 60000 })).resolves.toEqual({ ok: 1 });
+
+		expect(fetch).toHaveBeenCalledTimes(3);
+		for (const index of [0, 2]) {
+			const init = fetch.mock.calls[index][1]!;
+			expect(init.body).toBe(form);
+			expect((init.body as FormData).get('file')).toBeInstanceOf(File);
+			expect(new Headers(init.headers).has('Content-Type')).toBe(false);
+		}
+		expect(new Headers(fetch.mock.calls[2][1]!.headers).get('X-CSRF-Token')).toBe('tok-new');
+		expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([60000, 15000, 60000]);
+	});
+
+	it('with another e-mail on renewal, does not resend and throws session_changed', async () => {
+		const { client, fetch, onSessionChanged } = scripted('a@b.c', csrfInvalid(), sessionOf('z@b.c', 'tok-new'));
+
+		const error = await caught(client.post('/api/collection/import', upload()));
+
+		expect(error.code).toBe('session_changed');
+		expect(fetch).toHaveBeenCalledTimes(2);
+		expect(onSessionChanged).toHaveBeenCalledWith({ email: 'z@b.c' });
+	});
+});
+
+describe('createApiClient per-call timeout', () => {
+	it('lets post wait past the default timeout up to its own, while get still aborts at 15 s', async () => {
+		vi.useFakeTimers();
+		try {
+			vi.spyOn(AbortSignal, 'timeout').mockImplementation((ms) => {
+				const controller = new AbortController();
+				setTimeout(() => controller.abort(new DOMException('timed out', 'TimeoutError')), ms);
+				return controller.signal;
+			});
+			const fetch = vi.fn<typeof globalThis.fetch>(
+				(_url, init) =>
+					new Promise((_resolve, reject) => {
+						init!.signal!.addEventListener('abort', () => reject(init!.signal!.reason));
+					})
+			);
+			const client = createApiClient({
+				fetch,
+				onUnauthenticated: vi.fn(),
+				currentUserEmail: () => null,
+				onSessionChanged: vi.fn()
+			});
+
+			let postSettled = false;
+			const posting = caught(client.post('/api/x', undefined, { timeoutMs: 60000 })).finally(() => (postSettled = true));
+			const getting = caught(client.get('/api/x'));
+
+			await vi.advanceTimersByTimeAsync(15000);
+			expect((await getting).code).toBe('network_error');
+			expect(postSettled).toBe(false);
+
+			await vi.advanceTimersByTimeAsync(45000);
+			expect((await posting).code).toBe('network_error');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+});

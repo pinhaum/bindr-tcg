@@ -247,8 +247,8 @@ describe('pasta/+page.svelte', () => {
 
 		expect(csv).toHaveAttribute('href', '/collection/export');
 		expect(csv).toHaveAttribute('data-sveltekit-reload');
-		expect(imp).toHaveAttribute('href', '/collection/import');
-		expect(imp).toHaveAttribute('data-sveltekit-reload');
+		expect(imp).toHaveAttribute('href', '/app/pasta/importar');
+		expect(imp).not.toHaveAttribute('data-sveltekit-reload');
 		expect(wishlist).toHaveAttribute('href', '/app/pasta/desejos');
 		expect(wishlist).not.toHaveAttribute('data-sveltekit-reload');
 		expect(add).toHaveAttribute('href', '/app');
