@@ -21,12 +21,20 @@ module LegacyPath
     [ %r{\A/app/(.+)\z}m, "/%s" ]
   ].freeze
 
+  PROTOCOL_RELATIVE = %r{\A/[/\\]}
+  CONTROL = /[[:cntrl:]]/
+
   def self.destination(path, query)
     target = translate(path)
-    return if target.nil? || target.start_with?("//")
+    return if target.nil? || unsafe?(target) || query.match?(CONTROL)
 
     query.empty? ? target : "#{target}?#{query}"
   end
+
+  def self.unsafe?(target)
+    target.match?(PROTOCOL_RELATIVE) || target.match?(CONTROL)
+  end
+  private_class_method :unsafe?
 
   def self.translate(path)
     return FIXED[path] if FIXED.key?(path)

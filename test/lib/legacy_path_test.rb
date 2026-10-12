@@ -1,20 +1,7 @@
 require "test_helper"
 
 class LegacyPathTest < ActiveSupport::TestCase
-  FIXED = {
-    "/catalog" => "/",
-    "/session/new" => "/entrar",
-    "/registration/new" => "/criar-conta",
-    "/progress" => "/pasta",
-    "/wishlist" => "/pasta/desejos",
-    "/collection/import" => "/pasta/importar",
-    "/decks" => "/baralhos",
-    "/decks/new" => "/baralhos/novo",
-    "/decks/import" => "/baralhos/importar",
-    "/app" => "/"
-  }.freeze
-
-  FIXED.each do |origin, expected|
+  LegacyPath::FIXED.each do |origin, expected|
     test "#{origin} vai para #{expected}" do
       assert_equal expected, LegacyPath.destination(origin, "")
     end
@@ -51,6 +38,24 @@ class LegacyPathTest < ActiveSupport::TestCase
   test "destino que começaria por // é recusado" do
     assert_nil LegacyPath.destination("/app//evil.com", "")
     assert_nil LegacyPath.destination("/app//evil.com", "x=1")
+  end
+
+  test "destino que começaria por barra invertida é recusado" do
+    assert_nil LegacyPath.destination("/app/\\evil.com", "")
+    assert_nil LegacyPath.destination("/app/\\/evil.com", "x=1")
+  end
+
+  test "caractere de controle cru no caminho ou na query é recusado" do
+    assert_nil LegacyPath.destination("/app/\t/evil", "")
+    assert_nil LegacyPath.destination("/app/\r\n/evil", "")
+    assert_nil LegacyPath.destination("/app/a\u0000b", "")
+    assert_nil LegacyPath.destination("/cards/OP01-001", "x=\r\nLocation: /evil")
+    assert_nil LegacyPath.destination("/catalog", "a=\tb")
+  end
+
+  test "/app/ com barra final e query não tem regra" do
+    assert_nil LegacyPath.destination("/app/", "")
+    assert_nil LegacyPath.destination("/app/", "x=1")
   end
 
   test "barras codificadas ficam como caminho local" do
