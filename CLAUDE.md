@@ -35,8 +35,8 @@ A **`spa-fundacao`** (Req. 17, SPA-01..46) está **encerrada e verificada** (T1�
 `frontend/`: SvelteKit + Svelte 5, entrega em `/app`, cliente HTTP da API, sessão,
 temas, casco e mensagens; `validation.md` PASS na iteração 2); `STATE.md` (*Handoff*) tem o retrato.
 
-A **`spa-catalogo`** (Req. 18, SCAT-01..45) está **implementada (T1–T25) e aguarda o
-Verifier**: `/app` deixou de ser o início da fundação e é o catálogo (busca, chips de
+A **`spa-catalogo`** (Req. 18, SCAT-01..45) está **encerrada e verificada** (T1–T31,
+`validation.md` PASS): `/app` deixou de ser o início da fundação e é o catálogo (busca, chips de
 filtro, painel de filtros, grade, paginação, estados vazio/skeleton/erro), lendo só
 `GET /api/catalog` e `GET /api/catalog/filters` (SCAT-45: nenhum arquivo sob `app/`
 mudou desde `751e553`). O detalhe da carta era Hotwire na época (hoje é SPA: ver `spa-carta`).
@@ -48,8 +48,8 @@ Módulos novos em `frontend/src/lib/`: `catalog/url.ts` (links a partir de
 `ActiveFilters`, `CatalogPagination` e `FilterPanel`; a página é `src/routes/+page.svelte`.
 Design em `.specs/features/spa-catalogo/design.md`.
 
-A **`spa-carta`** (Req. 19, SCAR-01..49) está **implementada (T1–T22) e aguarda o
-Verifier**: o detalhe da carta saiu do Hotwire e é a rota `/app/cartas/[card_number]`
+A **`spa-carta`** (Req. 19, SCAR-01..49) está **encerrada e verificada** (T1–T22,
+`validation.md` PASS): o detalhe da carta saiu do Hotwire e é a rota `/app/cartas/[card_number]`
 (cabeçalho com arte e campos por tipo, linhas de variante com troca local do destaque,
 posse otimista com `−`/`+` em fila por variante, desejo por variante e morph da arte entre
 grade e detalhe). O tile do catálogo leva a ela (SCAR-03). Rails ganhou três rotas de
@@ -58,8 +58,8 @@ mutação em `Api::CardVariantsController` e `CollectionItem.increment_for!`/`de
 respostas, mensagens nem rotas HTML; SCAR-49: nenhum teste Rails existente foi editado).
 Design em `.specs/features/spa-carta/design.md`.
 
-A **`spa-portabilidade`** (Req. 22, SPOR-01..46) está **implementada (T1–T14) e aguarda o
-Verifier**: o import da coleção saiu do HTML e é SPA em `/app/pasta/importar` (envio do CSV) e
+A **`spa-portabilidade`** (Req. 22, SPOR-01..46) está **encerrada e verificada** (T1–T15,
+`validation.md` PASS): o import da coleção saiu do HTML e é SPA em `/app/pasta/importar` (envio do CSV) e
 `/app/pasta/importar/[token]` (pré-visualização em cinco grupos, confirmação e resumo); o
 export segue pelo link da pasta, para `GET /collection/export` do Rails, e a ida e volta é
 provada no e2e. Rails ganhou três rotas em `Api::CollectionImportsController` e o serviço
@@ -74,8 +74,8 @@ leem só `GET /api/progress` e `GET /api/wishlist`, além de `DELETE …/wishlis
 (SPAS-46). A entrada "Minha pasta" da navegação aponta para `/app/pasta`. Design em
 `.specs/features/spa-pasta/design.md`.
 
-A **`spa-decks`** (Req. 21, SDEC-01..61) está **implementada (T1–T29) e aguarda o
-Verifier**: os decks saíram do Hotwire. Rotas SPA `/app/baralhos` (lista), `/novo`,
+A **`spa-decks`** (Req. 21, SDEC-01..61) está **encerrada e verificada** (T1–T29,
+`validation.md` PASS): os decks saíram do Hotwire. Rotas SPA `/app/baralhos` (lista), `/novo`,
 `/importar`, `/[id]` (página do deck: status, motivos, grupos, falta por carta),
 `/[id]/renomear` e `/[id]/excluir`; o detalhe da carta ganhou o painel do deck em edição
 (`EditingDeckPanel`, com `−`/`+` e "Usar como Leader") e `/app/pasta` o bloco "Faltando
@@ -105,7 +105,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **2069 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **2100 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
 - **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
   controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
   imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
@@ -206,7 +206,8 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   entrada "Catálogo" da navegação aponta para ele (ver "Estado atual").
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens atuais: Vitest 982 testes, e2e 204, Rails 2069 (rubocop limpo).
+Contagens atuais (após o merge de `spa-decks` e `spa-portabilidade` na `spa-troca`):
+Vitest 1049 testes, Rails 2100 (rubocop limpo); o e2e não foi rodado sobre o conjunto.
 
 ```bash
 # quick
