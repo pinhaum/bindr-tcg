@@ -124,6 +124,9 @@ Rails.application.routes.draw do
   # no caminho.
   get "decks/import" => "deck_imports#new", as: :new_deck_import
   post "decks/import" => "deck_imports#create", as: :deck_imports
+  # `GET /decks/:id.txt` exporta a lista no formato do OPTCG Simulator (DCK-31),
+  # também antes de `resources :decks`: depois dele casaria com `decks#show`.
+  get "decks/:id.txt" => "deck_exports#show", as: :deck_export, format: false
   resources :decks, only: %i[index new create show edit update destroy] do
     member do
       get :delete

@@ -556,9 +556,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `GET /decks/<id>.txt` com sessão: `text/plain; charset=utf-8`, corpo igual ao de antes (`"1xDT16-001\n3xDT16-010\n4xDT16-011\n2xDT16-030"`), sem CR; deck alheio e inexistente `404`
-- [ ] `GET /collection/export`: mesmo corpo, tipo, `Content-Disposition` e `colecao.csv`
-- [ ] Gate check passes: Rails quick
+- [x] `GET /decks/<id>.txt` com sessão: `text/plain; charset=utf-8`, corpo igual ao de antes (`"1xDT16-001\n3xDT16-010\n4xDT16-011\n2xDT16-030"`), sem CR; deck alheio e inexistente `404`
+- [x] `GET /collection/export`: mesmo corpo, tipo, `Content-Disposition` e `colecao.csv`
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick

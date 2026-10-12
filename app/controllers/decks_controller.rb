@@ -38,19 +38,12 @@ class DecksController < ApplicationController
 
   # Leitura, retrato único e "fora da fonte" vêm de `DeckDetail`: o número de
   # consultas da página não cresce com o número de entradas.
-  #
-  # `GET /decks/:id.txt` exporta a lista no formato do OPTCG Simulator
-  # (DCK-31), em `text/plain; charset=utf-8` exibido no navegador: o usuário
-  # copia ou salva. O deck sai do mesmo `Current.user.decks`, então o de outro
-  # usuário é 404 também aqui (DCK-36).
   def show
     detail = DeckDetail.new(user: Current.user, deck_id: params[:id]).call
     @deck = detail.deck
     @legality = detail.legality
     @absent_card_ids = detail.absent_card_ids
     @shortfall = detail.shortfall_by_card_id
-
-    render plain: Deck::ListText.format(@deck) if request.format.text?
   end
 
   def edit

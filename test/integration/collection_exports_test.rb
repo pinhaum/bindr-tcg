@@ -20,6 +20,8 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
   PASSWORD = "grand-line-88".freeze
 
   setup do
+    @forgery = ActionController::Base.allow_forgery_protection
+    ActionController::Base.allow_forgery_protection = true
     @nami = User.create!(email: "nami-por6@example.com", password: PASSWORD)
     @zoro = User.create!(email: "zoro-por6@example.com", password: PASSWORD)
 
@@ -38,6 +40,10 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
     own(@zoro, @do_zoro, 2)
   end
 
+  teardown do
+    ActionController::Base.allow_forgery_protection = @forgery
+  end
+
   # A suíte roda em paralelo e o projeto não usa fixtures YAML: cada arquivo
   # cria os próprios registros, com chaves naturais distintas para não colidir
   # entre workers.
@@ -52,12 +58,24 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
     CollectionItem.create!(user: user, card_variant: card_variant, quantity: quantity)
   end
 
+  def api_headers(token)
+    { "Content-Type" => "application/json", "X-CSRF-Token" => token }
+  end
+
+  def csrf_token
+    get "/api/session"
+    response.parsed_body.dig("data", "csrf_token")
+  end
+
   def sign_in(user)
-    post session_path, params: { email: user.email, password: PASSWORD }
+    post "/api/session", params: { email: user.email, password: PASSWORD }.to_json,
+                         headers: api_headers(csrf_token)
+    assert_response :success
   end
 
   def sign_out
-    delete session_path
+    delete "/api/session", headers: api_headers(csrf_token)
+    assert_response :success
   end
 
   # As linhas de dado do corpo da resposta, lidas pelo mesmo parser que o import
