@@ -5,5 +5,5 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ parent }) => {
 	await parent();
-	if (session.user) redirect(307, resolve('/').replace(/\/$/, ''));
+	if (session.user) redirect(307, resolve('/'));
 };

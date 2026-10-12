@@ -6,10 +6,10 @@ import { ApiError, networkError } from '../../lib/api/errors';
 const nav = vi.hoisted(() => ({ goto: vi.fn() }));
 vi.mock('$app/navigation', () => nav);
 
-const pageState = vi.hoisted(() => ({ url: new URL('http://localhost/app/entrar') }));
+const pageState = vi.hoisted(() => ({ url: new URL('http://localhost/entrar') }));
 vi.mock('$app/state', () => ({ page: pageState }));
 
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path === '/' ? '/' : path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 const signIn = vi.hoisted(() => vi.fn());
 vi.mock('../../lib/session.svelte', () => ({
@@ -31,7 +31,7 @@ describe('entrar/+page.svelte', () => {
 	beforeEach(() => {
 		signIn.mockReset();
 		nav.goto.mockReset();
-		pageState.url = new URL('http://localhost/app/entrar');
+		pageState.url = new URL('http://localhost/entrar');
 	});
 	afterEach(cleanup);
 
@@ -48,37 +48,65 @@ describe('entrar/+page.svelte', () => {
 		expect(password).toBeRequired();
 		expect(password).toHaveAttribute('type', 'password');
 		expect(password).toHaveAttribute('autocomplete', 'current-password');
-		expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute('href', '/app/criar-conta');
+		expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute('href', '/criar-conta');
 	});
 
-	it('envia os valores para signIn e vai para /app sem return_to', async () => {
+	it('envia os valores para signIn e vai para / sem return_to', async () => {
 		signIn.mockResolvedValue(undefined);
 		render(Page);
 		await fill('ana@example.com', 'segredo123');
 		await submit();
 
-		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/app'));
+		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/'));
 		expect(signIn).toHaveBeenCalledWith('ana@example.com', 'segredo123');
 	});
 
 	it('vai para o return_to seguro', async () => {
-		pageState.url = new URL('http://localhost/app/entrar?return_to=%2Fapp%2Fcatalogo%3Fq%3Dluffy');
+		pageState.url = new URL('http://localhost/entrar?return_to=%2Fcatalogo%3Fq%3Dluffy');
 		signIn.mockResolvedValue(undefined);
 		render(Page);
 		await fill('ana@example.com', 'segredo123');
 		await submit();
 
-		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/app/catalogo?q=luffy'));
+		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/catalogo?q=luffy'));
+	});
+
+	it('com return_to de rota de arquivo navega a página inteira, sem goto', async () => {
+		const assign = vi.fn();
+		vi.stubGlobal('location', { assign });
+		pageState.url = new URL('http://localhost/entrar?return_to=%2Fdecks%2F5.txt');
+		signIn.mockResolvedValue(undefined);
+		render(Page);
+		await fill('ana@example.com', 'segredo123');
+		await submit();
+
+		await waitFor(() => expect(assign).toHaveBeenCalledWith('/decks/5.txt'));
+		expect(nav.goto).not.toHaveBeenCalled();
+		vi.unstubAllGlobals();
+	});
+
+	it('com return_to /pasta navega pelo goto, sem assign', async () => {
+		const assign = vi.fn();
+		vi.stubGlobal('location', { assign });
+		pageState.url = new URL('http://localhost/entrar?return_to=%2Fpasta');
+		signIn.mockResolvedValue(undefined);
+		render(Page);
+		await fill('ana@example.com', 'segredo123');
+		await submit();
+
+		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/pasta'));
+		expect(assign).not.toHaveBeenCalled();
+		vi.unstubAllGlobals();
 	});
 
 	it('descarta return_to inseguro', async () => {
-		pageState.url = new URL('http://localhost/app/entrar?return_to=%2F%2Fevil.com');
+		pageState.url = new URL('http://localhost/entrar?return_to=%2F%2Fevil.com');
 		signIn.mockResolvedValue(undefined);
 		render(Page);
 		await fill('ana@example.com', 'segredo123');
 		await submit();
 
-		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/app'));
+		await waitFor(() => expect(nav.goto).toHaveBeenCalledWith('/'));
 	});
 
 	it('invalid_credentials mostra a mensagem, mantém o e-mail, limpa a senha e foca o erro', async () => {
@@ -125,11 +153,11 @@ describe('entrar/+page.svelte', () => {
 });
 
 describe('entrar/+page load', () => {
-	it('com sessão ativa lança redirect para /app', async () => {
+	it('com sessão ativa lança redirect para /', async () => {
 		session.user = { email: 'ana@example.com' } as never;
 		await expect(load({ parent: async () => ({}) } as never)).rejects.toMatchObject({
 			status: 307,
-			location: '/app'
+			location: '/'
 		});
 	});
 

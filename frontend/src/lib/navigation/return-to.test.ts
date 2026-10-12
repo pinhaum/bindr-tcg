@@ -1,40 +1,64 @@
 import { describe, expect, it, vi } from 'vitest';
-import { safeReturnTo } from './return-to';
+import { isFileRoute, safeReturnTo } from './return-to';
 
 // `base` saiu dos tipos do SvelteKit 3 e chega `undefined` no Vitest; `resolve` é a API tipada.
-vi.mock('$app/paths', () => ({ resolve: (path: string) => `/app${path}` }));
+vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 describe('safeReturnTo', () => {
 	it.each([
-		['/app/x?y=1'],
-		['/app/x'],
-		['/app/catalogo?q=luffy&page=2#topo'],
-		['/app/x%20y'],
-		['/app/%252F%252Fevil'],
-		['/app/x..y'],
-		['/app/a.b/c'],
-		['/app/x?y=..'],
-		['/app/x#/../y'],
-		['/app'],
-		['/app?x=1'],
-		['/app?colors%5B%5D=Red&owned=owned']
-	])('aceita %s', (raw) => {
-		expect(safeReturnTo(raw)).toBe(raw);
+		['/pasta', '/pasta'],
+		['/pasta?x=1#topo', '/pasta?x=1#topo'],
+		['/catalogo?q=luffy&page=2#topo', '/catalogo?q=luffy&page=2#topo'],
+		['/x%20y', '/x%20y'],
+		['/%252F%252Fevil', '/%252F%252Fevil'],
+		['/x..y', '/x..y'],
+		['/a.b/c', '/a.b/c'],
+		['/x?y=..', '/x?y=..'],
+		['/x#/../y', '/x#/../y'],
+		['/appx', '/appx'],
+		['/application/x', '/application/x'],
+		['/', '/'],
+		['/?colors%5B%5D=Red&owned=owned', '/?colors%5B%5D=Red&owned=owned'],
+		['/app/pasta', '/pasta'],
+		['/app', '/'],
+		['/app?x=1', '/?x=1'],
+		['/app#topo', '/#topo'],
+		['/app/?x=1', '/?x=1'],
+		['/collection/export', '/collection/export'],
+		['/decks/5.txt?x=1', '/decks/5.txt?x=1']
+	])('aceita %s como %s', (raw, expected) => {
+		expect(safeReturnTo(raw)).toBe(expected);
+	});
+
+	it('lê %2Fapp%2Fpasta, com o prefixo legado codificado, como /pasta', () => {
+		expect(safeReturnTo(decodeURIComponent('%2Fapp%2Fpasta'))).toBe('/pasta');
+	});
+
+	it.each([
+		['/api/session'],
+		['/api'],
+		['/_app/x.js'],
+		['/card_images/x'],
+		['/app/api/session'],
+		['/app/app/api/session'],
+		['/app/app/app/_app/x.js'],
+		['/app/_app/x.js'],
+		['/app/card_images/x'],
+		['/%61pi/session'],
+		['/app/%61pi/session']
+	])('manda %s para a raiz', (raw) => {
+		expect(safeReturnTo(raw)).toBe('/');
 	});
 
 	it.each([
 		['null', null],
 		['vazio', ''],
-		['/appx', '/appx'],
-		['/appx?y=1', '/appx?y=1'],
 		['query com //', '/app?x=//evil'],
 		['query com %2F%2F', '/app?x=%2F%2Fevil'],
 		['query com barra invertida', '/app?\\'],
 		['query com %5C', '/app?x=%5C'],
 		['query com controle', '/app?x=\n1'],
 		['query com %0A', '/app?x=%0A1'],
-		['/catalog', '/catalog'],
-		['/application/x', '/application/x'],
 		['//evil.com', '//evil.com'],
 		['/app//evil', '/app//evil'],
 		['/app/..//evil', '/app/..//evil'],
@@ -49,6 +73,8 @@ describe('safeReturnTo', () => {
 		['/app/%5Cevil', '/app/%5Cevil'],
 		['decodificação inválida', '%E0%A4%A'],
 		['/app/x%E0%A4%A', '/app/x%E0%A4%A'],
+		['barra invertida logo após a raiz', '/\\x'],
+		['ponto-ponto sem prefixo', '/a/../b'],
 		['espaço no começo', ' /app/x'],
 		['tab no começo', '\t/app/x'],
 		['newline no começo', '\n/app/x'],
@@ -69,6 +95,34 @@ describe('safeReturnTo', () => {
 		['ponto-ponto antes do hash', '/app/x/..#a'],
 		['ponto-ponto após %3F no segmento anterior', '/app/x%3F/../y']
 	])('descarta %s', (_nome, raw) => {
-		expect(safeReturnTo(raw)).toBe('/app');
+		expect(safeReturnTo(raw)).toBe('/');
+	});
+});
+
+describe('isFileRoute', () => {
+	it.each([
+		'/collection/export',
+		'/collection/export?x=1',
+		'/decks/5.txt',
+		'/decks/5.txt?x=1',
+		'/decks/5.txt#a'
+	])('reconhece %s', (path) => {
+		expect(isFileRoute(path)).toBe(true);
+	});
+
+	it.each([
+		'/pasta',
+		'/',
+		'/decks/5',
+		'/decks/5.txt/x',
+		'/decks/a/b.txt',
+		'/api/x.txt',
+		'/decks/.txt/x',
+		'/decks//5.txt',
+		'/collection/exports',
+		'/collection/export/x',
+		'/x/collection/export'
+	])('não reconhece %s', (path) => {
+		expect(isFileRoute(path)).toBe(false);
 	});
 });

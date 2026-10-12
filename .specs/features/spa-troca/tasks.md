@@ -398,10 +398,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Nenhum `replace(/\/$/, '')` sobre `resolve` em `frontend/src`
-- [ ] Nenhum teste do front espera `/app` salvo os do `return-to` (T12)
-- [ ] Contagem de testes Vitest igual à de antes (sem teste removido)
-- [ ] Gate check passes: Front quick
+- [x] Nenhum `replace(/\/$/, '')` sobre `resolve` em `frontend/src`
+- [x] Nenhum teste do front espera `/app` salvo os do `return-to` (T12)
+- [x] Contagem de testes Vitest igual à de antes (sem teste removido)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
@@ -425,10 +425,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `/pasta` → `/pasta`; `/app/pasta` → `/pasta`; `/app` → `/`; `%2Fapp%2Fpasta` decodificado → `/pasta`; `//x`, `/\x`, `/a/../b`, controle, vazio e `null` → `/`
-- [ ] `/api/session`, `/_app/x.js`, `/card_images/x` → `/`; `/collection/export` e `/decks/5.txt?x=1` passam e `isFileRoute` é verdadeiro
-- [ ] Login e cadastro aceitos com `return_to=%2Fdecks%2F5.txt` → `window.location.assign('/decks/5.txt')`, sem `goto`; com `/pasta` → `goto('/pasta')`
-- [ ] Gate check passes: Front quick
+- [x] `/pasta` → `/pasta`; `/app/pasta` → `/pasta`; `/app` → `/`; `%2Fapp%2Fpasta` decodificado → `/pasta`; `//x`, `/\x`, `/a/../b`, controle, vazio e `null` → `/`
+- [x] `/api/session`, `/_app/x.js`, `/card_images/x` → `/`; `/collection/export` e `/decks/5.txt?x=1` passam e `isFileRoute` é verdadeiro
+- [x] Login e cadastro aceitos com `return_to=%2Fdecks%2F5.txt` → `window.location.assign('/decks/5.txt')`, sem `goto`; com `/pasta` → `goto('/pasta')`
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
@@ -452,9 +452,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Status 404: `<h1>` "Página não encontrada", título "Página não encontrada — Bindr", link "Ir para o catálogo" com `href="/"`
-- [ ] Outro status: "Algo deu errado" com o mesmo link
-- [ ] Gate check passes: Front quick
+- [x] Status 404: `<h1>` "Página não encontrada", título "Página não encontrada — Bindr", link "Ir para o catálogo" com `href="/"`
+- [x] Outro status: "Algo deu errado" com o mesmo link
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
@@ -478,9 +478,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Prefixos proibidos: `/catalog`, `/cards/`, `/session`, `/registration`, `/progress`, `/wishlist`, `/collection/import`, `/collection_items`, `/decks` (salvo `/decks/{…}.txt`), `/app`; `/collection/export` permitido
-- [ ] Teste negativo: um fonte sintético com `href="/progress"` reprova
-- [ ] Gate check passes: Front quick
+- [x] Prefixos proibidos: `/catalog`, `/cards/`, `/session`, `/registration`, `/progress`, `/wishlist`, `/collection/import`, `/collection_items`, `/decks` (salvo `/decks/{…}.txt`), `/app`; `/collection/export` permitido
+- [x] Teste negativo: um fonte sintético com `href="/progress"` reprova
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
@@ -504,9 +504,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `api/cards_test`, `api/catalog_test`, `api/collection_imports_confirm_test`, `api/decks_test`, `api/decks_write_test`, `api/decks_destroy_select_test` sem `session_path`, `get "/catalog"`, `get "/decks…"`, `css_select` nem `assert_select`
-- [ ] `git diff` desses arquivos sem mudança de asserção sobre resposta da API (só login e remoção das partes HTML), listado no inventário
-- [ ] Gate check passes: Rails quick
+- [x] `api/cards_test`, `api/catalog_test`, `api/collection_imports_confirm_test`, `api/decks_test`, `api/decks_write_test`, `api/decks_destroy_select_test` sem `session_path`, `get "/catalog"`, `get "/decks…"`, `css_select` nem `assert_select`
+- [x] `git diff` desses arquivos sem mudança de asserção sobre resposta da API (só login e remoção das partes HTML), listado no inventário
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick

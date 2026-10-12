@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { ApiError } from '../../lib/api/errors';
 	import Button from '../../lib/components/Button.svelte';
 	import FormError from '../../lib/components/FormError.svelte';
 	import TextField from '../../lib/components/TextField.svelte';
-	import { safeReturnTo } from '../../lib/navigation/return-to';
+	import { appPath } from '../../lib/navigation/nav-entries';
+	import { isFileRoute, safeReturnTo } from '../../lib/navigation/return-to';
 	import { signUp } from '../../lib/session.svelte';
 
 	const FIELD_ORDER = ['email', 'password', 'password_confirmation'] as const;
@@ -22,7 +22,7 @@
 	let formErrorBlock: FormError | undefined = $state();
 	const fieldRefs: Partial<Record<FieldName, TextField>> = $state({});
 
-	const signInHref = `${resolve('/').replace(/\/$/, '')}/entrar`;
+	const signInHref = appPath('/entrar');
 
 	const isKnown = (name: string): name is FieldName => (FIELD_ORDER as readonly string[]).includes(name);
 
@@ -46,7 +46,9 @@
 		fieldErrors = {};
 		try {
 			await signUp({ email, password, password_confirmation: passwordConfirmation });
-			await goto(safeReturnTo(page.url.searchParams.get('return_to'))); // eslint-disable-line svelte/no-navigation-without-resolve
+			const destination = safeReturnTo(page.url.searchParams.get('return_to'));
+			if (isFileRoute(destination)) window.location.assign(destination);
+			else await goto(destination); // eslint-disable-line svelte/no-navigation-without-resolve
 		} catch (error) {
 			if (!(error instanceof ApiError)) throw error;
 			if (error.code === 'validation_failed') distribute(error);

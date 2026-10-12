@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { ApiError } from '../../lib/api/errors';
 	import Button from '../../lib/components/Button.svelte';
 	import FormError from '../../lib/components/FormError.svelte';
 	import TextField from '../../lib/components/TextField.svelte';
-	import { safeReturnTo } from '../../lib/navigation/return-to';
+	import { appPath } from '../../lib/navigation/nav-entries';
+	import { isFileRoute, safeReturnTo } from '../../lib/navigation/return-to';
 	import { signIn } from '../../lib/session.svelte';
 
 	let email = $state('');
@@ -16,7 +16,7 @@
 	let formError = $state<string | null>(null);
 	let formErrorBlock: FormError | undefined = $state();
 
-	const signUpHref = `${resolve('/').replace(/\/$/, '')}/criar-conta`;
+	const signUpHref = appPath('/criar-conta');
 
 	async function onsubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -25,7 +25,9 @@
 		formError = null;
 		try {
 			await signIn(email, password);
-			await goto(safeReturnTo(page.url.searchParams.get('return_to'))); // eslint-disable-line svelte/no-navigation-without-resolve
+			const destination = safeReturnTo(page.url.searchParams.get('return_to'));
+			if (isFileRoute(destination)) window.location.assign(destination);
+			else await goto(destination); // eslint-disable-line svelte/no-navigation-without-resolve
 		} catch (error) {
 			if (!(error instanceof ApiError)) throw error;
 			formError = error.message;
