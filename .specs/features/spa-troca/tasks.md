@@ -210,11 +210,11 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Deck selecionado que muda de dono → `editing_deck` nulo e a chave sai da sessão; excluir o deck em edição limpa a chave
-- [ ] Incremento contra deck apagado depois do `find` → `404` sem gravar; `GET /api/decks/:id` sem erro com entrada sumindo entre leituras
-- [ ] Número de consultas de `GET /api/decks/:id` igual com 2 e com 20 entradas
-- [ ] Import com 5 cópias → `201` e `status: invalid`; importar a mesma lista duas vezes cria dois decks
-- [ ] Gate check passes: Rails quick
+- [x] Deck selecionado que muda de dono → `editing_deck` nulo e a chave sai da sessão; excluir o deck em edição limpa a chave
+- [x] Incremento contra deck apagado depois do `find` → `404` sem gravar; `GET /api/decks/:id` sem erro com entrada sumindo entre leituras
+- [x] Número de consultas de `GET /api/decks/:id` igual com 2 e com 20 entradas
+- [x] Import com 5 cópias → `201` e `status: invalid`; importar a mesma lista duas vezes cria dois decks
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
