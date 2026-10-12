@@ -525,7 +525,7 @@ Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham. Só ab
   - _Requisitos: 23.11–23.19, 23.24–23.26, 23.28, 23.30–23.33_
 - [x] **18.5 Dependências e build** — T20–T21
   - _Requisitos: 23.5–23.7, 23.27, 23.35_
-- [ ] **18.6 Ponta a ponta e documentos** — T22–T25
+- [x] **18.6 Ponta a ponta e documentos** — T22–T25
   - _Requisitos: 23.19, 23.22, 23.29, 23.34–23.37_
 
 ---

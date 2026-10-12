@@ -770,9 +770,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `bin/rails test`, `bin/rubocop`, `bin/brakeman`, Front quick, e2e e `docker build -f Dockerfile .` passam, com as contagens registradas
-- [ ] `git diff --stat <base>..HEAD -- db/` vazio
-- [ ] Gate check passes: Build
+- [x] `bin/rails test`, `bin/rubocop`, `bin/brakeman`, Front quick, e2e e `docker build -f Dockerfile .` passam, com as contagens registradas
+- [x] `git diff --stat <base>..HEAD -- db/` vazio
+- [x] Gate check passes: Build
 
 **Tests**: none
 **Gate**: build
