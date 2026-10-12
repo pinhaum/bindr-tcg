@@ -849,11 +849,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] "Baralhos" no casco abre `/app/baralhos` sem recarga, com a mesma sequência de nomes, Leaders, totais e status de `/decks` (SDEC-01, SDEC-02, SDEC-07)
-- [ ] Criar, renomear e excluir pela SPA aparecem em `/decks` (SDEC-11, SDEC-12, SDEC-16)
-- [ ] Para os quatro decks, status, motivos, aviso, "Na sua pasta", grupos, ordem e "pedida, possuída, falta" iguais aos de `/decks/<id>`, a 360px e 1280px, nos dois temas, sem scroll horizontal (SDEC-17, SDEC-21, SDEC-24, SDEC-26, SDEC-28)
-- [ ] Texto de `/decks/<id>.txt` colado em `/app/baralhos/importar` gera deck com o mesmo Leader e entradas; duas linhas ruins mostram as duas e não criam deck (SDEC-31, SDEC-32)
-- [ ] Gate check passes: Full
+- [x] "Baralhos" no casco abre `/app/baralhos` sem recarga, com a mesma sequência de nomes, Leaders, totais e status de `/decks` (SDEC-01, SDEC-02, SDEC-07)
+- [x] Criar, renomear e excluir pela SPA aparecem em `/decks` (SDEC-11, SDEC-12, SDEC-16)
+- [x] Para os quatro decks, status, motivos, aviso, "Na sua pasta", grupos, ordem e "pedida, possuída, falta" iguais aos de `/decks/<id>`, a 360px e 1280px, nos dois temas, sem scroll horizontal (SDEC-17, SDEC-21, SDEC-24, SDEC-26, SDEC-28)
+- [x] Texto de `/decks/<id>.txt` colado em `/app/baralhos/importar` gera deck com o mesmo Leader e entradas; duas linhas ruins mostram as duas e não criam deck (SDEC-31, SDEC-32)
+- [x] Gate check passes: Full
 
 **Tests**: e2e
 **Gate**: full
