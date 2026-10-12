@@ -238,10 +238,10 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Alvo 2 com posse 1 e posse zero → `fulfilled: false`; posse de outra variante da mesma carta não atende
-- [ ] Mudar a posse muda `fulfilled` sem escrita em `wishlist_items`
-- [ ] Variante que saiu da fonte continua listada
-- [ ] Gate check passes: Rails quick
+- [x] Alvo 2 com posse 1 e posse zero → `fulfilled: false`; posse de outra variante da mesma carta não atende
+- [x] Mudar a posse muda `fulfilled` sem escrita em `wishlist_items`
+- [x] Variante que saiu da fonte continua listada
+- [x] Gate check passes: Rails quick
 
 **Tests**: integration
 **Gate**: quick
