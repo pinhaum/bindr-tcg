@@ -640,9 +640,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `bundle list` sem as cinco gems; `grep -rn "assets\|importmap\|hotwire\|turbo\|stimulus" config` sem uso vigente
-- [ ] App sobe em dev (`docker compose up app`, `GET /up` 200)
-- [ ] Gate check passes: Rails quick
+- [x] `bundle list` sem as cinco gems; `grep -rn "assets\|importmap\|hotwire\|turbo\|stimulus" config` sem uso vigente
+- [x] App sobe em dev (`docker compose up app`, `GET /up` 200)
+- [x] Gate check passes: Rails quick
 
 **Tests**: none
 **Gate**: quick
