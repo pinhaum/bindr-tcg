@@ -666,9 +666,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] `docker build -f Dockerfile .` passa
-- [ ] Contêiner da imagem: `/` e `/pasta` com `no-cache`, `/_app/<chunk real>` com `max-age` longo, `/_app/x.js` `404`, `/200.html` `no-cache`
-- [ ] Gate check passes: Build
+- [x] `docker build -f Dockerfile .` passa
+- [x] Contêiner da imagem: `/` e `/pasta` com `no-cache`, `/_app/<chunk real>` com `max-age` longo, `/_app/x.js` `404`, `/200.html` `no-cache`
+- [x] Gate check passes: Build
 
 **Tests**: none
 **Gate**: build
