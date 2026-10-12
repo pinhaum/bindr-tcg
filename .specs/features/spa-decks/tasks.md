@@ -740,10 +740,10 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Título "Excluir deck — Bindr", cabeçalho "Excluir o deck “<nome>”?", texto, botão e "Cancelar" para a página do deck; abrir só chama o `GET` (SDEC-15)
-- [ ] Confirmar envia `DELETE`, navega a `/app/baralhos` só depois do `200` e mostra "Deck “<nome>” excluído."; erro mantém a tela com `notifyError` (SDEC-16)
-- [ ] `404` → `DeckNotFound` (SDEC-18)
-- [ ] Gate check passes: Front quick
+- [x] Título "Excluir deck — Bindr", cabeçalho "Excluir o deck “<nome>”?", texto, botão e "Cancelar" para a página do deck; abrir só chama o `GET` (SDEC-15)
+- [x] Confirmar envia `DELETE`, navega a `/app/baralhos` só depois do `200` e mostra "Deck “<nome>” excluído."; erro mantém a tela com `notifyError` (SDEC-16)
+- [x] `404` → `DeckNotFound` (SDEC-18)
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
