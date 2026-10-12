@@ -33,7 +33,6 @@ class Api::DecksDestroySelectTest < ActionDispatch::IntegrationTest
   test "excluir apaga deck e entradas, mantém coleção e wishlist, e nenhum deck fica em edição" do
     deck = Deck.create!(user: @user, name: "Some", leader: @leader)
     deck.entries.create!(card: @card, quantity: 2)
-    other = Deck.create!(user: @user, name: "Outro")
     CollectionItem.create!(user: @user, card_variant: @variant, quantity: 3)
     WishlistItem.create!(user: @user, card_variant: @variant, target_quantity: 4)
     send_json :post, "/api/decks/#{deck.id}/select"
@@ -46,12 +45,6 @@ class Api::DecksDestroySelectTest < ActionDispatch::IntegrationTest
     assert_equal({ "id" => deck.id, "name" => "Some" }, body["data"])
     assert_equal 1, @user.collection_items.count
     assert_equal 1, @user.wishlist_items.count
-
-    get "/decks"
-    assert_select "body", text: /Some/, count: 0
-    get "/decks/#{other.id}"
-    assert_response :ok
-    assert_select "main p", text: "Em edição", count: 0
   end
 
   test "select grava o deck em edição e repetir não muda nada" do
@@ -62,9 +55,6 @@ class Api::DecksDestroySelectTest < ActionDispatch::IntegrationTest
       assert_response :ok
       assert_equal({ "id" => deck.id, "name" => "Escolhido" }, body["data"])
     end
-
-    get "/decks/#{deck.id}"
-    assert_select "main p", text: "Em edição"
   end
 
   test "sem sessão é 401 nos dois" do
@@ -104,8 +94,6 @@ class Api::DecksDestroySelectTest < ActionDispatch::IntegrationTest
 
     send_json :post, "/api/decks/#{foreign.id}/select"
     assert_response :not_found
-    get "/decks/#{Deck.create!(user: @user, name: "Meu").id}"
-    assert_select "main p", text: "Em edição", count: 0
 
     send_json :delete, "/api/decks/0"
     assert_response :not_found

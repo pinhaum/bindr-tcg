@@ -98,29 +98,14 @@ class Api::CollectionImportsConfirmTest < ActionDispatch::IntegrationTest
     assert_equal 0, CollectionItem.find_by(user: @user, card_variant: @c).quantity
   end
 
-  test "updated inclui removed e o resultado é igual ao da confirmação HTML" do
+  test "updated inclui removed" do
     seed_collection(@user)
-    seed_collection_for_other = CollectionItem.create!(user: @other, card_variant: @b, quantity: 4)
-    CollectionItem.create!(user: @other, card_variant: @c, quantity: 1)
-    seed_collection_for_other
     csv = CSV_MISTO
 
     token = upload(csv)
     confirm(token, csrf_after_login)
     assert_response :ok
     assert_operator response.parsed_body.dig("data", "updated"), :>=, response.parsed_body.dig("data", "removed")
-
-    delete "/api/session", headers: { "X-CSRF-Token" => csrf_after_login }
-    ActionController::Base.allow_forgery_protection = false
-    post session_path, params: { email: @other.email, password: PASSWORD }
-    post collection_imports_path, params: { arquivo: Rack::Test::UploadedFile.new(StringIO.new(csv), "text/csv", original_filename: "colecao.csv") }
-    html_token = CollectionImport.order(:id).last.token
-    post confirm_collection_import_path(html_token)
-    assert_response :ok
-
-    mine = CollectionItem.where(user: @user).order(:card_variant_id).pluck(:card_variant_id, :quantity)
-    theirs = CollectionItem.where(user: @other).order(:card_variant_id).pluck(:card_variant_id, :quantity)
-    assert_equal mine, theirs
   end
 
   test "file e linhas no corpo da confirmação são ignorados" do

@@ -45,9 +45,6 @@ class Api::DecksWriteTest < ActionDispatch::IntegrationTest
     assert_equal deck.id, body.dig("data", "id")
     assert_equal true, body.dig("data", "editing")
     assert_equal "Aggro Preto", body.dig("data", "name")
-
-    get "/decks/#{deck.id}"
-    assert_select "main p", text: "Em edição"
   end
 
   test "renomear muda só o nome e preserva Leader e entradas" do

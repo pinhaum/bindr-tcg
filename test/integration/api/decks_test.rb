@@ -68,13 +68,10 @@ class Api::DecksTest < ActionDispatch::IntegrationTest
     assert_equal 0, zebra["main_total"]
   end
 
-  test "index tem o mesmo status da lista HTML e ignora user_id da query" do
+  test "index traz o status e ignora user_id da query" do
     deck!(name: "Um", leader: @leader)
     deck!(name: "Alheio", user: @other)
     sign_in
-
-    get "/decks"
-    assert_includes css_select(".deck__item").first.text, "incompleto"
 
     get "/api/decks", params: { user_id: @other.id }
     assert_equal [ "Um" ], body["data"].map { |d| d["name"] }
@@ -139,13 +136,9 @@ class Api::DecksTest < ActionDispatch::IntegrationTest
     assert_equal 1 + 4 + 1 + 1 + 1, data["missing_total"]
     assert_equal "incomplete", data["status"]
     assert_equal [ "Faltam 42 cartas para 50" ], data["reasons"]
-
-    get "/decks/#{deck.id}"
-    assert_equal data["reasons"], css_select(".deck__reason").map { |n| n.text.strip }
-    assert_includes css_select(".deck__summary")[0].text, "Faltam #{data['missing_total']} cópias"
   end
 
-  test "show de deck inválido por cor traz os motivos da página HTML" do
+  test "show de deck inválido por cor traz os motivos" do
     red = card!("AD03-002", name: "Vermelha", colors: [ "Red" ], cost: 1)
     deck = deck!(leader: @leader, entries: { red => 4 })
     sign_in
@@ -155,8 +148,6 @@ class Api::DecksTest < ActionDispatch::IntegrationTest
     data = body["data"]
     assert_equal "invalid", data["status"]
     assert(data["reasons"].any? { |r| r.include?("AD03-002") && r.include?("vermelha") })
-    get "/decks/#{deck.id}"
-    assert_equal data["reasons"], css_select(".deck__reason").map { |n| n.text.strip }
   end
 
   test "show de Leader com regra própria traz o aviso sem mudar o status" do

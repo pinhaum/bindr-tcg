@@ -25,7 +25,10 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
   end
 
   def sign_in(user)
-    post session_path, params: { email: user.email, password: PASSWORD }
+    get "/api/session"
+    token = response.parsed_body.dig("data", "csrf_token")
+    post "/api/session", params: { email: user.email, password: PASSWORD }.to_json,
+                         headers: { "Content-Type" => "application/json", "X-CSRF-Token" => token }
   end
 
   def fetch(number = "OP01-001", **params)
