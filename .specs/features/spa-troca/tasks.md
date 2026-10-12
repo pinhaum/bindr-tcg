@@ -744,9 +744,9 @@ T24 → T25
 
 **Done when**:
 
-- [ ] Cada critério da lista com a nota
-- [ ] `grep -n "/app/\|Hotwire" CLAUDE.md` só em contexto histórico
-- [ ] Gate check passes: Rails quick
+- [x] Cada critério da lista com a nota
+- [x] `grep -n "/app/\|Hotwire" CLAUDE.md` só em contexto histórico
+- [x] Gate check passes: Rails quick
 
 **Tests**: none
 **Gate**: quick

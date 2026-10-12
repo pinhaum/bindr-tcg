@@ -261,6 +261,9 @@ decidir o que caçar.
    com a coleção vazia, a lista inteira fica por código. A ordenação DEVE partir
    do usuário da sessão (Req. 6.5). SE o parâmetro de ordem for desconhecido ou
    inválido ENTÃO o sistema DEVE usar o padrão, sem erro.
+   *(emendado em 2026-10-12, spa-troca, Req. 23: a cláusula "sem JavaScript"
+   deixa de valer, porque a ordem é escolhida na SPA; o restante, com a ordem
+   na URL e o padrão para valor inválido, continua valendo)*
 
    > Acrescentado em 2026-09-27 (feature `conformidade`, decisão D11 do dono).
    > "Recente" é a atividade do usuário, não a data de lançamento: os sets da
@@ -351,6 +354,9 @@ os critérios abaixo preservam explicitamente.
    manual. As páginas Hotwire continuam no tema único escuro até saírem
    (`spa-troca`, AD-023); os demais critérios deste requisito valem para os
    dois temas.*
+   *(emendado em 2026-10-12, spa-troca, Req. 23: as páginas Hotwire saíram do
+   código; a frase sobre elas em tema único deixa de valer e só a SPA, com os
+   dois temas, permanece)*
 3. Todo par de texto sobre fundo DEVE atingir contraste de 4.5:1, exceto texto a
    partir de 24px, bordas de controle, anéis de foco e ícones, que DEVEM atingir
    3:1 — verificável por cálculo de luminância relativa sobre os valores dos tokens.
@@ -442,6 +448,9 @@ passa a ser obrigatório.
     O chip ativo DEVE exibir um sinal de remoção visível, e seu nome acessível
     DEVE dizer que o toque remove o filtro. O set continua num controle de
     seleção.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: a cláusula "sem JavaScript"
+    deixa de valer; o chip aplica ou remove o filtro na URL, sem recarregar a
+    página, e o restante continua valendo na SPA)*
 12. O catálogo DEVE exibir sempre a contagem de resultados. Com filtro ativo,
     DEVE exibir também quantos filtros estão ativos e a ação "Limpar filtros".
 13. Em "Minha pasta", os indicadores do critério 4 DEVEM aparecer como cartões
@@ -517,6 +526,8 @@ critério. A partir daqui o artboard é critério de aceite (AD-016).
 30. Em viewport estreita, o detalhe DEVE exibir uma miniatura da arte ao lado do
     título, e a imagem maior do Req. 5.1 DEVE abrir num controle que expande no
     próprio lugar, sem JavaScript.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: a cláusula "sem JavaScript"
+    deixa de valer; o restante continua valendo na SPA)*
 31. O cabeçalho do detalhe DEVE exibir, como chips, o tipo, a raridade e a cor
     da carta (e o counter, em viewport larga), e uma linha "nome do set ·
     código". Raridade e set são da variante: o cabeçalho usa os da primeira
@@ -559,6 +570,9 @@ na miniatura pequena da lista.
     variante em destaque DEVE estar marcada na lista. Sem escolha, ou com um
     `variant` que não está entre as variantes listadas, vale a primeira
     variante presente — parâmetro inválido é ignorado, nunca causa erro.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: a cláusula "sem JavaScript"
+    deixa de valer; a troca do destaque é local na SPA, e o restante, com a
+    escolha na URL, continua valendo)*
 
 ---
 
@@ -862,6 +876,9 @@ portabilidade são fatias seguintes.
     exceção no corpo.
 17. O comportamento dos controllers e das rotas HTML DEVE continuar inalterado:
     a suíte existente passa sem edição.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: os controllers e as rotas HTML
+    saíram do código, salvo as rotas de arquivo `GET /collection/export` e
+    `GET /decks/<id>.txt`; o critério deixa de valer)*
 
 Caso de borda (emenda do design, 2026-10-10): SE o corpo JSON de uma requisição
 a `/api` estiver malformado ENTÃO o sistema DEVE responder `400` `invalid_json`
@@ -937,6 +954,8 @@ que o usa.
    servidor de estáticos, com o cache de longa duração que ele já aplica.
 4. As rotas fora de `/app` DEVEM continuar inalteradas: a suíte existente passa
    sem edição.
+   *(emendado em 2026-10-12, spa-troca, Req. 23: a SPA saiu de `/app` para a
+   raiz e as rotas HTML foram removidas; o critério deixa de valer)*
 5. O build da SPA DEVE sair de um estágio Node do `Dockerfile` de produção, sem
    Node na imagem final.
 
@@ -1001,6 +1020,9 @@ que o usa.
 25. Toda rota da SPA DEVE exibir a navegação do Req. 13.1, na mesma ordem.
 26. Entrada para tela ainda não migrada DEVE apontar para a página Hotwire
     equivalente, com navegação de página inteira.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: não resta tela migrada a
+    migrar nem página Hotwire; toda entrada da navegação aponta para a rota da
+    SPA na raiz, e o critério deixa de valer)*
 27. A entrada atual DEVE ter `aria-current="page"` e se distinguir por fundo e
     peso, não só por cor.
 28. Abaixo de 64rem, a navegação DEVE ficar fixa embaixo, com entradas iguais,
@@ -1378,6 +1400,9 @@ com as opções recomendadas (AD-027).
     existente passa sem edição. O `CollectionItemsController` passa a
     delegar o SQL de posse ao model `CollectionItem`, sem mudar respostas,
     mensagens nem rotas (decisão do dono em 2026-10-11).
+    *(emendado em 2026-10-12, spa-troca, Req. 23: o `CollectionItemsController`
+    e as rotas HTML saíram do código; o SQL de posse continua no model
+    `CollectionItem`, e o critério deixa de valer)*
 
 ---
 
@@ -1574,6 +1599,9 @@ recomendada (AD-027).
     muda o registro lido ou apagado (Req. 6.5).
 46. Os controllers e as rotas HTML DEVEM continuar inalterados: a suíte
     existente passa sem edição.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: os controllers, as views e as
+    rotas HTML da pasta e dos desejos saíram do código; o critério deixa de
+    valer)*
 
 ---
 
@@ -1843,6 +1871,9 @@ abaixo (P12) tem opção recomendada e está no *Rastreamento de pendências*.
     14.37).
 61. Os controllers e as rotas HTML DEVEM continuar inalterados: a suíte
     existente passa sem edição.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: os controllers, as views e as
+    rotas HTML de deck saíram do código, salvo `GET /decks/<id>.txt`; o
+    critério deixa de valer)*
 
 ---
 
@@ -2064,6 +2095,10 @@ A escolha marcada DECISÃO PENDENTE abaixo (P13) tem opção recomendada e está
     POR-13).
 45. Os controllers e as rotas HTML DEVEM continuar inalterados: a suíte
     existente passa sem edição.
+    *(emendado em 2026-10-12, spa-troca, Req. 23: o controller, as views e os
+    serviços HTML do import saíram do código, e `CollectionCsv::Upload` ficou
+    como único validador do arquivo; o `GET /collection/export` continua como
+    rota de arquivo; o critério deixa de valer)*
 
 **Tela**
 
