@@ -767,11 +767,11 @@ T28 → T29
 
 **Done when**:
 
-- [ ] Título, cabeçalho, texto explicativo, rótulos exatos, `maxlength="60"` no nome, área obrigatória, botão e link (SDEC-30)
-- [ ] Sucesso navega ao deck criado e mostra "Deck importado." (SDEC-31)
-- [ ] Recusa com três linhas: resumo `role="alert"` focado com a `message` e as três linhas na ordem, área com `aria-describedby` do resumo e `aria-invalid="true"`, nome e lista mantidos; `fields.name` vai ao campo de nome (SDEC-32)
-- [ ] Envio repetido ignorado enquanto pendente
-- [ ] Gate check passes: Front quick
+- [x] Título, cabeçalho, texto explicativo, rótulos exatos, `maxlength="60"` no nome, área obrigatória, botão e link (SDEC-30)
+- [x] Sucesso navega ao deck criado e mostra "Deck importado." (SDEC-31)
+- [x] Recusa com três linhas: resumo `role="alert"` focado com a `message` e as três linhas na ordem, área com `aria-describedby` do resumo e `aria-invalid="true"`, nome e lista mantidos; `fields.name` vai ao campo de nome (SDEC-32)
+- [x] Envio repetido ignorado enquanto pendente
+- [x] Gate check passes: Front quick
 
 **Tests**: unit
 **Gate**: quick
