@@ -41,7 +41,7 @@ fechada** (STRO-08): `/up`, `/card_images/*`, `/_app/*` e os arquivos de `public
 as duas rotas de download e os redirecionamentos (próxima seção). O restante é
 a entrada da SPA. As seções "API JSON" e "Front SPA" abaixo descrevem o sistema como
 ele é; os parágrafos das fatias `spa-*` que seguem são **histórico** e citam
-`/app/...` como era na época (hoje, sem o prefixo). Contagens: Rails 1227 testes, Vitest 1113, e2e 224.
+`/app/...` como era na época (hoje, sem o prefixo). Contagens: Rails 1231 testes, Vitest 1170, e2e 224.
 
 ### Rotas do Rails fora de `/api` (`spa-troca`)
 
@@ -150,7 +150,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **1227 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **1231 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
 - **Sem pipeline de assets nem Hotwire.** Não há `propshaft`, importmap, Turbo nem
   Stimulus, e `app/assets/` e `app/javascript/` não existem; o Rails não serve CSS nem
   JS próprios, só o build da SPA em `/_app/`. Não reintroduzir um pipeline de assets
@@ -256,7 +256,7 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   encontrada" dentro do casco, com HTTP `200` (STRO-10).
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens da `spa-troca`: Vitest 1113 testes, Rails 1227 (rubocop limpo), e2e 224.
+Contagens da `spa-troca` (re-medidas em 2026-10-12 na `svelt-front`): Vitest 1170 testes, Rails 1231 (rubocop limpo), e2e 224.
 
 ```bash
 # quick

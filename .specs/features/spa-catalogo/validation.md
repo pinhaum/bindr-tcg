@@ -1,13 +1,13 @@
 # Validação — spa-catalogo (iteração 3)
 
-**Veredito**: FAIL
+**Veredito**: PASS (FAIL da iteração 3 fechado em 2026-10-12 pela correção do G12 e pela dispensa do dono; ver "Fechamento do G12")
 **Data**: 2026-10-11
 **Spec**: `.specs/features/spa-catalogo/spec.md` (SCAT-01..45, 10 edge cases, 4 Success Criteria)
 **Diff range**: `751e553..HEAD` (HEAD = `cde8011`; 33 commits, T1–T31). Desta iteração: `bc4e15d..HEAD` (`6792463` T29; `cde8011` T31 + asserções da T30)
 **Verifier**: sub-agente independente (autor ≠ verificador; não escreveu código da feature nem os relatórios anteriores)
 **Iteração**: 3 (última antes de escalar ao dono)
 
-## Validation: spa-catalogo - FAIL ❌
+## Validation: spa-catalogo - PASS ✅ (iteração 3 reprovada só pelo G12, fechado em 2026-10-12)
 
 G8–G11 da iteração 2 estão **fechadas**: N09, N18 e N13 morrem; E04 virou **equivalente provado** (a correção da T31 pôs `margin-inline-start: auto` em `.links`, que torna o `justify-content` de `.status` irrelevante para a posição dos links; E04 junto com a remoção dessa margem morre em 4 testes). Os 10 mutantes novos reais morrem. Implementação sem defeito conhecido; nada sob `app/` mudou desde `751e553`.
 
@@ -17,6 +17,16 @@ O FAIL vem do **gate e2e, que não é determinístico**: em 3 execuções comple
 **Gate**: Vitest 38 arquivos / 551 passed; build + `build/200.html` ok; **e2e 102 passed / 1 failed, 102/1, 103/0 em três execuções completas** (G12); Rails 1912 runs / 0 failures; rubocop 247 / 0; `docker build -f Dockerfile .` exit 0.
 **Sensor**: 17 mutações (4 da iteração 2 reexecutadas, 1 de CSS da iteração 1, 12 novas); 14 mortas, 3 sobreviventes, todas **equivalentes provadas** (E04, X07; e E04 confirmado por E04+X06). 0 sobreviventes reais.
 **Estado da árvore real**: ver "Isolamento" no fim. Escritas desta sessão: este arquivo, `.specs/LESSONS.md` e `.specs/lessons.json` (L-069).
+
+---
+
+## Fechamento do G12 (2026-10-12, decisão do dono)
+
+O único motivo do FAIL era o G12: a falha intermitente de `frontend/e2e/sessao.spec.ts` (SPA-46). O sensor desta iteração não deixou sobrevivente real, e nenhuma AC ficou sem evidência. O dono decidiu dispensar uma nova rodada do Verifier, e a corrida que este relatório diagnosticou foi corrigida no próprio teste:
+
+- **Correção** (`7e809db`): `settledBox` (`frontend/e2e/sessao.spec.ts:114-130`) confere `section[aria-busy="false"]` e lê `main#conteudo.getBoundingClientRect()` no mesmo `page.evaluate`, repetido por `expect.poll` até a seção sair do esqueleto. Como `aria-busy` segue o `skeleton` (`frontend/src/routes/+page.svelte:145`), a medida nunca pega o esqueleto da segunda `GET /api/catalog`. Nenhuma asserção mudou: a comparação de `:119` (agora `:135`) continua exigindo caixas iguais.
+- **Evidência**: `npx playwright test e2e/sessao.spec.ts --repeat-each=5` deu 25 passed e 0 failed (os quatro combos, incluindo os dois de 1280×800 que falhavam). Na suíte e2e completa de 2026-10-12, sobre a `svelt-front` em `75cabd4`, `sessao.spec.ts` passou. Houve uma falha, em `pasta-desejos.spec.ts:185` (ordem por `created_at`, flake D-10 do relógio do host), que não pertence a esta feature e passou rodando o arquivo isolado (9/9).
+- **Isso não é reverificação.** Autor ≠ verificador continua valendo: o PASS registra uma decisão do dono sobre uma falha que era só de determinismo do teste, não de comportamento.
 
 ---
 
@@ -184,7 +194,7 @@ Scratch: `git worktree add --detach <scratchpad>/wt HEAD` (fora do repositório;
 Contagem: 17 aplicações (N09, N18, N13, E04, E04+X06, X06, X07, X08, C05, X01–X05, mais a reexecução de E04 sozinho e as duas sondas de geometria não contam como mutantes) → **14 mortos, 3 sobreviventes equivalentes** (E04, X07, e E04 confirmado por E04+X06). Os demais mutantes das iterações 1 e 2 não foram reexecutados: o único código de produção alterado desde a iteração 2 é `CatalogStatus.svelte:58-59`, coberto por E04, E04+X06, X06, X07 e C05.
 
 **Sensor depth**: lightweight ampliado (funções de estado, página, componentes e CSS por e2e).
-**Result**: 0 sobreviventes reais → sensor ✅. O FAIL é só do gate (G12).
+**Result**: 0 sobreviventes reais → sensor ✅. A reprovação vinha só do gate (G12), corrigido depois.
 
 ---
 
