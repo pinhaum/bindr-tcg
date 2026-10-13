@@ -46,6 +46,17 @@ describe('createLoader', () => {
 		expect(loader.state).toMatchObject({ result: 'a', error: null, pending: false, seq: 1 });
 	});
 
+	it('guarda a resposta como veio, sem proxy reativo', async () => {
+		const payload = { items: [{ id: 1 }] };
+		const loader = createLoader<typeof payload>(vi.fn().mockResolvedValue(payload));
+
+		loader.load('');
+		await flush();
+
+		expect(loader.state.result).toBe(payload);
+		expect(loader.state.result?.items).toBe(payload.items);
+	});
+
 	it('slow só vira true após 200 ms e o resultado anterior permanece', async () => {
 		const first = deferred<string>();
 		const second = deferred<string>();

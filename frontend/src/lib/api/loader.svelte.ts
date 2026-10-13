@@ -1,58 +1,75 @@
 import { ApiError } from './errors';
 
 export type LoaderState<T> = {
-	result: T | null;
-	error: ApiError | null;
-	pending: boolean;
-	slow: boolean;
-	seq: number;
+	readonly result: T | null;
+	readonly error: ApiError | null;
+	readonly pending: boolean;
+	readonly slow: boolean;
+	readonly seq: number;
 };
 
 export function createLoader<T>(fetch: (key: string) => Promise<T>, slowMs = 200) {
-	const state: LoaderState<T> = $state({
-		result: null,
-		error: null,
-		pending: false,
-		slow: false,
-		seq: 0
-	});
+	// A resposta só é trocada inteira, nunca alterada: `raw` evita o proxy profundo.
+	let result = $state.raw<T | null>(null);
+	let error = $state.raw<ApiError | null>(null);
+	let pending = $state(false);
+	let slow = $state(false);
+	let seq = $state(0);
 	let token = 0;
 	let lastKey = '';
 	let timer: ReturnType<typeof setTimeout> | undefined;
 
+	const state: LoaderState<T> = {
+		get result() {
+			return result;
+		},
+		get error() {
+			return error;
+		},
+		get pending() {
+			return pending;
+		},
+		get slow() {
+			return slow;
+		},
+		get seq() {
+			return seq;
+		}
+	};
+
 	const settle = () => {
 		clearTimeout(timer);
-		state.pending = false;
-		state.slow = false;
+		pending = false;
+		slow = false;
 	};
 
 	const load = (key: string): void => {
 		const mine = ++token;
 		lastKey = key;
 		clearTimeout(timer);
-		state.pending = true;
-		state.slow = false;
+		pending = true;
+		slow = false;
 		timer = setTimeout(() => {
-			state.slow = true;
+			slow = true;
 		}, slowMs);
 
 		fetch(key).then(
-			(result) => {
+			(value) => {
 				if (mine !== token) return;
-				state.result = result;
-				state.error = null;
-				state.seq++;
+				result = value;
+				error = null;
+				seq++;
 				settle();
 			},
-			(error: unknown) => {
-				if (!(error instanceof ApiError)) {
+			(cause: unknown) => {
+				if (!(cause instanceof ApiError)) {
 					if (mine === token) settle();
-					throw error;
+					throw cause;
 				}
 				if (mine !== token) return;
 				settle();
-				state.error = error;
-				state.seq++;
+				error = cause;
+				seq++;
 			}
 		);
 	};
