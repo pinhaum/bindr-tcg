@@ -109,9 +109,23 @@ for (const combo of COMBOS) {
 				await expectLayout(page, combo, '/ após sair');
 
 				// Sair refaz a consulta do catálogo: a altura de main só vale com a grade estável.
+				// Checagem e medição na mesma leitura do DOM: entre duas chamadas separadas, a
+				// recarga do catálogo depois de sair pode trocar a grade pelo esqueleto (G12).
 				const settledBox = async () => {
-					await expect(page.locator('section[aria-busy="false"]')).toBeVisible();
-					return (await page.locator('main#conteudo').boundingBox())!;
+					let box: { x: number; y: number; width: number; height: number } | null = null;
+					await expect
+						.poll(async () => {
+							box = await page.evaluate(() => {
+								if (!document.querySelector('section[aria-busy="false"]')) return null;
+								const { x, y, width, height } = document
+									.querySelector('main#conteudo')!
+									.getBoundingClientRect();
+								return { x, y, width, height };
+							});
+							return box !== null;
+						})
+						.toBe(true);
+					return box!;
 				};
 				await expect(page.locator('.layer')).toHaveCSS('position', 'fixed');
 				const withMessage = await settledBox();
