@@ -11,7 +11,7 @@ export function useAside(snippet: Snippet): void {
 		if (!wide.current) return;
 		shell.aside = snippet;
 		return () => {
-			shell.aside = null;
+			if (shell.aside === snippet) shell.aside = null;
 		};
 	});
 }

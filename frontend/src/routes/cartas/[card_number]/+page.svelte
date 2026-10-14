@@ -42,6 +42,11 @@
 	);
 	const featured = $derived(result ? pickFeatured(result.variants, wanted) : null);
 
+	// Troca de carta, de sessão e resposta nova recriam as linhas, e com elas as filas de posse.
+	const detailKey = $derived(
+		`${page.params.card_number}|${session.user?.email ?? ''}|${loader.state.seq}`
+	);
+
 	// Troca de carta, de sessão ou resposta nova recomeça os valores exibidos pelos steppers.
 	const displayedByVariant = $derived.by(() => {
 		void detailKey;
@@ -50,11 +55,6 @@
 	});
 	const owned = $derived(
 		featured ? (displayedByVariant[featured.variant_code] ?? featured.owned_quantity ?? 0) : 0
-	);
-
-	// Troca de carta, de sessão e resposta nova recriam as linhas, e com elas as filas de posse.
-	const detailKey = $derived(
-		`${page.params.card_number}|${session.user?.email ?? ''}|${loader.state.seq}`
 	);
 
 	const title = $derived(

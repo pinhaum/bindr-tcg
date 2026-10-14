@@ -7,7 +7,7 @@
 	import { deckHref } from '../decks/url';
 	import Button from './Button.svelte';
 
-	const loader = createLoader(() => api.get<ShortfallCard[]>('/api/decks/shortfall'));
+	const loader = createLoader((key) => api.get<ShortfallCard[]>(key));
 
 	const cards = $derived(loader.state.result ?? []);
 	const error = $derived(loader.state.error);

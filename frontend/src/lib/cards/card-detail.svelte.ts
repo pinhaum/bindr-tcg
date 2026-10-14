@@ -18,7 +18,6 @@ const isMissing = (error: ApiError | null): error is ApiError =>
 
 export function createCardDetailLoader(client: Pick<ApiClient, 'get'>, skeletonDelayMs = 200) {
 	const base = createLoader((path) => client.get<CardDetailPayload>(path), skeletonDelayMs);
-	let loaded = false;
 
 	const state: CardDetailState = {
 		get result() {
@@ -42,14 +41,8 @@ export function createCardDetailLoader(client: Pick<ApiClient, 'get'>, skeletonD
 		}
 	};
 
-	const load = (cardNumber: string, variant: string | undefined): void => {
-		loaded = true;
+	const load = (cardNumber: string, variant: string | undefined): void =>
 		base.load(cardApiPath(cardNumber, variant));
-	};
 
-	const retry = (): void => {
-		if (loaded) base.retry();
-	};
-
-	return { state, load, retry };
+	return { state, load, retry: base.retry };
 }

@@ -10,7 +10,7 @@
 
 	const KEY = '/api/decks';
 
-	const loader = createLoader(() => api.get<DeckSummary[]>(KEY));
+	const loader = createLoader((key) => api.get<DeckSummary[]>(key));
 
 	const decks = $derived(loader.state.result);
 	const error = $derived(loader.state.error);

@@ -46,6 +46,16 @@ describe('createLoader', () => {
 		expect(loader.state).toMatchObject({ result: 'a', error: null, pending: false, seq: 1 });
 	});
 
+	it('retry antes de qualquer load não busca nada', () => {
+		const fetcher = vi.fn().mockResolvedValue('a');
+		const loader = createLoader<string>(fetcher);
+
+		loader.retry();
+
+		expect(fetcher).not.toHaveBeenCalled();
+		expect(loader.state.pending).toBe(false);
+	});
+
 	it('guarda a resposta como veio, sem proxy reativo', async () => {
 		const payload = { items: [{ id: 1 }] };
 		const loader = createLoader<typeof payload>(vi.fn().mockResolvedValue(payload));

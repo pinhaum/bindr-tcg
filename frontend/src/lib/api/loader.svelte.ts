@@ -16,7 +16,7 @@ export function createLoader<T>(fetch: (key: string) => Promise<T>, slowMs = 200
 	let slow = $state(false);
 	let seq = $state(0);
 	let token = 0;
-	let lastKey = '';
+	let lastKey: string | null = null;
 	let timer: ReturnType<typeof setTimeout> | undefined;
 
 	const state: LoaderState<T> = {
@@ -74,7 +74,9 @@ export function createLoader<T>(fetch: (key: string) => Promise<T>, slowMs = 200
 		);
 	};
 
-	const retry = (): void => load(lastKey);
+	const retry = (): void => {
+		if (lastKey !== null) load(lastKey);
+	};
 
 	return { state, load, retry };
 }

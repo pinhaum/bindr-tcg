@@ -41,7 +41,7 @@ fechada** (STRO-08): `/up`, `/card_images/*`, `/_app/*` e os arquivos de `public
 as duas rotas de download e os redirecionamentos (próxima seção). O restante é
 a entrada da SPA. As seções "API JSON" e "Front SPA" abaixo descrevem o sistema como
 ele é; os parágrafos das fatias `spa-*` que seguem são **histórico** e citam
-`/app/...` como era na época (hoje, sem o prefixo). Contagens: Rails 1231 testes, Vitest 1171, e2e 224.
+`/app/...` como era na época (hoje, sem o prefixo). Contagens: Rails 1231 testes, Vitest 1172, e2e 224.
 
 ### Rotas do Rails fora de `/api` (`spa-troca`)
 
@@ -256,7 +256,7 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   encontrada" dentro do casco, com HTTP `200` (STRO-10).
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens re-medidas em 2026-10-13 na `svelt-front` (depois do refactor dos carregadores): Vitest 1171 testes, Rails 1231 (rubocop limpo), e2e 224.
+Contagens re-medidas em 2026-10-13 na `svelt-front` (depois do refactor dos carregadores): Vitest 1172 testes, Rails 1231 (rubocop limpo), e2e 224.
 
 ```bash
 # quick

@@ -12,7 +12,7 @@
 	import { whenSignedIn } from '../../../lib/navigation/when-signed-in.svelte';
 	import { notifyError, notifySuccess } from '../../../lib/toasts.svelte';
 
-	const loader = createLoader(() => api.get<WishlistEntry[]>('/api/wishlist'));
+	const loader = createLoader((key) => api.get<WishlistEntry[]>(key));
 
 	const key = (entry: WishlistEntry) => `${entry.card_number}|${entry.variant_code}`;
 
