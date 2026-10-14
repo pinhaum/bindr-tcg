@@ -41,7 +41,7 @@ fechada** (STRO-08): `/up`, `/card_images/*`, `/_app/*` e os arquivos de `public
 as duas rotas de download e os redirecionamentos (próxima seção). O restante é
 a entrada da SPA. As seções "API JSON" e "Front SPA" abaixo descrevem o sistema como
 ele é; os parágrafos das fatias `spa-*` que seguem são **histórico** e citam
-`/app/...` como era na época (hoje, sem o prefixo). Contagens: Rails 1231 testes, Vitest 1170, e2e 224.
+`/app/...` como era na época (hoje, sem o prefixo). Contagens: Rails 1231 testes, Vitest 1171, e2e 224.
 
 ### Rotas do Rails fora de `/api` (`spa-troca`)
 
@@ -256,7 +256,7 @@ acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
   encontrada" dentro do casco, com HTTP `200` (STRO-10).
 
 Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
-Contagens da `spa-troca` (re-medidas em 2026-10-12 na `svelt-front`): Vitest 1170 testes, Rails 1231 (rubocop limpo), e2e 224.
+Contagens re-medidas em 2026-10-13 na `svelt-front` (depois do refactor dos carregadores): Vitest 1171 testes, Rails 1231 (rubocop limpo), e2e 224.
 
 ```bash
 # quick
@@ -359,8 +359,14 @@ Armadilhas da pasta (`spa-pasta`):
 - **"Um quarto da coluna" (SPAS-11)** é medido como a trilha de `repeat(4, 1fr)`
   descontados os vãos.
 - **A ação "Adicionar cartas" mora em `shell.aside` com `wide`** (AD-028).
-- **Dívida:** migrar `catalog.svelte.ts` e `card-detail.svelte.ts` para `createLoader`
-  (hoje só a pasta e a lista de desejos o usam).
+- **Um carregador só:** `catalog.svelte.ts` e `card-detail.svelte.ts` são invólucros de
+  `createLoader` (`skeleton` é o `slow` dele; `notFound` sai do erro 404 `not_found`). A
+  resposta fica em `$state.raw`: é trocada inteira, nunca alterada; não mutar `result`.
+- **Helpers de inicialização de componente:** `whenSignedIn(key, load)`
+  (`lib/navigation/when-signed-in.svelte.ts`) carrega com sessão e recarrega na troca de conta
+  ou de chave; `useAside(snippet)` (`shell.svelte.ts`) põe o snippet na coluna lateral a partir
+  de `64rem`. Ficam fora de `session.svelte.ts` porque os testes de página mocam esse módulo só
+  com `session`.
 
 Módulos dos decks (`spa-decks`): `components/QuantityStepper.svelte` (o stepper otimista
 generalizado: `send` devolve o número confirmado; `OwnershipStepper` e o `EditingDeckPanel`
