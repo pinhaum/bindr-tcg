@@ -16,10 +16,11 @@
 
 	const key = (entry: WishlistEntry) => `${entry.card_number}|${entry.variant_code}`;
 
-	let items: WishlistEntry[] = $state([]);
+	// A remoção reatribui `items`; a próxima resposta da API volta a valer.
+	let items: WishlistEntry[] = $derived(loader.state.result ?? []);
 	let heading: HTMLHeadingElement | undefined = $state();
 	const removing = new SvelteSet<string>();
-	const refs: Record<string, { focus(): void } | null> = $state({});
+	const refs: Record<string, { focus(): void } | null> = {};
 
 	const loaded = $derived(loader.state.result !== null);
 	const error = $derived(loader.state.error);
@@ -28,12 +29,6 @@
 		if (!session.user) return;
 		void session.user.email;
 		untrack(() => loader.load('/api/wishlist'));
-	});
-
-	$effect(() => {
-		void loader.state.seq;
-		const result = untrack(() => loader.state.result);
-		if (result) items = result;
 	});
 
 	function retry(event: SubmitEvent) {

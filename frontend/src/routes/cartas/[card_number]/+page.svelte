@@ -42,7 +42,12 @@
 	);
 	const featured = $derived(result ? pickFeatured(result.variants, wanted) : null);
 
-	let displayedByVariant = $state<Record<string, number>>({});
+	// Troca de carta, de sessão ou resposta nova recomeça os valores exibidos pelos steppers.
+	const displayedByVariant = $derived.by(() => {
+		void detailKey;
+		const fresh = $state<Record<string, number>>({});
+		return fresh;
+	});
 	const owned = $derived(
 		featured ? (displayedByVariant[featured.variant_code] ?? featured.owned_quantity ?? 0) : 0
 	);
@@ -80,11 +85,6 @@
 
 	// A View Transition só captura o estado novo com a arte do cabeçalho no DOM.
 	signalArrivalWhen(() => !!result && !error && notFound === null && !loader.state.skeleton);
-
-	$effect.pre(() => {
-		void detailKey;
-		displayedByVariant = {};
-	});
 
 	$effect(() => {
 		if (!wide.current) return;
