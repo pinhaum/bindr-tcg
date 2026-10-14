@@ -18,7 +18,7 @@
 	import { appPath } from '../lib/navigation/nav-entries';
 	import { safeReturnTo } from '../lib/navigation/return-to';
 	import { session } from '../lib/session.svelte';
-	import { shell, wide } from '../lib/shell.svelte';
+	import { useAside, wide } from '../lib/shell.svelte';
 
 	const SKELETON_TILES = Array.from({ length: 10 }, (_, index) => index);
 
@@ -75,13 +75,7 @@
 	// A View Transition de volta só captura o estado novo com os tiles da grade no DOM.
 	signalArrivalWhen(() => !!result && !error && !loader.state.skeleton);
 
-	$effect(() => {
-		if (!wide.current) return;
-		shell.aside = panel;
-		return () => {
-			shell.aside = null;
-		};
-	});
+	useAside(panel);
 
 	$effect(() => {
 		void loader.state.seq;

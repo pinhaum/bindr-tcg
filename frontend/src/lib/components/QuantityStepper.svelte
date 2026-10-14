@@ -56,7 +56,7 @@
 </script>
 
 <div class="ownership">
-	<p class="quantity" class:empty={queue.displayed === 0}>{quantityText(queue.displayed)}</p>
+	<p class={['quantity', { empty: queue.displayed === 0 }]}>{quantityText(queue.displayed)}</p>
 
 	<div class="actions">
 		<button

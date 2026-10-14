@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { untrack } from 'svelte';
 	import { api } from '../../lib/api/index';
 	import { createLoader } from '../../lib/api/loader.svelte';
 	import type { ProgressPayload } from '../../lib/api/types';
@@ -9,8 +8,8 @@
 	import PastaSummary from '../../lib/components/PastaSummary.svelte';
 	import SetProgressRow from '../../lib/components/SetProgressRow.svelte';
 	import { appPath } from '../../lib/navigation/nav-entries';
-	import { session } from '../../lib/session.svelte';
-	import { shell, wide } from '../../lib/shell.svelte';
+	import { whenSignedIn } from '../../lib/navigation/when-signed-in.svelte';
+	import { useAside, wide } from '../../lib/shell.svelte';
 
 	const ORDERS = [
 		{ order: 'recent', label: 'Recentes' },
@@ -22,22 +21,12 @@
 	const result = $derived(loader.state.result);
 	const error = $derived(loader.state.error);
 
-	$effect(() => {
-		if (!session.user) return;
-		void session.user.email;
+	whenSignedIn(() => {
 		const order = page.url.searchParams.get('order');
-		untrack(() =>
-			loader.load(order === null ? '/api/progress' : `/api/progress?order=${encodeURIComponent(order)}`)
-		);
-	});
+		return order === null ? '/api/progress' : `/api/progress?order=${encodeURIComponent(order)}`;
+	}, loader.load);
 
-	$effect(() => {
-		if (!wide.current) return;
-		shell.aside = addCards;
-		return () => {
-			shell.aside = null;
-		};
-	});
+	useAside(addCards);
 
 	function retry(event: SubmitEvent) {
 		event.preventDefault();
@@ -48,7 +37,7 @@
 <svelte:head><title>Minha pasta — Bindr</title></svelte:head>
 
 {#snippet addCards()}
-	<div class="add" class:side={wide.current}>
+	<div class={['add', { side: wide.current }]}>
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href parte de appPath -->
 		<a href={appPath('')}>{wide.current ? 'Adicionar cartas' : 'Adicionar cartas à pasta'}</a>
 	</div>
@@ -56,7 +45,7 @@
 
 <h1>Minha pasta</h1>
 
-<section aria-busy={loader.state.slow} class:reserve={!wide.current}>
+<section aria-busy={loader.state.slow} class={{ reserve: !wide.current }}>
 	{#if loader.state.slow}
 		<p class="visually-hidden">Carregando pasta…</p>
 	{/if}

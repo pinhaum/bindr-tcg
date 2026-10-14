@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { tick, untrack } from 'svelte';
+	import { tick } from 'svelte';
 	import { ApiError } from '../../../../lib/api/errors';
 	import { api } from '../../../../lib/api/index';
 	import { createLoader } from '../../../../lib/api/loader.svelte';
@@ -12,7 +12,7 @@
 	import { IMPORT_TIMEOUT_MS, confirmPath, importPath } from '../../../../lib/imports/api';
 	import { analyzedLines, groupRows, removalWarning } from '../../../../lib/imports/groups';
 	import { appPath } from '../../../../lib/navigation/nav-entries';
-	import { session } from '../../../../lib/session.svelte';
+	import { whenSignedIn } from '../../../../lib/navigation/when-signed-in.svelte';
 
 	const loader = createLoader((token) => api.get<ImportPreview>(importPath(token)));
 
@@ -34,18 +34,16 @@
 	);
 
 	// Troca de token ou de sessão descarta confirmação, alerta e resumo da tela anterior.
-	$effect(() => {
-		if (!session.user) return;
-		void session.user.email;
-		const current = token;
-		untrack(() => {
+	whenSignedIn(
+		() => token,
+		(current) => {
 			summary = null;
 			confirming = false;
 			confirmAlert = null;
 			outcomeUnknown = false;
 			loader.load(current);
-		});
-	});
+		}
+	);
 
 	function retry(event: SubmitEvent) {
 		event.preventDefault();

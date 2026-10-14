@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick, untrack } from 'svelte';
+	import { tick } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { ApiError } from '../../../lib/api/errors';
 	import { api } from '../../../lib/api/index';
@@ -9,7 +9,7 @@
 	import WishlistItem from '../../../lib/components/WishlistItem.svelte';
 	import { variantApiPath } from '../../../lib/cards/url';
 	import { appPath } from '../../../lib/navigation/nav-entries';
-	import { session } from '../../../lib/session.svelte';
+	import { whenSignedIn } from '../../../lib/navigation/when-signed-in.svelte';
 	import { notifyError, notifySuccess } from '../../../lib/toasts.svelte';
 
 	const loader = createLoader(() => api.get<WishlistEntry[]>('/api/wishlist'));
@@ -25,11 +25,7 @@
 	const loaded = $derived(loader.state.result !== null);
 	const error = $derived(loader.state.error);
 
-	$effect(() => {
-		if (!session.user) return;
-		void session.user.email;
-		untrack(() => loader.load('/api/wishlist'));
-	});
+	whenSignedIn(() => '/api/wishlist', loader.load);
 
 	function retry(event: SubmitEvent) {
 		event.preventDefault();

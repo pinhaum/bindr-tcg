@@ -14,7 +14,7 @@
 	import VariantRow from '../../../lib/components/VariantRow.svelte';
 	import { appPath } from '../../../lib/navigation/nav-entries';
 	import { session } from '../../../lib/session.svelte';
-	import { shell, wide } from '../../../lib/shell.svelte';
+	import { useAside, wide } from '../../../lib/shell.svelte';
 
 	const loader = createCardDetailLoader(api);
 
@@ -69,7 +69,6 @@
 	const cardNumber = $derived(page.params.card_number);
 
 	$effect(() => {
-		void session.user?.email;
 		const email = session.user?.email ?? '';
 		if (!cardNumber) return;
 		untrack(() => {
@@ -86,13 +85,7 @@
 	// A View Transition só captura o estado novo com a arte do cabeçalho no DOM.
 	signalArrivalWhen(() => !!result && !error && notFound === null && !loader.state.skeleton);
 
-	$effect(() => {
-		if (!wide.current) return;
-		shell.aside = back;
-		return () => {
-			shell.aside = null;
-		};
-	});
+	useAside(back);
 
 	function select(variantCode: string) {
 		if (!result) return;

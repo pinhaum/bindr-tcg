@@ -40,7 +40,7 @@
 	{/if}
 {/snippet}
 
-<header class="header" class:wide={wide.current}>
+<header class={['header', { wide: wide.current }]}>
 	{#if wide.current}
 		<div class="media">
 			{@render art(transitionName)}

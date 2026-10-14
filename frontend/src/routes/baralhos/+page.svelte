@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { api } from '../../lib/api/index';
 	import { createLoader } from '../../lib/api/loader.svelte';
 	import type { DeckSummary } from '../../lib/api/types';
@@ -7,7 +6,7 @@
 	import { statusLabel } from '../../lib/decks/labels';
 	import { deckHref } from '../../lib/decks/url';
 	import { appPath } from '../../lib/navigation/nav-entries';
-	import { session } from '../../lib/session.svelte';
+	import { whenSignedIn } from '../../lib/navigation/when-signed-in.svelte';
 
 	const KEY = '/api/decks';
 
@@ -16,11 +15,7 @@
 	const decks = $derived(loader.state.result);
 	const error = $derived(loader.state.error);
 
-	$effect(() => {
-		if (!session.user) return;
-		void session.user.email;
-		untrack(() => loader.load(KEY));
-	});
+	whenSignedIn(() => KEY, loader.load);
 
 	function retry(event: SubmitEvent) {
 		event.preventDefault();

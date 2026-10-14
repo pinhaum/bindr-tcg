@@ -15,8 +15,7 @@
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href já vem resolvido pelo chamador -->
 <a {href}
 	{onclick}
-	class="chip"
-	class:active
+	class={['chip', { active }]}
 	data-sveltekit-reset="false"
 	aria-current={current ? 'true' : undefined}
 	aria-label={active ? removeName : undefined}

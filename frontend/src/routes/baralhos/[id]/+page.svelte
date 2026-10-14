@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { untrack } from 'svelte';
 	import { ApiError } from '../../../lib/api/errors';
 	import { api } from '../../../lib/api/index';
 	import { createLoader } from '../../../lib/api/loader.svelte';
@@ -11,7 +10,7 @@
 	import { groupEntries, groupLabel, missingSentence, statusLabel } from '../../../lib/decks/labels';
 	import { deckApiPath, deckHref } from '../../../lib/decks/url';
 	import { appPath } from '../../../lib/navigation/nav-entries';
-	import { session } from '../../../lib/session.svelte';
+	import { whenSignedIn } from '../../../lib/navigation/when-signed-in.svelte';
 
 	const loader = createLoader((key) => api.get<DeckPayload>(key));
 
@@ -27,15 +26,13 @@
 	let selectError = $state<string | null>(null);
 	const editing = $derived(deck !== null && (deck.editing || selectedAt === loader.state.seq));
 
-	$effect(() => {
-		if (!session.user || Number.isNaN(id)) return;
-		void session.user.email;
-		const key = deckApiPath(id);
-		untrack(() => {
+	whenSignedIn(
+		() => (Number.isNaN(id) ? null : deckApiPath(id)),
+		(key) => {
 			selectError = null;
 			loader.load(key);
-		});
-	});
+		}
+	);
 
 	function retry(event: SubmitEvent) {
 		event.preventDefault();

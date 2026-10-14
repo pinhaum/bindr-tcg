@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { untrack } from 'svelte';
 	import { api } from '../../../../lib/api/index';
 	import { createLoader } from '../../../../lib/api/loader.svelte';
 	import type { DeckPayload } from '../../../../lib/api/types';
@@ -9,7 +8,7 @@
 	import DeckNameForm from '../../../../lib/components/DeckNameForm.svelte';
 	import DeckNotFound from '../../../../lib/components/DeckNotFound.svelte';
 	import { deckApiPath, deckHref } from '../../../../lib/decks/url';
-	import { session } from '../../../../lib/session.svelte';
+	import { whenSignedIn } from '../../../../lib/navigation/when-signed-in.svelte';
 	import { notifySuccess } from '../../../../lib/toasts.svelte';
 
 	const loader = createLoader((key) => api.get<DeckPayload>(key));
@@ -19,12 +18,7 @@
 	const notFound = $derived(error?.code === 'not_found' ? error : null);
 	const deck = $derived(loader.state.result?.id === id ? loader.state.result : null);
 
-	$effect(() => {
-		if (!session.user || Number.isNaN(id)) return;
-		void session.user.email;
-		const key = deckApiPath(id);
-		untrack(() => loader.load(key));
-	});
+	whenSignedIn(() => (Number.isNaN(id) ? null : deckApiPath(id)), loader.load);
 
 	function retry(event: SubmitEvent) {
 		event.preventDefault();

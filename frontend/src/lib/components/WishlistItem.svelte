@@ -39,7 +39,7 @@
 		<a href={cardDetailHref(cardNumber)}>{cardName} <code>{variantCode}</code></a>
 	</div>
 	<p class="quantity">{ownedQuantity} de {copies(targetQuantity)}</p>
-	<p class="status" class:fulfilled>{status}</p>
+	<p class={['status', { fulfilled }]}>{status}</p>
 	<button
 		bind:this={button}
 		type="button"
