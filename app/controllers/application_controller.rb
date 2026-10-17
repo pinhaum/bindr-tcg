@@ -4,6 +4,6 @@ class ApplicationController < ActionController::Base
 
   # Inverte o default do app: a partir daqui toda action exige sessão (Req.
   # 6.4) e o acesso público é exceção declarada com `allow_unauthenticated_access`
-  # — hoje só o `CatalogController` (Req. 6.3).
+  # — hoje só o `CardImagesController` (AD-012). Sobraram só ele e os downloads.
   include Authentication
 end

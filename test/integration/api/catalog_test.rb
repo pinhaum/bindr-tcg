@@ -28,7 +28,10 @@ class Api::CatalogTest < ActionDispatch::IntegrationTest
   end
 
   def sign_in(user)
-    post session_path, params: { email: user.email, password: PASSWORD }
+    get "/api/session"
+    token = response.parsed_body.dig("data", "csrf_token")
+    post "/api/session", params: { email: user.email, password: PASSWORD }.to_json,
+                         headers: { "Content-Type" => "application/json", "X-CSRF-Token" => token }
   end
 
   def fetch(**params)
@@ -114,7 +117,7 @@ class Api::CatalogTest < ActionDispatch::IntegrationTest
 
     assert_empty numbers(fetch(owned: "owned", user_id: @other.id))
 
-    delete session_path
+    delete "/api/session"
     assert_equal %w[OP01-001 OP01-002 OP01-003], numbers(fetch(owned: "owned", user_id: @other.id))
   end
 
@@ -200,7 +203,7 @@ class Api::CatalogTest < ActionDispatch::IntegrationTest
     assert_equal 1, response.parsed_body.dig("meta", "page")
     assert_equal %w[OP01-001 OP01-002 OP01-003], numbers(response.parsed_body)
 
-    get "/catalog", params: { page: "1000000000000000000000000000000", cost_max: "-99999999999999999999" }
+    get "/api/catalog", params: { page: "1000000000000000000000000000000", cost_max: "-99999999999999999999" }
     assert_response :ok
   end
 end

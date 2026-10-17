@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado atual: Fases 1, 2 (decks) e 3 (preços) encerradas; API JSON (`api-fundacao`) implementada
+## Estado atual: Fases 1 a 3 encerradas; API JSON e SPA na raiz (`spa-troca`), sem Hotwire
 
 **Todo o `.context/tasks.md` da Fase 1 está fechado** (§0 a §8). As features em
 `.specs/features/` estão todas encerradas e verificadas (Verifier autor ≠
@@ -31,18 +31,118 @@ retrato mais recente. A feature `api-fundacao` (Req. 16, API-01..32) acrescentou
 API JSON sob `/api` (sessão, cadastro, catálogo e detalhe da carta), com teste de
 ponta a ponta; a §11 do `.context/tasks.md` está fechada.
 
+A **`spa-troca`** (Req. 23, STRO-01..37) fez a **troca do front**: a SPA saiu de `/app` e
+é servida na **raiz** (`/`, `/entrar`, `/cartas/<card_number>`, `/pasta`, `/baralhos/...`),
+e o **Hotwire saiu do código**: controllers HTML, views fora de `app/views/api/`,
+helpers, `app/javascript/`, `app/assets/`, `config/importmap.rb` e as gems
+`importmap-rails`, `turbo-rails`, `stimulus-rails` e `propshaft`. Sem migração e sem
+dado alterado (STRO-29). O que o Rails ainda serve fora de `/api` é uma **lista
+fechada** (STRO-08): `/up`, `/card_images/*`, `/_app/*` e os arquivos de `public/`,
+as duas rotas de download e os redirecionamentos (próxima seção). O restante é
+a entrada da SPA. As seções "API JSON" e "Front SPA" abaixo descrevem o sistema como
+ele é; os parágrafos das fatias `spa-*` que seguem são **histórico** e citam
+`/app/...` como era na época (hoje, sem o prefixo). Contagens: Rails 1231 testes, Vitest 1172, e2e 224.
+
+### Rotas do Rails fora de `/api` (`spa-troca`)
+
+| Rota | Controller | Comportamento |
+|---|---|---|
+| `GET /collection/export` | `CollectionExportsController` | CSV da coleção do usuário da sessão (Req. 10.1); sem sessão, `302` para `/entrar?return_to=<caminho codificado>` |
+| `GET /decks/:id.txt` | `DeckExportsController` | lista em texto do OPTCG Simulator; deck de outra conta ou inexistente é `404`; sem sessão, mesmo `302` |
+| `GET /card_images/:variant_code` | `CardImagesController` | público; `Cache-Control` de um ano, `404` e `502` como antes |
+| `GET` das URLs antigas (`/catalog`, `/cards/:id`, `/progress`, `/decks/:id/edit`, `/app/...` etc.) | `LegacyRedirectsController` | `301` para a rota equivalente na raiz, com a query intacta |
+| `GET /*path` (a última rota) | `SpaController` | `spa/200.html` como `text/html` com `Cache-Control: no-cache` |
+
+Os downloads ficam fora de `/api` de propósito (AD-031, P14): o Req. 16.14 ("todo
+`/api` é JSON") e a varredura do `end_to_end_test.rb` continuam simples, e a URL
+`/decks/<id>.txt` já foi usada no simulador. Eles herdam de `ApplicationController`
+(com `Authentication` e `allow_browser`); nenhum identificador de usuário cabe na
+URL (Req. 6.5).
+
+**Redirecionamentos 301 (STRO-11..15).** `lib/legacy_path.rb` (`LegacyPath.destination`)
+é uma tabela de caminho antigo para novo; `LegacyRedirectsController` herda direto de
+`ActionController::Base` (sem `Authentication` nem `allow_browser`), não lê sessão nem
+banco e usa `request.original_fullpath`, porque o roteador colapsa `//` e
+`/app//evil.com` passaria como `/app/evil.com`. O segmento dinâmico (`card_number`,
+`id`, `token`) chega ao destino com a mesma codificação percentual; id inexistente é
+resolvido pela tela da SPA. `/app` e `/app/<caminho>` viram `/` e `/<caminho>`;
+`/app/_app/*` dá `404`. Só há rota `GET`: `POST`/`PATCH`/`DELETE` numa rota HTML
+removida caem no `404` do Rails, sem efeito. O navegador guarda o `301`, e um rollback
+para uma imagem com Hotwire deixaria favoritos apontando para rotas que ela não tem
+(custo aceito pelo dono, P15).
+
+**`return_to`.** Depois do login a SPA vai ao `return_to` decodificado se ele começar
+por `/` e não tiver `//`, `\`, controle nem segmento `.`/`..`; um `/app/...` antigo é
+lido sem o prefixo (STRO-21). Destino de download (`/collection/export`,
+`/decks/<id>.txt`) é navegação de página inteira; destino sob `/api/`, `/_app/` ou
+`/card_images/` vira `/` (STRO-22).
+
+A **`spa-fundacao`** (Req. 17, SPA-01..46) está **encerrada e verificada** (T1–T26, front em
+`frontend/`: SvelteKit + Svelte 5, entrega hoje na raiz, cliente HTTP da API, sessão,
+temas, casco e mensagens; `validation.md` PASS na iteração 2); `STATE.md` (*Handoff*) tem o retrato.
+
+A **`spa-catalogo`** (Req. 18, SCAT-01..45) está **encerrada e verificada** (T1–T31,
+`validation.md` PASS): `/` (então `/app`) deixou de ser o início da fundação e é o catálogo (busca, chips de
+filtro, painel de filtros, grade, paginação, estados vazio/skeleton/erro), lendo só
+`GET /api/catalog` e `GET /api/catalog/filters` (SCAT-45: nenhum arquivo sob `app/`
+mudou desde `751e553`). O detalhe da carta era Hotwire na época (hoje é SPA: ver `spa-carta`).
+Módulos novos em `frontend/src/lib/`: `catalog/url.ts` (links a partir de
+`active_filters`), `catalog/catalog.svelte.ts` (carregador com token),
+`catalog/filter-options.svelte.ts` (opções de filtro, uma vez por carga do app) e
+`shell.svelte.ts` (slot `shell.aside` e `wide`). Componentes em `src/lib/components/`:
+`CardTile`, `CardTileSkeleton`, `FilterChip`, `CatalogSearch`, `CatalogStatus`,
+`ActiveFilters`, `CatalogPagination` e `FilterPanel`; a página é `src/routes/+page.svelte`.
+Design em `.specs/features/spa-catalogo/design.md`.
+
+A **`spa-carta`** (Req. 19, SCAR-01..49) está **encerrada e verificada** (T1–T22,
+`validation.md` PASS): o detalhe da carta saiu do Hotwire e é a rota `/cartas/[card_number]`
+(cabeçalho com arte e campos por tipo, linhas de variante com troca local do destaque,
+posse otimista com `−`/`+` em fila por variante, desejo por variante e morph da arte entre
+grade e detalhe). O tile do catálogo leva a ela (SCAR-03). Rails ganhou três rotas de
+mutação em `Api::CardVariantsController` e `CollectionItem.increment_for!`/`decrement_for!`
+(o SQL atômico de posse passou do `CollectionItemsController` para o model, sem mudar
+respostas, mensagens nem rotas HTML da época; SCAR-49: nenhum teste Rails existente foi editado).
+Design em `.specs/features/spa-carta/design.md`.
+
+A **`spa-portabilidade`** (Req. 22, SPOR-01..46) está **encerrada e verificada** (T1–T15,
+`validation.md` PASS): o import da coleção saiu do HTML e é SPA em `/pasta/importar` (envio do CSV) e
+`/pasta/importar/[token]` (pré-visualização em cinco grupos, confirmação e resumo); o
+export segue pelo link da pasta, para `GET /collection/export` do Rails, e a ida e volta é
+provada no e2e. Rails ganhou três rotas em `Api::CollectionImportsController` e o serviço
+`CollectionCsv::Upload`; o controller, as views e os serviços HTML do import ficaram intocados
+até a `spa-troca` (SPOR-45: `git diff --name-status d5f13c6..HEAD -- test/` só com `A`). Design em
+`.specs/features/spa-portabilidade/design.md`.
+
+A **`spa-pasta`** (Req. 20, SPAS-01..46) está **encerrada e verificada** (T1–T17, `validation.md` PASS): `/pasta` (indicadores com número interpolado, progresso por set, chips de
+ordem, ações) e `/pasta/desejos` (lista e remoção não otimista, com foco) são SPA e
+leem só `GET /api/progress` e `GET /api/wishlist`, além de `DELETE …/wishlist`.
+`app/views/progress`, `app/views/wishlist_items` e os controllers HTML ficaram intocados
+até a `spa-troca` (SPAS-46). A entrada "Minha pasta" da navegação aponta para `/pasta`. Design em
+`.specs/features/spa-pasta/design.md`.
+
+A **`spa-decks`** (Req. 21, SDEC-01..61) está **encerrada e verificada** (T1–T29,
+`validation.md` PASS): os decks saíram do Hotwire. Rotas SPA `/baralhos` (lista), `/novo`,
+`/importar`, `/[id]` (página do deck: status, motivos, grupos, falta por carta),
+`/[id]/renomear` e `/[id]/excluir`; o detalhe da carta ganhou o painel do deck em edição
+(`EditingDeckPanel`, com `−`/`+` e "Usar como Leader") e `/pasta` o bloco "Faltando
+para os baralhos" (`DeckShortfall`). A API `/api/decks` é nova (tabela abaixo) e reusa
+`DeckDetail` e `DeckEntry.increment_for!`/`decrement_for!` (o SQL atômico passou do
+`DeckEntriesController` para o model, sem mudar o HTML). As rotas, controllers e views
+HTML de deck ficaram intocados até a `spa-troca` (SDEC-61); a única emenda em teste Rails existente é uma
+linha de `test/integration/api/cards_test.rb` (`except` também `editing_deck`, T10; ver
+`tmp/orchestration-decisions.md`). Design em `.specs/features/spa-decks/design.md`.
+
 O que existe hoje:
 
 - **Models**: `Card`, `CardVariant`, `CardSet`, `ImportRun`, `CollectionItem`,
   `WishlistItem`, `CollectionImport`, `Deck`, `DeckEntry`, `User`, `Session`,
   `Current`, e as peças puras `Deck::Legality` (status, motivos e avisos) e
   `Deck::ListText` (`parse`/`format` do OPTCG Simulator).
-- **Controllers**: `CatalogController` e `CardImagesController` (públicos),
-  `CollectionItemsController`, `WishlistItemsController`, `ProgressController`,
-  `CollectionImportsController`, `CollectionExportsController`,
-  `DecksController`, `DeckEntriesController`, `DeckImportsController`,
-  `SessionsController`, `RegistrationsController`, e os concerns
-  `Authentication` e `EditingDeck`.
+- **Controllers**: os de `app/controllers/api/` (todos sob `Api::BaseController`);
+  fora de `/api`, só `CardImagesController` (público), `CollectionExportsController`
+  e `DeckExportsController` (downloads, exigem sessão), `LegacyRedirectsController` e
+  `SpaController` (sem `Authentication`), e os concerns `Authentication` e
+  `EditingDeck`. Não existe mais controller HTML de tela.
 - **Query objects**: `CatalogQuery` (busca e filtros), `SetProgressQuery` e
   `DeckShortfallQuery` (o que falta na pasta, por deck ou agregado pelo maior
   uso; uma consulta, que a pasta paga mesmo sem decks, AD-021).
@@ -50,11 +150,11 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **144 arquivos de teste, 1904 testes**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
-- **Importmap só com Turbo** e **Stimulus deliberadamente não pinado** (não há
-  controller Stimulus no projeto; ver `config/importmap.rb`). O placeholder de
-  imagem do catálogo continua resolvido em CSS — não trocar por JS só porque
-  existe pipeline.
+- **1231 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **Sem pipeline de assets nem Hotwire.** Não há `propshaft`, importmap, Turbo nem
+  Stimulus, e `app/assets/` e `app/javascript/` não existem; o Rails não serve CSS nem
+  JS próprios, só o build da SPA em `/_app/`. Não reintroduzir um pipeline de assets
+  para uma tela: telas são da SPA.
 
 ### API JSON (`/api`, `api-fundacao`)
 
@@ -69,15 +169,31 @@ HTML). Rotas no `scope "api"` de `config/routes.rb` (`format: false` +
 | `POST /api/registration` | `RegistrationsController` | público |
 | `GET /api/catalog`, `GET /api/catalog/filters` | `CatalogController` | público (posse só com sessão) |
 | `GET /api/cards/:card_number` | `CardsController` | público (posse só com sessão) |
+| `POST /api/cards/:card_number/variants/:variant_code/increment` | `CardVariantsController` | exige sessão e CSRF |
+| `POST /api/cards/:card_number/variants/:variant_code/decrement` | `CardVariantsController` | exige sessão e CSRF; em zero é `200` com `owned_quantity: 0` |
+| `PUT /api/cards/:card_number/variants/:variant_code/wishlist` | `CardVariantsController` | exige sessão e CSRF; alvo inteiro ≥ 1 e ≤ 2147483647, senão `422 validation_failed` com mensagem pt-BR |
+| `GET /api/progress` | `ProgressController` | exige sessão; `{ data: { order, summary, sets } }`; `order` inválido cai em `recent`; `base_size` e `completion_percent` nulos quando o set não tem base; número de consultas constante |
+| `GET /api/wishlist` | `WishlistController` | exige sessão; itens por ordem de criação e id, com `owned_quantity` e `fulfilled` |
+| `DELETE /api/cards/:card_number/variants/:variant_code/wishlist` | `CardVariantsController` | exige sessão e CSRF; `200` com `{ variant_code, wishlist_target: null }`, idempotente; `404` para carta ou variante inexistente |
+| `GET /api/decks`, `GET /api/decks/:id` | `DecksController` | exige sessão; deck de outra conta é `404` |
+| `POST /api/decks`, `PATCH /api/decks/:id` | `DecksController` | exige sessão e CSRF; nome 1–60, senão `422 validation_failed` com `fields.name`; criar torna o deck o em edição |
+| `DELETE /api/decks/:id`, `POST /api/decks/:id/select` | `DecksController` | exige sessão e CSRF; `select` é idempotente e grava `session[:editing_deck_id]` |
+| `POST /api/decks/:id/cards/:card_number/increment` e `…/decrement` | `DeckEntriesController` | exige sessão e CSRF; teto de 50 e Leader como entrada são `422`; `decrement` sem entrada é `200` com `quantity: 0` |
+| `PUT /api/decks/:id/leader` | `DeckEntriesController` | exige sessão e CSRF; carta que não é Leader é `422` |
+| `POST /api/decks/import` | `DeckImportsController` | exige sessão e CSRF; `201` com o deck ou `422` com `fields.list` ("Linha N: …"), tudo ou nada |
+| `GET /api/decks/shortfall` | `DecksController` | exige sessão; linhas com falta positiva e os decks citados |
+| `POST /api/collection/imports` | `CollectionImportsController` | exige sessão e CSRF; multipart com `file`; `201` com a pré-visualização `{ token, filename, rows[] }`; recusa do arquivo é `422 validation_failed` com `fields.file`; não escreve em `collection_items` |
+| `GET /api/collection/imports/:token` | `CollectionImportsController` | exige sessão; pré-visualização do staging do próprio usuário (`quantity_before` `null` sem registro); token alheio, inexistente ou vencido é `404` |
+| `POST /api/collection/imports/:token/confirm` | `CollectionImportsController` | exige sessão e CSRF; `200` com `{ filename, created, updated, removed, unchanged, rejected[], failures[] }` (`updated` inclui `removed`); já confirmada ou vencida é `409 import_closed` |
 | `* /api/*path` | `NotFoundController` | catch-all |
 
 Sucesso é `{ "data": ... }` (a lista traz `meta`); erro é sempre
 `{ "error": { "code", "message", "fields" } }` com mensagem em pt-BR. Códigos:
 `unauthenticated` 401, `invalid_credentials` 401, `invalid_csrf_token` 422,
-`validation_failed` 422, `bad_request` 400, `invalid_json` 400, `not_found` 404,
+`validation_failed` 422, `bad_request` 400, `invalid_json` 400, `not_found` 404, `import_closed` 409,
 `not_acceptable` 406, `unsupported_browser` 406, `internal_error` 500 (genérico,
 a exceção só vai para o log). Nenhuma resposta sob `/api` é HTML ou redirect;
-`end_to_end_test.rb` varre isso. As peças reaproveitadas pelo HTML e pela API:
+`end_to_end_test.rb` varre isso. As peças que a API reusa, herdadas do HTML removido:
 `CatalogQuery`, `CardDetail`, `VariantHoldings`, `Card.preload_present_variants`.
 
 Armadilhas:
@@ -98,20 +214,245 @@ Armadilhas:
   `setup` e restaura no `teardown`: o ambiente de teste o desliga, e sem isso
   nenhum teste prova o `422`.
 
+### Front SPA (`frontend/`, `spa-fundacao`)
+
+SPA em **SvelteKit 3.0.1 + Svelte 5.57.2 + TypeScript**, `adapter-static` com
+fallback `200.html` e **sem `paths.base`** (a SPA mora na raiz), em `frontend/`. Consome só a API JSON
+acima. Testes: Vitest 5 (jsdom, `@testing-library/svelte`) e `@playwright/test`
+1.64.0. O ESLint proíbe `fetch` fora de `src/lib/api/client.ts` (SPA-06).
+
+- **Dev**: serviço `frontend` do compose (`node:24.21.0-slim`, `npm ci && npm run dev`,
+  porta 5173, volume nomeado `frontend_node_modules`). O proxy do Vite manda só a lista
+  fechada do Rails (`RAILS_PATH_PATTERN` em `frontend/rails-paths.ts`: `/api`,
+  `/card_images`, `/up`, as rotas de download, as URLs antigas e `/app`) para
+  `http://app:3000`; o resto é do Vite.
+- **Produção**: o estágio `frontend-build` do `Dockerfile` roda `npm ci`, `npm run
+  build` e confere que `build/` só tem `200.html` e `_app/`; a imagem final (sem Node)
+  recebe `build/_app` em `/rails/public/_app` e `build/200.html` em `/rails/spa/200.html`
+  (`/spa` e `/public/_app` estão no `.gitignore`). `SpaController <
+  ActionController::Base` (sem `Authentication` nem `allow_browser`) serve
+  `config.x.spa_entry_path` (`spa/200.html`) como `text/html` com `Cache-Control:
+  no-cache`. A rota `get "*path"` é a **última** de `config/routes.rb` e exclui `/_app/`
+  e `/app/_app/` (chunk ausente dá 404, nunca o HTML). O `Dockerfile` não tem mais
+  `assets:precompile`.
+- **Cliente** (`src/lib/api/client.ts`): JSON, `credentials: same-origin`,
+  `X-CSRF-Token` só em mutação e trocado por qualquer `data.csrf_token` string, tempo
+  limite de 15 s, `path` só iniciando por `/` (não `//`). Erros tipados `ApiError`
+  (`network_error` e `unexpected_response` com status 0; `session_changed` 422). `401
+  unauthenticated` chama `onUnauthenticated` (exceto `DELETE /api/session`). `422
+  invalid_csrf_token` em mutação renova por `GET /api/session` e reenvia **uma** vez,
+  só se o e-mail for o mesmo (`user` nulo → `unauthenticated`; outro e-mail →
+  `onSessionChanged` + `session_changed`).
+- **Estado e telas**: `session.svelte.ts`, `theme.svelte.ts` (script inline em
+  `app.html` antes do paint; `localStorage` `bindr-theme`), `toasts.svelte.ts` +
+  `Toaster` (duas regiões sempre montadas; o sucesso some em 5000 ms sem pausa, exceção
+  à WCAG 2.2.1 registrada), `motion.ts`, `safeReturnTo` (rejeita `//`, `\`, controle e
+  segmentos `.`/`..`; lê um `/app/...` antigo sem o prefixo). Rotas `/`, `/entrar`, `/criar-conta`. `AppShell`: barra
+  inferior abaixo de `64rem`, coluna lateral a partir dele, mesmo DOM. `<title>` por
+  rota; `afterNavigate` move o foco para `main#conteudo` (não na carga inicial). Tokens
+  dos dois temas verificados por contraste em `tokens.test.ts` (porta de
+  `test/design/contrast_test.rb`, que saiu com o HTML). `/` é o catálogo e a
+  entrada "Catálogo" da navegação aponta para ele; `+error.svelte` mostra "Página não
+  encontrada" dentro do casco, com HTTP `200` (STRO-10).
+
+Gates do front (em série com o gate Rails; o flake D-10 do relógio do host mistura).
+Contagens re-medidas em 2026-10-13 na `svelt-front` (depois do refactor dos carregadores): Vitest 1172 testes, Rails 1231 (rubocop limpo), e2e 224.
+
+```bash
+# quick
+docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm run lint && npm test -- --run"
+# e2e (Playwright contra a API real; não sobe no `docker compose up`)
+docker compose up -d app frontend && docker compose --profile e2e run --rm e2e
+```
+
+O e2e **exige o catálogo importado no banco de dev** (a comparação da SPA com a API e o
+selo de posse leem cartas reais; o lado HTML da paridade saiu com o Hotwire): `docker compose exec app bin/rails ingestion:import
+SNAPSHOT=storage/ingestion/apitcg-<UTC>.json`, offline, a partir de um snapshot em disco.
+As imagens `/card_images/*` respondem 502 porque o CDN responde 403 (AD-019); os e2e
+ignoram essas respostas.
+
+Armadilhas:
+
+- **Kit 3 difere do que a doc antiga mostra.** A config do Kit (`adapter`)
+  fica em `vite.config.ts` (não há `svelte.config.js`); **não existe `$lib`** (imports
+  relativos); `base` saiu de `$app/paths` (e, sem `paths.base`, os caminhos da SPA vêm de
+  `resolve('/...')`; nos testes, `vi.mock('$app/paths')`); arquivo de teste sob `src/routes` não pode começar
+  com `+` (`page.test.ts`, `layout.test.ts`); rodar `npx svelte-kit sync` antes de
+  `tsc`/`check`.
+- **O proxy não pode ter `changeOrigin`.** O `Host` chega ao Rails como
+  `localhost:5173` e a checagem de origem do CSRF compara `Origin` com
+  `request.base_url`; com `changeOrigin` o CSRF falharia. Também exigem
+  `server.allowedHosts` (`localhost`, `frontend`) e `config.hosts << "frontend"` em
+  `development.rb`. Os internos do Vite (`/@vite/client`, `/src`, `/node_modules`, HMR)
+  ficam na raiz e **não** casam com a lista do Rails, que por isso é fechada e explícita:
+  caminho novo do Rails fora de `/api` exige emendar `RAILS_PATH_PATTERN` e o STRO-08.
+- **`npm ci` com o `frontend` de pé troca o volume `node_modules` sob o Vite:** parar
+  o serviço antes ou reiniciá-lo depois.
+- **`credsStore` do host quebra o pull de imagem nova:** `export
+  DOCKER_CONFIG=$(mktemp -d)` com `{}` em `config.json`. A imagem do `e2e` tem de ter a
+  mesma versão do `@playwright/test`.
+- **`200.html` e cache:** `/_app/immutable/*` sai com `max-age` de 1 ano (certo, tem
+  hash); `/`, `/pasta` e qualquer caminho da SPA saem `no-cache`. A entrada mora em
+  `spa/`, fora de `public/`, então `GET /200.html` cai no fallback e também sai
+  `no-cache` (STRO-07; fecha a dívida do `/app/200.html`). `get "*path"` tem de continuar
+  a rota **última**.
+- **Primeiro quadro em dev:** o CSS chega por injeção do Vite depois do primeiro quadro;
+  o e2e prova `data-theme` certo desde o primeiro quadro e a cor após o carregamento. O
+  build é conferido por `build/200.html` trazer o script de tema antes da stylesheet.
+- **O e2e escreve contas** `e2e-<timestamp>@exemplo.test` no banco de dev, sem limpeza.
+- **Abertas para o dono:** `Button` pendente com `disabled` + `aria-busy` (perde o foco
+  e não é anunciado; `aria-disabled` exigiria emendar o SPA-21); dica de formato da
+  senha só no erro; chave desconhecida de `fields` vira `chave: mensagem`; e-mail como
+  identidade da sessão; login sem limite de tentativas (dívida da API).
+
+Armadilhas do catálogo (`spa-catalogo`):
+
+- **Foco e rolagem na mesma rota:** o Kit 3.0.1 não tem `keepFocus` nem `noScroll`. Use
+  `goto(url, { reset: false })` e `data-sveltekit-reset="false"` nos links (chips,
+  paginação). O `afterNavigate` do layout e o `viewTransitionOnNavigate` retornam cedo
+  quando só a query muda (mesmo `pathname`).
+- **Um único painel de filtros, dois lugares:** o slot `shell.aside` (snippet) e `wide`
+  (`MediaQuery` de `64rem`) decidem onde ele monta. A partir de `64rem` vai para a coluna
+  lateral do `AppShell`, abaixo disso para um `<details>` acima da grade. Nunca há duas
+  instâncias (sem id duplicado). O `open` do `<details>` é `$state` da página.
+- **Os hrefs nascem de `meta.active_filters` da última resposta** (SCAT-06), não da URL.
+  Logo, um segundo clique antes de a resposta chegar usa href obsoleto; e, se a
+  **primeira** carga falha, busca e chips ficam vazios até o "Tentar novamente"
+  (limitação aceita).
+- **Foco e anúncio:** `CatalogStatus` expõe `focus()` e exporta `statusSentence`. A
+  região `role="status"` (com a classe `.visually-hidden`) é esvaziada e regravada depois
+  de `tick()`, senão uma frase igual à anterior não é anunciada. `pendingFocus` (chip ou
+  status) não expira: dívida conhecida.
+- **`--z-nav` (10)** em `tokens.css`: a barra inferior fixa (abaixo de `64rem`) tem de
+  ficar acima do tile da grade. O `Toaster` segue com `100` literal.
+- **`signOut` vai a `/` e descarta a query:** sair em `/?owned=owned` não preserva
+  o resto dos filtros; a consulta é refeita por causa da troca de sessão (SCAT-09).
+
+Módulos do detalhe da carta (`spa-carta`): `lib/format.ts`; `lib/cards/url.ts`,
+`featured.ts`, `card-detail.svelte.ts` (carregador com token), `ownership-queue.svelte.ts`
+(fila de posse por variante), `morph.svelte.ts`; componentes `CardArt`, `CardHeader`,
+`CardFields`, `OwnershipStepper`, `WishlistForm`, `VariantRow`; rota
+`src/routes/cartas/[card_number]/+page.svelte`. `OwnershipResult` está em `api/types.ts` e,
+em versão parcial, em `ownership-queue.svelte.ts`.
+
+Módulos da pasta (`spa-pasta`): `lib/api/loader.svelte.ts` (`createLoader<T>(fetch,
+slowMs = 200)`), `lib/navigation/require-session.ts`, `easeStandard`/`cubicBezier` em
+`motion.ts`; componentes `AnimatedNumber`, `PastaSummary`, `SetProgressRow`,
+`WishlistItem`; rotas `src/routes/pasta/+page.svelte` e
+`src/routes/pasta/desejos/+page.svelte`.
+
+Armadilhas da pasta (`spa-pasta`):
+
+- **`api.get` já devolve o `data` desempacotado:** não leia `result.data`. O mock do teste
+  de página deve devolver o dado sem envelope; um teste unitário com envelope escondeu
+  isso e só o e2e pegou.
+- **`AnimatedNumber` interpola o valor monetário em CENTAVOS** e reserva a largura com uma
+  cópia invisível do texto final (`inline-grid`). O `Tween` nasce no valor final quando
+  `duration()` é 0. Teste com animação em curso precisa avançar os timers falsos no fim,
+  senão envenena o loop de rAF.
+- **`disabled` num botão focado manda o foco ao `body`:** a página de desejos devolve o
+  foco ao botão na falha.
+- **A remoção de desejo usa `variantApiPath(card, variant, 'wishlist')`**, a mesma rota do
+  `PUT`.
+- **A reserva de espaço da ação fixa abaixo de `64rem`** fica no contêiner que termina a
+  página.
+- **"Um quarto da coluna" (SPAS-11)** é medido como a trilha de `repeat(4, 1fr)`
+  descontados os vãos.
+- **A ação "Adicionar cartas" mora em `shell.aside` com `wide`** (AD-028).
+- **Um carregador só:** `catalog.svelte.ts` e `card-detail.svelte.ts` são invólucros de
+  `createLoader` (`skeleton` é o `slow` dele; `notFound` sai do erro 404 `not_found`). A
+  resposta fica em `$state.raw`: é trocada inteira, nunca alterada; não mutar `result`.
+- **Helpers de inicialização de componente:** `whenSignedIn(key, load)`
+  (`lib/navigation/when-signed-in.svelte.ts`) carrega com sessão e recarrega na troca de conta
+  ou de chave; `useAside(snippet)` (`shell.svelte.ts`) põe o snippet na coluna lateral a partir
+  de `64rem`. Ficam fora de `session.svelte.ts` porque os testes de página mocam esse módulo só
+  com `session`.
+
+Módulos dos decks (`spa-decks`): `components/QuantityStepper.svelte` (o stepper otimista
+generalizado: `send` devolve o número confirmado; `OwnershipStepper` e o `EditingDeckPanel`
+o usam), `DeckNameForm`, `DeckNotFound`, `EditingDeckPanel`, `DeckShortfall` (todos em `components/`); rótulos e
+grupos em `lib/decks/`, tipos e caminhos em `api/types.ts`; rotas `src/routes/baralhos/**`.
+
+Armadilhas dos decks (`spa-decks`):
+
+- **Criar e importar tornam o deck o em edição** (sessão do Rails): o botão "Editar este
+  deck" não aparece para ele. Teste que precise do botão cria outro deck logo depois.
+- **O deck vai por `id` e a carta por `card_number`** (`/api/decks/:id/cards/:card_number/…`),
+  não por `variant_code`: deck referencia `cards`, coleção referencia `card_variants`.
+- **`decks/import` e `decks/shortfall` vêm antes de `resources :decks`** em `routes.rb`
+  (senão casam com `show`), e os nomes levam `as: :api_…` para não colidir com o HTML.
+- **A falta é o maior uso entre os decks menos o possuído**, não a soma; `shortfall` só
+  traz linhas com falta positiva e o bloco some quando não há nenhuma (SDEC-41).
+- **`−` em zero não envia**: é `aria-disabled` e anuncia o texto do HTML (SDEC-37); a API
+  responde `200` com `quantity: 0` só por corrida entre abas.
+- **`editing_deck` no detalhe é `null` sem deck em edição ou sem sessão** e vem de uma
+  consulta só; o `OwnershipStepper.test.ts` lê o CSS agora em `QuantityStepper.svelte`.
+- **`pasta/page.test.ts` stuba `DeckShortfall`**: um mock do cliente com contagem de
+  chamadas quebra com a segunda chamada (`/api/decks/shortfall`).
+
+Módulos do import (`spa-portabilidade`): `lib/imports/api.ts` (caminhos e chamadas),
+`lib/imports/groups.ts` (cinco grupos da pré-visualização), tipos em `api/types.ts`;
+componentes `ImportRowItem` e `ImportSummary`; rotas `src/routes/pasta/importar/+page.svelte`
+e `src/routes/pasta/importar/[token]/+page.svelte`. O cliente HTTP (`api/client.ts`) agora
+aceita `FormData` (sem `Content-Type` próprio, com CSRF e o mesmo reenvio único) e
+`timeoutMs` por chamada: 60 s no envio e na confirmação, 15 s nas demais (SPOR-32).
+
+Armadilhas do import (`spa-portabilidade`):
+
+- **Confirmação com resposta perdida (P13, aberta):** rede ou tempo limite na confirmação
+  não reenvia; a SPA mostra "Não foi possível saber se a importação foi gravada…" com link
+  para a pasta (SPOR-31). O resumo não é persistido, como no HTML; uma segunda tentativa
+  recebe `409 import_closed`. Persistir o `Commit::Result` exige migração e é do dono.
+- **`409 import_closed` junta dois casos** (já confirmada e vencida), com a frase do HTML;
+  a pré-visualização continua na tela com alerta (SPOR-30).
+- **O teto do upload é imposto antes de ler o arquivo** (`CollectionCsv::Upload`, fix
+  `b02dcc1`): `content_length` acima do limite de 8 MB recusa sem chamar `read`.
+- **`line` da pré-visualização já vem somado (+2) do servidor**; a SPA não refaz a conta.
+- **Texto do arquivo entra como texto** (`card_name`, `message`): nada de `{@html}` (SPOR-17).
+- **Foco e anúncio no envio e na pendência** (fix `4d338c2`): o foco volta ao controle e a
+  pendência é anunciada em região viva; `disabled` num botão focado manda o foco ao `body`.
+- **Duplicação temporária:** `CollectionCsv::Upload` repete a validação e o saneamento do
+  nome do `CollectionImportsController` HTML; a duplicação sai na `spa-troca`, quando o
+  HTML do import for removido. Não unificar antes, para não editar o HTML (SPOR-45).
+- **Medições:** `Commit` de 10.000 linhas levou 7,91 s no container (T4, abaixo do teto de
+  30 s); a pré-visualização de 10.000 linhas leva ≈3,0 s no envio e 1,9 s para abrir a
+  360px (T13), sem virtualização.
+- **O e2e escreve contas** `e2e-<timestamp>@exemplo.test` e coleção no banco de dev, como os demais.
+
+Armadilhas do detalhe (`spa-carta`):
+
+- **`card_type` da API é minúsculo** (`leader`, `character`, `event`, `stage`): indexar os
+  campos por tipo em `CardFields` com a caixa errada some com a seção sem erro.
+- **O `OwnershipStepper` cria a própria fila.** Não há `Map` na página: o `{#key}` por
+  `card_number` + e-mail da sessão recria os steppers, e a fila descarta o que não foi
+  enviado ao desmontar. O valor exibido sobe por `bind:displayed` para o selo.
+- **O morph exige o destino renderizado quando a View Transition captura o novo estado.**
+  `awaitArrival`/`signalArrival` em `morph.svelte.ts` (teto de 500 ms) e `armArrival` em
+  `viewTransitionOnNavigate`; sem isso a transição roda sem a arte de destino.
+- **A marca do morph** (`view-transition-name`) é posta pelo tile e pela página do detalhe
+  (`markCard`), só no elemento visível; nome duplicado anula a transição.
+- **`WishlistForm` usa `novalidate`**: a regra do alvo é da API (422), não do navegador.
+- **Dívidas fora do escopo:** o `CardImagesController` busca a variante só por
+  `variant_code` (`card_images_controller.rb:23`); flake e2e de `sessao.spec.ts`
+  ("a mensagem não desloca o conteúdo", SPA-46) quando a altura do catálogo muda por carga
+  assíncrona.
+
 **O default do app é exigir sessão.** `ApplicationController` inclui
 `Authentication`, então toda action nasce protegida e o acesso público é exceção
-declarada com `allow_unauthenticated_access` — hoje `CatalogController`,
-`CardImagesController`, `RegistrationsController` e `new`/`create` do
-`SessionsController`. Os demais controllers não declaram nada e por isso exigem
-sessão.
-Uma action nova que não declare nada já está protegida.
+declarada com `allow_unauthenticated_access` — hoje só o `CardImagesController`
+(os downloads exigem sessão e não declaram nada). Sem sessão, o concern responde
+`302` para `/entrar?return_to=<caminho>` (a tela de entrada é da SPA). O
+`Api::BaseController` inclui o mesmo concern, mas responde `401 unauthenticated` em
+JSON, e as actions públicas da API (catálogo, carta, login, cadastro) declaram a
+exceção. Uma action nova que não declare nada já está protegida.
 
 **O deck em edição mora na sessão do Rails** (`session[:editing_deck_id]`,
 concern `EditingDeck`) e é revalidado contra `Current.user.decks` a cada
 leitura — um id herdado de outra conta vira `nil`. Num controller público
 (`CatalogController`), `editing_deck` chama `authenticated?` antes. O
 `DeckEntriesController` usa o mesmo SQL atômico da coleção, com o teto de 50 no
-`WHERE` do `DO UPDATE` e o decremento sob `FOR UPDATE`; o teste de corrida força
+`WHERE` do `DO UPDATE` e o decremento sob `FOR UPDATE` (hoje em `DeckEntry.increment_for!`/
+`decrement_for!`, chamados pelo `Api::DeckEntriesController`); o teste de corrida força
 a sobreposição por lock e é o único com `use_transactional_tests = false`.
 
 Dívidas abertas que valem saber antes de mexer em autenticação:
@@ -119,12 +460,13 @@ Dívidas abertas que valem saber antes de mexer em autenticação:
 - **Login sem limite de tentativas.** O `rate_limit` do template do Rails foi
   deliberadamente omitido na T4: sem cache store compartilhado ele não limita
   nada (teste é `:null_store`; produção cai em `:file_store` por container).
-  Justificativa completa em `app/controllers/sessions_controller.rb`. Reabrir
+  Justificativa completa em `app/models/user.rb`. Reabrir
   junto com Redis ou `solid_cache`.
 - **O cookie de sessão não declara `secure` explicitamente** — em produção vem
   de `config.force_ssl`. A garantia é indireta; comentada no concern.
-- **Não há navegador no container**, logo não há system test. Teste de UI vira
-  teste de integração sobre HTML renderizado, com `SPEC_DEVIATION` registrado.
+- **Não há navegador no container Rails**, logo não há system test. Teste de UI é
+  da SPA: Vitest e Playwright (e2e) no front; o Rails prova a API e os downloads por
+  teste de integração.
 - **`allow_unauthenticated_access` não resolve a sessão.** Ele remove o
   `before_action :require_authentication`, que era quem chamava
   `resume_session`: num controller público, `Current.user` é `nil` na action
@@ -143,7 +485,7 @@ cp .env.example .env
 # Depois de pôr a chave em `.env`, recrie o container (a variável passa como ENV):
 docker compose up
 docker compose exec app bin/rails test
-docker compose exec app bin/rails test test/integration/sessions_test.rb
+docker compose exec app bin/rails test test/integration/api/sessions_test.rb
 docker compose exec app bin/rails test test/models/user_password_test.rb -n "/senha/"
 docker compose exec app bin/rubocop      # rubocop-rails-omakase
 docker compose exec app bin/brakeman
@@ -165,6 +507,10 @@ docker compose exec app bin/rails ingestion:remap
 # Compara dois snapshots para medir estabilidade do tcgplayer.id (≥20h de diferença)
 docker compose exec app bin/rails ingestion:compare_snapshots A=storage/ingestion/<arq-A> B=storage/ingestion/<arq-B>
 ```
+
+Front SPA (`frontend/`): gates e armadilhas na seção "Front SPA" acima. Atalho:
+`docker compose run --rm --no-deps frontend sh -c "npm ci && npm run check && npm run lint && npm test -- --run"`
+(quick) e `docker compose up -d app frontend && docker compose --profile e2e run --rm e2e` (e2e).
 
 Gem nova exige `docker compose run --rm --no-deps app bundle install`: o volume
 nomeado `bundle` sombreia as gems da imagem, então rebuild **não** basta.
@@ -190,7 +536,11 @@ python3 $SKILL/scripts/validate_state.py <feature>
 ```
 
 `Dockerfile.dev` é a imagem de desenvolvimento (código como volume); `Dockerfile`
-é o de produção gerado pelo Rails — separados de propósito, não unificar.
+é o de produção — separados de propósito, não unificar. O `Dockerfile` de produção tem
+três estágios: `build` (gems, bootsnap), `frontend-build` (Node 24, `npm ci` e
+`npm run build` da SPA; sem `assets:precompile`, que saiu com o `propshaft`) e a
+imagem final, sem Node, com o build da SPA em `public/_app` e `spa/200.html`. A
+verificação é `docker build -f Dockerfile .`.
 
 ## Método de trabalho: spec-driven
 
@@ -211,9 +561,9 @@ Regras que valem para qualquer sessão de trabalho aqui:
 ### Dois diretórios de spec, de propósito
 
 `.context/` é a **fonte de verdade** de requisitos, design e plano de tasks.
-`.specs/` guarda o recorte por feature — dez features em `features/`, todas
-encerradas —, o log de decisões (`STATE.md`, AD-001 a AD-020) e os artefatos do
-Verifier. Em divergência, `.context/` vence (AD-005).
+`.specs/` guarda o recorte por feature — as dez da Fase 1, as de decks, preços,
+`api-fundacao`, as `spa-*` e a `spa-troca` em `features/` —, o log de decisões
+(`STATE.md`, AD-001 em diante) e os artefatos do Verifier. Em divergência, `.context/` vence (AD-005).
 Os IDs de `.specs/` apontam para os requisitos numerados de
 `.context/requirements.md` com prefixo próprio por feature (`CAT-NN` no
 `catalogo`, `COL-NN` na `colecao`, `SRC-NN` na `fonte-apitcg` etc.). **Todo plano
@@ -247,7 +597,7 @@ As sete pendências que bloqueavam código foram decididas na Fase 0 e estão em
 | P1 | Fonte = apitcg (`GET /api/one-piece/sets` e `/products?type=card`, header `x-api-key`) | **AD-019** |
 | P2 | Campos/raridades/sets reais extraídos da fixture; glossário de `product.md` §6 corrigido | task 0.2 |
 | P3 | "Set completo" = `baseSetSize` (variantes base); parallels em métrica separada | AD-003 |
-| P4 | Rails 8 + Hotwire + PostgreSQL | AD-002 |
+| P4 | Rails 8 + PostgreSQL; a camada de apresentação era Hotwire e hoje é a SPA SvelteKit na raiz (AD-023, `spa-troca`) | AD-002, AD-023 |
 | P5 | `variant_code = "tcgplayer:<id>"`, ou `"apitcg:<_id>"` sem esse id | **AD-019** |
 | P6 | App serve a imagem com cache em disco; host = `tcgplayer-cdn.tcgplayer.com` | **AD-019** |
 | P7 | `DON!!` fora do catálogo na Fase 1 | task 0.2 |
@@ -314,8 +664,8 @@ acentos, `tsvector` para texto de efeito, e uma **consulta separada** para match
 exato de `card_number` cujo resultado é prependido. Não tentar resolver ranking
 exato dentro do full-text.
 
-Um **único query object** traduz parâmetros de URL em consulta e serve tanto HTML
-quanto JSON — é o único lugar que precisa de teste de filtro. Contrato em
+Um **único query object** (`CatalogQuery`) traduz parâmetros de URL em consulta e
+serve a API JSON (antes também o HTML) — é o único lugar que precisa de teste de filtro. Contrato em
 `design.md` §4.2. Semântica: `OU` dentro de uma categoria, `E` entre categorias;
 filtro de cor inclui multicoloridas. **Parâmetro desconhecido ou inválido é
 ignorado, nunca causa erro** — uma URL compartilhada não pode dar 500 porque um

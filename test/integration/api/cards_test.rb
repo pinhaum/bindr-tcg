@@ -25,7 +25,10 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
   end
 
   def sign_in(user)
-    post session_path, params: { email: user.email, password: PASSWORD }
+    get "/api/session"
+    token = response.parsed_body.dig("data", "csrf_token")
+    post "/api/session", params: { email: user.email, password: PASSWORD }.to_json,
+                         headers: { "Content-Type" => "application/json", "X-CSRF-Token" => token }
   end
 
   def fetch(number = "OP01-001", **params)
@@ -46,7 +49,7 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
                    "block_icon" => nil, "attributes" => [], "traits" => [ "Straw Hat Crew" ],
                    "effect_text" => "Efeito", "trigger_text" => nil,
                    "set" => { "code" => "OP01", "name" => "Romance Dawn" } },
-                 card.except("variants", "featured_variant_code"))
+                 card.except("variants", "featured_variant_code", "editing_deck"))
     assert_equal %w[tcgplayer:1 tcgplayer:2 tcgplayer:3], card["variants"].pluck("variant_code")
   end
 
@@ -102,6 +105,17 @@ class Api::CardsTest < ActionDispatch::IntegrationTest
     body = fetch
     assert_equal 7, variant_json(body, "tcgplayer:1")["owned_quantity"]
     assert_nil variant_json(body, "tcgplayer:2")["wishlist_target"]
+  end
+
+  test "user_id nos parâmetros não muda a posse lida" do
+    CollectionItem.create!(user: @user, card_variant: @base, quantity: 2)
+    CollectionItem.create!(user: @other, card_variant: @base, quantity: 7)
+
+    sign_in(@user)
+    assert_equal 2, variant_json(fetch(user_id: @other.id), "tcgplayer:1")["owned_quantity"]
+
+    delete "/api/session"
+    assert_nil variant_json(fetch(user_id: @other.id), "tcgplayer:1")["owned_quantity"]
   end
 
   test "variante ausente da fonte só aparece, com in_source false, para quem a retém" do

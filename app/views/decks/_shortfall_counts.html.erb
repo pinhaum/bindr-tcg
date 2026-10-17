@@ -1,6 +1,0 @@
-<%#
-  DCK-21 — pedida, possuída e falta de uma carta do deck, com
-  `falta = max(0, pedida − possuída)` calculado na `DeckShortfallQuery`.
-  Possuída soma todas as variantes da carta, presentes ou não (DCK-20).
-%>
-<span class="deck__counts">pedida <%= row.required %>, possuída <%= row.owned %>, falta <%= row.missing %></span>

@@ -16,7 +16,6 @@ module Authentication
 
   included do
     before_action :require_authentication
-    helper_method :authenticated?
   end
 
   class_methods do
@@ -45,13 +44,11 @@ module Authentication
       Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
     end
 
+    # Só os downloads (`/collection/export`, `/decks/<id>.txt`) chegam aqui; a
+    # tela de entrada é da SPA e leva o destino em `return_to` (STRO-19). O
+    # caminho vai codificado por inteiro (`/` vira `%2F`), query inclusive.
     def request_authentication
-      session[:return_to_after_authenticating] = request.url
-      redirect_to new_session_path
-    end
-
-    def after_authentication_url
-      session.delete(:return_to_after_authenticating) || root_url
+      redirect_to "/entrar?return_to=#{ERB::Util.url_encode(request.fullpath)}"
     end
 
     # Duas propriedades do cookie são herdadas do template e ficam registradas
@@ -69,13 +66,10 @@ module Authentication
     #    apaga o registro, e um cookie órfão deixa de resolver sessão nenhuma.
     #
     # `reset_session` ao autenticar troca o id da sessão do Rails (fixação) e
-    # descarta o que ela carregava antes; só a origem guardada atravessa, porque
-    # é o que fecha o Req. 6.4. Ao sair, o mesmo reset impede que o próximo
-    # login no navegador herde a sessão da conta anterior.
+    # descarta o que ela carregava antes. Ao sair, o mesmo reset impede que o
+    # próximo login no navegador herde a sessão da conta anterior.
     def start_new_session_for(user)
-      return_to = session[:return_to_after_authenticating]
       reset_session
-      session[:return_to_after_authenticating] = return_to if return_to
 
       user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
         Current.session = session

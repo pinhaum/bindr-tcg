@@ -20,6 +20,8 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
   PASSWORD = "grand-line-88".freeze
 
   setup do
+    @forgery = ActionController::Base.allow_forgery_protection
+    ActionController::Base.allow_forgery_protection = true
     @nami = User.create!(email: "nami-por6@example.com", password: PASSWORD)
     @zoro = User.create!(email: "zoro-por6@example.com", password: PASSWORD)
 
@@ -38,6 +40,10 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
     own(@zoro, @do_zoro, 2)
   end
 
+  teardown do
+    ActionController::Base.allow_forgery_protection = @forgery
+  end
+
   # A suíte roda em paralelo e o projeto não usa fixtures YAML: cada arquivo
   # cria os próprios registros, com chaves naturais distintas para não colidir
   # entre workers.
@@ -52,12 +58,24 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
     CollectionItem.create!(user: user, card_variant: card_variant, quantity: quantity)
   end
 
+  def api_headers(token)
+    { "Content-Type" => "application/json", "X-CSRF-Token" => token }
+  end
+
+  def csrf_token
+    get "/api/session"
+    response.parsed_body.dig("data", "csrf_token")
+  end
+
   def sign_in(user)
-    post session_path, params: { email: user.email, password: PASSWORD }
+    post "/api/session", params: { email: user.email, password: PASSWORD }.to_json,
+                         headers: api_headers(csrf_token)
+    assert_response :success
   end
 
   def sign_out
-    delete session_path
+    delete "/api/session", headers: api_headers(csrf_token)
+    assert_response :success
   end
 
   # As linhas de dado do corpo da resposta, lidas pelo mesmo parser que o import
@@ -76,7 +94,8 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
   test "anônimo é redirecionado para a autenticação e não recebe arquivo" do
     get collection_export_path
 
-    assert_redirected_to new_session_path
+    assert_response :found
+    assert_equal "#{request.base_url}/entrar?return_to=%2Fcollection%2Fexport", response.headers["Location"]
     assert_nil response.headers["Content-Disposition"],
                "um redirect não pode vir com instrução de download"
   end
@@ -95,16 +114,6 @@ class CollectionExportsTest < ActionDispatch::IntegrationTest
     assert_not_includes corpo, @do_zoro.variant_code
     assert_not_includes corpo, CollectionCsv::Format.header_row.join(CollectionCsv::Format::DELIMITER),
                         "nem o cabeçalho do formato: a action não chegou a rodar"
-  end
-
-  # Seguir o redirect leva à tela de login, não ao arquivo. Fecha a porta de uma
-  # implementação que redirecionasse para a própria rota de export.
-  test "seguir o redirect do anônimo leva à autenticação, não ao arquivo" do
-    get collection_export_path
-    follow_redirect!
-
-    assert_response :success
-    assert_no_match(/text\/csv/, response.media_type)
   end
 
   # --- Resposta autenticada: tipo, download e nome de arquivo ---

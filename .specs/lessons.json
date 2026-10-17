@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 65,
+  "next_id": 76,
   "lessons": [
     {
       "id": "L-001",
@@ -1156,6 +1156,204 @@
       ],
       "created": "2026-10-10T19:11:03Z",
       "last_seen": "2026-10-10T19:11:03Z"
+    },
+    {
+      "id": "L-065",
+      "key": "surviving_mutant::assert any ac that fixes a pixel size or visual position with boundingbox or getcomputedstyle in an e2e test because dom level tests cannot kill a css mutant",
+      "text": "Assert any AC that fixes a pixel size or visual position with boundingBox or getComputedStyle in an e2e test, because DOM-level tests cannot kill a CSS mutant",
+      "signal": "surviving_mutant",
+      "scope": "frontend/e2e",
+      "status": "candidate",
+      "features": [
+        "spa-catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C01 FilterChip.svelte:34 (validation.md it.1 G1; morto na it.2 por e2e/catalogo-layout.spec.ts:92-97) (frontend/e2e)"
+      ],
+      "created": "2026-10-11T03:29:12Z",
+      "last_seen": "2026-10-11T03:29:12Z"
+    },
+    {
+      "id": "L-066",
+      "key": "surviving_mutant::test the exact boundary value of a count threshold such as exactly two items for a more than one rule not only a larger count",
+      "text": "Test the exact boundary value of a count threshold such as exactly two items for a more-than-one rule, not only a larger count",
+      "signal": "surviving_mutant",
+      "scope": "frontend/tests",
+      "status": "candidate",
+      "features": [
+        "spa-catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N09 CardTile.svelte:14 (validation.md it.2 G8) (frontend/tests)"
+      ],
+      "created": "2026-10-11T03:29:12Z",
+      "last_seen": "2026-10-11T03:29:12Z"
+    },
+    {
+      "id": "L-067",
+      "key": "surviving_mutant::when two ui states can hold at once such as a stale error and a pending retry test which one wins instead of testing each alone",
+      "text": "When two UI states can hold at once such as a stale error and a pending retry, test which one wins instead of testing each alone",
+      "signal": "surviving_mutant",
+      "scope": "frontend/tests",
+      "status": "candidate",
+      "features": [
+        "spa-catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N18 +page.svelte:142 (validation.md it.2 G9) (frontend/tests)"
+      ],
+      "created": "2026-10-11T03:29:12Z",
+      "last_seen": "2026-10-11T03:29:12Z"
+    },
+    {
+      "id": "L-068",
+      "key": "ac_gap::assert a layout position also in the wrapped state at the narrowest viewport with the longest content combination where flex rows break",
+      "text": "Assert a layout position also in the wrapped state, at the narrowest viewport with the longest content combination where flex rows break",
+      "signal": "ac_gap",
+      "scope": "frontend/e2e",
+      "status": "candidate",
+      "features": [
+        "spa-catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SCAT-30 / cde8011 CatalogStatus.svelte:58-59 (D11, K2/K3) (frontend/e2e)"
+      ],
+      "created": "2026-10-11T11:51:08Z",
+      "last_seen": "2026-10-11T11:51:08Z"
+    },
+    {
+      "id": "L-069",
+      "key": "gate_fail::in e2e check the settled state and read the measurement in the same evaluate call since a reload triggered by the action can start between two separate calls",
+      "text": "In e2e, check the settled state and read the measurement in the same evaluate call, since a reload triggered by the action can start between two separate calls",
+      "signal": "gate_fail",
+      "scope": "frontend/e2e",
+      "status": "candidate",
+      "features": [
+        "spa-catalogo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "frontend/e2e/sessao.spec.ts:112-119 (G12) (frontend/e2e)"
+      ],
+      "created": "2026-10-11T12:25:24Z",
+      "last_seen": "2026-10-11T12:25:24Z"
+    },
+    {
+      "id": "L-070",
+      "key": "surviving_mutant::test every conditional error branch that suppresses a message 401 session changed not only the generic failure path",
+      "text": "Test every conditional error branch that suppresses a message (401, session_changed), not only the generic failure path",
+      "signal": "surviving_mutant",
+      "scope": "frontend-tests",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M3 frontend/src/routes/pasta/desejos/+page.svelte:72 (SPAS-36) (frontend-tests)"
+      ],
+      "created": "2026-10-11T17:09:15Z",
+      "last_seen": "2026-10-11T17:09:15Z"
+    },
+    {
+      "id": "L-071",
+      "key": "spec_precision_gap::state in the spec whether grid gaps count when a criterion says a share of the column width",
+      "text": "State in the spec whether grid gaps count when a criterion says a share of the column width",
+      "signal": "spec_precision_gap",
+      "scope": "layout-specs",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SPAS-11 frontend/e2e/pasta.spec.ts:376-379 (layout-specs)"
+      ],
+      "created": "2026-10-11T17:09:15Z",
+      "last_seen": "2026-10-11T17:09:15Z"
+    },
+    {
+      "id": "L-072",
+      "key": "spec_precision_gap::name the comparator and tolerance when a criterion asks for captures compared against another screen",
+      "text": "Name the comparator and tolerance when a criterion asks for captures compared against another screen",
+      "signal": "spec_precision_gap",
+      "scope": "visual-parity-specs",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SPAS-26 frontend/e2e/pasta.spec.ts:516-530 (visual-parity-specs)"
+      ],
+      "created": "2026-10-11T17:09:15Z",
+      "last_seen": "2026-10-11T17:09:15Z"
+    },
+    {
+      "id": "L-073",
+      "key": "surviving_mutant::test the guard a spec clause adds to an action only move focus when it was lost not only the unguarded happy path",
+      "text": "Test the guard a spec clause adds to an action (only move focus when it was lost), not only the unguarded happy path",
+      "signal": "surviving_mutant",
+      "scope": "frontend-tests",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M7 frontend/src/routes/pasta/desejos/+page.svelte:62 (SPAS-34) (frontend-tests)"
+      ],
+      "created": "2026-10-11T17:14:14Z",
+      "last_seen": "2026-10-11T17:14:14Z"
+    },
+    {
+      "id": "L-074",
+      "key": "surviving_mutant::quando o spec fixa a curva de uma animacao amostrar o valor num instante em que a curva e a linear divergem e afirmar esse valor testar so os extremos e entre 0 e o final deixa a troca de easing passar",
+      "text": "Quando o spec fixa a curva de uma animação, amostrar o valor num instante em que a curva e a linear divergem e afirmar esse valor; testar só os extremos e 'entre 0 e o final' deixa a troca de easing passar.",
+      "signal": "surviving_mutant",
+      "scope": "frontend/motion",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "frontend/src/lib/components/AnimatedNumber.svelte:19 (F4, SPAS-12) (frontend/motion)"
+      ],
+      "created": "2026-10-11T17:30:16Z",
+      "last_seen": "2026-10-11T17:30:16Z"
+    },
+    {
+      "id": "L-075",
+      "key": "ac_gap::no e2e de paridade extrair o mesmo trecho do dom nos dois lados sem normalizar a estrutura de um deles remover um elemento so do lado do html esconde desvio de marcacao que o spec proibe",
+      "text": "No e2e de paridade, extrair o mesmo trecho do DOM nos dois lados sem normalizar a estrutura de um deles; remover um elemento só do lado do HTML esconde desvio de marcação que o spec proíbe.",
+      "signal": "ac_gap",
+      "scope": "frontend/e2e/paridade",
+      "status": "candidate",
+      "features": [
+        "spa-pasta"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "frontend/e2e/pasta-desejos.spec.ts:146-148; frontend/src/lib/components/WishlistItem.test.ts:23 (SPAS-30) (frontend/e2e/paridade)"
+      ],
+      "created": "2026-10-11T17:30:16Z",
+      "last_seen": "2026-10-11T17:30:16Z"
     }
   ]
 }
