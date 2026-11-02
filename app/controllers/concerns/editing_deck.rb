@@ -15,10 +15,6 @@
 module EditingDeck
   extend ActiveSupport::Concern
 
-  included do
-    helper_method :editing_deck
-  end
-
   private
     def editing_deck
       return @editing_deck if defined?(@editing_deck)

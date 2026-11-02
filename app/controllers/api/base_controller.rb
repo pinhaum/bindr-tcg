@@ -46,8 +46,7 @@ class Api::BaseController < ActionController::Base
       I18n.with_locale(:"pt-BR", &)
     end
 
-    # Sem `session[:return_to_after_authenticating]` nem redirect: a SPA
-    # decide para onde ir depois do login.
+    # Sem redirect: a SPA decide para onde ir depois do login.
     def request_authentication
       render_error(:unauthorized, "unauthenticated", "Faça login para continuar.")
     end

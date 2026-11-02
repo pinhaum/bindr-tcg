@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  # Fronteira fechada do Rails (STRO-08): `/up`, as imagens, as duas rotas de
+  # arquivo, as URLs antigas, a `/api` e, por último, a entrada da SPA. Rota nova
+  # de primeiro nível exige emenda do STRO-08 antes, para não engolir a SPA.
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
 
@@ -8,137 +12,23 @@ Rails.application.routes.draw do
   get "card_images/:variant_code" => "card_images#show", as: :card_image, format: false,
       constraints: { variant_code: /[^\/]+/ }
 
-  # A carta é identificada pelo `card_number` na URL, não pelo id: é o
-  # identificador que o usuário conhece e o que torna a URL compartilhável.
-  # O ponto em códigos como `P-029` exigiria `format: false`; os códigos reais
-  # do catálogo não têm ponto, mas a constraint fixa isso.
-  get "cards/:id" => "catalog#show", as: :card, constraints: { id: /[^\/]+/ }
-  get "catalog" => "catalog#index", as: :catalog
-
-  # Declarada na T3, antes do controller existir: o concern redireciona o
-  # anônimo para `new_session_path`, e um helper inexistente seria `NameError`
-  # em tempo de requisição em vez de redirect. A T4 preencheu o controller.
-  resource :session, only: %i[new create destroy]
-
-  # Singular como a sessão: não há o que listar nem id a exibir — o usuário cria
-  # a própria conta e pronto.
-  resource :registration, only: %i[new create]
-
-  # Posse por variante (Req. 7.2). A chave da URL é a **variante**, não o id do
-  # registro de coleção: o botão sai da grade do catálogo, onde o registro
-  # normalmente ainda não existe. O usuário nunca aparece aqui — vem de
-  # `Current.user` (Req. 6.5).
-  #
-  # `POST` e não `PATCH` porque a operação cria o registro quando ele falta; e
-  # duas rotas distintas em vez de uma com `?operation=` porque incremento e
-  # decremento são verbos diferentes, cada um com o seu statement.
-  post "collection_items/:card_variant_id/increment" => "collection_items#increment",
-       as: :increment_collection_item
-  post "collection_items/:card_variant_id/decrement" => "collection_items#decrement",
-       as: :decrement_collection_item
-
-  # Wishlist (Req. 8). Ao contrário da posse, aqui **existe id de item na URL**:
-  # remover parte da própria lista, onde o item existe por definição. É o que
-  # torna real o 404 por id alheio do critério 4 da história de isolamento — a
-  # T7 registrou `SPEC_DEVIATION` por não ter, no desenho da posse, nenhuma URL
-  # onde um id coubesse.
-  #
-  # `path: "wishlist"` porque é o nome que o usuário lê na barra de endereço;
-  # os helpers continuam `wishlist_items_path`, alinhados ao model e ao
-  # controller. `create` continua recebendo `card_variant_id` no corpo: o
-  # usuário nunca aparece na URL, vem de `Current.user` (Req. 6.5).
-  resources :wishlist_items, only: %i[index create destroy], path: "wishlist"
-
-  # Progresso por set (Req. 9). Rota singular e sem id: a página é sempre a do
-  # usuário da sessão, e não há coleção de "progressos" a listar nem recorte a
-  # endereçar. **Nenhum identificador de usuário cabe nesta URL** — quem
-  # calcula é `Current.user`, e é isso que torna `?user_id=` inócuo por desenho
-  # e não por checagem (Req. 6.5).
-  #
-  # `get` puro em vez de `resource`: só existe leitura, e `resource :progress`
-  # geraria `new`/`edit`/`create` que nunca serão escritos.
-  get "progress" => "progress#index", as: :progress
-
-  # Export da coleção em CSV (Req. 10 / POR-03). Mesmo desenho do progresso e
-  # pela mesma razão: rota singular, sem id, porque o arquivo é sempre o do
-  # usuário da sessão. **Nenhum identificador de usuário cabe nesta URL** — quem
-  # serializa é `Current.user`, e é isso que torna `?user_id=` inócuo por
-  # desenho e não por checagem (Req. 6.5).
-  #
-  # `get` puro em vez de `resources`: o export é uma leitura só, e
-  # `resources :collection_exports` geraria `show` com `:id` — exatamente o
-  # segmento que não pode existir aqui.
+  # Downloads (STRO-16..19): URLs fixas fora de `/api`, com sessão exigida. O
+  # arquivo é sempre o do usuário da sessão; nenhum identificador de usuário cabe
+  # nestas URLs (Req. 6.5). `decks/:id.txt` vem antes de `decks/:id` das URLs
+  # antigas, que o engoliria.
   get "collection/export" => "collection_exports#show", as: :collection_export
+  get "decks/:id.txt" => "deck_exports#show", as: :deck_export, format: false
 
-  # Import da coleção em CSV (Req. 10 / POR-07, POR-12). **Nenhum identificador
-  # de usuário cabe nestas URLs**, pela mesma razão do export e do progresso: o
-  # dono da pré-visualização é sempre `Current.user`, e é isso que torna
-  # `?user_id=` inócuo por desenho e não por checagem (Req. 6.5).
-  #
-  # O único segmento dinâmico é o **token** da pré-visualização — 32 bytes
-  # urlsafe gerados pela T11 —, e ele não identifica usuário nenhum: é um
-  # segredo por upload, resolvido sempre dentro do escopo do dono por
-  # `CollectionImport.find_by_token_for`. Um id sequencial aqui deixaria a
-  # pré-visualização alheia a uma tentativa de distância; o token deixa a URL
-  # endereçável (é para ela que o upload redireciona) sem deixá-la adivinhável.
-  #
-  # `get`/`post` explícitos em vez de `resources`: o recurso não tem `edit`,
-  # `update` nem `destroy`, e `resources` geraria `:id` — exatamente o segmento
-  # que não pode existir. A confirmação (T14) entra aqui como uma rota própria,
-  # também chaveada pelo token.
-  # Os três nomes são declarados à mão, e nenhum deles pode ser omitido: sem
-  # `as:` no `post`, o Rails deriva `collection_import` do caminho e ele colide
-  # com o nome do `show` — `ArgumentError` na carga das rotas, que aparece como
-  # `root_url` indefinido em todo teste que faz login, bem longe da causa.
-  get "collection/import" => "collection_imports#new", as: :new_collection_import
-  post "collection/import" => "collection_imports#create", as: :collection_imports
-  get "collection/import/:token" => "collection_imports#show", as: :collection_import
-
-  # A confirmação (T14) — a **única escrita** da feature. `post` e não `get`
-  # porque ela altera estado, e a tela da T13 chega aqui por `form_with`: um
-  # `get` deixaria a gravação a um prefetch ou a um histórico de navegador de
-  # distância, sobre o único dado insubstituível do sistema.
-  #
-  # Chaveada pelo mesmo token do `show`, e por nada mais: a rota **não aceita
-  # arquivo nem identificador de usuário**. O que é gravado vem do staging que
-  # a tela mostrou (Req. 10.5), e o dono é sempre `Current.user`.
-  post "collection/import/:token/confirm" => "collection_imports#confirm",
-       as: :confirm_collection_import
-
-  # Decks (Req. 14). Ao contrário da posse, aqui **existe id na URL**, e todo
-  # acesso parte de `Current.user.decks`: um id de deck alheio cai em
-  # `RecordNotFound` e responde 404, sem revelar que o deck existe (DCK-36).
-  # As actions entram à medida que as tasks da feature as escrevem.
-  #
-  # A exclusão pede confirmação numa página própria, `GET /decks/:id/delete`,
-  # e não num `turbo_confirm`: o diálogo depende de JS e não tem como ser
-  # testado sem navegador (design.md, Risks). O `GET` só mostra; quem apaga é o
-  # `DELETE`.
-  #
-  # `select` marca o deck como "em edição" na sessão (T12). É `POST` porque
-  # muda estado: um `GET` trocaria o deck em edição num prefetch.
-  #
-  # A importação (T17) vem **antes** de `resources :decks`: depois dele,
-  # `GET /decks/import` casaria com `decks#show` e `import` viraria um id.
-  # Importar só cria deck, nunca altera um existente (DCK-24), então não há id
-  # no caminho.
-  get "decks/import" => "deck_imports#new", as: :new_deck_import
-  post "decks/import" => "deck_imports#create", as: :deck_imports
-  resources :decks, only: %i[index new create show edit update destroy] do
-    member do
-      get :delete
-      post :select
-    end
+  # URLs antigas (STRO-11, STRO-12): só `GET`, destino calculado do caminho. Os
+  # outros métodos não têm rota e dão 404 (STRO-15). `decks/new` e
+  # `decks/import` vêm antes de `decks/:id`.
+  %w[catalog cards/:id session/new registration/new progress wishlist
+     collection/import collection/import/:token decks decks/new decks/import
+     decks/:id decks/:id/edit decks/:id/delete].each do |path|
+    get path => "legacy_redirects#show", format: false, constraints: { id: /[^\/]+/, token: /[^\/]+/ }
   end
-
-  # Quantidade de uma carta no deck (T13). Como na posse, a chave é a
-  # **carta**, não o id da entrada: o botão nasce no detalhe da carta, onde a
-  # entrada muitas vezes ainda não existe. O deck sai de `Current.user.decks`,
-  # e o de outro usuário é 404 (DCK-36).
-  post "decks/:deck_id/cards/:card_id/increment" => "deck_entries#increment", as: :increment_deck_card
-  post "decks/:deck_id/cards/:card_id/decrement" => "deck_entries#decrement", as: :decrement_deck_card
-  # O Leader do deck (T14). A carta vai no corpo, como `card_id`.
-  post "decks/:deck_id/leader" => "deck_entries#leader", as: :deck_leader
+  get "app(/*path)" => "legacy_redirects#show", format: false,
+      constraints: ->(request) { !request.path.start_with?("/app/_app/") }
 
   # API JSON. `format: false` tira a extensão do caminho (`.html` cai no
   # catch-all) e o default fixa `params[:format]`, que vence o `Accept`. Rotas
@@ -153,10 +43,59 @@ Rails.application.routes.draw do
     get "catalog" => "catalog#index", as: :api_catalog
     get "catalog/filters" => "catalog#filters", as: :api_catalog_filters
 
+    get "progress" => "progress#show", as: :api_progress
+    get "wishlist" => "wishlist#index", as: :api_wishlist
+
+    # Antes de `resources :decks`: depois dele, `import` e `shortfall` casariam
+    # com `decks#show`.
+    get "decks/shortfall" => "decks#shortfall", as: :api_decks_shortfall
+    post "decks/import" => "deck_imports#create", as: :api_deck_imports
+
+    # `as:` evita colidir com os nomes `decks` e `deck` das rotas HTML.
+    resources :decks, only: %i[index show create update destroy], as: :api_decks do
+      member { post :select }
+    end
+
+    # Entradas do deck (SDEC-51..55): o deck vai no caminho e a carta por
+    # `card_number`; o Leader leva a carta no corpo.
+    post "decks/:id/cards/:card_number/increment" => "deck_entries#increment",
+         as: :api_increment_deck_card, constraints: { card_number: /[^\/]+/ }
+    post "decks/:id/cards/:card_number/decrement" => "deck_entries#decrement",
+         as: :api_decrement_deck_card, constraints: { card_number: /[^\/]+/ }
+    put "decks/:id/leader" => "deck_entries#leader", as: :api_deck_leader
+
     get "cards/:card_number" => "cards#show", as: :api_card, constraints: { card_number: /[^\/]+/ }
 
+    # Posse por variante (SCAR-42, SCAR-43). O `variant_code` tem `:` e chega
+    # codificado (`tcgplayer%3A123`); a constraint aceita tudo até a próxima barra.
+    post "cards/:card_number/variants/:variant_code/increment" => "card_variants#increment",
+         as: :api_increment_card_variant,
+         constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+    post "cards/:card_number/variants/:variant_code/decrement" => "card_variants#decrement",
+         as: :api_decrement_card_variant,
+         constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+    put "cards/:card_number/variants/:variant_code/wishlist" => "card_variants#wishlist",
+        as: :api_wishlist_card_variant,
+        constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+    delete "cards/:card_number/variants/:variant_code/wishlist" => "card_variants#unwish",
+           constraints: { card_number: /[^\/]+/, variant_code: /[^\/]+/ }
+
+    post "collection/imports" => "collection_imports#create", as: :api_collection_imports
+    get "collection/imports/:token" => "collection_imports#show", as: :api_collection_import,
+        constraints: { token: /[^\/]+/ }
+    post "collection/imports/:token/confirm" => "collection_imports#confirm",
+         as: :confirm_api_collection_import, constraints: { token: /[^\/]+/ }
+
+    # `*path` não casa `/api` nem `/api/`; sem esta linha eles cairiam na SPA.
+    match "/", to: "not_found#show", via: :all
     match "*path", to: "not_found#show", via: :all
   end
 
-  root "catalog#index"
+  # Entrada da SPA na raiz (STRO-05) e fallback: qualquer `GET` fora das rotas
+  # acima recebe `spa/200.html`, e os outros métodos caem no 404 do Rails. Tem de
+  # ser a última rota. Os arquivos do build (`/_app/`, `/app/_app/`) nunca
+  # devolvem a entrada.
+  root "spa#show"
+  get "*path", to: "spa#show", format: false,
+      constraints: ->(request) { !request.path.start_with?("/_app/", "/app/_app/") }
 end

@@ -389,6 +389,145 @@ própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fec
 - [x] **11.3 Catálogo e fechamento** — T9–T12
   - _Requisitos: 16.12, 16.16, 16.18–16.32_
 
+## 12 — Fundação da SPA SvelteKit (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-fundacao/tasks.md` (T1–T22, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [x] **12.1 Scaffold e entrega** — T1–T4 da `spa-fundacao`
+  - Projeto em `frontend/`, serviço no compose e proxy do Vite em dev;
+    `SpaController` com `200.html` e `no-cache` e estágio Node no `Dockerfile`
+    em produção.
+  - _Requisitos: 17.1–17.6_
+- [x] **12.2 Cliente HTTP** — T5–T7
+  - _Requisitos: 17.6–17.13, 17.22_
+- [x] **12.3 Temas, movimento, sessão e mensagens** — T8–T14
+  - _Requisitos: 17.9, 17.10, 17.14–17.16, 17.18, 17.22, 17.23, 17.31–17.46_
+- [x] **12.4 Formulários e casco** — T15–T19
+  - _Requisitos: 17.16–17.30, 17.36_
+- [x] **12.5 Ponta a ponta e fechamento** — T20–T22
+  - _Requisitos: 17.1, 17.5, 17.14–17.18, 17.22–17.24, 17.27–17.30, 17.35–17.37, 17.42, 17.43_
+
+---
+
+## 13 — Catálogo na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-catalogo/tasks.md` (T1–T25, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [x] **13.1 Funções puras, cliente e guardas** — T1–T7 da `spa-catalogo`
+  - `getEnvelope` no cliente, `safeReturnTo` com `/app?…`, "Catálogo" em `/app`,
+    links e chips a partir de `active_filters`, `visually-hidden` e View
+    Transition só entre rotas.
+  - _Requisitos: 18.2, 18.4–18.6, 18.16, 18.19, 18.20, 18.23–18.25, 18.27–18.31, 18.36, 18.41, 18.44, 18.45_
+- [x] **13.2 Estado, casco e tile** — T8–T13
+  - _Requisitos: 18.3, 18.4, 18.8, 18.10–18.13, 18.18, 18.33, 18.38–18.41_
+- [x] **13.3 Componentes de busca, status e filtro** — T14–T19
+  - _Requisitos: 18.15–18.31, 18.36, 18.40, 18.42, 18.43_
+- [x] **13.4 Página, ponta a ponta e fechamento** — T20–T25
+  - _Requisitos: 18.1, 18.4, 18.5, 18.7, 18.9, 18.13, 18.14, 18.16, 18.17, 18.25–18.27, 18.29–18.45_
+
+## 14 — Detalhe da carta na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-carta/tasks.md` (T1–T22, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+
+- [x] **14.1 API de posse e desejo** — T1–T4 da `spa-carta`
+  - SQL atômico de posse movido para `CollectionItem` (abordagem A), endpoints
+    de incremento, decremento e desejo por `card_number` + `variant_code`
+    (AD-027) e teste de corrida.
+  - _Requisitos: 19.42–19.49_
+- [x] **14.2 Funções puras e estado do front** — T5–T10
+  - _Requisitos: 19.2, 19.5–19.8, 19.15, 19.21, 19.24, 19.25, 19.27–19.33, 19.36, 19.39–19.41_
+- [x] **14.3 Componentes do detalhe** — T11–T16
+  - _Requisitos: 19.1, 19.10–19.29, 19.32–19.39_
+- [x] **14.4 Página, tile, ponta a ponta e fechamento** — T17–T22
+  - _Requisitos: 19.1–19.13, 19.15, 19.17, 19.19, 19.21–19.27, 19.29–19.31, 19.36, 19.39–19.41, 19.49_
+
+## 15 — Pasta e lista de desejos na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-pasta/tasks.md` (T1–T17, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+Só abre depois do fechamento da §14 (`spa-carta`).
+
+- [x] **15.1 API da pasta e da lista de desejos** — T1–T3 da `spa-pasta`
+  - `GET /api/progress`, `GET /api/wishlist` e `DELETE …/variants/:variant_code/wishlist`
+    (AD-027), sobre as consultas da pasta e da lista Hotwire.
+  - _Requisitos: 20.37–20.46_
+- [x] **15.2 Funções puras, estado e navegação do front** — T4–T8
+  - _Requisitos: 20.2–20.7, 20.12, 20.30, 20.43_
+- [x] **15.3 Componentes** — T9–T12
+  - _Requisitos: 20.8–20.16, 20.19–20.23, 20.30–20.32, 20.35_
+- [x] **15.4 Páginas, ponta a ponta e fechamento** — T13–T17
+  - _Requisitos: 20.1, 20.3–20.7, 20.11, 20.12, 20.14, 20.16–20.18, 20.24–20.29, 20.33–20.36, 20.43, 20.46_
+- [x] **15.5 Correções da iteração 4 do Verifier** — T18–T19
+  - `variant_code` dentro do link do item da lista de desejos; curva `--ease-standard`
+    provada no `AnimatedNumber`.
+  - _Requisitos: 20.12, 20.13, 20.30_
+
+---
+
+## 16 — Decks na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-decks/tasks.md` (T1–T29, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham.
+Só abre depois do fechamento da §15 (`spa-pasta`).
+
+- [x] **16.1 API de decks** — T1–T10 da `spa-decks`
+  - `/api/decks` (lista, criar, renomear, excluir, escolher o deck em edição,
+    entradas, Leader, importar, `shortfall`) e `editing_deck` no detalhe da carta,
+    sobre `DeckEntry.increment_for!`/`decrement_for!` e `DeckDetail`; rotas HTML
+    intocadas (SDEC-61).
+  - _Requisitos: 21.43–21.61_
+- [x] **16.2 Tipos, rótulos, `QuantityStepper` e navegação do front** — T11–T14
+  - _Requisitos: 21.2, 21.7, 21.21, 21.24, 21.26, 21.35–21.37, 21.51_
+- [x] **16.3 Componentes** — T15–T18
+  - _Requisitos: 21.10, 21.13, 21.14, 21.18, 21.33, 21.35–21.42_
+- [x] **16.4 Telas de deck, detalhe da carta e pasta** — T19–T26
+  - _Requisitos: 21.1, 21.3–21.9, 21.10–21.12, 21.15–21.18, 21.19–21.32, 21.33, 21.34, 21.36, 21.40–21.42_
+- [x] **16.5 Ponta a ponta e fechamento** — T27–T29
+  - _Requisitos: 21.1, 21.2, 21.7, 21.11, 21.12, 21.16, 21.17, 21.20, 21.21, 21.24, 21.26, 21.28, 21.31–21.33, 21.35, 21.36, 21.38–21.40, 21.56, 21.61_
+
+## 17 — Import e export da coleção na SPA (troca de front, AD-023)
+
+Plano da feature em `.specs/features/spa-portabilidade/tasks.md` (T1–T15, numeração
+própria). Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham. A §16
+fica reservada à `spa-decks` (Req. 21). Só abre depois do fechamento da §15 (`spa-pasta`).
+
+- [x] **17.1 API do import** — T1–T4 da `spa-portabilidade`
+  - `CollectionCsv::Upload` e `POST /api/collection/imports`, `GET …/:token`,
+    `POST …/:token/confirm` (`409 import_closed`), sem mudar o import HTML.
+  - _Requisitos: 22.36–22.45_
+- [x] **17.2 Cliente, tipos e funções puras do front** — T5–T7
+  - _Requisitos: 22.12–22.14, 22.18, 22.24–22.27, 22.32, 22.35_
+- [x] **17.3 Componentes** — T8–T9
+  - _Requisitos: 22.14–22.17, 22.22–22.29_
+- [x] **17.4 Páginas** — T10–T12
+  - _Requisitos: 22.1–22.13, 22.16, 22.18, 22.19, 22.21, 22.22, 22.30–22.33_
+- [x] **17.5 Ponta a ponta e fechamento** — T13–T15
+  - _Requisitos: 22.20, 22.33, 22.34, 22.45, 22.46_
+
+
+## 18 — Troca do front: SPA na raiz e saída do Hotwire (AD-023)
+
+Plano da feature em `.specs/features/spa-troca/tasks.md` (T1–T25, numeração própria).
+Cada seção abaixo só fecha quando todas as tasks que ela cobre fecham. Só abre com as
+§13 a §17 fechadas (STRO-01).
+
+- [x] **18.1 Garantias migradas antes da remoção** — T1–T7 da `spa-troca`
+  - _Requisitos: 23.23, 23.24, 23.31_
+- [x] **18.2 Rails servindo a raiz** — T8–T9
+  - _Requisitos: 23.5–23.7, 23.10–23.14_
+- [x] **18.3 SPA na raiz** — T10–T14
+  - _Requisitos: 23.3, 23.4, 23.8–23.10, 23.20–23.22_
+- [x] **18.4 Corte do Hotwire** — T15–T19
+  - URLs antigas com `301`, downloads fora de `/api`, remoção do HTML pelo inventário.
+  - _Requisitos: 23.11–23.19, 23.24–23.26, 23.28, 23.30–23.33_
+- [x] **18.5 Dependências e build** — T20–T21
+  - _Requisitos: 23.5–23.7, 23.27, 23.35_
+- [x] **18.6 Ponta a ponta e documentos** — T22–T25
+  - _Requisitos: 23.19, 23.22, 23.29, 23.34–23.37_
+
 ---
 
 ## Fora do escopo da Fase 1

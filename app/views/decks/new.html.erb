@@ -1,9 +1,0 @@
-<% content_for :title, "Novo deck" %>
-
-<main class="deck">
-  <h1 class="deck__title">Novo deck</h1>
-
-  <%= render "decks/name_form", deck: @deck, submit: "Criar deck" %>
-
-  <p class="deck__actions"><%= link_to "Voltar aos baralhos", decks_path, class: "deck__action" %></p>
-</main>

@@ -414,15 +414,16 @@ class CollectionCsvPlanTest < ActionDispatch::IntegrationTest
   CONSULTAS_DA_PREVIA = 4
 
   def entrar
-    post session_path, params: { email: @grande.email, password: PASSWORD }
-    assert_response :redirect, "a sessão não foi estabelecida; a medição seria a do redirect de login"
+    post "/api/session", params: { email: @grande.email, password: PASSWORD }.to_json,
+                         headers: { "Content-Type" => "application/json" }
+    assert_response :success, "a sessão não foi estabelecida; a medição seria a de um 401"
   end
 
   def enviar(csv)
-    post collection_imports_path, params: {
-      arquivo: Rack::Test::UploadedFile.new(StringIO.new(csv), "text/csv", original_filename: "c.csv")
+    post "/api/collection/imports", params: {
+      file: Rack::Test::UploadedFile.new(StringIO.new(csv), "text/csv", original_filename: "c.csv")
     }
-    assert_response :redirect, "o upload não produziu pré-visualização; a medição seria a de uma recusa"
+    assert_response :created, "o upload não produziu pré-visualização; a medição seria a de uma recusa"
   end
 
   # Um CSV de `n` linhas, todas resolvíveis: variantes que existem no catálogo
@@ -566,7 +567,7 @@ class CollectionCsvPlanTest < ActionDispatch::IntegrationTest
   end
 
   # O seed insere usuários por SQL, então o `has_secure_password` não roda e o
-  # digest precisa ser produzido à mão — o login do fluxo de pré-visualização é
+  # digest precisa ser produzido à mão — o login pela API do fluxo de pré-visualização é
   # real e passa pelo `authenticate_by`. Gerado uma vez e reusado: 50 hashes de
   # BCrypt custariam mais que o resto do seed inteiro.
   def digest_da_senha

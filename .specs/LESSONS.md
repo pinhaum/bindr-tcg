@@ -398,6 +398,72 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md G2 / API-12 / cards_test.rb:155 (routes)
 - last seen: 2026-10-10T19:11:03Z
 
+### L-065 - Assert any AC that fixes a pixel size or visual position with boundingBox or getComputedStyle in an e2e test, because DOM-level tests cannot kill a CSS mutant
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/e2e` · harmful: 0
+- features: spa-catalogo
+- evidence: C01 FilterChip.svelte:34 (validation.md it.1 G1; morto na it.2 por e2e/catalogo-layout.spec.ts:92-97) (frontend/e2e)
+- last seen: 2026-10-11T03:29:12Z
+
+### L-066 - Test the exact boundary value of a count threshold such as exactly two items for a more-than-one rule, not only a larger count
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/tests` · harmful: 0
+- features: spa-catalogo
+- evidence: N09 CardTile.svelte:14 (validation.md it.2 G8) (frontend/tests)
+- last seen: 2026-10-11T03:29:12Z
+
+### L-067 - When two UI states can hold at once such as a stale error and a pending retry, test which one wins instead of testing each alone
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/tests` · harmful: 0
+- features: spa-catalogo
+- evidence: N18 +page.svelte:142 (validation.md it.2 G9) (frontend/tests)
+- last seen: 2026-10-11T03:29:12Z
+
+### L-068 - Assert a layout position also in the wrapped state, at the narrowest viewport with the longest content combination where flex rows break
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `frontend/e2e` · harmful: 0
+- features: spa-catalogo
+- evidence: SCAT-30 / cde8011 CatalogStatus.svelte:58-59 (D11, K2/K3) (frontend/e2e)
+- last seen: 2026-10-11T11:51:08Z
+
+### L-069 - In e2e, check the settled state and read the measurement in the same evaluate call, since a reload triggered by the action can start between two separate calls
+- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `frontend/e2e` · harmful: 0
+- features: spa-catalogo
+- evidence: frontend/e2e/sessao.spec.ts:112-119 (G12) (frontend/e2e)
+- last seen: 2026-10-11T12:25:24Z
+
+### L-070 - Test every conditional error branch that suppresses a message (401, session_changed), not only the generic failure path
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend-tests` · harmful: 0
+- features: spa-pasta
+- evidence: M3 frontend/src/routes/pasta/desejos/+page.svelte:72 (SPAS-36) (frontend-tests)
+- last seen: 2026-10-11T17:09:15Z
+
+### L-071 - State in the spec whether grid gaps count when a criterion says a share of the column width
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `layout-specs` · harmful: 0
+- features: spa-pasta
+- evidence: SPAS-11 frontend/e2e/pasta.spec.ts:376-379 (layout-specs)
+- last seen: 2026-10-11T17:09:15Z
+
+### L-072 - Name the comparator and tolerance when a criterion asks for captures compared against another screen
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `visual-parity-specs` · harmful: 0
+- features: spa-pasta
+- evidence: SPAS-26 frontend/e2e/pasta.spec.ts:516-530 (visual-parity-specs)
+- last seen: 2026-10-11T17:09:15Z
+
+### L-073 - Test the guard a spec clause adds to an action (only move focus when it was lost), not only the unguarded happy path
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend-tests` · harmful: 0
+- features: spa-pasta
+- evidence: M7 frontend/src/routes/pasta/desejos/+page.svelte:62 (SPAS-34) (frontend-tests)
+- last seen: 2026-10-11T17:14:14Z
+
+### L-074 - Quando o spec fixa a curva de uma animação, amostrar o valor num instante em que a curva e a linear divergem e afirmar esse valor; testar só os extremos e 'entre 0 e o final' deixa a troca de easing passar.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `frontend/motion` · harmful: 0
+- features: spa-pasta
+- evidence: frontend/src/lib/components/AnimatedNumber.svelte:19 (F4, SPAS-12) (frontend/motion)
+- last seen: 2026-10-11T17:30:16Z
+
+### L-075 - No e2e de paridade, extrair o mesmo trecho do DOM nos dois lados sem normalizar a estrutura de um deles; remover um elemento só do lado do HTML esconde desvio de marcação que o spec proíbe.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `frontend/e2e/paridade` · harmful: 0
+- features: spa-pasta
+- evidence: frontend/e2e/pasta-desejos.spec.ts:146-148; frontend/src/lib/components/WishlistItem.test.ts:23 (SPAS-30) (frontend/e2e/paridade)
+- last seen: 2026-10-11T17:30:16Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

@@ -45,8 +45,20 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+
+
+# Throw-away stage that builds the SvelteKit SPA; Node never reaches the final image
+FROM docker.io/library/node:24.21.0-slim AS frontend-build
+
+WORKDIR /frontend
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build && \
+    test "$(ls -A build | sort | tr '\n' ' ')" = "200.html _app "
 
 
 
@@ -54,9 +66,11 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Final stage for app image
 FROM base
 
-# Copy built artifacts: gems, application
+# Copy built artifacts: gems, application, SPA
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
+COPY --from=frontend-build /frontend/build/_app /rails/public/_app
+COPY --from=frontend-build /frontend/build/200.html /rails/spa/200.html
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \

@@ -286,7 +286,11 @@ class CardImagesTest < ActionDispatch::IntegrationTest
 
     # Simular tentativa de contaminação: logar um usuário.
     user = User.create!(email: "test@example.com", password: "password123")
-    post session_path, params: { email: "test@example.com", password: "password123" }
+    get "/api/session"
+    post "/api/session", params: { email: "test@example.com", password: "password123" }.to_json,
+                         headers: { "Content-Type" => "application/json",
+                                    "X-CSRF-Token" => response.parsed_body.dig("data", "csrf_token") }
+    assert_response :success
 
     # Requisição para a imagem deve funcionar normalmente sem ler o usuário.
     get card_image_path(variant.variant_code)
