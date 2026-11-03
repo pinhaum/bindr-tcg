@@ -464,6 +464,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: frontend/e2e/pasta-desejos.spec.ts:146-148; frontend/src/lib/components/WishlistItem.test.ts:23 (SPAS-30) (frontend/e2e/paridade)
 - last seen: 2026-10-11T17:30:16Z
 
+### L-076 - A config value pinned only by an AC (no behavior test) survives every gate; state in the spec that its evidence is file content and guard it with a test when the pin must hold
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `config` · harmful: 0
+- features: rails-8-1
+- evidence: validation.md M6 (config/application.rb:12) (config)
+- last seen: 2026-11-03T13:37:43Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

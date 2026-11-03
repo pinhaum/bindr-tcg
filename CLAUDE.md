@@ -150,7 +150,7 @@ O que existe hoje:
   `SourceConfig` e `apitcg/` (Fetch, Normalize, CompareSnapshots).
 - **Dez migrações**, de `20260919120000` a `20261005130000` (preço da variante). `schema_format`
   é `:sql`: migração nova exige `db:migrate` para regenerar `db/structure.sql`.
-- **1231 testes Rails**, rubocop e brakeman limpos (o único aviso do brakeman é o fim de suporte do Rails 8.0.5.1, de calendário).
+- **Rails 8.1.4 sobre Ruby 3.3.13** (`load_defaults` 8.0). **1231 testes Rails**, rubocop e brakeman limpos. O aviso EOLRails (fim de suporte do Rails) nunca é ignorado (AD-032): o Rails 8.1 começa a avisar em 2027-08-11, e o vermelho pede upgrade, não um ignore.
 - **Sem pipeline de assets nem Hotwire.** Não há `propshaft`, importmap, Turbo nem
   Stimulus, e `app/assets/` e `app/javascript/` não existem; o Rails não serve CSS nem
   JS próprios, só o build da SPA em `/_app/`. Não reintroduzir um pipeline de assets

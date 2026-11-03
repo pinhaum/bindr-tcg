@@ -1,7 +1,7 @@
 # Imagem de desenvolvimento. O Dockerfile de produção é `Dockerfile`, gerado
 # pelo Rails e mantido separado de propósito: este aqui monta o código como
 # volume e roda em modo development.
-FROM ruby:3.3.0-slim
+FROM ruby:3.3.13-slim
 
 # O cliente do PostgreSQL vem do repositório oficial (PGDG) fixado na major
 # 17, a mesma do serviço `db`. O `postgresql-client` do Debian bookworm é da

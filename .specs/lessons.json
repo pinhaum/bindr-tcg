@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 76,
+  "next_id": 77,
   "lessons": [
     {
       "id": "L-001",
@@ -1354,6 +1354,24 @@
       ],
       "created": "2026-10-11T17:30:16Z",
       "last_seen": "2026-10-11T17:30:16Z"
+    },
+    {
+      "id": "L-076",
+      "key": "surviving_mutant::a config value pinned only by an ac no behavior test survives every gate state in the spec that its evidence is file content and guard it with a test when the pin must hold",
+      "text": "A config value pinned only by an AC (no behavior test) survives every gate; state in the spec that its evidence is file content and guard it with a test when the pin must hold",
+      "signal": "surviving_mutant",
+      "scope": "config",
+      "status": "candidate",
+      "features": [
+        "rails-8-1"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md M6 (config/application.rb:12) (config)"
+      ],
+      "created": "2026-11-03T13:37:43Z",
+      "last_seen": "2026-11-03T13:37:43Z"
     }
   ]
 }
