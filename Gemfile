@@ -1,15 +1,14 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.1.4"
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
-# Preso na série 2.x de propósito: o ActiveSupport 8.0.5.1 chama
-# `JSON.generate(..., quirks_mode: true)` (active_support/json/encoding.rb:110)
-# e a json 3.x removeu esse argumento. Com a 3.x, qualquer escrita em coluna
-# jsonb levanta ArgumentError — o que atinge `import_runs.error_log` e,
-# portanto, o Req. 1.5 inteiro. Soltar o pin só quando o Rails parar de passar
-# esse argumento.
+# Preso na série 2.x. O motivo original deixou de valer: o ActiveSupport
+# 8.0.x chamava `JSON.generate(..., quirks_mode: true)`, argumento que a json
+# 3.x removeu, e o 8.1.4 chama `::JSON.generate` sem ele. O pin fica porque a
+# 2.x é a série provada pela suíte; soltá-lo é decisão separada (feature
+# rails-8-1).
 gem "json", "~> 2.7"
 # Declarada mesmo sendo uma *default gem* hoje: a partir do Ruby 3.4 a `csv`
 # saiu das default gems e virou bundled gem, então `require "csv"` deixa de
