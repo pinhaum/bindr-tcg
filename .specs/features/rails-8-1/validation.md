@@ -38,7 +38,7 @@ Sem `tasks.md`: o spec pulou a fase Tasks por porte Medium ("Coverage: 16 total;
 | RAILS8-12 | Comentário do step Brakeman no `ci.yml` | EOLRails não é ignorado e o vermelho pede upgrade | `.github/workflows/ci.yml:28-31`: "O aviso EOLRails … nunca é ignorado (AD-032)", "o vermelho dele é o alarme para subir o Rails, não para gravar um ignore" | ✅ PASS |
 | RAILS8-13 | `CLAUDE.md` cita o 8.1.4 onde citava o 8.0.5.1 | sem `8.0.5.1`, com `8.1.4` | `CLAUDE.md:153` "**Rails 8.1.4 sobre Ruby 3.3.13** … EOLRails … nunca é ignorado (AD-032)"; `grep -n "8.0.5.1\|Rails 8.0" CLAUDE.md` sem ocorrência | ✅ PASS |
 | RAILS8-14 | Comentário do pin do `json` sem afirmar que o AS passa `quirks_mode` | afirmação removida | `Gemfile:7-11`: "O motivo original deixou de valer: o ActiveSupport 8.0.x chamava … `quirks_mode: true` … e o 8.1.4 chama `::JSON.generate` sem ele." Conferido na fonte da gem instalada: `active_support/json/encoding.rb:144` `::JSON.generate(jsonified)` e `:170` `::JSON.generate(json_value)`, nenhum com `quirks_mode`. `grep 8.0.5.1 Gemfile` sem ocorrência | ✅ PASS |
-| RAILS8-15 | CI verde na branch depois do push | jobs `lint` e `test` verdes | Não dá para provar localmente: depende do push autorizado pelo dono | ⏸️ Pendente (autorização do dono) |
+| RAILS8-15 | CI verde na branch depois do push | jobs `lint` e `test` verdes | Run `41701660308` (push autorizado, `510f610`): `lint` success, `test` success | ✅ Provado na CI (2026-11-03) |
 
 **Status**: 15/15 ACs locais cobertos; RAILS8-15 pendente do dono. Sem lacuna de precisão bloqueante (G2 é observação).
 
@@ -117,7 +117,7 @@ Nota sobre M5: trocar **só o texto** de `.ruby-version`, com o container ainda 
 | ----------- | --------------- | ----------- |
 | RAILS8-01..04, 06..14, 16 | Done | ✅ Verified |
 | RAILS8-05 | Pending | ✅ Verified (build rc=0 no HEAD) |
-| RAILS8-15 | Pending | ⏸️ Pendente do push autorizado pelo dono |
+| RAILS8-15 | Done | ✅ CI verde, run `41701660308` |
 
 ---
 
@@ -130,3 +130,6 @@ Nota sobre M5: trocar **só o texto** de `.ruby-version`, com o container ainda 
 **Gate**: 1231 runs, rubocop 0, Brakeman 0, `docker build` 0; flakes pré-existentes documentados (G1).
 
 **Próximo passo**: push da `chore/rails-8-1` autorizado pelo dono para provar o RAILS8-15.
+
+
+**Adendo (2026-11-03, orquestrador):** depois do push autorizado, a run `41701660308` do workflow `CI` em `510f610` terminou com `lint` e `test` verdes; RAILS8-15 provado.

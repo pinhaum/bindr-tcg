@@ -145,7 +145,7 @@ a correção é subir para o Rails 8.1.4, com fim de suporte em 2027-10-10.
 | RAILS8-12 | P2: Política registrada (AC 2) | Execute | Done |
 | RAILS8-13 | P2: Política registrada (AC 3) | Execute | Done |
 | RAILS8-14 | P2: Política registrada (AC 4) | Execute | Done |
-| RAILS8-15 | P3: CI verde na branch (AC 1) | Execute | Pending |
+| RAILS8-15 | P3: CI verde na branch (AC 1) | Execute | Done |
 
 **Coverage:** 16 total; Tasks pulado por porte Medium, todos executados no Execute.
 
@@ -156,4 +156,4 @@ a correção é subir para o Rails 8.1.4, com fim de suporte em 2027-10-10.
 - [x] `bin/brakeman` com as flags da CI sai com código 0 no container.
 - [x] `bin/rails test && bin/rubocop` passa com ≥ 1231 testes e 0 falhas.
 - [x] `docker build -f Dockerfile .` conclui.
-- [ ] Depois do push autorizado, a CI da `chore/rails-8-1` fica verde.
+- [x] Depois do push autorizado, a CI da `chore/rails-8-1` fica verde (run `41701660308`, `lint` e `test` verdes em `510f610`).
