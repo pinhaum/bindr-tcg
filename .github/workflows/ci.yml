@@ -25,6 +25,10 @@ jobs:
       # config/brakeman.ignore; --ensure-no-obsolete-ignore-entries derruba o
       # build quando um ignore deixa de corresponder a um aviso real. Juntas,
       # impedem que o arquivo de ignore vire um depósito silencioso.
+      # O aviso EOLRails (fim de suporte do Rails) nunca é ignorado (AD-032):
+      # o fingerprint muda a cada degrau de confiança, e o vermelho dele é o
+      # alarme para subir o Rails, não para gravar um ignore. O 8.1 começa a
+      # avisar em 2027-08-11 (fim de suporte em 2027-10-10).
       - name: Brakeman
         run: bin/brakeman --no-pager --ensure-ignore-notes --ensure-no-obsolete-ignore-entries
 

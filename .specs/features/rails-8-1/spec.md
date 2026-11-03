@@ -137,12 +137,12 @@ a correção é subir para o Rails 8.1.4, com fim de suporte em 2027-10-10.
 | RAILS8-05 | P1: Rails 8.1.4 com a suíte verde (AC 5) | Execute | Pending |
 | RAILS8-06 | P1: Rails 8.1.4 com a suíte verde (AC 6) | Execute | Done |
 | RAILS8-16 | P1: Rails 8.1.4 com a suíte verde (AC 7) | Execute | Done |
-| RAILS8-07 | P1: Brakeman verde (AC 1) | Execute | Pending |
-| RAILS8-08 | P1: Brakeman verde (AC 2) | Execute | Pending |
-| RAILS8-09 | P1: Brakeman verde (AC 3) | Execute | Pending |
-| RAILS8-10 | P1: Brakeman verde (AC 4) | Execute | Pending |
+| RAILS8-07 | P1: Brakeman verde (AC 1) | Execute | Done |
+| RAILS8-08 | P1: Brakeman verde (AC 2) | Execute | Done |
+| RAILS8-09 | P1: Brakeman verde (AC 3) | Execute | Done |
+| RAILS8-10 | P1: Brakeman verde (AC 4) | Execute | Done |
 | RAILS8-11 | P2: Política registrada (AC 1) | Execute | Pending |
-| RAILS8-12 | P2: Política registrada (AC 2) | Execute | Pending |
+| RAILS8-12 | P2: Política registrada (AC 2) | Execute | Done |
 | RAILS8-13 | P2: Política registrada (AC 3) | Execute | Pending |
 | RAILS8-14 | P2: Política registrada (AC 4) | Execute | Pending |
 | RAILS8-15 | P3: CI verde na branch (AC 1) | Execute | Pending |

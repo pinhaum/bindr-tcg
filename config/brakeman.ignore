@@ -1,10 +1,6 @@
 {
   "ignored_warnings": [
     {
-      "fingerprint": "21ab0fe00fdd5899ffc405cff75aadb91b805ee996a614f7e27b08a287e9062d",
-      "note": "EOLRails avisa que o suporte ao Rails 8.0.5.1 acaba em 2026-11-07. Não é falha de código: é um prazo. Ignorado para o CI não reprovar por decurso de tempo antes de haver o que corrigir. Revisar na atualização do Rails; quando a versão subir, este ignore fica obsoleto e --ensure-no-obsolete-ignore-entries derruba o build."
-    },
-    {
       "fingerprint": "c37c93362933bc9da0848c3b1c690c9f5395afea8b32e3d29bce73ae1ef857d2",
       "note": "CardImagesController#show: variant_code é validado por CardImageCache::VARIANT_CODE_FORMAT (sem / nem .), com extensão de lista fechada, e o serviço confere que o caminho expandido fica dentro de storage_dir; nenhum dado do request chega ao caminho além do variant_code validado (AD-012, design.md §7)."
     }
