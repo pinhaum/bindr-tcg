@@ -12,9 +12,9 @@ a correção é subir para o Rails 8.1.4, com fim de suporte em 2027-10-10.
 
 ## Goals
 
-- [ ] O lockfile resolve o Rails 8.1.4, e a suíte Rails inteira passa sem teste existente editado para acomodar o upgrade.
-- [ ] O Brakeman com as flags da CI sai com código 0, sem entrada EOLRails no ignore.
-- [ ] A política "EOLRails nunca é ignorado" fica registrada como decisão (AD) e no próprio `ci.yml`.
+- [x] O lockfile resolve o Rails 8.1.4, e a suíte Rails inteira passa sem teste existente editado para acomodar o upgrade.
+- [x] O Brakeman com as flags da CI sai com código 0, sem entrada EOLRails no ignore.
+- [x] A política "EOLRails nunca é ignorado" fica registrada como decisão (AD) e no próprio `ci.yml`.
 
 ## Out of Scope
 
@@ -134,7 +134,7 @@ a correção é subir para o Rails 8.1.4, com fim de suporte em 2027-10-10.
 | RAILS8-02 | P1: Rails 8.1.4 com a suíte verde (AC 2) | Execute | Done |
 | RAILS8-03 | P1: Rails 8.1.4 com a suíte verde (AC 3) | Execute | Done |
 | RAILS8-04 | P1: Rails 8.1.4 com a suíte verde (AC 4) | Execute | Done |
-| RAILS8-05 | P1: Rails 8.1.4 com a suíte verde (AC 5) | Execute | Pending |
+| RAILS8-05 | P1: Rails 8.1.4 com a suíte verde (AC 5) | Execute | Done |
 | RAILS8-06 | P1: Rails 8.1.4 com a suíte verde (AC 6) | Execute | Done |
 | RAILS8-16 | P1: Rails 8.1.4 com a suíte verde (AC 7) | Execute | Done |
 | RAILS8-07 | P1: Brakeman verde (AC 1) | Execute | Done |
@@ -153,7 +153,7 @@ a correção é subir para o Rails 8.1.4, com fim de suporte em 2027-10-10.
 
 ## Success Criteria
 
-- [ ] `bin/brakeman` com as flags da CI sai com código 0 no container.
-- [ ] `bin/rails test && bin/rubocop` passa com ≥ 1231 testes e 0 falhas.
-- [ ] `docker build -f Dockerfile .` conclui.
+- [x] `bin/brakeman` com as flags da CI sai com código 0 no container.
+- [x] `bin/rails test && bin/rubocop` passa com ≥ 1231 testes e 0 falhas.
+- [x] `docker build -f Dockerfile .` conclui.
 - [ ] Depois do push autorizado, a CI da `chore/rails-8-1` fica verde.
