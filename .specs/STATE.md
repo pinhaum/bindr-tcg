@@ -250,7 +250,17 @@
 - **Date**: 2026-10-11
 - **Status**: active
 
+### AD-032
+- **Decision**: O aviso EOLRails do Brakeman nunca é ignorado. A entrada `21ab0fe0…` saiu de `config/brakeman.ignore` com a subida para o Rails 8.1.4, e nenhuma outra entra no lugar. Quando o aviso aparecer, a saída é subir o Rails.
+- **Reason**: Decisão do dono em 2026-11-03. O fingerprint do EOLRails muda a cada degrau de confiança (`low` → `medium` → `high`), então um ignore fica obsoleto e `--ensure-no-obsolete-ignore-entries` derruba a CI de qualquer jeito (12 runs vermelhas desde 2026-10-10). O vermelho antecipado é o alarme desejado: o Rails 8.1 começa a avisar em 2027-08-11, 60 dias antes do fim de suporte em 2027-10-10.
+- **Trade-off**: A CI fica vermelha por calendário, sem mudança de código, a partir de 2027-08-11, até o upgrade.
+- **Scope**: `rails-8-1` (RAILS8-07..12); `config/brakeman.ignore` e o step `Brakeman` de `.github/workflows/ci.yml`.
+- **Date**: 2026-11-03
+- **Status**: active
+
 ## Handoff
+
+> **Estado em 2026-11-03, rails-8-1 — este bloco vence os de baixo para a versão do Rails e do Ruby.** **Rails 8.1.4 e Ruby 3.3.13** na `chore/rails-8-1` (`<base>` = `03971c5`). O Ruby subiu junto, por emenda do spec com aval do dono (RAILS8-16): o 3.3.0 recusa parâmetro anônimo `*`/`**` usado dentro de bloco, e o `actionview` 8.1.4 usa isso em `action_view/helpers/capture_helper.rb:50`, então o app não sobe. O lock foi atualizado com `bundle update rails --conservative` (só a família Rails mudou, mais `action_text-trix` e menos `benchmark`); `load_defaults` segue 8.0 e o pin do `json` segue `~> 2.7`, com o comentário reescrito. Brakeman 8.1.0 sem aviso, com o ignore só do `CardImagesController` (AD-032). Gates: Rails 1231 runs, rubocop limpo; nenhum aviso de depreciação do 8.1.4 na suíte. **Flake conhecido:** `Api::CollectionImportsConfirmTest#test_staging_vencido_responde_409_e_não_altera_a_coleção` falhou 1 vez em 3 rodadas completas (passou 5/5 isolado). Causa provável: o `UPDATE … AND expires_at > now()` do `Commit` compara com o `now()` do início da transação do teste, e o teste grava `expires_at = 1.second.ago` pelo relógio do Ruby; se mais de 1 s passa entre o `BEGIN` e o `update_column`, o staging ainda parece vigente. É do teste, não do upgrade; não corrigido (RAILS8-03 proíbe editar teste existente). **Próximo passo:** push autorizado pelo dono para provar RAILS8-15 (CI verde).
 
 > **Estado em 2026-10-13, front (refactor, sem feature) — vale junto com o bloco da `spa-troca` abaixo.** Revisão do front pelas boas práticas do Svelte 5, aplicada em três commits `refactor(front)` sem mudança de comportamento: (1) `catalog.svelte.ts` e `card-detail.svelte.ts` viraram invólucros de `createLoader`, com a resposta em `$state.raw` (fecha a dívida da `spa-pasta`; um teste novo prova que `result` é a referência devolvida pela API); (2) `$derived` gravável no lugar de `$effect` que copiava estado em `/pasta/desejos` e no detalhe da carta; (3) helpers `whenSignedIn` e `useAside`, e `class:` trocado por array de classes. Gates: Vitest 1172, check e lint limpos, e2e 224. Ficaram de fora, por mexer na fila de posse (SCAR): o `{#key detailKey}` que remonta o detalhe a cada resposta e o `$bindable` do `QuantityStepper` sincronizado por `$effect.pre`. **Próximo passo** inalterado: PR de `svelt-front` para `main`.
 
