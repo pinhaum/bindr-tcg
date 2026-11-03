@@ -22,7 +22,7 @@ services:
     # `db:prepare` é idempotente: cria o banco na primeira subida e só aplica
     # migrações pendentes nas seguintes. É o que torna `docker compose up` o
     # comando único do Req. 11.6.
-    command: bash -c "bin/rails db:prepare && bin/rails server -b 0.0.0.0"
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails db:prepare && bin/rails server -b 0.0.0.0"
     environment:
       POSTGRES_HOST: db
       POSTGRES_USER: ${POSTGRES_USER:-bindr}
